@@ -37,10 +37,11 @@ var studentNotesListTable = (function () {
                     title: "Term",
                     field: "term",
                     headerHozAlign: "left",
-                    headerSort: false
+                    headerSort: false,
+                    width: "150",
                 },
                 {
-                    title: "Opening Date",
+                    title: "Date",
                     field: "opening_date",
                     headerHozAlign: "left",
                     width: "150",
@@ -59,15 +60,15 @@ var studentNotesListTable = (function () {
                     }
                 },
                 {
-                    title: "Created By",
-                    field: "created_by",
+                    title: "Flag",
+                    field: "student_flag_id",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
+                        if(cell.getData().is_flaged == 'Yes'){
+                            var color = cell.getData().flag_color;
+                            html = '<span class="bg-'+(color != '' ? color.toLowerCase() : 'bg-danger')+' font-medium text-white px-2 py-1">'+cell.getData().flaged_status+': '+cell.getData().flag_name+'</span>';
+                        }
 
                         return html;
                     }
@@ -79,17 +80,36 @@ var studentNotesListTable = (function () {
                         var html = '';
                         if(cell.getData().followed_up == 'yes'){
                             html += '<div>';
-                                if(cell.getData().followed != ''){
-                                    html += '<div class="font-medium whitespace-nowrap">'+cell.getData().followed+'</div>';
+                                if(cell.getData().followed_up_status != ''){
+                                    html += '<span class="bg-'+(cell.getData().followed_up_status == 'Pending' ? 'warning' : 'success')+' font-medium text-white px-2 py-1 inline-flex mb-1">'+cell.getData().followed_up_status+'</span>';
                                 }
-                                if(cell.getData().follow_up_start != '' || cell.getData().follow_up_end != ''){
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">';
-                                        html += (cell.getData().follow_up_start != '' ? cell.getData().follow_up_start : '');
-                                        html += (cell.getData().follow_up_end != '' ? ' - '+cell.getData().follow_up_end : '');
+                                if(cell.getData().followed != '' && cell.getData().followed_up_status == 'Pending'){
+                                    html += '<div class="whitespace-normal">';
+                                        html += cell.getData().followed;
+                                    html += '</div>';
+                                }
+                                if(cell.getData().followed_up_status == 'Completed'){
+                                    html += '<div class="whitespace-normal">';
+                                        html += (cell.getData().completed_by != '' ? '<div class="font-medium whitespace-nowrap">'+cell.getData().completed_by+'</div>' : '');
+                                        html += (cell.getData().completed_at != '' ? '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().completed_at+'</div>' : '');
                                     html += '</div>';
                                 }
                             html += '</div>';
                         }
+                        return html;
+                    }
+                },
+                {
+                    title: "Created By",
+                    field: "created_by",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        html += '<div>';
+                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                        html += '</div>';
+
                         return html;
                     }
                 },
@@ -174,19 +194,19 @@ var studentNotesListTable = (function () {
 })();
 
 (function(){
-    let tomOptions = {
+    let tomOptionsNote = {
         plugins: {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
-        persist: true,
+        //persist: true,
         create: false,
         allowEmptyOption: true,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
-    var termSN = new TomSelect('#term-SN', tomOptions);
+    var termSN = new TomSelect('#term-SN', tomOptionsNote);
 
     if ($("#studentNotesListTable").length) {
         // Init Table
@@ -213,10 +233,20 @@ var studentNotesListTable = (function () {
 
     }
 
-    var term_declaration_id = new TomSelect('#term_declaration_id', tomOptions);
-    var edit_term_declaration_id = new TomSelect('#edit_term_declaration_id', tomOptions);
-    var follow_up_by = new TomSelect('#follow_up_by', tomOptions);
-    var edit_follow_up_by = new TomSelect('#edit_follow_up_by', tomOptions);
+    let multiTomOptNote = {
+        ...tomOptionsNote,
+        plugins: {
+            ...tomOptionsNote.plugins,
+            remove_button: {
+                title: "Remove this item",
+            },
+        }
+    };
+
+    var note_term_declaration_id = new TomSelect('#note_term_declaration_id', tomOptionsNote);
+    var edit_note_term_declaration_id = new TomSelect('#edit_note_term_declaration_id', tomOptionsNote);
+    var follow_up_by = new TomSelect('#follow_up_by', multiTomOptNote);
+    var edit_follow_up_by = new TomSelect('#edit_follow_up_by', multiTomOptNote);
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
@@ -252,9 +282,19 @@ var studentNotesListTable = (function () {
         $('#addNoteModal .acc__input-error').html('');
         $('#addNoteModal input[name="document"]').val('');
         $('#addNoteModal #addNoteDocumentName').html('');
+
+        $('#addNoteModal [name="followed_up"]').prop('checked', false);
+        $('#addNoteModal .followedUpWrap').fadeOut('fast', function(){ 
+            follow_up_by.clear(true);
+        });
+        $('#addNoteModal [name="is_flaged"]').prop('checked', false);
+        $('#addNoteForm .flagedWrap').fadeOut('fast', function(){
+            $('#addNoteForm [name="student_flag_id"]').val('');
+            $('#addNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+        });
+
         addEditor.setData('');
-        term_declaration_id.clear(true);
-        follow_up_by.clear(true);
+        note_term_declaration_id.clear(true);
     });
 
     const editNoteModalEl = document.getElementById('editNoteModal')
@@ -265,9 +305,21 @@ var studentNotesListTable = (function () {
         $('#editNoteModal #editNoteDocumentName').html('');
         $('#editNoteModal input[name="id"]').val('0');
         $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
+
+        $('#editNoteForm .theFollowUpCover').removeClass('active');
+        $('#editNoteModal [name="followed_up"]').prop('checked', false);
+        $('#editNoteModal .followedUpWrap').fadeOut('fast', function(){ 
+            edit_follow_up_by.clear(true);
+        });
+        $('#editNoteForm .theFlagCover').removeClass('active');
+        $('#editNoteModal [name="is_flaged"]').prop('checked', false);
+        $('#editNoteModal .flagedWrap').fadeOut('fast', function(){
+            $('#editNoteModal [name="student_flag_id"]').val('');
+            $('#editNoteModal .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+        });
+
         editEditor.setData('');
-        edit_term_declaration_id.clear(true);
-        edit_follow_up_by.clear(true);
+        edit_note_term_declaration_id.clear(true);
     });
 
     const viewNoteModalEl = document.getElementById('viewNoteModal')
@@ -323,12 +375,10 @@ var studentNotesListTable = (function () {
     $('#addNoteForm').on('change', '[name="followed_up"]', function(){
         if($(this).prop('checked')){
             $('#addNoteForm .followedUpWrap').fadeIn('fast', function(){
-                $('input', this).val('');
                 follow_up_by.clear(true);
             });
         }else{
             $('#addNoteForm .followedUpWrap').fadeOut('fast', function(){
-                $('input', this).val('');
                 follow_up_by.clear(true);
             });
         }
@@ -337,14 +387,58 @@ var studentNotesListTable = (function () {
     $('#editNoteForm').on('change', '[name="followed_up"]', function(){
         if($(this).prop('checked')){
             $('#editNoteForm .followedUpWrap').fadeIn('fast', function(){
-                $('input', this).val('');
                 edit_follow_up_by.clear(true);
             });
         }else{
             $('#editNoteForm .followedUpWrap').fadeOut('fast', function(){
-                $('input', this).val('');
                 edit_follow_up_by.clear(true);
             });
+        }
+    });
+    
+    $('#addNoteForm').on('change', '[name="is_flaged"]', function(){
+        if($(this).prop('checked')){
+            $('#addNoteForm .flagedWrap').fadeIn('fast', function(){
+                $('#addNoteForm [name="student_flag_id"]').val('');
+                $('#addNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+            });
+        }else{
+            $('#addNoteForm .flagedWrap').fadeOut('fast', function(){
+                $('#addNoteForm [name="student_flag_id"]').val('');
+                $('#addNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+            });
+        }
+    });
+    
+    $('#addNoteForm').on('change', '[name="student_flag_id"]', function(){
+        if($(this).val() != ''){
+            var color = $('option:selected', this).attr('data-color');
+            $('#addNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-'+color.toLowerCase());
+        }else{
+            $('#addNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+        }
+    });
+    
+    $('#editNoteForm').on('change', '[name="is_flaged"]', function(){
+        if($(this).prop('checked')){
+            $('#editNoteForm .flagedWrap').fadeIn('fast', function(){
+                $('#editNoteForm [name="student_flag_id"]').val('');
+                $('#editNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+            });
+        }else{
+            $('#editNoteForm .flagedWrap').fadeOut('fast', function(){
+                $('#editNoteForm [name="student_flag_id"]').val('');
+                $('#editNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
+            });
+        }
+    });
+    
+    $('#editNoteForm').on('change', '[name="student_flag_id"]', function(){
+        if($(this).val() != ''){
+            var color = $('option:selected', this).attr('data-color');
+            $('#editNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-'+color.toLowerCase());
+        }else{
+            $('#editNoteForm .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200');
         }
     });
 
@@ -438,27 +532,59 @@ var studentNotesListTable = (function () {
             $('#editNoteModal input[name="id"]').val(noteId);
              
             if(dataset.term_declaration_id){
-                edit_term_declaration_id.addItem(dataset.term_declaration_id, true)
+                edit_note_term_declaration_id.addItem(dataset.term_declaration_id, true)
             }else{
-                edit_term_declaration_id.clear(true);
+                edit_note_term_declaration_id.clear(true);
             }
             if(dataset.docURL != ''){
                 $('#editNoteModal .downloadExistAttachment').attr('href', dataset.docURL).fadeIn();
             }else{
                 $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
             }
+           
             if(dataset.followed_up == 'yes'){
                 $('#editNoteForm [name="followed_up"]').prop('checked', true);
                 $('#editNoteForm .followedUpWrap').fadeIn('fast', function(){
-                    $('#editNoteForm  [name="follow_up_start"]').val(dataset.follow_up_start ? dataset.follow_up_start : '');
-                    $('#editNoteForm  [name="follow_up_end"]').val(dataset.follow_up_end ? dataset.follow_up_end : '');
-                    edit_follow_up_by.addItem(dataset.follow_up_by, true);
+                    $('#editNoteModal select[name="followed_up_status"]').val(dataset.followed_up_status ? dataset.followed_up_status : '');
+                    if(dataset.followed_by){
+                        edit_follow_up_by.clear(true);
+
+                        $.each(dataset.followed_by, function(index, id) {
+                            edit_follow_up_by.addItem(id, true); 
+                        });
+                    }else{
+                        edit_follow_up_by.clear(true);
+                    }
                 });
+                if(dataset.edit_followup != 1){
+                    $('#editNoteForm .theFollowUpCover').addClass('active');
+                }else{
+                    $('#editNoteForm .theFollowUpCover').removeClass('active');
+                }
             }else{
-                $('#editNoteForm [name="followed_up"]').prop('checked', false);
+                $('#editNoteForm [name="is_flaged"]').prop('checked', false);
                 $('#editNoteForm .followedUpWrap').fadeOut('fast', function(){
-                    $('input', this).val('');
+                    $('#editNoteModal select[name="followed_up_status"]').val('');
                     edit_follow_up_by.clear(true);
+                });
+            }
+            if(dataset.is_flaged == 'Yes'){
+                var color = (dataset.flag_color ? dataset.flag_color : 'bg-slate-200');
+                $('#editNoteForm [name="is_flaged"]').prop('checked', true);
+                $('#editNoteForm .flagedWrap').fadeIn('fast', function(){
+                    $('#editNoteModal [name="student_flag_id"]').val(dataset.student_flag_id);
+                    $('#editNoteModal .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-'+color.toLowerCase())
+                });
+                if(dataset.edit_flag != 1){
+                    $('#editNoteForm .theFlagCover').addClass('active');
+                }else{
+                    $('#editNoteForm .theFlagCover').removeClass('active');
+                }
+            }else{
+                $('#editNoteForm [name="is_flaged"]').prop('checked', false);
+                $('#editNoteForm .flagedWrap').fadeIn('fast', function(){
+                    $('#editNoteModal [name="student_flag_id"]').val('');
+                    $('#editNoteModal .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200')
                 });
             }
         }).catch(error => {

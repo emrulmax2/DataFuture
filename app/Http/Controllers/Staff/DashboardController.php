@@ -22,6 +22,7 @@ use App\Models\InternalLink;
 use App\Models\PlansDateList;
 use App\Models\ProcessList;
 use App\Models\Student;
+use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentTask;
 use App\Models\TaskListUser;
 use App\Models\User;
@@ -97,13 +98,18 @@ class DashboardController extends Controller
             'groups' => EmployeeGroup::where('type', 2)->orWhere(function($q) use($userEmployeeId){
                 $q->where('employee_id', $userEmployeeId)->whereIn('type', [1, 2]);
             })->orderBy('name', 'ASC')->get(),
-            'proxyClasses' => $this->getMyProxyClassForTheDay()
+            'proxyClasses' => $this->getMyProxyClassForTheDay(),
+            'myfollowups' => StudentNoteFollowedBy::where('user_id', auth()->user()->id)->whereHas('note', function($q){
+                                $q->where('followed_up', 'yes')->where('followed_up_status', 'Pending');
+                            })->get()->count()
         ]);
     }
+    
     public function getAccountDashBoard()
     {
         return view('pages.accounting.dashboard.index');
     }
+
     public function parentLinkBox($id)
     {
         $userData = \Auth::guard('web')->user();

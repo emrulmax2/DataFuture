@@ -152,27 +152,36 @@ import Tabulator from "tabulator-tables";
         var $theBtn = $(this);
         var reg_id = $theBtn.attr('data-reg-id');
 
-        axios({
-            method: "post",
-            url: route('student.slc.attendance.populate'),
-            data: {reg_id : reg_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            var res = response.data.res;
-
-            $('#addAttendanceModal .attendanceYear').text('Year '+res.year);
+        if(reg_id > 0){
+            axios({
+                method: "post",
+                url: route('student.slc.attendance.populate'),
+                data: {reg_id : reg_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                var res = response.data.res;
+    
+                $('#addAttendanceModal .attendanceYear').text('Year '+res.year);
+                $('#addAttendanceForm [name="session_term"]').val('');
+    
+                $('#addAttendanceForm [name="instance_fees"]').val(res.fees);
+                $('#addAttendanceForm [name="slc_registration_id"]').val(reg_id);
+                $('#addAttendanceForm [name="attendance_year"]').val(res.year);
+            }).catch(error => {
+                if (error.response){
+                    if (error.response.status && error.response.status == 422) {
+                        console.log('error');
+                    }
+                }
+            });
+        }else{
+            $('#addAttendanceModal .attendanceYear').text('Year 0');
             $('#addAttendanceForm [name="session_term"]').val('');
 
-            $('#addAttendanceForm [name="instance_fees"]').val(res.fees);
-            $('#addAttendanceForm [name="slc_registration_id"]').val(reg_id);
-            $('#addAttendanceForm [name="attendance_year"]').val(res.year);
-        }).catch(error => {
-            if (error.response){
-                if (error.response.status && error.response.status == 422) {
-                    console.log('error');
-                }
-            }
-        });
+            $('#addAttendanceForm [name="instance_fees"]').val(0);
+            $('#addAttendanceForm [name="slc_registration_id"]').val(0);
+            $('#addAttendanceForm [name="attendance_year"]').val(0);
+        }
     })
 
     $('#addAttendanceModal [name="attendance_code_id"]').on('change', function(){
@@ -186,12 +195,12 @@ import Tabulator from "tabulator-tables";
             instance_fees = instance_fees != '' ? parseInt(instance_fees, 10) : 0;
         var coc_required = $('option:selected', $attendance_code_id).attr('data-coc-required');
 
-        if(coc_required == 1){
+        if(coc_required == 1 && slc_registration_id > 0){
             $('#addAttendanceModal .cocReqWrap').fadeIn();
         }else{
             $('#addAttendanceModal .cocReqWrap').fadeOut();
         }
-        if(attendance_code_id == 1){
+        if(attendance_code_id == 1 && slc_registration_id > 0){
             var installment_amount;
             if(session_term != '' && instance_fees != '' && instance_fees > 0){
                 if(session_term == 1 || session_term == 2){
@@ -254,7 +263,7 @@ import Tabulator from "tabulator-tables";
         var instance_fees = $('#addAttendanceModal [name="instance_fees"]').val();
             instance_fees = instance_fees != '' ? parseInt(instance_fees, 10) : 0;
 
-        if(attendance_code_id == 1){
+        if(attendance_code_id == 1 && slc_registration_id > 0){
             var installment_amount;
             if(session_term != '' && instance_fees != '' && instance_fees > 0){
                 if(session_term == 1 || session_term == 2){

@@ -235,65 +235,65 @@
         @endforeach
     @endif
 
-    @if($undefinedSlcAttendances->count() > 0)
-        <div class="intro-y box p-5 mt-5">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Attendance at SLC is unspecified</div>
-                </div>
-                <div class="col-span-6 text-right relative"></div>
+    <div class="intro-y box p-5 mt-5">
+        <div class="grid grid-cols-12 gap-0 items-center">
+            <div class="col-span-6">
+                <div class="font-medium text-base">Attendance at SLC is unspecified</div>
             </div>
-            <div class="intro-y mt-5">
-                <table class="table table-bordered table-sm mt-3" id="undefinedAttendanceTable">
-                    <thead>
-                        <tr>
-                            <th class="whitespace-nowrap">ID</th>
-                            <th class="whitespace-nowrap">Confirmation Date</th>
-                            <th class="whitespace-nowrap">Attendance Semester</th>
-                            <th class="whitespace-nowrap">Session Term</th>
-                            <th class="whitespace-nowrap">Code</th>
-                            <th class="whitespace-nowrap">Note</th>
-                            <th class="whitespace-nowrap text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($undefinedSlcAttendances as $atn)
-                            <tr>
-                                <td>{{ $atn->id }}</td>
-                                <td>
-                                    <span>
-                                        {{ (!empty($atn->confirmation_date) ? date('jS M, Y', strtotime($atn->confirmation_date)) : '') }}
-                                        {!! (isset($atn->user->employee->full_name) && !empty($atn->user->employee->full_name) ? 'by '.$atn->user->employee->full_name : '') !!}
-                                    </span>
-                                </td>
-                                <td>
-                                    {{ isset($atn->term->name) && !empty($atn->term->name) ? $atn->term->name : '' }}
-                                    {{ isset($atn->term->termType->name) && !empty($atn->term->termType->name) ? ' - '.$atn->term->termType->name : '' }}
-                                </td>
-                                <td>{{ !empty($atn->session_term) ? 'Term '.$atn->session_term : '' }}</td>
-                                <td><span class="font-medium">{{ isset($atn->code->code) && !empty($atn->code->code) ? $atn->code->code : '' }}</span></td>
-                                <td>{{ !empty($atn->note) ? $atn->note : '' }}</td>
-                                <td class="text-right">
-                                    @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
-                                        <div class="dropdown inline-block" data-tw-placement="bottom-end">
-                                            <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
-                                            <div class="dropdown-menu w-64">
-                                                <ul class="dropdown-content">
-                                                    @foreach($slcRegistrations as $regs)
-                                                        <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-atn="{{ $atn->id }}" class="dropdown-item assignAttendanceToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
-                                                    @endforeach
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="col-span-6 text-right relative">
+                <button data-reg-id="0" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
             </div>
         </div>
-    @endif
+        <div class="intro-y mt-5">
+            <table class="table table-bordered table-sm mt-3" id="undefinedAttendanceTable">
+                <thead>
+                    <tr>
+                        <th class="whitespace-nowrap">ID</th>
+                        <th class="whitespace-nowrap">Confirmation Date</th>
+                        <th class="whitespace-nowrap">Attendance Semester</th>
+                        <th class="whitespace-nowrap">Session Term</th>
+                        <th class="whitespace-nowrap">Code</th>
+                        <th class="whitespace-nowrap">Note</th>
+                        <th class="whitespace-nowrap text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($undefinedSlcAttendances as $atn)
+                        <tr>
+                            <td>{{ $atn->id }}</td>
+                            <td>
+                                <span>
+                                    {{ (!empty($atn->confirmation_date) ? date('jS M, Y', strtotime($atn->confirmation_date)) : '') }}
+                                    {!! (isset($atn->user->employee->full_name) && !empty($atn->user->employee->full_name) ? 'by '.$atn->user->employee->full_name : '') !!}
+                                </span>
+                            </td>
+                            <td>
+                                {{ isset($atn->term->name) && !empty($atn->term->name) ? $atn->term->name : '' }}
+                                {{ isset($atn->term->termType->name) && !empty($atn->term->termType->name) ? ' - '.$atn->term->termType->name : '' }}
+                            </td>
+                            <td>{{ !empty($atn->session_term) ? 'Term '.$atn->session_term : '' }}</td>
+                            <td><span class="font-medium">{{ isset($atn->code->code) && !empty($atn->code->code) ? $atn->code->code : '' }}</span></td>
+                            <td>{{ !empty($atn->note) ? $atn->note : '' }}</td>
+                            <td class="text-right">
+                                @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
+                                    <div class="dropdown inline-block" data-tw-placement="bottom-end">
+                                        <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
+                                        <div class="dropdown-menu w-64">
+                                            <ul class="dropdown-content">
+                                                @foreach($slcRegistrations as $regs)
+                                                    <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-atn="{{ $atn->id }}" class="dropdown-item assignAttendanceToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">

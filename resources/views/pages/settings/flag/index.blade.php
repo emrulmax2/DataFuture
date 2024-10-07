@@ -108,7 +108,7 @@
                             <div class="acc__input-error error-color text-danger mt-2"></div>
                         </div> 
                         <div class="mt-3">
-                            <label for="user_ids" class="form-label">Raisers</label>
+                            <label for="user_ids" class="form-label">Clearer</label>
                             <select id="user_ids" placeholder="Select Users" name="user_ids[]" multiple class="w-full tom-selects">
                                 <option value="">Please Select Raiser</option>
                                 @if(!empty($users))
@@ -170,7 +170,7 @@
                             <div class="acc__input-error error-color text-danger mt-2"></div>
                         </div> 
                         <div class="mt-3">
-                            <label for="edit_user_ids" class="form-label">Raisers</label>
+                            <label for="edit_user_ids" class="form-label">Clearer</label>
                             <select id="edit_user_ids" placeholder="Select Users" name="user_ids[]" multiple class="w-full tom-selects">
                                 <option value="">Please Select Raiser</option>
                                 @if(!empty($users))

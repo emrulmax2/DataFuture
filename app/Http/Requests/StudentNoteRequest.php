@@ -27,7 +27,7 @@ class StudentNoteRequest extends FormRequest
             'opening_date' => 'required|date',
             'content' => 'required',
             'followed_up' => 'sometimes',
-            'follow_up_start' => 'required_if:followed_up,yes',
+            //'follow_up_start' => 'required_if:followed_up,yes',
             'follow_up_by' => 'required_if:followed_up,yes',
         ];
     }
@@ -36,7 +36,8 @@ class StudentNoteRequest extends FormRequest
     {
         return [
             'opening_date.required' => 'The Opening Date field can not be empty.',
-            'content.required' => 'The Note field can not be empty.'
+            'content.required' => 'The Note field can not be empty.',
+            'follow_up_by.required_if' => 'This field is required.'
         ];
     }
 }

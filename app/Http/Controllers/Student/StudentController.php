@@ -78,6 +78,7 @@ use App\Models\StudentDocument;
 use App\Models\StudentEmail;
 use App\Models\StudentEmailsAttachment;
 use App\Models\StudentEmailsDocument;
+use App\Models\StudentFlag;
 use App\Models\StudentLetter;
 use App\Models\StudentProposedCourse;
 use App\Models\Title;
@@ -262,6 +263,7 @@ class StudentController extends Controller
                     'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'url' => route('student.show', $list->id),
                     'photo_url' => $list->photo_url,
+                    'flag_html' => (isset($list->flag_html) && !empty($list->flag_html) ? $list->flag_html : ''),
                     'due' => $list->due
                 ];
                 $i++;
@@ -394,7 +396,8 @@ class StudentController extends Controller
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'terms' => TermDeclaration::orderBy('id', 'desc')->get(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'flags' => StudentFlag::orderBy('id', 'ASC')->get()
         ]);
     }
 
