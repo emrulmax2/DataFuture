@@ -1058,9 +1058,23 @@ var liveStudentsListTable = (function () {
             function filterStudentListTable() {
                 liveStudentsListTable.init();
             }
+
+            $('#registration_no').on('keypress', function(e){
+                var keycode = e.keyCode || e.which;
+                if(keycode == 13) {
+                    $(this).blur();
+                    $('#studentIDSearchBtn').trigger('click');
+                }
+            });
+            $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').on('keypress', function(e){
+                var keycode = e.keyCode || e.which;
+                if(keycode == 13) {
+                    $(this).blur();
+                    $('#studentSearchSubmitBtn').trigger('click');
+                }
+            })
             
             $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
-                
                 filterStudentListTable();
                 $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
             });
