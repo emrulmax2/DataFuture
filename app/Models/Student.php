@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 
@@ -272,6 +273,25 @@ class Student extends Model
         endif;
 
         return $dueStatus;
+    }
+
+    public function getFlagHtmlAttribute(){
+        $html = '';
+        $studentNotFlag = DB::table('student_notes as sn')
+                          ->select(DB::raw('COUNT(DISTINCT sn.student_flag_id) as TOTAL_FLAG'), 'sf.color')
+                          ->leftJoin('student_flags as sf', 'sn.student_flag_id', 'sf.id')
+                          ->where('sn.student_id', $this->id)
+                          ->where('sn.is_flaged', 'Yes')->where('sn.flaged_status', 'Active')
+                          ->groupBy('sf.color')->get();
+        if($studentNotFlag->count() > 0):
+            $html .= '<div class="inline-flex justify-end items-center mr-1">';
+                foreach($studentNotFlag as $flag):
+                    $html .= '<a href="'.route('student.notes', $this->id).'" class="relative flagLinks mr-2 text-'.strtolower($flag->color).'"><span class="flagCount bg-'.strtolower($flag->color).'">'.$flag->TOTAL_FLAG.'</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="flag" class="lucide lucide-flag w-6 h-6"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg></a>';
+                endforeach;
+            $html .= '</div>';
+        endif;
+
+        return $html;
     }
     
 }

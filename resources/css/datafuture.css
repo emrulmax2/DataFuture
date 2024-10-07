@@ -2151,3 +2151,27 @@ input[type=number] {
     width: 80px;
     height: 80px;
 }
+.theFollowUpCover.active::after,
+.theFlagCover.active::after{
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    background: transparent;
+}
+.flagCount{
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    font-size: 11px;
+    width: 16px;
+    height: 16px;
+    color: #fff;
+    text-align: center;
+    border-radius: 50%;
+    line-height: 1;
+    padding: 2px 0 0;
+}

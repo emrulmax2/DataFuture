@@ -283,6 +283,7 @@ export default defineConfig({
                 'resources/js/student-slc-reports.js',
                 
                 'resources/js/student-flag.js',
+                'resources/js/student-note-followups.js',
                 
             ],
             refresh: true,

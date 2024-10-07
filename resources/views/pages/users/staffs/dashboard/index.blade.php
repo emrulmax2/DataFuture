@@ -93,7 +93,7 @@
                 </div>
             </div>
         </div> 
-        @if(!empty($myPendingTask) || $proxyClasses->count() > 0)
+        @if(!empty($myPendingTask) || $proxyClasses->count() > 0 || $myfollowups > 0)
         <div class="col-span-12 2xl:col-span-3">
              <div class="2xl:border-l -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
@@ -182,11 +182,22 @@
                                     </div>
                                 @endforeach
                             @endif
+                            
+                            @if($myfollowups > 0)
+                                <div class="col-span-12 mt-5">
+                                    <div class="grid grid-cols-12 gap-5">
+                                        <a href="{{ route('followups') }}" class="intro-y block relative col-span-6 2xl:col-span-4 mb-3">
+                                            <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">Pending Followups</h6>
+                                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/blan_logo.png') }}" alt="Pending Followups" />
+                                            <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $myfollowups }}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
-             </div>
-            
+            </div>
         </div>
         @endif
     </div>

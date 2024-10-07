@@ -37,6 +37,7 @@
                         $day = 'text-amber-600';
                     endif;
                     $html = '<div class="inline-flex ml-auto">';
+                        $html .= (isset($student->flag_html) && !empty($student->flag_html) ? $student->flag_html : '');
                         if($student->due > 1):
                             $html .= '<div class="mr-2 '.($student->due == 2 ? 'text-success' : ($student->due == 3 ? 'text-warning' : 'text-danger')).'"><i data-lucide="badge-pound-sterling" class="w-6 h-6"></i></div>';
                         endif;

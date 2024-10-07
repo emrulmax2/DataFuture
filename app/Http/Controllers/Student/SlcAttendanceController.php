@@ -23,6 +23,9 @@ class SlcAttendanceController extends Controller
 {
     public function store(SlcAttendanceRequest $request){
         $studen_id = $request->studen_id;
+        $student = Student::find($studen_id);
+        $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : null);
+        $student_course_creation_id = (isset($student->activeCR->course_creation_id) && $student->activeCR->course_creation_id > 0 ? $student->activeCR->course_creation_id : null);
         $slc_registration_id = $request->slc_registration_id;
         $instance_fees = $request->instance_fees;
 
@@ -34,11 +37,12 @@ class SlcAttendanceController extends Controller
 
         $attenData = [];
         $attenData['student_id'] = $studen_id;
-        $attenData['student_course_relation_id'] = $slcReg->student_course_relation_id;
-        $attenData['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
-        $attenData['slc_registration_id'] = $slc_registration_id;
+        $attenData['course_relation_id'] = $student_course_creation_id;
+        $attenData['student_course_relation_id'] = (isset($slcReg->student_course_relation_id) && $slcReg->student_course_relation_id > 0 ? $slcReg->student_course_relation_id : $student_course_relation_id);
+        $attenData['course_creation_instance_id'] = (isset($slcReg->course_creation_instance_id) && $slcReg->course_creation_instance_id > 0 ? $slcReg->course_creation_instance_id : null);
+        $attenData['slc_registration_id'] = ($slc_registration_id > 0 ? $slc_registration_id : 0);
         $attenData['confirmation_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
-        $attenData['attendance_year'] = $request->attendance_year;
+        $attenData['attendance_year'] = (isset($request->attendance_year) && $request->attendance_year > 0 ? $request->attendance_year : null);
         $attenData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
         $attenData['session_term'] = $request->session_term;
         $attenData['attendance_code_id'] = $attendance_code_id;
@@ -47,47 +51,49 @@ class SlcAttendanceController extends Controller
 
         $slcAttendance = SlcAttendance::create($attenData);
         if($slcAttendance):
-            if($cocRequired):
-                $cocData = [];
-                $cocData['student_id'] = $studen_id;
-                $cocData['student_course_relation_id'] = $slcReg->student_course_relation_id;
-                $cocData['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
-                $cocData['slc_registration_id'] = $slc_registration_id;
-                $cocData['slc_attendance_id'] = $slcAttendance->id;
-                $cocData['confirmation_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
-                $cocData['coc_type'] = 'Outstanding';
-                $cocData['created_by'] = auth()->user()->id;
+            if($slc_registration_id > 0):
+                if($cocRequired):
+                    $cocData = [];
+                    $cocData['student_id'] = $studen_id;
+                    $cocData['student_course_relation_id'] = $slcReg->student_course_relation_id;
+                    $cocData['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
+                    $cocData['slc_registration_id'] = $slc_registration_id;
+                    $cocData['slc_attendance_id'] = $slcAttendance->id;
+                    $cocData['confirmation_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
+                    $cocData['coc_type'] = 'Outstanding';
+                    $cocData['created_by'] = auth()->user()->id;
 
-                $slcCoc = SlcCoc::create($cocData);
-            endif;
+                    $slcCoc = SlcCoc::create($cocData);
+                endif;
 
-            $session_term = $request->session_term;
-            $course_creation_instance_id = $slcReg->course_creation_instance_id;
+                $session_term = $request->session_term;
+                $course_creation_instance_id = $slcReg->course_creation_instance_id;
 
-            $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : 0);
-            $termDeclaration = TermDeclaration::find($term_declaration_id);
-            $term_type_id = (isset($termDeclaration->term_type_id) && $termDeclaration->term_type_id > 0 ? $termDeclaration->term_type_id : null);
+                $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : 0);
+                $termDeclaration = TermDeclaration::find($term_declaration_id);
+                $term_type_id = (isset($termDeclaration->term_type_id) && $termDeclaration->term_type_id > 0 ? $termDeclaration->term_type_id : null);
 
-            $slcAgreement = SlcAgreement::where('slc_registration_id', $slc_registration_id)->where('year', $slcReg->registration_year)
-                            ->where('student_id', $studen_id)->where('student_course_relation_id', $slcReg->student_course_relation_id)
-                            ->get()->first();
-            $agreementId = (isset($slcAgreement->id) && $slcAgreement->id > 0 ? $slcAgreement->id : null);
+                $slcAgreement = SlcAgreement::where('slc_registration_id', $slc_registration_id)->where('year', $slcReg->registration_year)
+                                ->where('student_id', $studen_id)->where('student_course_relation_id', $slcReg->student_course_relation_id)
+                                ->get()->first();
+                $agreementId = (isset($slcAgreement->id) && $slcAgreement->id > 0 ? $slcAgreement->id : null);
 
-            if($attendance_code_id == 1):
-                $installmentData = [];
-                $installmentData['student_id'] = $studen_id;
-                $installmentData['student_course_relation_id'] = $slcReg->student_course_relation_id;
-                $installmentData['course_creation_instance_id'] = $course_creation_instance_id;
-                $installmentData['slc_attendance_id'] = $slcAttendance->id;
-                $installmentData['slc_agreement_id'] = $agreementId;
-                $installmentData['installment_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
-                $installmentData['amount'] = $request->installment_amount;
-                $installmentData['term_type_id'] = $term_type_id;
-                $installmentData['session_term'] = $session_term;
-                $installmentData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
-                $installmentData['created_by'] = auth()->user()->id;
+                if($attendance_code_id == 1):
+                    $installmentData = [];
+                    $installmentData['student_id'] = $studen_id;
+                    $installmentData['student_course_relation_id'] = $slcReg->student_course_relation_id;
+                    $installmentData['course_creation_instance_id'] = $course_creation_instance_id;
+                    $installmentData['slc_attendance_id'] = $slcAttendance->id;
+                    $installmentData['slc_agreement_id'] = $agreementId;
+                    $installmentData['installment_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
+                    $installmentData['amount'] = $request->installment_amount;
+                    $installmentData['term_type_id'] = $term_type_id;
+                    $installmentData['session_term'] = $session_term;
+                    $installmentData['term_declaration_id'] = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : null);
+                    $installmentData['created_by'] = auth()->user()->id;
 
-                $installment = SlcInstallment::create($installmentData);
+                    $installment = SlcInstallment::create($installmentData);
+                endif;
             endif;
 
             return response()->json(['res' => 'Attendance successfully inserted.'], 200);
@@ -235,8 +241,10 @@ class SlcAttendanceController extends Controller
             if($slc_reg_id > 0 && $slc_atn_id > 0):
                 $slcReg = SlcRegistration::find($slc_reg_id);
                 $data = [];
+                $data['course_relation_id'] = $slcReg->course_relation_id;
                 $data['course_creation_instance_id'] = $slcReg->course_creation_instance_id;
                 $data['slc_registration_id'] = $slcReg->id;
+                $data['attendance_year'] = $slcReg->registration_year;
                 SlcAttendance::where('id', $slc_atn_id)->update($data);
 
                 return response()->json(['res' => 'Success'], 200);

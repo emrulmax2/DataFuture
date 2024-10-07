@@ -233,6 +233,7 @@ use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
+use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\Result\StudentResultController;
@@ -2884,6 +2885,12 @@ Route::middleware('auth')->group(function() {
         Route::any('reports/slc-attendance/excel-export', 'SLCAttendanceExcelDownload')->name('reports.slc.attendance.excel.export'); 
         Route::any('reports/slc-register/excel-export', 'SlcRegistrationHistoryExcelDownload')->name('reports.slc.register.excel.export'); 
         Route::any('reports/slc-coc/excel-export', 'SlcCocHistoryExcelDownload')->name('reports.slc.coc.excel.export'); 
+        
+    });
+    Route::controller(FollowupController::class)->group(function(){
+        Route::get('followups', 'index')->name('followups'); 
+        Route::get('followups/list', 'list')->name('followups.list'); 
+        Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
         
     });
     

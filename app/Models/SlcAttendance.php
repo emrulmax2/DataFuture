@@ -12,6 +12,7 @@ class SlcAttendance extends Model
 
     protected $fillable = [
         'student_id',
+        'course_relation_id',
         'student_course_relation_id',
         'course_creation_instance_id',
         'slc_registration_id',

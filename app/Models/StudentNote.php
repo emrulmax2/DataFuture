@@ -17,6 +17,12 @@ class StudentNote extends Model
         'note',
         'phase',
         'followed_up',
+        'followed_up_status',
+        'followup_completed_by',
+        'followup_completed_at',
+        'is_flaged',
+        'student_flag_id',
+        'flaged_status',
         'follow_up_start',
         'follow_up_end',
         'follow_up_by',
@@ -31,12 +37,20 @@ class StudentNote extends Model
      */
     protected $dates = ['deleted_at'];
 
+    public function student() {
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     public function term() {
         return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
     }
     
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
+    }
+    
+    public function completed(){
+        return $this->belongsTo(User::class, 'followup_completed_by');
     }
 
     public function setOpeningDateAttribute($value) {  
@@ -69,5 +83,25 @@ class StudentNote extends Model
 
     public function document(){
         return $this->hasOne(StudentNotesDocument::class, 'student_note_id', 'id')->latestOfMany();
+    }
+
+    public function follows(){
+        return $this->hasMany(StudentNoteFollowedBy::class, 'student_note_id', 'id');
+    }
+
+    public function flag(){
+        return $this->belongsTo(StudentFlag::class, 'student_flag_id');
+    }
+
+    public function getFollowedTagAttribute(){
+        $followedBy = StudentNoteFollowedBy::where('student_note_id', $this->id)->get();
+        $html = '';
+        if(!empty($followedBy)):
+            foreach($followedBy as $follow):
+                $html .= '<span class="bg-slate-200 text-xs text-primary font-medium inline-flex px-2 py-1 mr-1 mb-1 whitespace-nowrap">'.(isset($follow->user->employee->full_name) && !empty($follow->user->employee->full_name) ? $follow->user->employee->full_name : '').'</span>';
+            endforeach;
+        endif;
+
+        return $html;
     }
 }

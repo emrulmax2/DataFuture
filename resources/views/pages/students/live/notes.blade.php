@@ -64,21 +64,11 @@
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
                                 <li>
                                     <a id="tabulator-export-xlsx-AN" href="javascript:;" class="dropdown-item">
                                         <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                     </a>
                                 </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
                             </ul>
                         </div>
                     </div>
@@ -125,8 +115,8 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="edit_term_declaration_id" class="form-label">Term</label>
-                            <select id="edit_term_declaration_id" class="w-full" name="term_declaration_id">
+                            <label for="edit_note_term_declaration_id" class="form-label">Term</label>
+                            <select id="edit_note_term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
                                 <option value="">Please Select</option>
                                 @if($terms->count() > 0)
                                     @foreach($terms as $trm)
@@ -151,35 +141,79 @@
                             </div>
                             <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
-                        <div class="mt-4">
-                            <div class="form-check form-switch m-0 flex items-center">
-                                <label class="form-check-label mr-3 ml-0" for="edit_followed_up">Followed Up?</label>
-                                <input id="edit_followed_up" name="followed_up" class="form-check-input" value="yes" type="checkbox">
+                        <div class="relative theFollowUpCover">
+                            <div class="mt-4">
+                                <div class="form-check form-switch m-0 flex items-center">
+                                    <label class="form-check-label mr-3 ml-0" for="edit_followed_up">Followed Up?</label>
+                                    <input id="edit_followed_up" name="followed_up" class="form-check-input" value="yes" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="mt-3 followedUpWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-4">
+                                    {{--<div class="col-span-12 sm:col-span-4">
+                                        <label for="edit_follow_up_start" class="form-label">Start Date <span class="text-danger">*</span></label>
+                                        <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_start" class="form-control datepicker" name="follow_up_start" data-format="DD-MM-YYYY" data-single-mode="true">
+                                        <div class="acc__input-error error-follow_up_start text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-4">
+                                        <label for="edit_follow_up_end" class="form-label">End Date</label>
+                                        <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_end" class="form-control datepicker" name="follow_up_end" data-format="DD-MM-YYYY" data-single-mode="true">
+                                        <div class="acc__input-error error-follow_up_end text-danger mt-2"></div>
+                                    </div>--}}
+                                    <div class="col-span-8">
+                                        <label for="edit_follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
+                                        <select id="edit_follow_up_by" class="w-full tom-selects" multiple name="follow_up_by[]">
+                                            <option value="">Please Select</option>
+                                            @if($users->count() > 0)
+                                                @foreach($users as $usr)
+                                                    <option value="{{ $usr->id }}">{{ (isset($usr->employee->full_name) ? $usr->employee->full_name : $usr->name) }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-follow_up_by text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-4">
+                                        <label for="edit_followed_up_status" class="form-label">Followed Up Status <span class="text-danger">*</span></label>
+                                        <select id="edit_followed_up_status" class="w-full form-control" name="followed_up_status">
+                                            <option value="">Please Select</option>
+                                            <option value="Pending">Pending</option>
+                                            <option value="Completed">Completed</option>
+                                        </select>
+                                        <div class="acc__input-error error-followed_up_status text-danger mt-2"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="mt-3 followedUpWrap" style="display: none;">
-                            <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label for="edit_follow_up_start" class="form-label">Start Date <span class="text-danger">*</span></label>
-                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_start" class="form-control datepicker" name="follow_up_start" data-format="DD-MM-YYYY" data-single-mode="true">
-                                    <div class="acc__input-error error-follow_up_start text-danger mt-2"></div>
+                        <div class="relative theFlagCover">
+                            <div class="mt-4">
+                                <div class="form-check form-switch m-0 flex items-center">
+                                    <label class="form-check-label mr-3 ml-0" for="edit_is_flaged">Flaged?</label>
+                                    <input id="edit_is_flaged" name="is_flaged" class="form-check-input" value="Yes" type="checkbox">
                                 </div>
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label for="edit_follow_up_end" class="form-label">End Date</label>
-                                    <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_follow_up_end" class="form-control datepicker" name="follow_up_end" data-format="DD-MM-YYYY" data-single-mode="true">
-                                    <div class="acc__input-error error-follow_up_end text-danger mt-2"></div>
-                                </div>
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label for="edit_follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
-                                    <select id="edit_follow_up_by" class="w-full tom-selects" name="follow_up_by">
-                                        <option value="">Please Select</option>
-                                        @if($users->count() > 0)
-                                            @foreach($users as $usr)
-                                                <option value="{{ $usr->id }}">{{ (isset($usr->employee->full_name) ? $usr->employee->full_name : $usr->name) }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                    <div class="acc__input-error error-follow_up_by text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3 flagedWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-4">
+                                    <div class="col-span-6">
+                                        <label class="form-label" for="edit_student_flag_id">Available Flags</label>
+                                        <select id="edit_student_flag_id" class="w-full form-control" name="student_flag_id">
+                                            <option data-color="" value="">Please Select</option>
+                                            @if($flags->count() > 0)
+                                                @foreach($flags as $flg)
+                                                    <option data-color="{{ $flg->color }}" value="{{ $flg->id }}">{{ $flg->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-student_flag_id text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-6">
+                                        <div class="flex justify-start items-center pt-7">
+                                            <button class="theFlag w-9 h-9 rounded-full btn bg-slate-200 p-0 text-white"><i data-lucide="flag" class="w-4 h-4"></i></button>
+                                            <div class="form-check form-switch m-0 ml-auto flex items-center">
+                                                <label class="form-check-label ml-0 mr-5" for="flaged_status">Cleared?</label>
+                                                <input id="flaged_status" name="flaged_status" class="form-check-input" value="Cleared" type="checkbox">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -235,8 +269,8 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="term_declaration_id" class="form-label">Term</label>
-                            <select id="term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
+                            <label for="note_term_declaration_id" class="form-label">Term</label>
+                            <select id="note_term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
                                 <option value="">Please Select</option>
                                 @if($terms->count() > 0)
                                     @foreach($terms as $trm)
@@ -247,7 +281,7 @@
                             <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                            <label for="opening_date" class="form-label">Date <span class="text-danger">*</span></label>
                             <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-opening_date text-danger mt-2"></div>
                         </div>
@@ -269,7 +303,7 @@
                         </div>
                         <div class="mt-3 followedUpWrap" style="display: none;">
                             <div class="grid grid-cols-12 gap-4">
-                                <div class="col-span-12 sm:col-span-4">
+                                {{--<div class="col-span-12 sm:col-span-4">
                                     <label for="follow_up_start" class="form-label">Start Date <span class="text-danger">*</span></label>
                                     <input type="text" value="" placeholder="DD-MM-YYYY" id="follow_up_start" class="form-control datepicker" name="follow_up_start" data-format="DD-MM-YYYY" data-single-mode="true">
                                     <div class="acc__input-error error-follow_up_start text-danger mt-2"></div>
@@ -278,10 +312,10 @@
                                     <label for="follow_up_end" class="form-label">End Date</label>
                                     <input type="text" value="" placeholder="DD-MM-YYYY" id="follow_up_end" class="form-control datepicker" name="follow_up_end" data-format="DD-MM-YYYY" data-single-mode="true">
                                     <div class="acc__input-error error-follow_up_end text-danger mt-2"></div>
-                                </div>
-                                <div class="col-span-12 sm:col-span-4">
+                                </div>--}}
+                                <div class="col-span-12">
                                     <label for="follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
-                                    <select id="follow_up_by" class="w-full tom-selects" name="follow_up_by">
+                                    <select id="follow_up_by" class="w-full tom-selects" name="follow_up_by[]" multiple>
                                         <option value="">Please Select</option>
                                         @if($users->count() > 0)
                                             @foreach($users as $usr)
@@ -290,6 +324,31 @@
                                         @endif
                                     </select>
                                     <div class="acc__input-error error-follow_up_by text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="form-check form-switch m-0 flex items-center">
+                                <label class="form-check-label mr-3 ml-0" for="is_flaged">Flaged?</label>
+                                <input id="is_flaged" name="is_flaged" class="form-check-input" value="Yes" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 flagedWrap" style="display: none;">
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-6">
+                                    <label class="form-label" for="student_flag_id">Available Flags</label>
+                                    <select id="student_flag_id" class="w-full form-control" name="student_flag_id">
+                                        <option data-color="" value="">Please Select</option>
+                                        @if($flags->count() > 0)
+                                            @foreach($flags as $flg)
+                                                <option data-color="{{ $flg->color }}" value="{{ $flg->id }}">{{ $flg->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-student_flag_id text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-6">
+                                    <button class="theFlag w-9 h-9 rounded-full btn bg-slate-200 p-0 text-white mt-7"><i data-lucide="flag" class="w-4 h-4"></i></button>
                                 </div>
                             </div>
                         </div>
