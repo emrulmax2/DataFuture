@@ -804,7 +804,7 @@ class StudentController extends Controller
                         }
                         $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
-                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
+                        $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
                         $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
                         $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
@@ -872,7 +872,7 @@ class StudentController extends Controller
                         ];
                         $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
-                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
+                        $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
                         if(!isset($totalFeedListSet[$list->term_id][$list->plan_id])) {
                             
@@ -925,7 +925,7 @@ class StudentController extends Controller
 
                         $moduleNameList[$plan->id] = (isset($plan->creations->module)) ? $plan->creations->module->name."-".$plan->creations->module->code : $plan->creations->module->name;
                         
-                        $ClassType[$list->plan_id] = (isset($plan->creations->class_type)) ? $plan->creations->class_type : "N/A";
+                        
 
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$attendance->plans_date_list_id)->get()->first();
                         if(isset($attendanceInformation->tutor))
@@ -960,7 +960,6 @@ class StudentController extends Controller
                                 "attendance"=> ($attendance) ?? null,
                                 "term_id"=> $plan->term_declaration_id,
                                 "module_creation_id"=>$list->module_creation_id,
-                                "class_type" => $list->class_type,
                                 "plan_id" => $plan->id,
                                 "prev_plan_id" => Plan::find($attendance->prev_plan_id),
                         ];
@@ -995,7 +994,7 @@ class StudentController extends Controller
                         
                         $planSet = Plan::with(["tutor","personalTutor",'creations','group'])->where('id',$plan->id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
-                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
+                        $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
                         $avarageDetails[$plan->term_declaration_id][$plan->id] = $avarage;
                         $totalFeedListSet[$plan->term_declaration_id][$plan->id] = $totalFeedList;
