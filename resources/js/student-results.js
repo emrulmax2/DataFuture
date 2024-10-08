@@ -3,86 +3,7 @@ import { createIcons, icons } from "lucide";
 
 ("use strict");    
 
-document.addEventListener('DOMContentLoaded', function() {
-    
-    const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
 
-    const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
-        v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
-
-    document.querySelectorAll('#sortable-table th').forEach(th => th.addEventListener('click', function() {
-        const table = th.closest('table');
-        Array.from(table.querySelectorAll('tbody > tr'))
-            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-            .forEach(tr => table.querySelector('tbody').appendChild(tr));
-
-        // Reset all sorting icons to arrow-up-down
-        document.querySelectorAll('#sortable-table th svg').forEach(svg => {
-            svg.remove();
-        });
-
-        document.querySelectorAll('#sortable-table th').forEach(header => {
-            const defaultIcon = document.createElement('i');
-            defaultIcon.classList.add('w-4', 'h-4', 'ml-2','inline-flex');
-            defaultIcon.setAttribute('data-lucide', 'arrow-up-down');
-            header.appendChild(defaultIcon);
-        });
-        
-        // Update sorting icons
-        const icon = th.querySelector('svg');
-        const defaultNewIcon = th.querySelector('i');
-        defaultNewIcon.remove()
-        if (icon) {
-            icon.remove();
-            
-        }
-        const newIcon = document.createElement('i');
-        newIcon.classList.add('w-4', 'h-4', 'ml-2','inline-flex'); // Add classes to newIcon
-        if (this.asc) {
-            newIcon.setAttribute('data-lucide', 'arrow-up');
-        } else {
-            newIcon.setAttribute('data-lucide', 'arrow-down');
-        }
-        th.appendChild(newIcon);
-        // Refresh Lucide icons with the icons object
-        createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-        });
-        paginateTable();
-    }));
-
-    function paginateTable() {
-        const rowsPerPage = 10;
-        const rows = $('#sortable-table tbody tr');
-        const rowsCount = rows.length;
-        const pageCount = Math.ceil(rowsCount / rowsPerPage);
-        const numbers = $('#pagination-container');
-
-        numbers.html('');
-
-        for (let i = 0; i < pageCount; i++) {
-            numbers.append('<a href="#">' + (i + 1) + '</a>');
-        }
-
-        rows.hide();
-        rows.slice(0, rowsPerPage).show();
-
-        numbers.find('a').click(function(e) {
-            e.preventDefault();
-            const index = $(this).index();
-            const start = index * rowsPerPage;
-            const end = start + rowsPerPage;
-
-            rows.hide();
-            rows.slice(start, end).show();
-        });
-    }
-
-    paginateTable();
-});
 
 (function () {
 
@@ -301,28 +222,87 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } 
     })
-    // $('#sortable-table th').on('click', function() {
-    //     var table = $(this).parents('table').eq(0);
-    //     var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-    //     this.asc = !this.asc;
-    //     if (!this.asc) {
-    //         rows = rows.reverse();
-    //     }
-    //     for (var i = 0; i < rows.length; i++) {
-    //         table.append(rows[i]);
-    //     }
-    // });
 
-    // function comparer(index) {
-    //     return function(a, b) {
-    //         var valA = getCellValue(a, index);
-    //         var valB = getCellValue(b, index);
-    //         return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
-    //     };
-    // }
+    $('#sortable-table th').on('click', function() {
+        var th = $(this);
+        var table = $(this).parents('table').eq(0);
+        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
+        const asc = this.asc = !this.asc;
+        if (!this.asc) {
+            rows = rows.reverse();
+        }
+        for (var i = 0; i < rows.length; i++) {
+            table.append(rows[i]);
+        }
+        // Reset all sorting icons to arrow-up-down
+        $('#sortable-table th svg').remove();
 
-    // function getCellValue(row, index) {
-    //     return $(row).children('td').eq(index).text();
-    // }
+        // Add the arrow-up-down icon to all headers
+        $('#sortable-table th').each(function() {
+            const defaultIcon = $('<i>').addClass('w-4 h-4 ml-2 inline-flex').attr('data-lucide', 'arrow-up-down');
+            $(this).append(defaultIcon);
+        });
+            
+        // Update sorting icon for the clicked header
+        const $th = $(th);
+        const $icon = $th.find('svg');
+        const $defaultNewIcon = $th.find('i');
+        $defaultNewIcon.remove();
+        if ($icon.length) {
+            $icon.remove();
+        }
+
+        const newIcon = $('<i>').addClass('w-4 h-4 ml-2 inline-flex');
+        if (asc) {
+            newIcon.attr('data-lucide', 'arrow-up');
+        } else {
+            newIcon.attr('data-lucide', 'arrow-down');
+        }
+        $(th).append(newIcon);
+        // Refresh Lucide icons with the icons object
+        createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+        });
+        paginateTable();
+    });
+    function paginateTable() {
+        const rowsPerPage = 10;
+        const rows = $('#sortable-table tbody tr');
+        const rowsCount = rows.length;
+        const pageCount = Math.ceil(rowsCount / rowsPerPage);
+        const numbers = $('#pagination-container');
+    
+        numbers.html('');
+    
+        for (let i = 0; i < pageCount; i++) {
+            numbers.append('<a href="#">' + (i + 1) + '</a>');
+        }
+    
+        rows.hide();
+        rows.slice(0, rowsPerPage).show();
+    
+        numbers.find('a').click(function(e) {
+            e.preventDefault();
+            const index = $(this).index();
+            const start = index * rowsPerPage;
+            const end = start + rowsPerPage;
+    
+            rows.hide();
+            rows.slice(start, end).show();
+        });
+    }
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index);
+            var valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+        };
+    }
+
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
+    }
 
 })()

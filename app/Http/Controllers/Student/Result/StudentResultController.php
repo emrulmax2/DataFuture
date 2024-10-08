@@ -77,10 +77,10 @@ class StudentResultController extends Controller
             endforeach;
 
         return view('pages.students.live.result.index', [
-            'title' => 'Live Students - London Churchill College',
+            'title' => 'Students - Results',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
-                ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
+                ['label' => 'Results', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
             'dataSet' => ($data) ?? null,

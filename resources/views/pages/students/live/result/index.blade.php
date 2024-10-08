@@ -9,13 +9,22 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
+
+    <!-- BEGIN: Page Title -->
+    <div class="intro-y flex items-center p-5 mt-5 box">
+        <h2 class="text-lg font-medium mr-auto">
+            {{ $title }}
+        </h2>
+    </div>
+    <!-- END: Page Title -->
+
     <!-- BEGIN: Daily Sales -->
     <div class="intro-y box col-span-12 p-5 mt-5">
-        <div id="tabledata1" class="tabledataset overflow-x-auto p-5 pt-5" style="display: inline-block;">
-            <table id="sortable-table" data-tw-merge class="w-full text-left">
-                  <thead data-tw-merge>
+        <div id="tabledata1" class=" overflow-x-auto p-5 pt-5" >
+            <table id="sortable-table" data-tw-merge class="min-w-full divide-y divide-gray-200">
+                  <thead>
                     <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                        <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
                             Id <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                         <th data-sort="attendance_term" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
@@ -45,7 +54,7 @@
                         <th data-sort="last_updated_by" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Last Updated By <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="action" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 w-80 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="action" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2  dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between w-80">
                             Action <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                     </tr>
