@@ -104,6 +104,7 @@ use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\AttendanceLiveController;
 use App\Http\Controllers\Communication\BulkCommunicationController;
+use App\Http\Controllers\ConsoleController;
 use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
@@ -744,7 +745,7 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/get-course', 'getCourses')->name('plans.tree.get.courses');
         Route::post('course-management/plans/tree/get-groups', 'getGroups')->name('plans.tree.get.groups');
         Route::post('course-management/plans/tree/get-module', 'getModule')->name('plans.tree.get.module');
-        Route::get('course-management/plans/tree/list', 'list')->name('plans.tree.list'); 
+        Route::get('course-management/plans/tree/list', 'list')->name('plans.tree.list');  
         Route::get('course-management/plans/tree/edit/{id}', 'edit')->name('plans.tree.edit'); 
         Route::post('course-management/plans/tree/update', 'update')->name('plans.tree.update'); 
         Route::delete('course-management/plans/tree/delete/{id}', 'destroy')->name('plans.tree.destory');
@@ -753,6 +754,8 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/get-assign-details', 'getAssignDetails')->name('plans.get.assign.details');
         Route::post('course-management/plans/tree/assign-participants', 'assignParticipants')->name('plans.assign.participants');
         Route::post('course-management/plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
+
+        Route::get('course-management/plans/tree/assigned-list', 'assignedList')->name('plans.tree.assigned.list');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
@@ -2891,7 +2894,6 @@ Route::middleware('auth')->group(function() {
         Route::get('followups', 'index')->name('followups'); 
         Route::get('followups/list', 'list')->name('followups.list'); 
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
-        
     });
     
 });

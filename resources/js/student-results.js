@@ -1,6 +1,9 @@
 import IMask from 'imask';
- 
+import { createIcons, icons } from "lucide";
+
 ("use strict");    
+
+
 
 (function () {
 
@@ -219,4 +222,87 @@ import IMask from 'imask';
             });
         } 
     })
+
+    $('#sortable-table th').on('click', function() {
+        var th = $(this);
+        var table = $(this).parents('table').eq(0);
+        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
+        const asc = this.asc = !this.asc;
+        if (!this.asc) {
+            rows = rows.reverse();
+        }
+        for (var i = 0; i < rows.length; i++) {
+            table.append(rows[i]);
+        }
+        // Reset all sorting icons to arrow-up-down
+        $('#sortable-table th svg').remove();
+
+        // Add the arrow-up-down icon to all headers
+        $('#sortable-table th').each(function() {
+            const defaultIcon = $('<i>').addClass('w-4 h-4 ml-2 inline-flex').attr('data-lucide', 'arrow-up-down');
+            $(this).append(defaultIcon);
+        });
+            
+        // Update sorting icon for the clicked header
+        const $th = $(th);
+        const $icon = $th.find('svg');
+        const $defaultNewIcon = $th.find('i');
+        $defaultNewIcon.remove();
+        if ($icon.length) {
+            $icon.remove();
+        }
+
+        const newIcon = $('<i>').addClass('w-4 h-4 ml-2 inline-flex');
+        if (asc) {
+            newIcon.attr('data-lucide', 'arrow-up');
+        } else {
+            newIcon.attr('data-lucide', 'arrow-down');
+        }
+        $(th).append(newIcon);
+        // Refresh Lucide icons with the icons object
+        createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+        });
+        paginateTable();
+    });
+    function paginateTable() {
+        const rowsPerPage = 10;
+        const rows = $('#sortable-table tbody tr');
+        const rowsCount = rows.length;
+        const pageCount = Math.ceil(rowsCount / rowsPerPage);
+        const numbers = $('#pagination-container');
+    
+        numbers.html('');
+    
+        for (let i = 0; i < pageCount; i++) {
+            numbers.append('<a href="#">' + (i + 1) + '</a>');
+        }
+    
+        rows.hide();
+        rows.slice(0, rowsPerPage).show();
+    
+        numbers.find('a').click(function(e) {
+            e.preventDefault();
+            const index = $(this).index();
+            const start = index * rowsPerPage;
+            const end = start + rowsPerPage;
+    
+            rows.hide();
+            rows.slice(start, end).show();
+        });
+    }
+    function comparer(index) {
+        return function(a, b) {
+            var valA = getCellValue(a, index);
+            var valB = getCellValue(b, index);
+            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+        };
+    }
+
+    function getCellValue(row, index) {
+        return $(row).children('td').eq(index).text();
+    }
+
 })()

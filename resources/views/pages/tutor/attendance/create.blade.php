@@ -36,7 +36,7 @@
 			<div class="col-span-2">
 				<div class="intro-y box p-5 h-auto sm:h-full bg-success">
 					<div class="theClockWrap h-full flex justify-center items-center font-bold whitespace-nowrap text-4xl text-white"  id="dataclassend" data-classend="{{ ($data['attendanceInformation']->end_time == null ? 0 : 1) }}">
-						<label id="hours">{{ $data['classTakenTimeHour'] }}</label>:<label id="minutes">{{ $data["classTakenTimeMin"] }}</label>:<label id="seconds">{{ $data["classTakenTimeSeconds"] }}</label>
+						<label id="hours">{{ ($data['classTakenTimeHour'] < 10 ? '0'.$data['classTakenTimeHour'] : $data['classTakenTimeHour']) }}</label>:<label id="minutes">{{ ($data["classTakenTimeMin"] < 10 ? '0'.$data["classTakenTimeMin"] : $data["classTakenTimeMin"]) }}</label>:<label id="seconds">{{ ($data["classTakenTimeSeconds"] < 10 ? '0'.$data["classTakenTimeSeconds"] : $data["classTakenTimeSeconds"]) }}</label>
 					</div>
 				</div>
 			</div>
@@ -73,7 +73,7 @@
 	</div>
 
     
-    @if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
+    @if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0) || (isset(auth()->user()->priv()['edit_attendance']) && auth()->user()->priv()['edit_attendance'] == 1))
     <form id="attendanceFeed" method="post" >
     @endif
     	<div class="intro-y box p-5 mt-5">
@@ -288,7 +288,7 @@
             		</tbody>
         		</table>-->
       		</div>
-			@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
+			@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0) || (isset(auth()->user()->priv()['edit_attendance']) && auth()->user()->priv()['edit_attendance'] == 1))
 			<div class="intro-y flex flex-col sm:flex-row items-center justify-end mt-5">
 				<div class="w-full sm:w-auto flex mt-4 sm:mt-0">
 					<button type="submit" class="save btn btn-success text-white shadow-md">Save Attendance
@@ -313,7 +313,7 @@
 			</div>
 			@endif
     	</div>
-	@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0))
+	@if($data["attendanceInformation"]->end_time == null || ($data['feed_given'] != 1 && $data['feed_count'] == 0) || (isset(auth()->user()->priv()['edit_attendance']) && auth()->user()->priv()['edit_attendance'] == 1))
 	</form>
 	@endif
 

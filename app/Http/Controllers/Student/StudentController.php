@@ -652,6 +652,7 @@ class StudentController extends Controller
         // endforeach;
         $termData = $returnSet["termData"];
         $moduleNameList = $returnSet["moduleNameList"];
+        $ClassType   = $returnSet["ClassType"];
         $data = $returnSet["data"];
         $planDetails = $returnSet["planDetails"];
         $avarageDetails = $returnSet["avarageDetails"];
@@ -680,6 +681,7 @@ class StudentController extends Controller
             "totalClassFullSet" =>$totalClassFullSet,
             "attendanceFeedStatus" =>$attendanceFeedStatus,
             "moduleNameList" =>$moduleNameList,
+            "ClassType" => $ClassType,
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
@@ -696,6 +698,7 @@ class StudentController extends Controller
             $avarageTermDetails = [];
             $totalClassFullSet = [];
             $moduleNameList = [];
+            $ClassType[] = [];
             $arryBox = [];
                 $QueryInner = DB::table('plans_date_lists as pdl')
                             ->select( 'pdl.*','td.id as term_id',
@@ -703,7 +706,7 @@ class StudentController extends Controller
                                         'instance_terms.start_date',
                                         'instance_terms.end_date', 
                                         'plan.module_creation_id as module_creation_id' , 
-                                        'mc.module_name','mc.code as module_code', 
+                                        'mc.module_name','mc.code as module_code','mc.class_type as class_type', 
                                         'plan.id as plan_id' , 
                                         'gp.name as group_name', 
                                         'gp.id as group_id')
@@ -730,6 +733,7 @@ class StudentController extends Controller
                     if(isset($attendance)) {
 
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
+                        $ClassType[$list->plan_id] = (isset($list->class_type)) ? $list->class_type : "N/A";
                         
                         
                         $termAttendanceFound[$list->term_id] = true;
@@ -758,7 +762,6 @@ class StudentController extends Controller
                         $avaragePercentage[$list->term_id][$list->plan_id] = (($totalPresentFound[$list->term_id][$list->plan_id]/$total)*100);
                         $precision = 2;
                         $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
-                    
 
                         $data[$list->term_id][$list->plan_id][$list ->date] = [
                                 "id" => $list->id,
@@ -767,7 +770,9 @@ class StudentController extends Controller
                                 "attendance"=> ($attendance) ?? null,
                                 "term_id"=> $list->term_id,
                                 "module_creation_id"=>$list->module_creation_id,
+                                
                                 "plan_id" => $list->plan_id,
+                                
                         ];
                         
                         $termData[$list->term_id] = [
@@ -829,6 +834,7 @@ class StudentController extends Controller
                         $avarageTermDetails[$list->term_id] = $avarage;
                     } else {
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
+                        $ClassType[$list->plan_id] = (isset($list->class_type)) ? $list->class_type : "N/A";
                         if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
                             $totalPresentFound[$list->term_id][$list->plan_id] = 0;
                         }
@@ -914,7 +920,8 @@ class StudentController extends Controller
 
                         $moduleNameList[$plan->id] = (isset($plan->creations->module)) ? $plan->creations->module->name."-".$plan->creations->module->code : $plan->creations->module->name;
                         
-                        
+                        $ClassType[$list->plan_id] = (isset($list->class_type)) ? $list->class_type : "N/A";
+
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$attendance->plans_date_list_id)->get()->first();
                         if(isset($attendanceInformation->tutor))
                             $attendanceInformation->tutor->load(["employee"]);
@@ -948,6 +955,7 @@ class StudentController extends Controller
                                 "attendance"=> ($attendance) ?? null,
                                 "term_id"=> $plan->term_declaration_id,
                                 "module_creation_id"=>$list->module_creation_id,
+                                "class_type" => $list->class_type,
                                 "plan_id" => $plan->id,
                                 "prev_plan_id" => Plan::find($attendance->prev_plan_id),
                         ];
@@ -1024,6 +1032,7 @@ class StudentController extends Controller
                      "totalFullSetFeedList" => $totalFullSetFeedList,
                      "avarageTermDetails" => $avarageTermDetails,
                      "totalClassFullSet" => $totalClassFullSet ,
+                     "ClassType" =>$ClassType,
                      "moduleNameList" =>$moduleNameList];
 
 

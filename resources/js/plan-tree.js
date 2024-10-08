@@ -76,6 +76,13 @@ var classPlanTreeListTable = (function () {
                     title: "No of Student",
                     field: "on_of_student",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        if(cell.getData().assigned_count > 0){
+                            return '<a data-id="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#viewAssignedStudentModal" href="javascript:void(0);" class="viewAssignStdBtn text-primary underline font-medium">'+cell.getData().on_of_student+'</a>';
+                        }else{
+                            return '<span>'+cell.getData().on_of_student+'</span>';
+                        }
+                    }
                 },
                 {
                     title: "Class Days",
@@ -188,6 +195,122 @@ var classPlanTreeListTable = (function () {
     };
 })();
 
+var assignedStudentModalListTable = (function () {
+    var _tableGen = function (plan_id) {
+        let tableContent = new Tabulator("#assignedStudentModalListTable", {
+            ajaxURL: route("plans.tree.assigned.list"),
+            ajaxParams: { plan_id : plan_id },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Reg. No",
+                    field: "registration_no",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
+                                html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -13px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
+                                    
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
+                },
+                {
+                    title: "First Name",
+                    field: "first_name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Last Name",
+                    field: "last_name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "",
+                    field: "full_time",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    formatter(cell, formatterParams) {  
+                        let day=false;
+                        if(cell.getData().full_time==1) 
+                            day = 'text-slate-900' 
+                        else  
+                            day = 'text-amber-600'
+                        var html = '<div class="flex">';
+                                html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
+                                if(cell.getData().full_time==1){
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>';
+                                }else{
+                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+                                }
+                                html += '</div>';
+                            
+                            html += '</div>';
+                            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide"});
+
+                        return html;
+                    }
+                },
+                {
+                    title: "Semester",
+                    field: "semester",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Course",
+                    field: "course",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status_id",
+                    headerHozAlign: "left",
+                }
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+            rowClick:function(e, row){
+                window.open(row.getData().url, '_blank');
+            }
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+    };
+    return {
+        init: function (plan_id) {
+            _tableGen(plan_id);
+        },
+    };
+})();
+
 
 (function(){
     let tomOptions = {
@@ -229,6 +352,7 @@ var classPlanTreeListTable = (function () {
     const editPlanModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPlanModal"));
     const confirmModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalCP"));
     const assignManagerOrCoOrdinatorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#assignManagerOrCoOrdinatorModal"));
+    const viewAssignedStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAssignedStudentModal"));
 
     const assignManagerOrCoOrdinatorModalEl = document.getElementById('assignManagerOrCoOrdinatorModal')
     assignManagerOrCoOrdinatorModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -251,6 +375,20 @@ var classPlanTreeListTable = (function () {
         personalTutorId.clear(true);
     });
 
+    const viewAssignedStudentModalEl = document.getElementById('viewAssignedStudentModal')
+    viewAssignedStudentModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#assignedStudentModalListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+    });
+
+
+    /* View Assigned Student List START */
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .viewAssignStdBtn', function(e){
+        var $theLink = $(this);
+        var plan_id = $theLink.attr('data-id');
+
+        assignedStudentModalListTable.init(plan_id);
+    })
+    /* View Assigned Student List END */
 
     /* Get Term By AC Year */
     $('.classPlanTree').on('click', '.academicYear', function(e){
