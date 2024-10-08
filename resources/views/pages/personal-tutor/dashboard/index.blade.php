@@ -7,7 +7,7 @@
 @section('subcontent')
     <div id="personalTutorDashboard" class="grid grid-cols-12 gap-6">
         <div class="col-span-12 2xl:col-span-9">
-            <div class="grid grid-cols-12 gap-6">
+            <div class="grid grid-cols-12 gap-6 relative z-20">
                 <!-- BEGIN: General Report -->
                 <div class="col-span-12 mt-8 relative z-20">
                     <div class="intro-y flex items-center h-10">
@@ -64,12 +64,28 @@
                                         </button>
                                     </li>
                                 </ul>
+                                @php $theory = 0; @endphp
                                 <div class="tab-content px-5 pb-5">
                                     <div class="tab-pane active grid grid-cols-12 gap-y-8 gap-x-10" id="weekly-report" role="tabpanel" aria-labelledby="weekly-report-tab">
                                         <div class="col-span-6 sm:col-span-6">
                                             <div class="text-slate-500">No of Module</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div id="totalModule" class="text-base">{{ $modules->count() }}</div>
+                                                <div id="totalModule" class="text-base">
+                                                    @if($myModules->count() > 0)
+                                                        @foreach($myModules as $mm)
+                                                            @php 
+                                                                if($mm->class_type == 'Theory'):
+                                                                    $theory += $mm->TOTAL_MODULE;
+                                                                endif;
+                                                            @endphp
+                                                            @if($mm->TOTAL_MODULE > 0)
+                                                                <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">{{$mm->class_type}}: {{ $mm->TOTAL_MODULE}}</span>
+                                                            @endif
+                                                        @endforeach
+                                                    @else 
+                                                        <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
@@ -81,13 +97,13 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Expected Assignments</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">0</div>
+                                                <div class="text-base">{{ ($no_of_assigned * $theory) }}</div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Average Attendance</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">0%</div>
+                                                <div class="text-base">{{ $attendance_avg }}</div>
                                             </div>
                                         </div>
 
@@ -96,7 +112,7 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Attendance Bellow 60%</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">0</div>
+                                                <div class="text-base">{{ $bellow_60 }}</div>
                                             </div>
                                         </div>
                                         
@@ -112,117 +128,8 @@
                     </div>
                 </div>
                 <!-- END: General Report -->
-                
-                <!-- BEGIN: Weekly Top Products
-                <div class="col-span-12 mt-6 relative z-10">
-                    <div class="intro-y block sm:flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Students Work List</h2>
-                        <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
-                            <button class="btn box flex items-center text-slate-600 dark:text-slate-300">
-                                <i data-lucide="file-text" class="hidden sm:block w-4 h-4 mr-2"></i> {{ date('jS M, Y')}}
-                            </button>
-                        </div>
-                    </div>
-                    <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0">
-                        <table class="table table-report sm:mt-2">
-                            <thead>
-                                <tr>
-                                    <th class="whitespace-nowrap">IMAGES</th>
-                                    <th class="whitespace-nowrap">NAME</th>
-                                    <th class="text-center whitespace-nowrap">Attendance %</th>
-                                    <th class="text-center whitespace-nowrap text-left">Missed Module</th>
-                                    <th class="text-center whitespace-nowrap">ACTIONS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (array_slice($fakers, 0, 4) as $faker)
-                                    <tr class="intro-x">
-                                        <td class="w-40">
-                                            <div class="flex">
-                                                <div class="w-10 h-10 image-fit zoom-in">
-                                                    <img alt="London Churchill College" class="tooltip rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}" title="Uploaded at {{ $faker['dates'][0] }}">
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="" class="font-medium whitespace-nowrap">{{ $faker['products'][0]['name'] }}</a>
-                                            <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $faker['products'][0]['category'] }}</div>
-                                        </td>
-                                        <td class="text-center">{{ $faker['stocks'][0] }}</td>
-                                        <td class="w-60 text-left">
-                                            <div class="flex items-start justify-start text-success">
-                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Business Environment -B
-                                            </div>
-                                            <div class="flex items-start justify-start text-success mt-1">
-                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Accounting - M
-                                            </div>
-                                        </td>
-                                        <td class="table-report__action w-56">
-                                            <div class="flex justify-center items-center">
-                                                <a class="flex items-center mr-3" href="">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note
-                                                </a>
-                                                <a class="flex items-center text-danger" href="">
-                                                    <i data-lucide="tablet-smartphone" class="w-4 h-4 mr-1"></i> Send SMS
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="intro-y flex flex-wrap sm:flex-row sm:flex-nowrap items-center mt-3">
-                        <nav class="w-full sm:w-auto sm:mr-auto">
-                            <ul class="pagination">
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevrons-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevron-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">...</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">1</a>
-                                </li>
-                                <li class="page-item active">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">...</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevron-right"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevrons-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                        <select class="w-20 form-select box mt-3 sm:mt-0">
-                            <option>10</option>
-                            <option>25</option>
-                            <option>35</option>
-                            <option>50</option>
-                        </select>
-                    </div>
-                </div>
-                END: Weekly Top Products -->
             </div>
-            <div class="grid grid-cols-12 gap-6">
+            <div class="grid grid-cols-12 gap-6 mt-5 relative z-10">
                 <div class="col-span-12 pt-5 relative">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">

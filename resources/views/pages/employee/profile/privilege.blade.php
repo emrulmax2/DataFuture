@@ -310,6 +310,12 @@
                             <label class="form-check-label ml-4" for="permission_module_contents_3">Analytics</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['module_contents']['edit_attendance']) && $priv['module_contents']['edit_attendance'] == 1 ? 'checked' : '') }} id="permission_module_contents_4" class="form-check-input" type="checkbox" value="1" name="permission[module_contents][edit_attendance]">
+                            <label class="form-check-label ml-4" for="permission_module_contents_4">Edit Attendance</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

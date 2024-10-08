@@ -90,12 +90,71 @@ class DashboardController extends Controller
                                 })->get()->sortBy(function($classes, $key) {
                                     return $classes->plan->start_time;
                                 }),
+            'myModules' => DB::table('plans')->select('class_type', DB::raw('COUNT(DISTINCT id) as TOTAL_MODULE'))
+                            ->where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)
+                            ->groupBy('class_type')->orderBy('class_type', 'ASC')->get(),
+            'attendance_avg' => $this->myModulesAttendanceAverage($plan_ids),
+            'bellow_60' => $this->myModulesAttendanceBellow($plan_ids),
         ]);
 
     }
 
-    public function totalUndecidedCount() {
+    public function myModulesAttendanceAverage($plan_ids = []){
+        if(!empty($plan_ids) && count($plan_ids) > 0):
+            $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
+            $query = DB::table('attendances as atn')
+                        ->select(
+                            DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
+                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
+                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                        )
+                        ->whereIn('atn.plan_id', $plan_ids);
+            if(!empty($student_ids)):
+                $query->whereIn('atn.student_id', $student_ids);
+            endif;
+            $attendance = $query->get()->first();
 
+            return (isset($attendance->percentage_withexcuse) && $attendance->percentage_withexcuse > 0 ? number_format($attendance->percentage_withexcuse, 2).'%' : '0%');
+        else:
+            return '0%';
+        endif;
+    }
+
+    public function myModulesAttendanceBellow($plan_ids = [], $percentage = 60){
+        if(!empty($plan_ids) && count($plan_ids) > 0):
+            $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
+            $query = DB::table('attendances as atn')
+                    ->select(
+                        DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
+                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
+                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
+                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                    )
+                    ->whereIn('atn.plan_id', $plan_ids);
+            if(!empty($student_ids)):
+                $query->whereIn('atn.student_id', $student_ids);
+            endif;
+            $query->groupBy('atn.student_id')->havingRaw('percentage_withexcuse < '.$percentage.' OR round(percentage_withexcuse) = 0');
+            $attendance = $query->get()->count();
+
+            return ($attendance > 0 ? $attendance : 0);
+        else:
+            return 0;
+        endif;
+    }
+
+    public function totalUndecidedCount() {
         $id = auth()->user()->id; //304; 
         $theDate = Date('Y-m-d'); //'2023-11-24';
 

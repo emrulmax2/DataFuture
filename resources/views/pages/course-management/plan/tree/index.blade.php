@@ -44,6 +44,27 @@
         </div>
     </div>
 
+    <!-- BEGIN: Assigned Student List Modal -->
+    <div id="viewAssignedStudentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto theModTitle">Assigned Student List</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                </div>
+                <div class="modal-body">
+                    <div class="overflow-x-auto scrollbar-hidden">
+                        <div id="assignedStudentModalListTable" class="table-report table-report--tabulator"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Assigned Student List Modal -->
+
     <!-- BEGIN: Assign Manager Or Co-Ordinator Modal -->
     <div id="assignManagerOrCoOrdinatorModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
