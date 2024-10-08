@@ -706,7 +706,7 @@ class StudentController extends Controller
                                         'instance_terms.start_date',
                                         'instance_terms.end_date', 
                                         'plan.module_creation_id as module_creation_id' , 
-                                        'mc.module_name','mc.code as module_code','mc.class_type as class_type', 
+                                        'mc.module_name','mc.code as module_code', 
                                         'plan.id as plan_id' , 
                                         'gp.name as group_name', 
                                         'gp.id as group_id')
@@ -733,7 +733,7 @@ class StudentController extends Controller
                     if(isset($attendance)) {
 
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
-                        $ClassType[$list->plan_id] = (isset($list->class_type)) ? $list->class_type : "N/A";
+                        
                         
                         
                         $termAttendanceFound[$list->term_id] = true;
@@ -802,9 +802,9 @@ class StudentController extends Controller
                             }
 
                         }
-                    
-                        $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$list->plan_id)->get()->first();
-                        
+                        $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
+                        $planDetails[$list->term_id][$list->plan_id] = $planSet;
+                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
                         
                         $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
                         $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
@@ -836,7 +836,7 @@ class StudentController extends Controller
 
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
 
-                        $ClassType[$list->plan_id] = (isset($list->class_type)) ? $list->class_type : "N/A";
+                        
 
                         if(!isset($totalPresentFound[$list->term_id][$list->plan_id])) {
                             $totalPresentFound[$list->term_id][$list->plan_id] = 0;
@@ -870,7 +870,9 @@ class StudentController extends Controller
                             "start_date" => $list->start_date,
                             "end_date" => $list->end_date,
                         ];
-                        $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
+                        $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
+                        $planDetails[$list->term_id][$list->plan_id] = $planSet;
+                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
                         
                         if(!isset($totalFeedListSet[$list->term_id][$list->plan_id])) {
                             
@@ -991,9 +993,9 @@ class StudentController extends Controller
 
                         }
                         
-
-                        $planDetails[$plan->term_declaration_id][$plan->id] = Plan::with(["tutor","personalTutor",'group'])->where('id',$plan->id)->get()->first();
-                        
+                        $planSet = Plan::with(["tutor","personalTutor",'creations','group'])->where('id',$plan->id)->get()->first();
+                        $planDetails[$list->term_id][$list->plan_id] = $planSet;
+                        $ClassType[$list->plan_id] = (isset($planSet->creations->class_type)) ? $planSet->creations->class_type : "N/A";
                         
                         $avarageDetails[$plan->term_declaration_id][$plan->id] = $avarage;
                         $totalFeedListSet[$plan->term_declaration_id][$plan->id] = $totalFeedList;
