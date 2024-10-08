@@ -16,6 +16,7 @@ use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanParticipant;
 use App\Models\Room;
+use App\Models\Student;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -344,6 +345,7 @@ class PlanTreeController extends Controller
                     'day'=> $day,
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? $list->dates->count() : 0,
+                    'assigned_count' => $assignStudentListForPlans->count(),
                     'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count(),
                     'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
                 ];
@@ -606,5 +608,55 @@ class PlanTreeController extends Controller
         endif;
 
         return response()->json(['message' => $message, 'suc' => $suc, 'visibility' => ($visibility == 1 ? 0 : 1)], 200);
+    }
+
+    public function assignedList(Request $request){
+        $plan_id = (isset($request->plan_id) && !empty($request->plan_id) ? $request->plan_id : 0);
+        $student_ids = Assign::where('plan_id', $plan_id)->pluck('student_id')->unique()->toArray();
+        $student_ids = (!empty($student_ids) ? $student_ids : [0]);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Student::orderByRaw(implode(',', $sorts))->whereIn('id', $student_ids);
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'full_time' => (isset($list->activeCR->propose->full_time) && $list->activeCR->propose->full_time > 0) ? $list->activeCR->propose->full_time : 0, 
+                    'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
+                    'first_name' => $list->first_name,
+                    'last_name' => $list->last_name,
+                    'course'=> (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : ''),
+                    'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
+                    'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
+                    'url' => route('student.show', $list->id),
+                    'photo_url' => $list->photo_url,
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 }
