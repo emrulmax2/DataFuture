@@ -1,15 +1,18 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
- 
+
 ("use strict");
-var pendingFollowupsListTable = (function () {
+var allFollowupsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
 
-        let tableContent = new Tabulator("#pendingFollowupsListTable", {
-            ajaxURL: route("followups.list"),
-            ajaxParams: { querystr: '' },
+        var term_delclaration = $('#flup_term_declaration_id').val();
+        var flup_status = $('#flup_status').val();
+
+        let tableContent = new Tabulator("#allFollowupsListTable", {
+            ajaxURL: route("followups.list.all"),
+            ajaxParams: { term_delclaration: term_delclaration, status : flup_status},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -43,13 +46,11 @@ var pendingFollowupsListTable = (function () {
                     field: "term",
                     headerHozAlign: "left",
                     headerSort: false,
-                    width: "150",
                 },
                 {
                     title: "Date",
                     field: "opening_date",
                     headerHozAlign: "left",
-                    width: "150",
                 },
                 {
                     title: "Followed Up",
@@ -62,9 +63,15 @@ var pendingFollowupsListTable = (function () {
                                 if(cell.getData().followed_up_status != ''){
                                     html += '<span class="bg-'+(cell.getData().followed_up_status == 'Pending' ? 'warning' : 'success')+' font-medium text-white px-2 py-1 inline-flex mb-1">'+cell.getData().followed_up_status+'</span>';
                                 }
-                                if(cell.getData().followed != ''){
+                                if(cell.getData().followed != '' && cell.getData().followed_up_status == 'Pending'){
                                     html += '<div class="whitespace-normal">';
                                         html += cell.getData().followed;
+                                    html += '</div>';
+                                }
+                                if(cell.getData().followed_up_status == 'Completed'){
+                                    html += '<div class="whitespace-normal">';
+                                        html += (cell.getData().completed_by != '' ? '<div class="font-medium whitespace-nowrap">'+cell.getData().completed_by+'</div>' : '');
+                                        html += (cell.getData().completed_at != '' ? '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().completed_at+'</div>' : '');
                                     html += '</div>';
                                 }
                             html += '</div>';
@@ -100,8 +107,8 @@ var pendingFollowupsListTable = (function () {
                             btns +='<a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
                         }
 
-                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
-                        btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
+                        btns += '<a href="'+route('student.notes', cell.getData().student_id) +'" class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                        //btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
                             
                         
                         return btns;
@@ -134,27 +141,27 @@ var pendingFollowupsListTable = (function () {
     };
 })();
 
-
 (function () {
-    pendingFollowupsListTable.init();
+    allFollowupsListTable.init();
 
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const viewNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewNoteModal"));
-    const confirmModalN = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalN"));
+    function filterHTMLFormCML() {
+        allFollowupsListTable.init();
+    }
 
-    $('#successModal .successCloser').on('click', function(e){
-        e.preventDefault();
-        if($(this).attr('data-action') == 'RELOAD'){
-            successModal.hide();
-            window.location.reload();
-        }else{
-            successModal.hide();
-        }
-    })
+    // On click go button
+    $("#tabulator-html-filter-go").on("click", function (event) {
+        filterHTMLFormCML();
+    });
 
-    $('#pendingFollowupsListTable').on('click', '.view_btn', function(e){
+    // On reset filter form
+    $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#flup_term_declaration_id").val("");
+        $("#flup_status").val("Pending");
+
+        filterHTMLFormCML();
+    });
+
+    $('#allFollowupsListTable').on('click', '.view_btn', function(e){
         var $btn = $(this);
         var noteId = $btn.attr('data-id');
         axios({
@@ -176,115 +183,4 @@ var pendingFollowupsListTable = (function () {
             console.log('error');
         });
     });
-
-    $('#pendingFollowupsListTable').on('click', '.downloadDoc', function(e){
-        e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('student.note.document.download'), 
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
-        });
-    });
-
-    $('#viewNoteModal').on('click', '.downloadDoc', function(e){
-        e.preventDefault();
-        var $theLink = $(this);
-        var row_id = $theLink.attr('data-id');
-
-        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
-
-        axios({
-            method: "post",
-            url: route('student.document.download'), 
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200){
-                let res = response.data.res;
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-
-                if(res != ''){
-                    window.open(res, '_blank');
-                }
-            } 
-        }).catch(error => {
-            if(error.response){
-                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
-                console.log('error');
-            }
-        });
-    });
-
-    $('#pendingFollowupsListTable').on('click', '.completedBtn', function(e){
-        e.preventDefault();
-        var $btn = $(this);
-        var noteId = $btn.attr('data-id');
-
-        confirmModalN.show();
-        document.getElementById("confirmModalN").addEventListener("shown.tw.modal", function (event) {
-            $("#confirmModalN .confModTitle").html('Select "Yes" to finish the process.' );
-            $("#confirmModalN .agreeWith").attr('data-recordid', noteId);
-            $("#confirmModalN .agreeWith").attr('data-status', 'COMPLETEFOLLOWUP');
-        });
-    });
-
-    $('#confirmModalN .agreeWith').on('click', function(e){
-        e.preventDefault();
-        let $agreeBTN = $(this);
-        let recordid = $agreeBTN.attr('data-recordid');
-        let action = $agreeBTN.attr('data-status');
-
-        $('#confirmModalN button').attr('disabled', 'disabled');
-
-        if(action == 'COMPLETEFOLLOWUP'){
-            axios({
-                method: 'POST',
-                url: route('followups.completed'),
-                data: {recordid : recordid},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
-                    $('#confirmModalN button').removeAttr('disabled');
-                    confirmModalN.hide();
-                    pendingFollowupsListTable.init();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('The process successfully completed.');
-                        $('#successModal .successCloser').attr('data-action', 'NONE');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else{
-            confirmModal.hide();
-        }
-    });
-
-})();
+})()
