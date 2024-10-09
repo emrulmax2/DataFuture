@@ -120,7 +120,7 @@ class NoteController extends Controller
                     'sl' => $i,
                     'term' => (isset($list->term->name) && !empty($list->term->name) ? $list->term->name : ''),
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
-                    'note' => (strlen(strip_tags($list->note)) > 40 ? substr(strip_tags($list->note), 0, 40).'...' : strip_tags($list->note)),
+                    'note' => strip_tags($list->note),
                     'note_document_id' => (isset($list->document->id) && $list->document->id > 0 ? $list->document->id : 0),
                     'followed_up' => (isset($list->followed_up) && !empty($list->followed_up) ? $list->followed_up : 'no'),
                     'followed_up_status' => (isset($list->followed_up_status) && !empty($list->followed_up_status) ? $list->followed_up_status : ''),

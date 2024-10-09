@@ -41,25 +41,23 @@ var studentNotesListTable = (function () {
                     width: "150",
                 },
                 {
-                    title: "Date",
-                    field: "opening_date",
-                    headerHozAlign: "left",
-                    width: "150",
-                },
-                {
                     title: "Note",
                     field: "note",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += cell.getData().note;
-                        html += '</div>';
-
+                        var note = cell.getData().note;
+                        var html = '<div class="whitespace-normal break-words">';
+                                if(note.length > 250){
+                                    html += note.substring(0, 250);
+                                    html += '&nbsp;<a data-id="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#viewNoteModal" href="javascript:void(0);" class="view_btn text-primary font-medium underline">[More]</a>';
+                                }else{
+                                    html += note;
+                                }
+                            html += '</div>';
                         return html;
                     }
                 },
-                {
+                /*{
                     title: "Flag",
                     field: "student_flag_id",
                     headerHozAlign: "left",
@@ -72,12 +70,19 @@ var studentNotesListTable = (function () {
 
                         return html;
                     }
-                },{
-                    title: "Followed Up",
+                },*/
+                {
+                    title: "Flag & Followed Up",
                     field: "followed_up",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         var html = '';
+                        if(cell.getData().is_flaged == 'Yes' && cell.getData().flaged_status == 'Active'){
+                            var color = cell.getData().flag_color;
+                            html += '<div class="mb-5">';
+                                html += '<span class="bg-'+(color != '' ? color.toLowerCase() : 'bg-danger')+' font-medium text-white px-2 py-1 inline-flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="flag" class="lucide lucide-flag w-4 h-4 mr-2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" x2="4" y1="22" y2="15"></line></svg> '+cell.getData().flag_name+'</span>';
+                            html += '</div>';
+                        }
                         if(cell.getData().followed_up == 'yes'){
                             html += '<div>';
                                 if(cell.getData().followed_up_status != ''){
@@ -103,11 +108,12 @@ var studentNotesListTable = (function () {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    width: "250",
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().opening_date+'</div>';
+                            html += '<div class="font-medium whitespace-nowrap">By: '+cell.getData().created_by+'</div>';
                         html += '</div>';
 
                         return html;
@@ -119,7 +125,7 @@ var studentNotesListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "230",
+                    width: "150",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";

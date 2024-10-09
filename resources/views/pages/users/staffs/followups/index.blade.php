@@ -113,7 +113,7 @@
                         <div class="text-3xl mt-5 confModTitle font-medium">Are you sure?</div>
                     </div>
                     <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
                         <button type="button" data-recordid="0" data-status="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>

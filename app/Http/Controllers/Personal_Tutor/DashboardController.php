@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\DB;
 use App\Traits\SendSmsTrait;
 use DateTime;
 use App\Traits\GenerateEmailPdfTrait;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -66,6 +67,7 @@ class DashboardController extends Controller
         $undecidedUploads = $this->totalUndecidedCount();
         
         $today = date('Y-m-d');
+        $yesterday = Carbon::yesterday()->format('d-m-Y');
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -95,6 +97,7 @@ class DashboardController extends Controller
                             ->groupBy('class_type')->orderBy('class_type', 'ASC')->get(),
             'attendance_avg' => $this->myModulesAttendanceAverage($id, $latestTermId),
             'bellow_60' => $this->myModulesAttendanceBellow($id, $latestTermId),
+            'yesterday' => $yesterday
         ]);
 
     }
@@ -599,6 +602,20 @@ class DashboardController extends Controller
         endif;
 
         return $minutes;
+    }
+
+    public function getStudentAttenTrackingHtml(Request $request){
+        $user_id = auth()->user()->id;
+        $theDate = (isset($request->theDate) && !empty($request->theDate) ? date('Y-m-d', strtotime($request->theDate)) : Carbon::yesterday()->format('Y-m-d'));
+        $tutor_plans = PlansDateList::where('date', $theDate)->whereHas('plan', function($q) use($user_id){
+            $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id);
+        })->get();
+        $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
+        $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();
+
+        $assigns = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
+            $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+        })->pluck('student_id')->unique()->toArray();
     }
 
 }

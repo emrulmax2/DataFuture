@@ -2404,7 +2404,9 @@ Route::middleware('auth')->group(function() {
         Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
         Route::post('personal-tutor-dashboard/get-class-info', 'getClassInformations')->name('pt.dashboard.class.info');
         Route::post('personal-tutor-dashboard/update-class-status', 'UpdateClassStatus')->name('pt.dashboard.class.status.update'); 
-        Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count'); 
+        Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count');
+
+        Route::post('personal-tutor-dashboard/student-attendance-tracking', 'getStudentAttenTrackingHtml')->name('pt.dashboard.get.student.attn.tracking'); 
         
     });
 

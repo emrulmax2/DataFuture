@@ -25,6 +25,7 @@ var pendingFollowupsListTable = (function () {
                     title: "Student",
                     field: "registration_no",
                     headerHozAlign: "left",
+                    width: "250",
                     formatter(cell, formatterParams) {  
                         var html = '<a href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
@@ -39,17 +40,25 @@ var pendingFollowupsListTable = (function () {
                     }
                 },
                 {
-                    title: "Term",
-                    field: "term",
+                    title: "Note",
+                    field: "note",
                     headerHozAlign: "left",
                     headerSort: false,
-                    width: "150",
-                },
-                {
-                    title: "Date",
-                    field: "opening_date",
-                    headerHozAlign: "left",
-                    width: "150",
+                    formatter(cell, formatterParams){
+                        var note = cell.getData().note;
+                        var html = '<div class="whitespace-normal break-words">';
+                                if(note.length > 250){
+                                    html += note.substring(0, 250);
+                                    html += '&nbsp;<a data-id="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#viewNoteModal" href="javascript:void(0);" class="view_btn text-primary font-medium underline">[More]</a>';
+                                }else{
+                                    html += note;
+                                }
+                                if(cell.getData().note_document_id > 0){
+                                    html +='<br/><a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn btn-linkedin text-white px-2 py-0 w-auto h-auto mt-2"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-1"></i> Download Attachment</a>';
+                                }
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Followed Up",
@@ -76,11 +85,12 @@ var pendingFollowupsListTable = (function () {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    width: "250",
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().opening_date+'</div>';
+                            html += '<div class="font-medium whitespace-nowrap">By: '+cell.getData().created_by+'</div>';
                         html += '</div>';
 
                         return html;
@@ -92,15 +102,12 @@ var pendingFollowupsListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "230",
+                    width: "150",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        if(cell.getData().note_document_id > 0){
-                            btns +='<a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
-                        }
 
-                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
+                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i></button>';
                         btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
                             
                         
