@@ -93,13 +93,17 @@ class DashboardController extends Controller
             'myModules' => DB::table('plans')->select('class_type', DB::raw('COUNT(DISTINCT id) as TOTAL_MODULE'))
                             ->where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)
                             ->groupBy('class_type')->orderBy('class_type', 'ASC')->get(),
-            'attendance_avg' => $this->myModulesAttendanceAverage($plan_ids),
-            'bellow_60' => $this->myModulesAttendanceBellow($plan_ids),
+            'attendance_avg' => $this->myModulesAttendanceAverage($id, $latestTermId),
+            'bellow_60' => $this->myModulesAttendanceBellow($id, $latestTermId),
         ]);
 
     }
 
-    public function myModulesAttendanceAverage($plan_ids = []){
+    public function myModulesAttendanceAverage($id = 0, $term_declaration_id){
+        $id = ($id > 0 ? $id : auth()->user()->id);
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $id)
+                    ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+
         if(!empty($plan_ids) && count($plan_ids) > 0):
             $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
             $query = DB::table('attendances as atn')
@@ -126,7 +130,11 @@ class DashboardController extends Controller
         endif;
     }
 
-    public function myModulesAttendanceBellow($plan_ids = [], $percentage = 60){
+    public function myModulesAttendanceBellow($id = 0, $term_declaration_id, $percentage = 60){
+        $id = ($id > 0 ? $id : auth()->user()->id);
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $id)
+                    ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+
         if(!empty($plan_ids) && count($plan_ids) > 0):
             $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
             $query = DB::table('attendances as atn')

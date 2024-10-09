@@ -49,4 +49,8 @@ class Course extends Model
     public function groups(){
         return $this->hasMany(Group::class);
     }
+
+    public function team(){
+        return $this->hasOne(TutorMonitorTeam::class, 'course_id', 'id')->latestOfMany();
+    }
 }

@@ -24,8 +24,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('employeestatusupdater:cron')->dailyAt('23:30');
         $schedule->command('dailyclassreminder:cron')->everyThirtyMinutes();
+
+        $schedule->command('coursecontentmissingteamnotification:cron')->weeklyOn(7, '23:45');
+        $schedule->command('coursecontentmissingtutornotification:cron')->weeklyOn(7, '23:50');
         
 
+
+        //$schedule->command('coursecontentmissingteamnotification:cron')->everyMinute();
+        //$schedule->command('coursecontentmissingtutornotification:cron')->everyMinute();
         // $schedule->command('passportexpiry:cron')->everyMinute();
         // $schedule->command('visaexpiry:cron')->everyMinute();
         // $schedule->command('visaexpired:cron')->everyMinute();

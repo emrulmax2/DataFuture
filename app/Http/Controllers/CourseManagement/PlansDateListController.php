@@ -91,6 +91,7 @@ class PlansDateListController extends Controller
                     'deleted_at' => $list->deleted_at,
                     'tutor_id' => (isset($list->plan->tutor_id) && $list->plan->tutor_id > 0 ? $list->plan->tutor_id : 0),
                     'personal_tutor_id' => (isset($list->plan->personal_tutor_id) && $list->plan->personal_tutor_id > 0 ? $list->plan->personal_tutor_id : 0),
+                    'class_type' => (isset($list->plan->class_type) && !empty($list->plan->class_type) ? $list->plan->class_type : ''),
                     "start_time" => $start_time,
                     "end_time" => $end_time,
                     "end_date_time" => $end_day,
