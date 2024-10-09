@@ -15,12 +15,17 @@ class Result extends Model
     protected $fillable = [
         'assessment_plan_id',
         'published_at',
+        'is_primary',
         'plan_id',
         'student_id',
         'grade_id',
         'created_by',
         'updated_by'
     ];
+    
+    public function plan(){
+        return $this->belongsTo(Plan::class);
+    }
     public function grade(){
         return $this->belongsTo(Grade::class);
     }
