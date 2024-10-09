@@ -35,6 +35,8 @@ use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
+use App\Models\StudentNote;
+use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentTask;
 use App\Models\StudentTaskDocument;
 use App\Models\StudentTaskLog;
@@ -336,7 +338,9 @@ class PendingTaskManagerController extends Controller
             ],
             'processTasks' => $this->getAllPendingProcessTasks(),
             'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
-            'terms' => TermDeclaration::orderBy('id', 'DESC')->get()
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'followups' => StudentNote::where('followed_up', 'yes')->where('followed_up_status', 'Pending')->get()->count(),
+            'flags' => StudentNote::where('is_flaged', 'Yes')->where('flaged_status', 'Active')->get()->count(),
         ]);
     }
 

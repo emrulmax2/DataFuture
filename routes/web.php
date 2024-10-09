@@ -234,6 +234,7 @@ use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
+use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
@@ -2567,7 +2568,8 @@ Route::middleware('auth')->group(function() {
         Route::post('result/update-all', 'updateAll')->name('result.update.all');
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
         Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
-        Route::post('result/{result}/restore', 'restoreSingle')->name('result.restore');
+        Route::post('result/{id}/restore', 'restore')->name('result.restore');
+        Route::post('result/{id}/default', 'default')->name('result.default');
         
         Route::get('result-list/{assessment_plan}', 'list')->name('result.list'); 
         Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore.all');
@@ -2894,6 +2896,13 @@ Route::middleware('auth')->group(function() {
         Route::get('followups', 'index')->name('followups'); 
         Route::get('followups/list', 'list')->name('followups.list'); 
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
+        Route::get('followups/all', 'showAllFollowups')->name('followups.all'); 
+        Route::get('followups/list-all', 'listAll')->name('followups.list.all'); 
+    });
+
+    Route::controller(FlagManagementController::class)->group(function(){
+        Route::get('raised-flags', 'index')->name('raised.flags'); 
+        Route::get('raised-flags/list', 'list')->name('raised.flags.list'); 
     });
     
     /*Route::controller(ConsoleController::class)->group(function(){

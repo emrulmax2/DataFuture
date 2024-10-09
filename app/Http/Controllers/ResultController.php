@@ -336,7 +336,20 @@ class ResultController extends Controller
     }
 
     
+    public function restore($id) {
 
+        $data = Result::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
+    }
+
+    public function default($id) {
+        
+        $data = Result::where('id', $id)->get()->first();
+        $data->is_primary = "Yes";
+        $data->save();
+        response()->json($data);
+    }
     /**
      * Display the specified resource.
      *
