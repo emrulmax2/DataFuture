@@ -22,11 +22,13 @@
                     Attendance
                 </a>
             </li>
+            @if(isset(auth()->user()->priv()['result_view']) && auth()->user()->priv()['result_view'] == 1)
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student-results.index', $student->id) }}" class="nav-link py-4 {{ (Route::currentRouteName() == 'student-results.index') ? 'active' : '' }}">
                     Result
                 </a>
             </li>
+            @endif
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.slc.history', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.slc.history' ? 'active' : '' }}">
                     SLC History

@@ -117,6 +117,10 @@ var classPlanDateListsTutorTable = (function () {
                     formatter(cell, formatterParams) {
                         let btn = '';
                         let attendanceInformation = cell.getData().attendance_information;
+                        let personal_tutor_id = cell.getData().personal_tutor_id;
+                        let tutor_id = cell.getData().tutor_id;
+                        let class_type = cell.getData().class_type;
+                        let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
                         if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
                             btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</a>';
                         }else{
@@ -127,14 +131,14 @@ var classPlanDateListsTutorTable = (function () {
                             }else if(cell.getData().status == 'Unknown'){
                                 btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
                             }else{
-                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
+                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
                                 }
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
                                     btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
                                 }
-                                if(cell.getData().status == 'Completed'){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                if(cell.getData().status == 'Completed' && the_id > 0){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
                                 }
                             }
                         }

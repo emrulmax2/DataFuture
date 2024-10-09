@@ -45,37 +45,70 @@ class StudentResultController extends Controller
                         ->get();
             $data = [];
             foreach($QueryInner as $list):
+                $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
+                $checkPrimaryResult = Result::with([
+                "grade",
+                "createdBy",
+                "updatedBy",
+                "plan",
+                "plan.creations",
+                "plan.course.body",
+                "plan.creations.module"])->where("student_id", $student->id)
+                ->whereHas('plan', function($query) use ($list) {
+                    $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->plan_id);
+                })
+                ->orderBy('id','DESC')->get();
+                $resultPrimarySet = [];
+                if($checkPrimaryResult->isNotEmpty()) {
+                    foreach ($checkPrimaryResult as $key => $result) {
+                        $data[$moduleCreation->module->name][] = $result;
 
-                $resultByPlanGroup[$list->plan_id] = Result::with(["assementPlan","grade","createdBy","updatedBy"])->where("student_id", $student->id)->where("plan_id",$list->plan_id)->orderBy('id','DESC')->get()->groupBy(function($data) {
-                    return $data->assessment_plan_id;
-                });
-                
-                if(isset($resultByPlanGroup) && count($resultByPlanGroup[$list->plan_id])>0) {
-                    $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
-                    $data[$list->term_id][$list->plan_id] = [
-                            "term_id"=> $list->term_id,
-                            "module_creation_id"=>$list->module_creation_id,
-                            "module_name"=>$moduleCreation->module->name,
-                            "code"=>$moduleCreation->code,
-                            "awardingBody"=>$list->award,
-                            "level"=>$moduleCreation->level->name,
-                            "id" => $list->plan_id,
-                            "results" => ($resultByPlanGroup[$list->plan_id]) ?? null
-                    ];
-                    
-                    $termData[$list->term_id] = [
-                        "name" => $list->term_name,
-                        "start_date" => $list->start_date,
-                        "end_date" => $list->end_date,
-                    ];
-                    $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
-                    
-
-                    //total code list and total class list
+                        if($result->is_primary === "Yes") {
+                            $resultPrimarySet[$result->id] = "Yes";
+                        }
+                    }
 
                 }
-            endforeach;
+                
+                //     $termName = $gradeCode = $gradeName = null;
 
+                //     if($checkPrimaryResult->isNotEmpty()):
+
+                //         $firstResult = $checkPrimaryResult->first();
+                //         $id  = $firstResult->id;
+                //         $termName  = $firstResult->plan->attenTerm->name;
+                //         $gradeCode = $firstResult->grade->code;
+                //         $gradeName = $firstResult->grade->name;
+                        
+                //         foreach ($checkPrimaryResult as $key => $result) {
+                //             if ($result->is_primary === "Yes") {
+                //                 $id        = $result->id;
+                //                 $termName  = $result->plan->attenTerm->name;
+                //                 $gradeCode = $result->grade->code;
+                //                 $gradeName = $result->grade->name;
+                //             }
+                //         }
+                //     endif;
+                // if($checkPrimaryResult->isNotEmpty()) {
+                //     $data[$moduleCreation->module->name] = [
+                //         "id" => $id,
+                //         "term"=> $termName,
+                //         "module_name"=>$moduleCreation->module->name,
+                //         "code"=>$moduleCreation->code,
+                //         "awardingBody"=>$list->award,
+                //         "grade_code" => $gradeCode,
+                //         "grade_name" => $gradeName,                                                
+                //         "level"=>$moduleCreation->level->name,
+                //         "results" => $resultByPlanGroup[$moduleCreation->module->name],
+                //     ];
+                // }
+
+                $termData[$list->term_id] = [
+                    "name" => $list->term_name,
+                    "start_date" => $list->start_date,
+                    "end_date" => $list->end_date,
+                ];
+            endforeach;
         return view('pages.students.live.result.index', [
             'title' => 'Students - Results',
             'breadcrumbs' => [
@@ -84,9 +117,8 @@ class StudentResultController extends Controller
             ],
             'student' => $student,
             'dataSet' => ($data) ?? null,
-            "term" =>$termData,
             "grades" =>$grades,
-            "planDetails" => $planDetails ?? null,
+            "resultPrimarySet" =>$resultPrimarySet,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }

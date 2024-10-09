@@ -2896,4 +2896,8 @@ Route::middleware('auth')->group(function() {
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
     });
     
+    /*Route::controller(ConsoleController::class)->group(function(){
+        Route::get('console', 'index')->name('console'); 
+    });*/
+    
 });

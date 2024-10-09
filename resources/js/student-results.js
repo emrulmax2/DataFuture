@@ -1,233 +1,301 @@
 import IMask from 'imask';
-import { createIcons, icons } from "lucide";
+import helper from './helper';
+import colors from './colors';
+import Chart from 'chart.js/auto';
 
-("use strict");    
+import { createIcons, icons } from 'lucide';
+import TomSelect from 'tom-select';
 
-
+import dayjs from 'dayjs';
+import Litepicker from 'litepicker';
+('use strict');
 
 (function () {
+    document.querySelectorAll('.datepicker_custom').forEach(function (element) {
+        new Litepicker({
+            element: element,
+            singleMode: true,
+            numberOfColumns: 2,
+            numberOfMonths: 2,
+            format: 'DD-MM-YYYY HH:mm',
+            time: {
+                enabled: true,
+            },
+            dropdowns: {
+                minYear: 2000,
+                maxYear: null,
+                months: true,
+                years: true,
+            },
+            setup: (picker) => {
+                picker.on('render', (ui) => {
+                    // Customize the time display format
+                    ui.querySelectorAll('.litepicker-time').forEach(
+                        (timeElement) => {
+                            const timeInput =
+                                timeElement.querySelector('input');
+                            if (timeInput) {
+                                timeInput.setAttribute('placeholder', 'HH:mm');
+                                timeInput.addEventListener('input', (event) => {
+                                    const value = event.target.value;
+                                    const formattedValue = value
+                                        .replace(/[^0-9:]/g, '')
+                                        .slice(0, 5);
+                                    event.target.value = formattedValue;
+                                });
+                            }
+                        }
+                    );
+                });
+            },
+        });
 
-    
-    $(".timeMask").each(function () {
         var maskOptions = {
-            mask: 'HH:MM',
+            mask: 'DD-MM-YYYY HH:mm',
             blocks: {
-            HH: {
+                MM: {
+                    mask: IMask.MaskedRange,
+                    placeholderChar: 'MM',
+                    from: 1,
+                    to: 12,
+                    maxLength: 2,
+                },
+                YYYY: {
+                    mask: IMask.MaskedRange,
+                    placeholderChar: 'YYYY',
+                    from: 2000,
+                    to: 2099,
+                    maxLength: 4,
+                },
+                DD: {
+                    mask: IMask.MaskedRange,
+                    placeholderChar: 'DD',
+                    from: 1,
+                    to: 31,
+                    maxLength: 2,
+                },
+                HH: {
                     mask: IMask.MaskedRange,
                     placeholderChar: 'HH',
                     from: 0,
                     to: 23,
-                    maxLength: 2
+                    maxLength: 2,
                 },
-            MM: {
+                mm: {
                     mask: IMask.MaskedRange,
                     placeholderChar: 'MM',
                     from: 0,
                     to: 59,
-                    maxLength: 2
-                }
-            }
+                    maxLength: 2,
+                },
+            },
         };
-        var mask = IMask(this, maskOptions);
+        var mask = IMask(element, maskOptions);
     });
 
-    
-    $(".tablepoint-toggle").on('click', function(e) {
+    $('.tablepoint-toggle').on('click', function (e) {
         e.preventDefault();
-        let tthis = $(this)
-        let currentThis=tthis.children(".plusminus").eq(0);
+        let tthis = $(this);
+        let currentThis = tthis.children('.plusminus').eq(0);
         console.log(currentThis);
-        let nextThis=tthis.children(".plusminus").eq(1);
-        if(currentThis.hasClass('hidden') ) {
-            currentThis.removeClass('hidden')
-            nextThis.addClass('hidden')
-        }else {
-            nextThis.removeClass('hidden')
-            currentThis.addClass('hidden')
+        let nextThis = tthis.children('.plusminus').eq(1);
+        if (currentThis.hasClass('hidden')) {
+            currentThis.removeClass('hidden');
+            nextThis.addClass('hidden');
+        } else {
+            nextThis.removeClass('hidden');
+            currentThis.addClass('hidden');
         }
 
         tthis.parent().siblings('div.tabledataset').slideToggle();
-
     });
-    $(".toggle-heading").on('click', function(e) {
+    $('.toggle-heading').on('click', function (e) {
         e.preventDefault();
-        let tthis = $(this)
-        tthis.siblings("div.tablepoint-toggle").trigger('click')
-    })
+        let tthis = $(this);
+        tthis.siblings('div.tablepoint-toggle').trigger('click');
+    });
 
-    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#delete-confirmation-modal"));
-    const editAttemptModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAttemptModal"));
-    const addAttemptModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addAttemptModal"));
+    const succModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#successModal')
+    );
+    const confirmModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#delete-confirmation-modal')
+    );
+    const editAttemptModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#editAttemptModal')
+    );
     // Confirm Modal Action
 
-    $('.delete_btn').on('click', function(){
+    $('.delete_btn').on('click', function () {
         let $statusBTN = $(this);
 
         let rowID = $statusBTN.attr('data-id');
-        let confModalDelTitle = "Do you want to delete";
+        let confModalDelTitle = 'Do you want to delete';
         confirmModal.show();
-        document.getElementById('delete-confirmation-modal').addEventListener('shown.tw.modal', function(event){
-            $('#delete-confirmation-modal .confModTitle').html(confModalDelTitle);
-            $('#delete-confirmation-modal .confModDesc').html('Do you really want to delete these record? If yes, the please click on agree btn.');
-            $('#delete-confirmation-modal .agreeWith').attr('data-id', rowID);
-            $('#delete-confirmation-modal .agreeWith').attr('data-action', 'DELETE');
-        });
+        document
+            .getElementById('delete-confirmation-modal')
+            .addEventListener('shown.tw.modal', function (event) {
+                $('#delete-confirmation-modal .confModTitle').html(
+                    confModalDelTitle
+                );
+                $('#delete-confirmation-modal .confModDesc').html(
+                    'Do you really want to delete these record? If yes, the please click on agree btn.'
+                );
+                $('#delete-confirmation-modal .agreeWith').attr(
+                    'data-id',
+                    rowID
+                );
+                $('#delete-confirmation-modal .agreeWith').attr(
+                    'data-action',
+                    'DELETE'
+                );
+            });
     });
-    $('.edit_btn').on('click', function(){
+    $('.edit_btn').on('click', function () {
         let $statusBTN = $(this);
         let rowID = $statusBTN.attr('data-id');
         let grade = $statusBTN.attr('data-grade');
         let publishTime = $statusBTN.attr('data-publishTime');
         let publishDate = $statusBTN.attr('data-publishDate');
+
+        let module = $statusBTN.attr('data-module');
+        let code = $statusBTN.attr('data-code');
+        let term = $statusBTN.attr('data-term');
+
         editAttemptModal.show();
-        document.getElementById('editAttemptModal').addEventListener('shown.tw.modal', function(event){
-            $('#editAttemptModal input[name="id"]').val(rowID);
-            $('#editAttemptModal select[name="grade_id"]').val(grade);
-            $('#editAttemptModal input[name="published_at"]').val(publishDate);
-            $('#editAttemptModal input[name="published_time"]').val(publishTime);
-        });
+        document
+            .getElementById('editAttemptModal')
+            .addEventListener('shown.tw.modal', function (event) {
+                $('#editAttemptModal .modulename').html(module);
+                $('#editAttemptModal .modulecode').html(code);
+                $('#editAttemptModal .term').html(term);
+                $('#editAttemptModal input[name="id"]').val(rowID);
+                $('#editAttemptModal select[name="grade_id"]').val(grade);
+                $('#editAttemptModal input[name="published_at"]').val(
+                    publishDate
+                );
+                $('#editAttemptModal input[name="published_time"]').val(
+                    publishTime
+                );
+            });
     });
 
-    $('.add_btn').on('click', function(){
-        let $statusBTN = $(this);
-        let assessmentPlan = $statusBTN.attr('data-assessmentPlan');
-        let plan = $statusBTN.attr('data-plan');
-    
-        document.getElementById('addAttemptModal').addEventListener('shown.tw.modal', function(event){
-            $('#addAttemptModal input[name="assessment_plan_id"]').val(assessmentPlan);
-            $('#addAttemptModal input[name="plan_id"]').val(plan);
-        });
-    });
-    
-    $("#addAttemptForm").on("submit", function (e) {
-
-        e.preventDefault();
-        const form = document.getElementById("addAttemptForm");
-
-        document.querySelector('#save').setAttribute('disabled', 'disabled');
-        document.querySelector('#save svg').style.cssText = 'display: inline-block;';
-
-        let form_data = new FormData(form);
-
-        axios({
-            method: "post",
-            url: route("result.store.single"),
-            data: form_data,
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
-        }).then((response) => {
-            if (response.status == 200) {
-                document.querySelector("#save").removeAttribute("disabled");
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                addAttemptModal.hide();
-
-                succModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Success!");
-                    $("#successModal .successModalDesc").html('Result updated');
-                });
-            }
-            location.reload();
-        }).catch((error) => {
-            document.querySelector("#save").removeAttribute("disabled");
-            document.querySelector("#save svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editForm .${key}`).addClass('border-danger')
-                        $(`#editForm  .error-${key}`).html(val)
-                    }
-                }else {
-                    console.log("error");
-                }
-            }
-        });
-    });
-    $("#editAttemptForm").on("submit", function (e) {
+    $('#editAttemptForm').on('submit', function (e) {
         let editId = $('#editAttemptForm input[name="id"]').val();
 
         e.preventDefault();
-        const form = document.getElementById("editAttemptForm");
+        const form = document.getElementById('editAttemptForm');
 
         document.querySelector('#update').setAttribute('disabled', 'disabled');
-        document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+        document.querySelector('#update svg').style.cssText =
+            'display: inline-block;';
 
         let form_data = new FormData(form);
 
         axios({
-            method: "post",
-            url: route("result.update", editId),
+            method: 'post',
+            url: route('result.update', editId),
             data: form_data,
             headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
             },
-        }).then((response) => {
-            if (response.status == 200) {
-                document.querySelector("#update").removeAttribute("disabled");
-                document.querySelector("#update svg").style.cssText = "display: none;";
-                editAttemptModal.hide();
+        })
+            .then((response) => {
+                if (response.status == 200) {
+                    document
+                        .querySelector('#update')
+                        .removeAttribute('disabled');
+                    document.querySelector('#update svg').style.cssText =
+                        'display: none;';
+                    editAttemptModal.hide();
 
-                succModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Success!");
-                    $("#successModal .successModalDesc").html('Result updated');
-                });
-            }
-            location.reload();
-        }).catch((error) => {
-            document.querySelector("#update").removeAttribute("disabled");
-            document.querySelector("#update svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editForm .${key}`).addClass('border-danger')
-                        $(`#editForm  .error-${key}`).html(val)
-                    }
-                }else {
-                    console.log("error");
+                    succModal.show();
+                    document
+                        .getElementById('successModal')
+                        .addEventListener('shown.tw.modal', function (event) {
+                            $('#successModal .successModalTitle').html(
+                                'Success!'
+                            );
+                            $('#successModal .successModalDesc').html(
+                                'Result updated'
+                            );
+                        });
                 }
-            }
-        });
+                location.reload();
+            })
+            .catch((error) => {
+                document.querySelector('#update').removeAttribute('disabled');
+                document.querySelector('#update svg').style.cssText =
+                    'display: none;';
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(
+                            error.response.data.errors
+                        )) {
+                            $(`#editForm .${key}`).addClass('border-danger');
+                            $(`#editForm  .error-${key}`).html(val);
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
     });
 
-    $('#delete-confirmation-modal .agreeWith').on('click', function(){
+    $('#delete-confirmation-modal .agreeWith').on('click', function () {
         let $agreeBTN = $(this);
         let resultId = $agreeBTN.attr('data-id');
         let action = $agreeBTN.attr('data-action');
 
         $('#delete-confirmation-modal button').attr('disabled', 'disabled');
-        if(action == 'DELETE'){
+        if (action == 'DELETE') {
             axios({
                 method: 'delete',
                 url: route('result.destroy', resultId),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
-                if (response.status == 200) {
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content'
+                    ),
+                },
+            })
+                .then((response) => {
+                    if (response.status == 200) {
+                        $('#delete-confirmation-modal button').removeAttr(
+                            'disabled'
+                        );
+                        confirmModal.hide();
+                        succModal.show();
+                        document
+                            .getElementById('successModal')
+                            .addEventListener(
+                                'shown.tw.modal',
+                                function (event) {
+                                    $('#successModal .successModalTitle').html(
+                                        'Done!'
+                                    );
+                                    $('#successModal .successModalDesc').html(
+                                        'Data successfully deleted.'
+                                    );
+                                }
+                            );
 
-                    $('#delete-confirmation-modal button').removeAttr('disabled');
-                    confirmModal.hide();
-                    succModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Data successfully deleted.');
-                    });
+                        location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    });
 
-                    location.reload();
-
-                }
-            }).catch(error =>{
-                console.log(error)
-            });
-        } 
-    })
-
-    $('#sortable-table th').on('click', function() {
+    $('#sortable-table th').on('click', function () {
         var th = $(this);
         var table = $(this).parents('table').eq(0);
-        var rows = table.find('tbody tr').toArray().sort(comparer($(this).index()));
-        const asc = this.asc = !this.asc;
+        var rows = table
+            .find('tbody tr')
+            .toArray()
+            .sort(comparer($(this).index()));
+        const asc = (this.asc = !this.asc);
         if (!this.asc) {
             rows = rows.reverse();
         }
@@ -238,11 +306,13 @@ import { createIcons, icons } from "lucide";
         $('#sortable-table th svg').remove();
 
         // Add the arrow-up-down icon to all headers
-        $('#sortable-table th').each(function() {
-            const defaultIcon = $('<i>').addClass('w-4 h-4 ml-2 inline-flex').attr('data-lucide', 'arrow-up-down');
+        $('#sortable-table th').each(function () {
+            const defaultIcon = $('<i>')
+                .addClass('w-4 h-4 ml-2 inline-flex')
+                .attr('data-lucide', 'arrow-up-down');
             $(this).append(defaultIcon);
         });
-            
+
         // Update sorting icon for the clicked header
         const $th = $(th);
         const $icon = $th.find('svg');
@@ -261,9 +331,9 @@ import { createIcons, icons } from "lucide";
         $(th).append(newIcon);
         // Refresh Lucide icons with the icons object
         createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
+            icons,
+            'stroke-width': 1.5,
+            nameAttr: 'data-lucide',
         });
         paginateTable();
     });
@@ -273,36 +343,37 @@ import { createIcons, icons } from "lucide";
         const rowsCount = rows.length;
         const pageCount = Math.ceil(rowsCount / rowsPerPage);
         const numbers = $('#pagination-container');
-    
+
         numbers.html('');
-    
+
         for (let i = 0; i < pageCount; i++) {
             numbers.append('<a href="#">' + (i + 1) + '</a>');
         }
-    
+
         rows.hide();
         rows.slice(0, rowsPerPage).show();
-    
-        numbers.find('a').click(function(e) {
+
+        numbers.find('a').click(function (e) {
             e.preventDefault();
             const index = $(this).index();
             const start = index * rowsPerPage;
             const end = start + rowsPerPage;
-    
+
             rows.hide();
             rows.slice(start, end).show();
         });
     }
     function comparer(index) {
-        return function(a, b) {
+        return function (a, b) {
             var valA = getCellValue(a, index);
             var valB = getCellValue(b, index);
-            return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.localeCompare(valB);
+            return $.isNumeric(valA) && $.isNumeric(valB)
+                ? valA - valB
+                : valA.localeCompare(valB);
         };
     }
 
     function getCellValue(row, index) {
         return $(row).children('td').eq(index).text();
     }
-
-})()
+})();
