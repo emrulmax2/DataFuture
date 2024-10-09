@@ -272,6 +272,24 @@
                             <label class="form-check-label ml-4" for="permission_student_portal_2">Login as Student</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (!isset($priv['student_live_portal']['result_view']) || (isset($priv['student_live_portal']['result_view']) && $priv['student_live_portal']['result_view'] == 1) ? 'checked' : '') }} id="permission_student_portal_3" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[student_live_portal][result_view]">
+                            <label class="form-check-label ml-4" for="permission_student_portal_3">Results (view)</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['result_edit']) && $priv['student_live_portal']['result_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_4" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][result_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_4">Edit</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['result_delete']) && $priv['student_live_portal']['result_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_5" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][result_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_5">Delete</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
