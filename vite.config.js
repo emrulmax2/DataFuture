@@ -284,6 +284,8 @@ export default defineConfig({
                 
                 'resources/js/student-flag.js',
                 'resources/js/student-note-followups.js',
+                'resources/js/followups-all.js',
+                'resources/js/flag-management.js',
                 
             ],
             refresh: true,

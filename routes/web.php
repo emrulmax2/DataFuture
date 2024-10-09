@@ -234,6 +234,7 @@ use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
+use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
@@ -2895,6 +2896,13 @@ Route::middleware('auth')->group(function() {
         Route::get('followups', 'index')->name('followups'); 
         Route::get('followups/list', 'list')->name('followups.list'); 
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
+        Route::get('followups/all', 'showAllFollowups')->name('followups.all'); 
+        Route::get('followups/list-all', 'listAll')->name('followups.list.all'); 
+    });
+
+    Route::controller(FlagManagementController::class)->group(function(){
+        Route::get('raised-flags', 'index')->name('raised.flags'); 
+        Route::get('raised-flags/list', 'list')->name('raised.flags.list'); 
     });
     
     /*Route::controller(ConsoleController::class)->group(function(){

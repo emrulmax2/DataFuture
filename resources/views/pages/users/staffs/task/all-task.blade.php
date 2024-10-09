@@ -36,7 +36,7 @@
             <div class="grid grid-cols-12 gap-6 mt-8">
                 @if(!empty($processTasks))
                     <div class="col-span-12">
-                        <div id="userPendingTaskAccordion" class="accordion mb-8">
+                        <div id="userPendingTaskAccordion" class="accordion mb-2">
                             @foreach($processTasks as $process_id => $process)
                                 @if($process['outstanding_tasks'] > 0)
                                     <div class="accordion-item bg-white mb-3 border-0 rounded">
@@ -81,6 +81,16 @@
                         </div>
                     </div>
                 @endif
+                <div class="col-span-12">
+                    <a href="{{ route('followups.all') }}" class="relative w-full font-medium text-lg bg-white  px-5 py-4 flex items-center rounded  mb-3">
+                        Pending Followups
+                        <span class="w-10 h-10 justify-center items-center inline-flex rounded-full bg-warning text-sm font-semibold text-white ml-auto relative">{{ ($followups > 0 ? $followups : 0) }}</span>
+                    </a>
+                    <a href="{{ route('raised.flags') }}" class="relative w-full font-medium text-lg bg-white  px-5 py-4 flex items-center rounded" >
+                        Open Flags
+                        <span class="w-10 h-10 justify-center items-center inline-flex rounded-full bg-warning text-sm font-semibold text-white ml-auto relative">{{ ($flags > 0 ? $flags : 0) }}</span>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
