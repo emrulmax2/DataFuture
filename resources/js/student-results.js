@@ -121,6 +121,9 @@ import Litepicker from 'litepicker';
     const confirmModal = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#delete-confirmation-modal')
     );
+    const defaultModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#default-confirmation-modal')
+    );
     const editAttemptModal = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#editAttemptModal')
     );
@@ -176,6 +179,32 @@ import Litepicker from 'litepicker';
                 );
                 $('#editAttemptModal input[name="published_time"]').val(
                     publishTime
+                );
+            });
+    });
+
+    $('.default_btn').on('click', function () {
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let confModalDelTitle = 'Do you want to set as default ?';
+        defaultModal.show();
+
+        document
+            .getElementById('default-confirmation-modal')
+            .addEventListener('shown.tw.modal', function (event) {
+                $('#default-confirmation-modal .confModTitle').html(
+                    confModalDelTitle
+                );
+                $('#default-confirmation-modal .confModDesc').html(
+                    'it will show as default result.'
+                );
+                $('#default-confirmation-modal .agreeWith').attr(
+                    'data-id',
+                    rowID
+                );
+                $('#default-confirmation-modal .agreeWith').attr(
+                    'data-action',
+                    'DEFAULT'
                 );
             });
     });
@@ -275,6 +304,89 @@ import Litepicker from 'litepicker';
                                     );
                                     $('#successModal .successModalDesc').html(
                                         'Data successfully deleted.'
+                                    );
+                                }
+                            );
+
+                        location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        } else if (action == 'DEFAULT') {
+            axios({
+                method: 'post',
+                url: route('result.default', resultId),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content'
+                    ),
+                },
+            })
+                .then((response) => {
+                    if (response.status == 200) {
+                        $('#default-confirmation-modal button').removeAttr(
+                            'disabled'
+                        );
+                        confirmModal.hide();
+                        succModal.show();
+                        document
+                            .getElementById('successModal')
+                            .addEventListener(
+                                'shown.tw.modal',
+                                function (event) {
+                                    $('#successModal .successModalTitle').html(
+                                        'Done!'
+                                    );
+                                    $('#successModal .successModalDesc').html(
+                                        'Result set as default.'
+                                    );
+                                }
+                            );
+
+                        location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    });
+
+    $('#default-confirmation-modal .agreeWith').on('click', function () {
+        let $agreeBTN = $(this);
+        let resultId = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#default-confirmation-modal button').attr('disabled', 'disabled');
+        if (action == 'DEFAULT') {
+            axios({
+                method: 'post',
+                url: route('result.default', resultId),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content'
+                    ),
+                },
+            })
+                .then((response) => {
+                    if (response.status == 200) {
+                        $('#default-confirmation-modal button').removeAttr(
+                            'disabled'
+                        );
+                        defaultModal.hide();
+                        succModal.show();
+                        document
+                            .getElementById('successModal')
+                            .addEventListener(
+                                'shown.tw.modal',
+                                function (event) {
+                                    $('#successModal .successModalTitle').html(
+                                        'Updated!'
+                                    );
+                                    $('#successModal .successModalDesc').html(
+                                        'Result set as default.'
                                     );
                                 }
                             );

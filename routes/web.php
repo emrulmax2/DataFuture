@@ -2567,7 +2567,8 @@ Route::middleware('auth')->group(function() {
         Route::post('result/update-all', 'updateAll')->name('result.update.all');
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
         Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
-        Route::post('result/{result}/restore', 'restoreSingle')->name('result.restore');
+        Route::post('result/{id}/restore', 'restore')->name('result.restore');
+        Route::post('result/{id}/default', 'default')->name('result.default');
         
         Route::get('result-list/{assessment_plan}', 'list')->name('result.list'); 
         Route::post('result-list/{assessment_plan}/restore', 'restore')->name('result.restore.all');

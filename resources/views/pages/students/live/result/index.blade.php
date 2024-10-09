@@ -23,6 +23,9 @@
             <table id="sortable-table" data-tw-merge class="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                        <th data-sort="serial" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
+                            Serial <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        </th>
                         <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
                             Id <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
@@ -60,49 +63,66 @@
                 </thead>
                 <tbody>
                     @if($dataSet)
-                        @foreach($dataSet as $moduleDetails => $result)
+                        @php
+                            $serial = 1;
+                        @endphp
+                        @foreach($dataSet as $moduleDetails => $resultSet)
+                        @php
+                            $currentResult = $resultSet[0];
+                            foreach($resultSet as $result):
+                                if($result->is_primary =="Yes" ):
+                                    $currentResult = $result;
+                                    break;
+                                endif;
+                            endforeach;
+                        @endphp
                                         <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->id  }}
+                                               {{ $serial++ }}
+                                             </td>
+                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                               
+                                               {{ $currentResult->id  }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->plan->attenTerm->name }}
+                                                {{ $currentResult->plan->attenTerm->name }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->plan->creations->module_name }} - {{ $result[0]->plan->creations->level->name }}
+                                                {{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->plan->course->body->name }}
+                                                {{ $currentResult->plan->course->body->name }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->plan->creations->code }}
+                                                {{ $currentResult->plan->creations->code }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ date('d F, Y',strtotime($result[0]->published_at))  }}
+                                                {{ date('d F, Y',strtotime($currentResult->published_at))  }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->grade->code }} 
+                                                {{ $currentResult->grade->code }} 
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $result[0]->grade->name }}
+                                                {{ $currentResult->grade->name }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $result[0]->id  }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($result) }}</a>
+                                                    <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet) }}</a>
                                                     
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
 
-                                                {{ isset($result[0]->updatedBy) ? $result[0]->updatedBy->employee->full_name : $result[0]->createdBy->employee->full_name}}
+                                                {{ isset($currentResult->updatedBy) ? $currentResult->updatedBy->employee->full_name : $currentResult->createdBy->employee->full_name}}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                
                                                 @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
-                                                    <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-module="{{ $result[0]->plan->creations->module_name }} - {{ $result[0]->plan->creations->level->name }}" data-code= "{{ $result[0]->plan->creations->code }}" data-term=" {{ $result[0]->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($result[0]->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result[0]->published_at))  }} data-grade="{{ $result[0]->grade->id }}" data-id="{{ $result[0]->id  }}">
+                                                    <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-term=" {{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
                                                         <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                                         Edit
                                                     </button>
                                                 @endif
                                                 @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
-                                                    <button class="items-center text-danger inline-flex delete_btn" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal" data-id="{{ $result[0]->id  }}">
+                                                    <button class="items-center text-danger inline-flex delete_btn" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal" data-id="{{ $currentResult->id  }}">
                                                         <i data-lucide="trash" class="w-4 h-4"></i>
                                                         Delete
                                                     </button>
@@ -128,6 +148,7 @@
                                     <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                                 </a>
                             </div>
+                            
                             <div class="modal-body  overflow-x-auto">
                                 <div class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap mb-3">
                                     <div class="flex justify-between">
@@ -172,7 +193,10 @@
                                     <tbody>
                                         @foreach($resultSet as $result)
                                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                    @if(isset($resultPrimarySet[$result->id]) && $resultPrimarySet[$result->id] == "Yes") 
+                                                    <i data-lucide="check-circle" class="w-5 h-5 text-success absolute left-0 "></i>
+                                                    @endif
                                                     {{ $result->plan->attenTerm->name }}
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
@@ -196,6 +220,10 @@
                                                     </td>
                                                 @else
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                    <button class="mr-3 items-center inline-flex default_btn" type="button" data-tw-toggle="modal" data-tw-target="#default-confirmation-modal" data-module="{{ $result->plan->creations->module_name }} - {{ $result->plan->creations->level->name }}" data-code= "{{ $result->plan->creations->code }}" data-term=" {{ $result->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($result->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result->published_at))  }} data-grade="{{ $result->grade->id }}" data-id="{{ $result->id  }}">
+                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
+                                                        Make Default
+                                                    </button>
                                                     @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
                                                         <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-publishTime={{ date('h:m',strtotime($result->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result->published_at))  }} data-grade="{{ $result->grade->id }}" data-id="{{ $result->id  }}">
                                                             <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
@@ -302,6 +330,25 @@
                 <div class="px-5 pb-8 text-center">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
                     <button type="button" data-id="0" data-action="DELETE" class="agreeWith btn btn-danger w-24">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BEGIN: default Confirmation Modal -->
+<div id="default-confirmation-modal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="alert-circle" class="w-16 h-16 text-orange-500 mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                    <div class="text-slate-500 mt-2 confModDesc">Do you really want to delete these records? <br>This process cannot be undone.</div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
+                    <button type="button" data-id="0" data-action="DEFAULT" class="agreeWith btn btn-elevated-warning w-24">Update</button>
                 </div>
             </div>
         </div>
