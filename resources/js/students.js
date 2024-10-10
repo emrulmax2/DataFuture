@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import IMask from 'imask';
 
 
 ("use strict");
@@ -182,6 +183,11 @@ var liveStudentsListTable = (function () {
 
 
 (function(){
+    var dobMaskOptions = {
+        mask: '00-00-0000'
+    };
+    var student_dob_mask = IMask(document.getElementById('student_dob'), dobMaskOptions);
+
     let tomOptions = {
         plugins: {
             dropdown_input: {}
@@ -1034,7 +1040,8 @@ var liveStudentsListTable = (function () {
             
             student_status.clear(true);
             $('#studentSearchStatus').val('0');
-            $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
+            $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code').val('');
+            student_dob_mask.updateValue('');
         }
 
         function resetGroupSearch() {
@@ -1072,12 +1079,14 @@ var liveStudentsListTable = (function () {
                     filterStudentListTable();
                     $(this).blur();
                     $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
+                    student_dob_mask.updateValue('');
                 }
             })
             
             $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();
                 $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
+                student_dob_mask.updateValue('');
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();

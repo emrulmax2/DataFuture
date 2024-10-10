@@ -13,15 +13,6 @@ import Toastify from "toastify-js";
             var mask = IMask(this, maskOptions);
         })
     }
-    if($('.datepickerMask').length > 0){
-        $('.datepickerMask').each(function(){
-            $(this).attr('autocomplete', 'off');
-            var maskOptions = {
-                mask: '00-00-0000'
-            };
-            var mask = IMask(this, maskOptions);
-        })
-    }
 
     // Turn off Mouse Wheel for Number Fields.
     if($('input[type="number"').length > 0){

@@ -43,8 +43,11 @@ class LetterSetController extends Controller
             $query->orWhere('letter_title','LIKE','%'.$queryStr.'%');
         endif;
         if(!empty($phase)): $query->where($phase, 1); endif;
+        
         if($status == 2):
             $query->onlyTrashed();
+        elseif($status == 3):
+            $query->withTrashed();
         else:
             $query->where('status', $status);
         endif;
