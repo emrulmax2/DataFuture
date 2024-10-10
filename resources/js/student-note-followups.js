@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import tippy, { roundArrow } from "tippy.js";
  
 ("use strict");
 var pendingFollowupsListTable = (function () {
@@ -106,8 +107,8 @@ var pendingFollowupsListTable = (function () {
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-
-                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i></button>';
+                        var countHtml = cell.getData().unread_comment > 0 ? '<span class="bg-danger absolute r-0 t-0" style="    width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 1; padding: 3px 0 0; margin: -5px -5px 0 0;">'+cell.getData().unread_comment+'</span>' : '';
+                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#followUpCommentModal"  class="viewCommentBtn relative btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i>'+countHtml+'</button>';
                         btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
                             
                         
@@ -150,6 +151,14 @@ var pendingFollowupsListTable = (function () {
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const viewNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewNoteModal"));
     const confirmModalN = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalN"));
+    const followUpCommentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#followUpCommentModal"));
+
+    const followUpCommentModalEl = document.getElementById('followUpCommentModal')
+    followUpCommentModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#followUpCommentModal textarea').val('');
+        $('#followUpCommentModal [name="student_note_id"]').val('0');
+        $('#followUpCommentModal #followUpCommentWrap').html('Loading...');
+    });
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -292,6 +301,100 @@ var pendingFollowupsListTable = (function () {
         }else{
             confirmModal.hide();
         }
+    });
+
+    $('#pendingFollowupsListTable').on('click', '.viewCommentBtn', function(e){
+        var $btn = $(this);
+        var note_id = $btn.attr('data-id');
+        axios({
+            method: "POST",
+            url: route('followups.comment.list'),
+            data: {note_id : note_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#followUpCommentWrap').html(response.data.htm);
+                $('#followUpCommentModal [name="student_note_id"]').val(note_id);
+
+                
+                setTimeout(() => {
+                    $('#followUpCommentModal').find('.tooltip').each(function () {
+                        let tippyOption = {
+                            content: $(this).attr("alt"),
+                        };
+                        tippy(this, {
+                            arrow: roundArrow,
+                            animation: "shift-away",
+                            zIndex: '9999999999',
+                            ...tippyOption,
+                        });
+                    });
+                }, 10);
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+
+        pendingFollowupsListTable.init();
+    });
+
+    $('#followUpCommentForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('followUpCommentForm');
+    
+        $('#postCommentBtn').attr('disabled', 'disabled');
+        $('#postCommentBtn svg.theIcon').fadeOut();
+        $('#postCommentBtn svg.theLoader').fadeIn();
+
+        if($('#the_comment', $form).val() != ''){
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('followups.comment.store'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn svg.theIcon').fadeIn();
+                $('#postCommentBtn svg.theLoader').fadeOut();
+
+                if (response.status == 200) {
+                    $('#followUpCommentWrap').html(response.data.htm);
+                    $('#the_comment', $form).val('');
+
+                
+                    setTimeout(() => {
+                        $('#followUpCommentModal').find('.tooltip').each(function () {
+                            let tippyOption = {
+                                content: $(this).attr("alt"),
+                            };
+                            tippy(this, {
+                                arrow: roundArrow,
+                                animation: "shift-away",
+                                zIndex: '9999999999',
+                                ...tippyOption,
+                            });
+                        });
+                    }, 10);
+                }
+            }).catch(error => {
+                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn svg.theIcon').fadeIn();
+                $('#postCommentBtn svg.theLoader').fadeOut();
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $('#postCommentBtn').attr('disabled', 'disabled');
+            $('#postCommentBtn svg.theIcon').fadeIn();
+            $('#postCommentBtn svg.theLoader').fadeOut();
+        }
+
+        pendingFollowupsListTable.init();
     });
 
 })();

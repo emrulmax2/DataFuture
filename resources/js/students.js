@@ -1066,18 +1066,18 @@ var liveStudentsListTable = (function () {
                     $('#studentIDSearchBtn').trigger('click');
                 }
             });
-            $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').on('keypress', function(e){
+            $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').on('keypress', function(e){
                 var keycode = e.keyCode || e.which;
                 if(keycode == 13) {
                     filterStudentListTable();
                     $(this).blur();
-                    $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
+                    $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
                 }
             })
             
             $("#studentIDSearchBtn, #studentIDSearchSubmitBtn, #studentSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();
-                $('#student_id, #student_name, #student_dob #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
+                $('#student_id, #student_name, #student_dob, #student_abr, #student_ssn, #student_uhn, #student_mobile, #student_email, #student_post_code, #application_no').val('');
             });
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
                 filterStudentListTable();

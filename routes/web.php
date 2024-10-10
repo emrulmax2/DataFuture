@@ -2900,6 +2900,9 @@ Route::middleware('auth')->group(function() {
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
         Route::get('followups/all', 'showAllFollowups')->name('followups.all'); 
         Route::get('followups/list-all', 'listAll')->name('followups.list.all'); 
+
+        Route::post('followups/get-comment-list', 'getCommentList')->name('followups.comment.list'); 
+        Route::post('followups/store-comment', 'storeComment')->name('followups.comment.store'); 
     });
 
     Route::controller(FlagManagementController::class)->group(function(){

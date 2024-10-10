@@ -23,6 +23,7 @@ use App\Models\PlansDateList;
 use App\Models\ProcessList;
 use App\Models\Student;
 use App\Models\StudentNoteFollowedBy;
+use App\Models\StudentNoteFollowupCommentRead;
 use App\Models\StudentTask;
 use App\Models\TaskListUser;
 use App\Models\User;
@@ -75,6 +76,11 @@ class DashboardController extends Controller
                                 return $item;
                                 }
                             })->pluck('course_creation_id')->unique()->toArray();
+        $myFollowups = StudentNoteFollowedBy::where('user_id', auth()->user()->id)->whereHas('note', function($q){
+                            $q->where('followed_up', 'yes')->where('followed_up_status', 'Pending');
+                        })->get();
+        $followedNoteId = $myFollowups->pluck('student_note_id')->unique()->toArray();
+        $myUnreadNoteCount = (!empty($followedNoteId) ? StudentNoteFollowupCommentRead::whereIn('student_note_id', $followedNoteId)->where('user_id', auth()->user()->id)->where('read', '!=', 1)->get()->count() : 0);
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -99,9 +105,8 @@ class DashboardController extends Controller
                 $q->where('employee_id', $userEmployeeId)->whereIn('type', [1, 2]);
             })->orderBy('name', 'ASC')->get(),
             'proxyClasses' => $this->getMyProxyClassForTheDay(),
-            'myfollowups' => StudentNoteFollowedBy::where('user_id', auth()->user()->id)->whereHas('note', function($q){
-                                $q->where('followed_up', 'yes')->where('followed_up_status', 'Pending');
-                            })->get()->count()
+            'myfollowups' => $myFollowups->count(),
+            'myunreadcomments' => $myUnreadNoteCount
         ]);
     }
     

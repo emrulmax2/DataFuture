@@ -60,7 +60,7 @@
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="student_dob" class="form-label">DOB</label>
-                                                <input type="text" value="" placeholder="DD-MM-YYYY" id="student_dob" class="form-control" name="student[student_dob]">
+                                                <input type="text" value="" placeholder="DD-MM-YYYY" id="student_dob" class="form-control datepickerMask" name="student[student_dob]">
                                             </div>
                                             <div class="col-span-12 sm:col-span-3">
                                                 <label for="student_post_code" class="form-label">Post Code</label>
