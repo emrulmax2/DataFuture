@@ -28,6 +28,7 @@ var allFollowupsListTable = (function () {
                     title: "Student",
                     field: "registration_no",
                     headerHozAlign: "left",
+                    width: "250",
                     formatter(cell, formatterParams) {  
                         var html = '<a href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
@@ -42,15 +43,25 @@ var allFollowupsListTable = (function () {
                     }
                 },
                 {
-                    title: "Term",
-                    field: "term",
+                    title: "Note",
+                    field: "note",
                     headerHozAlign: "left",
                     headerSort: false,
-                },
-                {
-                    title: "Date",
-                    field: "opening_date",
-                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var note = cell.getData().note;
+                        var html = '<div class="whitespace-normal break-words">';
+                                if(note.length > 250){
+                                    html += note.substring(0, 250);
+                                    html += '&nbsp;<a data-id="'+cell.getData().id+'" data-tw-toggle="modal" data-tw-target="#viewNoteModal" href="javascript:void(0);" class="view_btn text-primary font-medium underline">[More]</a>';
+                                }else{
+                                    html += note;
+                                }
+                                if(cell.getData().note_document_id > 0){
+                                    html +='<br/><a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn btn-linkedin text-white px-2 py-0 w-auto h-auto mt-2"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-1"></i> Download Attachment</a>';
+                                }
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Followed Up",
@@ -82,24 +93,25 @@ var allFollowupsListTable = (function () {
                 {
                     title: "Created By",
                     field: "created_by",
+                    width: "250",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().opening_date+'</div>';
+                            html += '<div class="font-medium whitespace-nowrap">By: '+cell.getData().created_by+'</div>';
                         html += '</div>';
 
                         return html;
                     }
                 },
-                {
+                /*{
                     title: "Actions",
                     field: "id",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "230",
+                    width: "100",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -113,7 +125,7 @@ var allFollowupsListTable = (function () {
                         
                         return btns;
                     },
-                },
+                },*/
             ],
             renderComplete() {
                 createIcons({
@@ -181,6 +193,64 @@ var allFollowupsListTable = (function () {
             });
         }).catch(error => {
             console.log('error');
+        });
+    });
+
+    $('#allFollowupsListTable').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('student.note.document.download'), 
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
+        });
+    });
+
+    $('#viewNoteModal').on('click', '.downloadDoc', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+
+        $theLink.css({'opacity' : '.6', 'cursor' : 'not-allowed'});
+
+        axios({
+            method: "post",
+            url: route('student.document.download'), 
+            data: {row_id : row_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                let res = response.data.res;
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+
+                if(res != ''){
+                    window.open(res, '_blank');
+                }
+            } 
+        }).catch(error => {
+            if(error.response){
+                $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
+                console.log('error');
+            }
         });
     });
 })()

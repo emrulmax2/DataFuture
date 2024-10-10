@@ -189,7 +189,10 @@
                                         <a href="{{ route('followups') }}" class="intro-y block relative col-span-6 2xl:col-span-4 mb-3">
                                             <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">Pending Followups</h6>
                                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/blan_logo.png') }}" alt="Pending Followups" />
-                                            <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $myfollowups }}</span>
+                                            <span style="margin-top: -38px; left: {{ $myunreadcomments > 0 ? '-32px' : '0px' }};" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $myfollowups }}</span>
+                                            @if($myunreadcomments > 0)
+                                            <span style="margin-top: -38px; right: -32px;" class="absolute bg-danger rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $myunreadcomments }}</span>
+                                            @endif
                                         </a>
                                     </div>
                                 </div>

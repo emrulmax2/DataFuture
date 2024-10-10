@@ -278,67 +278,96 @@ import moment from 'moment';
     });
 
 
-        /* On Change The Calendar */
-        $("#planClassStatus").on('change',function(){
+    /* On Change The Calendar */
+    $("#planClassStatus").on('change',function(){
 
-            var planClassStatus = $(this).val();
+        var planClassStatus = $(this).val();
+        var planCourseId = $('#planCourseId').val();
+        
+        $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
+        axios({
+            method: 'post',
+            url: route('pt.dashboard.class.info'),
+            data: {planClassStatus : planClassStatus, planCourseId : planCourseId},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
+                var res = response.data.res;
+                $('#dailyClassInfoTable tbody').html(res.planTable);
+                doSthWithLoadedContent();
+
+            }
+        }).catch(error =>{
+            $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
+            console.log(error)
+        });
+    });
+
+    doSthWithLoadedContent();
+    
+    function doSthWithLoadedContent() {
+        
+
+        $('input.class-fileupload').on('change', function(){
+            let tthis = $(this);
+            var classFileUploadFound  = tthis.val();
             var planCourseId = $('#planCourseId').val();
-            
+            var plansDateListId = tthis.data('id')*1;
+            var planClassStatus = $("#planClassStatus").val();
             $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
             axios({
                 method: 'post',
-                url: route('pt.dashboard.class.info'),
-                data: {planClassStatus : planClassStatus, planCourseId : planCourseId},
+                url: route('pt.dashboard.class.status.update'),
+                data: {classFileUploadFound : classFileUploadFound,planCourseId : planCourseId, plansDateListId : plansDateListId, planClassStatus: planClassStatus},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
+
                 if (response.status == 200) {
                     $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
                     var res = response.data.res;
                     $('#dailyClassInfoTable tbody').html(res.planTable);
-                    doSthWithLoadedContent();
-    
                 }
+                
             }).catch(error =>{
+
                 $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
-                console.log(error)
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        
+                    }
+                }
             });
         });
+    }
 
-        doSthWithLoadedContent();
-        
-        function doSthWithLoadedContent() {
-            
 
-            $('input.class-fileupload').on('change', function(){
-                let tthis = $(this);
-                var classFileUploadFound  = tthis.val();
-                var planCourseId = $('#planCourseId').val();
-                var plansDateListId = tthis.data('id')*1;
-                var planClassStatus = $("#planClassStatus").val();
-                $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
-                axios({
-                    method: 'post',
-                    url: route('pt.dashboard.class.status.update'),
-                    data: {classFileUploadFound : classFileUploadFound,planCourseId : planCourseId, plansDateListId : plansDateListId, planClassStatus: planClassStatus},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
+    /* Student Attendance Tracking Start
+    const theAttendanceDate = new Litepicker({
+        element: document.getElementById('theAttendanceDate'),
+        ...dateOption
+    });
 
-                    if (response.status == 200) {
-                        $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
-                        var res = response.data.res;
-                        $('#dailyClassInfoTable tbody').html(res.planTable);
-                    }
-                    
-                }).catch(error =>{
+    function generateStudentAttendanceTrackingHtml(){
+        let $theWrap = $('#studentAttendanceTrackingWrap');
+        let $theCalendar = $('#theAttendanceDate');
+        let theDate = $theCalendar.val();
 
-                    $('.dailyClassInfoTableWrap .leaveTableLoader').removeClass('active');
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            
-                        }
-                    }
-                });
-            });
-        }
+        axios({
+            method: "POST",
+            url: route('pt.dashboard.get.student.attn.tracking'),
+            data: {theDate : theDate},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    }
+    Student Attendance Tracking  End*/
     
 })();

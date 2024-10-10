@@ -2404,7 +2404,9 @@ Route::middleware('auth')->group(function() {
         Route::post('personal-tutor-dashboard/search-student', 'searchStudent')->name('pt.student.filter.id'); 
         Route::post('personal-tutor-dashboard/get-class-info', 'getClassInformations')->name('pt.dashboard.class.info');
         Route::post('personal-tutor-dashboard/update-class-status', 'UpdateClassStatus')->name('pt.dashboard.class.status.update'); 
-        Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count'); 
+        Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count');
+
+        Route::post('personal-tutor-dashboard/student-attendance-tracking', 'getStudentAttenTrackingHtml')->name('pt.dashboard.get.student.attn.tracking'); 
         
     });
 
@@ -2898,6 +2900,9 @@ Route::middleware('auth')->group(function() {
         Route::post('followups/completed', 'completeFollowup')->name('followups.completed'); 
         Route::get('followups/all', 'showAllFollowups')->name('followups.all'); 
         Route::get('followups/list-all', 'listAll')->name('followups.list.all'); 
+
+        Route::post('followups/get-comment-list', 'getCommentList')->name('followups.comment.list'); 
+        Route::post('followups/store-comment', 'storeComment')->name('followups.comment.store'); 
     });
 
     Route::controller(FlagManagementController::class)->group(function(){

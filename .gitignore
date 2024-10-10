@@ -16,6 +16,7 @@ yarn-error.log
 /.idea
 /.vscode
 .env.live2
+.env.local
 pnpm-lock.yaml
 composer.lock
 composer.lock

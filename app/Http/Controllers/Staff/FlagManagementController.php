@@ -59,6 +59,7 @@ class FlagManagementController extends Controller
                     'first_name' => (isset($list->student->first_name) && !empty($list->student->first_name) ? $list->student->first_name : ''),
                     'last_name' => (isset($list->student->last_name) && !empty($list->student->last_name) ? $list->student->last_name : ''),
                     'registration_no' => (isset($list->student->registration_no) && !empty($list->student->registration_no) ? $list->student->registration_no : ''),
+                    'note' => (isset($list->note) && !empty($list->note) ? strip_tags($list->note) : ''),
                     'term' => (isset($list->term->name) && !empty($list->term->name) ? $list->term->name : ''),
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'note_document_id' => (isset($list->document->id) && $list->document->id > 0 ? $list->document->id : 0),

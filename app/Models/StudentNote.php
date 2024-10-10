@@ -104,4 +104,13 @@ class StudentNote extends Model
 
         return $html;
     }
+
+    public function comments(){
+        return $this->hasMany(StudentNoteFollowupComment::class, 'student_note_id', 'id');
+    }
+
+    public function getUnreadCommentCountAttribute(){
+        $count = StudentNoteFollowupCommentRead::where('student_note_id', $this->id)->where('user_id', auth()->user()->id)->where('read', '!=', 1)->get()->count();
+        return ($count > 0 ? $count : 0);
+    }
 }
