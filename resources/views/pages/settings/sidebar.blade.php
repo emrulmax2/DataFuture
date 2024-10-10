@@ -114,10 +114,10 @@
                 </a>
             </li>
             <li class="hasChild">
-                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
+                <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set.edit' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="mail" class="w-4 h-4 mr-2 "></i> Communication Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'communication.template' || Route::currentRouteName() == 'letterheaderfooter' || Route::currentRouteName() == 'signatory' || Route::currentRouteName() == 'consent' || Route::currentRouteName() == 'letter.set.edit' || Route::currentRouteName() == 'letter.set' || Route::currentRouteName() == 'common.smtp' || Route::currentRouteName() == 'email.template' || Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'block' : 'none' }};">
                     <li class="hasChild">
                         <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'sms.template' || Route::currentRouteName() == 'site.setting.sms.api' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> SMS Settings <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
@@ -153,7 +153,7 @@
                         </ul>
                     </li>
                     <li>
-                        <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'letter.set' ? 'active text-primary font-medium' : '' }}" href="{{ route('letter.set') }}">
+                        <a class="flex items-center  mt-4 {{ Route::currentRouteName() == 'letter.set.edit' || Route::currentRouteName() == 'letter.set' ? 'active text-primary font-medium' : '' }}" href="{{ route('letter.set') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Letter Templates
                         </a>
                     </li>

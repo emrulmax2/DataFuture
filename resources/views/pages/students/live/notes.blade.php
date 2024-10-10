@@ -315,7 +315,7 @@
                                 </div>--}}
                                 <div class="col-span-12">
                                     <label for="follow_up_by" class="form-label">Follow Up By <span class="text-danger">*</span></label>
-                                    <select id="follow_up_by" class="w-full tom-selects" name="follow_up_by[]" multiple>
+                                    <select data-self="{{ auth()->user()->id }}" id="follow_up_by" class="w-full tom-selects" name="follow_up_by[]" multiple>
                                         <option value="">Please Select</option>
                                         @if($users->count() > 0)
                                             @foreach($users as $usr)

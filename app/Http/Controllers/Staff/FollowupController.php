@@ -21,11 +21,13 @@ class FollowupController extends Controller
                 ['label' => 'Followups', 'href' => 'javascript:void(0);'],
             ],
             'user' => $userData,
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
         ]);
     }
 
     public function list(Request $request){
-        $querystr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
+        $term_delclaration = (isset($request->term_delclaration) && $request->term_delclaration > 0 ? $request->term_delclaration : 0);
+        $status = (isset($request->status) && !empty($request->status) ? $request->status : 'Pending');
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -33,8 +35,11 @@ class FollowupController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = StudentNoteFollowedBy::orderByRaw(implode(',', $sorts))->where('user_id', auth()->user()->id)->whereHas('note', function($q){
-            $q->where('followed_up', 'yes')->where('followed_up_status', 'Pending');
+        $query = StudentNoteFollowedBy::orderByRaw(implode(',', $sorts))->where('user_id', auth()->user()->id)->whereHas('note', function($q) use($term_delclaration, $status){
+            $q->where('followed_up', 'yes')->where('followed_up_status', $status);
+            if($term_delclaration > 0):
+                $q->where('term_declaration_id', $term_delclaration);
+            endif;
         });
 
         $total_rows = $query->count();

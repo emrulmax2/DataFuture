@@ -30,7 +30,7 @@ var allFollowupsListTable = (function () {
                     headerHozAlign: "left",
                     width: "250",
                     formatter(cell, formatterParams) {  
-                        var html = '<a href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
+                        var html = '<a target="_blank" href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
                                     html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().student_photo+'">';
                                 html += '</div>';

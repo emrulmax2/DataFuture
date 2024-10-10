@@ -379,9 +379,11 @@ var studentNotesListTable = (function () {
     };
     
     $('#addNoteForm').on('change', '[name="followed_up"]', function(){
+        let self_id = $('#addNoteModal #follow_up_by').attr('data-self');
         if($(this).prop('checked')){
             $('#addNoteForm .followedUpWrap').fadeIn('fast', function(){
                 follow_up_by.clear(true);
+                follow_up_by.addItem(self_id);
             });
         }else{
             $('#addNoteForm .followedUpWrap').fadeOut('fast', function(){
