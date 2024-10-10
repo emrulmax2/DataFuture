@@ -41,11 +41,13 @@ class LetterSetController extends Controller
         if(!empty($queryStr)):
             $query->where('letter_type','LIKE','%'.$queryStr.'%');
             $query->orWhere('letter_title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('description','LIKE','%'.$queryStr.'%');
         endif;
         if(!empty($phase)): $query->where($phase, 1); endif;
+        
         if($status == 2):
             $query->onlyTrashed();
+        elseif($status == 3):
+            $query->withTrashed();
         else:
             $query->where('status', $status);
         endif;
@@ -118,8 +120,19 @@ class LetterSetController extends Controller
      */
     public function edit($id)
     {
-        $letterSet = LetterSet::find($id);
-        return response()->json($letterSet);
+        //$letterSet = LetterSet::find($id);
+        //return response()->json($letterSet);
+
+        return view('pages.settings.letter.edit', [
+            'title' => 'Letter Sets - London Churchill College',
+            'subtitle' => 'Communication Settings',
+            'breadcrumbs' => [
+                ['label' => 'Site Settings', 'href' => route('site.setting')],
+                ['label' => 'Letter Sets', 'href' => route('letter.set')],
+                ['label' => 'Edit', 'href' => 'javascript:void(0);']
+            ],
+            'letter' => LetterSet::find($id)
+        ]);
     }
 
     /**

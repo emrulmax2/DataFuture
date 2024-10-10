@@ -8,9 +8,12 @@ var pendingFollowupsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
 
+        var term_delclaration = $('#flup_term_declaration_id').val();
+        var flup_status = $('#flup_status').val();
+
         let tableContent = new Tabulator("#pendingFollowupsListTable", {
             ajaxURL: route("followups.list"),
-            ajaxParams: { querystr: '' },
+            ajaxParams: { term_delclaration: term_delclaration, status : flup_status },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -28,7 +31,7 @@ var pendingFollowupsListTable = (function () {
                     headerHozAlign: "left",
                     width: "250",
                     formatter(cell, formatterParams) {  
-                        var html = '<a href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
+                        var html = '<a target="_blank" href="'+route('student.notes', cell.getData().student_id) +'" class="block">';
                                 html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
                                     html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().student_photo+'">';
                                 html += '</div>';
@@ -145,6 +148,23 @@ var pendingFollowupsListTable = (function () {
 
 (function () {
     pendingFollowupsListTable.init();
+
+    function filterHTMLFormCML() {
+        pendingFollowupsListTable.init();
+    }
+
+    // On click go button
+    $("#tabulator-html-filter-go").on("click", function (event) {
+        filterHTMLFormCML();
+    });
+
+    // On reset filter form
+    $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#flup_term_declaration_id").val("");
+        $("#flup_status").val("Pending");
+
+        filterHTMLFormCML();
+    });
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));

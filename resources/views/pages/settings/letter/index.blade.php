@@ -46,7 +46,8 @@
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="status-LS" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
+                                    <option value="3">All</option>
+                                    <option selected value="1">Active</option>
                                     <option value="0">Inactive</option>
                                     <option value="2">Archived</option>
                                 </select>
@@ -90,7 +91,7 @@
     </div>
     <!-- END: Settings Page Content -->
 
-    <!-- BEGIN: Edit Modal -->
+    <!-- BEGIN: Edit Modal
     <div id="editLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editLetterForm" enctype="multipart/form-data">
@@ -171,7 +172,7 @@
             </form>
         </div>
     </div>
-    <!-- END: Edit Modal -->
+    END: Edit Modal -->
 
     <!-- BEGIN: Add Modal -->
     <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

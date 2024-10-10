@@ -53,6 +53,9 @@ var studentNotesListTable = (function () {
                                 }else{
                                     html += note;
                                 }
+                                if(cell.getData().note_document_id > 0){
+                                    html +='<br/><a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn btn-linkedin text-white px-2 py-0 w-auto h-auto mt-2"><i data-lucide="cloud-lightning" class="w-4 h-4 mr-1"></i> Download Attachment</a>';
+                                }
                             html += '</div>';
                         return html;
                     }
@@ -125,15 +128,15 @@ var studentNotesListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "150",
+                    width: "120",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        if(cell.getData().note_document_id > 0){
-                            btns +='<a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
-                        }
+                        //if(cell.getData().note_document_id > 0){
+                            //btns +='<a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                        //}
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
+                            //btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
                             if(cell.getData().is_ownere == 1){
                                 btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#editNoteModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             }
@@ -379,9 +382,11 @@ var studentNotesListTable = (function () {
     };
     
     $('#addNoteForm').on('change', '[name="followed_up"]', function(){
+        let self_id = $('#addNoteModal #follow_up_by').attr('data-self');
         if($(this).prop('checked')){
             $('#addNoteForm .followedUpWrap').fadeIn('fast', function(){
                 follow_up_by.clear(true);
+                follow_up_by.addItem(self_id);
             });
         }else{
             $('#addNoteForm .followedUpWrap').fadeOut('fast', function(){

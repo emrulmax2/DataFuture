@@ -44,7 +44,7 @@ class NoteController extends Controller
         ]);
         if($note):
             if($followed_up == 'yes' && !empty($follow_up_by)):
-                $follow_up_by[] = auth()->user()->id;
+                //$follow_up_by[] = auth()->user()->id;
                 foreach($follow_up_by as $fub):
                     StudentNoteFollowedBy::create([
                         'student_note_id' => $note->id,

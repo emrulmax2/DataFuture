@@ -286,6 +286,7 @@ export default defineConfig({
                 'resources/js/student-note-followups.js',
                 'resources/js/followups-all.js',
                 'resources/js/flag-management.js',
+                'resources/js/letter-set-edit.js',
                 
             ],
             refresh: true,
