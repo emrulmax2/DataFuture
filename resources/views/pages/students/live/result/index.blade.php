@@ -185,10 +185,17 @@
                                     </thead>
                                     <tbody>
                                         @foreach($resultSet as $result)
+                                        @php
+                                            if(isset($result->term_declaration_id) && !empty($result->term_declaration_id))
+                                                    $termData = $result->term_declaration_id;
+
+                                                else
+                                                    $termData = $result->plan->attenTerm->id;
+                                            @endphp
                                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
                                                     
-                                                    {{ $result->plan->attenTerm->name }} 
+                                                    {{ $termData }} 
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
                                                     {{ ($result->module_code)??$result->plan->creations->code }}
@@ -363,6 +370,74 @@
 </div>
 @endforeach
 @endif
+
+<div class="intro-y flex items-center p-5 mt-5 box">
+    <h2 class="text-lg font-medium mr-auto">
+        Previous Results
+    </h2>
+    <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+        <h4 id="frequency-distribution-old" class="text-sm font-medium mr-auto ">[  ]</h4>
+    </div>
+</div>
+<div class="intro-y box col-span-12 p-5 mt-5">
+    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+        <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
+            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Term</label>
+                <select id="term-SN" name="term" class="mt-2 sm:mt-0 sm:w-40 2xl:w-48 tom-selects" >
+                    <option selected value="">Please Select</option>
+                    @if($terms->count() > 0)
+                        @foreach($terms as $trm)
+                            <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
+                <input id="query-AN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+            </div>
+            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
+                <select id="status-AN" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                    <option selected value="1">Active</option>
+                    <option value="2">Archived</option>
+                </select>
+            </div>
+            <div class="mt-2 xl:mt-0">
+                <button id="tabulator-html-filter-go-AN" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+            </div>
+        </form>
+        <div class="flex mt-5 sm:mt-0">
+            <button id="tabulator-print-AN" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+            </button>
+            <div class="dropdown w-1/2 sm:w-auto">
+                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                </button>
+                <div class="dropdown-menu w-40">
+                    <ul class="dropdown-content">
+                        <li>
+                            <a id="tabulator-export-csv-AN" href="javascript:;" class="dropdown-item">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                            </a>
+                        </li>
+                        <li>
+                            <a id="tabulator-export-xlsx-AN" href="javascript:;" class="dropdown-item">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="overflow-x-auto scrollbar-hidden">
+        <div id="studentNotesListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+    </div>
+</div>
 <!-- BEGIN: Delete Confirmation Modal -->
 <div id="delete-confirmation-modal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -381,7 +456,6 @@
         </div>
     </div>
 </div>
-
 <!-- BEGIN: default Confirmation Modal -->
 <div id="default-confirmation-modal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
