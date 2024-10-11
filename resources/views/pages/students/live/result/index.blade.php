@@ -243,9 +243,11 @@
                             <div class="text-base font-medium">{{  $key }}</div>
                             <div class=" font-normal  text-slate-500">Level {{  $resultSet[0]->plan->creations->level->name }}</div>
                         </div>
+                        @if(isset(auth()->user()->priv()['result_add']) && auth()->user()->priv()['result_add'] == 1)
                         <div class="mb-5 ml-auto items-end">
                             <button type="button" data-id="{{ $resultSet[0]->id }}" class="btn btn-primary shadow-md mr-2 addNewRowBtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add New Row</button>
                         </div>
+                        @endif
                     </div>
                     <table id="result-bulk{{ $resultSet[0]->id }}" class="min-w-full divide-y divide-gray-200">
                         <thead data-tw-merge class="">
