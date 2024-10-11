@@ -674,13 +674,16 @@ class AssignController extends Controller
             foreach($newAssigndPlans as $module_id => $modules):
                 foreach($modules as $classType => $plan_ids):
                     foreach($plan_ids as $plan_id):
-                        $data = [];
-                        $data['plan_id'] = $plan_id;
-                        $data['student_id'] = $student_id;
-                        $data['attendance'] = null;
-                        $data['created_by'] = auth()->user()->id;
+                        $exist = Assign::where('plan_id', $plan_id)->where('student_id', $student_id)->get()->count();
+                        if($exist == 0):
+                            $data = [];
+                            $data['plan_id'] = $plan_id;
+                            $data['student_id'] = $student_id;
+                            $data['attendance'] = null;
+                            $data['created_by'] = auth()->user()->id;
 
-                        Assign::create($data);
+                            Assign::create($data);
+                        endif;
                     endforeach;
                 endforeach;
             endforeach;
