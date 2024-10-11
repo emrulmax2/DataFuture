@@ -15,6 +15,9 @@
         <h2 class="text-lg font-medium mr-auto">
             {{ $title }}
         </h2>
+        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <h4 id="frequency-distribution" class="text-sm font-medium mr-auto ">[  ]</h4>
+        </div>
     </div>
     <!-- END: Page Title -->
     <!-- BEGIN: Daily Sales -->

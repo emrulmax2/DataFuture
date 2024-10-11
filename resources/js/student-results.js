@@ -760,68 +760,6 @@ import { Litepicker } from 'litepicker';
             });
     });
 
-    // $('#editAttemptForm').on('submit', function (e) {
-    //     let editId = $('#editAttemptForm input[name="id"]').val();
-
-    //     e.preventDefault();
-    //     const form = document.getElementById('editAttemptForm');
-
-    //     document.querySelector('#update').setAttribute('disabled', 'disabled');
-    //     document.querySelector('#update svg').style.cssText =
-    //         'display: inline-block;';
-
-    //     let form_data = new FormData(form);
-
-    //     axios({
-    //         method: 'post',
-    //         url: route('result.update', editId),
-    //         data: form_data,
-    //         headers: {
-    //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-    //         },
-    //     })
-    //         .then((response) => {
-    //             if (response.status == 200) {
-    //                 document
-    //                     .querySelector('#update')
-    //                     .removeAttribute('disabled');
-    //                 document.querySelector('#update svg').style.cssText =
-    //                     'display: none;';
-    //                 editAttemptModal.hide();
-
-    //                 succModal.show();
-    //                 document
-    //                     .getElementById('successModal')
-    //                     .addEventListener('shown.tw.modal', function (event) {
-    //                         $('#successModal .successModalTitle').html(
-    //                             'Success!'
-    //                         );
-    //                         $('#successModal .successModalDesc').html(
-    //                             'Result updated'
-    //                         );
-    //                     });
-    //             }
-    //             location.reload();
-    //         })
-    //         .catch((error) => {
-    //             document.querySelector('#update').removeAttribute('disabled');
-    //             document.querySelector('#update svg').style.cssText =
-    //                 'display: none;';
-    //             if (error.response) {
-    //                 if (error.response.status == 422) {
-    //                     for (const [key, val] of Object.entries(
-    //                         error.response.data.errors
-    //                     )) {
-    //                         $(`#editForm .${key}`).addClass('border-danger');
-    //                         $(`#editForm  .error-${key}`).html(val);
-    //                     }
-    //                 } else {
-    //                     console.log('error');
-    //                 }
-    //             }
-    //         });
-    // });
-
     $('#delete-confirmation-modal .agreeWith').on('click', function () {
         let $agreeBTN = $(this);
         let resultId = $agreeBTN.attr('data-id');
@@ -905,52 +843,6 @@ import { Litepicker } from 'litepicker';
         }
     });
 
-    // $('#default-confirmation-modal .agreeWith').on('click', function () {
-    //     let $agreeBTN = $(this);
-    //     let resultId = $agreeBTN.attr('data-id');
-    //     let action = $agreeBTN.attr('data-action');
-
-    //     $('#default-confirmation-modal button').attr('disabled', 'disabled');
-    //     if (action == 'DEFAULT') {
-    //         axios({
-    //             method: 'post',
-    //             url: route('result.default', resultId),
-    //             headers: {
-    //                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-    //                     'content'
-    //                 ),
-    //             },
-    //         })
-    //             .then((response) => {
-    //                 if (response.status == 200) {
-    //                     $('#default-confirmation-modal button').removeAttr(
-    //                         'disabled'
-    //                     );
-    //                     defaultModal.hide();
-    //                     succModal.show();
-    //                     document
-    //                         .getElementById('successModal')
-    //                         .addEventListener(
-    //                             'shown.tw.modal',
-    //                             function (event) {
-    //                                 $('#successModal .successModalTitle').html(
-    //                                     'Updated!'
-    //                                 );
-    //                                 $('#successModal .successModalDesc').html(
-    //                                     'Result set as default.'
-    //                                 );
-    //                             }
-    //                         );
-
-    //                     location.reload();
-    //                 }
-    //             })
-    //             .catch((error) => {
-    //                 console.log(error);
-    //             });
-    //     }
-    // });
-
     $('#sortable-table th').on('click', function () {
         var th = $(this);
         var table = $(this).parents('table').eq(0);
@@ -1000,6 +892,46 @@ import { Litepicker } from 'litepicker';
         });
         paginateTable();
     });
+    if ($('#sortable-table').length > 0) {
+        // Initialize an empty object to store the frequency of each grade
+        var gradeFrequency = {};
+
+        if (gradeFrequency['P'] == undefined) gradeFrequency['P'] = 0;
+        if (gradeFrequency['M'] == undefined) gradeFrequency['M'] = 0;
+        if (gradeFrequency['D'] == undefined) gradeFrequency['D'] = 0;
+        if (gradeFrequency['C'] == undefined) gradeFrequency['C'] = 0;
+        if (gradeFrequency['A'] == undefined) gradeFrequency['A'] = 0;
+        if (gradeFrequency['R'] == undefined) gradeFrequency['R'] = 0;
+        if (gradeFrequency['U'] == undefined) gradeFrequency['U'] = 0;
+        if (gradeFrequency['W'] == undefined) gradeFrequency['W'] = 0;
+        // Select all rows from the table body
+        $('#sortable-table tbody tr').each(function () {
+            // Extract the grade value from the specific column (assuming it's the third column)
+            var grade = $(this).find('td').eq(7).text().trim();
+
+            // Increment the count for the extracted grade in the frequency object
+            if (gradeFrequency[grade]) {
+                gradeFrequency[grade]++;
+            } else {
+                gradeFrequency[grade] = 1;
+            }
+        });
+
+        // Display the frequency distribution
+        console.log(gradeFrequency);
+
+        // Optionally, you can display the frequency distribution in the HTML
+        var frequencyHtml = '[ ';
+        $.each(gradeFrequency, function (grade, count) {
+            frequencyHtml += grade + ': ' + count + ', ';
+        });
+        frequencyHtml +=
+            'Total: ' + $('#sortable-table tbody tr').length + ' ]';
+
+        // Append the frequency distribution to a specific element
+        $('#frequency-distribution').html(frequencyHtml);
+    }
+
     function paginateTable() {
         const rowsPerPage = 10;
         const rows = $('#sortable-table tbody tr');
