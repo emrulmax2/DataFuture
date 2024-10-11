@@ -38,6 +38,7 @@
                                     <th class="whitespace-nowrap">Attendance Rate</th>
                                     <th class="whitespace-nowrap">Submission Rate</th>
                                     <th class="whitespace-nowrap">Achivement Rate</th>
+                                    <th class="whitespace-nowrap">Outstanding Uploads</th>
                                     <th class="whitespace-nowrap">&nbsp;</th>
                                 </tr>
                             </thead>
@@ -49,6 +50,7 @@
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
+                                    <td class="font-medium"></td>
                                 </tr>
                                 @php 
                                     $P = $O = $L = $E = $M = $H = $OVERALLTOTAL = 0;
@@ -57,11 +59,11 @@
                                     @foreach($plans as $pln)
                                         <tr class="intro-x">
                                             <td class="font-medium">
-                                                <div class="block">
+                                                <div class="flex items-center">
                                                     <div class="w-10 h-10 intro-x image-fit mr-4 inline-block">
                                                         <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                                     </div>
-                                                    <div class="inline-block relative" style="top: -5px;">
+                                                    <div class="inline-block relative">
                                                         <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}</div>
                                                         <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->class_type) && !empty($pln->class_type) ? $pln->class_type : '') }}</div>
                                                     </div>
@@ -107,6 +109,11 @@
                                             </td>
                                             <td></td>
                                             <td></td>
+                                            <td class="text-center">
+                                                <button type="button" data-tutor="{{ $tutor->id }}" data-plan="{{ $pln->id }}" data-term="{{ $pln->term_declaration_id }}" {{ $pln->undecidedUploads > 0 ? ' data-tw-toggle=modal data-tw-target=#viewElearnincTrackingModal ' : '' }} class="{{ $pln->undecidedUploads > 0 ? 'showUndeciededModulesBtn' : '' }} rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                                    {{ $pln->undecidedUploads }}
+                                                </button>
+                                            </td>
                                             <td>
                                                 <a href="{{ route('tutor-dashboard.plan.module.show', $pln->id) }}" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
                                             </td>
@@ -192,6 +199,59 @@
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Add Modal -->
+    <div id="viewElearnincTrackingModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="viewElearnincTrackingForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">E-learning Tracking</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-report" id="dailyClassInfoTable">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap uppercase">Schedule</th>
+                                    <th class="whitespace-nowrap uppercase">Module</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Tutor</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Room</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Status</th>
+                                    {{--<th class="text-left whitespace-nowrap uppercase">Upload Found? </th>
+                                    <th class="text-right">&nbsp;</th>--}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <!--<button type="submit" id="saveSettings" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>-->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Modal -->
 @endsection
 @section('script')
     <script type="module">
@@ -199,4 +259,5 @@
             $('.overAllAttendanceRate').html('<?php echo $overallRate; ?>');
         })();
     </script>
+    @vite('resources/js/manager-tutor-tracking.js')
 @endsection
