@@ -100,8 +100,8 @@
 
                                                     $OVERALLTOTAL += (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
                                                     $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
-                                                    if($attendance > 0 && $attendanceTotal > 0):
-                                                        echo number_format($attendance / $attendanceTotal * 100, 2).'%';
+                                                    if($attendances->percentage_withexcuse):
+                                                        echo number_format($attendances->percentage_withexcuse).'%';
                                                     else:
                                                         echo '0.00%';
                                                     endif;

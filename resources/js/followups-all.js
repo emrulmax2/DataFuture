@@ -98,8 +98,8 @@ var allFollowupsListTable = (function () {
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().opening_date+'</div>';
-                            html += '<div class="font-medium whitespace-nowrap">By: '+cell.getData().created_by+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().opening_date != '' ? cell.getData().opening_date : cell.getData().created_at)+'</div>';
+                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
                         html += '</div>';
 
                         return html;
