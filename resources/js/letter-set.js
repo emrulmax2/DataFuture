@@ -34,11 +34,17 @@ var letterSettingsListTable = (function () {
                     title: "Letter Type",
                     field: "letter_type",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<a href="'+route("letter.set.edit", cell.getData().id)+'" target="_blank" class="font-medium text-primary underline">'+cell.getData().letter_type+'</a>';
+                    }
                 },
                 {
                     title: "Letter Title",
                     field: "letter_title",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        return '<a href="'+route("letter.set.edit", cell.getData().id)+'" target="_blank" class="font-medium text-primary underline">'+cell.getData().letter_title+'</a>';
+                    }
                 },
                 {
                     title: "Admission",
@@ -87,8 +93,8 @@ var letterSettingsListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            //btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editLetterModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<a href="'+route("letter.set.edit", cell.getData().id)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editLetterModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            //btns +='<a href="'+route("letter.set.edit", cell.getData().id)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -177,7 +183,7 @@ var letterSettingsListTable = (function () {
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const addLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addLetterModal"));
-    //const editLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editLetterModal"));
+    const editLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editLetterModal"));
 
     let addEditor;
     if($("#addEditor").length > 0){
@@ -191,7 +197,7 @@ var letterSettingsListTable = (function () {
     }
 
 
-    /*let editEditor;
+    let editEditor;
     if($("#editEditor").length > 0){
         const el = document.getElementById('editEditor');
         ClassicEditor.create(el).then((editor) => {
@@ -200,7 +206,7 @@ var letterSettingsListTable = (function () {
         }).catch((error) => {
             console.error(error);
         });
-    }*/
+    }
 
     const addLetterModalEl = document.getElementById('addLetterModal')
     addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -211,14 +217,14 @@ var letterSettingsListTable = (function () {
         addEditor.setData('');
     });
 
-    /*const editLetterModalEl = document.getElementById('editLetterModal')
+    const editLetterModalEl = document.getElementById('editLetterModal')
     editLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editLetterModal .acc__input-error').html('');
         $('#editLetterModal .modal-body input:not([type="checkbox"])').val('');
         $('#editLetterModal .phaseCheckboxs').prop('checked', false);
         $('#addLetterModal #edit_status').prop('checked', false);
         editEditor.setData('');
-    });*/
+    });
 
     document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
         $('#confirmModal .agreeWith').attr('data-id', '0');
@@ -274,13 +280,13 @@ var letterSettingsListTable = (function () {
         });
     });
 
-    /*$('#letterSettingsListTable').on('click', '.edit_btn', function(){
+    $('#letterSettingsListTable').on('click', '.edit_btn', function(){
         var $btn = $(this);
         var recordId = $btn.attr('data-id');
 
         axios({
             method: "get",
-            url: route("letter.set.edit", recordId),
+            url: route("letter.set.get.row", recordId),
             headers: {
                 "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
             },
@@ -317,10 +323,10 @@ var letterSettingsListTable = (function () {
         }).catch((error) => {
             console.log(error);
         });
-    });*/
+    });
 
 
-    /*$('#editLetterForm').on('submit', function(e){
+    $('#editLetterForm').on('submit', function(e){
         e.preventDefault();
         const form = document.getElementById('editLetterForm');
     
@@ -366,7 +372,7 @@ var letterSettingsListTable = (function () {
                 }
             }
         });
-    });*/
+    });
 
     // Delete Course
     $('#letterSettingsListTable').on('click', '.delete_btn', function(){

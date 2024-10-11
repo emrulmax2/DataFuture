@@ -1923,6 +1923,7 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/letter-sets/list', 'list')->name('letter.set.list'); 
         Route::post('site-settings/letter-sets/store', 'store')->name('letter.set.store');
         Route::get('site-settings/letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::get('site-settings/letter-sets/get-row/{id}', 'getRow')->name('letter.set.get.row');
         Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
         Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
