@@ -362,7 +362,7 @@ class StudentController extends Controller
             'student' => Student::find($studentId),
             'allStatuses' => Status::where('type', 'Student')->get(),
             'smtps' => ComonSmtp::all(),
-            'letterSet' => LetterSet::where('live', 1)->where('status', 1)->orderBy('letter_title', 'ASC')->get(),
+            'letterSet' => LetterSet::where('live', 1)->where('status', 1)->orderBy('letter_type', 'ASC')->orderBy('letter_title', 'ASC')->get(),
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),

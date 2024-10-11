@@ -1924,6 +1924,7 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/letter-sets/list', 'list')->name('letter.set.list'); 
         Route::post('site-settings/letter-sets/store', 'store')->name('letter.set.store');
         Route::get('site-settings/letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::get('site-settings/letter-sets/get-row/{id}', 'getRow')->name('letter.set.get.row');
         Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
         Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
@@ -2425,6 +2426,7 @@ Route::middleware('auth')->group(function() {
         Route::post('programme-dashboard/end-class', 'endClass')->name('programme.dashboard.end.class'); 
 
         Route::post('programme-dashboard/reassign-class', 'reAssignClass')->name('programme.dashboard.reassign.class'); 
+        Route::post('programme-dashboard/get-undecided-class', 'getUndecidedClass')->name('programme.dashboard.get.undecided.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {

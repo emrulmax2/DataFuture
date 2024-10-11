@@ -2176,7 +2176,8 @@ input[type=number] {
     padding: 2px 0 0;
 }
 @media (min-width: 1024px) {
-    .modal#viewAssignedStudentModal .modal-dialog.modal-xl {
+    .modal#viewAssignedStudentModal .modal-dialog.modal-xl ,
+    .modal#viewElearnincTrackingModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }

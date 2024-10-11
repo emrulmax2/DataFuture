@@ -44,7 +44,7 @@
                     </thead>
                     <tbody>
                         @if(!empty($tutors))
-                            @foreach($tutors as $tut)
+                            @foreach($tutors as $tutor_id => $tut)
                                 @php 
                                     $contracted_hour = (isset($tut->contracted_hour) && !empty($tut->contracted_hour) ? $tut->contracted_hour : '');
                                     $hours = (!empty($contracted_hour) ? explode(':', $contracted_hour) : []);
@@ -109,8 +109,11 @@
                                         @endphp
                                     </td>
                                     <td class="text-left"></td>
-                                    <td class="text-center"><span class="rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
-                                        {{ $tut->undecidedUploads }}</span></td>
+                                    <td class="text-center">
+                                        <button type="button" data-plan="0" data-tutor="{{ $tut->id }}" data-term="{{ $termDeclaration->id }}" {{ $tut->undecidedUploads > 0 ? ' data-tw-toggle=modal data-tw-target=#viewElearnincTrackingModal ' : '' }} class="{{ $tut->undecidedUploads > 0 ? 'showUndeciededModulesBtn' : '' }} rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
+                                            {{ $tut->undecidedUploads }}
+                                        </button>
+                                    </td>
                                     <td class="text-left"></td>
                                 </tr>
                             @endforeach
@@ -126,6 +129,59 @@
             </div>
         </div>
     </div>
+
+    <!-- BEGIN: Add Modal -->
+    <div id="viewElearnincTrackingModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="viewElearnincTrackingForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">E-learning Tracking</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-report" id="dailyClassInfoTable">
+                            <thead>
+                                <tr>
+                                    <th class="whitespace-nowrap uppercase">Schedule</th>
+                                    <th class="whitespace-nowrap uppercase">Module</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Tutor</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Room</th>
+                                    <th class="text-left whitespace-nowrap uppercase">Status</th>
+                                    {{--<th class="text-left whitespace-nowrap uppercase">Upload Found? </th>
+                                    <th class="text-right">&nbsp;</th>--}}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <!--<button type="submit" id="saveSettings" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>-->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Modal -->
 @endsection
 
 @section('script')
@@ -136,4 +192,5 @@
             })
         })()
     </script>
+    @vite('resources/js/manager-tutor-tracking.js')
 @endsection

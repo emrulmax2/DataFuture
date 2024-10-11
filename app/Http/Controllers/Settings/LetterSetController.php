@@ -135,6 +135,11 @@ class LetterSetController extends Controller
         ]);
     }
 
+    public function getRow($id){
+        $letterSet = LetterSet::find($id);
+        return response()->json($letterSet);
+    }
+
     /**
      * Update the specified resource in storage.
      *
