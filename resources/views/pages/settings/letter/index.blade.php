@@ -91,7 +91,7 @@
     </div>
     <!-- END: Settings Page Content -->
 
-    <!-- BEGIN: Edit Modal
+    <!-- BEGIN: Edit Modal -->
     <div id="editLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editLetterForm" enctype="multipart/form-data">
@@ -172,7 +172,7 @@
             </form>
         </div>
     </div>
-    END: Edit Modal -->
+    <!-- END: Edit Modal -->
 
     <!-- BEGIN: Add Modal -->
     <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

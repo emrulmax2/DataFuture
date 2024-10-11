@@ -64,7 +64,7 @@
                                 <option value="">Please Select</option>
                                 @if(!empty($letterSet))
                                     @foreach($letterSet as $ls)
-                                        <option value="{{ $ls->id }}">{{ $ls->letter_title }}</option>
+                                        <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
                                     @endforeach
                                 @endif
                             </select>

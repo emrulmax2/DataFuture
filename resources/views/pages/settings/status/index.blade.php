@@ -118,7 +118,7 @@
                                 <option value="">Please Select a Template</option>
                                 @if(!empty($letters))
                                     @foreach($letters as $altr)
-                                        <option value="{{ $altr->id }}">{{ $altr->letter_title }}</option>
+                                        <option value="{{ $altr->id }}">{{ $altr->letter_type.' - '.$altr->letter_title }}</option>
                                     @endforeach
                                 @endif
                             </select>

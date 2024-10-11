@@ -287,7 +287,8 @@ export default defineConfig({
                 'resources/js/followups-all.js',
                 'resources/js/flag-management.js',
                 'resources/js/letter-set-edit.js',
-                
+                'resources/js/manager-tutor-tracking.js',
+                'resources/js/student-class-status-reports.js',
             ],
             refresh: true,
         }),

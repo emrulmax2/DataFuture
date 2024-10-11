@@ -217,6 +217,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
+use App\Http\Controllers\Reports\ClassStatusByTermController;
 use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
@@ -1923,6 +1924,7 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/letter-sets/list', 'list')->name('letter.set.list'); 
         Route::post('site-settings/letter-sets/store', 'store')->name('letter.set.store');
         Route::get('site-settings/letter-sets/edit/{id}', 'edit')->name('letter.set.edit');
+        Route::get('site-settings/letter-sets/get-row/{id}', 'getRow')->name('letter.set.get.row');
         Route::post('site-settings/letter-sets/update', 'update')->name('letter.set.update');
         Route::delete('site-settings/letter-sets/delete/{id}', 'destroy')->name('letter.set.destory');
         Route::post('site-settings/letter-sets/restore/{id}', 'restore')->name('letter.set.restore');
@@ -2424,6 +2426,7 @@ Route::middleware('auth')->group(function() {
         Route::post('programme-dashboard/end-class', 'endClass')->name('programme.dashboard.end.class'); 
 
         Route::post('programme-dashboard/reassign-class', 'reAssignClass')->name('programme.dashboard.reassign.class'); 
+        Route::post('programme-dashboard/get-undecided-class', 'getUndecidedClass')->name('programme.dashboard.get.undecided.class'); 
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {
@@ -2567,7 +2570,8 @@ Route::middleware('auth')->group(function() {
         
         Route::post('result-single/', 'storeSingle')->name('result.store.single'); 
         Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
-        Route::post('result/update-all', 'updateAll')->name('result.update.all');
+        //Route::post('result/update-all', 'updateAll')->name('result.update.all');
+        
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
         Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
         Route::post('result/{id}/restore', 'restore')->name('result.restore');
@@ -2582,6 +2586,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('result-list/{assessmentPlan}/delete-all', 'destroyByAssessmentPlan')->name('result.all.delete');
         Route::get('result-list/{assessmentPlan}/show/{student}', 'resultByAssessmentAndStudent')->name('result.show.assessment');
         
+        Route::post('results/update-bulk', 'updateBulk')->name('result.update.bulk');
         
     });
 
@@ -2892,6 +2897,12 @@ Route::middleware('auth')->group(function() {
         Route::any('reports/slc-attendance/excel-export', 'SLCAttendanceExcelDownload')->name('reports.slc.attendance.excel.export'); 
         Route::any('reports/slc-register/excel-export', 'SlcRegistrationHistoryExcelDownload')->name('reports.slc.register.excel.export'); 
         Route::any('reports/slc-coc/excel-export', 'SlcCocHistoryExcelDownload')->name('reports.slc.coc.excel.export'); 
+        
+    });
+    Route::controller(ClassStatusByTermController::class)->group(function(){
+
+        Route::get('reports/class-status-report', 'index')->name('reports.class-status.index'); 
+        Route::any('reports/class-status-report/list', 'list')->name('reports.class-status.list'); 
         
     });
     Route::controller(FollowupController::class)->group(function(){

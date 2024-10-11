@@ -23,6 +23,7 @@ use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
 use App\Models\ResultsegmentInCoursemodules;
 use App\Models\Student;
+use App\Models\StudentArchive;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -345,7 +346,7 @@ class ResultController extends Controller
 
     public function default($id) {
         
-        $data = Result::where('id', $id)->get()->first();
+        $data = Result::with('plan')->where('id', $id)->get()->first();
         $data->is_primary = "Yes";
         $data->save();
         response()->json($data);
@@ -406,21 +407,22 @@ class ResultController extends Controller
      * @param  \App\Models\Result  $result
      * @return \Illuminate\Http\Response
      */
-    public function updateAll(UpdateResultRequest $request)
+    public function updateBulk(UpdateResultRequest $request)
     {
-        $gradeList = $request->input('grade_id');
-        foreach($gradeList as $grade) {
-            if($grade==null) {
-                return response()->json(['message' => 'Grade field required',"errors"=>["grade_id[]"=>"This field is required."]], 422);
-            }
-        }
-        if(is_array($request->input('grade_id')))
-        {
+        // $gradeList = $request->input('grade_id');
+        // foreach($gradeList as $grade) {
+        //     if($grade==null) {
+        //         return response()->json(['message' => 'Grade field required',"errors"=>["grade_id[]"=>"This field is required."]], 422);
+        //     }
+        // }
+        // if(is_array($request->input('grade_id')))
+        // {
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
-            $assessment_plan_id = $request->input('assessment_plan_id');
+            $term_declaration_id = $request->input('term_declaration_id');
             $student_id = $request->input('student_id');
             $published_at = $request->input('published_at');
+            $created_at = $request->input('created_at');
             $updated_by = $request->input('updated_by');
             $created_by = $request->input('created_by');
             $id = $request->input('id');
@@ -428,23 +430,52 @@ class ResultController extends Controller
             for($count = 0; $count < count($grade_id); $count++)
             {
                 
-                $data = array(
-                        'id' => $id[$count],
+                $data = [
+                        "id"=>$id[$count] ?? null,
                         'grade_id' => $grade_id[$count],
-                        'assessment_plan_id'  => $assessment_plan_id[$count],
+                        'term_declaration_id'  => $term_declaration_id[$count],
                         'student_id'  => $student_id[$count],
                         'plan_id' =>$plan_id[$count],
                         'created_by'=> $created_by[$count],
                         'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$count])),
+                        'created_at'  => date("Y-m-d H:i:s",strtotime($created_at[$count])),
                         'updated_by'  => $updated_by[$count],
-                    );
+                ];
+                if($data['id'] == null) {
+                    $data['created_at'] = date("Y-m-d H:i:s");
+                    $data['created_by'] = auth()->user()->id;
+                    $result = Result::create($data);
+                   
+                } else {
+                    $ResultOldRow = Result::find($data['id']);
+                    $result = Result::find($data['id']);
+                    $result->fill($data);
+                    $changes = $result->getDirty();
+                    $result->save();
 
-                $insert_schedule[] = $data; 
+                    if($result->wasChanged() && !empty($changes)):
+                        foreach($changes as $field => $value):
+                            $data = [];
+                            $data['student_id'] = $result->student_id;
+                            $data['table'] = 'results';
+                            $data['field_name'] = $field;
+                            $data['field_value'] = $ResultOldRow->$field;
+                            $data['field_new_value'] = $value;
+                            $data['created_by'] = auth()->user()->id;
+                            StudentArchive::create($data);
+                        endforeach;
+                    endif;
+                }
+                
+                //$insert_schedule[] = $data; 
             }
+            //$upsertData = Result::upsert($insert_schedule,['id'],['grade_id','term_declaration_id','created_by','updated_by','published_at','created_at']);
+            if($result->id)
+                return response()->json(['message' => 'Result successfully updated.',"data"=>['result'=>$result]], 200);
+            else
+                return response()->json(['message' => 'Result could not be saved'], 302);
 
-            return Result::upsert($insert_schedule,['id'],['grade_id','updated_by']);
-
-        }
+        //}
     }
 
     /**
@@ -455,6 +486,7 @@ class ResultController extends Controller
      */
     public function destroy(Result $result)
     {
+        
         $result->delete();
     }
 

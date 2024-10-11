@@ -87,7 +87,7 @@
         </tbody>
     </table>
     @if(isset($result) && count($result)>0)
-        <input type="hidden" name="url" value="{{ route('result.update.all') }}" />
+        <input type="hidden" name="url" value="{{ route('result.update.bulk') }}" />
     @else
         <input type="hidden" name="url" value="{{ route('result.store') }}" />
     @endif

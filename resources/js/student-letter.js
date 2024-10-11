@@ -207,7 +207,7 @@ var studentCommLetterListTable = (function () {
     const addLetterModalEl = document.getElementById('addLetterModal')
     addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal .modal-body input:not([type="checkbox"]').val('');
+        $('#addLetterModal .modal-body input:not([type="checkbox"])').val('');
         $('#addLetterModal .modal-body select').val('');
         $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#addLetterModal .letterEditorArea').fadeOut();
@@ -216,6 +216,17 @@ var studentCommLetterListTable = (function () {
 
         $('#addLetterModal .modal-body input[name="send_in_email"]').prop('checked', false);
         $('#addLetterModal .commonSmtpWrap').fadeOut();
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        const todayDate = dd + '-' + mm + '-' + yyyy;
+        $('#addLetterModal .modal-body input[name="issued_date"]').val(todayDate);
     });
 
     const confirmModalEl = document.getElementById('confirmModal')

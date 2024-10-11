@@ -67,68 +67,59 @@
                             $serial = 1;
                         @endphp
                         @foreach($dataSet as $moduleDetails => $resultSet)
-                        @php
-                            $currentResult = $resultSet[0];
-                            foreach($resultSet as $result):
-                                if($result->is_primary =="Yes" ):
-                                    $currentResult = $result;
-                                    break;
-                                endif;
-                            endforeach;
-                        @endphp
-                                        <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                               {{ $serial++ }}
-                                             </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                               
-                                               {{ $currentResult->id  }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->plan->attenTerm->name }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->plan->course->body->name }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->plan->creations->code }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ date('d F, Y',strtotime($currentResult->published_at))  }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->grade->code }} 
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $currentResult->grade->name }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet) }}</a>
-                                                    
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                            @php
+                                $currentResult = $resultSet[0];
+                            @endphp
+                            <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $serial++ }}
+                                    </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    
+                                    {{ $currentResult->id  }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    @if($currentResult->term_declaration_id == Null)
+                                        {{ $currentResult->plan->attenTerm->name }}
+                                    @else
+                                        {{ $currentResult->term->name }}
+                                    @endif
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->plan->course->body->name }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->plan->creations->code }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ date('d F, Y',strtotime($currentResult->published_at))  }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->grade->code }} 
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->grade->name }}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                        <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet) }}</a>
+                                        
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
 
-                                                {{ isset($currentResult->updatedBy) ? $currentResult->updatedBy->employee->full_name : $currentResult->createdBy->employee->full_name}}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                
-                                                @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
-                                                    <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-term=" {{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
-                                                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                                        Edit
-                                                    </button>
-                                                @endif
-                                                @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
-                                                    <button class="items-center text-danger inline-flex delete_btn" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal" data-id="{{ $currentResult->id  }}">
-                                                        <i data-lucide="trash" class="w-4 h-4"></i>
-                                                        Delete
-                                                    </button>
-                                                @endif
-                                            </td>
-                                        </tr>
+                                    {{ isset($currentResult->updatedBy) ? $currentResult->updatedBy->employee->full_name : $currentResult->createdBy->employee->full_name}}
+                                </td>
+                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
+                                        <button class="mr-3 items-center inline-flex" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ?? $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
+                                            <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
+                                            Edit
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
                         @endforeach
                     @endif
                 </tbody>
@@ -148,7 +139,6 @@
                                     <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                                 </a>
                             </div>
-                            
                             <div class="modal-body  overflow-x-auto">
                                 <div class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap mb-3">
                                     <div class="flex justify-between">
@@ -171,6 +161,9 @@
                                                 Term
                                             </th>
                                             <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                                Code
+                                            </th>
+                                            <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                                 Created At
                                             </th>
                                             <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
@@ -185,25 +178,23 @@
                                             <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                                 Last Updated By
                                             </th>
-                                            <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                                Action
-                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($resultSet as $result)
                                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
-                                                    @if(isset($resultPrimarySet[$result->id]) && $resultPrimarySet[$result->id] == "Yes") 
-                                                    <i data-lucide="check-circle" class="w-5 h-5 text-success absolute left-0 "></i>
-                                                    @endif
-                                                    {{ $result->plan->attenTerm->name }}
+                                                    
+                                                    {{ $result->plan->attenTerm->name }} 
+                                                </td>
+                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                    {{ ($result->module_code)??$result->plan->creations->code }}
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    {{ date('d F, Y',strtotime($result->created_at))  }}
+                                                    {{ date('d F,Y h:i a',strtotime($result->created_at))  }}
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    {{ date('d F, Y',strtotime($result->published_at))  }}
+                                                    {{ date('d F,Y h:i a',strtotime($result->published_at))  }}
                                                 </td>
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ $result->grade->code }} 
@@ -214,30 +205,6 @@
                                                 <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}}
                                                 </td>
-                                                @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] != 1 && isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] != 1)
-                                                    <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                        <span class="text-danger">No Action</span>
-                                                    </td>
-                                                @else
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    <button class="mr-3 items-center inline-flex default_btn" type="button" data-tw-toggle="modal" data-tw-target="#default-confirmation-modal" data-module="{{ $result->plan->creations->module_name }} - {{ $result->plan->creations->level->name }}" data-code= "{{ $result->plan->creations->code }}" data-term=" {{ $result->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($result->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result->published_at))  }} data-grade="{{ $result->grade->id }}" data-id="{{ $result->id  }}">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i>
-                                                        Make Default
-                                                    </button>
-                                                    @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
-                                                        <button class="mr-3 items-center inline-flex edit_btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal" data-publishTime={{ date('h:m',strtotime($result->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($result->published_at))  }} data-grade="{{ $result->grade->id }}" data-id="{{ $result->id  }}">
-                                                            <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                                            Edit
-                                                        </button>
-                                                    @endif
-                                                    @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
-                                                        <button class="items-center text-danger inline-flex delete_btn" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal" data-id="{{ $result->id  }}">
-                                                            <i data-lucide="trash" class="w-4 h-4"></i>
-                                                            Delete
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                                 @endif  
                                             </tr>
                                             
                                         @endforeach
@@ -251,72 +218,146 @@
     @endif
 <!-- END: Student Profile Lock Modal -->
 
-
+@if($dataSet)
+@foreach($dataSet as $key => $resultSet)
 <!-- BEGIN: Edit Modal -->
-<div id="editAttemptModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" id="editAttemptForm">
-            @method('PUT')
+<div id="editAttemptModal{{ $resultSet[0]->id  }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" id="editAttemptForm{{ $resultSet[0]->id  }}">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Edit</h2>
+                    <h2 class="font-medium text-base mr-auto">Result Update</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
+                    
                 </div>
                 <div class="modal-body ">
-                        <div class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap mb-3 overflow-x-scroll">
-                            
-                                    <div class="mb-2">
-                                        <label class="form-label">Term</label>
-                                        <div class="text-base font-medium term"></div>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">Module</label>
-                                        <div class="text-base font-medium modulename"></div>
-                                    </div>
-                                    <div class="mb-2">
-                                        <label class="form-label">Code</label>
-                                        <div class="text-base font-medium modulecode"></div>
-                                    </div>
-                        </div> 
-                    <div class="mt-3">
-                        <label for="grade_id" class="form-label">Grade <span class="text-danger">*</span></label>
-                        <select id="grade_id" name="grade_id" class="form-control w-full">
-                            <option value="">Please Select</option>
-                            @if(!empty($grades))
-                                @foreach($grades as $grade)
-                                    <option value="{{ $grade->id }}">{{ $grade->name }} - {{ $grade->code }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                        <div class="acc__input-error error-process_list_id text-danger mt-2"></div>
+                    <div role="alert" class="alert hidden relative border rounded-md px-5 py-4 bg-warning border-warning text-slate-900 dark:border-warning mb-2 flex items-center"><i data-tw-merge data-lucide="alert-circle" class="stroke-1.5 w-5 h-5 mr-2 h-6 w-6 mr-2 h-6 w-6"></i>
+                        <span class="error-text">Awesome alert with icon</span>
+                        <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 h-4 w-4 h-4 w-4"></i></button>
+                    </div>
+                    <div class="flex">
+                        <div class="mr-2 mb-5">
+                            <label class="form-label">Module</label>
+                            <div class="text-base font-medium">{{  $key }}</div>
+                            <div class=" font-normal  text-slate-500">Level {{  $resultSet[0]->plan->creations->level->name }}</div>
+                        </div>
+                        <div class="mb-5 ml-auto items-end">
+                            <button type="button" data-id="{{ $resultSet[0]->id }}" class="btn btn-primary shadow-md mr-2 addNewRowBtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add New Row</button>
+                        </div>
+                    </div>
+                    <table id="result-bulk{{ $resultSet[0]->id }}" class="min-w-full divide-y divide-gray-200">
+                        <thead data-tw-merge class="">
+                            <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Term
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Code
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Created At
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Published At
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Grade
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Last Updated By
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bulk-update">
+                            @php $index= 0; @endphp
+                            @foreach($resultSet as $result)
+                            @php
+                                if(isset($result->term_declaration_id) && !empty($result->term_declaration_id))
+                                    $termData = $result->term_declaration_id;
+
+                                else
+                                    $termData = $result->plan->attenTerm->id;
+                            @endphp
+                                <tr data-tw-merge class="items-center justify-between [&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t relative w-36">
+                                        <input type="hidden" name="id[]" value="{{ $result->id }}" />
+                                        <input type="hidden" name="plan_id[]" value="{{ $result->plan_id }}" />
+                                        <input type="hidden" name="student_id[]" value="{{ $result->student_id }}" />
+                                        <input type="hidden" name="created_by[]" value="{{ $result->created_by }}" />
+                                        <input type="hidden" name="updated_by[]" value="{{ auth()->user()->id }}" />
+                                        
+                                         <select id="term-data{{ $result->id }}" data-index="{{ $index }}" class="w-full lccTom lcc-tom-select" name="term_declaration_id[]">
+                                            <option value="">Please Select</option>
+                                            @if($terms->count() > 0)
+                                                @foreach($terms as $trm)
+                                                    <option  {{ $termData==$trm->id ? 'selected' : '' }} value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-term_declaration_id text-danger mt-2" data-index="{{ $index }}"></div>
+                                        
+                                    </td>
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                        <input type="text" class="form-control mt-2 sm:mt-0" value="{{ ($result->module_code)??$result->plan->creations->code }}" placeholder="{{ ($result->module_code)??$result->plan->creations->code }}"  name="module_code[]" >
+                                    </td>
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t w-40">
+                                        <input id="created" placeholder="{{ date('d-m-Y H:i',strtotime($result->created_at))  }}" autocomplete="off"  class="datepicker_custom form-control w-full placeholder:text-slate-700" value=""  data-single-mode="true">
+                                        <input name="created_at[]" data-index="{{ $index }}" type="hidden" value="{{ date('Y-m-d H:i:s',strtotime($result->created_at))  }}">
+                                        <div class="acc__input-error error-created_at text-danger mt-2" data-index="{{ $index }}"></div>
+                                    </td>
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t  w-40">
+                                        <input id="published"   placeholder="{{ date('d-m-Y H:i',strtotime($result->published_at))  }}" autocomplete="off" class="datepicker_custom form-control w-full  placeholder:text-slate-700" value=""  data-single-mode="true">
+                                        <input name="published_at[]" data-index="{{ $index }}" type="hidden" value="{{ date('Y-m-d H:i:s',strtotime($result->published_at))  }}">
+                                        <div class="acc__input-error error-published_at text-danger mt-2" data-index="{{ $index }}"></div>
+                                    </td>
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                        <select id="grade_id" name="grade_id[]" data-index="{{ $index }}" class="form-control w-full">
+                                            <option value="">Please Select</option>
+                                            @if(!empty($grades))
+                                                @foreach($grades as $grade)
+                                                    <option {{ $result->grade->id == $grade->id  ? 'selected' : "" }}  value="{{ $grade->id }}">{{ $grade->code }} - {{ $grade->name }} </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-grade_id text-danger mt-2" data-index="{{ $index }}"></div>
+                                    </td>
+                                    <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                        <div class="flex justify-between items-stretch ">
+                                            <div class="item updated-name"> 
+                                                {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}} 
+                                            </div>
+                                            @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
+                                            <div class="py-1 ml-2 item-center anchor-box">
+                                                <a href="javascript:;" data-theme="light"  data-id="{{ $result->id }}"  data-action="DELETE" class="delete_btn intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer" title="delete result">
+                                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                                                </a>
+                                            </div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @php $index++; @endphp
+                            @endforeach
+                        </tbody>
+                    </table>
                         
-                    </div>
-                    <div class="mt-3">
-                        <div>
-                            <label class="form-label" for="published_at">Publish Date Time</label>
-                            <input id="published_at" placeholder="DD-MM-YYYY HH:mm" autocomplete="off" class="datepicker_custom form-control w-full" name="published_at" data-single-mode="true">
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <div>
-                            <label class="form-label" for="timepicker">Publish Time</label>
-                            <input id="timepicker" placeholder="HH:mm" autocomplete="off" class="timepicker form-control w-full" name="published_at" data-single-mode="true">
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="update" class="btn btn-primary w-auto">
+                    @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
+                    <button type="submit" id="update" data-id="{{ $resultSet[0]->id }}" class="btn btn-primary w-auto update_btn">
                         Update <i class="w-4 h-4 ml-2 text-white hidden" data-loading-icon="oval" ></i>
                     </button>
-                    <input type="hidden" name="id" value="" />
+                    @endif
                 </div>
             </div>
         </form>
     </div>
 </div>
+@endforeach
+@endif
 <!-- BEGIN: Delete Confirmation Modal -->
 <div id="delete-confirmation-modal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -345,6 +386,7 @@
                     <i data-lucide="alert-circle" class="w-16 h-16 text-orange-500 mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
                     <div class="text-slate-500 mt-2 confModDesc">Do you really want to delete these records? <br>This process cannot be undone.</div>
+                    <input type="hidden" name="result_primary_set" value="">
                 </div>
                 <div class="px-5 pb-8 text-center">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>

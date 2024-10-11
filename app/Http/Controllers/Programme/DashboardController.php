@@ -540,7 +540,7 @@ class DashboardController extends Controller
             foreach($tutors as $tut):
 
                 $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
-                $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',"Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $tut){
+                $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found', "Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $tut){
                     
                     
                         $q->where('personal_tutor_id', $tut->id);
@@ -584,8 +584,16 @@ class DashboardController extends Controller
         $tutorPlans = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $tutorid)->get();
         if($tutorPlans->count() > 0):
             foreach($tutorPlans as $tp):
+                $planDates = PlansDateList::where('plan_id', $tp->id)->where('class_file_upload_found', "Undecided")->where('status','Completed')
+                    ->whereHas('plan', function($q) use($term_declaration_id, $tutorid){  
+                            $q->where('personal_tutor_id', $tutorid);
+                            $q->where('class_type', "Theory");
+                            $q->where('term_declaration_id', $term_declaration_id);
+                    })->get();
+
                 $plans[$tp->id] = $tp;
                 $plans[$tp->id]['attendances'] = $this->getPlanAttendanceRate($tp->id);
+                $plans[$tp->id]['undecidedUploads'] = $planDates->count();
             endforeach;
         endif;
 
@@ -873,5 +881,154 @@ class DashboardController extends Controller
         PlansDateList::where('id', $plans_date_list_id)->where('plan_id', $plan_id)->update($data);
 
         return response()->json(['message' => 'Class successfully re-assigned to new tutor.'], 200);
+    }
+
+    public function getUndecidedClass(Request $request){
+        $tutor_id = $request->tutor_id;
+        $term_id = $request->term_id;
+        $plan_id = (isset($request->plan_id) && $request->plan_id > 0 ? $request->plan_id : 0);
+        
+        $html = '';
+        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found', 'Undecided')->where('status','Completed')
+                    ->whereHas('plan', function($q) use($term_id, $tutor_id){
+                        $q->where('personal_tutor_id', $tutor_id);
+                        $q->where('class_type', "Theory");
+                        $q->where('term_declaration_id', $term_id);
+                    });
+        if($plan_id > 0):
+            $query->where('plan_id', $plan_id);
+        endif;
+        $planDates = $query->get()->sortBy(function($planDates, $key) {
+            return date("Y-m-d H:i", strtotime($planDates->date." ".$planDates->plan->start_time));
+        });
+
+        if(!empty($planDates) && $planDates->count() > 0):
+            foreach($planDates as $pln):
+                $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
+                $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
+                $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', date("Y-m-d",strtotime($pln->date)))->where('attendance_type', 1)->get();
+
+                $proxyEmployeeId = (isset($pln->proxy->employee->id) && $pln->proxy->employee->id > 0 ? $pln->proxy->employee->id : 0);
+                
+                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', date("Y-m-d",strtotime($pln->date)))->where('attendance_type', 1)->get();
+
+                $classStatus = 0;
+                $classLabel = '';
+                
+                if(isset($pln->attendanceInformation->id)):
+                    if($pln->feed_given == 1 && $pln->attendances->count() > 0):
+                        $classLabel .= '<span class="btn-rounded btn font-medium btn-success text-white p-0 w-9 h-9 mr-1" style="flex: 0 0 36px;">A</span>';
+                    endif;
+                    if(!empty($pln->attendanceInformation->start_time) && empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'</span>';
+                    elseif(!empty($pln->attendanceInformation->start_time) && !empty($pln->attendanceInformation->end_time)):
+                        $classLabel .= '<span class="text-success font-medium">';
+                            $classLabel .= 'Started '.date('h:i A', strtotime($pln->attendanceInformation->start_time)).'<br/>'; 
+                            $classLabel .= 'Finished '.date('h:i A', strtotime($pln->attendanceInformation->end_time)); 
+                        $classLabel .= '</span>';
+                    endif;
+                else:
+                    $classLabel .= '<span class="text-danger font-medium">Completed But No Attendance Found</span>';
+                endif;
+
+                $html .= '<tr class="intro-x">';
+                    $html .= '<td>';
+                        $html .= '<div class="font-fedium">'.date('jS M, Y', strtotime($pln->date.' '.$pln->plan->start_time)).'</div>';
+                        $html .= '<div class="text-slate-500">'.date('H:i ', strtotime($pln->date.' '.$pln->plan->start_time)).' - '.date('H:i ', strtotime($pln->date.' '.$pln->plan->end_time)).'</div>';
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= '<div class="flex items-center">';
+                            $html .= '<div>';
+                                $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
+                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown'). ' <span class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5"> '.$pln->plan->group->name .' </spane></div>';
+                                if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
+                                    $html .= '<div class="flex flex-start pt-1">';
+                                    foreach($pln->plan->tasks as $tsk):
+                                        $sc_class = 'btn-success';
+                                        if($tsk->uploads->count() == 0):
+                                            if($tsk->last_date && $tsk->last_date > date('Y-m-d')):
+                                                $sc_class = 'btn-warning';
+                                            elseif($tsk->last_date && $tsk->last_date <= date('Y-m-d')):
+                                                $sc_class = 'btn-danger';
+                                            endif;
+                                        endif;
+                                        $html .= '<span class="btn btn-sm px-2 py-0.5 text-white '.$sc_class.' mr-1">'.$tsk->eLearn->short_code.'</span>';
+                                    endforeach;
+                                    $html .= '</div>';
+                                endif;
+                            $html .= '</div>';
+                            
+                        $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '<td class="text-left">';
+                        if($pln->plan->tutor_id > 0):
+                            $html .= '<div class="flex justify-start items-center">';
+                                $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                    else:
+                                        $html .= '<img src="'.(isset($pln->plan->tutor->employee->photo_url) ? $pln->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : 'LCC').'">';
+                                    endif;
+                                $html .= '</div>';
+                                $html .= '<div class="inline-block font-medium relative text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
+                                    $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->tutor->employee->full_name) && !empty($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : (isset($pln->plan->tutor->name) ? $pln->plan->tutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
+                                    endif;
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        elseif($pln->plan->personal_tutor_id > 0):
+                            $html .= '<div class="flex justify-start items-center">';
+                                $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                    else:
+                                        $html .= '<img src="'.(isset($pln->plan->personalTutor->employee->photo_url) ? $pln->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : 'LCC').'">';
+                                    endif;
+                                $html .= '</div>';
+                                $html .= '<div class="inline-block font-medium relative text-'.($empAttendanceLive->count() > 0 ? 'success' : 'danger').'">';
+                                    $html .= ($pln->proxy_tutor_id > 0 ? '<span class="line-through">' : '').(isset($pln->plan->personalTutor->employee->full_name) && !empty($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : (isset($pln->plan->personalTutor->name) ? $pln->plan->personalTutor->name : 'LCC')).($pln->proxy_tutor_id > 0 ? '</span>' : '');
+                                    if($pln->proxy_tutor_id > 0):
+                                        $html .= '<br/><span class="'.($proxyAttendanceLive->count() > 0 ? 'text-success' : 'text-danger').'">'.(isset($pln->proxy->employee->full_name) && !empty($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'Unknown Proxy').'</span>';
+                                    endif;
+                                    $html .= '</div>';
+                            $html .= '</div>';
+                        else:
+                            $html .= '<span>N/A</span>';
+                        endif;
+                    $html .= '</td>';
+                    $html .= '<td class="text-left">';
+                        $html .= (isset($pln->plan->room->name) && !empty($pln->plan->room->name) ? $pln->plan->room->name : '');
+                    $html .= '</td>';
+                    $html .= '<td class="text-left">';
+                        $html .= '<span class="flex justify-start items-center">';
+                            $html .= $classLabel;
+                        $html .= '</span>';
+                    $html .= '</td>';
+                    /*$html .= '<td class="text-left">';
+                        $html .= '<span class="flex justify-start items-center">';
+                        $html .= '<div class="mt-2 flex flex-col sm:flex-row">';
+                        $html .=   '<div data-tw-merge class="flex items-center mr-2 "><input id="radio-switch-'.$pln->id.'" data-tw-merge data-id="'.$pln->id.'"  name="class_file_upload_found'.$pln->id.'" value="Yes"  type="radio" '.(isset($pln->class_file_upload_found) && !empty($pln->class_file_upload_found) && $pln->class_file_upload_found=="Yes" ? 'checked' : '').' class="class-fileupload transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type=\'radio\']]:checked:bg-primary [&[type=\'radio\']]:checked:border-primary [&[type=\'radio\']]:checked:border-opacity-10 [&[type=\'checkbox\']]:checked:bg-primary [&[type=\'checkbox\']]:checked:border-primary [&[type=\'checkbox\']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />';
+                        $html .=      '<label data-tw-merge for="radio-switch-'.$pln->id.'" class="cursor-pointer ml-2">Yes</label>';
+                        $html .=   '</div>';
+                        $html .=   '<div data-tw-merge class="flex items-center mr-2 mt-2 sm:mt-0 "><input id="radio-switch2-'.$pln->id.'" data-tw-merge data-id="'.$pln->id.'"   name="class_file_upload_found'.$pln->id.'" value="No" type="radio" '.(isset($pln->class_file_upload_found) && !empty($pln->class_file_upload_found) && $pln->class_file_upload_found=="No" ? 'checked' : '').' class="class-fileupload transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type=\'radio\']]:checked:bg-primary [&[type=\'radio\']]:checked:border-primary [&[type=\'radio\']]:checked:border-opacity-10 [&[type=\'checkbox\']]:checked:bg-primary [&[type=\'checkbox\']]:checked:border-primary [&[type=\'checkbox\']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"   />';
+                        $html .=       '<label data-tw-merge for="radio-switch2-'.$pln->id.'" class="cursor-pointer ml-2">No</label>';
+                        $html .=   '</div>';
+                        $html .= '</div>';
+                        $html .= '</span>';
+                    $html .= '</td>';
+                    $html .= '<td class="text-right"></td>';*/
+                $html .= '</tr>';
+            endforeach;
+        else:
+            $html .= '<tr class="intro-x">';
+                $html .= '<td colspan="5">';
+                    $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan found for the selected date.</div>';
+                $html .= '</td>';
+            $html .= '</tr>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
     }
 }
