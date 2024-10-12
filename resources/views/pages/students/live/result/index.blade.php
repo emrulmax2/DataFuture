@@ -26,40 +26,40 @@
             <table id="sortable-table" data-tw-merge class="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                        <th data-sort="serial" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
-                            Serial <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="s/n" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
+                            S/N <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
+                        <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
                             Id <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="attendance_term" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Attendance Term <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="attendance_term" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                            Attendance <br/>Term <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="module" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="module" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Module <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="awarding_body" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Awarding Body <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="module_code" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                            Code <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="module_code" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Module Code <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="awarding_body" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                            Awarding <br/>Body <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="exam_published_date" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Exam Published Date <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="exam_published_date" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                            Published Date <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="grade" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="grade" data-tw-merge class=" text-center cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Grade <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="merit" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="merit" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Merit <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="attempted" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                        <th data-sort="attempted" data-tw-merge class="text-center cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Attempted <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="last_updated_by" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Last Updated By <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                        <th data-sort="last_updated_by" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
+                            Updated By <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
-                        <th data-sort="action" data-tw-merge class="cursor-pointer font-medium px-5 py-3 border-b-2  dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between w-80">
+                        <th data-sort="action" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2  dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between w-80">
                             Action <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                     </tr>
@@ -74,47 +74,48 @@
                                 $currentResult = $resultSet[0];
                             @endphp
                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     {{ $serial++ }}
                                     </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     
                                     {{ $currentResult->id  }}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     @if($currentResult->term_declaration_id == Null)
                                         {{ $currentResult->plan->attenTerm->name }}
                                     @else
                                         {{ $currentResult->term->name }}
                                     @endif
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     {{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->plan->course->body->name }}
-                                </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     {{ $currentResult->plan->creations->code }}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ date('d F, Y',strtotime($currentResult->published_at))  }}
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ $currentResult->plan->course->body->name }}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                    {{ date('d F, Y ',strtotime($currentResult->published_at))  }}<br />
+                                    {{ date('h:i a',strtotime($currentResult->published_at))  }}
+                                </td>
+                                <td data-tw-merge class="px-3 py-3 text-center border-b dark:border-darkmode-300 border-l border-r border-t">
                                     {{ $currentResult->grade->code }} 
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     {{ $currentResult->grade->name }}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 text-center border-b dark:border-darkmode-300 border-l border-r border-t">
                                         <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet) }}</a>
                                         
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
 
                                     {{ isset($currentResult->updatedBy) ? $currentResult->updatedBy->employee->full_name : $currentResult->createdBy->employee->full_name}}
                                 </td>
-                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
                                         <button class="mr-3 items-center inline-flex" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ?? $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
                                             <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
@@ -148,11 +149,8 @@
                                         <div class="flex">
                                             <div class="mr-2">
                                                 <label class="form-label">Module</label>
-                                                <div class="text-base font-medium">{{  $resultSet[0]->plan->creations->module_name }} - {{  $resultSet[0]->plan->creations->level->name }}</div>
-                                            </div>
-                                            <div class="mr-2">
-                                                <label class="form-label">Code</label>
-                                                <div class="text-base font-medium">{{  $resultSet[0]->plan->creations->code }}</div>
+                                                <div class="text-base font-medium">{{  $resultSet[0]->plan->creations->module_name }}</div>
+                                                <div class="font-medium text-slate-600">Level: {{  $resultSet[0]->plan->creations->level->name }}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -187,36 +185,34 @@
                                         @foreach($resultSet as $result)
                                         @php
                                             if(isset($result->term_declaration_id) && !empty($result->term_declaration_id))
-                                                    $termData = $result->term_declaration_id;
-
+                                                    $termData = $result->term->name;
                                                 else
-                                                    $termData = $result->plan->attenTerm->id;
+                                                    $termData = $result->plan->attenTerm->name;
                                             @endphp
                                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
                                                     
                                                     {{ $termData }} 
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
                                                     {{ ($result->module_code)??$result->plan->creations->code }}
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ date('d F,Y h:i a',strtotime($result->created_at))  }}
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ date('d F,Y h:i a',strtotime($result->published_at))  }}
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ $result->grade->code }} 
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ $result->grade->name }}
                                                 </td>
-                                                <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}}
                                                 </td>
                                             </tr>
-                                            
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -262,22 +258,22 @@
                     <table id="result-bulk{{ $resultSet[0]->id }}" class="min-w-full divide-y divide-gray-200">
                         <thead data-tw-merge class="">
                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Term
                                 </th>
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Code
                                 </th>
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Created At
                                 </th>
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Published At
                                 </th>
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Grade
                                 </th>
-                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
                                     Last Updated By
                                 </th>
                             </tr>
@@ -342,7 +338,7 @@
                                             </div>
                                             @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
                                             <div class="py-1 ml-2 item-center anchor-box">
-                                                <a href="javascript:;" data-theme="light"  data-id="{{ $result->id }}"  data-action="DELETE" class="delete_btn intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer" title="delete result">
+                                                <a href="javascript:;" data-theme="light"  data-id="{{ $result->id }}" data-url="{{ route('result.destroy', $result->id); }}"  data-action="DELETE" class="delete_btn intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer" title="delete result">
                                                     <i data-lucide="x-circle" class="w-5 h-5"></i>
                                                 </a>
                                             </div>
@@ -382,7 +378,7 @@
 <div class="intro-y box col-span-12 p-5 mt-5">
     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
         <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
-            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+            {{-- <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Term</label>
                 <select id="term-SN" name="term" class="mt-2 sm:mt-0 sm:w-40 2xl:w-48 tom-selects" >
                     <option selected value="">Please Select</option>
@@ -392,7 +388,7 @@
                         @endforeach
                     @endif
                 </select>
-            </div>
+            </div> --}}
             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
                 <input id="query-AN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
@@ -434,10 +430,57 @@
             </div>
         </div>
     </div>
+   
     <div class="overflow-x-auto scrollbar-hidden">
         <div id="studentNotesListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
+
+<!-- BEGIN: Edit Modal -->
+<div id="editNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" action="#" id="editNoteForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Edit Previous Exam Result</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div role="alert" class="alert hidden relative border rounded-md px-5 py-4 bg-warning border-warning text-slate-900 dark:border-warning mb-2 flex items-center"><i data-tw-merge data-lucide="alert-circle" class="stroke-1.5 w-5 h-5 mr-2 h-6 w-6 mr-2 h-6 w-6"></i>
+                        <span class="error-text">Awesome alert with icon</span>
+                        <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 h-4 w-4 h-4 w-4"></i></button>
+                    </div>
+                    
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="UpdateNote" class="btn btn-primary w-auto">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                    <input type="hidden" name="id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Modal -->
 <!-- BEGIN: Delete Confirmation Modal -->
 <div id="delete-confirmation-modal" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -450,7 +493,7 @@
                 </div>
                 <div class="px-5 pb-8 text-center">
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">Cancel</button>
-                    <button type="button" data-id="0" data-action="DELETE" class="agreeWith btn btn-danger w-24">Delete</button>
+                    <button type="button" data-url="#" data-id="0" data-action="DELETE" class="agreeWith btn btn-danger w-24">Delete</button>
                 </div>
             </div>
         </div>
