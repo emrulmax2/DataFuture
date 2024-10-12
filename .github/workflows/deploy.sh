@@ -8,7 +8,7 @@ git pull origin main
 # Install/update composer dependencies
 composer install --no-interaction
 
-
+export PATH=/opt/cpanel/ea-nodejs16/bin/:$PATH
 # Install NPM dependencies and build assets
 npm install
 npm run build
