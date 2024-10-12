@@ -1,17 +1,187 @@
 import IMask from 'imask';
-import helper from './helper';
-import colors from './colors';
-import Chart from 'chart.js/auto';
+import Tabulator from 'tabulator-tables';
 
 import { createIcons, icons } from 'lucide';
 import TomSelect from 'tom-select';
 
-import dayjs from 'dayjs';
 import { Litepicker } from 'litepicker';
 
 ('use strict');
+var studentNotesListTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let studentId =
+            $('#studentNotesListTable').attr('data-student') != ''
+                ? $('#studentNotesListTable').attr('data-student')
+                : '0';
+        let queryStr = $('#query-AN').val() != '' ? $('#query-AN').val() : '';
+        let status = $('#status-AN').val() != '' ? $('#status-AN').val() : '1';
+
+        let tableContent = new Tabulator('#studentNotesListTable', {
+            ajaxURL: route('student.result.previous.list'),
+            ajaxParams: {
+                studentId: studentId,
+                queryStr: queryStr,
+                status: status,
+            },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: 'remote',
+            paginationSize: 10,
+            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            layout: 'fitColumns',
+            responsiveLayout: 'collapse',
+            placeholder: 'No matching records found',
+            columns: [
+                {
+                    title: 'Module',
+                    field: 'course_module_id',
+                    headerHozAlign: 'left',
+                    formatter(cell, formatterParams) {
+                        return cell.getData().course_module;
+                    },
+                },
+                {
+                    title: 'Attempt',
+                    field: 'attempt',
+                    headerHozAlign: 'center',
+                    hozAlign: 'center',
+                    headerSort: false,
+                },
+                {
+                    title: 'Paper ID',
+                    field: 'paperID',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Module No',
+                    field: 'module_no',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Exam Date',
+                    field: 'exam_date',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Grade',
+                    field: 'grade',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Status',
+                    field: 'status',
+                    headerHozAlign: 'left',
+                },
+
+                {
+                    title: 'Actions',
+                    field: 'id',
+                    headerSort: false,
+                    hozAlign: 'right',
+                    headerHozAlign: 'right',
+                    width: '120',
+                    download: false,
+                    formatter(cell, formatterParams) {
+                        var btns = '';
+                        if (cell.getData().deleted_at == null) {
+                            btns +=
+                                '<button data-id="' +
+                                cell.getData().id +
+                                '" data-tw-toggle="modal" data-tw-target="#editNoteModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            if (cell.getData().delete_url != null) {
+                                btns +=
+                                    '<button data-url="' +
+                                    cell.getData().delete_url +
+                                    '"  data-id="' +
+                                    cell.getData().id +
+                                    '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            }
+                        } else if (cell.getData().deleted_at != null) {
+                            btns +=
+                                '<button data-id="' +
+                                cell.getData().id +
+                                '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        }
+
+                        return btns;
+                    },
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    'stroke-width': 1.5,
+                    nameAttr: 'data-lucide',
+                });
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener('resize', () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                'stroke-width': 1.5,
+                nameAttr: 'data-lucide',
+            });
+        });
+
+        // Export
+        $('#tabulator-export-csv-AN').on('click', function (event) {
+            tableContent.download('csv', 'data.csv');
+        });
+
+        $('#tabulator-export-json-AN').on('click', function (event) {
+            tableContent.download('json', 'data.json');
+        });
+
+        $('#tabulator-export-xlsx-AN').on('click', function (event) {
+            window.XLSX = xlsx;
+            tableContent.download('xlsx', 'data.xlsx', {
+                sheetName: 'Student Note Details',
+            });
+        });
+
+        $('#tabulator-export-html-AN').on('click', function (event) {
+            tableContent.download('html', 'data.html', {
+                style: true,
+            });
+        });
+
+        // Print
+        $('#tabulator-print-AN').on('click', function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
 
 (function () {
+    const succModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#successModal')
+    );
+    const confirmModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#delete-confirmation-modal')
+    );
+    const editNoteModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#editNoteModal')
+    );
+    // const termSN = new TomSelect('#term-SN', {
+    //     plugins: {
+    //         dropdown_input: {},
+    //     },
+    //     placeholder: 'Select Term...',
+    //     persist: false,
+    //     create: false,
+    //     allowEmptyOption: true,
+    // });
     var tomSelectArray = [];
     var tomOptions = {
         plugins: {
@@ -46,6 +216,149 @@ import { Litepicker } from 'litepicker';
         }
         tomSelectArray.push(new TomSelect(this, tomOptions));
     });
+
+    if ($('#studentNotesListTable').length) {
+        // Init Table
+        studentNotesListTable.init();
+
+        // Filter function
+        function filterHTMLFormAN() {
+            studentNotesListTable.init();
+        }
+
+        // On click go button
+        $('#tabulator-html-filter-go-AN').on('click', function (event) {
+            filterHTMLFormAN();
+        });
+
+        // On reset filter form
+        $('#tabulator-html-filter-reset-AN').on('click', function (event) {
+            $('#query-AN').val('');
+            $('#status-AN').val('1');
+            termSN.clear(true);
+            filterHTMLFormAN();
+        });
+        $('#studentNotesListTable').on('click', '.edit_btn', function (e) {
+            var $btn = $(this);
+            var noteId = $btn.attr('data-id');
+            axios({
+                method: 'post',
+                url: route('student.result.previous.edit'),
+                data: { id: noteId },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content'
+                    ),
+                },
+            })
+                .then((response) => {
+                    let dataset = response.data.res;
+
+                    $('#editNoteForm input[name="id"]').val(dataset.id);
+
+                    $('#editNoteForm input[name="paper_id"]').val(
+                        dataset.paper_id
+                    );
+                    $('#editNoteForm input[name="module_no"]').val(
+                        dataset.module_no
+                    );
+                    $('#editNoteForm input[name="exam_date"]').val(
+                        dataset.exam_date
+                    );
+                    $('#editNoteForm input[name="grade"]').val(dataset.grade);
+                    $('#editNoteForm input[name="status"]').val(dataset.status);
+                    $('#editNoteForm input[name="created_at"]').val(
+                        dataset.created_at
+                    );
+                })
+                .catch((error) => {
+                    console.log('error');
+                });
+        });
+
+        $('#editNoteForm').on('submit', function (e) {
+            e.preventDefault();
+            const form = document.getElementById('editNoteForm');
+
+            document
+                .querySelector('#UpdateNote')
+                .setAttribute('disabled', 'disabled');
+            document.querySelector('#UpdateNote svg').style.cssText =
+                'display: inline-block;';
+
+            let form_data = new FormData(form);
+
+            form_data.append('content', editEditor.getData());
+            axios({
+                method: 'post',
+                url: route('student.result.previous.update'),
+                data: form_data,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                        'content'
+                    ),
+                },
+            })
+                .then((response) => {
+                    document
+                        .querySelector('#UpdateNote')
+                        .removeAttribute('disabled');
+                    document.querySelector('#UpdateNote svg').style.cssText =
+                        'display: none;';
+                    //console.log(response.data.message);
+                    //return false;
+
+                    if (response.status == 200) {
+                        editNoteModal.hide();
+
+                        successModal.show();
+                        document
+                            .getElementById('successModal')
+                            .addEventListener(
+                                'shown.tw.modal',
+                                function (event) {
+                                    $('#successModal .successModalTitle').html(
+                                        'Congratulation!'
+                                    );
+                                    $('#successModal .successModalDesc').html(
+                                        'Student Note successfully updated.'
+                                    );
+                                    $('#successModal .successCloser').attr(
+                                        'data-action',
+                                        'NONE'
+                                    );
+                                }
+                            );
+
+                        setTimeout(function () {
+                            successModal.hide();
+                        }, 2000);
+                    }
+                    studentNotesListTable.init();
+                })
+                .catch((error) => {
+                    document
+                        .querySelector('#UpdateNote')
+                        .removeAttribute('disabled');
+                    document.querySelector('#UpdateNote svg').style.cssText =
+                        'display: none;';
+                    if (error.response) {
+                        if (error.response.status == 422) {
+                            for (const [key, val] of Object.entries(
+                                error.response.data.errors
+                            )) {
+                                $(`#editNoteForm .${key}`).addClass(
+                                    'border-danger'
+                                );
+                                $(`#editNoteForm  .error-${key}`).html(val);
+                            }
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+        });
+    }
 
     document
         .querySelectorAll('.datepicker_custom')
@@ -264,38 +577,6 @@ import { Litepicker } from 'litepicker';
             var mask = IMask(element, maskOptions);
         });
 
-    // $('.tablepoint-toggle').on('click', function (e) {
-    //     e.preventDefault();
-    //     let tthis = $(this);
-    //     let currentThis = tthis.children('.plusminus').eq(0);
-
-    //     let nextThis = tthis.children('.plusminus').eq(1);
-    //     if (currentThis.hasClass('hidden')) {
-    //         currentThis.removeClass('hidden');
-    //         nextThis.addClass('hidden');
-    //     } else {
-    //         nextThis.removeClass('hidden');
-    //         currentThis.addClass('hidden');
-    //     }
-
-    //     tthis.parent().siblings('div.tabledataset').slideToggle();
-    // });
-    // $('.toggle-heading').on('click', function (e) {
-    //     e.preventDefault();
-    //     let tthis = $(this);
-    //     tthis.siblings('div.tablepoint-toggle').trigger('click');
-    // });
-
-    const succModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#successModal')
-    );
-    const confirmModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#delete-confirmation-modal')
-    );
-    // const defaultModal = tailwind.Modal.getOrCreateInstance(
-    //     document.querySelector('#default-confirmation-modal')
-    // );
-
     // Add New Result
     $('.addNewRowBtn').on('click', function () {
         let $$this = $(this);
@@ -323,17 +604,13 @@ import { Litepicker } from 'litepicker';
         //$firstRow.find('a').remove();
 
         // Remove the delete_btn class and add delete_btn_new class
-        let newAnchor = $firstRow.find('a').first();
-
-        newAnchor.attr('data-id', 0);
-        newAnchor.removeAttr('data-tw-toggle');
-        newAnchor.removeAttr('data-tw-target');
-        newAnchor.removeAttr('data-trigger');
-        newAnchor.removeClass('delete_btn');
-        newAnchor.addClass('delete_btn_new');
 
         // Clone the first row
         let $newRow = $firstRow.clone();
+        let newAnchor = $newRow.find('a').first();
+
+        newAnchor.removeClass('delete_btn');
+        newAnchor.addClass('delete_btn_new');
 
         // Append the anchor element to the new row
 
@@ -352,9 +629,6 @@ import { Litepicker } from 'litepicker';
                 $element.attr('data-index', newIndex);
                 $element.html(''); // Clear any previous error messages
             }
-            // if ($element.is('input') || $element.is('select')) {
-            //     $element.val(''); // Clear the value for the new row
-            // }
         });
         // Empty the values of input fields and reset select elements
         $newRow.find('input').val('');
@@ -384,29 +658,28 @@ import { Litepicker } from 'litepicker';
         // Create a new input element for created_at[]
 
         if (newAnchor.length == 0) {
-            newAnchor = $('<a></a>'); // Create a new anchor element
+            let CreateNewAnchor = $('<a></a>'); // Create a new anchor element
             // Set attributes
-            newAnchor.attr('href', 'javascript:;');
-            newAnchor.attr('data-theme', 'light');
-            newAnchor.attr('data-id', 0);
-            newAnchor.attr('data-action', 'DELETE');
-            newAnchor.attr('title', 'delete result');
-            newAnchor.removeAttr('data-tw-toggle');
-            newAnchor.removeAttr('data-tw-target');
-            newAnchor.removeAttr('data-trigger');
-            newAnchor.removeClass('delete_btn');
-            newAnchor.addClass('delete_btn_new');
+            CreateNewAnchor.attr('href', 'javascript:;');
+            CreateNewAnchor.attr('data-theme', 'light');
+            CreateNewAnchor.attr('data-id', 0);
+            CreateNewAnchor.attr('data-action', 'DELETE');
+            CreateNewAnchor.attr('title', 'delete result');
+
+            CreateNewAnchor.addClass('delete_btn_new');
             // Set classes
-            newAnchor.addClass(
+            CreateNewAnchor.addClass(
                 'intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer'
             );
 
             // Append inner HTML content
-            newAnchor.html('<i data-lucide="x-circle" class="w-5 h-5"></i>');
+            CreateNewAnchor.html(
+                '<i data-lucide="x-circle" class="w-5 h-5"></i>'
+            );
 
             // Reinitialize Lucide icons to ensure the new icon is rendered
 
-            $newRow.find('div.updated-name').html(newAnchor[0].outerHTML);
+            $newRow.find('div.updated-name').html(CreateNewAnchor[0].outerHTML);
         }
         // Append the cloned row to tbody.bulk-update
         $$this.closest('form').find('tbody.bulk-update').append($newRow);
@@ -647,6 +920,9 @@ import { Litepicker } from 'litepicker';
         let $statusBTN = $(this);
 
         let rowID = $statusBTN.attr('data-id');
+        let url = $statusBTN.attr('data-url')
+            ? $statusBTN.attr('data-url')
+            : route('result.destroy', rowID);
         let confModalDelTitle = 'Do you want to delete';
         confirmModal.show();
         document
@@ -661,6 +937,10 @@ import { Litepicker } from 'litepicker';
                 $('#delete-confirmation-modal .agreeWith').attr(
                     'data-id',
                     rowID
+                );
+                $('#delete-confirmation-modal .agreeWith').attr(
+                    'data-url',
+                    url
                 );
                 $('#delete-confirmation-modal .agreeWith').attr(
                     'data-action',
@@ -843,6 +1123,57 @@ import { Litepicker } from 'litepicker';
         }
     });
 
+    $('#delete-confirmation-prevresultmodal .agreeWith').on(
+        'click',
+        function () {
+            let $agreeBTN = $(this);
+            let resultId = $agreeBTN.attr('data-id');
+            let action = $agreeBTN.attr('data-action');
+            let url = $agreeBTN.attr('data-url');
+            $('#delete-confirmation-prevresultmodal button').attr(
+                'disabled',
+                'disabled'
+            );
+            if (action == 'DELETE') {
+                axios({
+                    method: 'delete',
+                    url: url,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                            'content'
+                        ),
+                    },
+                })
+                    .then((response) => {
+                        if (response.status == 200) {
+                            $(
+                                '#delete-confirmation-prevresultmodal button'
+                            ).removeAttr('disabled');
+                            confirmModal.hide();
+                            succModal.show();
+                            document
+                                .getElementById('successModal')
+                                .addEventListener(
+                                    'shown.tw.modal',
+                                    function (event) {
+                                        $(
+                                            '#successModal .successModalTitle'
+                                        ).html('Done!');
+                                        $(
+                                            '#successModal .successModalDesc'
+                                        ).html('Data successfully deleted.');
+                                    }
+                                );
+
+                            location.reload();
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+            }
+        }
+    );
     $('#sortable-table th').on('click', function () {
         var th = $(this);
         var table = $(this).parents('table').eq(0);

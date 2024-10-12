@@ -228,6 +228,7 @@ use App\Http\Controllers\Reports\TermPerformance\TermPerformanceReportController
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
+use App\Http\Controllers\ResultPreviousController;
 use App\Http\Controllers\Settings\AccBankController;
 use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
@@ -2589,7 +2590,16 @@ Route::middleware('auth')->group(function() {
         Route::post('results/update-bulk', 'updateBulk')->name('result.update.bulk');
         
     });
-
+    Route::controller(ResultPreviousController::class)->group(function() {
+        Route::get('result-previous', 'index')->name('student.result.previous.index');
+        Route::get('result-previous/list', 'list')->name('student.result.previous.list');
+        Route::post('result-previous/store', 'store')->name('student.result.previous.store');
+        Route::get('result-previous/edit/{id}', 'edit')->name('student.result.previous.edit');
+        Route::post('result-previous/update', 'update')->name('student.result.previous.update');
+        Route::delete('result-previous/delete/{id}', 'destroy')->name('student.result.previous.destory');
+        Route::post('result-previous/restore/{id}', 'restore')->name('student.result.previous.restore');
+        
+    });
     
 
     Route::controller(CompanyController::class)->group(function() {

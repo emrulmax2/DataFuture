@@ -58,6 +58,8 @@ class StudentResultController extends Controller
                 }
                 
             endforeach;
+
+            
         return view('pages.students.live.result.index', [
             'title' => 'Students - Results',
             'breadcrumbs' => [
