@@ -55,7 +55,7 @@ var studentCommLetterListTable = (function () {
                         var html = '';
                         html += '<div>';
                             html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().created_at != '' ? cell.getData().created_at : (cell.getData().issued_date != '' ? cell.getData().issued_date : ''))+'</div>';
                         html += '</div>';
 
                         return html;

@@ -485,6 +485,17 @@ var attendanceReportListTable = (function () {
 
         letterEditor.setData('');
         letter_set_id.clear(true);
+
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        const todayDate = dd + '-' + mm + '-' + yyyy;
+        $('#generateBulkLetterModal .modal-body input[name="issued_date"]').val(todayDate);
     });
 
     /* Bulk Letter Start */

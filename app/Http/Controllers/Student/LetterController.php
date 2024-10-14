@@ -210,6 +210,7 @@ class LetterController extends Controller
                     'letter_doc_id' => (isset($list->letter_doc_id) && $list->letter_doc_id > 0 ? $list->letter_doc_id : 0),
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
+                    'issued_date'=> (isset($list->issued_date) && !empty($list->issued_date) ? date('jS F, Y', strtotime($list->issued_date)) : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
