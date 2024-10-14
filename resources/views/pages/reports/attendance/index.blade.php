@@ -140,18 +140,6 @@
                             <div class="acc__input-error error-issued_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($smtps))
-                                    @foreach($smtps as $sm)
-                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
                             <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
                             <select id="letter_set_id" name="letter_set_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
@@ -187,23 +175,29 @@
                             </select>
                             <div class="acc__input-error error-signatory_id text-danger mt-2"></div>
                         </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch items-center">
+                                <label class="form-check-label ml-0 mr-5" for="checkbox-switch-7">Send Email</label>
+                                <input id="send_in_email" class="form-check-input" name="send_in_email" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 commonSmtpWrap" style="display: none;">
+                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
+                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($smtps))
+                                    @foreach($smtps as $sm)
+                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        {{--<div class="modal-footer-left pt-2" style="float: left;">
-                            <div class="flex flex-col sm:flex-row">
-                                <div class="form-check mr-5">
-                                    <input checked id="is_send_email" name="is_email_or_attachment" class="form-check-input" type="radio" value="1">
-                                    <label class="form-check-label" for="is_send_email">Send Email</label>
-                                </div>
-                                <div class="form-check mr-0">
-                                    <input id="is_send_attachment" name="is_email_or_attachment" class="form-check-input" type="radio" value="2">
-                                    <label class="form-check-label" for="is_send_attachment">Send Attachment</label>
-                                </div>
-                            </div>
-                        </div>--}}
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
-                            Send Letter                      
+                            Generate Letter                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
@@ -218,6 +212,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="student_ids" value=""/>
+                        <input type="hidden" name="print_pdf" value="1"/>
                     </div>
                 </div>
             </form>

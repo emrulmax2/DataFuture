@@ -209,7 +209,6 @@ var studentCommLetterListTable = (function () {
         $('#addLetterModal .acc__input-error').html('');
         $('#addLetterModal .modal-body input:not([type="checkbox"])').val('');
         $('#addLetterModal .modal-body select').val('');
-        $('#addLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#addLetterModal .letterEditorArea').fadeOut();
         letterEditor.setData('');
         letter_set_id.clear(true);

@@ -477,9 +477,11 @@ var attendanceReportListTable = (function () {
         $('#generateBulkLetterModal .acc__input-error').html('');
         $('#generateBulkLetterModal .modal-body input').val('');
         $('#generateBulkLetterModal .modal-body select').val('');
-        $('#generateBulkLetterModal .modal-footer input#is_send_email').prop('checked', true);
         $('#generateBulkLetterModal .letterEditorArea').fadeOut();
         $('#generateBulkLetterModal input[name="student_ids"]').val('');
+
+        $('#generateBulkLetterModal .modal-body input[name="send_in_email"]').prop('checked', false);
+        $('#generateBulkLetterModal .commonSmtpWrap').fadeOut();
 
         letterEditor.setData('');
         letter_set_id.clear(true);
@@ -505,6 +507,19 @@ var attendanceReportListTable = (function () {
             document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
                 $("#warningModal .warningModalTitle").html("Error Found!");
                 $("#warningModal .warningModalDesc").html('Selected students not foudn. Please select some students first or contact with the site administrator.');
+            });
+        }
+    });
+
+
+    $('#send_in_email').on('change', function() {
+        if($(this).prop('checked')){
+            $('.commonSmtpWrap').fadeIn('fast', function(){
+                $('select', this).val('')
+            });
+        }else{
+            $('.commonSmtpWrap').fadeOut('fast', function(){
+                $('select', this).val('')
             });
         }
     });
@@ -536,7 +551,9 @@ var attendanceReportListTable = (function () {
 
     $('#generateBulkLetterForm').on('submit', function(e){
         e.preventDefault();
+        let $form = $(this);
         const form = document.getElementById('generateBulkLetterForm');
+        let print_pdf = $form.find('input[name="print_pdf"]').val();
     
         document.querySelector('#sendLetterBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#sendLetterBtn svg").style.cssText ="display: inline-block;";
@@ -554,6 +571,10 @@ var attendanceReportListTable = (function () {
 
             if (response.status == 200) {
                 generateBulkLetterModal.hide();
+                let pdf_url = (response.data.pdf_url ? response.data.pdf_url : '');
+                if(print_pdf == 1 && pdf_url != ''){
+                    window.open(pdf_url, '_blank');
+                }
 
                 successModal.show(); 
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
