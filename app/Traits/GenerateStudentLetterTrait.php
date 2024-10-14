@@ -205,7 +205,8 @@ trait GenerateStudentLetterTrait{
         $content = $pdf->output();
         Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
 
-        return ['path' => Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName];
+        $the_content = $letter_content.'<div class="pageBreak"></div>';
+        return ['path' => Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName, 'the_content' => $the_content];
     }
     
     public function perseLetterData($content){

@@ -30,10 +30,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\GenerateStudentLetterTrait;
+use App\Traits\GenerateBulkCommunicationPdfTrait;
 
 class BulkCommunicationController extends Controller
 {
-    use GenerateStudentLetterTrait;
+    use GenerateStudentLetterTrait, GenerateBulkCommunicationPdfTrait;
     
     public function index($classplans){
         return view('pages.communication.index', [
@@ -115,44 +116,51 @@ class BulkCommunicationController extends Controller
             $letter_set_id = $request->letter_set_id;
             $letter_body = $request->letter_body;
 
+            $send_in_email = (isset($request->send_in_email) && $request->send_in_email > 0 ? $request->send_in_email : 0);
+            $print_pdf = (isset($request->print_pdf) && $request->print_pdf > 0 ? $request->print_pdf : 0);
+            $PRINT_PDF_CONTENT = ''; 
+
             $letterSet = LetterSet::find($letter_set_id);
             $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
 
             $is_email_or_attachment = 2;
             $signatory_id = (isset($request->signatory_id) && $request->signatory_id > 0 ? $request->signatory_id : 0);
             $signatoryHTML = '';
-            if($signatory_id > 0):
-                $signatory = Signatory::find($signatory_id);
-                $signatoryHTML .= '<p>';
-                    $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
-                    if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
-                        $signatureImage = url('storage/signatories/'.$signatory->signature);
-                        $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
-                    endif;
-                    $signatoryHTML .= $signatory->signatory_name.'<br/>';
-                    $signatoryHTML .= $signatory->signatory_post.'<br/>';
-                    $signatoryHTML .= 'London Churchill College';
-                $signatoryHTML .= '</p>';
-            else:
-                $signatoryHTML .= '<p>';
-                    $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
-                    $signatoryHTML .= 'The Academic Admin Dept.<br/>';
-                    $signatoryHTML .= 'London Churchill College';
-                $signatoryHTML .= '</p>';
-            endif;
+            $comon_smtp_id = null;
+            if($send_in_email == 1):
+                if($signatory_id > 0):
+                    $signatory = Signatory::find($signatory_id);
+                    $signatoryHTML .= '<p>';
+                        $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
+                        if(isset($signatory->signature) && !empty($signatory->signature) && Storage::disk('local')->exists('public/signatories/'.$signatory->signature)):
+                            $signatureImage = url('storage/signatories/'.$signatory->signature);
+                            $signatoryHTML .= '<img src="'.$signatureImage.'" style="width:150px; height: auto; margin: 10px 0 10px;" alt="'.$signatory->signatory_name.'"/><br/>';
+                        endif;
+                        $signatoryHTML .= $signatory->signatory_name.'<br/>';
+                        $signatoryHTML .= $signatory->signatory_post.'<br/>';
+                        $signatoryHTML .= 'London Churchill College';
+                    $signatoryHTML .= '</p>';
+                else:
+                    $signatoryHTML .= '<p>';
+                        $signatoryHTML .= '<strong>Best Regards,</strong><br/>';
+                        $signatoryHTML .= 'The Academic Admin Dept.<br/>';
+                        $signatoryHTML .= 'London Churchill College';
+                    $signatoryHTML .= '</p>';
+                endif;
 
-            $comon_smtp_id = (isset($request->comon_smtp_id) && $request->comon_smtp_id > 0 ? $request->comon_smtp_id : 0);
-            $commonSmtp = ComonSmtp::find($comon_smtp_id);
-            $configuration = [
-                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
-                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
-                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
-                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
-                
-                'from_email'    => 'no-reply@lcc.ac.uk',
-                'from_name'    =>  'London Churchill College',
-            ];
+                $comon_smtp_id = (isset($request->comon_smtp_id) && $request->comon_smtp_id > 0 ? $request->comon_smtp_id : 0);
+                $commonSmtp = ComonSmtp::find($comon_smtp_id);
+                $configuration = [
+                    'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+                    'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+                    'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                    'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+                    'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+                    
+                    'from_email'    => 'no-reply@lcc.ac.uk',
+                    'from_name'    =>  'London Churchill College',
+                ];
+            endif;
 
             $sendLetterCount = 0;
             foreach($student_ids as $student_id):
@@ -174,6 +182,7 @@ class BulkCommunicationController extends Controller
                 $attachmentFiles = [];
                 if($letter):
                     $generatedLetter = $this->generateLetter($student_id, $letter_title, $letter_body, $issued_date, $pin, $signatory_id);
+                    $PRINT_PDF_CONTENT .= ($print_pdf == 1 ? $generatedLetter['the_content'] : '');
 
                     $data = [];
                     $data['student_id'] = $student_id;
@@ -187,33 +196,44 @@ class BulkCommunicationController extends Controller
                     $letterDocument = StudentLettersDocument::create($data);
 
 
-                    $emailHTML = '';
-                    $emailHTML .= 'Dear '.$student->first_name.' '.$student->last_name.', <br/>';
-                    $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
-                    $emailHTML .= $signatoryHTML;
+                    if($send_in_email == 1):
+                        $emailHTML = '';
+                        $emailHTML .= 'Dear '.$student->first_name.' '.$student->last_name.', <br/>';
+                        $emailHTML .= '<p>Please Find the letter attached herewith. </p>';
+                        $emailHTML .= $signatoryHTML;
 
-                    $attachmentFiles[] = [
-                        "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
-                        "nameinfo" => $generatedLetter['filename'],
-                        "mimeinfo" => 'application/pdf',
-                        "disk" => 's3'
-                    ];
-                    
-                    $sendTo = [];
-                    if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
-                        $sendTo[] = $student->contact->institutional_email;
+                        $attachmentFiles[] = [
+                            "pathinfo" => 'public/students/'.$student_id.'/'.$generatedLetter['filename'],
+                            "nameinfo" => $generatedLetter['filename'],
+                            "mimeinfo" => 'application/pdf',
+                            "disk" => 's3'
+                        ];
+                        
+                        $sendTo = [];
+                        if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+                            $sendTo[] = $student->contact->institutional_email;
+                        endif;
+                        if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+                            $sendTo[] = $student->contact->personal_email;
+                        endif;
+                        $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
+            
+                        UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
                     endif;
-                    if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
-                        $sendTo[] = $student->contact->personal_email;
-                    endif;
-                    $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
-        
-                    UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
                     $sendLetterCount += 1;
                 endif;
             endforeach;
 
-            return response()->json(['message' => 'Letter successfully generated and sent to <strong>'.$sendLetterCount.' out of '.count($student_ids).'</strong> students.'], 200);
+            $fileUrl = '';
+            if($print_pdf == 1):
+                $fileUrl = $this->generateBulkLetterPdf($PRINT_PDF_CONTENT, $pin);
+            endif;
+
+            if($send_in_email == 1):
+                return response()->json(['message' => 'Letter successfully generated and sent to <strong>'.$sendLetterCount.' out of '.count($student_ids).'</strong> students.', 'pdf_url' => $fileUrl], 200);
+            else:
+                return response()->json(['message' => 'Letter successfully generated for selected students.', 'pdf_url' => $fileUrl], 200);
+            endif;
         else:
             return response()->json(['message' => 'Student ids can not be empty. Please select some student first.'], 412);
         endif;
