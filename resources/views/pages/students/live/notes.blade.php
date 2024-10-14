@@ -115,7 +115,7 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="edit_note_term_declaration_id" class="form-label">Term</label>
+                            <label for="edit_note_term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
                             <select id="edit_note_term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
                                 <option value="">Please Select</option>
                                 @if($terms->count() > 0)
@@ -269,7 +269,7 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="note_term_declaration_id" class="form-label">Term</label>
+                            <label for="note_term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
                             <select id="note_term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
                                 <option value="">Please Select</option>
                                 @if($terms->count() > 0)

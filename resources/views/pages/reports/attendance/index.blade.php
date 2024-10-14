@@ -136,7 +136,7 @@
                     <div class="modal-body">
                         <div>
                             <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
-                            <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
+                            <input id="issued_date" type="text" name="issued_date" value="<?php echo date('d-m-Y') ?>" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
                             <div class="acc__input-error error-issued_date text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">

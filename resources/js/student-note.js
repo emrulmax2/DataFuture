@@ -593,7 +593,7 @@ var studentNotesListTable = (function () {
                 }
             }else{
                 $('#editNoteForm [name="is_flaged"]').prop('checked', false);
-                $('#editNoteForm .flagedWrap').fadeIn('fast', function(){
+                $('#editNoteForm .flagedWrap').fadeOut('fast', function(){
                     $('#editNoteModal [name="student_flag_id"]').val('');
                     $('#editNoteModal .theFlag').removeClass('bg-danger bg-success bg-warning bg-slate-200').addClass('bg-slate-200')
                 });
