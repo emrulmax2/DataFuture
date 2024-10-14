@@ -112,12 +112,12 @@
                                         
                                 </td>
                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-
-                                    {{ isset($currentResult->updatedBy) ? $currentResult->updatedBy->employee->full_name : $currentResult->createdBy->employee->full_name}}
+                                    
+                                    {{ isset($currentResult->updatedBy->employee->full_name)  ? $currentResult->updatedBy->employee->full_name : (isset($currentResult->createdBy->employee->full_name) ? $currentResult->createdBy->employee->full_name : $currentResult->createdBy->name) }}
                                 </td>
                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                     @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
-                                        <button class="mr-3 items-center inline-flex" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ?? $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('h:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
+                                        <button class="mr-3 items-center inline-flex" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ? $currentResult->term_declaration_id : $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('H:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
                                             <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
                                             Edit
                                         </button>
@@ -191,11 +191,10 @@
                                             @endphp
                                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
-                                                    
                                                     {{ $termData }} 
                                                 </td>
                                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
-                                                    {{ ($result->module_code)??$result->plan->creations->code }}
+                                                    {{ ($result->module_code)? $result->module_code :$result->plan->creations->code }}
                                                 </td>
                                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                     {{ date('d F,Y h:i a',strtotime($result->created_at))  }}
@@ -210,7 +209,7 @@
                                                     {{ $result->grade->name }}
                                                 </td>
                                                 <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                    {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}}
+                                                    {{ isset($result->updatedBy->employee->full_name)  ? $result->updatedBy->employee->full_name : (isset($result->createdBy->employee->full_name) ? $result->createdBy->employee->full_name: $result->createdBy->name)  }}
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -308,7 +307,7 @@
                                         
                                     </td>
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t relative">
-                                        <input type="text" class="form-control mt-2 sm:mt-0" value="{{ ($result->module_code)??$result->plan->creations->code }}" placeholder="{{ ($result->module_code)??$result->plan->creations->code }}"  name="module_code[]" >
+                                        <input type="text" class="form-control mt-2 sm:mt-0" value="{{ ($result->module_code)? $result->module_code :$result->plan->creations->code }}" placeholder="{{ ($result->module_code) ? $result->module_code :$result->plan->creations->code }}"  name="module_code[]" >
                                     </td>
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t w-40">
                                         <input id="created" placeholder="{{ date('d-m-Y H:i',strtotime($result->created_at))  }}" autocomplete="off"  class="datepicker_custom form-control w-full placeholder:text-slate-700" value=""  data-single-mode="true">
@@ -316,8 +315,8 @@
                                         <div class="acc__input-error error-created_at text-danger mt-2" data-index="{{ $index }}"></div>
                                     </td>
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t  w-40">
-                                        <input id="published"   placeholder="{{ date('d-m-Y H:i',strtotime($result->published_at))  }}" autocomplete="off" class="datepicker_custom form-control w-full  placeholder:text-slate-700" value=""  data-single-mode="true">
-                                        <input name="published_at[]" data-index="{{ $index }}" type="hidden" value="{{ date('Y-m-d H:i:s',strtotime($result->published_at))  }}">
+                                        <input id="published"   placeholder="{{ $result->published_at  }}" autocomplete="off" class="datepicker_custom form-control w-full  placeholder:text-slate-700" value=""  data-single-mode="true">
+                                        <input name="published_at[]" data-index="{{ $index }}" type="hidden" value="{{ $result->published_at  }}">
                                         <div class="acc__input-error error-published_at text-danger mt-2" data-index="{{ $index }}"></div>
                                     </td>
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t">
@@ -334,7 +333,7 @@
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t">
                                         <div class="flex justify-between items-stretch ">
                                             <div class="item updated-name"> 
-                                                {{ isset($result->updatedBy) ? $result->updatedBy->employee->full_name : $result->createdBy->employee->full_name}} 
+                                                {{ isset($result->updatedBy->employee->full_name)  ? $result->updatedBy->employee->full_name : (isset($result->createdBy->employee->full_name) ? $result->createdBy->employee->full_name: $result->createdBy->name) }}
                                             </div>
                                             @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
                                             <div class="py-1 ml-2 item-center anchor-box">
@@ -533,6 +532,52 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div id="previous-attempListmodal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Previous Attempt List</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+
+                <div class="modal-body overflow-x-auto scrollbar-hidden">
+                    <table id="studentAttemptPreviousListTable" data-student="{{ $student->id }}" class="min-w-full divide-y divide-gray-200">
+                        <thead data-tw-merge class="">
+                            <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+
+                                
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Term
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Code
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Paper ID
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Exam Date
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Grade
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Status
+                                </th>
+                                <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                    Last Updated By
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
     </div>
 </div>
 @endsection

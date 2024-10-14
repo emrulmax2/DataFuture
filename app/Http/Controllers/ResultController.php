@@ -25,9 +25,13 @@ use App\Models\ResultsegmentInCoursemodules;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\User;
+use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
+use DebugBar\DebugBar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+
+use Carbon\Carbon;
 
 class ResultController extends Controller
 {
@@ -341,16 +345,16 @@ class ResultController extends Controller
 
         $data = Result::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 
-    public function default($id) {
+    // public function default($id) {
         
-        $data = Result::with('plan')->where('id', $id)->get()->first();
-        $data->is_primary = "Yes";
-        $data->save();
-        response()->json($data);
-    }
+    //     $data = Result::with('plan')->where('id', $id)->get()->first();
+    //     $data->is_primary = "Yes";
+    //     $data->save();
+    //     return  response()->json($data);
+    // }
     /**
      * Display the specified resource.
      *
@@ -423,48 +427,81 @@ class ResultController extends Controller
             $student_id = $request->input('student_id');
             $published_at = $request->input('published_at');
             $created_at = $request->input('created_at');
-            $updated_by = $request->input('updated_by');
-            $created_by = $request->input('created_by');
             $id = $request->input('id');
 
             for($count = 0; $count < count($grade_id); $count++)
             {
                 
-                $data = [
-                        "id"=>$id[$count] ?? null,
+
+
+                if($id[$count] == null) {
+
+                    $data = [
                         'grade_id' => $grade_id[$count],
                         'term_declaration_id'  => $term_declaration_id[$count],
                         'student_id'  => $student_id[$count],
                         'plan_id' =>$plan_id[$count],
-                        'created_by'=> $created_by[$count],
                         'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$count])),
-                        'created_at'  => date("Y-m-d H:i:s",strtotime($created_at[$count])),
-                        'updated_by'  => $updated_by[$count],
-                ];
-                if($data['id'] == null) {
-                    $data['created_at'] = date("Y-m-d H:i:s");
-                    $data['created_by'] = auth()->user()->id;
-                    $result = Result::create($data);
+                        'created_at'  => ($created_at[$count]!=null) ? date("Y-m-d H:i:s",strtotime($created_at[$count])) : date("Y-m-d H:i:s"),
+                        'created_by'  => auth()->user()->id,
+
+                    ];
+                    $resultCreate = Result::create($data);
                    
                 } else {
-                    $ResultOldRow = Result::find($data['id']);
-                    $result = Result::find($data['id']);
-                    $result->fill($data);
-                    $changes = $result->getDirty();
-                    $result->save();
+                    //(isset($result->createdBy->employee->full_name) ? $result->createdBy->employee->full_name: $result->createdBy->name) 
+                    
+                    
 
-                    if($result->wasChanged() && !empty($changes)):
-                        foreach($changes as $field => $value):
-                            $data = [];
-                            $data['student_id'] = $result->student_id;
-                            $data['table'] = 'results';
-                            $data['field_name'] = $field;
-                            $data['field_value'] = $ResultOldRow->$field;
-                            $data['field_new_value'] = $value;
-                            $data['created_by'] = auth()->user()->id;
-                            StudentArchive::create($data);
-                        endforeach;
-                    endif;
+                    $ResultOldRow = Result::find($id[$count]);
+                    $result = Result::find($id[$count]);
+                    
+                    // Normalize the datetime values
+                    $publishedAt = Carbon::parse($published_at[$count])->format('Y-m-d H:i:s');
+                    $currentPublishedAt = $result->published_at ? Carbon::parse($result->published_at)->format('Y-m-d H:i:s'): null;
+
+                    // Assign the normalized value to the model
+                    if ($currentPublishedAt != $publishedAt) {
+                        $result->published_at = $publishedAt;
+                    }
+                    // Normalize the datetime values for created_at
+                    $createdAt = Carbon::parse($created_at[$count])->format('Y-m-d H:i:s');
+                    $currentCreatedAt = $result->created_at ? Carbon::parse($result->created_at)->format('Y-m-d H:i:s') : null;
+
+                    // Assign the normalized value to the model if they are different
+                    if ($currentCreatedAt != $createdAt) {
+                        $result->created_at = $createdAt;
+                    }
+                    
+                    $result->grade_id = $grade_id[$count];
+                    $result->term_declaration_id  = $term_declaration_id[$count];
+                    $result->student_id  = $student_id[$count];
+                    $result->plan_id = $plan_id[$count];
+
+                    $changes = $result->getDirty();
+
+                    if(!empty($changes)) {
+
+                        FacadesDebugbar::info($changes);
+                        $result->updated_by = auth()->user()->id;
+                        
+                        $result->save();
+
+                        if($result->wasChanged() && !empty($changes)):
+                            foreach($changes as $field => $value):
+                                $data = [];
+                                $data['student_id'] = $result->student_id;
+                                $data['table'] = 'results';
+                                $data['field_name'] = $field;
+                                $data['field_value'] = $ResultOldRow->$field;
+                                $data['field_new_value'] = $value;
+                                $data['created_by'] = auth()->user()->id;
+                                StudentArchive::create($data);
+                            endforeach;
+                        endif;
+                    }
+
+                    
                 }
                 
                 //$insert_schedule[] = $data; 
@@ -472,6 +509,8 @@ class ResultController extends Controller
             //$upsertData = Result::upsert($insert_schedule,['id'],['grade_id','term_declaration_id','created_by','updated_by','published_at','created_at']);
             if($result->id)
                 return response()->json(['message' => 'Result successfully updated.',"data"=>['result'=>$result]], 200);
+            else if($resultCreate->id)
+                return response()->json(['message' => 'Result successfully created.',"data"=>['result'=>$resultCreate]], 200);
             else
                 return response()->json(['message' => 'Result could not be saved'], 302);
 

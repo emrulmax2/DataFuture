@@ -50,13 +50,10 @@ class StudentResultController extends Controller
                     foreach ($checkPrimaryResult as $key => $result) {
                         $data[$moduleCreation->module->name][] = $result;
                         
-                        if($result->is_primary == "Yes") {
-                            $resultPrimarySet[$result->id] = "Yes";
-                        }
                     }
 
                 }
-                
+                $resultPrimarySet[$result->id] = null;
             endforeach;
 
             
