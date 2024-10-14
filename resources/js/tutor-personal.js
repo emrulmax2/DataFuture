@@ -342,16 +342,33 @@ import moment from 'moment';
     }
 
 
-    /* Student Attendance Tracking Start
+    /* Student Attendance Tracking Start */
     const theAttendanceDate = new Litepicker({
         element: document.getElementById('theAttendanceDate'),
         ...dateOption
     });
 
-    function generateStudentAttendanceTrackingHtml(){
+    theAttendanceDate.on('selected', (date) => {
+        let theYear = date.getFullYear();
+        let theMonth = date.getMonth() + 1;
+        let theDay = date.getDate();
+
+        let theDate = theYear+'-'+theMonth+'-'+theDay;
+        generateStudentAttendanceTrackingHtml(theDate);
+    });
+
+    $(window).on('load', function(){
+        generateStudentAttendanceTrackingHtml();
+    })
+
+    function generateStudentAttendanceTrackingHtml(theDate = null){
         let $theWrap = $('#studentAttendanceTrackingWrap');
-        let $theCalendar = $('#theAttendanceDate');
-        let theDate = $theCalendar.val();
+        let $theLoader = $('#studentAttendanceTrackingWrap .leaveTableLoader')
+        $theLoader.addClass('active');
+        if(theDate == null){
+            let $theCalendar = $('#theAttendanceDate');
+            let theDate = $theCalendar.val();
+        }
 
         axios({
             method: "POST",
@@ -360,14 +377,23 @@ import moment from 'moment';
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                
+                //console.log(response.data);
+                $theLoader.removeClass('active');
+                $('#studentTrackingListTable tbody').html(response.data.htm);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
             }
         }).catch(error => {
+            $theLoader.removeClass('active');
             if (error.response) {
                 console.log('error');
             }
         });
     }
-    Student Attendance Tracking  End*/
+    /*Student Attendance Tracking  End*/
     
 })();

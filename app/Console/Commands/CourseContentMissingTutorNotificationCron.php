@@ -124,7 +124,7 @@ class CourseContentMissingTutorNotificationCron extends Command
                         $MAILBODY .= 'Monitoring Team<br/>';
                         $MAILBODY .= 'London Churchill College';
 
-                        UserMailerJob::dispatch($configuration, ['limon@churchill.ac'], new CommunicationSendMail($subject, $MAILBODY, []));
+                        UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MAILBODY, []));
                         $i++;
                     endif;
                 endforeach;

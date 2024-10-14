@@ -135,7 +135,7 @@ class DashboardController extends Controller
                     $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
                 endif;
 
-                $html .= '<tr class="intro-x">';
+                $html .= '<tr class="intro-x" data-planListId="'.$pln->id.'">';
                     $html .= '<td>';
                         $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
                     $html .= '</td>';

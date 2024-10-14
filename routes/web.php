@@ -211,6 +211,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
 use App\Http\Controllers\Reports\Accounts\DueReportController;
@@ -2934,5 +2935,10 @@ Route::middleware('auth')->group(function() {
     /*Route::controller(ConsoleController::class)->group(function(){
         Route::get('console', 'index')->name('console'); 
     });*/
+
+    Route::controller(AttendancePercentageController::class)->group(function(){
+        Route::get('attendance-percentage/{tutor_id}/{term_id}', 'index')->name('attendance.percentage'); 
+        Route::get('attendance-percentage/list', 'list')->name('attendance.percentage.list'); 
+    });
     
 });
