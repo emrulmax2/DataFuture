@@ -5,6 +5,7 @@ import { createIcons, icons } from 'lucide';
 import TomSelect from 'tom-select';
 
 import { Litepicker } from 'litepicker';
+import { param } from 'jquery';
 
 ('use strict');
 var studentNotesListTable = (function () {
@@ -49,6 +50,21 @@ var studentNotesListTable = (function () {
                     headerHozAlign: 'center',
                     hozAlign: 'center',
                     headerSort: false,
+                    formatter(cell, formatterParams) {
+                        var btns = '';
+                        btns +=
+                            '<a data-id="' +
+                            cell.getData().id +
+                            '" data-coursemodule="' +
+                            cell.getData().course_module_id +
+                            '" data-student_id="' +
+                            cell.getData().student_id +
+                            '" data-tw-toggle="modal" data-tw-target="#previous-attempListmodal" class="view_attemptlist text-emerald-700 p-0 w-9 h-9 ml-1">' +
+                            cell.getData().attempt +
+                            '</a>';
+
+                        return btns;
+                    },
                 },
                 {
                     title: 'Paper ID',
@@ -116,6 +132,79 @@ var studentNotesListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                $('.view_attemptlist').on('click', function (e) {
+                    let tthis = $(this);
+                    let attempt = tthis.text();
+                    let studentId = tthis.attr('data-student_id');
+                    let courseModule = tthis.attr('data-coursemodule');
+                    let attemptPreview = tailwind.Modal.getOrCreateInstance(
+                        document.querySelector('#previous-attempListmodal')
+                    );
+                    $('#studentAttemptPreviousListTable tbody').html(
+                        '<tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50"><td colspan="7" data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">Loading...</td></tr>'
+                    );
+                    axios({
+                        method: 'get',
+                        url: route('student.result.previous.attemptlist'),
+                        params: {
+                            student_id: studentId,
+                            course_module_id: courseModule,
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                'content'
+                            ),
+                        },
+                    })
+                        .then((response) => {
+                            let dataset = response.data.res;
+                            let attemptList = '';
+                            console.log(dataset);
+                            if (dataset.length > 0) {
+                                // <td>
+                                //     <button data-id="${element.id}" data-tw-toggle="modal" data-tw-target="#editNoteModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>
+                                //     <button data-id="${element.id}" data-url="${element.delete_url}" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>
+                                // </td>
+                                dataset.forEach((element, index) => {
+                                    attemptList += `<tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.semester.name
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.module_no
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.paperID
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.exam_date
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.grade
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.status
+                                    }</td>
+                                    <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">${
+                                        element.updated_by
+                                            ? element.updated_by
+                                            : 'N/A'
+                                    }</td>
+                                </tr>`;
+                                });
+                            } else {
+                                attemptList = `<tr data-tw-merge class=" text-center [&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50"><td colspan="7" data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">No data found</td></tr>`;
+                            }
+
+                            $('#studentAttemptPreviousListTable tbody').html(
+                                attemptList
+                            );
+                            attemptPreview.show();
+                        })
+                        .catch((error) => {
+                            console.log('error');
+                        });
+                });
             },
         });
 
@@ -173,6 +262,7 @@ var studentNotesListTable = (function () {
     const editNoteModal = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#editNoteModal')
     );
+
     // const termSN = new TomSelect('#term-SN', {
     //     plugins: {
     //         dropdown_input: {},
@@ -1044,12 +1134,13 @@ var studentNotesListTable = (function () {
         let $agreeBTN = $(this);
         let resultId = $agreeBTN.attr('data-id');
         let action = $agreeBTN.attr('data-action');
+        let url = $agreeBTN.attr('data-url');
 
         $('#delete-confirmation-modal button').attr('disabled', 'disabled');
         if (action == 'DELETE') {
             axios({
                 method: 'delete',
-                url: route('result.destroy', resultId),
+                url: url,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
                         'content'
@@ -1123,57 +1214,6 @@ var studentNotesListTable = (function () {
         }
     });
 
-    $('#delete-confirmation-prevresultmodal .agreeWith').on(
-        'click',
-        function () {
-            let $agreeBTN = $(this);
-            let resultId = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
-            let url = $agreeBTN.attr('data-url');
-            $('#delete-confirmation-prevresultmodal button').attr(
-                'disabled',
-                'disabled'
-            );
-            if (action == 'DELETE') {
-                axios({
-                    method: 'delete',
-                    url: url,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                            'content'
-                        ),
-                    },
-                })
-                    .then((response) => {
-                        if (response.status == 200) {
-                            $(
-                                '#delete-confirmation-prevresultmodal button'
-                            ).removeAttr('disabled');
-                            confirmModal.hide();
-                            succModal.show();
-                            document
-                                .getElementById('successModal')
-                                .addEventListener(
-                                    'shown.tw.modal',
-                                    function (event) {
-                                        $(
-                                            '#successModal .successModalTitle'
-                                        ).html('Done!');
-                                        $(
-                                            '#successModal .successModalDesc'
-                                        ).html('Data successfully deleted.');
-                                    }
-                                );
-
-                            location.reload();
-                        }
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-            }
-        }
-    );
     $('#sortable-table th').on('click', function () {
         var th = $(this);
         var table = $(this).parents('table').eq(0);

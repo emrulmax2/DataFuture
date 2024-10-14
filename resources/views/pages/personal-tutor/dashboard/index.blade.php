@@ -106,7 +106,7 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Attendance Bellow 60%</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <a href="{{ route('attendance.percentage', [auth()->user()->id, ($current_term->id > 0 ? $current_term->id : 0)]) }}" class="text-base font-medium underline">{{ $bellow_60 }}</a>
+                                                <a target="_blank" href="{{ route('attendance.percentage', [auth()->user()->id, ($current_term->id > 0 ? $current_term->id : 0)]) }}" class="text-base font-medium underline">{{ $bellow_60 }}</a>
                                             </div>
                                         </div>
                                         

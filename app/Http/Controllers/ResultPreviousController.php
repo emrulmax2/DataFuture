@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 
 class ResultPreviousController extends Controller
 {
-    public function list(Request $request){
+    public function list(Request $request)
+    {
 
-        
         $queryStr = (isset($request->queryStr) && $request->queryStr != '' ? $request->queryStr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
 
@@ -84,7 +84,7 @@ class ResultPreviousController extends Controller
                     'priviliage_edit' => (isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1) ? true : false,
                 ];
                 if($data[$i]['priviliage_delete'] == true):
-                    $data[$i]['delete_url'] = route('result-previous.destroy', $list->id);
+                    $data[$i]['delete_url'] = route('student.result.previous.destory', $list->id);
                 endif;
                 $i++;
             endforeach;
@@ -97,15 +97,32 @@ class ResultPreviousController extends Controller
      */
     public function index()
     {
-        //
+        
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function attempt(Request $request)
     {
-        //
+        // $request->validate([
+        //     'student_id' => 'required|integer',
+        //     'course_module_id' => 'required|integer',
+        // ]);
+        $student_id = $request->student_id;
+        $course_module_id = $request->course_module_id;
+
+        $results =ExamResultPrev::with('student', 'course', 'semester', 'courseModule', 'awardingBody')->where('student_id', $student_id)->where('course_module_id', $course_module_id)->get();
+        if(isset($results))
+        foreach ($results as $result) {
+
+            $result->created_at = date('jS F, Y ', strtotime($result->created_at));
+            $result->updated_by = isset($result->updatedBy->name) ? $result->updatedBy->name : (isset($result->createdBy->name) ? $result->createdBy->name : '');
+            
+        }
+        return response()->json(['res' => $results]);
+
+        //return response()->json(['res' => ]);
     }
 
     /**
@@ -113,7 +130,22 @@ class ResultPreviousController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $examResult = new ExamResultPrev();
+        $examResult->awarding_body_id = $request->awarding_body_id;
+        $examResult->semester_id = $request->semester_id;
+        $examResult->module_no = $request->module_no;
+        $examResult->exam_date = $request->exam_date;  
+        $examResult->paperID = $request->paperID;
+        $examResult->course_module_id = $request->course_module_id;
+        $examResult->course_id = $request->course_id;
+        $examResult->student_id = $request->student_id;
+        $examResult->grade = $request->grade;
+        $examResult->status = $request->status;
+        $examResult->created_by = auth()->user()->id;
+        $examResult->updated_by = auth()->user()->id;
+        $examResult->save();
+
+        return response()->json(['message' => 'Result added successfully']);
     }
 
     /**
@@ -121,7 +153,7 @@ class ResultPreviousController extends Controller
      */
     public function show(string $id)
     {
-        //
+        return response()->json(['res' => ExamResultPrev::with('student', 'course', 'semester', 'courseModule', 'awardingBody')->find($id)]);
     }
 
     /**
@@ -176,6 +208,15 @@ class ResultPreviousController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $examResult = ExamResultPrev::find($id);
+        $examResult->delete();
+        return response()->json(['message' => 'Result deleted successfully']);
+    }
+
+    public function restore($id) {
+
+        $data = ExamResultPrev::where('id', $id)->withTrashed()->restore();
+
+        return response()->json($data);
     }
 }

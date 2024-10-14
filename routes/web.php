@@ -2599,6 +2599,8 @@ Route::middleware('auth')->group(function() {
         Route::post('result-previous/update', 'update')->name('student.result.previous.update');
         Route::delete('result-previous/delete/{id}', 'destroy')->name('student.result.previous.destory');
         Route::post('result-previous/restore/{id}', 'restore')->name('student.result.previous.restore');
+        Route::get('result-previous/attempt', 'attempt')->name('student.result.previous.attemptlist');
+        
         
     });
     
