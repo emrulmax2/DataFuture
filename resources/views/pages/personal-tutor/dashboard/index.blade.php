@@ -64,7 +64,6 @@
                                         </button>
                                     </li>
                                 </ul>
-                                @php $theory = 0; @endphp
                                 <div class="tab-content px-5 pb-5">
                                     <div class="tab-pane active grid grid-cols-12 gap-y-8 gap-x-10" id="weekly-report" role="tabpanel" aria-labelledby="weekly-report-tab">
                                         <div class="col-span-6 sm:col-span-6">
@@ -73,11 +72,6 @@
                                                 <div id="totalModule" class="text-base">
                                                     @if($myModules->count() > 0)
                                                         @foreach($myModules as $mm)
-                                                            @php 
-                                                                if($mm->class_type == 'Theory'):
-                                                                    $theory += $mm->TOTAL_MODULE;
-                                                                endif;
-                                                            @endphp
                                                             @if($mm->TOTAL_MODULE > 0)
                                                                 <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">{{$mm->class_type}}: {{ $mm->TOTAL_MODULE}}</span>
                                                             @endif
@@ -97,7 +91,7 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Expected Assignments</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">{{ ($no_of_assigned * $theory) }}</div>
+                                                <div class="text-base">{{ ($no_of_assignment) }}</div>
                                             </div>
                                         </div>
                                         <div class="col-span-12 sm:col-span-6">
@@ -112,7 +106,7 @@
                                         <div class="col-span-12 sm:col-span-6">
                                             <div class="text-slate-500">Attendance Bellow 60%</div>
                                             <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">{{ $bellow_60 }}</div>
+                                                <a href="{{ route('attendance.percentage', [auth()->user()->id, ($current_term->id > 0 ? $current_term->id : 0)]) }}" class="text-base font-medium underline">{{ $bellow_60 }}</a>
                                             </div>
                                         </div>
                                         
@@ -140,8 +134,20 @@
                             </div>
                         </div>
                     </div>
-                    <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0" id="studentAttendanceTrackingWrap">
-                        <table class="table table-report sm:mt-2">
+                    <div class="intro-y overflow-auto lg:overflow-visible mt-8 sm:mt-0 relative" id="studentAttendanceTrackingWrap">
+                        <div class="leaveTableLoader">
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+                        <table class="table table-report sm:mt-2" id="studentTrackingListTable">
                             <thead>
                                 <tr>
                                     <th class="whitespace-nowrap">IMAGES</th>
@@ -152,89 +158,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (array_slice($fakers, 0, 4) as $faker)
-                                    <tr class="intro-x">
-                                        <td class="w-40">
-                                            <div class="flex">
-                                                <div class="w-10 h-10 image-fit zoom-in">
-                                                    <img alt="London Churchill College" class="tooltip rounded-full" src="{{ asset('build/assets/images/' . $faker['images'][0]) }}" title="Uploaded at {{ $faker['dates'][0] }}">
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="" class="font-medium whitespace-nowrap">{{ $faker['products'][0]['name'] }}</a>
-                                            <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $faker['products'][0]['category'] }}</div>
-                                        </td>
-                                        <td class="text-center">{{ $faker['stocks'][0] }}</td>
-                                        <td class="w-60 text-left">
-                                            <div class="flex items-start justify-start text-success">
-                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Business Environment -B
-                                            </div>
-                                            <div class="flex items-start justify-start text-success mt-1">
-                                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Accounting - M
-                                            </div>
-                                        </td>
-                                        <td class="table-report__action w-56">
-                                            <div class="flex justify-center items-center">
-                                                <a class="flex items-center mr-3" href="">
-                                                    <i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note
-                                                </a>
-                                                <a class="flex items-center text-danger" href="">
-                                                    <i data-lucide="tablet-smartphone" class="w-4 h-4 mr-1"></i> Send SMS
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                <tr class="intro-x">
+                                    <td colspan="5">
+                                        <div class="alert alert-pending-soft show flex items-center" role="alert">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-circle" class="lucide lucide-alert-circle w-6 h-6 mr-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                                            Assiged student not foud for the day.
+                                        </div>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="intro-y flex flex-wrap sm:flex-row sm:flex-nowrap items-center mt-3">
-                        <nav class="w-full sm:w-auto sm:mr-auto">
-                            <ul class="pagination">
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevrons-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevron-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">...</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">1</a>
-                                </li>
-                                <li class="page-item active">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">...</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevron-right"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
-                                        <i class="w-4 h-4" data-lucide="chevrons-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                        <select class="w-20 form-select box mt-3 sm:mt-0">
-                            <option>10</option>
-                            <option>25</option>
-                            <option>35</option>
-                            <option>50</option>
-                        </select>
                     </div>
                 </div>
                 END:  Student Attendance Tracking -->

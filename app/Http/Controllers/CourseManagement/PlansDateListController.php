@@ -204,7 +204,7 @@ class PlansDateListController extends Controller
                                 $data['plan_id'] = $cp_id;
                                 $data['name'] = $name;
                                 $data['date'] = $start;
-                                $data['status'] = 'Schedule';
+                                $data['status'] = 'Scheduled';
                                 $data['created_by'] = auth()->user()->id;
 
                                 $plandateList = PlansDateList::create($data);

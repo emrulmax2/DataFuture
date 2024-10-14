@@ -289,6 +289,8 @@ export default defineConfig({
                 'resources/js/letter-set-edit.js',
                 'resources/js/manager-tutor-tracking.js',
                 'resources/js/student-class-status-reports.js',
+
+                'resources/js/student-attendance-percentage.js',
             ],
             refresh: true,
         }),

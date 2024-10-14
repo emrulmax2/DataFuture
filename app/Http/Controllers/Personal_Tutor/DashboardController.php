@@ -97,9 +97,23 @@ class DashboardController extends Controller
                             ->groupBy('class_type')->orderBy('class_type', 'ASC')->get(),
             'attendance_avg' => $this->myModulesAttendanceAverage($id, $latestTermId),
             'bellow_60' => $this->myModulesAttendanceBellow($id, $latestTermId),
-            'yesterday' => $yesterday
+            'yesterday' => $yesterday,
+            'no_of_assignment' => $this->getAssignmentCount($id, $latestTermId)
         ]);
 
+    }
+
+    public function getAssignmentCount($id, $term_declaration_id){
+        $plan_ids = Plan::where('personal_tutor_id', $id)->where('term_declaration_id', $term_declaration_id)
+                   ->where('class_type', 'Theory')->pluck('id')->unique()->toArray();
+        if(!empty($plan_ids)):
+            $assigns = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
+                    $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+                })->count('student_id');
+            return $assigns;
+        else:
+            return 0;
+        endif;
     }
 
     public function myModulesAttendanceAverage($id = 0, $term_declaration_id){
@@ -616,6 +630,111 @@ class DashboardController extends Controller
         $assigns = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
             $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
         })->pluck('student_id')->unique()->toArray();
+
+        $res = [];
+        if(!empty($assigns)):
+            foreach($assigns as $student_id):
+                $student = Student::find($student_id);
+                $student_modules = $this->getStudentModules($student->id, $plan_ids, $theDate);
+                if($student_modules):
+                    $res[$student_id] = [
+                        'student_id' => $student->id,
+                        'registration_no' => $student->registration_no,
+                        'photo_url' => $student->photo_url,
+                        'name' => $student->full_name,
+                        'course' => (isset($student->activeCR->creation->course->name) && !empty($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''),
+                        'attendance' => $this->getStudentAttendanceRate($student->id, $plan_ids),
+                        'modules' => $this->getStudentModules($student->id, $plan_ids, $theDate)
+                    ];
+                endif;
+            endforeach;
+        endif;
+        usort($res, fn($a, $b) => $a['attendance'] <=> $b['attendance']);
+
+        $html = '';
+        if(!empty($res)):
+            foreach($res as $row):
+                $html .= '<tr class="intro-x">';
+                    $html .= '<td class="w-40">';
+                        $html .= '<div class="flex items-center">';
+                            $html .= '<div class="w-10 h-10 image-fit zoom-in">';
+                                $html .= '<img alt="'.$row['name'].'" class="tooltip rounded-full" src="'.$row['photo_url'].'">';
+                            $html .= '</div>';
+                            $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap ml-3">'.$row['registration_no'].'</a>';
+                        $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap">'.$row['name'].' - '.$row['student_id'].'</a>';
+                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.$row['course'].'</div>';
+                    $html .= '</td>';
+                    $html .= '<td class="text-center">'.number_format($row['attendance'], 2).'%</td>';
+                    $html .= '<td class="text-left">';
+                        if(isset($row['modules']) && !empty($row['modules'])):
+                            $m = 1;
+                            foreach($row['modules'] as $mod):
+                                $html .= '<div class="'.($m != count($mod) ? 'mb-1' : '').' flex items-start justify-start text-'.($mod['status'] == 1 ? 'success' : 'danger').'">';
+                                    $html .= '<i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> '.$mod['module'].' - '.$mod['type'].' - '.$mod['start'];
+                                $html .= '</div>';
+
+                                $m++;
+                            endforeach;
+                        endif;
+                    $html .= '</td>';
+                    $html .= '<td class="table-report__action w-56">';
+                        $html .= '<div class="flex justify-center items-center">';
+                            $html .= '<a class="flex items-center mr-3" href="">';
+                                $html .= '<i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note';
+                            $html .= '</a>';
+                            $html .= '<a class="flex items-center text-danger" href="">';
+                                $html .= '<i data-lucide="tablet-smartphone" class="w-4 h-4 mr-1"></i> Send SMS';
+                            $html .= '</a>';
+                        $html .= '</div>';
+                    $html .= '</td>';
+                $html .= '</tr>';
+            endforeach;
+        else:
+            $html .= '<tr class="intro-x">';
+                $html .= '<td colspan="5">';
+                    $html .= '<div class="alert alert-pending-soft show flex items-center" role="alert">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-circle" class="lucide lucide-alert-circle w-6 h-6 mr-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+                                Assiged student not foud for the day.
+                            </div>';
+                $html .= '</td>';
+            $html .= '</tr>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
+    }
+
+    public function getStudentAttendanceRate($student_id, $plan_ids){
+        $query = DB::table('attendances as atn')
+                ->select(
+                    DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                )->whereIn('atn.plan_id', $plan_ids)->where('atn.student_id', $student_id)->get()->first();
+        return (isset($query->percentage_withexcuse) && $query->percentage_withexcuse > 0 ? $query->percentage_withexcuse : 0);
+    }
+
+    public function getStudentModules($student_id, $plan_ids, $theDate){
+        $student_plans = Assign::where('student_id', $student_id)->whereIn('plan_id', $plan_ids)->pluck('plan_id')->unique()->toArray();
+        $res = [];
+        $absentCount = 0;
+        if(!empty($student_plans)):
+            foreach($student_plans as $plan_id):
+                $attendance = Attendance::where('student_id', $student_id)->where('attendance_date', $theDate)->where('plan_id', $plan_id)->get()->first();
+                if(isset($attendance->id) && $attendance->id > 0):
+                    $plan = Plan::find($plan_id);
+                    $res[$plan_id] = [
+                        'module' => $plan->creations->module_name,
+                        'type' => $plan->class_type,
+                        'start' => (!empty($plan->start_time) ? date('H:i', strtotime($plan->start_time)) : ''),
+                        'end' => (!empty($plan->end_time) ? date('H:i', strtotime($plan->end_time)) : ''),
+                        'status' => (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id != 4 ? 1 : 0)
+                    ];
+                    $absentCount = (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id == 4 ? 1 : 0);
+                endif;
+            endforeach;
+        endif;
+        return (!empty($res) && $absentCount > 0 ? $res : false);
     }
 
 }
