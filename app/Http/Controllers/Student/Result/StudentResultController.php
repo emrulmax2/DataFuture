@@ -49,7 +49,7 @@ class StudentResultController extends Controller
                 if($checkPrimaryResult->isNotEmpty()) {
                     foreach ($checkPrimaryResult as $key => $result) {
                         $data[$moduleCreation->module->name][] = $result;
-                        
+                        $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
                     }
 
                 }
@@ -65,6 +65,7 @@ class StudentResultController extends Controller
             ],
             'student' => $student,
             'dataSet' => ($data) ?? null,
+            'termSet'=> ($termSet) ?? null,
             "grades" =>$grades,
             "terms" =>TermDeclaration::orderBy('id','DESC')->get(),
             "resultPrimarySet" =>$resultPrimarySet,

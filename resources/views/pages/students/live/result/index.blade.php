@@ -281,6 +281,7 @@
                             @php $index= 0; @endphp
                             @foreach($resultSet as $result)
                             @php
+                                
                                 if(isset($result->term_declaration_id) && !empty($result->term_declaration_id))
                                     $termData = $result->term_declaration_id;
 
@@ -297,8 +298,8 @@
                                         
                                          <select id="term-data{{ $result->id }}" data-index="{{ $index }}" class="w-full lccTom lcc-tom-select" name="term_declaration_id[]">
                                             <option value="">Please Select</option>
-                                            @if($terms->count() > 0)
-                                                @foreach($terms as $trm)
+                                            @if(isset($termSet[$result->plan->creations->module_name]))
+                                                @foreach($termSet[$result->plan->creations->module_name] as $trm)
                                                     <option  {{ $termData==$trm->id ? 'selected' : '' }} value="{{ $trm->id }}">{{ $trm->name }}</option>
                                                 @endforeach
                                             @endif
