@@ -224,7 +224,7 @@
               </table>
         </table>
         
-         <table border="1" style="width:360px;float:left;font-size:9px;border-collapse:collapse;">
+         <table border="1" style="width:300px;float:left;font-size:9px;border-collapse:collapse;">
          <tbody><tr>
             <td>STATUS</td>
             <td>DESCRIPTION</td>
