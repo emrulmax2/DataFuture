@@ -838,6 +838,8 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student-results/{student}', 'index')->name('student-results.index'); 
         
+        Route::get('student-results/{student}/print', 'print')->name('student-results.print');
+        
     }); 
 
     Route::controller(PersonalDetailController::class)->group(function() {

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class ModuleCreation extends Model
 {
     use HasFactory, SoftDeletes;
@@ -38,6 +38,11 @@ class ModuleCreation extends Model
     }
     public function getSubmissionDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function getUnitModeAttribute() {
+        $status = $this->attributes['status'];
+        return  Str::upper(Str::substr($status, 0, 1));
     }
 
     public function term(){
