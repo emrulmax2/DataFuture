@@ -184,8 +184,7 @@
       
       
         <table id="grade-detail" border="1" style="width:350px;border-collapse:collapse;font-size:9px; margin-right: 10px; float: left;">
-            <table id="grade-detail" border="1" style="width:350px;border-collapse:collapse;font-size:9px; margin-right: 10px; float: left;">
-                <tr>
+              <tr>
                   <td>GRADE</td>
                   <td>DESCRIPTION</td>
                 </tr>
@@ -220,8 +219,7 @@
                 <tr>
                   <td>W</td>
                   <td>WITHHOLD</td>
-                </tr>        
-              </table>
+                </tr>    
         </table>
         
          <table border="1" style="width:300px;float:left;font-size:9px;border-collapse:collapse;">
