@@ -348,13 +348,7 @@ class ResultController extends Controller
         return response()->json($data);
     }
 
-    // public function default($id) {
-        
-    //     $data = Result::with('plan')->where('id', $id)->get()->first();
-    //     $data->is_primary = "Yes";
-    //     $data->save();
-    //     return  response()->json($data);
-    // }
+  
     /**
      * Display the specified resource.
      *
@@ -413,14 +407,7 @@ class ResultController extends Controller
      */
     public function updateBulk(UpdateResultRequest $request)
     {
-        // $gradeList = $request->input('grade_id');
-        // foreach($gradeList as $grade) {
-        //     if($grade==null) {
-        //         return response()->json(['message' => 'Grade field required',"errors"=>["grade_id[]"=>"This field is required."]], 422);
-        //     }
-        // }
-        // if(is_array($request->input('grade_id')))
-        // {
+        
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
             $term_declaration_id = $request->input('term_declaration_id');
@@ -504,9 +491,8 @@ class ResultController extends Controller
                     
                 }
                 
-                //$insert_schedule[] = $data; 
             }
-            //$upsertData = Result::upsert($insert_schedule,['id'],['grade_id','term_declaration_id','created_by','updated_by','published_at','created_at']);
+            
             if($result->id)
                 return response()->json(['message' => 'Result successfully updated.',"data"=>['result'=>$result]], 200);
             else if($resultCreate->id)
@@ -539,4 +525,7 @@ class ResultController extends Controller
         }
         
     }
+
+
+    
 }

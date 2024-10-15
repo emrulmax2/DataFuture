@@ -40,4 +40,14 @@ class Address extends Model
         $html .= (isset($this->country) && !empty($this->country) ? $this->country : '');
         return $html;
     }
+
+    public function getFullAddressPdfAttribute(){
+        $html = '';
+        $html .= (isset($this->address_line_1) && !empty($this->address_line_1) ? $this->address_line_1.', ' : '');
+        $html .= (isset($this->address_line_2) && !empty($this->address_line_2) ? ''.$this->address_line_2.', ' : '');
+        $html .= (isset($this->city) && !empty($this->city) ? $this->city.', ' : '');
+        $html .= (isset($this->post_code) && !empty($this->post_code) ? $this->post_code.', ' : '');
+        $html .= (isset($this->country) && !empty($this->country) ? $this->country : '');
+        return $html;
+    }
 }
