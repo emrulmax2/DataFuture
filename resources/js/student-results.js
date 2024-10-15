@@ -1294,7 +1294,7 @@ var studentNotesListTable = (function () {
         // Optionally, you can display the frequency distribution in the HTML
         var frequencyHtml = '[ ';
         $.each(gradeFrequency, function (grade, count) {
-            frequencyHtml += grade + ': ' + count + ', ';
+            if (count != 0) frequencyHtml += grade + ': ' + count + ', ';
         });
         frequencyHtml +=
             'Total: ' + $('#sortable-table tbody tr').length + ' ]';
