@@ -525,12 +525,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-span-12 eveningWeekendWrap" style="display: {{ isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1 ? 'block' : 'none'}};">
+                        <div class="col-span-12 eveningWeekendWrap" style="display: {{ $applicant->creation_venue_status ? 'block' : 'none' }};">
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
                                 <div class="col-span-12 sm:col-span-6">
                                     <div class="form-check form-switch">
-                                        <input {{ (isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1) && (isset($applicant->course->full_time) && $applicant->course->full_time == 1) ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
+                                        <input {{ (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'checked' : '') }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
                                         <label class="form-check-label" for="full_time">&nbsp;</label>
                                     </div>
                                     <div class="acc__input-error error-full_time text-danger mt-2"></div>

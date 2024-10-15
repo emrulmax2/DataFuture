@@ -117,6 +117,9 @@ class CoursCreationController extends Controller
         $request->request->remove('has_evening_and_weekend');
         $venuList = $request->venue_id;
         $slcCode =$request->slc_code;
+        $evening_and_weekend =$request->evening_and_weekend;
+        $weekdays =$request->weekdays;
+        $weekends =$request->weekends;
 
         $request->request->remove('venue_id');
         $request->request->remove('slc_code');
@@ -128,10 +131,14 @@ class CoursCreationController extends Controller
 
         if($courseCreation)
         foreach($venuList as $key => $venueId):
+            $eveningAndWeekend = (isset($evening_and_weekend[$key]) ? $evening_and_weekend[$key] : '');
             $courseCreationVenue = new CourseCreationVenue();
             $courseCreationVenue->course_creation_id =  $courseCreation->id;
             $courseCreationVenue->venue_id = $venueId;
             $courseCreationVenue->slc_code = $slcCode[$key];
+            $courseCreationVenue->evening_and_weekend = $eveningAndWeekend;
+            $courseCreationVenue->weekdays = (isset($weekdays[$key]) ? $weekdays[$key] : 0);
+            $courseCreationVenue->weekends = ($eveningAndWeekend == 1 && isset($weekends[$key]) ? $weekends[$key] : 0);
             $courseCreationVenue->save();
         endforeach;
 
@@ -186,14 +193,21 @@ class CoursCreationController extends Controller
 
         $venuList = $request->venue_id;
         $slcCode =$request->slc_code;
+        $evening_and_weekend =$request->evening_and_weekend;
+        $weekdays =$request->weekdays;
+        $weekends =$request->weekends;
         if($courseDF)
         foreach($venuList as $key => $venueId):
+            $eveningAndWeekend = (isset($evening_and_weekend[$key]) ? $evening_and_weekend[$key] : '');
             $courseCreationVenue = CourseCreationVenue::where('course_creation_id',$CC_ID)->where('venue_id',$venueId)->withTrashed()->get()->first();
             if($courseCreationVenue):
                 if($courseCreationVenue->deleted_at!=NULL) {
                     $courseCreationVenue->restore();
                 }
                 $courseCreationVenue->slc_code = $slcCode[$key];
+                $courseCreationVenue->evening_and_weekend = $eveningAndWeekend;
+                $courseCreationVenue->weekdays = (isset($weekdays[$key]) ? $weekdays[$key] : 0);
+                $courseCreationVenue->weekends = ($eveningAndWeekend == 1 && isset($weekends[$key]) ? $weekends[$key] : 0);
                 
                 $courseCreationVenue->save();
                 
@@ -202,6 +216,9 @@ class CoursCreationController extends Controller
                 $courseCreationVenue->course_creation_id =  $CC_ID;
                 $courseCreationVenue->venue_id = $venueId;
                 $courseCreationVenue->slc_code = $slcCode[$key];
+                $courseCreationVenue->evening_and_weekend = $eveningAndWeekend;
+                $courseCreationVenue->weekdays = (isset($weekdays[$key]) ? $weekdays[$key] : 0);
+                $courseCreationVenue->weekends = ($eveningAndWeekend == 1 && isset($weekends[$key]) ? $weekends[$key] : 0);
                 $courseCreationVenue->save();
             endif;
         endforeach;

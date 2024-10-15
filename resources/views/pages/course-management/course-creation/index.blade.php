@@ -103,7 +103,7 @@
 
     <!-- BEGIN: Add Modal -->
     <div id="addCourseCreationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="addCourseCreationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -198,16 +198,28 @@
                         </div>
                         <div class="grid grid-cols-12 gap-3 border border-gray-100 p-5 mt-2">
                             
-                            <div class="col-start-8 col-span-4">
-                                <button class="venueAdd transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-48 "><i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
-                                    Add more venue <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i></button>
+                            <div class="col-span-12 text-right">
+                                <button class="venueAdd btn btn-primary w-auto text-shite">
+                                    <i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
+                                    Add more venue 
+                                    <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i>
+                                </button>
                             </div>
-                            <table id="add-newvenue" class=" col-span-12 text-left tabulator-responsive-collapse border-0">
-                                <tbody>
-                                    <tr>
-                                        <td class="col-span-5">
-                                            <div>
-                                                <label for="venue_id1" class="form-label">Venue</label>
+                            <div class="col-span-12">
+                                <table id="add-newvenue" class="table table-sm table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Venue</th>
+                                            <th>SLC Code</th>
+                                            <th>Evening/Weekend</th>
+                                            <th>Weekdays</th>
+                                            <th>Weekends</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="w-2/6">
                                                 <select id="venue_id1" name="venue_id[]" class="form-control w-full">
                                                     <option value="">Please Select</option>
                                                     @if(!empty($venues))
@@ -216,20 +228,27 @@
                                                         @endforeach
                                                     @endif
                                                 </select>
-                                            </div>
-                                        </td>
-                                        <td class="col-span-5">
-                                            <div>
-                                                <label for="slc_code1" class="form-label">SLC Code</label>
+                                            </td>
+                                            <td class="w-1/6">
                                                 <input id="slc_code1" type="text" name="slc_code[]" class="form-control w-full">
-                                            </div>
-                                        </td>
-                                        <td class="col-span-2">
-                                            
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            </td>
+                                            <td>
+                                                <div class="form-check form-switch m-0 justify-center">
+                                                    <input name="evWkToggle[]" class="form-check-input eveningAndWeekend" value="1" type="checkbox">
+                                                </div>
+                                                <input type="hidden" class="evening_and_weekend" name="evening_and_weekend[]" value="0"/>
+                                            </td>
+                                            <td>
+                                                <input type="number" class="w-full form-control weekdays" step="1" name="weekdays[]" value=""/>
+                                            </td>
+                                            <td>
+                                                <input readonly type="number" class="w-full form-control weekends" step="1" name="weekends[]" value=""/>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>      
                     </div>
                     <div class="modal-footer">
@@ -257,7 +276,7 @@
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
     <div id="editCourseCreationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="editCourseCreationForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -366,13 +385,28 @@
                         </div>
                         <div class="grid grid-cols-12 gap-3 border border-gray-100 p-5 mt-2">
                             
-                            <div class="col-start-8 col-span-4">
-                                <button class="venueAddForEdit transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-2 w-48 "><i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
-                                    Add more venue <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i></button>
+                            <div class="col-span-12 text-right">
+                                <button class="venueAddForEdit  btn btn-primary w-auto text-shite">
+                                    <i data-tw-merge data-lucide="plus" class="stroke-1.5  mr-2 h-4 w-4"></i>
+                                    Add more venue 
+                                    <i  data-loading-icon="oval" data-color="white" class="load-icon w-4 h-4 ml-2 hidden"></i>
+                                </button>
                             </div>
-                            <table id="edit-newvenue" class=" col-span-12 text-left tabulator-responsive-collapse border-0">
-                                <tbody><tr></tr></tbody>
-                            </table>
+                            <div class="col-span-12">
+                                <table id="edit-newvenue" class="table table-sm table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Venue</th>
+                                            <th>SLC Code</th>
+                                            <th>Evening/Weekend</th>
+                                            <th>Weekdays</th>
+                                            <th>Weekends</th>
+                                            <th>&nbsp;</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                             <div class="acc__input-error error-venue_id text-danger mt-2 col-span-12"></div>
                         </div>    
                     </div>

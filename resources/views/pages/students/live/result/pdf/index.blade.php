@@ -58,7 +58,7 @@
     <div class="row div_print_table" style="text-transform:uppercase;">
               
   
-        <p class="transcript-header">Interim transcript of academic achievement</p>
+        <p style="padding-top:100px;" class="transcript-header ">Interim transcript of academic achievement</p>
         
         <table style="width:360px;float:left;font-size:15px;">
           <tbody><tr>
@@ -184,8 +184,7 @@
       
       
         <table id="grade-detail" border="1" style="width:350px;border-collapse:collapse;font-size:9px; margin-right: 10px; float: left;">
-            <table id="grade-detail" border="1" style="width:350px;border-collapse:collapse;font-size:9px; margin-right: 10px; float: left;">
-                <tr>
+              <tr>
                   <td>GRADE</td>
                   <td>DESCRIPTION</td>
                 </tr>
@@ -220,8 +219,7 @@
                 <tr>
                   <td>W</td>
                   <td>WITHHOLD</td>
-                </tr>        
-              </table>
+                </tr>    
         </table>
         
          <table border="1" style="width:300px;float:left;font-size:9px;border-collapse:collapse;">
@@ -247,7 +245,7 @@
         //                     $signatureImg = url('storage/signatories/'.$signature->signature);
         //                 endif;
         @endphp
-        <div style="position: absolute; bottom: 0; top:95%;">
+        <div style="position: absolute; bottom: 0; top:96%;">
         <p style="border-bottom:1px dotted black;width:200px;"></p>
         <p style="margin-left:20px;margin-bottom:5px; font-size: 10px;"></p>
         <p style="margin:0;margin-left:20px;margin-bottom:5px; font-size: 10px;">Date Issue: {{ date('jS M, Y') }}</p>

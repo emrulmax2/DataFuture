@@ -2181,3 +2181,24 @@ input[type=number] {
         width: 80%;
     }
 }
+
+#add-newvenue.table tr th,
+#add-newvenue.table tr td,
+#edit-newvenue.table tr th,
+#edit-newvenue.table tr td{
+    padding-right: 3px;
+    padding-left: 3px;
+}
+#add-newvenue.table tr th:first-child,
+#add-newvenue.table tr td:first-child,
+#edit-newvenue.table tr th:first-child,
+#edit-newvenue.table tr td:first-child{
+    padding-left: 0;
+}
+#add-newvenue.table tr th:last-child,
+#add-newvenue.table tr td:last-child,
+#edit-newvenue.table tr th:last-child,
+#edit-newvenue.table tr td:last-child{
+    padding-right: 0;
+    width: 50px;
+}

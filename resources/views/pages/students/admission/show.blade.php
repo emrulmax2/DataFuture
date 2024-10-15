@@ -323,7 +323,7 @@
                         </div>
                     </div>
                 @endif
-                @if(isset($applicant->course->creation->has_evening_and_weekend) && $applicant->course->creation->has_evening_and_weekend == 1)
+                @if($applicant->creation_venue_status)
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Are you applying for evening and weekend classes (Full Time)</div>

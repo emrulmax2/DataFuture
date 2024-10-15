@@ -8,7 +8,7 @@ import TomSelect from "tom-select";
         },
         placeholder: 'Search Here...',
         //persist: false,
-        create: true,
+        create: false,
         allowEmptyOption: true,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
@@ -62,6 +62,10 @@ import TomSelect from "tom-select";
 
             venue_id.disable();
 
+        })
+
+        $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+            $('[name="full_time"]', this).prop('checked', false);
         })
     });
 
@@ -144,6 +148,10 @@ import TomSelect from "tom-select";
                 venue_id.disable();
             })
             
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+            })
+            
             axios({
                 method: "post",
                 url: route('student.get.semesters.by.academic'),
@@ -193,6 +201,10 @@ import TomSelect from "tom-select";
                 venue_id.clear(true);
                 venue_id.disable();
             })
+            
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+            })
         }
     });
 
@@ -206,6 +218,10 @@ import TomSelect from "tom-select";
             $('#editStudentCourseChangeModal .courseWrap').fadeOut('fast', function(){
                 courseTom.clear();
                 courseTom.disable();
+            })
+            
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
             })
             axios({
                 method: "post",
@@ -241,6 +257,10 @@ import TomSelect from "tom-select";
             $('#editStudentCourseChangeModal .courseWrap').fadeOut('fast', function(){
                 courseTom.clear();
                 courseTom.disable();
+            })
+            
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
             })
         }
     });
@@ -315,7 +335,11 @@ import TomSelect from "tom-select";
                 venue_id.clear(true);
                 venue_id.clearOptions();
             })
-        }else 
+            
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+            })
+        }else
             axios({
                 method: "get",
                 url: route("course.creation.edit", SelectedValue),
@@ -356,6 +380,44 @@ import TomSelect from "tom-select";
                 console.log(error);
             });
             
+    });
+
+    $('#venue_id').on('change', function(e){
+        let $theVenue = $(this);
+        let $theCourseCreation = $('#course_id');
+
+        let venue_id = $theVenue.val();
+        let course_creation_id = $theCourseCreation.val();
+
+        if(venue_id > 0 && course_creation_id > 0){
+            axios({
+                method: "post",
+                url: route("student.get.evening.weekend.status"),
+                data: {course_creation_id : course_creation_id, venue_id : venue_id},
+                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+            }).then((response) => {
+                if (response.status == 200) {
+                    if(response.data.weekends == 1){
+                        $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeIn('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', false);
+                        })
+                    }else{
+                        $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', false);
+                        })
+                    }
+                }
+            }).catch((error) => {
+                $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                    $('[name="full_time"]', this).prop('checked', false);
+                })
+                console.log(error);
+            });
+        }else{
+            $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
+                $('[name="full_time"]', this).prop('checked', false);
+            })
+        }
     })
 
 })();
