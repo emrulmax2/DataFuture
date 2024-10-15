@@ -210,8 +210,8 @@
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="academic_year_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 flex justify-start">Academic year <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
-                                    <div class="col-span-12 sm:col-span-7">
+                                    <label for="academic_year_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6 flex justify-start">Academic year <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <select id="academic_year_id" class="lcc-tom-select w-full" name="academic_year_id">
                                             <option value="">Please Select</option>
                                             @if($academicYears->count() > 0)
@@ -226,8 +226,8 @@
                             </div>
                             <div class="col-span-12 semesterWrap" style="display: none;">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="semester_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 flex justify-start">Semester <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
-                                    <div class="col-span-12 sm:col-span-7">
+                                    <label for="semester_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6 flex justify-start">Semester <span class="text-danger">*</span><i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 loading hidden"></i></label>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <select id="semester_id" class="lcc-tom-select w-full" name="semester_id">
                                             <option value="">Please Select</option>
                                             {{-- @if($semesters->count() > 0)
@@ -242,8 +242,8 @@
                             </div>
                             <div class="col-span-12 courseWrap" style="display: none;">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="course_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5 inline-flex">Course <span class="text-danger">*</span> <i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 courseLoading hidden"></i></label>
-                                    <div class="col-span-12 sm:col-span-7">
+                                    <label for="course_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6 inline-flex">Course <span class="text-danger">*</span> <i data-loading-icon="oval" class="w-4 h-4 ml-2 relative t-1 courseLoading hidden"></i></label>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <select id="course_id" class="lcc-tom-select w-full" name="course_id">
                                             <option value="">Please Select</option>
                                             {{-- @if($courses->count() > 0)
@@ -258,8 +258,8 @@
                             </div>
                             <div class="col-span-12 venueWrap" style="display: none;">
                                 <div class="grid grid-cols-12 gap-x-4">
-                                    <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-5">Venue <span class="text-danger">*</span></label>
-                                    <div class="col-span-12 sm:col-span-7">
+                                    <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Venue <span class="text-danger">*</span></label>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <select id="venue_id" class="lcc-tom-select w-full" name="venue_id">
                                             <option value="">Please Select</option>
                                             {{-- @if($courses->count() > 0)
@@ -269,6 +269,18 @@
                                             @endif --}}
                                         </select>
                                         <div class="acc__input-error error-venue_id text-danger mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 eveningWeekendWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4">
+                                    <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time)</label>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <div class="form-check form-switch">
+                                            <input id="cr_full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
+                                            <label class="form-check-label" for="cr_full_time">&nbsp;</label>
+                                        </div>
+                                        <div class="acc__input-error error-full_time text-danger mt-2"></div>
                                     </div>
                                 </div>
                             </div>

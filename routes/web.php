@@ -340,6 +340,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::get('application/show/{id}', 'show')->name('application.show');
 
             Route::post('application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+            Route::post('application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
 
         Route::controller(ApplicantQualificationController::class)->group(function() {
@@ -433,6 +434,8 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('agent-application/review', 'review')->name('application.review');
             Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
+
+            Route::post('agent-application/get-evening-weekend-status', 'getEveningWeekendStatus')->name('application.get.evening.weekend.status');
         });
 
         Route::controller(ApplicantQualificationController::class)->group(function() {
@@ -970,6 +973,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/get-semesters-by-academic', 'getSemesterByAcademic')->name('student.get.semesters.by.academic');
         Route::post('student/get-courses-by-academic-semester', 'getCourseByAcademicSemester')->name('student.get.courses.by.academic.semester');
         Route::post('student/assigned-new-course', 'assignedNewCourse')->name('student.assigned.new.course');
+
+        Route::post('student/get-evening-weekend-status', 'getEveningWeekendStatus')->name('student.get.evening.weekend.status');
     });
 
     Route::controller(AwardingBodyDetailController::class)->group(function() {
@@ -1124,6 +1129,8 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/send-mobile-verify-code','verifyMobileVerificationCode')->name('admission.mobile.verify.code');
 
         Route::post('admission/download-document', 'admissionDocumentDownload')->name('admission.document.download');
+
+        Route::post('admission/get-evening-weekend-status', 'getEveningWeekendStatus')->name('admission.get.evening.weekend.status');
         
     });
 

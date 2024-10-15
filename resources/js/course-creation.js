@@ -210,6 +210,12 @@ var courseCreationListTable = (function () {
             $('#addCourseCreationModal .requiredHoursWrap').fadeOut('fast', function(){
                 $('[name="required_hours"]', this).val('');
             })
+            $('#addCourseCreationModal #add-newvenue .ajaxRows').remove();
+            $('#addCourseCreationModal #add-newvenue select').val('');
+            $('#addCourseCreationModal #add-newvenue input:not([type="checkbox"]):not([type="hidden"])').val('');
+            $('#addCourseCreationModal #add-newvenue .eveningAndWeekend').prop('checked', false);
+            $('#addCourseCreationModal #add-newvenue .evening_and_weekend').val('0');
+            $('#addCourseCreationModal #add-newvenue .weekends').attr('readonly', 'readonly');
         });
         
         const editCourseCreationModalEl = document.getElementById('editCourseCreationModal')
@@ -227,6 +233,7 @@ var courseCreationListTable = (function () {
             $('#editCourseCreationModal .requiredHoursWrap').fadeOut('fast', function(){
                 $('[name="required_hours"]', this).val('');
             })
+            $('#editCourseCreationModal #edit-newvenue tbody').html('');
         });
 
 
@@ -395,24 +402,36 @@ var courseCreationListTable = (function () {
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);
                     let venues = response.data.venues;
-                    $('table#edit-newvenue').html('');
-                    $('table#edit-newvenue').html('<tr></tr>');
+                    $('table#edit-newvenue tbody').html('');
                     venues.forEach((e, i) => {
                     if(e.pivot.deleted_at==null) {
-                    let html='<tr id="'+e.pivot.id+'"><td class="col-span-5">\
-                                <label for="venue_id'+e.pivot.id+'" class="form-label">Venue</label>\
-                                <select id="venue_id'+e.pivot.id+'" name="venue_id[]" class="form-control w-full">\
-                                    <option selected value="'+e.id+'">'+e.name+'</option>\
-                                </select>\
-                            </td>\
-                            <td class="col-span-5">\
-                                <label for="slc_code'+e.pivot.id+'" class="form-label">SLC Code</label>\
-                                <input id="slc_code'+e.pivot.id+'" type="text" name="slc_code[]" value="'+e.pivot.slc_code+'" class="form-control w-full">\
-                            </td>\
-                            <td class="col-span-2">\
-                                <button id="delete-'+e.pivot.id+'" type="button" data-id="'+e.pivot.id+'"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
-                            </td></tr>';
-                            $('table#edit-newvenue tr:last').after(html); 
+                            let html='<tr id="'+e.pivot.id+'">\
+                                        <td class="w-2/6">\
+                                            <select id="venue_id'+e.pivot.id+'" name="venue_id[]" class="form-control w-full">\
+                                                <option selected value="'+e.id+'">'+e.name+'</option>\
+                                            </select>\
+                                        </td>\
+                                        <td class="w-1/6">\
+                                            <input id="slc_code'+e.pivot.id+'" type="text" name="slc_code[]" value="'+e.pivot.slc_code+'" class="form-control w-full">\
+                                        </td>\
+                                        <td>\
+                                            <div class="form-check form-switch m-0 justify-center">\
+                                                <input '+(e.pivot.evening_and_weekend == 1 ? 'checked' : '')+' name="evWkToggle[]" class="form-check-input eveningAndWeekend" value="1" type="checkbox">\
+                                            </div>\
+                                            <input type="hidden" class="evening_and_weekend" name="evening_and_weekend[]" value="'+(e.pivot.evening_and_weekend == 1 ? '1' : '0')+'"/>\
+                                        </td>\
+                                        <td>\
+                                            <input type="number" class="w-full form-control weekdays" step="1" name="weekdays[]" value="'+(e.pivot.weekdays > 0 ? e.pivot.weekdays : '')+'"/>\
+                                        </td>\
+                                        <td>\
+                                            <input '+(e.pivot.evening_and_weekend == 1 ? '' : 'readonly')+' type="number" class="w-full form-control weekends" step="1" name="weekends[]" value="'+(e.pivot.evening_and_weekend == 1 && e.pivot.weekends > 0 ? e.pivot.weekends : '')+'"/>\
+                                        </td>\
+                                        <td class="col-span-2">\
+                                            <button id="delete-'+e.pivot.id+'" type="button" data-id="'+e.pivot.id+'"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                                        </td>\
+                                    </tr>';
+                            //$('table#edit-newvenue tr:last').after(html); 
+                            $('table#edit-newvenue tbody').append(html); 
                             createIcons({
                                 icons,
                                 "stroke-width": 1.5,
@@ -424,6 +443,17 @@ var courseCreationListTable = (function () {
             }).catch((error) => {
                 console.log(error);
             });
+        });
+
+        $("table#edit-newvenue").on('change','.eveningAndWeekend',function(){
+            let $theTr = $(this).closest('tr');
+            if($(this).prop('checked')){
+                $theTr.find('.weekends').removeAttr('readonly').val('')
+                $theTr.find('.evening_and_weekend').val(1)
+            }else{
+                $theTr.find('.weekends').attr('readonly', 'readonly').val('');
+                $theTr.find('.evening_and_weekend').val(0)
+            }
         });
 
         $('#editCourseCreationForm').on('submit', function(e){
@@ -516,10 +546,20 @@ var courseCreationListTable = (function () {
 
         $("table#add-newvenue").on('click','.btnDelete',function(){
             let tthis = $(this);
-                tthis.closest('tr').remove();
-            
-            
+            tthis.closest('tr').remove();
         });
+
+        $("table#add-newvenue").on('change','.eveningAndWeekend',function(){
+            let $theTr = $(this).closest('tr');
+            if($(this).prop('checked')){
+                $theTr.find('.weekends').removeAttr('readonly').val('')
+                $theTr.find('.evening_and_weekend').val(1)
+            }else{
+                $theTr.find('.weekends').attr('readonly', 'readonly').val('');
+                $theTr.find('.evening_and_weekend').val(0)
+            }
+        });
+
         $('.venueAdd').on('click', function(e){
             e.preventDefault();
             document.querySelector('.venueAdd').setAttribute('disabled', 'disabled');
@@ -535,11 +575,9 @@ var courseCreationListTable = (function () {
                 document.querySelector(".venueAdd svg.load-icon").style.cssText ="display:none;";
             
                 if (response.status == 200) {
-
                     let dataset = response.data
                     let randomId = Math.floor(Math.random() * 101);
-                    let html='<tr><td class="col-span-5">\
-                                <label for="venue_id'+randomId+'" class="form-label">Venue</label>\
+                    let html='<tr class="ajaxRows"><td class="w-2/6">\
                                 <select id="venue_id'+randomId+'" name="venue_id[]" class="form-control w-full">\
                                     <option value="">Please Select</option>'
                                     dataset.forEach((e, i) => {
@@ -548,12 +586,23 @@ var courseCreationListTable = (function () {
                     
                                  html+='</select>\
                             </td>\
-                            <td class="col-span-5">\
-                                <label for="slc_code'+randomId+'" class="form-label">SLC Code</label>\
+                            <td class="w-1/6">\
                                 <input id="slc_code'+randomId+'" type="text" name="slc_code[]" class="form-control w-full">\
                             </td>\
+                            <td>\
+                                <div class="form-check form-switch m-0 justify-center">\
+                                    <input name="evening_and_weekend[]" class="form-check-input eveningAndWeekend" value="1" type="checkbox">\
+                                </div>\
+                                <input type="hidden" class="evening_and_weekend" name="evening_and_weekend[]" value="0"/>\
+                            </td>\
+                            <td>\
+                                <input type="number" class="w-full form-control weekdays" step="1" name="weekdays[]" value=""/>\
+                            </td>\
+                            <td>\
+                                <input readonly type="number" class="w-full form-control weekends" step="1" name="weekends[]" value=""/>\
+                            </td>\
                             <td class="col-span-2">\
-                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
                             </td></tr>';
                             $('table#add-newvenue tr:last').after(html); 
                             createIcons({
@@ -568,7 +617,7 @@ var courseCreationListTable = (function () {
             .catch((error) => {
                 console.log(error);
             });
-        })
+        });
 
         $("table#edit-newvenue").on('click','.btnDelete',function(){
             let tthis = $(this);
@@ -655,8 +704,7 @@ var courseCreationListTable = (function () {
 
                     let dataset = response.data
                     let randomId = Math.floor(Math.random() * 101);
-                    let html='<tr id="'+randomId+'"><td class="col-span-5">\
-                                <label for="venue_id'+randomId+'" class="form-label">Venue</label>\
+                    let html='<tr id="'+randomId+'"><td class="w-2/6">\
                                 <select id="venue_id'+randomId+'" name="venue_id[]" class="form-control w-full">\
                                     <option value="">Please Select</option>'
                                     dataset.forEach((e, i) => {
@@ -665,12 +713,23 @@ var courseCreationListTable = (function () {
                     
                                  html+='</select>\
                             </td>\
-                            <td class="col-span-5">\
-                                <label for="slc_code'+randomId+'" class="form-label">SLC Code</label>\
+                            <td class="w-1/6">\
                                 <input id="slc_code'+randomId+'" type="text" name="slc_code[]" class="form-control w-full">\
                             </td>\
+                            <td>\
+                                <div class="form-check form-switch m-0 justify-center">\
+                                    <input name="evening_and_weekend[]" class="form-check-input eveningAndWeekend" value="1" type="checkbox">\
+                                </div>\
+                                <input type="hidden" class="evening_and_weekend" name="evening_and_weekend[]" value="0"/>\
+                            </td>\
+                            <td>\
+                                <input type="number" class="w-full form-control weekdays" step="1" name="weekdays[]" value=""/>\
+                            </td>\
+                            <td>\
+                                <input readonly type="number" class="w-full form-control weekends" step="1" name="weekends[]" value=""/>\
+                            </td>\
                             <td class="col-span-2">\
-                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8 mt-7"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
+                                <button type="button" data-id="0"  class="btnDelete btn btn-danger text-white btn-rounded ml-1 p-0 w-8 h-8"><i data-lucide="Trash2" class="w-4 h-4"></i></button>\
                             </td></tr>';
                             $('table#edit-newvenue tr:last').after(html); 
                             createIcons({

@@ -98,12 +98,13 @@ class PaymentUploadManagementController extends Controller
                 $HTML .= '<input type="hidden" name="parent_total" value="'.$summaryRow[5].'"/>';
                 $HTML .= '<table class="table table-bordered table-sm mb-3">';
                     $HTML .= '<thead>';
-                        $HTML .= '<tr><th>Name</th><th>No of Transactions</th><th>Date</th><th>Total</th></tr>';
+                        $HTML .= '<tr><th>Name</th><th>No of Transactions</th><th>Date</th><th>Total</th><th>Errors</th></tr>';
                         $HTML .= '<tr>';
                             $HTML .= '<td>'.$summaryRow[1].'</td>';
                             $HTML .= '<td>'.$summaryRow[2].'</td>';
                             $HTML .= '<td>'.date('d-m-Y', strtotime($trans_date)).'</td>';
                             $HTML .= '<td>'.$summaryRow[5].'</td>';
+                            $HTML .= '<td>[ERRORS]</td>';
                         $HTML .= '</tr>';
                     $HTML .= '</thead>';
                 $HTML .= '</table>';
@@ -124,6 +125,7 @@ class PaymentUploadManagementController extends Controller
                     $HTML .= '</thead>';
                     $HTML .= '<tbody>';
                         $r = 1;
+                        $errorCount = 0;
                         foreach($csvData as $row):
                             if($r > 1):
                                 $term = $row[0];
@@ -247,6 +249,7 @@ class PaymentUploadManagementController extends Controller
                                     $HTML .= '<tr class="'.$tr_class.'" style="background: '.($error ? '#ebccd1;' : '#FFF').'">';
                                         $HTML .= '<td colspan="9" class="text-center font-medium text-danger">'.$labels.'</td>';
                                     $HTML .= '</tr>';
+                                    $errorCount += 1;
                                 endif;
                             endif;
                             $r++;
@@ -270,11 +273,15 @@ class PaymentUploadManagementController extends Controller
                                 </svg>';
                     $HTML .= '</button>';
                 $HTML .= '</div>';
+
+                $errorHTML = ($errorCount > 0 ? '<span class="text-danger font-medium">'.$errorCount.' Error Found</span>' : '<span class="text-success font-medium">No Error Found</span>');
+                $HTML = str_replace('[ERRORS]', $errorHTML, $HTML);
             else:
                 $HTML = '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
                             <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Empty csv file uploaded. Please upload a valid .csv file with transactions.
                         </div>';
             endif;
+
             return response()->json(['htm' => $HTML], 200);
         else:
             $HTML = '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">

@@ -15,5 +15,8 @@ class CourseCreationVenue extends Model
         'course_creation_id',
         'venue_id',
         'slc_code',
+        'evening_and_weekend',
+        'weekdays',
+        'weekends',
     ];
 }

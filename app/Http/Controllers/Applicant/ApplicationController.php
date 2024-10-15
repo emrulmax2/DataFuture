@@ -31,6 +31,7 @@ use App\Models\ApplicantQualification;
 use App\Models\ComonSmtp;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseCreationVenue;
 use App\Models\EmploymentReference;
 use App\Models\Option;
 use App\Models\ReferralCode;
@@ -45,6 +46,7 @@ use Illuminate\Support\Facades\Http;
 class ApplicationController extends Controller
 {
     public function index(){
+        
         return view('pages.applicant.application.index', [
             'title' => 'Application Form - London Churchill College',
             'breadcrumbs' => [
@@ -164,12 +166,16 @@ class ApplicationController extends Controller
     public function storeCourseDetails(ApplicantCourseDetailsRequest $request){
         $applicant_id = $request->applicant_id;
         $course_creation_id = $request->course_creation_id;
+        $venue_id = (isset($request->venue_id) && $request->venue_id > 0 ? $request->venue_id : 0);
         $courseCreation = CourseCreation::find($course_creation_id);
         $studentLoan = $request->student_loan;
         $studentFinanceEngland = ($studentLoan == 'Student Loan' && isset($request->student_finance_england) && $request->student_finance_england > 0 ? $request->student_finance_england : null);
         $appliedReceivedFund = ($studentLoan == 'Student Loan' && isset($request->applied_received_fund) && $request->applied_received_fund > 0 ? $request->applied_received_fund : null);
         $fundReceipt = ($studentFinanceEngland == 1 && isset($request->fund_receipt) && $request->fund_receipt > 0 ? $request->fund_receipt : null);
         $crsCrnInstance = CourseCreationInstance::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get()->first();
+
+        $courseVenue = CourseCreationVenue::where('course_creation_id', $course_creation_id)->where('venue_id', $venue_id)->get()->first();
+        $venueEW = ((isset($courseVenue->evening_and_weekend) && $courseVenue->evening_and_weekend == 1) && (isset($courseVenue->weekends) && $courseVenue->weekends > 0) ? true : false );
 
         $course = ApplicantProposedCourse::updateOrCreate(['applicant_id' => $applicant_id], [
             'course_creation_id' => $course_creation_id,
@@ -181,7 +187,7 @@ class ApplicationController extends Controller
             'applied_received_fund' => $appliedReceivedFund,
             'fund_receipt' => $fundReceipt,
             'other_funding' => ($studentLoan == 'Others' && isset($request->other_funding) && !empty($request->other_funding) ? $request->other_funding : null),
-            'full_time' => ((isset($courseCreation->has_evening_and_weekend) && $courseCreation->has_evening_and_weekend == 1) && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),
+            'full_time' => ($venueEW && (isset($request->full_time) && $request->full_time > 0) ? $request->full_time : 0),
             'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
             'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
         ]);
@@ -813,5 +819,17 @@ class ApplicationController extends Controller
         }
 
         return response()->json(['msg' => $res], 200);
+    }
+
+    public function getEveningWeekendStatus(Request $request){
+        $course_creation_id = $request->course_creation_id;
+        $venue_id = $request->venue_id;
+
+        $creationVenue = CourseCreationVenue::where('course_creation_id', $course_creation_id)->where('venue_id', $venue_id)->get()->first();
+        if((isset($creationVenue->evening_and_weekend) && $creationVenue->evening_and_weekend == 1) && (isset($creationVenue->weekends) && $creationVenue->weekends > 0)):
+            return response()->json(['weekends' => 1], 200);
+        else:
+            return response()->json(['weekends' => 0], 200);
+        endif;
     }
 }

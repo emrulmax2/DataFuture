@@ -409,8 +409,8 @@ var employmentHistoryTable = (function () {
             dropdown_input: {},
         },
         placeholder: 'Search Here...',
-        persist: false,
-        create: true,
+        //persist: false,
+        create: false,
         allowEmptyOption: true,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
@@ -593,7 +593,7 @@ var employmentHistoryTable = (function () {
     });
 
     $('#course_creation_id').on('change', function(e){
-        var has_ew = $('option:selected', this).attr('data-ew');
+        /*var has_ew = $('option:selected', this).attr('data-ew');
         if(has_ew == 1){
             $('.eveningWeekendWrap').fadeIn('fast', function(){
                 $('[name="full_time"]', this).prop('checked', false);
@@ -602,7 +602,7 @@ var employmentHistoryTable = (function () {
             $('.eveningWeekendWrap').fadeOut('fast', function(){
                 $('[name="full_time"]', this).prop('checked', false);
             })
-        }
+        }*/
         $('.courseLoading').show();
         let SelectedValue = $(this).val();
         //woorking all here get the venues
@@ -650,6 +650,44 @@ var employmentHistoryTable = (function () {
                 console.log(error);
             });
             
+    });
+
+    $('#venue_id').on('change', function(e){
+        let $theVenue = $(this);
+        let $theCourseCreation = $('#course_creation_id');
+
+        let venue_id = $theVenue.val();
+        let course_creation_id = $theCourseCreation.val();
+
+        if(venue_id > 0 && course_creation_id > 0){
+            axios({
+                method: "post",
+                url: route("applicant.application.get.evening.weekend.status"),
+                data: {course_creation_id : course_creation_id, venue_id : venue_id},
+                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+            }).then((response) => {
+                if (response.status == 200) {
+                    if(response.data.weekends == 1){
+                        $('.eveningWeekendWrap').fadeIn('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', false);
+                        })
+                    }else{
+                        $('.eveningWeekendWrap').fadeOut('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', false);
+                        })
+                    }
+                }
+            }).catch((error) => {
+                $('.eveningWeekendWrap').fadeOut('fast', function(){
+                    $('[name="full_time"]', this).prop('checked', false);
+                })
+                console.log(error);
+            });
+        }else{
+            $('.eveningWeekendWrap').fadeOut('fast', function(){
+                $('[name="full_time"]', this).prop('checked', false);
+            })
+        }
     })
 
     $('#disability_status').on('change', function(){

@@ -351,22 +351,44 @@
                             </div>
                         </div>
                     </div>
+                    @php
+                        $venues = (isset($apply->course->creation->venues) && !empty($apply->course->creation->venues) ? $apply->course->creation->venues : []);
+                    @endphp
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5 ">
-                        <div id="selectVenue" class="col-span-12 sm:col-span-8 hidden">
+                        <div id="selectVenue" class="col-span-12 sm:col-span-8 {{ isset($apply->course->course_creation_id) && $apply->course->course_creation_id > 0 ? '' : 'hidden' }}">
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="venue_id" class="form-label sm:pt-2 col-span-12 sm:col-span-6">Venues <span class="text-danger">*</span></label>
                                 <div class="col-span-12 sm:col-span-6">
                                     <select id="venue_id" class="lcc-tom-select w-full tomselected" name="venue_id">
-                                
+                                        <option value="" selected>Please Select</option>
+                                        @if(!empty($venues))
+                                            @foreach($venues as $vn)
+                                                @if($vn->pivot->deleted_at==null)
+                                                    <option {{ isset($apply->course->venue) && !empty($apply->course->venue) && ($apply->course->venue->id == $vn->id) ? 'selected' : ''}} value="{{ $vn->id }}">{{ $vn->name }}</option>
+                                                @endif
+                                            @endforeach 
+                                        @endif 
                                     </select>
                                     <div class="acc__input-error error-venue_id text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="font-medium text-base">Programme</div>
+                    <!--<div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                    <div class="font-medium text-base">Programme</div>-->
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
+                        <div class="col-span-12 sm:col-span-8 eveningWeekendWrap" style="display: {{ $apply->creation_venue_status ? 'block' : 'none'}};">
+                            <div class="grid grid-cols-12 gap-x-4">
+                                <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <div class="form-check form-switch">
+                                        <input {{ (isset($apply->course->full_time) && $apply->course->full_time == 1) ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
+                                        <label class="form-check-label" for="full_time">&nbsp;</label>
+                                    </div>
+                                    <div class="acc__input-error error-full_time text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-span-12 sm:col-span-8">
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="student_loan" class="form-label sm:pt-2 col-span-12 sm:col-span-6">How are you funding your education at London Churchill College? <span class="text-danger">*</span></label>
@@ -425,18 +447,6 @@
                                 <div class="col-span-12 sm:col-span-6">
                                     <input type="text" placeholder="Other Funding" value="{{ isset($apply->course->other_funding) && !empty($apply->course->other_funding) ? $apply->course->other_funding : '' }}" id="other_funding" class="form-control" name="other_funding">
                                     <div class="acc__input-error error-other_funding text-danger mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-8 eveningWeekendWrap" style="display: {{ isset($apply->course->creation->has_evening_and_weekend) && $apply->course->creation->has_evening_and_weekend == 1 ? 'block' : 'none'}};">
-                            <div class="grid grid-cols-12 gap-x-4">
-                                <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
-                                <div class="col-span-12 sm:col-span-6">
-                                    <div class="form-check form-switch">
-                                        <input {{ (isset($apply->course->creation->has_evening_and_weekend) && $apply->course->creation->has_evening_and_weekend == 1) && (isset($apply->course->full_time) && $apply->course->full_time == 1) ? 'checked' : '' }} id="full_time" class="form-check-input" name="full_time" value="1" type="checkbox">
-                                        <label class="form-check-label" for="full_time">&nbsp;</label>
-                                    </div>
-                                    <div class="acc__input-error error-full_time text-danger mt-2"></div>
                                 </div>
                             </div>
                         </div>
@@ -644,6 +654,7 @@
                                             <input type="hidden" class="is_referral_varified" name="is_referral_varified" value="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" data-org="{{ isset($apply->is_referral_varified) && $apply->is_referral_varified > 0 ? $apply->is_referral_varified : 0 }}" />
                                         </div>
                                         <div class="acc__input-error error-verificationError text-danger mt-2"></div>
+                                        <div class="acc__input-error error-referral_code text-danger mt-2"></div>
                                     </div>
                                 </div>
                             </div>

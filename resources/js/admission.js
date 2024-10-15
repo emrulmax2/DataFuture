@@ -1742,7 +1742,7 @@ var employmentHistoryTable = (function () {
 
         $('#course_creation_id').on('change', function(e){
 
-            var has_ew = $('option:selected', this).attr('data-ew');
+            /*var has_ew = $('option:selected', this).attr('data-ew');
             if(has_ew == 1){
                 $('.eveningWeekendWrap').fadeIn('fast', function(){
                     $('[name="full_time"]', this).prop('checked', false);
@@ -1751,48 +1751,88 @@ var employmentHistoryTable = (function () {
                 $('.eveningWeekendWrap').fadeOut('fast', function(){
                     $('[name="full_time"]', this).prop('checked', false);
                 })
-            }
+            }*/
             $('.courseLoading').show();
-        let SelectedValue = $(this).val();
-        //woorking all here get the venues
-        if(SelectedValue=="") {
-            $('#selectVenue').fadeOut('fast', function(){
-                $('.courseLoading').hide();
-            })
-        }else
-            axios({
-                method: "get",
-                url: route("course.creation.edit", $('#course_creation_id').val()),
-                headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
-            }).then((response) => {
-                if (response.status == 200) {
-                    let venues = response.data.venues;
-                        venue_id.clear();
-                        venue_id.clearOptions();
-                    if(venues.length>1) {
-                        venue_id.addOption({value:'',text:"Please Select"});
-                        venue_id.addItem('');
-                    }
-                    venues.forEach((e, i) => {
-                        if(e.pivot.deleted_at==null) {
-                            if(venues.length==1) {
-                                venue_id.removeOption('');
-                                venue_id.addOption({value:e.id,text:e.name});
-                                venue_id.addItem(e.id);
-                            } else {
-                                venue_id.removeItem(e.id);
-                                venue_id.addOption({value:e.id,text:e.name});
-                            }
-                        }
-                    });
+            let SelectedValue = $(this).val();
+            //woorking all here get the venues
+            if(SelectedValue=="") {
+                $('#selectVenue').fadeOut('fast', function(){
                     $('.courseLoading').hide();
-                    
-                }
-            }).catch((error) => {
-                console.log(error);
-            });
+                })
+            }else{
+                axios({
+                    method: "get",
+                    url: route("course.creation.edit", $('#course_creation_id').val()),
+                    headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+                }).then((response) => {
+                    if (response.status == 200) {
+                        let venues = response.data.venues;
+                            venue_id.clear();
+                            venue_id.clearOptions();
+                        if(venues.length>1) {
+                            venue_id.addOption({value:'',text:"Please Select"});
+                            venue_id.addItem('');
+                        }
+                        venues.forEach((e, i) => {
+                            if(e.pivot.deleted_at==null) {
+                                if(venues.length==1) {
+                                    venue_id.removeOption('');
+                                    venue_id.addOption({value:e.id,text:e.name});
+                                    venue_id.addItem(e.id);
+                                } else {
+                                    venue_id.removeItem(e.id);
+                                    venue_id.addOption({value:e.id,text:e.name});
+                                }
+                            }
+                        });
+                        $('.courseLoading').hide();
+                        
+                    }
+                }).catch((error) => {
+                    console.log(error);
+                });
+            }
         
+        });
+
+        $('#venue_id').on('change', function(e){
+            let $theVenue = $(this);
+            let $theCourseCreation = $('#course_creation_id');
+
+            let venue_id = $theVenue.val();
+            let course_creation_id = $theCourseCreation.val();
+
+            if(venue_id > 0 && course_creation_id > 0){
+                axios({
+                    method: "post",
+                    url: route("admission.get.evening.weekend.status"),
+                    data: {course_creation_id : course_creation_id, venue_id : venue_id},
+                    headers: {"X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content")},
+                }).then((response) => {
+                    if (response.status == 200) {
+                        if(response.data.weekends == 1){
+                            $('.eveningWeekendWrap').fadeIn('fast', function(){
+                                $('[name="full_time"]', this).prop('checked', false);
+                            })
+                        }else{
+                            $('.eveningWeekendWrap').fadeOut('fast', function(){
+                                $('[name="full_time"]', this).prop('checked', false);
+                            })
+                        }
+                    }
+                }).catch((error) => {
+                    $('.eveningWeekendWrap').fadeOut('fast', function(){
+                        $('[name="full_time"]', this).prop('checked', false);
+                    })
+                    console.log(error);
+                });
+            }else{
+                $('.eveningWeekendWrap').fadeOut('fast', function(){
+                    $('[name="full_time"]', this).prop('checked', false);
+                })
+            }
         })
+        
 
         const editAdmissionCourseDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionCourseDetailsModal"));
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -1825,7 +1865,7 @@ var employmentHistoryTable = (function () {
                     });      
                     
                     setTimeout(function(){
-                        successModal.show();
+                        successModal.hide();
                         window.location.reload();
                     }, 2000);
                 }

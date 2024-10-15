@@ -8,6 +8,7 @@ use App\Http\Requests\StudentNewCourseAssignedRequest;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
+use App\Models\CourseCreationVenue;
 use App\Models\InstanceTerm;
 use App\Models\Semester;
 use App\Models\StudentArchive;
@@ -156,6 +157,10 @@ class CourseDetailController extends Controller
         $student_course_relation_id = $request->student_course_relation_id;
         $studentCourseRel = StudentCourseRelation::find($student_course_relation_id);
 
+        $courseVenue = CourseCreationVenue::where('course_creation_id', $request->course_id)->where('venue_id', $venue_id)->get()->first();
+        $venueEW = ((isset($courseVenue->evening_and_weekend) && $courseVenue->evening_and_weekend == 1) && (isset($courseVenue->weekends) && $courseVenue->weekends > 0) ? true : false );
+        $full_time = ($venueEW && isset($request->full_time) && $request->full_time > 0 ? $request->full_time : 0);
+
         $courseCreationIds = CourseCreationInstance::where('academic_year_id', $academic_year_id)->pluck('course_creation_id')->unique()->toArray();
         $courseCreation = CourseCreation::whereIn('id', $courseCreationIds)->where('course_id', $course_id)->where('semester_id', $semester_id)->orderBy('id', 'DESC')->get()->first();
 
@@ -184,6 +189,7 @@ class CourseDetailController extends Controller
                 'venue_id' => $venue_id,
                 'course_creation_id' => $courseCreation->id,
                 'semester_id' => $semester_id,
+                'full_time' => $full_time,
                 'created_by' => auth()->user()->id,
             ]);
 
@@ -199,4 +205,18 @@ class CourseDetailController extends Controller
             return response()->json(['msg' => $msg], 304);
         endif;
     }
+
+    public function getEveningWeekendStatus(Request $request){
+        $course_creation_id = $request->course_creation_id;
+        $venue_id = $request->venue_id;
+
+        $creationVenue = CourseCreationVenue::where('course_creation_id', $course_creation_id)->where('venue_id', $venue_id)->get()->first();
+        if((isset($creationVenue->evening_and_weekend) && $creationVenue->evening_and_weekend == 1) && (isset($creationVenue->weekends) && $creationVenue->weekends > 0)):
+            return response()->json(['weekends' => 1], 200);
+        else:
+            return response()->json(['weekends' => 0], 200);
+        endif;
+    }
+
+
 }

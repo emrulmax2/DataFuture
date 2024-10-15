@@ -192,4 +192,13 @@ class Applicant extends Model
         }
     }
 
+    public function getCreationVenueStatusAttribute(){
+        $proposed = ApplicantProposedCourse::where('applicant_id', $this->id)->get()->first();
+        if(isset($proposed->id) && $proposed->id > 0){
+            $courseVenue = CourseCreationVenue::where('course_creation_id', $proposed->course_creation_id)->where('venue_id', $proposed->venue_id)->get()->first();
+            return ((isset($courseVenue->evening_and_weekend) && $courseVenue->evening_and_weekend == 1) && (isset($courseVenue->weekends) && $courseVenue->weekends > 0) ? true : false );
+        }
+        return false;
+    }
+
 }

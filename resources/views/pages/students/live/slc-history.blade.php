@@ -624,7 +624,7 @@
                         </button>
                         <input type="hidden" name="studen_id" value="{{ $student->id }}"/>
                         <input type="hidden" name="studen_ssn" value="{{ $student->ssn_no }}"/>
-                        <input type="hidden" name="slc_course_code" value="{{ (isset($student->crel->creation->slc_code) ? $student->crel->creation->slc_code : '') }}"/>
+                        <input type="hidden" name="slc_course_code" value="{{ (isset($student->crel->propose->slc_code) && !empty($student->crel->propose->slc_code) ? $student->crel->propose->slc_code : '')}}"/>
                         <input type="hidden" name="student_course_relation_id" value="{{ $student->crel->id }}"/>
                         <input type="hidden" name="course_creation_id" value="{{ (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0) }}"/>
                         <input type="hidden" name="awarding_body_ref" value="{{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}"/>
@@ -952,11 +952,12 @@
                                 <select id="coc_type" class="form-control w-full" name="coc_type">
                                     <option value="">Please Select</option>
                                     <option value="Fee">Fee</option>
+                                    <option value="Outstanding">Outstanding</option>
+                                    <option value="Repetition">Repetition</option>
                                     <option value="Resumption">Resumption</option>
                                     <option value="Suspension">Suspension</option>
                                     <option value="Transfer">Transfer</option>
                                     <option value="Withdrawal">Withdrawal</option>
-                                    <option value="Outstanding">Outstanding</option>
                                 </select>
                                 <div class="acc__input-error error-coc_type text-danger mt-2"></div>
                             </div>
@@ -1034,11 +1035,12 @@
                                 <select id="ecoc_type" class="form-control w-full" name="coc_type">
                                     <option value="">Please Select</option>
                                     <option value="Fee">Fee</option>
+                                    <option value="Outstanding">Outstanding</option>
+                                    <option value="Repetition">Repetition</option>
                                     <option value="Resumption">Resumption</option>
                                     <option value="Suspension">Suspension</option>
                                     <option value="Transfer">Transfer</option>
                                     <option value="Withdrawal">Withdrawal</option>
-                                    <option value="Outstanding">Outstanding</option>
                                 </select>
                                 <div class="acc__input-error error-coc_type text-danger mt-2"></div>
                             </div>

@@ -67,7 +67,7 @@ class CourseCreation extends Model
 
     public function venues(): BelongsToMany
     {
-        return $this->belongsToMany(Venue::class,'course_creation_venue', 'course_creation_id', 'venue_id')->withPivot('slc_code','id','deleted_at');
+        return $this->belongsToMany(Venue::class,'course_creation_venue', 'course_creation_id', 'venue_id')->withPivot('slc_code','id','deleted_at', 'evening_and_weekend', 'weekdays', 'weekends');
     }
 
 }
