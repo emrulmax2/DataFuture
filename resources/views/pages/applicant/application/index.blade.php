@@ -377,7 +377,7 @@
                     <!--<div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                     <div class="font-medium text-base">Programme</div>-->
                     <div class="grid grid-cols-12 gap-4 gap-y-5 mt-5">
-                        <div class="col-span-12 sm:col-span-8 eveningWeekendWrap" style="display: {{ $apply->creation_venue_status ? 'block' : 'none'}};">
+                        <div class="col-span-12 sm:col-span-8 eveningWeekendWrap" style="display: {{ (isset($apply->creation_venue_status) && $apply->creation_venue_status ? 'block' : 'none') }};">
                             <div class="grid grid-cols-12 gap-x-4">
                                 <label for="full_time" class="form-label col-span-12 sm:col-span-6">Are you applying for evening and weekend classes (Full Time) <span class="text-danger">*</span></label>
                                 <div class="col-span-12 sm:col-span-6">
