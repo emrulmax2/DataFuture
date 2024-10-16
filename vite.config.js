@@ -287,7 +287,9 @@ export default defineConfig({
                 'resources/js/manager-tutor-tracking.js',
                 'resources/js/student-class-status-reports.js',
                 'resources/js/student-attendance-percentage.js',
+
                 'resources/js/intake-submission-pass-rate-reports.js',
+                'resources/js/intake-award-rate-reports.js',
             ],
             refresh: true,
         }),

@@ -220,6 +220,7 @@ use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Reports\ClassStatusByTermController;
 use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
+use App\Http\Controllers\Reports\IntakePerformance\AwardRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
@@ -2955,7 +2956,13 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SubmissionPassRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-submission-pass-rate-report', 'getSubmissionPassRatReport')->name('reports.intake.performance.get.submission.pass.rate.report'); 
-        //Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
+        Route::get('reports/intake-performance/print-submission-pass-rate-report/{semesters?}', 'printSubmissionPassRatReport')->name('reports.intake.performance.print.submission.pass.rate.report'); 
+        //Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
+    });
+
+    Route::controller(AwardRateReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-award-rate-report', 'getAwardRatReport')->name('reports.intake.performance.get.award.rate.report'); 
+        Route::get('reports/intake-performance/print-award-rate-report/{semesters?}', 'printAwardRatReport')->name('reports.intake.performance.print.award.rate.report'); 
         //Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
     });
     
