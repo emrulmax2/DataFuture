@@ -40,6 +40,7 @@ class ClassStatusByTermController extends Controller
         
 
         // Fetch the plans related to the term_declaration_id
+        //data
         $plans = Plan::where('term_declaration_id', $termDeclarationId[0])->get();
         $planList = $plans->pluck('id')->toArray();
 
