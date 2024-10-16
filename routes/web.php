@@ -223,6 +223,7 @@ use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportControlle
 use App\Http\Controllers\Reports\StudentDataReportController;
 use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
+use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermPerformanceReportController;
@@ -2950,6 +2951,12 @@ Route::middleware('auth')->group(function() {
     Route::controller(AttendancePercentageController::class)->group(function(){
         Route::get('attendance-percentage/{tutor_id}/{term_id}', 'index')->name('attendance.percentage'); 
         Route::get('attendance-percentage/list', 'list')->name('attendance.percentage.list'); 
+    });
+
+    Route::controller(SubmissionPassRateReportController::class)->group(function(){
+        Route::post('reports/intake-performance/get-submission-pass-rate-report', 'getSubmissionPassRatReport')->name('reports.intake.performance.get.submission.pass.rate.report'); 
+        //Route::get('reports/intake-performance/print-retention-rate/{semesters?}', 'printRetentionRateReport')->name('reports.intake.performance.print.retention.rate'); 
+        //Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
     });
     
 });

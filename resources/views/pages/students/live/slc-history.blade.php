@@ -526,7 +526,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($reg_status) && $reg_status->count() > 0)
                                         @foreach($reg_status as $rst)
-                                            <option value="{{ $rst->id }}">{{ $rst->name }}</option>
+                                            <option {{ (!isset($student->crel->abody->reference) || empty($student->crel->abody->reference) ? ($rst->id == 2 ? '' : 'disabled') : '' ) }} value="{{ $rst->id }}">{{ $rst->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -602,7 +602,7 @@
                     <div class="modal-footer">
                         @php 
                             $disable = '';
-                            if(empty($student->ssn_no) || (!isset($student->crel->creation->slc_code) || empty($student->crel->creation->slc_code)) || (!isset($student->crel->id) || empty($student->crel->id)) || !isset($student->crel->abody->reference) || empty($student->crel->abody->reference)):
+                            if(empty($student->ssn_no) || (!isset($student->crel->creation->slc_code) || empty($student->crel->creation->slc_code)) || (!isset($student->crel->id) || empty($student->crel->id))):
                                 $disable = ' disabled ';
                             endif;
                         @endphp
@@ -697,7 +697,7 @@
                                     <option value="">Please Select</option>
                                     @if(!empty($reg_status) && $reg_status->count() > 0)
                                         @foreach($reg_status as $rst)
-                                            <option value="{{ $rst->id }}">{{ $rst->name }}</option>
+                                            <option {{ (!isset($student->crel->abody->reference) || empty($student->crel->abody->reference) ? ($rst->id == 2 ? '' : 'disabled') : '' ) }} value="{{ $rst->id }}">{{ $rst->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
