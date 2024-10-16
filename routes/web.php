@@ -844,6 +844,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student-results/{student}', 'index')->name('student-results.index'); 
         
         Route::get('student-results/{student}/print', 'print')->name('student-results.print');
+
+        
         
     }); 
 
@@ -2927,6 +2929,8 @@ Route::middleware('auth')->group(function() {
 
         Route::get('reports/class-status-report', 'index')->name('reports.class-status.index'); 
         Route::any('reports/class-status-report/list', 'list')->name('reports.class-status.list'); 
+        Route::any('reports/class-status-report/schedule-list/{group}/{course}/{term}', 'scheduleList')->name('reports.class-status.schedule'); 
+        
         
     });
     Route::controller(FollowupController::class)->group(function(){

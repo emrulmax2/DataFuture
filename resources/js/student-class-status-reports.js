@@ -155,17 +155,6 @@ var statusListTable = (function () {
                     },
                 },
             ],
-            rowFormatter: function (row) {
-                var rowElement = row.getElement();
-                var expandContent = document.createElement('div');
-                expandContent.classList.add('expand-content');
-                expandContent.style.display = 'none';
-                expandContent.innerHTML =
-                    '<div>Additional content for ' +
-                    row.getData().course_name +
-                    '</div>';
-                rowElement.appendChild(expandContent);
-            },
             ajaxResponse: function (url, params, response) {
                 // Log the response to debug
                 console.log('AJAX Response:', response);
@@ -184,6 +173,26 @@ var statusListTable = (function () {
 
                 $('#classStatusFormBtn svg').removeClass('hidden');
                 $('#classStatusFormBtn svg.loadingClass').addClass('hidden');
+            },
+            rowClick: function (e, row) {
+                // Check if the row has _children
+                let childrenData = row.getData();
+
+                if (childrenData) {
+                    let $group = childrenData.group_id;
+                    let $course = childrenData.course_id;
+                    let $term = childrenData.term_id;
+
+                    // Define the new route
+                    const newRoute = route('reports.class-status.schedule', [
+                        $group,
+                        $course,
+                        $term,
+                    ]);
+
+                    // Navigate to the new route
+                    window.open(newRoute, '_blank');
+                }
             },
         });
 
