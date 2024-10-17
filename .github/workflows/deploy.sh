@@ -14,7 +14,7 @@ npm install
 npm run build
 
 # Run database migrations
-php artisan migrate --force
+php artisan migrate
 
 # Clear caches
 php artisan cache:clear
