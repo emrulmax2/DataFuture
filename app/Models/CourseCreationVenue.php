@@ -19,4 +19,8 @@ class CourseCreationVenue extends Model
         'weekdays',
         'weekends',
     ];
+
+    public function venue(){
+        return $this->belongsTo(Venue::class, 'venue_id');
+    }
 }

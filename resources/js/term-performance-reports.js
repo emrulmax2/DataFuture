@@ -8,153 +8,17 @@ import Chart from "chart.js/auto";
 import { bottom } from "@popperjs/core";
 
 (function(){
-    let dueTomOptions = {
-        plugins: {
-            dropdown_input: {}
-        },
-        placeholder: 'Search Here...',
-        //persist: false,
-        create: false,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
-    };
+    $('#termPerformanceReportAccordion .accordion-button').on('click', function(e){
+        var $thebtn = $(this);
+        var hash = $thebtn.attr('data-tw-target');
+        window.location.hash = hash;
+    });
 
-    let dueTomOptionsMul = {
-        ...dueTomOptions,
-        plugins: {
-            ...dueTomOptions.plugins,
-            remove_button: {
-                title: "Remove this item",
-            },
-        }
-    };
-
-    var term_declaration_id = new TomSelect('#term_declaration_id', dueTomOptions);
-    let attendanceRateBarChart = null;
     $(window).on('load', function(){
-        let $theTable = $('#attendanceRateOvTable');
-        let theTitle = $theTable.attr('data-title');
-        let labels = [];
-        let rates = [];
-        let bgs = [];
-        let bds = [];
-
-        $theTable.find('.rateRow').each(function(){
-            let $theRow = $(this);
-            let $checkbox = $theRow.find('.rateRowCheck');
-            if($checkbox.prop('checked')){
-                var thisLabel = [];
-                var datalabel = $theRow.attr('data-label');
-                if(datalabel.length > 33){
-                    thisLabel.push(datalabel.substr(0, 33));
-                    thisLabel.push(datalabel.substr(34));
-                    labels.push(thisLabel);
-                }else{
-                    labels.push($theRow.attr('data-label'));
-                }
-                bgs.push($theRow.attr('data-bg'));
-                bds.push($theRow.attr('data-bd'));
-                rates.push($theRow.attr('data-rate'));
-            }
-        });
-
-        if(labels.length > 0 && rates.length > 0){
-            let ctx = document.getElementById('attendanceRateBarChart').getContext("2d");
-            attendanceRateBarChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        axis: 'y',
-                        label: false,
-                        data: rates,
-                        barThickness: 25,
-                        fill: false,
-                        backgroundColor: bgs,
-                        borderColor: bds,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: theTitle,
-                            color: '#164e63e6',
-                            padding: {
-                                bottom: 20
-                            },
-                            font: {
-                                size: 18,
-                                weight: 'bold',
-                                lineHeight: 1
-                            }
-                        },
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                color: '#164e63e6',
-                                display: true,
-                                font: {
-                                    size: 13,
-                                    weight: 'bold',
-                                    lineHeight: 1.5
-                                }
-                            },
-                            stacked: false,
-                            afterFit(scale) {
-                                scale.width = 250;
-                            },
-                        }
-                    }
-                }
-            });
+        if(window.location.hash){     
+            $('#termPerformanceReportAccordion .accordion-button[data-tw-target="'+window.location.hash+'"]').removeClass('collapsed').attr('aria-expanded', 'true');
+            $('#termPerformanceReportAccordion '+window.location.hash).addClass('show').show();
         }
     });
 
-    $('#attendanceRateOvTable .rateRowCheck').on('change', function(e){
-        let $theTable = $('#attendanceRateOvTable');
-        let labels = [];
-        let rates = [];
-        let bgs = [];
-        let bds = [];
-
-        $theTable.find('.rateRow').each(function(){
-            let $theRow = $(this);
-            let $checkbox = $theRow.find('.rateRowCheck');
-            if($checkbox.prop('checked')){
-                bgs.push($theRow.attr('data-bg'));
-                bds.push($theRow.attr('data-bd'));
-                //labels.push($theRow.attr('data-label'));
-                rates.push($theRow.attr('data-rate'));
-
-                var thisLabel = [];
-                var datalabel = $theRow.attr('data-label');
-                if(datalabel.length > 33){
-                    thisLabel.push(datalabel.substr(0, 33));
-                    thisLabel.push(datalabel.substr(34));
-                    labels.push(thisLabel);
-                }else{
-                    labels.push($theRow.attr('data-label'));
-                }
-            }
-        });
-
-        attendanceRateBarChart.data.datasets[0].data = rates;
-        attendanceRateBarChart.data.datasets[0].backgroundColor = bgs;
-        attendanceRateBarChart.data.datasets[0].borderColor = bds;
-        attendanceRateBarChart.data.labels = labels;
-
-        attendanceRateBarChart.update();
-    });
-})();
+})()

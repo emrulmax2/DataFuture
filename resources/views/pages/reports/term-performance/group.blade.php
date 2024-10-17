@@ -29,7 +29,7 @@
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-12">
                         <div class="chartWrap mb-7" style="max-width: 70%;">
-                            <canvas height="{{ (55 * $result->count()) }}" id="attendanceRateBarChart"></canvas>
+                            <canvas height="{{ (55 * $result->count()) + 110 }}" id="attendanceRateBarChart"></canvas>
                         </div>
                     </div>
                 </div>

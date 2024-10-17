@@ -2831,7 +2831,11 @@ class AdmissionController extends Controller
 
         $creationVenue = CourseCreationVenue::where('course_creation_id', $course_creation_id)->where('venue_id', $venue_id)->get()->first();
         if((isset($creationVenue->evening_and_weekend) && $creationVenue->evening_and_weekend == 1) && (isset($creationVenue->weekends) && $creationVenue->weekends > 0)):
-            return response()->json(['weekends' => 1], 200);
+            if($creationVenue->weekdays > 0):
+                return response()->json(['weekends' => 1], 200);
+            else:
+                return response()->json(['weekends' => 2], 200);
+            endif;
         else:
             return response()->json(['weekends' => 0], 200);
         endif;
