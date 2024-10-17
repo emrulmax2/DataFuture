@@ -119,6 +119,9 @@ class StorageController extends Controller
 
     public function list(Request $request){
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        
+        $canEdit = ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0);
+        
         $queryStr = (isset($request->queryStr) && !empty($request->queryStr) ? $request->queryStr : '');
         $storage = (isset($request->storage) && $request->storage > 0 ? $request->storage : 0);
         $bank = AccBank::find($storage);
@@ -199,7 +202,7 @@ class StorageController extends Controller
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.$balance : '-£'.str_replace('-', '', $balance)) : ''),
                     'deleted_at' => $list->deleted_at,
                     'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? $list->transaction_doc_name : ''),
-                    'can_eidt' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
+                    'can_eidt' => $canEdit,
                 ];
                 $i++;
             endforeach;
