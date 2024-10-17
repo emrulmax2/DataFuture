@@ -17,6 +17,7 @@ class StudentDataReportBySelectionExport implements WithColumnWidths, FromView
     public function __construct($returnData)
     {
         $this->returnData = $returnData;
+        
     }
 
     public function view(): View
