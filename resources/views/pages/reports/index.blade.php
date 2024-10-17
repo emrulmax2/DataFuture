@@ -28,7 +28,7 @@
 
             <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
                 <a href="{{ route('reports.term.performance'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
-                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/report_icons/term_performance _report.png') }}">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/report_icons/term_performance_report_2.png') }}">
                 </a>
             </div>
 

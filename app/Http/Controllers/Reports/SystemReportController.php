@@ -54,6 +54,7 @@ class SystemReportController extends Controller
                 ['label' => 'Term Performance Reports', 'href' => 'javascript:void(0);']
             ],
             'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'semester' => Semester::orderBy('id', 'DESC')->get(),
         ]);
     }
 }
