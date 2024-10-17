@@ -178,7 +178,7 @@ class StorageController extends Controller
                 $flow = (isset($list->flow) && $list->flow != '' ? $list->flow : 0);
                 $transaction_amount = (isset($list->transaction_amount) && $list->transaction_amount > 0 ? $list->transaction_amount : 0);
                 
-                $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id) : 0);
+                $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id,$audit_status) : 0);
 
                 $data[] = [
                     'id' => $list->id,
@@ -211,8 +211,7 @@ class StorageController extends Controller
     }
 
 
-    public function getBalance($storage, $transaction_id){
-        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+    public function getBalance($storage, $transaction_id , $audit_status = []) {
         $bank = AccBank::find($storage);
         $openingDate = (isset($bank->opening_date) && !empty($bank->opening_date) ? date('Y-m-d', strtotime($bank->opening_date)) : '');
         $openingBalance = (isset($bank->opening_balance) && $bank->opening_balance > 0 ? $bank->opening_balance : 0);
