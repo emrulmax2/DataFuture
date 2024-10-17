@@ -444,7 +444,7 @@
                             </div>
                         </div>
                         @php
-                           $venues = $applicant->course->creation->venues
+                           $venues = (isset($applicant->course->creation->venues) && !empty($applicant->course->creation->venues) ? $applicant->course->creation->venues : []);
                         @endphp
                         <div class="col-span-12">
                             <div class="grid grid-cols-12 gap-x-4">

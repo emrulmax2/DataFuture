@@ -12,11 +12,11 @@ use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class TermPerformanceReportController extends Controller
+class TermAttendancePerformanceReportController extends Controller
 {
-    public function index(Request $request){
+    /*public function index(Request $request){
         $term_declaration_ids = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : 0);
-        return view('pages.reports.term-performance.index', [
+        return view('pages.reports.term-performance.index-old', [
             'title' => 'Term Performance Reports - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => route('reports')],
@@ -27,6 +27,71 @@ class TermPerformanceReportController extends Controller
             'theTerm' => ($term_declaration_ids > 0 ? TermDeclaration::find($term_declaration_ids) : []), 
             'result' => ($term_declaration_ids > 0 ? $this->getTermAttendance($term_declaration_ids) : false)
         ]);
+    }*/
+
+    public function generateReport(Request $request){
+        $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : 0);
+        $theTerm = TermDeclaration::find($term_declaration_id);
+        $result = $this->getTermAttendance($term_declaration_id);
+
+        $html = '';
+        if($term_declaration_id > 0 && !empty($result) && count($result) > 0):
+            $overAll = 0;
+            $row = 1;
+            if($result && !empty($result)):
+                $perticipents = $result->sum('TOTAL');
+                $attendances = $result->sum('P') + $result->sum('O') + $result->sum('E') + $result->sum('M') + $result->sum('H') + $result->sum('L');
+                $overAll = ($attendances > 0 && $perticipents > 0 ? round($attendances * 100 / $perticipents, 2) : 0);
+            endif;
+
+            $bgs = ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)'];
+            $bds = ['rgb(75, 192, 192)', 'rgb(54, 162, 235)', 'rgb(153, 102, 255)', 'rgb(255, 99, 132)', 'rgb(255, 159, 64)'];
+           
+            $html .= '<div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap">';
+                $html .= '<div class="grid grid-cols-12 gap-0">';
+                    $html .= '<div class="col-span-12">';
+                        $html .= '<div class="chartWrap mb-7" style="max-width: 70%;">';
+                            $html .= '<canvas height="300" id="attendanceRateBarChart"></canvas>';
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+                $html .= '<table class="table table-bordered table-sm" id="attendanceRateOvTable" data-title="'.(isset($theTerm->name) && !empty($theTerm->name) ? $theTerm->name : 'Undefined').'">';
+                    $html .= '<tbody>';
+                        if($result && !empty($result)):
+                            $html .= '<tr class="rateRow" data-label="Overall" data-rate="'.($overAll > 0 ? $overAll : 0).'" data-bg="'.$bgs[0].'" data-bd="'.$bds[0].'">';
+                                $html .= '<td class="w-20">';
+                                    $html .= '<div class="form-check m-0 justify-center">';
+                                        $html .= '<input checked id="rateRowCheck_0" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
+                                    $html .= '</div>';
+                                $html .= '</td>';
+                                $html .= '<th>Overall</th>';
+                                $html .= '<th>';
+                                    $html .= $overAll > 0 ? $overAll.'%' : '0.00%';
+                                $html .= '</th>';
+                            $html .= '</tr>';
+                            foreach($result as $res):
+                                $html .= '<tr class="rateRow" data-label="'.$res->course_name.'" data-rate="'.($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2) : 0).'" data-bg="'.$bgs[$row].'" data-bd="'.$bds[$row].'">';
+                                    $html .= '<td class="w-20">';
+                                        $html .= '<div class="form-check m-0 justify-center">';
+                                            $html .= '<input checked id="rateRowCheck_'.$row.'" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
+                                        $html .= '</div>';
+                                    $html .= '</td>';    
+                                    $html .= '<th><a href="'.route('reports.term.performance.course.view', [$term_declaration_id, $res->course_id]).'">'.$res->course_name.'</a></th>';
+                                    $html .= '<th>'.($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%').'</th>';
+                                $html .= '</tr>';
+                                $row++;
+                            endforeach;
+                        endif;
+                    $html .= '</tbody>';
+                $html .= '</table>';
+            $html .= '</div>';
+        else:
+            $html .= '<div class="alert alert-danger-soft show flex items-center mt-5" role="alert">';
+                $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Data not found';
+            $html .= '</div>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
     }
 
     public function getTermAttendance($term_declaration_ids){

@@ -669,24 +669,35 @@ var employmentHistoryTable = (function () {
                 if (response.status == 200) {
                     if(response.data.weekends == 1){
                         $('.eveningWeekendWrap').fadeIn('fast', function(){
-                            $('[name="full_time"]', this).prop('checked', false);
+                            $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
+                        })
+                    }else if(response.data.weekends == 2){
+                        $('.eveningWeekendWrap').fadeIn('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', true).addClass('onlyWeekends');
                         })
                     }else{
                         $('.eveningWeekendWrap').fadeOut('fast', function(){
-                            $('[name="full_time"]', this).prop('checked', false);
+                            $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
                         })
                     }
                 }
             }).catch((error) => {
                 $('.eveningWeekendWrap').fadeOut('fast', function(){
-                    $('[name="full_time"]', this).prop('checked', false);
+                    $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
                 })
                 console.log(error);
             });
         }else{
             $('.eveningWeekendWrap').fadeOut('fast', function(){
-                $('[name="full_time"]', this).prop('checked', false);
+                $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
             })
+        }
+    });
+
+    $('#full_time').on('click', function(e){
+        if($(this).hasClass('onlyWeekends')){
+            e.preventDefault();
+            e.stopPropagation();
         }
     })
 

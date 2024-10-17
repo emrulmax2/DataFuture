@@ -216,6 +216,7 @@ use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
 use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
+use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Reports\ClassStatusByTermController;
@@ -227,7 +228,7 @@ use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SystemReportController;
-use App\Http\Controllers\Reports\TermPerformance\TermPerformanceReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -2851,6 +2852,7 @@ Route::middleware('auth')->group(function() {
         Route::get('reports', 'index')->name('reports'); 
         Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
         Route::get('reports/intake-performance', 'intakePerformance')->name('reports.intake.performance'); 
+        Route::get('reports/term-performance', 'termPerformance')->name('reports.term.performance'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
@@ -2896,8 +2898,9 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
     });
 
-    Route::controller(TermPerformanceReportController::class)->group(function(){
-        Route::any('reports/term-performance', 'index')->name('reports.term.performance'); 
+    Route::controller(TermAttendancePerformanceReportController::class)->group(function(){
+        //Route::any('reports/term-performance', 'index')->name('reports.term.performance'); 
+        Route::post('reports/term-performance/generate', 'generateReport')->name('reports.term.performance.generate.report'); 
         Route::any('reports/term-performance/trend/{terms}', 'viewTermTrend')->name('reports.term.performance.term.trend'); 
 
         Route::any('reports/term-performance/course/{terms}/{course}', 'courseView')->name('reports.term.performance.course.view'); 
@@ -2961,13 +2964,17 @@ Route::middleware('auth')->group(function() {
     Route::controller(SubmissionPassRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-submission-pass-rate-report', 'getSubmissionPassRatReport')->name('reports.intake.performance.get.submission.pass.rate.report'); 
         Route::get('reports/intake-performance/print-submission-pass-rate-report/{semesters?}', 'printSubmissionPassRatReport')->name('reports.intake.performance.print.submission.pass.rate.report'); 
-        //Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
     });
 
     Route::controller(AwardRateReportController::class)->group(function(){
         Route::post('reports/intake-performance/get-award-rate-report', 'getAwardRatReport')->name('reports.intake.performance.get.award.rate.report'); 
         Route::get('reports/intake-performance/print-award-rate-report/{semesters?}', 'printAwardRatReport')->name('reports.intake.performance.print.award.rate.report'); 
-        //Route::get('reports/intake-performance/export-retention-rate/{semesters?}', 'exportRetentionRateReport')->name('reports.intake.performance.export.retention.rate'); 
+    });
+
+    Route::controller(ApplicantAnalysisReportController::class)->group(function(){
+        Route::get('reports/applicant-analysis', 'index')->name('reports.applicant.analysis'); 
+        Route::post('reports/applicant-analysis/generate-report', 'generateReport')->name('reports.applicant.analysis.generate.report'); 
+        Route::get('reports/applicant-analysis/print-report/{semesters?}', 'printReport')->name('reports.applicant.analysis.print.report'); 
     });
     
 });

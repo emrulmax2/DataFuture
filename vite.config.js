@@ -269,7 +269,7 @@ export default defineConfig({
                 'resources/js/intake-attendance-rate-reports.js',
                 'resources/js/agent-application.js',
                 'resources/js/intake-retention-reports.js',
-                'resources/js/term-performance-reports.js',
+                'resources/js/term-attendance-performance-reports.js',
                 'resources/js/term-performance-course-reports.js',
                 'resources/js/term-performance-group-reports.js',
                 'resources/js/term-performance-trend-reports.js',
@@ -290,6 +290,7 @@ export default defineConfig({
 
                 'resources/js/intake-submission-pass-rate-reports.js',
                 'resources/js/intake-award-rate-reports.js',
+                'resources/js/applicant-analysis-report.js',
             ],
             refresh: true,
         }),

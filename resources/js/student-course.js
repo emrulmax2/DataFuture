@@ -65,7 +65,7 @@ import TomSelect from "tom-select";
         })
 
         $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-            $('[name="full_time"]', this).prop('checked', false);
+            $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
         })
     });
 
@@ -149,7 +149,7 @@ import TomSelect from "tom-select";
             })
             
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false).removeClass('onlyWeekends');
             })
             
             axios({
@@ -203,7 +203,7 @@ import TomSelect from "tom-select";
             })
             
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false).removeClass('onlyWeekends');
             })
         }
     });
@@ -221,7 +221,7 @@ import TomSelect from "tom-select";
             })
             
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false).removeClass('onlyWeekends');
             })
             axios({
                 method: "post",
@@ -260,7 +260,7 @@ import TomSelect from "tom-select";
             })
             
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false).removeClass('onlyWeekends');
             })
         }
     });
@@ -337,7 +337,7 @@ import TomSelect from "tom-select";
             })
             
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false);
+                $('#editStudentCourseChangeModal .eveningWeekendWrap [name="full_time"]').prop('checked', false).removeClass('onlyWeekends');
             })
         }else
             axios({
@@ -399,24 +399,35 @@ import TomSelect from "tom-select";
                 if (response.status == 200) {
                     if(response.data.weekends == 1){
                         $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeIn('fast', function(){
-                            $('[name="full_time"]', this).prop('checked', false);
+                            $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
+                        })
+                    }else if(response.data.weekends == 2){
+                        $('.eveningWeekendWrap').fadeIn('fast', function(){
+                            $('[name="full_time"]', this).prop('checked', true).addClass('onlyWeekends');
                         })
                     }else{
                         $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                            $('[name="full_time"]', this).prop('checked', false);
+                            $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
                         })
                     }
                 }
             }).catch((error) => {
                 $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                    $('[name="full_time"]', this).prop('checked', false);
+                    $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
                 })
                 console.log(error);
             });
         }else{
             $('#editStudentCourseChangeModal .eveningWeekendWrap').fadeOut('fast', function(){
-                $('[name="full_time"]', this).prop('checked', false);
+                $('[name="full_time"]', this).prop('checked', false).removeClass('onlyWeekends');
             })
+        }
+    })
+
+    $('#editStudentCourseChangeModal #cr_full_time').on('click', function(e){
+        if($(this).hasClass('onlyWeekends')){
+            e.preventDefault();
+            e.stopPropagation();
         }
     })
 
