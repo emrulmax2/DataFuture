@@ -34,7 +34,7 @@ class ApplicantAnalysisReportController extends Controller
         $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
         $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
 
-        $report_title = 'Application Analysis Report';
+        $report_title = 'Admission Report';
         $PDFHTML = '';
         $PDFHTML .= '<html>';
             $PDFHTML .= '<head>';
@@ -89,11 +89,11 @@ class ApplicantAnalysisReportController extends Controller
                             $PDFHTML .= '<td rowspan="3" class="text-right"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
                         $PDFHTML .= '</tr>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td>Semister</td>';
+                            $PDFHTML .= '<td>Semester</td>';
                             $PDFHTML .= '<td>'.(!empty($semesterNames) ? implode(', ', $semesterNames) : 'Undefined').'</td>';
                         $PDFHTML .= '</tr>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td>Cereated By</td>';
+                            $PDFHTML .= '<td>By</td>';
                             $PDFHTML .= '<td>';
                                 $PDFHTML .= (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name);
                                 $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
@@ -130,12 +130,6 @@ class ApplicantAnalysisReportController extends Controller
         $html .= '</table>';
 
         $html .= '<table class="table table-bordered basicAnalysisTable table-sm mt-4" id="basicAnalysisTable">';
-            $html .= '<thead>';
-                $html .= '<tr>';
-                    $html .= '<th>Application Analysis</th>';
-                    $html .= '<th class="numberColumn w-[150px]">&nbsp;</th>';
-                $html .= '</tr>';
-            $html .= '</thead>';
             $html .= '<tbody>';
                 $html .= '<tr>';
                     $html .= '<th>Total Application</th>';
@@ -162,7 +156,7 @@ class ApplicantAnalysisReportController extends Controller
                             $html .= '<th>&nbsp;</th>';
                             $html .= '<th>Venue</th>';
                             $html .= '<th>Weekdays</th>';
-                            $html .= '<th>Weekends</th>';
+                            $html .= '<th>Evening / Weekend</th>';
                             $html .= '<th>Total</th>';
                             $html .= '<th>Mature Entry</th>';
                             $html .= '<th>Academic Entry</th>';
@@ -250,11 +244,60 @@ class ApplicantAnalysisReportController extends Controller
                         $html .= '<tr>';
                             $html .= '<th>&nbsp;</th>';
                             $html .= '<th>Venue</th>';
+                            $html .= '<th>&nbsp;</th>';
+                            $html .= '<th>Weekdays</th>';
+                            $html .= '<th>Evening / Weekend</th>';
+                            $html .= '<th>Total</th>';
+                            $html .= '<th>Mature Entry</th>';
+                            $html .= '<th>Academic Entry</th>';
+                            $html .= '<th>Unknown Entry</th>';
+                        $html .= '</tr>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                        if(!empty($course['venues'])):
+                            $v = 1;
+                            foreach($course['venues'] as $venue_id => $venue):
+                                $html .= '<tr>';
+                                    if($v == 1):
+                                        $html .= '<td class="courseName" rowspan="'.(count($course['venues']) * 2).'">'.$course['name'].'</td>';
+                                    endif;
+                                    $html .= '<td rowspan="2" class="w-1/6">'.$venue['name'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">Target</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekdays_trget'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekends_trget'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['total_trget'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">&nbsp;</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">&nbsp;</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">&nbsp;</td>';
+                                $html .= '</tr>';
+                                $html .= '<tr>';
+                                    $html .= '<td class="numberColumn w-[150px]">Offered</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekdays_offered'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekends_offered'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['total_offered'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['mature_entry'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['academic_entry'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['unknown_entry'].'</td>';
+                                $html .= '</tr>';
+                                $v++;
+                            endforeach;
+                        endif;
+                    $html .= '</tbody>';
+                $html .= '</table>';
+
+
+
+
+                /*$html .= '<table class="table table-bordered offeredCourseAnalysisTable table-sm mt-4" id="offeredCourseAnalysisTable">';
+                    $html .= '<thead '.($c > 1 ? 'style="display: none;"' : '').'>';
+                        $html .= '<tr>';
+                            $html .= '<th>&nbsp;</th>';
+                            $html .= '<th>Venue</th>';
                             $html .= '<th>Weekdays</th>';
                             $html .= '<th>Weekends</th>';
                             $html .= '<th>Total Target</th>';
                             $html .= '<th>Weekdays</th>';
-                            $html .= '<th>Weekends</th>';
+                            $html .= '<th>Evening / Weekend</th>';
                             $html .= '<th>Offered</th>';
                             $html .= '<th>Mature Entry</th>';
                             $html .= '<th>Academic Entry</th>';
@@ -282,7 +325,7 @@ class ApplicantAnalysisReportController extends Controller
                             endforeach;
                         endif;
                     $html .= '</tbody>';
-                $html .= '</table>';
+                $html .= '</table>';*/
                 $c++;
             endforeach;
         endif;
@@ -348,7 +391,7 @@ class ApplicantAnalysisReportController extends Controller
                                     endforeach;
                                 endif;
                                 $html .= '<tr>';
-                                    $html .= '<td class="text-left">Mean Application Age</td>';
+                                    $html .= '<td class="text-left">Mean</td>';
                                     $html .= '<td class="w-1/6">'.($avg_age > 0 ? $avg_age : '').'</td>';
                                     $html .= '<td class="w-1/6">&nbsp;</td>';
                                 $html .= '</tr>';
@@ -481,7 +524,7 @@ class ApplicantAnalysisReportController extends Controller
                         $query = DB::table('applicant_proposed_courses as apc')
                                 ->select(
                                     'sts.name as status_name', 'ap.status_id',
-                                    DB::raw('GROUP_CONCAT(DISTINCT(apc.applicant_id)) as applicant_ids'),
+                                    DB::raw('GROUP_CONCAT(DISTINCT (apc.applicant_id) ) as applicant_ids'),
                                     DB::raw('COUNT(ap.id) as TOTAL'),
                                     DB::raw('SUM(CASE WHEN apc.full_time = 0 THEN 1 ELSE 0 END) AS WEEKDAYS'), 
                                     DB::raw('SUM(CASE WHEN apc.full_time = 1 THEN 1 ELSE 0 END) AS WEEKENDS'), 
@@ -499,15 +542,22 @@ class ApplicantAnalysisReportController extends Controller
 
                         $applicant_ids = (isset($query->applicant_ids) && !empty($query->applicant_ids) ? explode(',', str_replace(' ', '', $query->applicant_ids)) : []);
                         $offeredApplicants = array_merge($offeredApplicants, $applicant_ids);
-                        $academicEntry = (!empty($applicant_ids) ? ApplicantOtherDetail::whereIn('applicant_id', $applicant_ids)->where('is_edication_qualification', 1)->get()->count() : 0);
+                        $academicEntry = 0;
                         $matureEntry = 0;
+                        $unknownEntry = 0;
                         if(!empty($applicant_ids)):
+                            $academicEntry = ApplicantOtherDetail::whereIn('applicant_id', $applicant_ids)->where('is_edication_qualification', 1)->get()->count();
                             $matureEntry = Applicant::whereIn('id', $applicant_ids)->whereHas('other', function($q){
                                                 $q->whereNotNull('employment_status');
                                             })->whereHas('employment')->get()->count();
+                            $unknownEntry = Applicant::whereIn('id', $applicant_ids)->whereHas('other', function($q){
+                                                $q->whereNot('is_edication_qualification', 1);
+                                                $q->whereNotNull('employment_status');
+                                            })->has('employment', '=', 0)->get()->count();
                         endif;
                         $res[$creation->course_id]['venues'][$venue->venue_id]['mature_entry'] = $matureEntry;
                         $res[$creation->course_id]['venues'][$venue->venue_id]['academic_entry'] = $academicEntry;
+                        $res[$creation->course_id]['venues'][$venue->venue_id]['unknown_entry'] = $unknownEntry;
                     endforeach;
                 endif;
             endforeach;
