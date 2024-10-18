@@ -34,8 +34,8 @@
                                     <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div>
                                 </div>
                                 <div class="mt-1">1 Day ago</div>
-                                <div class="text-justify mt-1">Welcome to your new student portal.<br /> September Term will start at 09 September 2024 and
-                                    end at 22 November 2024</div>
+                                <div class="text-justify mt-1">Welcome to your new student portal.<br /> September Term will start on 09 September 2024 and
+                                    end on 22 November 2024</div>
                                 {{-- <div class="font-medium flex mt-5">
                                     <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
                                     <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
