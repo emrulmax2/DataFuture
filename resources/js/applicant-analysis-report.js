@@ -3,6 +3,105 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
+("use strict");
+var unknownEntryApplicantList = (function () {
+    var _tableGen = function (applicant_ids) {
+        let tableContent = new Tabulator("#unknownEntryApplicantList", {
+            ajaxURL: route("reports.applicant.analysis.unknown.entry.list"),
+            ajaxParams: { applicant_ids : applicant_ids },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 50,
+            paginationSizeSelector: [true, 50,100,200,500],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "Ref. No",
+                    field: "application_no",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '<div class="block">';
+                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
+                                html += '</div>';
+                                html += '<div class="inline-block relative" style="top: -5px;">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().application_no+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().full_name+'</div>';
+                                html += '</div>';
+                            html += '</div>';
+                        return html;
+                    }
+                },
+                {
+                    title: "First Name",
+                    field: "first_name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Last Name",
+                    field: "last_name",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "DOB",
+                    field: "date_of_birth",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Gender",
+                    field: "gender",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Semester",
+                    field: "semester",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Course",
+                    field: "course",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Status",
+                    field: "status_id",
+                    headerHozAlign: "left",
+                }
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+            rowClick:function(e, row){
+                window.open(row.getData().url, '_blank');
+            }
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+    };
+    return {
+        init: function (applicant_ids) {
+            _tableGen(applicant_ids);
+        },
+    };
+})();
+
 (function(){
     let apAnlsTomOptions = {
         plugins: {
@@ -85,5 +184,19 @@ import TomSelect from "tom-select";
             $('#printPdfAplicntAnalysisBtn').attr('href', 'javascript:void(0);').fadeOut();
         }
     });
+
+
+    const viewUnknownEntryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewUnknownEntryModal"));
+    const viewUnknownEntryModalEl = document.getElementById('viewUnknownEntryModal')
+    viewUnknownEntryModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#unknownEntryApplicantList').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+    });
+
+    $(document).on('click', '.viewUnknownEntryBtn', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        let applicant_ids = $theBtn.attr('data-ids');
+        unknownEntryApplicantList.init(applicant_ids);
+    })
 
 })()

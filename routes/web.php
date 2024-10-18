@@ -2974,6 +2974,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(ApplicantAnalysisReportController::class)->group(function(){
         Route::post('reports/applicant-analysis/generate-report', 'generateReport')->name('reports.applicant.analysis.generate.report'); 
         Route::get('reports/applicant-analysis/print-report/{semesters?}', 'printReport')->name('reports.applicant.analysis.print.report'); 
+        Route::get('reports/applicant-analysis/unknown-entry-list', 'unknownEntryList')->name('reports.applicant.analysis.unknown.entry.list'); 
     });
     
 });
