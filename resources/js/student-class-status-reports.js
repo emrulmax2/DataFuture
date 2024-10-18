@@ -157,12 +157,17 @@ var statusListTable = (function () {
             ],
             ajaxResponse: function (url, params, response) {
                 // Log the response to debug
-                console.log('AJAX Response:', response);
+                //console.log('AJAX Response:', response);
+                $('#classStatusFormBtn svg').removeClass('hidden');
+                $('#classStatusFormBtn svg.loadingClass').addClass('hidden');
+
                 return response; // Return the response data to Tabulator
             },
             ajaxError: function (xhr, textStatus, errorThrown) {
                 // Log any AJAX errors
                 console.error('AJAX Error:', textStatus, errorThrown);
+                $('#classStatusFormBtn svg').removeClass('hidden');
+                $('#classStatusFormBtn svg.loadingClass').addClass('hidden');
             },
             renderComplete() {
                 createIcons({
@@ -239,16 +244,25 @@ var statusListTable = (function () {
 
     $('#classStatusFormBtn').on('click', function (e) {
         let tthis = $(this);
-        $('svg', tthis).addClass('hidden');
-        $('svg.loadingClass', tthis).removeClass('hidden');
         e.preventDefault();
 
         let attendSemester = attendance_semester.getValue();
 
         if (attendSemester > 0) {
-            $('#studentGroupSearchForm .reportAlert').remove();
+            $('svg', tthis).addClass('hidden');
+            $('svg.loadingClass', tthis).removeClass('hidden');
+            $('#classStatusForm .reportAlert').remove();
             $('.statusReportListTableWrap').fadeIn();
             statusListTable.init(attendSemester);
+        } else {
+            $('#classStatusForm .reportAlert').remove();
+            $('#classStatusForm').append(
+                '<div class="reportAlert alert alert-warning mt-5 w-96 ">Please select an attendance term to proceed.</div>'
+            );
+
+            setTimeout(function () {
+                $('#classStatusForm .reportAlert').fadeOut();
+            }, 3000);
         }
     });
 
