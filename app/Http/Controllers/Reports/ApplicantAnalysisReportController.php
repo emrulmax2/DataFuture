@@ -78,6 +78,7 @@ class ApplicantAnalysisReportController extends Controller
                                 .table.offeredCourseAnalysisTable tr .numberColumn{ width: auto; }
                                 .table.offeredCourseAnalysisTable tr .courseName, .table.offeredCourseAnalysisTable tr .venueName{ width: 16.666666%; }
                                 .table.courseAnalysisTable tr .numberColumn{ width: 100px; }
+                                .viewUnknownEntryBtn{ color: inherit; font-weight: normal; text-decoration: inherit; }
                             </style>';
             $PDFHTML .= '</head>';
 
@@ -250,7 +251,7 @@ class ApplicantAnalysisReportController extends Controller
                             $html .= '<th>Total</th>';
                             $html .= '<th>Mature Entry</th>';
                             $html .= '<th>Academic Entry</th>';
-                            $html .= '<th>Unknown Entry</th>';
+                            $html .= '<th>Unknown</th>';
                         $html .= '</tr>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
@@ -277,7 +278,15 @@ class ApplicantAnalysisReportController extends Controller
                                     $html .= '<td class="numberColumn w-[150px]">'.$venue['total_offered'].'</td>';
                                     $html .= '<td class="numberColumn w-[150px]">'.$venue['mature_entry'].'</td>';
                                     $html .= '<td class="numberColumn w-[150px]">'.$venue['academic_entry'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['unknown_entry'].'</td>';
+                                    $html .= '<td class="numberColumn w-[150px]">';
+                                        if(isset($venue['unknown_entry']) && $venue['unknown_entry'] > 0 && isset($venue['unknown_ids']) && !empty($venue['unknown_ids'])):
+                                            $html .= '<a href="javascript:void(0);" data-ids="'.implode(',', $venue['unknown_ids']).'" data-tw-toggle="modal" data-tw-target="#viewUnknownEntryModal" class="viewUnknownEntryBtn text-primary underline font-medium">';
+                                        endif;
+                                        $html .= ($venue['unknown_entry'] > 0 ? $venue['unknown_entry'] : 0);
+                                        if(isset($venue['unknown_entry']) && $venue['unknown_entry'] > 0 && isset($venue['unknown_ids']) && !empty($venue['unknown_ids'])):
+                                            $html .= '</a>';
+                                        endif;
+                                    $html .= '</td>';
                                 $html .= '</tr>';
                                 $v++;
                             endforeach;
@@ -285,47 +294,6 @@ class ApplicantAnalysisReportController extends Controller
                     $html .= '</tbody>';
                 $html .= '</table>';
 
-
-
-
-                /*$html .= '<table class="table table-bordered offeredCourseAnalysisTable table-sm mt-4" id="offeredCourseAnalysisTable">';
-                    $html .= '<thead '.($c > 1 ? 'style="display: none;"' : '').'>';
-                        $html .= '<tr>';
-                            $html .= '<th>&nbsp;</th>';
-                            $html .= '<th>Venue</th>';
-                            $html .= '<th>Weekdays</th>';
-                            $html .= '<th>Weekends</th>';
-                            $html .= '<th>Total Target</th>';
-                            $html .= '<th>Weekdays</th>';
-                            $html .= '<th>Evening / Weekend</th>';
-                            $html .= '<th>Offered</th>';
-                            $html .= '<th>Mature Entry</th>';
-                            $html .= '<th>Academic Entry</th>';
-                        $html .= '</tr>';
-                    $html .= '</thead>';
-                    $html .= '<tbody>';
-                        if(!empty($course['venues'])):
-                            $v = 1;
-                            foreach($course['venues'] as $venue_id => $venue):
-                                $html .= '<tr>';
-                                    if($v == 1):
-                                        $html .= '<td class="courseName" '.(count($course['venues']) > 1 ? ' rowspan="'.count($course['venues']).'" ' : '').'>'.$course['name'].'</td>';
-                                    endif;
-                                    $html .= '<td class="w-1/6">'.$venue['name'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekdays_trget'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekends_trget'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['total_trget'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekdays_offered'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['weekends_offered'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['total_offered'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['mature_entry'].'</td>';
-                                    $html .= '<td class="numberColumn w-[150px]">'.$venue['academic_entry'].'</td>';
-                                $html .= '</tr>';
-                                $v++;
-                            endforeach;
-                        endif;
-                    $html .= '</tbody>';
-                $html .= '</table>';*/
                 $c++;
             endforeach;
         endif;
@@ -544,7 +512,8 @@ class ApplicantAnalysisReportController extends Controller
                         $offeredApplicants = array_merge($offeredApplicants, $applicant_ids);
                         $academicEntry = 0;
                         $matureEntry = 0;
-                        $unknownEntry = 0;
+                        $unknownEntryCount = 0;
+                        $unknownEntryids = [];
                         if(!empty($applicant_ids)):
                             $academicEntry = ApplicantOtherDetail::whereIn('applicant_id', $applicant_ids)->where('is_edication_qualification', 1)->get()->count();
                             $matureEntry = Applicant::whereIn('id', $applicant_ids)->whereHas('other', function($q){
@@ -553,11 +522,14 @@ class ApplicantAnalysisReportController extends Controller
                             $unknownEntry = Applicant::whereIn('id', $applicant_ids)->whereHas('other', function($q){
                                                 $q->whereNot('is_edication_qualification', 1);
                                                 $q->whereNotNull('employment_status');
-                                            })->has('employment', '=', 0)->get()->count();
+                                            })->has('employment', '=', 0)->get();
+                            $unknownEntryCount = $unknownEntry->count();
+                            $unknownEntryids = $unknownEntry->pluck('id')->unique()->toArray();
                         endif;
                         $res[$creation->course_id]['venues'][$venue->venue_id]['mature_entry'] = $matureEntry;
                         $res[$creation->course_id]['venues'][$venue->venue_id]['academic_entry'] = $academicEntry;
-                        $res[$creation->course_id]['venues'][$venue->venue_id]['unknown_entry'] = $unknownEntry;
+                        $res[$creation->course_id]['venues'][$venue->venue_id]['unknown_entry'] = $unknownEntryCount;
+                        $res[$creation->course_id]['venues'][$venue->venue_id]['unknown_ids'] = $unknownEntryids;
                     endforeach;
                 endif;
             endforeach;
@@ -614,5 +586,58 @@ class ApplicantAnalysisReportController extends Controller
         endif;
 
         return $res;
+    }
+
+    public function unknownEntryList(Request $request){
+        $applicant_ids = (isset($request->applicant_ids) && !empty($request->applicant_ids) ? explode(',', str_replace(' ', '', $request->applicant_ids)) : [0]);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = Applicant::orderByRaw(implode(',', $sorts))->whereNotNull('submission_date')->whereIn('id', $applicant_ids);
+        
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query = $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
+                    'first_name' => ucfirst($list->first_name),
+                    'last_name' => ucfirst($list->last_name),
+                    'full_name' => ucfirst($list->first_name)." ".ucfirst($list->last_name),
+                    
+                    'date_of_birth'=> $list->date_of_birth,
+                    'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                    'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                    'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
+                    'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                    'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
+                    'url' => route('admission.show', $list->id),
+                    'photo_url' => $list->photo_url
+                ];
+                $i++;
+            endforeach;
+        endif;
+        
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 }

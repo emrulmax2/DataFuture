@@ -227,6 +227,7 @@ use App\Http\Controllers\Reports\IntakePerformance\ContinuationReportController;
 use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController;
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
+use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
@@ -2974,6 +2975,13 @@ Route::middleware('auth')->group(function() {
     Route::controller(ApplicantAnalysisReportController::class)->group(function(){
         Route::post('reports/applicant-analysis/generate-report', 'generateReport')->name('reports.applicant.analysis.generate.report'); 
         Route::get('reports/applicant-analysis/print-report/{semesters?}', 'printReport')->name('reports.applicant.analysis.print.report'); 
+        Route::get('reports/applicant-analysis/unknown-entry-list', 'unknownEntryList')->name('reports.applicant.analysis.unknown.entry.list'); 
+    });
+
+    Route::controller(SlcRecordReportController::class)->group(function(){
+        Route::post('reports/slc-report/generate-slc-record', 'generateReport')->name('reports.slc.record.generate.report'); 
+        Route::get('reports/slc-report/print-slc-record/{semesters?}', 'printReport')->name('reports.slc.record.print.report'); 
+        Route::get('reports/slc-report/export-slc-record/{semesters?}', 'exportReport')->name('reports.slc.record.export.report'); 
     });
     
 });
