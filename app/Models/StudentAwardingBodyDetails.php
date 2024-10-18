@@ -55,6 +55,10 @@ class StudentAwardingBodyDetails extends Model
         return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
     }
 
+    public function student(){
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
     // public function  SendPreasonVerificationNotification() {
     //     $this->notify(new StudentAwardingBodyDetailsUpdate($this));
     // }

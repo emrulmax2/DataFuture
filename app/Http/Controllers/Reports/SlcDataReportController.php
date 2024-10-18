@@ -36,6 +36,7 @@ class SlcDataReportController extends Controller
             'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'academicYears' => AcademicYear::orderBy('id', 'DESC')->get(),
             'slcRegistrationStatuses' => SlcRegistrationStatus::orderBy('name', 'ASC')->get(),
+            'semesters' => Semester::orderBY('id', 'DESC')->get()
         ]);
     }
 
