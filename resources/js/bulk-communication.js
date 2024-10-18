@@ -201,7 +201,7 @@ var communicationStudentListTable = (function () {
     const generateBulkLetterModalEl = document.getElementById('generateBulkLetterModal')
     generateBulkLetterModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#generateBulkLetterModal .acc__input-error').html('');
-        $('#generateBulkLetterModal .modal-body input').val('');
+        $('#generateBulkLetterModal .modal-body input:not([type="checkbox"])').val('');
         $('#generateBulkLetterModal .modal-body select').val('');
         $('#generateBulkLetterModal .letterEditorArea').fadeOut();
         $('#generateBulkLetterModal input[name="student_ids"]').val('');

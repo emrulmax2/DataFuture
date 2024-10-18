@@ -218,7 +218,9 @@ class BulkCommunicationController extends Controller
                         endif;
                         $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
             
-                        UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+                        if(!empty($sendTo)):
+                            UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+                        endif;
                     endif;
                     $sendLetterCount += 1;
                 endif;
