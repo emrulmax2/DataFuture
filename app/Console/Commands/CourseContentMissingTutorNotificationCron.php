@@ -83,6 +83,7 @@ class CourseContentMissingTutorNotificationCron extends Command
 
                 foreach($tutorContent as $tutor_id => $modules):
                     //if($i > 1): break; endif;
+                    $mailTo = [];
                     $tutor = User::find($tutor_id);
                     $tutorName = (isset($tutor->employee->full_name) && !empty($tutor->employee->full_name) ? $tutor->employee->full_name : $tutor->name);
                     $mailTo = [$tutor->email];
