@@ -2178,7 +2178,8 @@ input[type=number] {
 @media (min-width: 1024px) {
     .modal#viewAssignedStudentModal .modal-dialog.modal-xl ,
     .modal#viewElearnincTrackingModal .modal-dialog.modal-xl,
-    .modal#viewUnknownEntryModal .modal-dialog.modal-xl {
+    .modal#viewUnknownEntryModal .modal-dialog.modal-xl ,
+    .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }
@@ -2202,4 +2203,12 @@ input[type=number] {
 #edit-newvenue.table tr td:last-child{
     padding-right: 0;
     width: 50px;
+}
+
+.table.table-sm.submissionPerformanceReportTable th,
+.table.table-sm.submissionPerformanceReportTable td {
+    padding-left: .5rem;
+    padding-right: .5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 }
