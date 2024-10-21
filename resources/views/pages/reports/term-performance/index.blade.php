@@ -154,6 +154,57 @@
                     </div>
                 </div>
             </div>
+            <div class="accordion-item">
+                <div id="termPerformanceReportAccordion-6" class="accordion-header">
+                    <button id="studentSearchBtn" class="accordion-button collapsed relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#termPerformanceReportAccordion-collapse-6" aria-expanded="false" aria-controls="termPerformanceReportAccordion-collapse-6">
+                        Submission Performance
+                        <span class="accordionCollaps"></span>
+                    </button>
+                </div>
+                <div id="termPerformanceReportAccordion-collapse-6" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-6" data-tw-parent="#termPerformanceReportAccordion">
+                    <div class="accordion-body">
+                        <form method="post" action="#" id="submissionPerformanceReportForm">
+                            @csrf
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-3">
+                                    <label for="sub_perf_term_id" class="form-label semesterLabel inline-flex items-center">Attendance Term <span class="text-danger">*</span></label>
+                                    <select name="sub_perf_term_id" class="tom-selects w-full" id="sub_perf_term_id">
+                                        <option value="">Please Select</option>
+                                        @if($terms->count() > 0)
+                                            @foreach($terms as $trm)
+                                                <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-sub_perf_term_id text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-9 text-right" style="padding-top: 31px;">
+                                    <div class="flex justify-end items-center">
+                                        <button type="submit" id="submissionPerformanceReportBtn" class="btn btn-primary text-white w-auto ml-2">
+                                            Generate Report
+                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                                stroke="white" class="w-4 h-4 ml-2 loaders">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </button>
+                                        <a href="javascript:void(0);" style="display: none;" id="printSubmissionPerformanceReportBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                        <a href="javascript:void(0);" style="display: none;" id="exportSubmissionPerformanceReportBtn" class="btn btn-facebook text-white ml-2"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="overflow-x-auto scrollbar-hidden mt-5" id="submissionPerformanceReportWrap" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -224,4 +275,5 @@
     @vite('resources/js/applicant-analysis-report.js')
 
     @vite('resources/js/student-class-status-reports.js')
+    @vite('resources/js/term-submission-performance-reports.js')
 @endsection
