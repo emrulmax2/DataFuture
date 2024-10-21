@@ -71,6 +71,7 @@ class SlcRecordReportController extends Controller
                                 .w-2/6{width: 33.333333%;}
                                 .table.slcRecordReportTable tr th, .table.slcRecordReportTable tr td{ text-align: left;}
                                 .table.slcRecordReportTable tr th a{ text-decoration: none; color: #1e293b; }
+                                .table.slcRecordReportTable tr th.exportAction, .table.slcRecordReportTable tr td.exportAction{ display: none !important; }
                             </style>';
             $PDFHTML .= '</head>';
 
@@ -122,11 +123,12 @@ class SlcRecordReportController extends Controller
                     $html .= '<th>SLC Withdrawn</th>';
                     $html .= '<th>Student Withdrawn or Intermittent</th>';
                     $html .= '<th>Self funded students</th>';
+                    $html .= '<th class="exportAction text-right">&nbsp;</th>';
                 $html .= '</tr>';
             $html .= '</thead>';
             $html .= '<tbody>';
                 if(!empty($res)):
-                    foreach($res as $row):
+                    foreach($res as $semester_id => $row):
                         $html .= '<tr>';
                             $html .= '<td class="w-1/6">'.$row['name'].'</td>';
                             $html .= '<td>'.$row['slc_sms_registered'].'</td>';
@@ -136,6 +138,7 @@ class SlcRecordReportController extends Controller
                             $html .= '<td>'.$row['slc_withdrawn'].'</td>';
                             $html .= '<td>'.$row['slc_interminate'].'</td>';
                             $html .= '<td>'.$row['slc_self_funded'].'</td>';
+                            $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', $semester_id).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
                         $html .= '</tr>';
                     endforeach;
                 else:
@@ -210,5 +213,186 @@ class SlcRecordReportController extends Controller
         endif;
 
         return $res;
+    }
+
+    public function exportDetailsReport($semester_id){
+        $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43];
+        $slc_withdrawn_satuses = [30, 31, 43];
+        $slc_interminate_satuses = [27, 42];
+        $slc_self_funded_satuses = [15];
+
+        $theCollection = [];
+        $row = 1;
+        $theCollection[$row][] = "Retistration No";
+        $theCollection[$row][] = "First Name";
+        $theCollection[$row][] = "Last Name";
+        $theCollection[$row][] = "Semester";
+        $theCollection[$row][] = "Course";
+        $theCollection[$row][] = "Status";
+        $row += 1; 
+        
+        $semester = Semester::find($semester_id);
+        $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
+        $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();
+        $slc_sms_registered = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)->orderBy('first_name', 'ASC')->get();
+        $theCollection[$row][] = "Initial LCC SMS Registration (excluding discarded)";
+        $row += 1; 
+        if(!empty($slc_sms_registered) && $slc_sms_registered->count() > 0):
+            foreach($slc_sms_registered as $std):
+                $theCollection[$row][] = $std->registration_no;
+                $theCollection[$row][] = $std->first_name;
+                $theCollection[$row][] = $std->last_name;
+                $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                $row += 1; 
+            endforeach;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "Student Registered with Awarding Body";
+        $row += 1; 
+        $slc_awb_registered_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($creations){
+                                    $q->whereIn('course_creation_id', $creations);
+                                })->pluck('student_id')->unique()->toArray();
+        if(!empty($slc_awb_registered_ids)):
+            $slc_awb_registered = Student::whereIn('id', $slc_awb_registered_ids)->orderBy('first_name', 'ASC')->get();
+            if(!empty($slc_awb_registered) && $slc_awb_registered->count() > 0):
+                foreach($slc_awb_registered as $std):
+                    $theCollection[$row][] = $std->registration_no;
+                    $theCollection[$row][] = $std->first_name;
+                    $theCollection[$row][] = $std->last_name;
+                    $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                    $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                    $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                    $row += 1; 
+                endforeach;
+            endif;
+        else:
+            $theCollection[$row][] = "Student not found.";
+            $row += 1;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "SLC Registered";
+        $row += 1; 
+        $year_1_registered_ids = SlcRegistration::whereIn('student_id', $student_ids)->where('registration_year', 1)->whereIn('slc_registration_status_id', [1, 3])
+                                                          ->pluck('student_id')->unique()->toArray();
+        if(!empty($year_1_registered_ids)):
+            $year_1_registered = Student::whereIn('id', $year_1_registered_ids)->orderBy('first_name', 'ASC')->get();
+            if(!empty($year_1_registered) && $year_1_registered->count() > 0):
+                foreach($year_1_registered as $std):
+                    $theCollection[$row][] = $std->registration_no;
+                    $theCollection[$row][] = $std->first_name;
+                    $theCollection[$row][] = $std->last_name;
+                    $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                    $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                    $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                    $row += 1; 
+                endforeach;
+            endif;
+        else:
+            $theCollection[$row][] = "Student not found.";
+            $row += 1;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "SLC Attendance Confirmed";
+        $row += 1; 
+        $year_1_attendance_ids = SlcAttendance::whereIn('student_id', $student_ids)->where('attendance_year', 1)->where('attendance_code_id', 1)
+                                                          ->pluck('student_id')->unique()->toArray();
+        if(!empty($year_1_attendance_ids)):
+            $year_1_attendance = Student::whereIn('id', $year_1_attendance_ids)->orderBy('first_name', 'ASC')->get();
+            if(!empty($year_1_attendance) && $year_1_attendance->count() > 0):
+                foreach($year_1_attendance as $std):
+                    $theCollection[$row][] = $std->registration_no;
+                    $theCollection[$row][] = $std->first_name;
+                    $theCollection[$row][] = $std->last_name;
+                    $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                    $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                    $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                    $row += 1; 
+                endforeach;
+            endif;
+        else:
+            $theCollection[$row][] = "Student not found.";
+            $row += 1;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "SLC Withdrawn";
+        $row += 1;
+        $slc_withdrawn = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_withdrawn_satuses)->orderBy('first_name', 'ASC')->get();
+        if(!empty($slc_withdrawn) && $slc_withdrawn->count() > 0):
+            foreach($slc_withdrawn as $std):
+                $theCollection[$row][] = $std->registration_no;
+                $theCollection[$row][] = $std->first_name;
+                $theCollection[$row][] = $std->last_name;
+                $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                $row += 1; 
+            endforeach;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "Student Withdrawn or Intermittent";
+        $row += 1;
+        $slc_intermittent = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_interminate_satuses)->orderBy('first_name', 'ASC')->get();
+        if(!empty($slc_intermittent) && $slc_intermittent->count() > 0):
+            foreach($slc_intermittent as $std):
+                $theCollection[$row][] = $std->registration_no;
+                $theCollection[$row][] = $std->first_name;
+                $theCollection[$row][] = $std->last_name;
+                $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                $row += 1; 
+            endforeach;
+        endif;
+
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = '';
+        $row += 1;
+        $theCollection[$row][] = "Self funded students";
+        $row += 1;
+        $slc_self_funded = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_self_funded_satuses)->orderBy('first_name', 'ASC')->get();
+        if(!empty($slc_self_funded) && $slc_self_funded->count() > 0):
+            foreach($slc_self_funded as $std):
+                $theCollection[$row][] = $std->registration_no;
+                $theCollection[$row][] = $std->first_name;
+                $theCollection[$row][] = $std->last_name;
+                $theCollection[$row][] = (isset($std->activeCR->creation->semester->name) && !empty($std->activeCR->creation->semester->name) ? $std->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($std->activeCR->creation->course->name) && !empty($std->activeCR->creation->course->name) ? $std->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($std->status->name) && !empty($std->status->name) ? $std->status->name : '');
+
+                $row += 1; 
+            endforeach;
+        endif;
+
+        $fileName = str_replace(' ', '_', $semester->name).'_slc_record_details_report.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
 }

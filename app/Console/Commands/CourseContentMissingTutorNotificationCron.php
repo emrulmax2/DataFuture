@@ -83,6 +83,7 @@ class CourseContentMissingTutorNotificationCron extends Command
 
                 foreach($tutorContent as $tutor_id => $modules):
                     //if($i > 1): break; endif;
+                    $mailTo = [];
                     $tutor = User::find($tutor_id);
                     $tutorName = (isset($tutor->employee->full_name) && !empty($tutor->employee->full_name) ? $tutor->employee->full_name : $tutor->name);
                     $mailTo = [$tutor->email];
@@ -92,7 +93,7 @@ class CourseContentMissingTutorNotificationCron extends Command
                     $MAILBODY = '';
                     if(!empty($modules)):
                         $MAILBODY .= 'Dear '.$tutorName.',<br><br/>';
-                        $MAILBODY .= '<p>I hope this message finds you well. I’m reaching out to inform you that certain course materials appear to be missing from the following:</p>';
+                        $MAILBODY .= '<p>I hope this message finds you well. I\'m reaching out to inform you that certain course materials appear to be missing from the following:</p>';
                         $MAILBODY .= '<table style="border: 1px solid #ddd; width: 100%; border-spacing: 0; border-collapse: collapse; text-align:left">';
                             $MAILBODY .= '<thead>';
                                 $MAILBODY .= '<tr>';

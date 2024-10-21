@@ -292,6 +292,8 @@ export default defineConfig({
                 'resources/js/intake-award-rate-reports.js',
                 'resources/js/applicant-analysis-report.js',
                 'resources/js/student-slc-recored-reports.js',
+
+                'resources/js/term-submission-performance-reports.js',
             ],
             refresh: true,
         }),

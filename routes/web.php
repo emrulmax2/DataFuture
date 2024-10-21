@@ -230,6 +230,7 @@ use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
@@ -2982,6 +2983,13 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/slc-report/generate-slc-record', 'generateReport')->name('reports.slc.record.generate.report'); 
         Route::get('reports/slc-report/print-slc-record/{semesters?}', 'printReport')->name('reports.slc.record.print.report'); 
         Route::get('reports/slc-report/export-slc-record/{semesters?}', 'exportReport')->name('reports.slc.record.export.report'); 
+        Route::get('reports/slc-report/export-slc-record-details/{semester?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
+    });
+
+    Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){
+        Route::post('reports/term-performance/generate-submission-performance', 'generateReport')->name('reports.term.performance.submission.generate.report'); 
+        Route::get('reports/term-performance/print-submission-performance/{term_declaration_id?}', 'printReport')->name('reports.term.performance.submission.print.report'); 
+        Route::get('reports/term-performance/export-submission-performance/{term_declaration_id?}', 'exportReport')->name('reportsterm.performance.submission.export.report'); 
     });
     
 });

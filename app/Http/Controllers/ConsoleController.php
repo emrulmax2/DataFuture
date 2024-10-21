@@ -120,8 +120,7 @@ class ConsoleController extends Controller
     }*/
 
     
-    /*public function index(){
-        $today = date('Y-m-d');
+    public function index2(){
         $latest_term_declaration = Plan::orderBy('term_declaration_id', 'DESC')->get()->first();
         $term_declaration_id = $latest_term_declaration->term_declaration_id;
 
@@ -154,9 +153,115 @@ class ConsoleController extends Controller
             foreach($res as $course_id => $tutor_tasks):
                 $course = Course::find($course_id);
                 if(isset($course->team->email) && !empty($course->team->email)):
-                    $mailTo = $course->team->email;
+                    $mailTo = [];
+                    $mailTo[] = $course->team->email;
                     $subject = 'Missing Course Content - Require your Attention';
-                    $fileName = $this->generateCronAttachments($course_id, $tutor_tasks);
+                    //$fileName = $this->generateCronAttachments($course_id, $tutor_tasks);
+
+                    /* Generate PDF Start */
+                    $report_title = $course->name.' Missing Required Module Documents';
+                    $PDFHTML = '';
+                    $PDFHTML .= '<html>';
+                        $PDFHTML .= '<head>';
+                            $PDFHTML .= '<title>'.$report_title.'</title>';
+                            $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                            $PDFHTML .= '<style>
+                                            body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
+                                            table{margin-left: 0px; width: 100%; border-collapse: collapse;}
+                                            figure{margin: 0;}
+                                            @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
+
+                                            header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
+                                            .headerTable tr td{vertical-align: top; padding: 0; line-height: 13px;}
+                                            .headerTable img{height: 70px; width: auto;}
+                                            .headerTable tr td.reportTitle{font-size: 16px; line-height: 16px; font-weight: bold;}
+
+                                            footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                            .pageCounter{position: relative;}
+                                            .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                            .pinRow td{border-bottom: 1px solid gray;}
+                                            .text-center{text-align: center;}
+                                            .text-left{text-align: left;}
+                                            .text-right{text-align: right;}
+                                            @media print{ .pageBreak{page-break-after: always;} }
+                                            .pageBreak{page-break-after: always;}
+                                            
+                                            .mb-15{margin-bottom: 15px;}
+                                            .mb-10{margin-bottom: 10px;}
+                                            .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
+                                            .table-sm th, .table-sm td{padding: 5px 10px;}
+                                            .w-1/6{width: 16.666666%;}
+                                            .w-2/6{width: 33.333333%;}
+                                            .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
+                                            .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
+                                        </style>';
+                        $PDFHTML .= '</head>';
+
+                        $PDFHTML .= '<body>';
+                            $PDFHTML .= '<header>';
+                                $PDFHTML .= '<table class="headerTable">';
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<td colspan="2" class="reportTitle">Missing Course Content</td>';
+                                        $PDFHTML .= '<td rowspan="3" class="text-right"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
+                                    $PDFHTML .= '</tr>';
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<td>Course</td>';
+                                        $PDFHTML .= '<td>'.$course->name.'</td>';
+                                    $PDFHTML .= '</tr>';
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<td>Cereated By</td>';
+                                        $PDFHTML .= '<td>';
+                                            $PDFHTML .= 'System';
+                                            $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
+                                        $PDFHTML .= '</td>';
+                                    $PDFHTML .= '</tr>';
+                                $PDFHTML .= '</table>';
+                            $PDFHTML .= '</header>';
+
+                            $PDFHTML .= '<table class="table table-bordered table-sm attenRateReportTable">';
+                                $PDFHTML .= '<thead>';
+                                    $PDFHTML .= '<tr>';
+                                        $PDFHTML .= '<th>Tutor</th>';
+                                        $PDFHTML .= '<th>Group</th>';
+                                        $PDFHTML .= '<th>Module</th>';
+                                        $PDFHTML .= '<th>Document</th>';
+                                    $PDFHTML .= '</tr>';
+                                $PDFHTML .= '</thead>';
+                                $PDFHTML .= '<tbody>';
+                                    foreach($tutor_tasks as $tutor_id => $modules):
+                                        $tutor = User::with('employee')->find($tutor_id);
+                                        $row = 1;
+                                        foreach($modules as $module):
+                                            $PDFHTML .= '<tr>';
+                                                if($row == 1):
+                                                    $PDFHTML .= '<td style="'.(count($modules) > 1 ? 'border-bottom: none;' : '').'">'.(isset($tutor->employee->full_name) && !empty($tutor->employee->full_name) ? $tutor->employee->full_name : $tutor->name).'</td>';
+                                                else:
+                                                    $PDFHTML .= '<td style="border-top: none; border-bottom: none;">&nbsp;</td>';
+                                                endif;
+                                                $PDFHTML .= '<td>'.$module['group'].'</td>';
+                                                $PDFHTML .= '<td>'.$module['module'].'</td>';
+                                                $PDFHTML .= '<td>'.$module['tsks'].'</td>';
+                                            $PDFHTML .= '</tr>';
+                                            $row++;
+                                        endforeach;
+                                    endforeach;
+                                $PDFHTML .= '</tbody>';
+                            $PDFHTML .= '</table>';
+
+                        $PDFHTML .= '</body>';
+                    $PDFHTML .= '</html>';
+
+                    $fileName = $course_id.'_missing_course_content.pdf';
+                    if (Storage::disk('s3')->exists('public/'.$fileName)):
+                        Storage::disk('s3')->delete('public/'.$fileName);
+                    endif;
+                    $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+                                ->setPaper('a4', 'portrait')
+                                ->setWarnings(false);
+                    $content = $pdf->output();
+                    Storage::disk('s3')->put('public/'.$fileName, $content);
+                    /* Generate PDF END */
+
 
                     $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
                     $configuration = [
@@ -175,7 +280,7 @@ class ConsoleController extends Controller
                         "pathinfo" => 'public/'.$fileName,
                         "nameinfo" => $fileName,
                         "mimeinfo" => 'application/pdf',
-                        "disk" => 'local'
+                        "disk" => 's3'
                     ];
 
                     $MAILBODY = 'Dear Concern,<br/><br/>';
@@ -188,123 +293,13 @@ class ConsoleController extends Controller
                     $MAILBODY .= 'System<br/>';
                     $MAILBODY .= 'London Churchill College';
 
-                    //UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MAILBODY, $attachmentFiles));
+                    UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MAILBODY, $attachmentFiles));
                 endif;
             endforeach;
         endif;
 
+        //return 0;
+
         dd($res);
     }
-
-    public function generateCronAttachments($course_id, $tutor_tasks){
-        $course = Course::find($course_id);
-        $user = User::find(auth()->user()->id);
-
-        $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
-        $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
-
-        $report_title = $course->name.' Missing Required Module Documents';
-        $PDFHTML = '';
-        $PDFHTML .= '<html>';
-            $PDFHTML .= '<head>';
-                $PDFHTML .= '<title>'.$report_title.'</title>';
-                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                $PDFHTML .= '<style>
-                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
-                                table{margin-left: 0px; width: 100%; border-collapse: collapse;}
-                                figure{margin: 0;}
-                                @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
-
-                                header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
-                                .headerTable tr td{vertical-align: top; padding: 0; line-height: 13px;}
-                                .headerTable img{height: 70px; width: auto;}
-                                .headerTable tr td.reportTitle{font-size: 16px; line-height: 16px; font-weight: bold;}
-
-                                footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
-                                .pageCounter{position: relative;}
-                                .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
-                                .pinRow td{border-bottom: 1px solid gray;}
-                                .text-center{text-align: center;}
-                                .text-left{text-align: left;}
-                                .text-right{text-align: right;}
-                                @media print{ .pageBreak{page-break-after: always;} }
-                                .pageBreak{page-break-after: always;}
-                                
-                                .mb-15{margin-bottom: 15px;}
-                                .mb-10{margin-bottom: 10px;}
-                                .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
-                                .table-sm th, .table-sm td{padding: 5px 10px;}
-                                .w-1/6{width: 16.666666%;}
-                                .w-2/6{width: 33.333333%;}
-                                .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
-                                .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
-                            </style>';
-            $PDFHTML .= '</head>';
-
-            $PDFHTML .= '<body>';
-                $PDFHTML .= '<header>';
-                    $PDFHTML .= '<table class="headerTable">';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td colspan="2" class="reportTitle">Missing Course Content</td>';
-                            $PDFHTML .= '<td rowspan="3" class="text-right"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
-                        $PDFHTML .= '</tr>';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td>Course</td>';
-                            $PDFHTML .= '<td>'.$course->name.'</td>';
-                        $PDFHTML .= '</tr>';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td>Cereated By</td>';
-                            $PDFHTML .= '<td>';
-                                $PDFHTML .= 'System';
-                                $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
-                            $PDFHTML .= '</td>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</table>';
-                $PDFHTML .= '</header>';
-
-                $PDFHTML .= '<table class="table table-bordered table-sm attenRateReportTable">';
-                    $PDFHTML .= '<thead>';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th>Tutor</th>';
-                            $PDFHTML .= '<th>Group</th>';
-                            $PDFHTML .= '<th>Module</th>';
-                            $PDFHTML .= '<th>Document</th>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</thead>';
-                    $PDFHTML .= '<tbody>';
-                        foreach($tutor_tasks as $tutor_id => $modules):
-                            $tutor = User::with('employee')->find($tutor_id);
-                            $row = 1;
-                            foreach($modules as $module):
-                                $PDFHTML .= '<tr>';
-                                    if($row == 1):
-                                        $PDFHTML .= '<td style="'.(count($modules) > 1 ? 'border-bottom: none;' : '').'">'.(isset($tutor->employee->full_name) && !empty($tutor->employee->full_name) ? $tutor->employee->full_name : $tutor->name).'</td>';
-                                    else:
-                                        $PDFHTML .= '<td style="border-top: none; border-bottom: none;">&nbsp;</td>';
-                                    endif;
-                                    $PDFHTML .= '<td>'.$module['group'].'</td>';
-                                    $PDFHTML .= '<td>'.$module['module'].'</td>';
-                                    $PDFHTML .= '<td>'.$module['tsks'].'</td>';
-                                $PDFHTML .= '</tr>';
-                                $row++;
-                            endforeach;
-                        endforeach;
-                    $PDFHTML .= '</tbody>';
-                $PDFHTML .= '</table>';
-
-            $PDFHTML .= '</body>';
-        $PDFHTML .= '</html>';
-
-        $fileName = $course_id.'_missing_course_content.pdf';
-        if (Storage::disk('local')->exists('public/'.$fileName)):
-            Storage::disk('local')->delete('public/'.$fileName);
-        endif;
-        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
-                    ->setPaper('a4', 'portrait')
-                    ->setWarnings(false);
-        $content = $pdf->output();
-        Storage::disk('local')->put('public/'.$fileName, $content);
-
-        return $fileName;
-    }*/
 }
