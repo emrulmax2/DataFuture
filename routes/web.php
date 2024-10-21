@@ -2990,6 +2990,7 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/term-performance/generate-submission-performance', 'generateReport')->name('reports.term.performance.submission.generate.report'); 
         Route::get('reports/term-performance/print-submission-performance/{term_declaration_id?}', 'printReport')->name('reports.term.performance.submission.print.report'); 
         Route::get('reports/term-performance/export-submission-performance/{term_declaration_id?}', 'exportReport')->name('reportsterm.performance.submission.export.report'); 
+        Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reportsterm.performance.submission.student.list'); 
     });
     
 });
