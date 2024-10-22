@@ -10,6 +10,8 @@ class HighestQualificationOnEntry extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'highest_qualification_of_entry'; // Set the table name
+
     protected $fillable = [
         'name',
         'is_hesa',
