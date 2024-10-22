@@ -110,6 +110,7 @@ class TermRetentionReportController extends Controller
 
     public function exportReport($term_declaration_ids = ''){
         $term_declaration_ids = (!empty($term_declaration_ids) ? explode('_', $term_declaration_ids) : []);
+        $termName = (!empty($term_declaration_ids) ? TermDeclaration::whereIn('id', [$term_declaration_ids])->pluck('name')->unique()->toArray() : []);
         $res = $this->refineResult($term_declaration_ids);
 
         $term = TermDeclaration::where('id', $term_declaration_ids)->get()->first();
@@ -118,11 +119,11 @@ class TermRetentionReportController extends Controller
         $row = 1;
         $theCollection = [];
         $theCollection[$row][] = "Report Name";
-        $theCollection[$row][] = "Progression Report";
+        $theCollection[$row][] = "Retention Rate Report";
         $row += 1;
 
-        $theCollection[$row][] = "Intake Semester";
-        $theCollection[$row][] = $term->name;
+        $theCollection[$row][] = "Attendance Term";
+        $theCollection[$row][] = (!empty($termName) ? implode(', ', $termName) : '');
         $row += 1;
 
         $theCollection[$row][] = "Report created date time";
@@ -136,9 +137,36 @@ class TermRetentionReportController extends Controller
         $theCollection[$row][] = '';
         $row += 1;
 
-        
+        if(isset($res['result']) && !empty($res['result'])):
+            foreach($res['result'] as $term_id => $term_data):
+                $term_rate = ($term_data['registered'] > 0 && $term_data['droppedout'] > 0 ? (($term_data['registered'] - $term_data['droppedout']) / $term_data['registered']) * 100 : 0);
+                $theCollection[$row][] = $term_data['name'];
+                $theCollection[$row][] = $term_data['admissions'];
+                $theCollection[$row][] = $term_data['registered'];
+                $theCollection[$row][] = $term_data['droppedout'];
+                $theCollection[$row][] = number_format($term_rate, 2);
+                $row += 1;
 
-        $report_title = 'Term_Progression_Reports.xlsx';
+                if(isset($term_data['semester']) && !empty($term_data['semester'])):
+                    foreach($term_data['semester'] as $semester_id => $semester_data):
+                        $sems_rate = ($semester_data['registered'] > 0 && $semester_data['droppedout'] > 0 ? (($semester_data['registered'] - $semester_data['droppedout']) / $semester_data['registered']) * 100 : 0);
+                        $theCollection[$row][] = $semester_data['name'];
+                        $theCollection[$row][] = $semester_data['admissions'];
+                        $theCollection[$row][] = $semester_data['registered'];
+                        $theCollection[$row][] = $semester_data['droppedout'];
+                        $theCollection[$row][] = number_format($sems_rate, 2);
+                        $row += 1;
+                    endforeach;
+                endif;
+
+                $theCollection[$row][] = '';
+                $row += 1;
+                $theCollection[$row][] = '';
+                $row += 1;
+            endforeach;
+        endif;
+
+        $report_title = 'Term_Retention_Reports.xlsx';
         return Excel::download(new ArrayCollectionExport($theCollection), $report_title);
     }
 
@@ -173,9 +201,9 @@ class TermRetentionReportController extends Controller
                                 $sems_rate = ($semester_data['registered'] > 0 && $semester_data['droppedout'] > 0 ? (($semester_data['registered'] - $semester_data['droppedout']) / $semester_data['registered']) * 100 : 0);
                                 $html .= '<tr class="semester_row_'.$term_id.'" style="display: none;">';
                                     $html .= '<td style="padding-left: 28px;">'.$semester_data['name'].'</td>';
-                                    $html .= '<td class="w-[150px]">'.$semester_data['admissions'].'</td>';
-                                    $html .= '<td class="w-[150px]">'.$semester_data['registered'].'</td>';
-                                    $html .= '<td class="w-[150px]">'.$semester_data['droppedout'].'</td>';
+                                    $html .= '<td class="w-[150px]"><a href="javascript:void(0);" class="trmRetnStdBtn text-primary font-medium underline" data-ids="'.(!empty($semester_data['admissions_ids']) ? implode(',', $semester_data['admissions_ids']) : '').'">'.$semester_data['admissions'].'</a></td>';
+                                    $html .= '<td class="w-[150px]"><a href="javascript:void(0);" class="trmRetnStdBtn text-primary font-medium underline" data-ids="'.(!empty($semester_data['registered_ids']) ? implode(',', $semester_data['registered_ids']) : '').'">'.$semester_data['registered'].'</a></td>';
+                                    $html .= '<td class="w-[150px]"><a href="javascript:void(0);" class="trmRetnStdBtn text-primary font-medium underline" data-ids="'.(!empty($semester_data['droppedout_ids']) ? implode(',', $semester_data['droppedout_ids']) : '').'">'.$semester_data['droppedout'].'</a></td>';
                                     $html .= '<td class="w-[150px]" style="text-align: right;">'.number_format($sems_rate, 2).'%</td>';
                                 $html .= '</tr>';
                             endforeach;
@@ -204,6 +232,7 @@ class TermRetentionReportController extends Controller
                     $res['result'][$term->id]['semester'][$semester_id]['name'] = $semester->name;
 
                     $admissions = $registered = $droppedout = 0;
+                    $admissions_ids = $registered_ids = $droppedout_ids = [];
                     $course_creations = CourseCreation::where('semester_id', $semester_id)->get();
                     if($course_creations->count() > 0):
                         foreach($course_creations as $creation):
@@ -230,14 +259,20 @@ class TermRetentionReportController extends Controller
                                                         $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
                                                     })->pluck('std.id')->unique()->toArray();
                                 $admissions += (!empty($student_ids) ? count($student_ids) : 0);
+                                $admissions_ids = array_merge($admissions_ids, $student_ids);
                                 $registered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
+                                $registered_ids = array_merge($registered_ids, $registered_std_ids);
                                 $droppedout += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
+                                $droppedout_ids = array_merge($droppedout_ids, $droppedOutStdents);
                             endif;
                         endforeach;
                     endif;
                     $res['result'][$term->id]['semester'][$semester_id]['admissions'] = $admissions;
+                    $res['result'][$term->id]['semester'][$semester_id]['admissions_ids'] = $admissions_ids;
                     $res['result'][$term->id]['semester'][$semester_id]['registered'] = $registered;
+                    $res['result'][$term->id]['semester'][$semester_id]['registered_ids'] = $registered_ids;
                     $res['result'][$term->id]['semester'][$semester_id]['droppedout'] = $droppedout;
+                    $res['result'][$term->id]['semester'][$semester_id]['droppedout_ids'] = $droppedout_ids;
 
                     $term_admissions += $admissions;
                     $term_registered += $registered;

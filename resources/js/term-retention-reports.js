@@ -236,7 +236,7 @@ var submissionPerformanceSTDListTable = (function () {
     submissionPerformanceSTDListModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#submissionPerformanceSTDListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
     });
-    $('#termRetentionReportWrap').on('click', '.subPerfmStdBtn', function(e){
+    $('#termRetentionReportWrap').on('click', '.trmRetnStdBtn', function(e){
         e.preventDefault();
         let $thebtn = $(this);
         let student_ids = $thebtn.attr('data-ids');
