@@ -231,6 +231,7 @@ use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -2970,6 +2971,7 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(ApplicantAnalysisReportController::class)->group(function(){
+        Route::get('reports/applicant-analysis', 'index')->name('reports.applicant.analysis'); 
         Route::post('reports/applicant-analysis/generate-report', 'generateReport')->name('reports.applicant.analysis.generate.report'); 
         Route::get('reports/applicant-analysis/print-report/{semesters?}', 'printReport')->name('reports.applicant.analysis.print.report'); 
         Route::get('reports/applicant-analysis/unknown-entry-list', 'unknownEntryList')->name('reports.applicant.analysis.unknown.entry.list'); 
@@ -2994,6 +2996,13 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/term-performance/print-progression/{semester_id?}', 'printReport')->name('reports.term.progression.print.report'); 
         Route::get('reports/term-performance/export-progression/{semester_id?}', 'exportReport')->name('reports.term.progression.report'); 
         Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reports.term.progression.student.list'); 
+    });
+
+    Route::controller(TermRetentionReportController::class)->group(function(){
+        Route::post('reports/term-performance/generate-retention', 'generateReport')->name('reports.term.retention.generate.report'); 
+        Route::get('reports/term-performance/print-retention/{term_declaration_ids?}', 'printReport')->name('reports.term.retention.print.report'); 
+        Route::get('reports/term-performance/export-retention/{term_declaration_ids?}', 'exportReport')->name('reports.term.retention.report'); 
+        Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reports.term.retention.student.list'); 
     });
     
 });

@@ -9,6 +9,7 @@ use App\Models\CourseCreation;
 use App\Models\CourseCreationVenue;
 use App\Models\Option;
 use App\Models\Semester;
+use App\Models\TermDeclaration;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,17 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApplicantAnalysisReportController extends Controller
 {
+    public function index(){
+        return view('pages.reports.application-analysis.index', [
+            'title' => 'Application Analysis Report - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Reports', 'href' => 'javascript:void(0);'],
+                ['label' => 'Application Analysis Report', 'href' => 'javascript:void(0);']
+            ],
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'semester' => Semester::orderBy('id', 'DESC')->get(),
+        ]);
+    }
 
     public function generateReport(Request $request){
         $semester_id = (isset($request->ap_an_semester_id) && !empty($request->ap_an_semester_id) ? $request->ap_an_semester_id : 0);

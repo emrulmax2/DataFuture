@@ -3,12 +3,11 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
-/*
 ("use strict");
 var submissionPerformanceSTDListTable = (function () {
     var _tableGen = function (student_ids) {
         let tableContent = new Tabulator("#submissionPerformanceSTDListTable", {
-            ajaxURL: route("reports.term.progression.student.list"),
+            ajaxURL: route("reports.term.retention.student.list"),
             ajaxParams: { student_ids : student_ids },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -135,7 +134,7 @@ var submissionPerformanceSTDListTable = (function () {
 })();
 
 (function(){
-    let progressionTomOptions = {
+    let tRetentionTomOptions = {
         plugins: {
             dropdown_input: {}
         },
@@ -148,53 +147,53 @@ var submissionPerformanceSTDListTable = (function () {
         },
     };
 
-    let progressionTomOptionsMul = {
-        ...progressionTomOptions,
+    let tRetentionTomOptionsMul = {
+        ...tRetentionTomOptions,
         plugins: {
-            ...progressionTomOptions.plugins,
+            ...tRetentionTomOptions.plugins,
             remove_button: {
                 title: "Remove this item",
             },
         }
     };
 
-    var progression_semester_id = new TomSelect('#progression_semester_id', progressionTomOptions);
-    $('#progression_semester_id').on('change', function(){
-        $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
-        $('#progressionReportWrap').fadeOut().html('');
+    var retention_term_id = new TomSelect('#retention_term_id', tRetentionTomOptionsMul);
+    $('#retention_term_id').on('change', function(){
+        $('#printtermRetentionReportBtn, #exporttermRetentionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+        $('#termRetentionReportWrap').fadeOut().html('');
     });
 
-    $('#progressionReportForm').on('submit', function(e){
+    $('#termRetentionReportForm').on('submit', function(e){
         e.preventDefault();
         let $form = $(this);
-        const form = document.getElementById('progressionReportForm');
-        let progression_semester_id = $form.find('#progression_semester_id').val();
+        const form = document.getElementById('termRetentionReportForm');
+        let retention_term_id = $form.find('#retention_term_id').val();
         
-        if(progression_semester_id > 0){
-            $form.find('.error-progression_semester_id').html('')
-            document.querySelector('#progressionReportBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#progressionReportBtn svg").style.cssText ="display: inline-block;";
-            $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
-            $('#progressionReportWrap').fadeOut().html('');
+        if(retention_term_id.length > 0){
+            $form.find('.error-retention_term_id').html('')
+            document.querySelector('#termRetentionReportBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#termRetentionReportBtn svg").style.cssText ="display: inline-block;";
+            $('#printtermRetentionReportBtn, #exporttermRetentionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $('#termRetentionReportWrap').fadeOut().html('');
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('reports.term.progression.generate.report'),
+                url: route('reports.term.retention.generate.report'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#progressionReportBtn').removeAttribute('disabled');
-                document.querySelector("#progressionReportBtn svg").style.cssText = "display: none;";
+                document.querySelector('#termRetentionReportBtn').removeAttribute('disabled');
+                document.querySelector("#termRetentionReportBtn svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
                     //console.log(response.data);
                     //return false;
-                    let pdf_url = route('reports.term.progression.print.report', progression_semester_id);
-                    let excel_url = route('reports.term.progression.report', progression_semester_id);
-                    $('#progressionReportWrap').fadeIn().html(response.data.htm);
-                    $('#printProgressionReportBtn').attr('href', pdf_url).fadeIn();
-                    $('#exportProgressionReportBtn').attr('href', excel_url).fadeIn();
+                    let pdf_url = route('reports.term.retention.print.report', retention_term_id.join('_'));
+                    let excel_url = route('reports.term.retention.report', retention_term_id.join('_'));
+                    $('#termRetentionReportWrap').fadeIn().html(response.data.htm);
+                    $('#printtermRetentionReportBtn').attr('href', pdf_url).fadeIn();
+                    $('#exporttermRetentionReportBtn').attr('href', excel_url).fadeIn();
 
                     setTimeout(() => {
                         createIcons({
@@ -205,28 +204,28 @@ var submissionPerformanceSTDListTable = (function () {
                     }, 10);
                 }
             }).catch(error => {
-                document.querySelector('#progressionReportBtn').removeAttribute('disabled');
-                document.querySelector("#progressionReportBtn svg").style.cssText = "display: none;";
-                $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+                document.querySelector('#termRetentionReportBtn').removeAttribute('disabled');
+                document.querySelector("#termRetentionReportBtn svg").style.cssText = "display: none;";
+                $('#printtermRetentionReportBtn, #exporttermRetentionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
                 if (error.response) {
                     console.log('error');
                 }
             });
         }else{
-            $form.find('.error-progression_semester_id').html('Semesters can not be empty.');
-            $('#progressionReportWrap').fadeOut().html('');
-            $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $form.find('.error-retention_term_id').html('Semesters can not be empty.');
+            $('#termRetentionReportWrap').fadeOut().html('');
+            $('#printtermRetentionReportBtn, #exporttermRetentionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
         }
     });
 
-    $('#progressionReportWrap').on('click', '#submissionPerformanceReportTable .semesterRowToggle', function(e){
+    $('#termRetentionReportWrap').on('click', '#termRetentionTable .semisterToggle', function(e){
         e.preventDefault();
-        var semesterid = $(this).attr('data-semester');
+        var termid = $(this).attr('data-termid');
         if($(this).hasClass('active')){
-            $('#submissionPerformanceReportTable .course_row_'+semesterid).fadeOut();
+            $('#termRetentionTable .semester_row_'+termid).fadeOut();
             $(this).removeClass('active');
         }else{
-            $('#submissionPerformanceReportTable .course_row_'+semesterid).fadeIn();
+            $('#termRetentionTable .semester_row_'+termid).fadeIn();
             $(this).addClass('active');
         }
     });
@@ -237,7 +236,7 @@ var submissionPerformanceSTDListTable = (function () {
     submissionPerformanceSTDListModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#submissionPerformanceSTDListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
     });
-    $('#progressionReportWrap').on('click', '.subPerfmStdBtn', function(e){
+    $('#termRetentionReportWrap').on('click', '.trmRetnStdBtn', function(e){
         e.preventDefault();
         let $thebtn = $(this);
         let student_ids = $thebtn.attr('data-ids');
@@ -248,5 +247,3 @@ var submissionPerformanceSTDListTable = (function () {
         }
     })
 })();
-
-*/
