@@ -10,6 +10,8 @@ class QualificationTypeIdentifier extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'entry_qualification_type'; // Set the table name
+
     protected $fillable = [
         'name',
         'is_hesa',
