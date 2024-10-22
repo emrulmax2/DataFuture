@@ -280,6 +280,7 @@ var studentNotesListTable = (function () {
         placeholder: 'Search Here...',
         persist: false,
         create: false,
+        maxOptions: null,
         allowEmptyOption: true,
         onDelete: function (values) {
             return confirm(
