@@ -815,7 +815,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
                                 @foreach($QualificationTypeIdentifiers as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -827,7 +827,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaQualificationSubjects))
                                 @foreach($HesaQualificationSubjects as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -839,7 +839,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HighestQualificationOnEntrys))
                                 @foreach($HighestQualificationOnEntrys as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -851,7 +851,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaExamSittingVenues))
                                 @foreach($HesaExamSittingVenues as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -941,7 +941,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
                                 @foreach($QualificationTypeIdentifiers as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -953,7 +953,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaQualificationSubjects))
                                 @foreach($HesaQualificationSubjects as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -965,7 +965,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HighestQualificationOnEntrys))
                                 @foreach($HighestQualificationOnEntrys as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -978,7 +978,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaExamSittingVenues))
                                 @foreach($HesaExamSittingVenues as $n)
-                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
