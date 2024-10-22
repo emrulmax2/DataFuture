@@ -815,7 +815,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
                                 @foreach($QualificationTypeIdentifiers as $n)
-                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -941,7 +941,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
                                 @foreach($QualificationTypeIdentifiers as $n)
-                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ $n->hesa_code }} {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
