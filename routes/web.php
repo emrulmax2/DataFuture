@@ -230,6 +230,7 @@ use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
+use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -2989,8 +2990,15 @@ Route::middleware('auth')->group(function() {
     Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){
         Route::post('reports/term-performance/generate-submission-performance', 'generateReport')->name('reports.term.performance.submission.generate.report'); 
         Route::get('reports/term-performance/print-submission-performance/{term_declaration_id?}', 'printReport')->name('reports.term.performance.submission.print.report'); 
-        Route::get('reports/term-performance/export-submission-performance/{term_declaration_id?}', 'exportReport')->name('reportsterm.performance.submission.export.report'); 
+        Route::get('reports/term-performance/export-submission-performance/{term_declaration_id?}', 'exportReport')->name('reports.term.performance.submission.report'); 
         Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reportsterm.performance.submission.student.list'); 
+    });
+
+    Route::controller(TermProgressionReportController::class)->group(function(){
+        Route::post('reports/term-performance/generate-progression', 'generateReport')->name('reports.term.progression.generate.report'); 
+        Route::get('reports/term-performance/print-progression/{semester_id?}', 'printReport')->name('reports.term.progression.print.report'); 
+        Route::get('reports/term-performance/export-progression/{semester_id?}', 'exportReport')->name('reports.term.progression.report'); 
+        Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reports.term.progression.student.list'); 
     });
     
 });

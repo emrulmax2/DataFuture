@@ -283,27 +283,27 @@ class TermSubmissionPerformanceReportController extends Controller
                         $html .= '<th>&nbsp;</th>';
                         $html .= '<th>Expected Submission</th>';
                         $html .= '<th>No. Of Submission</th>';
+                        $html .= '<th class="tooltip" title="(Total Submission / Expected Submission) * 100">';
+                            $html .= 'Submission Rate';
+                        $html .= '</th>';
                         $html .= '<th>Total Pass</th>';
                         $html .= '<th>Grade Pass</th>';
                         $html .= '<th>Grade Merit</th>';
                         $html .= '<th>Grade Distinction</th>';
                         $html .= '<th>Grade Referred (R)</th>';
-                        $html .= '<th>Grade Plagiarised(C)</th>';
+                        $html .= '<th>Grade Plagiarised (C)</th>';
                         $html .= '<th>Grade (Absent)</th>';
-                        $html .= '<th>';
-                            $html .= 'Total Pass Rate (Total Pass / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Total Pass / No. Of Submission) * 100">';
+                            $html .= 'Total Pass Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Pass Rate (Grade Pass / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Pass / No. Of Submission) * 100">';
+                            $html .= 'Grade Pass Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Merit Rate (Grade Merit / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Merit / No. Of Submission) * 100">';
+                            $html .= 'Grade Merit Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Distinction Rate (Grade Distinction / No. Of Submission) * 100';
-                        $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Assessment Rate (Total Submission / Expected Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Distinction / No. Of Submission) * 100">';
+                            $html .= 'Grade Distinction Rate';
                         $html .= '</th>';
                     $html .= '</tr>';
                 $html .= '</thead>';
@@ -315,6 +315,7 @@ class TermSubmissionPerformanceReportController extends Controller
                             $html .= '<td>'.$row['student_status'].'</td>';
                             $html .= '<td>'.$row['exp_submission'].'</td>';
                             $html .= '<td>'.$row['no_of_submission'].'</td>';
+                            $html .= '<td>'.$row['assessment_rate'].'%</td>';
                             $html .= '<td>'.$row['total_pass'].'</td>';
                             $html .= '<td>'.$row['grade_pass'].'</td>';
                             $html .= '<td>'.$row['grade_merit'].'</td>';
@@ -326,7 +327,6 @@ class TermSubmissionPerformanceReportController extends Controller
                             $html .= '<td>'.$row['grade_pass_rate'].'%</td>';
                             $html .= '<td>'.$row['grade_merit_rate'].'%</td>';
                             $html .= '<td>'.$row['grade_distinction_rate'].'%</td>';
-                            $html .= '<td>'.$row['assessment_rate'].'%</td>';
                         $html .= '</tr>';
                         if(isset($term_data['course']) && !empty($term_data['course'])):
                             foreach($term_data['course'] as $course_id => $course):
@@ -336,6 +336,7 @@ class TermSubmissionPerformanceReportController extends Controller
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['student_status_ids'].'">'.$crow['student_status'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['exp_submission_ids'].'">'.$crow['exp_submission'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['no_of_submission_ids'].'">'.$crow['no_of_submission'].'</a></td>';
+                                    $html .= '<td>'.$crow['assessment_rate'].'%</td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['total_pass_ids'].'">'.$crow['total_pass'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['grade_pass_ids'].'">'.$crow['grade_pass'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['grade_merit_ids'].'">'.$crow['grade_merit'].'</a></td>';
@@ -347,7 +348,6 @@ class TermSubmissionPerformanceReportController extends Controller
                                     $html .= '<td>'.$crow['grade_pass_rate'].'%</td>';
                                     $html .= '<td>'.$crow['grade_merit_rate'].'%</td>';
                                     $html .= '<td>'.$crow['grade_distinction_rate'].'%</td>';
-                                    $html .= '<td>'.$crow['assessment_rate'].'%</td>';
                                 $html .= '</tr>';
                             endforeach;
                         endif;
@@ -361,27 +361,27 @@ class TermSubmissionPerformanceReportController extends Controller
                         $html .= '<th>&nbsp;</th>';
                         $html .= '<th>Expected Submission</th>';
                         $html .= '<th>No. Of Submission</th>';
+                        $html .= '<th class="tooltip" title="(Total Submission / Expected Submission) * 100">';
+                            $html .= 'Submission Rate';
+                        $html .= '</th>';
                         $html .= '<th>Total Pass</th>';
                         $html .= '<th>Grade Pass</th>';
                         $html .= '<th>Grade Merit</th>';
                         $html .= '<th>Grade Distinction</th>';
                         $html .= '<th>Grade Referred (R)</th>';
-                        $html .= '<th>Grade Plagiarised(C)</th>';
+                        $html .= '<th>Grade Plagiarised (C)</th>';
                         $html .= '<th>Grade (Absent)</th>';
-                        $html .= '<th>';
-                            $html .= 'Total Pass Rate (Total Pass / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Total Pass / No. Of Submission) * 100">';
+                            $html .= 'Total Pass Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Pass Rate (Grade Pass / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Pass / No. Of Submission) * 100">';
+                            $html .= 'Grade Pass Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Merit Rate (Grade Merit / No. Of Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Merit / No. Of Submission) * 100">';
+                            $html .= 'Grade Merit Rate';
                         $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Grade Distinction Rate (Grade Distinction / No. Of Submission) * 100';
-                        $html .= '</th>';
-                        $html .= '<th>';
-                            $html .= 'Assessment Rate (Total Submission / Expected Submission) * 100';
+                        $html .= '<th class="tooltip" title="(Grade Distinction / No. Of Submission) * 100">';
+                            $html .= 'Grade Distinction Rate';
                         $html .= '</th>';
                     $html .= '</tr>';
                 $html .= '</thead>';
@@ -393,6 +393,7 @@ class TermSubmissionPerformanceReportController extends Controller
                             $html .= '<td>'.$row['student_status'].'</td>';
                             $html .= '<td>'.$row['exp_submission'].'</td>';
                             $html .= '<td>'.$row['no_of_submission'].'</td>';
+                            $html .= '<td>'.$row['assessment_rate'].'%</td>';
                             $html .= '<td>'.$row['total_pass'].'</td>';
                             $html .= '<td>'.$row['grade_pass'].'</td>';
                             $html .= '<td>'.$row['grade_merit'].'</td>';
@@ -404,7 +405,6 @@ class TermSubmissionPerformanceReportController extends Controller
                             $html .= '<td>'.$row['grade_pass_rate'].'%</td>';
                             $html .= '<td>'.$row['grade_merit_rate'].'%</td>';
                             $html .= '<td>'.$row['grade_distinction_rate'].'%</td>';
-                            $html .= '<td>'.$row['assessment_rate'].'%</td>';
                         $html .= '</tr>';
                         if(isset($term_data['course']) && !empty($term_data['course'])):
                             foreach($term_data['course'] as $course_id => $course):
@@ -414,6 +414,7 @@ class TermSubmissionPerformanceReportController extends Controller
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['student_status'].'">'.$crow['student_status'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['exp_submission'].'">'.$crow['exp_submission'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['no_of_submission'].'">'.$crow['no_of_submission'].'</a></td>';
+                                    $html .= '<td>'.$crow['assessment_rate'].'%</td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['total_pass'].'">'.$crow['total_pass'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['grade_pass'].'">'.$crow['grade_pass'].'</a></td>';
                                     $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$crow['grade_merit'].'">'.$crow['grade_merit'].'</a></td>';
@@ -425,7 +426,6 @@ class TermSubmissionPerformanceReportController extends Controller
                                     $html .= '<td>'.$crow['grade_pass_rate'].'%</td>';
                                     $html .= '<td>'.$crow['grade_merit_rate'].'%</td>';
                                     $html .= '<td>'.$crow['grade_distinction_rate'].'%</td>';
-                                    $html .= '<td>'.$crow['assessment_rate'].'%</td>';
                                 $html .= '</tr>';
                             endforeach;
                         endif;

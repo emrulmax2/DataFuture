@@ -2,13 +2,12 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
-import tippy, { roundArrow } from "tippy.js";
 
 ("use strict");
 var submissionPerformanceSTDListTable = (function () {
     var _tableGen = function (student_ids) {
         let tableContent = new Tabulator("#submissionPerformanceSTDListTable", {
-            ajaxURL: route("reportsterm.performance.submission.student.list"),
+            ajaxURL: route("reports.term.progression.student.list"),
             ajaxParams: { student_ids : student_ids },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -135,7 +134,7 @@ var submissionPerformanceSTDListTable = (function () {
 })();
 
 (function(){
-    let subPerfTomOptions = {
+    let progressionTomOptions = {
         plugins: {
             dropdown_input: {}
         },
@@ -148,67 +147,55 @@ var submissionPerformanceSTDListTable = (function () {
         },
     };
 
-    let subPerfTomOptionsMul = {
-        ...subPerfTomOptions,
+    let progressionTomOptionsMul = {
+        ...progressionTomOptions,
         plugins: {
-            ...subPerfTomOptions.plugins,
+            ...progressionTomOptions.plugins,
             remove_button: {
                 title: "Remove this item",
             },
         }
     };
 
-    var sub_perf_term_id = new TomSelect('#sub_perf_term_id', subPerfTomOptions);
-    $('#sub_perf_term_id').on('change', function(){
-        $('#printSubmissionPerformanceReportBtn, #exportSubmissionPerformanceReportBtn').attr('href', 'javascript:void(0);').fadeOut();
-        $('#submissionPerformanceReportWrap').fadeOut().html('');
+    var progression_semester_id = new TomSelect('#progression_semester_id', progressionTomOptions);
+    $('#progression_semester_id').on('change', function(){
+        $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+        $('#progressionReportWrap').fadeOut().html('');
     });
 
-    $('#submissionPerformanceReportForm').on('submit', function(e){
+    $('#progressionReportForm').on('submit', function(e){
         e.preventDefault();
         let $form = $(this);
-        const form = document.getElementById('submissionPerformanceReportForm');
-        let sub_perf_term_id = $form.find('#sub_perf_term_id').val();
+        const form = document.getElementById('progressionReportForm');
+        let progression_semester_id = $form.find('#progression_semester_id').val();
         
-        if(sub_perf_term_id.length > 0){
-            $form.find('.error-sub_perf_term_id').html('')
-            document.querySelector('#submissionPerformanceReportBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#submissionPerformanceReportBtn svg").style.cssText ="display: inline-block;";
-            $('#printSubmissionPerformanceReportBtn, #exportSubmissionPerformanceReportBtn').attr('href', 'javascript:void(0);').fadeOut();
-            $('#submissionPerformanceReportWrap').fadeOut().html('');
+        if(progression_semester_id > 0){
+            $form.find('.error-progression_semester_id').html('')
+            document.querySelector('#progressionReportBtn').setAttribute('disabled', 'disabled');
+            document.querySelector("#progressionReportBtn svg").style.cssText ="display: inline-block;";
+            $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $('#progressionReportWrap').fadeOut().html('');
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('reports.term.performance.submission.generate.report'),
+                url: route('reports.term.progression.generate.report'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#submissionPerformanceReportBtn').removeAttribute('disabled');
-                document.querySelector("#submissionPerformanceReportBtn svg").style.cssText = "display: none;";
+                document.querySelector('#progressionReportBtn').removeAttribute('disabled');
+                document.querySelector("#progressionReportBtn svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
                     //console.log(response.data);
                     //return false;
-                    let pdf_url = route('reports.term.performance.submission.print.report', sub_perf_term_id);
-                    let excel_url = route('reports.term.performance.submission.report', sub_perf_term_id);
-                    $('#submissionPerformanceReportWrap').fadeIn().html(response.data.htm);
-                    $('#printSubmissionPerformanceReportBtn').attr('href', pdf_url).fadeIn();
-                    $('#exportSubmissionPerformanceReportBtn').attr('href', excel_url).fadeIn();
+                    let pdf_url = route('reports.term.progression.print.report', progression_semester_id);
+                    let excel_url = route('reports.term.progression.report', progression_semester_id);
+                    $('#progressionReportWrap').fadeIn().html(response.data.htm);
+                    $('#printProgressionReportBtn').attr('href', pdf_url).fadeIn();
+                    $('#exportProgressionReportBtn').attr('href', excel_url).fadeIn();
 
                     setTimeout(() => {
-                        $("#submissionPerformanceReportWrap .tooltip").each(function () {
-                            let tTipoptions = {
-                                content: $(this).attr("title"),
-                            };
-                            $(this).removeAttr("title");
-                    
-                            tippy(this, {
-                                arrow: roundArrow,
-                                animation: "shift-away",
-                                ...tTipoptions,
-                            });
-                        });
                         createIcons({
                             icons,
                             "stroke-width": 1.5,
@@ -217,40 +204,28 @@ var submissionPerformanceSTDListTable = (function () {
                     }, 10);
                 }
             }).catch(error => {
-                document.querySelector('#submissionPerformanceReportBtn').removeAttribute('disabled');
-                document.querySelector("#submissionPerformanceReportBtn svg").style.cssText = "display: none;";
-                $('#printSubmissionPerformanceReportBtn, #exportSubmissionPerformanceReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+                document.querySelector('#progressionReportBtn').removeAttribute('disabled');
+                document.querySelector("#progressionReportBtn svg").style.cssText = "display: none;";
+                $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
                 if (error.response) {
                     console.log('error');
                 }
             });
         }else{
-            $form.find('.error-sub_perf_term_id').html('Semesters can not be empty.');
-            $('#submissionPerformanceReportWrap').fadeOut().html('');
-            $('#printSubmissionPerformanceReportBtn, #exportSubmissionPerformanceReportBtn').attr('href', 'javascript:void(0);').fadeOut();
+            $form.find('.error-progression_semester_id').html('Semesters can not be empty.');
+            $('#progressionReportWrap').fadeOut().html('');
+            $('#printProgressionReportBtn, #exportProgressionReportBtn').attr('href', 'javascript:void(0);').fadeOut();
         }
     });
 
-    $('#submissionPerformanceReportWrap').on('click', '#firstSubmissionPerformanceReportTable .semesterFirstRowToggle', function(e){
+    $('#progressionReportWrap').on('click', '#submissionPerformanceReportTable .semesterRowToggle', function(e){
         e.preventDefault();
         var semesterid = $(this).attr('data-semester');
         if($(this).hasClass('active')){
-            $('#firstSubmissionPerformanceReportTable .course_first_row_'+semesterid).fadeOut();
+            $('#submissionPerformanceReportTable .course_row_'+semesterid).fadeOut();
             $(this).removeClass('active');
         }else{
-            $('#firstSubmissionPerformanceReportTable .course_first_row_'+semesterid).fadeIn();
-            $(this).addClass('active');
-        }
-    });
-
-    $('#submissionPerformanceReportWrap').on('click', '#allSubmissionPerformanceReportTable .semesterAllRowToggle', function(e){
-        e.preventDefault();
-        var semesterid = $(this).attr('data-semester');
-        if($(this).hasClass('active')){
-            $('#allSubmissionPerformanceReportTable .course_all_row_'+semesterid).fadeOut();
-            $(this).removeClass('active');
-        }else{
-            $('#allSubmissionPerformanceReportTable .course_all_row_'+semesterid).fadeIn();
+            $('#submissionPerformanceReportTable .course_row_'+semesterid).fadeIn();
             $(this).addClass('active');
         }
     });
@@ -261,7 +236,7 @@ var submissionPerformanceSTDListTable = (function () {
     submissionPerformanceSTDListModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#submissionPerformanceSTDListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
     });
-    $('#submissionPerformanceReportWrap').on('click', '.subPerfmStdBtn', function(e){
+    $('#progressionReportWrap').on('click', '.subPerfmStdBtn', function(e){
         e.preventDefault();
         let $thebtn = $(this);
         let student_ids = $thebtn.attr('data-ids');
