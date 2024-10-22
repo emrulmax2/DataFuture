@@ -294,6 +294,7 @@ export default defineConfig({
                 'resources/js/student-slc-recored-reports.js',
 
                 'resources/js/term-submission-performance-reports.js',
+                'resources/js/term-progression-reports.js',
             ],
             refresh: true,
         }),
