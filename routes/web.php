@@ -2819,11 +2819,6 @@ Route::middleware('auth')->group(function() {
         Route::post('my-account/groups/restore/{id}', 'restore')->name('user.account.group.restore');
     });
 
-    Route::controller(ApplicationAnalysisController::class)->group(function(){
-        Route::any('reports/application-analysis-report', 'index')->name('report.application.analysis'); 
-        Route::get('reports/application-analysis-report/print-personal-data/{semester}', 'printPersonalData')->name('report.application.analysis.print.pd'); 
-    });
-
     Route::controller(BulkCommunicationController::class)->group(function(){
         Route::get('bulk-communication/communication/{classplans}', 'index')->name('bulk.communication'); 
         Route::get('bulk-communication/list', 'list')->name('bulk.communication.student.list'); 
