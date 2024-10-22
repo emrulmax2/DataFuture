@@ -295,6 +295,7 @@ export default defineConfig({
 
                 'resources/js/term-submission-performance-reports.js',
                 'resources/js/term-progression-reports.js',
+                'resources/js/term-retention-reports.js',
             ],
             refresh: true,
         }),
