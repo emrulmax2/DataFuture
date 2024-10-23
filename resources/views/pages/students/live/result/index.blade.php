@@ -20,9 +20,14 @@
             <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </a>
+            
+            @if(in_array($student->status_id, [21, 42]) && empty($award) && !isset($award->id))
+                <button data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="btn btn-success text-white w-auto ml-2">Add Award</button>
+            @endif
         </div>
     </div>
     <!-- END: Page Title -->
+     
     <!-- BEGIN: Daily Sales -->
     <div class="intro-y box col-span-12 p-5 mt-5">
         <div id="tabledata1" class=" overflow-x-auto p-5 pt-5" >
@@ -134,6 +139,101 @@
         </div>
     </div>
     <!-- END: Daily Sales -->
+
+    <!-- BEGIN: Award Section -->
+    @if(in_array($student->status_id, [21, 42]) && (isset($award->id) && $award->id > 0))
+    <div class="intro-y box mt-5">
+        <div class="grid grid-cols-12 gap-0 items-center p-5">
+            <div class="col-span-6">
+                <div class="font-medium text-base">Award Details</div>
+            </div>
+            <div class="col-span-6 text-right">
+                <button data-student="{{ $student->id }}" data-id="{{ $award->id }}" data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="editStudentAwardBtn btn btn-success text-white w-auto mr-0 mb-0">
+                    <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Update Award
+                </button>
+            </div>
+        </div>
+        <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
+        <div class="p-5">
+            <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Date Of Award</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_award) && !empty($award->date_of_award) ? date('jS F, Y', strtotime($award->date_of_award)) : '') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Overall Result</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->qual->name) && !empty($award->qual->name) ? $award->qual->name : '') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
+
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Certificate Requested from Awarding body?</div>
+                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_requested) && !empty($award->certificate_requested) ? '<span class="btn btn-'.($award->certificate_requested == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_requested.'</span>' : '') !!}</div>
+                    </div>
+                </div>
+                @if(isset($award->certificate_requested) && $award->certificate_requested == 'Yes')
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Date of request</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_requested) && !empty($award->date_of_certificate_requested) ? date('jS F, Y', strtotime($award->date_of_certificate_requested)) : '') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Requested by</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->requested->employee->full_name) && !empty($award->requested->employee->full_name) ? $award->requested->employee->full_name : '') }}</div>
+                    </div>
+                </div>
+                @endif
+                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
+
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Certificate Received?</div>
+                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_received) && !empty($award->certificate_received) ? '<span class="btn btn-'.($award->certificate_received == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_received.'</span>' : '') !!}</div>
+                    </div>
+                </div>
+                @if(isset($award->certificate_received) && $award->certificate_received == 'Yes')
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Date of received</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_requested) && !empty($award->date_of_certificate_requested) ? date('jS F, Y', strtotime($award->date_of_certificate_requested)) : '') }}</div>
+                    </div>
+                </div>
+                @endif
+                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
+
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Certificate Release to Student?</div>
+                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_released) && !empty($award->certificate_released) ? '<span class="btn btn-'.($award->certificate_released == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_released.'</span>' : '') !!}</div>
+                    </div>
+                </div>
+                @if(isset($award->certificate_released) && $award->certificate_released == 'Yes')
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Date of Released</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_released) && !empty($award->date_of_certificate_released) ? date('jS F, Y', strtotime($award->date_of_certificate_released)) : '') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Released by</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->released->employee->full_name) && !empty($award->released->employee->full_name) ? $award->released->employee->full_name : '') }}</div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+    <!-- END: Award Section -->
+
 <!-- BEGIN: Student Profile Lock Modal -->
    @if($dataSet)
         @foreach($dataSet as $key => $resultSet)
@@ -370,6 +470,7 @@
 @endforeach
 @endif
 
+@if($prev_result_count > 0)
 <div class="intro-y flex items-center p-5 mt-5 box">
     <h2 class="text-lg font-medium mr-auto">
         Previous Results
@@ -438,6 +539,7 @@
         <div id="studentNotesListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
+@endif
 
 <!-- BEGIN: Edit Modal -->
 <div id="editNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -584,9 +686,167 @@
             </div>
     </div>
 </div>
+
+
+<!-- BEGIN: Add/Edit Award Modal -->
+<div id="addStudentAwardInfoModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="addStudentAwardInfoForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Award Informations</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="date_of_award" class="form-label">Date of award <span class="text-danger">*</span></label>
+                        <input id="date_of_award" name="date_of_award" type="text" class="form-control w-full datepicker" value="" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" />
+                        <div class="acc__input-error error-date_of_award text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="qual_award_result_id" class="form-label">Overall Result <span class="text-danger">*</span></label>
+                        <select id="qual_award_result_id" class="tom-selects w-full" name="qual_award_result_id">
+                            <option value="">Please Select</option>
+                            @if($qualAwards->count() > 0)
+                                @foreach($qualAwards as $qual)
+                                    <option value="{{ $qual->id }}">{{ $qual->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-date_of_award text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="certificate_requested" class="form-label">Certificate Requested from Awarding body?</label>
+                        <div class="form-check form-switch">
+                            <input id="certificate_requested" class="form-check-input" name="certificate_requested" value="Yes" type="checkbox">
+                            <label class="form-check-label checkLabel" for="certificate_requested">No</label>
+                        </div>
+                        <div class="acc__input-error error-certificate_requested text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 cerReqWrap" style="display: none;">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="date_of_certificate_requested" class="form-label">Date of Request</label>
+                                    <input id="date_of_certificate_requested" name="date_of_certificate_requested" type="text" class="form-control w-full datepicker" value="" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" />
+                                    <div class="acc__input-error error-date_of_certificate_requested text-danger mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="certificate_requested_by" class="form-label">Requested by</label>
+                                    <select id="certificate_requested_by" class="tom-selects w-full" name="certificate_requested_by">
+                                        <option value="">Please Select</option>
+                                        @if($users->count() > 0)
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}">{{ (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name) }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-certificate_requested_by text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="certificate_received" class="form-label">Certificate Received</label>
+                        <div class="form-check form-switch">
+                            <input id="certificate_received" class="form-check-input" name="certificate_received" value="Yes" type="checkbox">
+                            <label class="form-check-label checkLabel" for="certificate_received">No</label>
+                        </div>
+                        <div class="acc__input-error error-certificate_received text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 cerRcvdWrap" style="display: none;">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                                <div>
+                                    <label for="date_of_certificate_received" class="form-label">Date of Received</label>
+                                    <input id="date_of_certificate_received" name="date_of_certificate_received" type="text" class="form-control w-full datepicker" value="" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" />
+                                    <div class="acc__input-error error-date_of_certificate_received text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="certificate_released" class="form-label">Certificate Release to Student?</label>
+                        <div class="form-check form-switch">
+                            <input id="certificate_released" class="form-check-input" name="certificate_released" value="Yes" type="checkbox">
+                            <label class="form-check-label checkLabel" for="certificate_released">No</label>
+                        </div>
+                        <div class="acc__input-error error-certificate_released text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 cerRelsdWrap" style="display: none;">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="date_of_certificate_released" class="form-label">Date of Release</label>
+                                    <input id="date_of_certificate_released" name="date_of_certificate_released" type="text" class="form-control w-full datepicker" value="" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" />
+                                    <div class="acc__input-error error-date_of_certificate_released text-danger mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div>
+                                    <label for="certificate_released_by" class="form-label">Release by</label>
+                                    <select id="certificate_released_by" class="tom-selects w-full" name="certificate_released_by">
+                                        <option value="">Please Select</option>
+                                        @if($users->count() > 0)
+                                            @foreach($users as $user)
+                                                <option value="{{ $user->id }}">{{ (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name) }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-certificate_released_by text-danger mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="addAwardBtn" class="btn btn-primary w-auto">     
+                        Save                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
+                    <input type="hidden" value="{{ $student->crel->id }}" name="student_course_relation_id"/>
+                    <input type="hidden" value="{{ (isset($award->id) && $award->id > 0 ? $award->id : 0) }}" name="id"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Add/Edit Award Modal -->
+<div id="successAWModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 successAWModalTitle"></div>
+                    <div class="text-slate-500 mt-2 successAWModalDesc"></div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-action="NONE" class="successCloser btn btn-primary w-24">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('script')
 
         @vite('resources/js/student-results.js')
+        @vite('resources/js/student-award.js')
 @endsection

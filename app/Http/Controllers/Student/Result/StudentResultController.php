@@ -9,11 +9,13 @@ use App\Models\Grade;
 use App\Models\ModuleCreation;
 use App\Models\ModuleLevel;
 use App\Models\Plan;
+use App\Models\QualAwardResult;
 use App\Models\Result;
 use App\Models\Semester;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\TermDeclaration;
+use App\Models\User;
 use Barryvdh\DomPDF\PDF as DomPDFPDF;
 use FontLib\Table\Type\name;
 use Illuminate\Http\Request;
@@ -60,7 +62,10 @@ class StudentResultController extends Controller
                 $resultPrimarySet[$result->id] = null;
             endforeach;
 
-            
+
+        $subQuery = ExamResultPrev::select('id')->where('student_id', $student->id)->groupBy('student_id', 'course_module_id')->havingRaw('MAX(created_at)');
+        $prevResultCount = ExamResultPrev::whereIn('id', $subQuery)->where('student_id', $student->id)->get()->count();
+        
         return view('pages.students.live.result.index', [
             'title' => 'Students - Results',
             'breadcrumbs' => [
@@ -73,7 +78,11 @@ class StudentResultController extends Controller
             "grades" =>$grades,
             "terms" =>TermDeclaration::orderBy('id','DESC')->get(),
             "resultPrimarySet" =>$resultPrimarySet,
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'prev_result_count' => $prevResultCount,
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'award' => isset($student->awarded) && isset($student->awarded->id) && $student->awarded->id > 0 ? $student->awarded : null
         ]);
     }
 
