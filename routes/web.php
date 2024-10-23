@@ -247,6 +247,7 @@ use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectControl
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\AwardController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\Result\StudentResultController;
 use App\Http\Controllers\Student\SlcCocController;
@@ -845,13 +846,8 @@ Route::middleware('auth')->group(function() {
     
     
     Route::controller(StudentResultController::class)->group(function() {
-
         Route::get('student-results/{student}', 'index')->name('student-results.index'); 
-        
         Route::get('student-results/{student}/print', 'print')->name('student-results.print');
-
-        
-        
     }); 
 
     Route::controller(PersonalDetailController::class)->group(function() {
@@ -3003,6 +2999,11 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/term-performance/print-retention/{term_declaration_ids?}', 'printReport')->name('reports.term.retention.print.report'); 
         Route::get('reports/term-performance/export-retention/{term_declaration_ids?}', 'exportReport')->name('reports.term.retention.report'); 
         Route::get('reports/term-performance/get-student-list', 'getStudentList')->name('reports.term.retention.student.list'); 
+    });
+
+    Route::controller(AwardController::class)->group(function(){
+        Route::post('student/results/award/store', 'store')->name('student.store.award'); 
+        Route::post('student/results/award/edit', 'edit')->name('student.edit.award'); 
     });
     
 });

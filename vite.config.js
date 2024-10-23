@@ -296,6 +296,7 @@ export default defineConfig({
                 'resources/js/term-submission-performance-reports.js',
                 'resources/js/term-progression-reports.js',
                 'resources/js/term-retention-reports.js',
+                'resources/js/student-award.js',
             ],
             refresh: true,
         }),
