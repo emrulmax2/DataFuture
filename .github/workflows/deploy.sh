@@ -15,7 +15,7 @@ npm run build
 rm -rf node_modules
 
 # Run database migrations
-php artisan migrate
+php artisan migrate --force
 
 # Clear caches
 php artisan cache:clear
