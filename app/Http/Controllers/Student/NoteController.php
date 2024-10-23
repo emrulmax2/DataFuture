@@ -134,7 +134,7 @@ class NoteController extends Controller
                     'student_flag_id' => ($list->student_flag_id > 0 ? $list->student_flag_id : '0'),
                     'flag_name' => ($list->student_flag_id > 0 && isset($list->flag->name) && !empty($list->flag->name) ? $list->flag->name : ''),
                     'flag_color' => ($list->student_flag_id > 0 && isset($list->flag->color) && !empty($list->flag->color) ? $list->flag->color : ''),
-                    'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : $list->user->name),
+                    'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : (isset($list->user->name) && !empty($list->user->name) ? $list->user->name : '')),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
                     'is_ownere' => (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0)
