@@ -803,7 +803,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($PreviousProviders))
                                 @foreach($PreviousProviders as $n)
-                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -928,7 +928,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($PreviousProviders))
                                 @foreach($PreviousProviders as $n)
-                                    <option value="{{ $n->id }}">{{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
