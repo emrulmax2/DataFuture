@@ -204,6 +204,7 @@ use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\CourseManagement\TutorMonitorController;
 use App\Http\Controllers\Filemanager\DocumentTagController;
 use App\Http\Controllers\Filemanager\FilemanagerController;
+use App\Http\Controllers\Forms\EmployeeFormController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
@@ -3006,4 +3007,9 @@ Route::middleware('auth')->group(function() {
         Route::post('student/results/award/edit', 'edit')->name('student.edit.award'); 
     });
     
+});
+
+
+Route::controller(EmployeeFormController::class)->group(function(){
+    Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
 });

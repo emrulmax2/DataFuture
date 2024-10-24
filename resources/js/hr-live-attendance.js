@@ -7,6 +7,8 @@ import dayjs from "dayjs";
 import Litepicker from "litepicker";
 import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
+import tippy, { roundArrow } from "tippy.js";
+
 
 (function(){
     const senMailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#senMailModal"));
@@ -105,6 +107,27 @@ import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+
+                    setTimeout(() => {
+                        $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+                            let thTippyOptions = {
+                                content: $(this).attr("title"),
+                            };
+                            if ($(this).data("tooltip-content") !== undefined) {
+                                thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                            }
+                    
+                            $(this).removeAttr("title");
+                    
+                            tippy(this, {
+                                arrow: roundArrow,
+                                animation: "shift-away",
+                                theme: 'light',
+                                placement: 'top-start',
+                                ...thTippyOptions,
+                            });
+                        })
+                    }, 10);
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
