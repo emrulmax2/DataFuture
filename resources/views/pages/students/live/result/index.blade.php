@@ -21,7 +21,7 @@
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </a>
             
-            @if(in_array($student->status_id, [21, 42]) && empty($award) && !isset($award->id))
+            @if(in_array($student->status_id, [13, 21, 42]) && empty($award) && !isset($award->id))
                 <button data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="btn btn-success text-white w-auto ml-2">Add Award</button>
             @endif
         </div>
@@ -141,7 +141,7 @@
     <!-- END: Daily Sales -->
 
     <!-- BEGIN: Award Section -->
-    @if(in_array($student->status_id, [21, 42]) && (isset($award->id) && $award->id > 0))
+    @if(in_array($student->status_id, [13, 21, 42]) && (isset($award->id) && $award->id > 0))
     <div class="intro-y box mt-5">
         <div class="grid grid-cols-12 gap-0 items-center p-5">
             <div class="col-span-6">
