@@ -135,12 +135,12 @@ class EducationQualificationController extends Controller
             'awarding_body' => $request->awarding_body,
             'subjects' => $request->subjects,
             'result' => $request->result,
-            'highest_qualification_on_entry_id'=> $request->highest_qualification_on_entry_id,
-            'hesa_qualification_subject_id'=> $request->hesa_qualification_subject_id,
-            'qualification_type_identifier_id'=> $request->qualification_type_identifier_id,
-            'previous_provider_id'=> $request->previous_provider_id,
-            'hesa_exam_sitting_venue_id'=> ($request->hesa_exam_sitting_venue_id) ?? null,
-            'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
+            'highest_qualification_on_entry_id'=> (isset($request->highest_qualification_on_entry_id) && !empty($request->highest_qualification_on_entry_id)) ? $request->highest_qualification_on_entry_id : null,
+            'hesa_qualification_subject_id'=> (isset($request->hesa_qualification_subject_id) && !empty($request->hesa_qualification_subject_id)) ? $request->hesa_qualification_subject_id : null,
+            'qualification_type_identifier_id'=> (isset($request->qualification_type_identifier_id) && !empty($request->qualification_type_identifier_id)) ? $request->qualification_type_identifier_id : null,
+            'previous_provider_id'=> (isset($request->previous_provider_id) && !empty($request->previous_provider_id)) ? $request->previous_provider_id : null,
+            'hesa_exam_sitting_venue_id'=> (isset($request->hesa_exam_sitting_venue_id) && !empty($request->hesa_exam_sitting_venue_id)) ? $request->hesa_exam_sitting_venue_id : null,
+            'degree_award_date'=> (isset($request->degree_award_date) && !empty($request->degree_award_date)) ? date('Y-m-d', strtotime($request->degree_award_date)) : null,
             'updated_by' => auth()->user()->id
         ]);
 

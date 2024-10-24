@@ -923,7 +923,7 @@
                     </div>
                     
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="previous_provider_id" class="form-label">Provider Name <span class="text-danger">*</span></label>
+                        <label for="previous_provider_id" class="form-label">Provider Name </label>
                         <select id="previous_provider_id" class=" lcc-tom-select w-full" name="previous_provider_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($PreviousProviders))
@@ -936,7 +936,7 @@
                     </div>
 
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="qualification_type_identifier_id" class="form-label">Qualification Type <span class="text-danger">*</span></label>
+                        <label for="qualification_type_identifier_id" class="form-label">Qualification Type </label>
                         <select id="qualification_type_identifier_id" class=" lcc-tom-select w-full" name="qualification_type_identifier_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
@@ -948,7 +948,7 @@
                         <div class="acc__input-error error-qualification_type_identifier_id text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="hesa_qualification_subject_id" class="form-label">Hesa Qualification Subject <span class="text-danger">*</span></label>
+                        <label for="hesa_qualification_subject_id" class="form-label">Hesa Qualification Subject </label>
                         <select id="hesa_qualification_subject_id" class=" lcc-tom-select w-full" name="hesa_qualification_subject_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaQualificationSubjects))
@@ -960,7 +960,7 @@
                         <div class="acc__input-error error-hesa_qualification_subject_id text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="highest_qualification_on_entry_id" class="form-label">HIghest Qualification Entry (QualEnt3)<span class="text-danger">*</span></label>
+                        <label for="highest_qualification_on_entry_id" class="form-label">HIghest Qualification Entry (QualEnt3)</label>
                         <select id="highest_qualification_on_entry_id" class=" lcc-tom-select w-full" name="highest_qualification_on_entry_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($HighestQualificationOnEntrys))
@@ -973,7 +973,7 @@
                     </div>
                     
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="hesa_exam_sitting_venue_id" class="form-label">Exam Sitting<span class="text-danger">*</span></label>
+                        <label for="hesa_exam_sitting_venue_id" class="form-label">Exam Sitting</label>
                         <select id="hesa_exam_sitting_venue_id" class="lcc-tom-select w-full" name="hesa_exam_sitting_venue_id">
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaExamSittingVenues))
