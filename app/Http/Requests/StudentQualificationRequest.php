@@ -28,11 +28,6 @@ class StudentQualificationRequest extends FormRequest
             'awarding_body' => 'required',
             'subjects' => 'required',
             'result' => 'required',
-            'degree_award_date' => 'required|date',
-            'highest_qualification_on_entry_id'=> 'required',
-            'hesa_qualification_subject_id'=> 'required',
-            'qualification_type_identifier_id'=> 'required',
-            'previous_provider_id'=> 'required',
         ];
     }
 }
