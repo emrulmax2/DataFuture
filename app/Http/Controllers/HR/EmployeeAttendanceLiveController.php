@@ -95,11 +95,12 @@ class EmployeeAttendanceLiveController extends Controller
                 $day = $this->getTheDayStatusWithSchedule($list->id, $theDate);
                 $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
                 $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
+                $hasTooltip = ($day['working_status'] && $day['attendances']->count() > 0  && !empty($day['tooltip']) ? true : false);
 
                 $html .= '<tr>';
 
                     $html .= '<td class="w-2/6">';
-                        $html .= '<a href="javascript:void(0);" class="block">';
+                        $html .= '<a href="javascript:void(0);" '.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'" ' : '').' class="block '.($hasTooltip ? 'tooltip' : '').'">';
                             $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
                                 $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
                             $html .= '</div>';
@@ -108,6 +109,13 @@ class EmployeeAttendanceLiveController extends Controller
                                 $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
                             $html .= '</div>';
                         $html .= '</a>';
+                        if($hasTooltip):
+                            $html .= '<div class="tooltip-content">';
+                                $html .= '<div id="live-tooltip-'.$list->id.'" class="relative py-1">';
+                                    $html .= $day['tooltip'];
+                                $html .= '</div>';
+                            $html .= '</div>';
+                        endif;
                     $html .= '</td>';
 
                     $html .= '<td class="text-center w-1/6">';
@@ -254,6 +262,39 @@ class EmployeeAttendanceLiveController extends Controller
         $res['label'] = $statusLabel;
         $res['class'] = $statusClass;
         $res['since'] = $since;
+        $res['working_status'] = ($dayStatus || $overtimeStatus ? true : false);
+        $res['attendances'] = $todaysAttendances;
+
+        if($res['working_status'] && $todaysAttendances->count() > 0):
+            $html = '<div class="grid grid-cols-12 gap-x-4 gap-y-1 items-center">';
+                foreach($todaysAttendances as $attn):
+                    $attendance_type = $attn->attendance_type;
+                    $attendance_label = '';
+                    switch($attendance_type):
+                        case(1):
+                            $attendance_label = 'Clock In';
+                            break;
+                        case(2):
+                            $attendance_label = 'Break';
+                            break;
+                        case(3):
+                            $attendance_label = 'Return';
+                            break;
+                        case(4):
+                            $attendance_label = 'Clock Out';
+                            break;
+                        default:
+                            $attendance_label = 'Unknown';
+                            break;
+                    endswitch;
+                    $html .= '<div class="col-span-6 font-medium text-slate-500">'.$attendance_label.'</div>';
+                    $html .= '<div class="col-span-6 font-medium">'.(isset($attn->time) && !empty($attn->time) ? date('H:i', strtotime($attn->time)) : '').'</div>';
+                endforeach;
+            $html .= '</div>';
+            $res['tooltip'] = $html;
+        else:
+            $res['tooltip'] = '';
+        endif;
 
         return $res;
     }

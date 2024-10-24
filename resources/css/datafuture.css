@@ -2212,3 +2212,8 @@ input[type=number] {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
 }
+
+
+.dataCollectionFormWrap{
+    padding: 120px 0;
+}
