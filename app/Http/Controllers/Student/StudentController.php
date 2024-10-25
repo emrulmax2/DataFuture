@@ -1120,7 +1120,7 @@ class StudentController extends Controller
 
             $attendanceFeedStatus = AttendanceFeedStatus::all();
             $termData = [];
-
+            $ClassType = [];
                 $QueryInner = DB::table('plans_date_lists as pdl')
                             ->select( 'pdl.*','td.id as term_id',    'td.name as term_name','instance_terms.start_date','instance_terms.end_date', 'plan.module_creation_id as module_creation_id' , 'mc.module_name','mc.code as module_code', 'plan.id as plan_id' )
                             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
@@ -1178,9 +1178,10 @@ class StudentController extends Controller
                         "start_date" => $list->start_date,
                         "end_date" => $list->end_date,
                     ];
-                    $planDetails[$list->term_id][$list->plan_id] = Plan::with(["tutor","personalTutor"])->where('id',$list->plan_id)->get()->first();
-                    
-                    
+                    $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
+                    $planDetails[$list->term_id][$list->plan_id] = $planSet;
+                    $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
+                        
                     $avarageDetails[$list->term_id][$list->plan_id] = $avarage;
                     $totalFeedListSet[$list->term_id][$list->plan_id] = $totalFeedList;
 
@@ -1228,6 +1229,7 @@ class StudentController extends Controller
             "totalClassFullSet" =>$totalClassFullSet,
             "attendanceFeedStatus" =>$attendanceFeedStatus,
             "moduleNameList" =>$moduleNameList,
+            "ClassType" =>$ClassType,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
