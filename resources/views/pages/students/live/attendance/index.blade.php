@@ -77,9 +77,10 @@
                         
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
-                        <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} [ {{ $planId }} ] <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded {{ $attendanceIndicator[$planId]===0 ? "bg-danger" : "bg-primary" }} text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
+                        <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded {{ $attendanceIndicator[$planId]===0 ? "bg-danger" : "bg-primary" }} text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
                         
-                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
+                        <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1">
+                            <i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
                             <i data-lucide="user" class="w-4 h-4 mr-1 ml-2"></i> 
                             @if($ClassType[$planId]!="Tutorial")
                                 {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A" }}
