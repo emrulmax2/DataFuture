@@ -55,6 +55,7 @@
                                 <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 hidden"></i>
                             </div>
                             @php
+                                
                                 $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
                                 $start_time = date('h:i A', strtotime($start_time));
                                 
@@ -63,7 +64,14 @@
                             @endphp
                             <div class="ml-4 mr-auto toggle-heading">
                                 <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
-                                <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="user" class="w-4 h-4 mr-1"></i> {{ $planDetails[$termId][$planId]->tutor->employee->full_name }}</div>
+                                <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1">
+                                    <i data-lucide="user" class="w-4 h-4 mr-1"></i> 
+                                    @if($ClassType[$planId]!="Tutorial")
+                                        {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A" }}
+                                    @else
+                                        {{ !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : "N/A" }} 
+                                    @endif
+                                </div>
                             </div>
                             <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$planId] }}%</div>
                             <div class="flex-none"></div>
@@ -92,39 +100,32 @@
                                     @foreach($data as $planDateList)
                                     
                                         @if($planDateList["attendance"]!=null)
-
-                                        @php
-                                            $start_time = date("Y-m-d ".$planDateList["attendance_information"]->start_time);
-                                            $start_time = date('h:i A', strtotime($start_time));
-                                            
-                                            $end_time = date("Y-m-d ".$planDateList["attendance_information"]->end_time);
-                                            $end_time = date('h:i A', strtotime($end_time));  
-                                            $iCountColSpan =0;
-                                        @endphp
-                                        <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ date('d F, Y',strtotime($planDateList["date"]))  }}
-                                            </td>
-                                            <input name="id[]" value="{{ $planDateList["attendance"]->id }}" type="hidden" />
-                                            @foreach($attendanceFeedStatus as $status)
-                                                @php $iCountColSpan++; @endphp    
-                                            @if($planDateList["attendance"]->feed->code == $status->code)
-                                                
-                                                    <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t {{ ($planDateList["attendance"]->feed->attendance_count ? "text-emerald-600" : "text-red-600") }}  ">
-                                                        {{ $planDateList["attendance"]->feed->code }} - {{ $planDateList["attendance"]->feed->name }}
-                                                    </td>
-                                                @else
+                                            @php $iCountColSpan = 0; @endphp
+                                           
+                                                <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                        <input data-tw-merge  id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}"  type="radio" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"/>
-                                                        <label data-tw-merge for="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" class="cursor-pointer ml-2">{{ $status->name }}</label>
-                                                        
+                                                        {{ date('d F, Y',strtotime($planDateList["date"]))  }}
                                                     </td>
-                                                @endif
-                                            @endforeach
-                                            <td data-tw-merge class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
-                                                <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $planDateList["attendance"]->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
-                                            </td>
-                                        </tr>
+                                                    <input name="id[]" value="{{ $planDateList["attendance"]->id }}" type="hidden" />
+                                                    @foreach($attendanceFeedStatus as $status)
+                                                        @php $iCountColSpan++; @endphp    
+                                                        @if($planDateList["attendance"]->feed->code == $status->code)
+                                                        
+                                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t {{ ($planDateList["attendance"]->feed->attendance_count ? "text-emerald-600" : "text-red-600") }}  ">
+                                                                {{ $planDateList["attendance"]->feed->code }} - {{ $planDateList["attendance"]->feed->name }}
+                                                            </td>
+                                                        @else
+                                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                                <input data-tw-merge  id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}"  type="radio" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"/>
+                                                                <label data-tw-merge for="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" class="cursor-pointer ml-2">{{ $status->name }}</label>
+                                                                
+                                                            </td>
+                                                        @endif
+                                                    @endforeach
+                                                    <td data-tw-merge class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                                                        <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $planDateList["attendance"]->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
+                                                    </td>
+                                                </tr>
                                         @endif
                                     @endforeach
                                 </tbody>
