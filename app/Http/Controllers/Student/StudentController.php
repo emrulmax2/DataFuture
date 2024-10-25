@@ -831,8 +831,10 @@ class StudentController extends Controller
                         $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
                         
                         $replace = array('{', '}', "'", '"');
-                        $totalFullSetFeedList[$list->term_id] = str_replace ($replace, " ", $json);
+                        $intermediate = str_replace ($replace, " ", $json);
                         //End Feed List Set
+                        // Add a space after each colon
+                        $totalFullSetFeedList[$list->term_id] = preg_replace('/:/', ': ', $intermediate);
                         
                         $totalClassFullSet[$list->term_id] = $totalBoxPresentFound[$list->term_id] + $totalBoxAbsentFound[$list->term_id];
 
