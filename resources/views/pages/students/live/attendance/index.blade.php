@@ -15,21 +15,22 @@
         @foreach($dataSet as $termId =>$dataStartPoint)
         @php $termstart++ @endphp
         <div class="intro-y box col-span-12 p-5 mt-5">
-            <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 class="font-medium text-base mr-auto">{{ $term[$termId]["name"] }} <div class="font-medium dark:text-slate-500 bg-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }}/20 text-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
-                    <div class="text-slate-500 sm:mr-5 ml-auto text-sm mt-2">{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ".$totalClassFullSet[$termId]. " days class" : "No class found" }} </div>
+            <div class="flex items-center px-5 py-5 sm:py-3 mb-5 border-slate-200/60 bg-teal-600 text-slate-100 rounded-tl rounded-tr">
+                
+                <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} <div class="font-medium {{ ($avarageTotalPercentage[$termId]>79)? "bg-cyan-900/20" : "bg-warning/20" }} {{ ($avarageTotalPercentage[$termId]>79)? " text-cyan-300" : "text-warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                    <div class="text-slate-100 sm:mr-5 ml-auto text-sm mt-2">{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ".$totalClassFullSet[$termId]. " days class" : "No class found" }} </div>
                 </h2>
-                <div class="text-slate-500 sm:mr-5 ml-auto">
+                <div class="text-slate-100 sm:mr-5 ml-auto">
                     Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} 
-                    <div class="col-span-12">
+                    <div class="col-span-12 pt-1">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-12 text-slate-500 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId] && $lastAttendanceDate[$termId]!="N/A") ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
+                            <div class="col-span-12 text-slate-100 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId] && $lastAttendanceDate[$termId]!="N/A") ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="dropdown ml-auto sm:hidden">
                     <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
+                        <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-100"></i>
                     </a>
                     <div class="dropdown-menu w-40">
                         <ul class="dropdown-content">
@@ -49,7 +50,7 @@
                         </ul>
                     </div>
                 </div>
-                <button class="btn btn-outline-secondary hidden sm:flex">
+                <button class="btn btn-pending hidden sm:flex">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print Now
                 </button>
                 @if($termstart==1 && $termAttendanceFound[$termId]===true)
@@ -60,10 +61,10 @@
             </div>
             @foreach($dataStartPoint as $planId => $data)
             
-            <div class="p-5">
+            <div class="p-5 ">
 
                 <div class="relative flex items-center mb-5">
-                    <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer">
+                    <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
                         <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
                             <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                     </div>
@@ -76,7 +77,7 @@
                         
                     @endphp
                     <div class="ml-4 mr-auto toggle-heading">
-                        <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} [ {{ $planId }} ] <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
+                        <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} [ {{ $planId }} ] <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded {{ $attendanceIndicator[$planId]===0 ? "bg-danger" : "bg-primary" }} text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
                         
                         <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1"><i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
                             <i data-lucide="user" class="w-4 h-4 mr-1 ml-2"></i> 

@@ -643,6 +643,7 @@ class StudentController extends Controller
         $avarageTermDetails = [];
         $totalClassFullSet = [];
         $returnSet = [];
+        $attendanceIndicator = [];
             $attendanceFeedStatus = AttendanceFeedStatus::all();
             $returnSet = $this->PlanWithAttendanceSet($student);
             
@@ -662,6 +663,7 @@ class StudentController extends Controller
         $totalClassFullSet = $returnSet["totalClassFullSet"];
         $termAttendanceFound = $returnSet["termAttendanceFound"];
         $lastAttendanceDate = $returnSet["lastAttendanceDate"];
+        $attendanceIndicator = $returnSet["attendanceIndicator"];
         
         
         return view('pages.students.live.attendance.index', [
@@ -684,6 +686,7 @@ class StudentController extends Controller
             "ClassType" => $ClassType,
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
+            "attendanceIndicator" => $attendanceIndicator,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
@@ -709,7 +712,7 @@ class StudentController extends Controller
                                         'mc.module_name','mc.code as module_code', 
                                         'plan.id as plan_id' , 
                                         'gp.name as group_name', 
-                                        'gp.id as group_id')
+                                        'gp.id as group_id','assign.attendance as indicator')
                             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
                             ->leftJoin('instance_terms', 'instance_terms.id', 'plan.instance_term_id')
                             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
@@ -722,6 +725,7 @@ class StudentController extends Controller
                             
                             $attendanceFeedStatus = AttendanceFeedStatus::all();
                 $termAttendanceFound = [];
+                $attendanceIndicator = [];
                 $i=0;
                 if($QueryInner->isNotEmpty())
                 foreach($QueryInner as $list):
@@ -733,8 +737,8 @@ class StudentController extends Controller
                     if(isset($attendance)) {
 
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
-                        
-                        
+                        // attendance indicator check
+                        $attendanceIndicator[$list->plan_id]  = ($list->indicator===0) ? 0:1;
                         
                         $termAttendanceFound[$list->term_id] = true;
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
@@ -823,9 +827,13 @@ class StudentController extends Controller
                         $totalBoxPresentFound[$list->term_id] += $attendance->feed->attendance_count;
                         $totalBoxAbsentFound[$list->term_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
 
+                        //Feed List Set
                         $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
+                        
                         $replace = array('{', '}', "'", '"');
-                        $totalFullSetFeedList[$list->term_id] = str_replace ($replace, "", $json);
+                        $totalFullSetFeedList[$list->term_id] = str_replace ($replace, " ", $json);
+                        //End Feed List Set
+                        
                         $totalClassFullSet[$list->term_id] = $totalBoxPresentFound[$list->term_id] + $totalBoxAbsentFound[$list->term_id];
 
                         $avarageTotalPercentage[$list->term_id] = (($totalBoxPresentFound[$list->term_id]/$totalClassFullSet[$list->term_id])*100);
@@ -925,7 +933,8 @@ class StudentController extends Controller
 
                         $moduleNameList[$plan->id] = (isset($plan->creations->module)) ? $plan->creations->module->name."-".$plan->creations->module->code : $plan->creations->module->name;
                         
-                        
+                        // attendance indicator check
+                        $attendanceIndicator[$list->plan_id]  = ($list->indicator===0) ? 0:1;
 
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$attendance->plans_date_list_id)->get()->first();
                         if(isset($attendanceInformation->tutor))
@@ -1013,10 +1022,11 @@ class StudentController extends Controller
                         $totalBox[$plan->term_declaration_id][$attendance->feed->code] += 1;
                         $totalBoxPresentFound[$plan->term_declaration_id] += $attendance->feed->attendance_count;
                         $totalBoxAbsentFound[$plan->term_declaration_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
-
+                        //Feed List Set
                         $json = json_encode ($totalBox[$plan->term_declaration_id], JSON_FORCE_OBJECT);
                         $replace = array('{', '}', "'", '"');
-                        $totalFullSetFeedList[$plan->term_declaration_id] = str_replace ($replace, "", $json);
+                        $totalFullSetFeedList[$plan->term_declaration_id] = str_replace ($replace, " ", $json);
+                        //End Feed List Set
                         $totalClassFullSet[$plan->term_declaration_id] = $totalBoxPresentFound[$plan->term_declaration_id] + $totalBoxAbsentFound[$plan->term_declaration_id];
 
                         $avarageTotalPercentage[$plan->term_declaration_id] = (($totalBoxPresentFound[$plan->term_declaration_id]/$totalClassFullSet[$plan->term_declaration_id])*100);
@@ -1037,6 +1047,7 @@ class StudentController extends Controller
                      "avarageTermDetails" => $avarageTermDetails,
                      "totalClassFullSet" => $totalClassFullSet ,
                      "ClassType" =>$ClassType,
+                     "attendanceIndicator" =>$attendanceIndicator,
                      "moduleNameList" =>$moduleNameList];
 
 
