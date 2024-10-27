@@ -732,13 +732,13 @@ class StudentController extends Controller
                     
                     
                     $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
-                    
+                    $attendanceIndicator[$list->term_id]  = ($list->indicator===0) ? 0:1;
                     $termAttendanceFound[$list->term_id] = false;
                     if(isset($attendance)) {
 
                         $moduleNameList[$list->plan_id] = (isset($list->module_code)) ? $list->module_name."-".$list->module_code : $list->module_name;
                         // attendance indicator check
-                        $attendanceIndicator[$list->plan_id]  = ($list->indicator===0) ? 0:1;
+                        
                         
                         $termAttendanceFound[$list->term_id] = true;
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$list->id)->get()->first();
@@ -827,12 +827,17 @@ class StudentController extends Controller
                         $totalBoxPresentFound[$list->term_id] += $attendance->feed->attendance_count;
                         $totalBoxAbsentFound[$list->term_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
 
-                        //Feed List Set
-                        $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
+                        // Remove zero content
+                        $totalBox[$list->term_id] = array_filter($totalBox[$list->term_id], function($value) {
+                            return $value != 0;
+                        });
                         
+                        //Feed List Set Start
+                        $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);                        
                         $replace = array('{', '}', "'", '"');
                         $intermediate = str_replace ($replace, " ", $json);
                         //End Feed List Set
+
                         // Add a space after each colon
                         $totalFullSetFeedList[$list->term_id] = preg_replace('/:/', ': ', $intermediate);
                         
@@ -926,18 +931,16 @@ class StudentController extends Controller
                 endforeach;
 
                 $attendance4prev = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->WhereNotNull("prev_plan_id")->get();   
-
+                
                 foreach($attendance4prev as $attendance):
                         $list = PlansDateList::with('plan')->where('id',$attendance->plans_date_list_id )->get()->first();
                         $plan = Plan::find($attendance->plan_id);
                         $termAttendanceFound[$plan->term_declaration_id] = true;
-                    
+                        // attendance indicator check
+                        //$attendanceIndicator[$plan->term_declaration_id]  = ($attendance->assign->indicator===0) ? 0:1;
 
                         $moduleNameList[$plan->id] = (isset($plan->creations->module)) ? $plan->creations->module->name."-".$plan->creations->module->code : $plan->creations->module->name;
                         
-                        // attendance indicator check
-                        $attendanceIndicator[$list->plan_id]  = ($list->indicator===0) ? 0:1;
-
                         $attendanceInformation =AttendanceInformation::with(["tutor","planDate"])->where("plans_date_list_id",$attendance->plans_date_list_id)->get()->first();
                         if(isset($attendanceInformation->tutor))
                             $attendanceInformation->tutor->load(["employee"]);
@@ -1199,9 +1202,14 @@ class StudentController extends Controller
                     $totalBoxPresentFound[$list->term_id] += $attendance->feed->attendance_count;
                     $totalBoxAbsentFound[$list->term_id] += ($attendance->feed->attendance_count==0)? 1 : 0;
 
+                    $totalBox[$list->term_id] = array_filter($totalBox[$list->term_id], function($value) {
+                        return $value != 0;
+                    });
+                    
                     $json = json_encode ($totalBox[$list->term_id], JSON_FORCE_OBJECT);
                     $replace = array('{', '}', "'", '"');
                     $totalFullSetFeedList[$list->term_id] = str_replace ($replace, "", $json);
+                    
                     $totalClassFullSet[$list->term_id] = $totalBoxPresentFound[$list->term_id] + $totalBoxAbsentFound[$list->term_id];
 
                     $avarageTotalPercentage[$list->term_id] = (($totalBoxPresentFound[$list->term_id]/$totalClassFullSet[$list->term_id])*100);
