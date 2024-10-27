@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentQualificationRequest;
+use App\Http\Requests\UpdateStudentQualificationRequest;
 use App\Models\StudentArchive;
 use App\Models\StudentOtherDetail;
 use App\Models\StudentQualification;
@@ -128,7 +129,7 @@ class EducationQualificationController extends Controller
         }
     }
 
-    public function update(StudentQualificationRequest $request){      
+    public function update(UpdateStudentQualificationRequest $request){      
         $data = StudentQualification::where('id', $request->id)->update([
             'student_id' => $request->student_id,
             'highest_academic' => $request->highest_academic,
