@@ -897,27 +897,27 @@
                 </div>
                 <div class="modal-body grid grid-cols-12 gap-4">
                     <div class="col-span-12 sm:col-span-4">
-                        <label for="edit_highest_academic" class="form-label">Highest Academic Qualification <span class="text-danger">*</span></label>
+                        <label for="edit_highest_academic" class="form-label">Highest Academic Qualification </label>
                         <input type="text" placeholder="Qualification" id="edit_highest_academic" class="form-control w-full" name="highest_academic">
                         <div class="acc__input-error error-highest_academic text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
-                        <label for="edit_awarding_body" class="form-label">Awarding Body <span class="text-danger"></span></label>
+                        <label for="edit_awarding_body" class="form-label">Awarding Body </label>
                         <input type="text" placeholder="Awarding Body" id="edit_awarding_body" class="form-control w-full" name="awarding_body">
                         <div class="acc__input-error error-awarding_body text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
-                        <label for="edit_subjects" class="form-label">Subjects <span class="text-danger"></span></label>
+                        <label for="edit_subjects" class="form-label">Subjects </label>
                         <input type="text" placeholder="Subjects" id="edit_subjects" class="form-control" name="subjects">
                         <div class="acc__input-error error-subjects text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
-                        <label for="edit_result" class="form-label">Result <span class="text-danger"></span></label>
+                        <label for="edit_result" class="form-label">Result </label>
                         <input type="text" placeholder="Result" id="edit_result" class="form-control" name="result">
                         <div class="acc__input-error error-result text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
-                        <label for="edit_degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
+                        <label for="edit_degree_award_date" class="form-label">Date Of Award </label>
                         <input type="text" placeholder="DD-MM-YYYY" id="edit_degree_award_date" class="form-control datepicker" name="degree_award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                         <div class="acc__input-error error-degree_award_date text-danger mt-2"></div>
                     </div>
@@ -928,7 +928,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($PreviousProviders))
                                 @foreach($PreviousProviders as $n)
-                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code.' - ' : '' }} {{ (isset($n->df_code) && !empty($n->df_code)) ? $n->df_code.' - ' : '' }}{{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -941,7 +941,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($QualificationTypeIdentifiers))
                                 @foreach($QualificationTypeIdentifiers as $n)
-                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code.' - ' : '' }} {{ (isset($n->df_code) && !empty($n->df_code)) ? $n->df_code.' - ' : '' }}{{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -953,7 +953,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaQualificationSubjects))
                                 @foreach($HesaQualificationSubjects as $n)
-                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code.' - ' : '' }}{{ (isset($n->df_code) && !empty($n->df_code)) ? $n->df_code.' - ' : '' }}{{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -965,7 +965,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HighestQualificationOnEntrys))
                                 @foreach($HighestQualificationOnEntrys as $n)
-                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code.' - ' : '' }}{{ (isset($n->df_code) && !empty($n->df_code)) ? $n->df_code.' - ' : '' }}{{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
@@ -978,7 +978,7 @@
                             <option value="" selected>Please Select</option>
                             @if(!empty($HesaExamSittingVenues))
                                 @foreach($HesaExamSittingVenues as $n)
-                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code : $n->df_code }} - {{ $n->name }}</option>
+                                    <option value="{{ $n->id }}">{{ (isset($n->hesa_code) && !empty($n->hesa_code)) ? $n->hesa_code.' - ' : '' }} {{ (isset($n->df_code) && !empty($n->df_code)) ? $n->df_code.' - ' : '' }}{{ $n->name }}</option>
                                 @endforeach 
                             @endif 
                         </select>
