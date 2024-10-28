@@ -17,11 +17,13 @@
                     Course Details
                 </a>
             </li>
+            @if(isset(auth()->user()->priv()['attendance_view']) && auth()->user()->priv()['attendance_view'] == 1)
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.attendance', $student->id) }}" class="nav-link py-4 {{ (Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance') ? 'active' : '' }}" class="nav-link py-4">
                     Attendance
                 </a>
             </li>
+            @endif
             @if(isset(auth()->user()->priv()['result_view']) && auth()->user()->priv()['result_view'] == 1)
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student-results.index', $student->id) }}" class="nav-link py-4 {{ (Route::currentRouteName() == 'student-results.index') ? 'active' : '' }}">
@@ -29,11 +31,14 @@
                 </a>
             </li>
             @endif
+            @if(isset(auth()->user()->priv()['slc_history_view']) && auth()->user()->priv()['slc_history_view'] == 1)
+            
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.slc.history', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.slc.history' ? 'active' : '' }}">
                     SLC History
                 </a>
             </li>
+            @endif
             @if(isset($student->crel->creation->is_workplacement) && $student->crel->creation->is_workplacement == 1)
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.workplacement', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.workplacement' ? 'active' : '' }}">
@@ -41,16 +46,21 @@
                 </a>
             </li>
             @endif
+            @if(isset(auth()->user()->priv()['student_account_view']) && auth()->user()->priv()['student_account_view'] == 1)
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.accounts', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.accounts' ? 'active' : '' }}">
                     Accounts
                 </a>
             </li>
+            @endif
+            @if(isset(auth()->user()->priv()['student_performance_view']) && auth()->user()->priv()['student_performance_view'] == 1)
             <li class="nav-item" role="presentation">
                 <a href="javascript:void(0);" class="nav-link py-4">
                     Student Performance
                 </a>
             </li>
+            @endif
+            @if(isset(auth()->user()->priv()['student_course_change_view']) && auth()->user()->priv()['student_course_change_view'] == 1)
             <li class="nav-item hasDropdown" role="presentation">
                 <a href="javascript:void(0);" class="nav-link py-4 {{ (Session::has('student_temp_course_relation_'.$student->id) && Session::get('student_temp_course_relation_'.$student->id) > 0 ? 'temp-course font-medium' : '' ) }}">
                     Other Course Relations ({{ (isset($student->otherCrels) ? $student->otherCrels->count() : 0)}})
@@ -72,6 +82,7 @@
                     </ul>
                 @endif
             </li>
+            @endif
 
         </ul>
     </li>
