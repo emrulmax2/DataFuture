@@ -62,11 +62,11 @@
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/ACCOUNT-logos.png') }}">
                         </a>
                         @endif
-                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
+                        {{-- @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['programme_dashboard']) && auth()->user()->priv()['programme_dashboard'] == 1)
                         <a href="{{ route('library.management.index') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/library.png') }}">
                         </a>
-                        @endif
+                        @endif --}}
                     </div>
                 </div>
             </div>
