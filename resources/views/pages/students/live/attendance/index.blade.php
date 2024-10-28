@@ -16,9 +16,15 @@
             
         @php $termstart++; $planId=1; @endphp
         <div class="intro-y box col-span-12 p-5 mt-5  ">
-            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ ($avarageTotalPercentage[$termId]>79 )? "bg-teal-600" : ( $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-amber-600" )  }} text-slate-100 rounded-tl rounded-tr">
+            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ ($attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
                 
-                <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} <div class="font-medium bg-transparent  text-white  rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} 
+                    @if($attendanceIndicator[$termId]===0)
+                    <div class="font-medium dark:text-slate-500 text-white rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                    
+                    @else
+                    <div class="font-medium dark:text-slate-500 {{ ($avarageTotalPercentage[$termId]>79)? "bg-teal-900" : "bg-warning" }} {{ ($avarageTotalPercentage[$termId]>79)? "text-white" : "text-white" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                    @endif
                     <div class="text-slate-100 sm:mr-5 ml-auto text-sm mt-2">{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ".$totalClassFullSet[$termId]. " days class" : "No class found" }} </div>
                 </h2>
                 <div class="text-slate-100 sm:mr-5 ml-auto">
@@ -60,7 +66,7 @@
                 </a>
                 @endif
             </div>
-            <div class="w-full py-3 {{ ($avarageTotalPercentage[$termId]>79 )? "border-teal-600" : ($attendanceIndicator[$termId]===0 ? "border-red-600" : "border-amber-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
+            <div class="w-full py-3  {{ ($attendanceIndicator[$termId]===0 ? "border-red-600" : "border-teal-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
                 @foreach($dataStartPoint as $planId => $data)
                 
                     <div class="p-5 ">
@@ -79,7 +85,7 @@
                                 
                             @endphp
                             <div class="ml-4 mr-auto toggle-heading">
-                                <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded  text-white cursor-pointer font-medium w-auto   btn-success inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
+                                <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded cursor-pointer font-medium w-auto border-slate-300 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
                                 
                                 <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1">
                                     <i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
