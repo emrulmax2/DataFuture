@@ -212,6 +212,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\LibraryManagementController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
@@ -3008,7 +3009,10 @@ Route::middleware('auth')->group(function() {
     });
     
 });
-
+Route::controller(LibraryManagementController::class)->group(function(){
+    Route::get('library/management', 'index')->name('library.management.index'); 
+    Route::get('library/settings', 'settings')->name('library.settings'); 
+});
 
 Route::controller(EmployeeFormController::class)->group(function(){
     Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
