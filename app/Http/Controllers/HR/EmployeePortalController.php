@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateTemporaryEmpRequest;
 use App\Http\Requests\HrPortalAbsentUpdateRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
+use App\Models\ComonSmtp;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAppraisal;
@@ -23,6 +27,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Crypt;
 
 class EmployeePortalController extends Controller
 {
@@ -710,6 +715,52 @@ class EmployeePortalController extends Controller
             endif;
         else:
             return response()->json(['suc' => 1, 'msg' => ''], 200);
+        endif;
+    }
+
+    public function createTemporaryEmployee(CreateTemporaryEmpRequest $request){
+        $email = $request->email;
+        $subject = 'Complete Your Profile Setup Form';
+
+        $employeeCount = Employee::where('email', $email)->get()->count();
+        if($employeeCount == 0):
+            $employee = Employee::create([
+                'email' => $email,
+                'status' => 2
+            ]);
+
+            $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+            if(isset($commonSmtp->id) && $commonSmtp->id > 0 && $employee):
+                $url = route('forms.employee', Crypt::encrypt($employee->id));
+                $configuration = [
+                    'smtp_host'    => $commonSmtp->smtp_host,
+                    'smtp_port'    => $commonSmtp->smtp_port,
+                    'smtp_username'  => $commonSmtp->smtp_user,
+                    'smtp_password'  => $commonSmtp->smtp_pass,
+                    'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                    
+                    'from_email'    => 'hr@lcc.ac.uk',
+                    'from_name'    =>  'LCC HR Team',
+                ];
+
+                $MAILHTML = 'Hi,<br/><br/>';
+                $MAILHTML .= '<p>Welcome to LONDON CHURCHILL COLLEGE.</p>';
+                $MAILHTML .= '<p>To get you set up in our system, please fill out the form and return it. This will help us complete your profile and grant you access to essential resources.</p>';
+                $MAILHTML .= '<p>If you have any questions, feel free to reach out to our HR at hr@lcc.ac.uk</p>';
+                $MAILHTML .= '<p><a href="'.$url.'" style="background: #164e63; color: #FFF; font-size: 12px; font-weight: bold; text-transform: uppercase; padding: 10px 25px; display: inline-block; border-radius: 3px;">Click Here to fill the Form</a></p>';
+
+                $MAILHTML .= '<p>Thanks, and welcome aboard!</p>';
+
+                $MAILHTML .= '<br/>Best, <br/>LCC HR Team';
+
+                UserMailerJob::dispatch($configuration, [$email], new CommunicationSendMail($subject, $MAILHTML, []));
+
+                return response()->json(['suc' => 1], 200);
+            else:
+                return response()->json(['suc' => 2], 200);
+            endif;
+        else:
+            return response()->json(['suc' => 3], 200);
         endif;
     }
 }

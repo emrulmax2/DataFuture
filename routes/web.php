@@ -1188,7 +1188,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee','index')->name('employee');
         Route::get('employee/list','list')->name('employee.list');
         Route::post('employee/upload-photo', 'UploadEmployeePhoto')->name('employee.upload.photo');
-        Route::get('employee/new','create')->name('employee.create');
+        Route::get('employee/new/{id?}','create')->name('employee.create');
         Route::post('employee/save','save')->name('employee.save');
         Route::post('employee/update/{employee}','update')->name('employee.update');
         Route::post('employement/save','saveEmployment')->name('employement.save');
@@ -1373,6 +1373,8 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/portal/get-leave-day-details', 'getLeaveDayDetails')->name('hr.portal.get.leave.day.details');
 
         Route::post('hr/portal/absent-employe-pending-leave', 'checkIfisPendingLeaveExist')->name('hr.portal.check.pending.leave');
+
+        Route::post('hr/portal/create-temporary-employee', 'createTemporaryEmployee')->name('hr.portal.create.temporary.employee');
         
     });     
 
@@ -3016,4 +3018,5 @@ Route::controller(LibraryManagementController::class)->group(function(){
 
 Route::controller(EmployeeFormController::class)->group(function(){
     Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
+    Route::post('forms/employee/store', 'store')->name('forms.employee.store'); 
 });

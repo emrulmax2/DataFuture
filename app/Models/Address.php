@@ -50,4 +50,25 @@ class Address extends Model
         $html .= (isset($this->country) && !empty($this->country) ? $this->country : '');
         return $html;
     }
+
+    public function getFullAddressInputAttribute(){
+        $html = '';
+        $html .= '<span class="text-slate-600 font-medium">'.$this->address_line_1.'</span><br/>';
+        $html .= '<input type="hidden" name="emp_address_line_1" value="'.$this->address_line_1.'"/>';
+        if(isset($this->address_line_2) && !empty($this->address_line_2)){
+            $html .= '<span class="text-slate-600 font-medium">'.isset($this->address_line_2) && !empty($this->address_line_2).'</span><br/>';
+        }
+        $html .= '<input type="hidden" name="emp_address_line_2" value="'.(isset($this->address_line_2) && !empty($this->address_line_2) ? $this->address_line_2 : '').'"/>';
+
+        $html .= '<span class="text-slate-600 font-medium">'.(isset($this->city) && !empty($this->city) ? $this->city.', ' : '').'</span>';
+        $html .= '<input type="hidden" name="emp_city" value="'.(isset($this->city) && !empty($this->city) ? $this->city : '').'"/>';
+
+        $html .= '<span class="text-slate-600 font-medium">'.(isset($this->post_code) && !empty($this->post_code) ? $this->post_code.', ' : '').'</span><br/>';
+        $html .= '<input type="hidden" name="emp_post_code" value="'.(isset($this->post_code) && !empty($this->post_code) ? $this->post_code : '').'"/>';
+
+        $html .= '<span class="text-slate-600 font-medium">'.(isset($this->country) && !empty($this->country) ? $this->country : '').'</span><br/>';
+        $html .= '<input type="hidden" name="emp_country" value="'.(isset($this->country) && !empty($this->country) ? $this->country : '').'"/>';
+        $html .= '<input type="hidden" name="emp_address_id" value="'.$this->id.'"/>';
+        return $html;
+    }
 }
