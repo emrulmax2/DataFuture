@@ -237,9 +237,25 @@ import IMask from 'imask';
             $('.employeeWorkTypeFields').fadeIn('fast', function(){
                 $('input', this).val('');
             });
+            $('.taxRefNo').fadeOut('fast', function(){
+                $('input', this).val('');
+                $('.acc__input-error', this).html('');
+            });
+        }else if(employee_work_type == 2){
+            $('.taxRefNo').fadeIn('fast', function(){
+                $('input', this).val('');
+                $('.acc__input-error', this).html('');
+            });
+            $('.employeeWorkTypeFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            });
         }else{
             $('.employeeWorkTypeFields').fadeOut('fast', function(){
                 $('input', this).val('');
+            });
+            $('.taxRefNo').fadeOut('fast', function(){
+                $('input', this).val('');
+                $('.acc__input-error', this).html('');
             });
         }
     });
@@ -274,6 +290,17 @@ import IMask from 'imask';
             $('.workPermitFields').fadeOut('fast', function(){
                 $('input', this).val('');
             })
+        }
+    });
+
+    $('#highest_qualification_on_entry_id').on('change', function() {
+        let $this = $(this)
+        var highest_qualification_on_entry_id = $this.val();
+        
+        if(highest_qualification_on_entry_id == 1) {
+            $('.eduQuals .text-danger').fadeOut();
+        }else{
+            $('.eduQuals .text-danger').fadeIn();
         }
     });
     
@@ -351,6 +378,7 @@ import IMask from 'imask';
                 htmls += '<input type="hidden" name="'+prfix+'post_code" value="'+$('#student_address_postal_zip_code', $form).val()+'"/>';
                 htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_country', $form).val()+'</span><br/>';
                 htmls += '<input type="hidden" name="'+prfix+'country" value="'+$('#student_address_country', $form).val()+'"/>';
+                htmls += '<input type="hidden" name="'+prfix+'address_id" value="0"/>';
 
                 document.querySelector('#insertAddress').removeAttribute('disabled');
                 document.querySelector('#insertAddress svg').style.cssText = 'display: none;';

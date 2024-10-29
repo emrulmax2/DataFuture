@@ -14,6 +14,17 @@ import Toastify from "toastify-js";
         })
     }
 
+    // Turn Off Autocomplete for Datepicker Fields.
+    if($('.monthYearMask').length > 0){
+        $('.monthYearMask').each(function(){
+            $(this).attr('autocomplete', 'off');
+            var maskOptions = {
+                mask: '00-0000'
+            };
+            var mask = IMask(this, maskOptions);
+        })
+    }
+
     // Turn off Mouse Wheel for Number Fields.
     if($('input[type="number"').length > 0){
         document.addEventListener("wheel", function(event){

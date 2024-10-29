@@ -2,6 +2,8 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import dayjs from "dayjs";
+import Litepicker from "litepicker";
 
 ("use strict");
 var studentEmploymentHistoryTable = (function () {
@@ -193,6 +195,29 @@ var studentEmploymentHistoryTable = (function () {
             successModal.hide();
         }
     });
+
+    let employmentHisOption = {
+        autoApply: true,
+        singleMode: true,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: false,
+        inlineMode: false,
+        format: "MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+
+    $('.employmentPicker').each(function(){
+        new Litepicker({
+            element: this,
+            ...employmentHisOption
+        });
+    })
     
     let tomOptionsNew = {
         plugins: {

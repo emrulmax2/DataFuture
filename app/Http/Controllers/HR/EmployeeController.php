@@ -29,6 +29,7 @@ use App\Models\EmployeeWorkType;
 use App\Models\Employment;
 use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
+use App\Models\HighestQualificationOnEntry;
 use App\Models\SexIdentifier;
 use App\Models\StudentArchive;
 use App\Models\User;
@@ -89,7 +90,7 @@ class EmployeeController extends Controller
             $query->orWhere('emp.mobile','LIKE','%'.$queryStr.'%');
             $query->orWhere('emp.email','LIKE','%'.$queryStr.'%');
         endif;
-        if($status == 2):
+        if($status == 3):
             $query->onlyTrashed();
         else:
             $query->where('emp.status', $status);
@@ -119,6 +120,14 @@ class EmployeeController extends Controller
                     $photo_url = asset('build/assets/images/placeholders/200x200.jpg');
                 }
 
+                if($list->status == 2):
+                    $url = '';
+                elseif($list->status == 4):
+                    $url = route('employee.create', $list->id);
+                else:
+                    $url = route('profile.employee.view', $list->id);
+                endif;
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -131,7 +140,7 @@ class EmployeeController extends Controller
                     'empt_works_number' => (isset($list->empt_works_number) ? $list->empt_works_number : ''),
                     'status' => $list->status,
                     'deleted_at' => $list->deleted_at,
-                    'url' => route('profile.employee.view', $list->id),
+                    'url' => $url,
                     
                 ];
                 $i++;
@@ -145,7 +154,7 @@ class EmployeeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($id = null)
     {
         $titles = Title::all();
         // $gender = HesaGender::all();
@@ -163,6 +172,7 @@ class EmployeeController extends Controller
         $jobTitles = EmployeeJobTitle::orderBy('name', 'ASC')->get();
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
+        $qualEntries = HighestQualificationOnEntry::all();
         
         return view('pages.employee.create',[
             'title' => 'HR Portal - London Churchill College',
@@ -183,11 +193,16 @@ class EmployeeController extends Controller
             'documentTypes' => $documentTypes,
             'workPermitTypes' => $workPermitTypes,
             'sexIdentifier' => $sexIdentifier,
+            'qualEntries' => $qualEntries,
+            'employee' => (!empty($id) && $id > 0 ? Employee::find($id) : null),
+            'emp_dis' => (!empty($id) && $id > 0 ? DB::table('employee_disability')->where('employee_id', $id)->pluck('disability_id')->toArray() : []),
+            'emp_venue' => (!empty($id) && $id > 0 ? DB::table('employee_venue')->where('employee_id', $id)->pluck('venue_id')->toArray() : [])
         ]);
     }
     public function save(EmployeeDataSaveRequest $request)
     {
         Session::put([
+            'employee_id' => $request->employee_id,
             'title' => $request->title,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -205,6 +220,7 @@ class EmployeeController extends Controller
             'address_line_2' => $request->emp_address_line_2,
             'city' => $request->emp_city,
             'post_code' => $request->emp_post_code,
+            'address_id' => $request->emp_address_id,
             'country' => $request->emp_country,
             "disability_status" =>$request->disability_status,
             "disability_id" => ($request->disability_id) ?? null
@@ -215,6 +231,7 @@ class EmployeeController extends Controller
     public function saveEmployment(EmploymentDataSaveRequest $request)
     {
         Session::put([
+            'employment_employee_id' => $request->employee_id,
             'started_on' => $request->started_on,
             'punch_number' => $request->punch_number,
             'site_location' => $request->site_location,
@@ -236,6 +253,7 @@ class EmployeeController extends Controller
     public function saveEligibility(EmployeeEligibilityDataSaveRequest $request)
     {
         Session::put([
+            'eligible_employee_id' => $request->employee_id,
             'eligible_to_work' => $request->eligible_to_work_status,
             'workpermit_type' => $request->workpermit_type,
             'workpermit_number' => $request->workpermit_number,
@@ -251,6 +269,7 @@ class EmployeeController extends Controller
     public function saveEmergencyContact(EmployeeEmergencyContactDataSaveRequest $request)
     {
         Session::put([
+            'emergency_employee_id' => $request->employee_id,
             'emergency_contact_name' => $request->emergency_contact_name,
             'relationship' => $request->relationship,
             'emergency_contact_telephone' => $request->emergency_contact_telephone,
@@ -261,6 +280,7 @@ class EmployeeController extends Controller
             'emergency_contact_city' => $request->emc_city,
             'emergency_contact_country' => $request->emc_country,
             'emergency_contact_mobile' => $request->emergency_contact_mobile,
+            'emergency_address_id' => $request->emc_address_id,
         ]);
 
 
@@ -276,8 +296,12 @@ class EmployeeController extends Controller
     public function store()
     {
         $data = session()->all();
+        $employee_id = Session::get('employee_id');
+        $address_id = Session::get('address_id');
+        $emergency_address_id = Session::get('emergency_address_id');
         
-        $address = Address::create([
+        
+        $address = Address::updateOrCreate(['id' => $address_id], [
             'address_line_1' => Session::get('address_line_1'),
             'address_line_2' => Session::get('address_line_2'),
             'city' => Session::get('city'),
@@ -286,7 +310,7 @@ class EmployeeController extends Controller
             'country' =>  Session::get('country'),
         ]);
 
-        $name = Session::get('first_name'). " ". Session::get('last_name');
+        $name = Session::get('first_name')." ".Session::get('last_name');
 
         $user = User::create([
             'name'=> $name,
@@ -296,7 +320,7 @@ class EmployeeController extends Controller
             'active'=> 1,
         ]);
 
-        $employee = Employee::create([
+        $employee = Employee::updateOrCreate(['id' => $employee_id], [
             "title_id" => Session::get('title'),
             "user_id" =>  $user->id,
             "first_name" => strtoupper(Session::get('first_name')),
@@ -313,12 +337,12 @@ class EmployeeController extends Controller
             "drive_license_number"  => Session::get('drive_license_number'),
             "disability_status" => (Session::get('disability_status')) ? "Yes" : "No",
             "address_id" =>   $address->id,
+            "status" =>  1,
         ]);
-
         $employee->disability()->sync(Session::get('disability_id'));
 
         
-        $employment = Employment::create([
+        $employment = Employment::updateOrCreate(['employee_id' => $employee->id], [
             "employee_id" => $employee->id, 
             'started_on' => Session::get('started_on'),
             'punch_number' => Session::get('punch_number'),
@@ -331,8 +355,7 @@ class EmployeeController extends Controller
             'email' => Session::get('email')
         ]);
 
-
-        $EmployeeEligibilites = EmployeeEligibilites::create([
+        $EmployeeEligibilites = EmployeeEligibilites::updateOrCreate(['employee_id' => $employee->id], [
             "employee_id" => $employee->id,
             'eligible_to_work' => Session::get('eligible_to_work'),
             'employee_work_permit_type_id' => Session::get('workpermit_type'),
@@ -344,7 +367,7 @@ class EmployeeController extends Controller
             'doc_issue_country' => Session::get('doc_issue_country'),
 
         ]);
-        $address = Address::create([
+        $address = Address::updateOrCreate(['id' => $emergency_address_id], [
             'address_line_1' => Session::get('emergency_contact_address_line_1'),
             'address_line_2' => Session::get('emergency_contact_address_line_2'),
             'city' => Session::get('emergency_contact_city'),
@@ -353,7 +376,7 @@ class EmployeeController extends Controller
             'country' =>  Session::get('emergency_contact_country'),
         ]);
 
-        $EmployeeEmergencyContact = EmployeeEmergencyContact::create([
+        $EmployeeEmergencyContact = EmployeeEmergencyContact::updateOrCreate(['employee_id' => $employee->id], [
             'employee_id' => $employee->id,
             'emergency_contact_name' => Session::get('emergency_contact_name'),
             'kins_relation_id' => Session::get('relationship'),
@@ -365,7 +388,7 @@ class EmployeeController extends Controller
 
         ]);
         
-        $employmentTerm = EmployeeTerm::create([
+        $employmentTerm = EmployeeTerm::updateOrCreate(['employee_id' => $employee->id], [
             "employee_id" => $employee->id,
             'employee_notice_period_id' => Session::get('notice_period'),
             'employment_ssp_term_id' => Session::get('ssp_term'),

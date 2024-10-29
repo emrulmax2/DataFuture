@@ -90,7 +90,7 @@ class Employee extends Model
 
     public function disability(){
 
-        return $this->belongsToMany(Disability::class, 'employee_disability', 'employee_id','disability_id');
+        return $this->belongsToMany(Disability::class, 'employee_disability', 'employee_id', 'disability_id');
     }
 
     public function sex(){
@@ -151,5 +151,13 @@ class Employee extends Model
         $banks = $this->hasMany(EmployeeBankDetail::class, 'employee_id', 'id');
         $banks->getQuery()->where('active', '1');
         return $banks;
+    }
+
+    public function education(){
+        return $this->hasOne(EmployeeEducationalQualification::class, 'employee_id', 'id')->latestOfMany();
+    }
+
+    public function terms(){
+        return $this->hasOne(EmployeeTerm::class, 'employee_id', 'id')->latestOfMany();
     }
 }

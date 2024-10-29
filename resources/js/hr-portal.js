@@ -62,7 +62,15 @@ var employeeListTable = (function () {
                     headerHozAlign: "left",
                     headerSort: false,
                     formatter(cell, formatterParams){
-                        return (cell.getData().status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>');
+                        if(cell.getData().status == 1){
+                            return '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
+                        }else if(cell.getData().status == 2){
+                            return '<span class="btn inline-flex btn-pending w-auto px-2 text-white py-0 rounded-0">Temporary</span>';
+                        }else if(cell.getData().status == 4){
+                            return '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">Submitted</span>';
+                        }else{
+                            return '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
+                        }
                     }
                 }
             ],
@@ -74,7 +82,9 @@ var employeeListTable = (function () {
                 });
             },
             rowClick:function(e, row){
-                window.open(row.getData().url, '_blank');
+                if(row.getData().status == 1 || row.getData().status == 0 || row.getData().status == 4){
+                    window.open(row.getData().url, '_blank');
+                }
             }
         });
 
@@ -147,6 +157,7 @@ var employeeListTable = (function () {
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const absentUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#absentUpdateModal"));
     const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
+    const addTempEmployeeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTempEmployeeModal"));
 
     const absentUpdateModalEl = document.getElementById('absentUpdateModal')
     absentUpdateModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -164,6 +175,11 @@ var employeeListTable = (function () {
     empNewLeaveRequestModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#empNewLeaveRequestModal .modal-body').html('');
         $('#empNewLeaveRequestModal [name="employee_leave_id"]').html('0');
+    });
+
+    const addTempEmployeeModalEl = document.getElementById('addTempEmployeeModal')
+    addTempEmployeeModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addTempEmployeeModal .modal-body input').val('');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -385,5 +401,65 @@ var employeeListTable = (function () {
         }
     }); 
     /* Pending Leave Request Action End */
+
+
+    
+    $("#addTempEmployeeForm").on("submit", function (e) {
+        e.preventDefault();
+        let $form = $(this);
+        const form = document.getElementById("addTempEmployeeForm");
+
+        document.querySelector('#tempEmpBtn').setAttribute('disabled', 'disabled');
+        document.querySelector('#tempEmpBtn svg').style.cssText = 'display: inline-block;';
+
+        let form_data = new FormData(form);
+        axios({
+            method: "POST",
+            url: route("hr.portal.create.temporary.employee"),
+            data: form_data,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                document.querySelector("#tempEmpBtn").removeAttribute("disabled");
+                document.querySelector("#tempEmpBtn svg").style.cssText = "display: none;";
+                if(response.data.suc == 2){
+                    $('#addTempEmployeeModal .modal-content .employeeError').remove();
+                    $('#addTempEmployeeModal .modal-content').prepend('<div class="alert employeeError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try again later or contact with the administrator.</div>');
+                }else if(response.data.suc == 3){
+                    $('#addTempEmployeeModal .modal-content .employeeError').remove();
+                    $('#addTempEmployeeModal .modal-content').prepend('<div class="alert employeeError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Email address already exist. Please try with a new one.</div>');
+                }else{
+                    addTempEmployeeModal.hide();
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Success!");
+                        $("#successModal .successModalDesc").html('Employee successfull saved and email sent to the employee.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(() => {
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }
+        })
+        .catch((error) => {
+            document.querySelector("#tempEmpBtn").removeAttribute("disabled");
+            document.querySelector("#tempEmpBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addTempEmployeeForm .${key}`).addClass('border-danger')
+                        $(`#addTempEmployeeForm  .error-${key}`).html(val)
+                    }
+                }else {
+                    console.log("error");
+                }
+            }
+        });
+    });
 
 })();

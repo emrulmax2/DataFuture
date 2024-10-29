@@ -33,7 +33,9 @@
                                     <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
-                                        <option value="2">Archived</option>
+                                        <option value="2">Temporary</option>
+                                        <option value="4">Submitted</option>
+                                        <option value="3">Archived</option>
                                     </select>
                                 </div>
                                 <div class="mt-2 xl:mt-0">
@@ -65,6 +67,7 @@
                                     </div>
                                 </div>
                                 <a href="{{ route('employee.create') }}" class="btn btn-success text-white w-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Employee</a>
+                                <button data-tw-toggle="modal" data-tw-target="#addTempEmployeeModal" type="button" class="btn btn-facebook text-white w-auto ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Temp Employee</button>
                             </div>
                         </div>
                         <div class="overflow-x-auto scrollbar-hidden">
@@ -445,6 +448,46 @@
         </div>
     </div>
     <!-- END: Edit New Request Modal -->
+
+    <!-- BEGIN: Add Temporary Employee Modal -->
+    <div id="addTempEmployeeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="addTempEmployeeForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Add Temporary Employee</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="w-full form-control" name="email" id="email"/>
+                            <div class="acc__input-error error-email text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="tempEmpBtn" class="btn btn-primary w-auto">     
+                            Save                  
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: addTempEmployeeModal Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
