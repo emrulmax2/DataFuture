@@ -207,6 +207,7 @@ use App\Http\Controllers\Filemanager\FilemanagerController;
 use App\Http\Controllers\Forms\EmployeeFormController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
+use App\Http\Controllers\HR\EmployeeEducationalQualificationController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
@@ -3008,6 +3009,11 @@ Route::middleware('auth')->group(function() {
     Route::controller(AwardController::class)->group(function(){
         Route::post('student/results/award/store', 'store')->name('student.store.award'); 
         Route::post('student/results/award/edit', 'edit')->name('student.edit.award'); 
+    });
+
+    
+    Route::controller(EmployeeEducationalQualificationController::class)->group(function() {
+        Route::post('employee-educationa-qualification/store/','store')->name('employee.edu.qual.store');
     });
     
 });

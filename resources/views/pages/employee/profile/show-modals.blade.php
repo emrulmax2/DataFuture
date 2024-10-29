@@ -626,6 +626,69 @@
 </div>
 <!-- END: Edit Terms Details Modal -->
 
+<!-- BEGIN: Edit Educational Qualification Details Modal -->
+<div id="storeEducationalQualisModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="storeEducationalQualisForm" enctype="multipart/form-data">
+            <input type="hidden" name="url" value="{{ route('employee.edu.qual.store') }}" />
+            <input type="hidden" value="{{ $employee->id }}" name="employee_id"/>
+            <input type="hidden" value="{{ (isset($employee->education->id) && $employee->education->id > 0 ? $employee->education->id : 0) }}" name="employee_education_id"/>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Educational Qualification</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="highest_qualification_on_entry_id" class="form-label inline-flex">Highest Educational Qualification <span class="text-danger"> *</span></label>
+                        <select id="highest_qualification_on_entry_id" name="highest_qualification_on_entry_id" class="tom-selects w-full lccTom">
+                            <option value="">Please Select</option>
+                            @foreach($qualEntries as $entry)
+                                <option {{ (isset($employee->education->highest_qualification_on_entry_id) && $employee->education->highest_qualification_on_entry_id == $entry->id ? 'Selected' : '') }} value="{{ $entry->id }}">{{ $entry->name }}</option>              
+                            @endforeach
+                        </select>
+                        <div class="acc__input-error error-highest_qualification_on_entry_id text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 eduQuals">
+                        <label for="qualification_name" class="form-label inline-flex">Qualification Name <span class="text-danger">*</span></label>
+                        <input value="{{ (isset($employee->education->qualification_name) ? $employee->education->qualification_name : '') }}" id="qualification_name" type="text" class="form-control" name="qualification_name">
+                        <div class="acc__input-error error-qualification_name text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 eduQuals">
+                        <label for="award_body" class="form-label inline-flex">Award Body <span class="text-danger">*</span></label>
+                        <input value="{{ (isset($employee->education->award_body) ? $employee->education->award_body : '') }}" id="award_body" type="text" class="form-control" name="award_body">
+                        <div class="acc__input-error error-award_body text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 eduQuals">
+                        <label for="award_date" class="form-label inline-flex">Award Date <span class="text-danger"> *</span></label>
+                        <input value="{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('d-m-Y', strtotime($employee->education->award_date)) : '') }}" id="award_date" type="text" placeholder="DD-MM-YYYY" autocomplete="off" class="form-control datepicker" name="award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                        <div class="acc__input-error error-award_date text-danger mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="savePD" class="btn btn-primary w-auto save">     
+                        Update                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Edit Educational Qualification Modal -->
+
 <!-- BEGIN: Address Modal -->
 <div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">

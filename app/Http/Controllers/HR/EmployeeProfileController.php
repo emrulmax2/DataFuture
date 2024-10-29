@@ -19,6 +19,7 @@ use App\Models\Employment;
 use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
 use App\Models\Ethnicity;
+use App\Models\HighestQualificationOnEntry;
 use App\Models\KinsRelation;
 use App\Models\Option;
 use App\Models\SexIdentifier;
@@ -68,6 +69,7 @@ class EmployeeProfileController extends Controller
         $workPermitTypes = EmployeeWorkPermitType::all();
         $employeeDisablities = DB::table('employee_disability')->where('employee_id', $id)->pluck('disability_id')->toArray();
         $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
+        $qualEntries = HighestQualificationOnEntry::all();
 
         return view('pages.employee.profile.show',[
             'title' => 'HR Portal - London Churchill College',
@@ -97,6 +99,7 @@ class EmployeeProfileController extends Controller
             "employmentVenue" => $employmentVenue,
             "empDisIds" => $employeeDisablities,
             "postcodeApi" => $PostCodeAPI,
+            "qualEntries" => $qualEntries,
         ]);
     }
     

@@ -244,7 +244,7 @@
                 </div>
                 <div class="intro-y col-span-12 sm:col-span-3 eduQuals">
                     <label for="award_date" class="form-label inline-flex">Award Date <span class="text-danger"> *</span></label>
-                    <input value="{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('Y-m-d', strtotime($employee->education->award_date)) : '') }}" id="award_date" type="text" placeholder="DD-MM-YYYY" autocomplete="off" class="form-control datepicker" name="award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                    <input value="{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('d-m-Y', strtotime($employee->education->award_date)) : '') }}" id="award_date" type="text" placeholder="DD-MM-YYYY" autocomplete="off" class="form-control datepicker" name="award_date" data-format="DD-MM-YYYY" data-single-mode="true">
                     <div class="acc__input-error error-award_date text-danger mt-2"></div>
                 </div>
 

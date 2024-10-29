@@ -61,6 +61,14 @@ var settingsListTable = (function () {
                     }
                 },
                 {
+                    title: "Elibible for Award",
+                    field: "eligible_for_award",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return (cell.getData().eligible_for_award == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">No</span>');
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -202,8 +210,9 @@ var settingsListTable = (function () {
         const addSettingsModalEl = document.getElementById('addSettingsModal')
         addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addSettingsModal .acc__input-error').html('');
-            $('#addSettingsModal .modal-body input').val('');
+            $('#addSettingsModal .modal-body input:not([type="checkbox"])').val('');
             $('#addSettingsModal .modal-body select').val('');
+            $('#addSettingsModal .modal-body input[name="eligible_for_award"]').prop('checked', false);
 
             letter_set_id.clear(true);
             $('#addSettingsModal .signatoryWrap').fadeOut('fast', function(){
@@ -218,9 +227,10 @@ var settingsListTable = (function () {
         const editSettingsModalEl = document.getElementById('editSettingsModal')
         editSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editSettingsModal .acc__input-error').html('');
-            $('#editSettingsModal .modal-body input').val('');
+            $('#editSettingsModal .modal-body input:not([type="checkbox"])').val('');
             $('#editSettingsModal .modal-body select').val('');
             $('#editSettingsModal input[name="id"]').val('0');
+            $('#editSettingsModal .modal-body input[name="eligible_for_award"]').prop('checked', false);
 
             edit_letter_set_id.clear(true);
             $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
@@ -387,6 +397,12 @@ var settingsListTable = (function () {
                         }else{
                             edit_process_list_id.clear(true);
                             edit_process_list_id.clearOptions(); 
+                        }
+
+                        if(dataset.eligible_for_award == 1){
+                            $('#editSettingsModal input[name="eligible_for_award"]').prop('checked', true);
+                        }else{
+                            $('#editSettingsModal input[name="eligible_for_award"]').prop('checked', false);
                         }
                     }
                 })

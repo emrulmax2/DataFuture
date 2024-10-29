@@ -28,6 +28,10 @@ class EmployeeEducationalQualification extends Model
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
+    public function qual(){
+        return $this->belongsTo(HighestQualificationOnEntry::class, 'highest_qualification_on_entry_id');
+    }
+
     public function setAwardDateAttribute($value) {  
         $this->attributes['award_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
     }

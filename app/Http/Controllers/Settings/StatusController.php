@@ -74,6 +74,7 @@ class StatusController extends Controller
                     'signatory_name' => (isset($list->signatory->signatory_name) && !empty($list->signatory->signatory_name) ? $list->signatory->signatory_name : ''),
                     'email_template_id' => $list->email_template_id,
                     'email_name' => (isset($list->mail->email_title) && !empty($list->mail->email_title) ? $list->mail->email_title : ''),
+                    'eligible_for_award' => (isset($list->eligible_for_award) && $list->eligible_for_award > 0 ? $list->eligible_for_award : 0),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -93,6 +94,7 @@ class StatusController extends Controller
             'letter_set_id' => $letter_set_id,
             'signatory_id' => $signatory_id,
             'email_template_id' => $email_template_id,
+            'eligible_for_award' => (isset($request->eligible_for_award) && $request->eligible_for_award > 0 ? $request->eligible_for_award : 0),
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -134,6 +136,7 @@ class StatusController extends Controller
             'letter_set_id' => $letter_set_id,
             'signatory_id' => $signatory_id,
             'email_template_id' => $email_template_id,
+            'eligible_for_award' => (isset($request->eligible_for_award) && $request->eligible_for_award > 0 ? $request->eligible_for_award : 0),
             'updated_by' => auth()->user()->id
         ]);
 

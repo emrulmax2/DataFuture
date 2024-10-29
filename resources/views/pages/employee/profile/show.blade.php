@@ -372,6 +372,56 @@
         <div class="intro-y box p-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
+                    <div class="font-medium text-base">Educational Qualification</div>
+                </div>
+                <div class="col-span-6 text-right">
+                    <button data-tw-toggle="modal" data-tw-target="#storeEducationalQualisModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                        <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Educational Qualification
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4"> 
+                @if(isset($employee->education->id) && $employee->education->id > 0)
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0 mb-4">
+                            <div class="col-span-4 text-slate-500 font-medium">Highest Educational Qualification</div>
+                            <div class="col-span-8 font-medium">{{ (isset($employee->education->qual->name) ? $employee->education->qual->name : '') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0 mb-4">
+                            <div class="col-span-4 text-slate-500 font-medium">Qualification Name</div>
+                            <div class="col-span-8 font-medium">{{ (isset($employee->education->qualification_name) ? $employee->education->qualification_name : '') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0 mb-4">
+                            <div class="col-span-4 text-slate-500 font-medium">Award Body</div>
+                            <div class="col-span-8 font-medium">{{ (isset($employee->education->award_body) ? $employee->education->award_body : '') }}</div>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="grid grid-cols-12 gap-0 mb-4">
+                            <div class="col-span-4 text-slate-500 font-medium">Award Date</div>
+                            <div class="col-span-8 font-medium">{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('jS F, Y', strtotime($employee->education->award_date)) : '') }}</div>
+                        </div>
+                    </div>
+                @else 
+                    <div class="col-span-12">
+                        <div class="text-slate-500 font-medium">Educational Qualification data not available.</div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="intro-y mt-5">
+        <div class="intro-y box p-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
                     <div class="font-medium text-base">Employment Terms</div>
                 </div>
 
