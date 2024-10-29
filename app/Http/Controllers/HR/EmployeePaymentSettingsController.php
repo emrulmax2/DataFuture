@@ -47,6 +47,8 @@ class EmployeePaymentSettingsController extends Controller
         $holiday_entitled = (isset($request->holiday_entitled) ? $request->holiday_entitled : 0);
         $pension_enrolled = (isset($request->pension_enrolled) ? $request->pension_enrolled : 0);
 
+        $employee_bank_detail_id = (isset($request->employee_bank_detail_id) && $request->employee_bank_detail_id > 0 ? $request->employee_bank_detail_id : 0);
+
         $data = [];
         $data['employee_id'] = $employee_id;
         $data['pay_frequency'] = (isset($request->pay_frequency) ? $request->pay_frequency : null);
@@ -62,9 +64,13 @@ class EmployeePaymentSettingsController extends Controller
             $bdata['sort_code'] = (isset($request->sort_code) ? $request->sort_code : '');
             $bdata['ac_no'] = (isset($request->ac_no) ? $request->ac_no : '');
             $bdata['active'] = (isset($request->active) ? $request->active : 1);
-            $bdata['created_by'] = auth()->user()->id;
-
-            EmployeeBankDetail::create($bdata);
+            if($employee_bank_detail_id > 0):
+                $bdata['updated_by'] = auth()->user()->id;
+                EmployeeBankDetail::where('id', $employee_bank_detail_id)->where('employee_id', $employee_id)->update($bdata);
+            else:
+                $bdata['created_by'] = auth()->user()->id;
+                EmployeeBankDetail::create($bdata);
+            endif;
         endif;
 
         if($subject_to_clockin == 1):
