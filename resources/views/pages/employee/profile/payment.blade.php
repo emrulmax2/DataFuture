@@ -160,7 +160,7 @@
                         <div class="col-span-8 font-medium">
                             @if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0)
                                 @foreach($employee->holidayAuth as $ha)
-                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ $ha->user->name }}</span>
+                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ (isset($ha->user->employee->full_name) && !empty($ha->user->employee->full_name) ? $ha->user->employee->full_name : (isset($ha->user->name) && !empty($ha->user->name) ? $ha->user->name : 'Unknown')) }}</span>
                                 @endforeach
                             @endif
                         </div>

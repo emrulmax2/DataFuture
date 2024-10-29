@@ -112,7 +112,7 @@ class EmployeeFormController extends Controller
                 'sex_identifier_id'=> $request->sex,
                 'date_of_birth'  => date('Y-m-d', strtotime($request->date_of_birth)),
                 'ni_number'  => (isset($request->national_insurance_num) && !empty($request->national_insurance_num) ? strtoupper($request->national_insurance_num) : null),
-                //'nationality_id'  => $request->nationality,
+                'nationality_id'  => $request->nationality_id,
                 'ethnicity_id'  => $request->ethnicity,
                 'disability_status' => $request->disability_status ? 'Yes' : 'No',
                 'address_id' =>   ($personalAddress->id && $personalAddress->id > 0 ? $personalAddress->id : null),
