@@ -18,6 +18,7 @@ use App\Models\Ethnicity;
 use App\Models\Disability;
 use App\Models\Employee;
 use App\Models\EmployeeArchive;
+use App\Models\EmployeeEducationalQualification;
 use App\Models\EmployeeEligibilites;
 use App\Models\EmployeeEmergencyContact;
 use App\Models\EmployeeJobTitle;
@@ -223,7 +224,12 @@ class EmployeeController extends Controller
             'address_id' => $request->emp_address_id,
             'country' => $request->emp_country,
             "disability_status" =>$request->disability_status,
-            "disability_id" => ($request->disability_id) ?? null
+            "disability_id" => ($request->disability_id) ?? null,
+
+            "highest_qualification_on_entry_id" => $request->highest_qualification_on_entry_id,
+            "qualification_name" => $request->qualification_name,
+            "award_body" => $request->award_body,
+            "award_date" => $request->award_date,
         ]);
         return response()->json(["data success",$data = session()->all()]);
     }
@@ -236,6 +242,7 @@ class EmployeeController extends Controller
             'punch_number' => $request->punch_number,
             'site_location' => $request->site_location,
             'employee_work_type' => $request->employee_work_type,
+            'utr_number' => $request->utr_number,
             'works_number' => $request->works_number,
             'job_title' => $request->job_title,
             'department' => $request->department,
@@ -347,12 +354,22 @@ class EmployeeController extends Controller
             'started_on' => Session::get('started_on'),
             'punch_number' => Session::get('punch_number'),
             'employee_work_type_id' => Session::get('employee_work_type'),
+            'utr_number' => Session::get('utr_number'),
             'works_number' => Session::get('works_number'),
             'employee_job_title_id' => Session::get('job_title'),
             'department_id' => Session::get('department'),
             'office_telephone' => Session::get('office_telephone'),
             'mobile' => Session::get('mobile'),
             'email' => Session::get('email')
+        ]);
+
+        $empEduQual = EmployeeEducationalQualification::updateOrCreate(['employee_id' => $employee->id], [
+            'employee_id' => $employee->id,
+            'highest_qualification_on_entry_id' => Session::get('highest_qualification_on_entry_id'),
+            'qualification_name' => Session::get('qualification_name'),
+            'award_body' => Session::get('award_body'),
+            'award_date' => (!empty(Session::get('award_date')) ? date('Y-m-d', strtotime('01-'.Session::get('award_date'))) : null),
+            'created_by' => auth()->user()->id,
         ]);
 
         $EmployeeEligibilites = EmployeeEligibilites::updateOrCreate(['employee_id' => $employee->id], [

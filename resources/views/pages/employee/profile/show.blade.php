@@ -149,6 +149,14 @@
                         <div class="col-span-8 font-medium">{{ (isset($employment->employeeWorkType->name) ? $employment->employeeWorkType->name : '') }}</div>
                     </div>
                 </div>
+                @if($employment->employee_work_type_id == 2)
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">UTR Number</div>
+                        <div class="col-span-8 font-medium">{{ (isset($employment->utr_number) && !empty($employment->utr_number) ? $employment->utr_number : '') }}</div>
+                    </div>
+                </div>
+                @endif
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Punch number</div>
@@ -405,7 +413,7 @@
                     <div class="col-span-12 sm:col-span-3">
                         <div class="grid grid-cols-12 gap-0 mb-4">
                             <div class="col-span-4 text-slate-500 font-medium">Award Date</div>
-                            <div class="col-span-8 font-medium">{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('jS F, Y', strtotime($employee->education->award_date)) : '') }}</div>
+                            <div class="col-span-8 font-medium">{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('F, Y', strtotime($employee->education->award_date)) : '') }}</div>
                         </div>
                     </div>
                 @else 

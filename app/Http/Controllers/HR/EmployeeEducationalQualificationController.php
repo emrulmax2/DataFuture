@@ -18,7 +18,7 @@ class EmployeeEducationalQualificationController extends Controller
             'highest_qualification_on_entry_id' => $request->highest_qualification_on_entry_id,
             'qualification_name' => $request->qualification_name,
             'award_body' => $request->award_body,
-            'award_date' => (isset($request->award_date) && !empty($request->award_date) ? date('Y-m-d', strtotime($request->award_date)) : null),
+            'award_date' => (isset($request->award_date) && !empty($request->award_date) ? date('Y-m-d', strtotime('01-'.$request->award_date)) : null),
         ];
 
         if($id > 0):

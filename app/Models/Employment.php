@@ -17,6 +17,7 @@ class Employment extends Model
         'ended_on',
         'punch_number',
         'employee_work_type_id',
+        'utr_number',
         'works_number',
         'employee_job_title_id',
         'department_id',

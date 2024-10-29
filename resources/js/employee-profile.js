@@ -68,13 +68,24 @@ import { createIcons, icons } from "lucide";
             $('.employeeWorkTypeFields').fadeIn('fast', function(){
                 $('input', this).val('');
             });
+            $('.contractorFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            });
+        }else if(employee_work_type_id == 2){
+            $('.employeeWorkTypeFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            });
+            $('.contractorFields').fadeIn('fast', function(){
+                $('input', this).val('');
+            });
         }else{
             $('.employeeWorkTypeFields').fadeOut('fast', function(){
                 $('input', this).val('');
             });
+            $('.contractorFields').fadeOut('fast', function(){
+                $('input', this).val('');
+            });
         }
-        
-
     });
 
     
