@@ -53,10 +53,10 @@ class Address extends Model
 
     public function getFullAddressInputAttribute(){
         $html = '';
-        $html .= '<span class="text-slate-600 font-medium">'.$this->address_line_1.'</span><br/>';
+        $html .= '<span class="text-slate-600 font-medium">'.$this->address_line_1.', </span><br/>';
         $html .= '<input type="hidden" name="emp_address_line_1" value="'.$this->address_line_1.'"/>';
         if(isset($this->address_line_2) && !empty($this->address_line_2)){
-            $html .= '<span class="text-slate-600 font-medium">'.isset($this->address_line_2) && !empty($this->address_line_2).'</span><br/>';
+            $html .= '<span class="text-slate-600 font-medium">'.$this->address_line_2.', </span><br/>';
         }
         $html .= '<input type="hidden" name="emp_address_line_2" value="'.(isset($this->address_line_2) && !empty($this->address_line_2) ? $this->address_line_2 : '').'"/>';
 

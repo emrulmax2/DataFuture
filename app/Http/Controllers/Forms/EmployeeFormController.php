@@ -54,8 +54,9 @@ class EmployeeFormController extends Controller
         $jobTitles = EmployeeJobTitle::orderBy('name', 'ASC')->get();
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
-        $qualEntries = HighestQualificationOnEntry::all();
+        $qualEntries = HighestQualificationOnEntry::orderBy('name', 'ASC')->get();
         $employee = ($the_id > 0 ? Employee::find($the_id) : []);
+        $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
 
 
         return view('pages.forms.employee.index', [
@@ -78,7 +79,8 @@ class EmployeeFormController extends Controller
             'sexIdentifier' => $sexIdentifier,
             'employee' => $employee,
             'qualEntries' => $qualEntries,
-            'logo' => Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->get()->first()
+            'logo' => Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->get()->first(),
+            'postcode_api' => $PostCodeAPI,
         ]);
     }
 
@@ -90,12 +92,12 @@ class EmployeeFormController extends Controller
 
         if(isset($theEmployee->id) && $theEmployee->id > 0 && isset($theEmployee->status) && $theEmployee->status == 2):
             $personalAddress = Address::create([
-                'address_line_1' => $request->address_line_1,
-                'address_line_2' => (!empty($request->address_line_2) ? $request->address_line_2 : null),
-                'city' => $request->city,
-                'state' => !empty($request->state) ? $request->state : null,
-                'post_code' => $request->post_code,
-                'country' => 'United Kingdom',
+                'address_line_1' => $request->emp_address_line_1,
+                'address_line_2' => (!empty($request->emp_address_line_2) ? $request->emp_address_line_2 : null),
+                'city' => $request->emp_city,
+                'state' => null,
+                'post_code' => $request->emp_post_code,
+                'country' => (isset($request->emp_country) && !empty($request->emp_country) ? $request->emp_country : null),
                 'active' => 1,
                 'created_by' => 1,
             ]);
@@ -122,7 +124,7 @@ class EmployeeFormController extends Controller
             $employment = Employment::create([
                 "employee_id" => $employee_id, 
                 'employee_work_type_id' => $request->employee_work_type,
-                'utr_number' => (isset($request->employee_work_type) && $request->employee_work_type == 2 && $request->utr_number ? $request->utr_number : null),
+                'utr_number' => (isset($request->utr_number) && !empty($request->utr_number) ? $request->utr_number : null),
                 'email' => $employee->email
             ]);
 
@@ -153,9 +155,9 @@ class EmployeeFormController extends Controller
                 'address_line_1' => $request->emc_address_line_1,
                 'address_line_2' => (!empty($request->emc_address_line_2) ? $request->emc_address_line_2 : null),
                 'city' => $request->emc_city,
-                'state' => !empty($request->emc_state) ? $request->emc_state : null,
+                'state' => null,
                 'post_code' => $request->emc_post_code,
-                'country' => 'United Kingdom',
+                'country' => (isset($request->emc_country) && !empty($request->emc_country) ? $request->emc_country : null),
                 'active' => 1,
                 'created_by' => 1,
             ]);
@@ -174,7 +176,7 @@ class EmployeeFormController extends Controller
                 'highest_qualification_on_entry_id' => $request->highest_qualification_on_entry_id,
                 'qualification_name' => $request->qualification_name,
                 'award_body' => $request->award_body,
-                'award_date' => (isset($request->award_date) && !empty($request->award_date) ? date('Y-m-d', strtotime($request->award_date)) : null),
+                'award_date' => (isset($request->award_date) && !empty($request->award_date) ? date('Y-m-d', strtotime('01-'.$request->award_date)) : null),
             ]);
 
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();

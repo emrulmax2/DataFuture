@@ -127,31 +127,17 @@
                                         </div>
 
                                         <div class="col-span-12 font-medium text-base pt-3 pb-3">Address</div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="address_line_1" class="form-label inline-flex">Number and street name <span class="text-danger">*</span></label>
-                                            <input id="address_line_1" type="text" class="form-control require" name="address_line_1">
-                                            <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
+                                        <div class="col-span-6 addressWrap" id="empAddressWrap">
+                                            <div class="addresses mb-2" style="display: none;"></div>
+                                            <div>
+                                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
+                                                </button>
+                                                <input type="hidden" name="address_prfix" class="address_prfix_field" value="emp_"/>
+                                            </div>
+                                            <div class="acc__input-error error-emp_address_line_1 text-danger mt-2"></div>
                                         </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                            <input id="address_line_2" type="text" class="form-control" name="address_line_2">
-                                            <div class="acc__input-error error-address_line_2 text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="city" class="form-label inline-flex">Locality <span class="text-danger">*</span></label>
-                                            <input id="city" type="text" class="form-control require" name="city">
-                                            <div class="acc__input-error error-city text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="state" class="form-label inline-flex">County</label>
-                                            <input id="state" type="text" class="form-control" name="state">
-                                            <div class="acc__input-error error-state text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="post_code" class="form-label inline-flex">Post Code <span class="text-danger">*</span></label>
-                                            <input id="post_code" type="text" class="form-control require" name="post_code">
-                                            <div class="acc__input-error error-post_code text-danger mt-2"></div>
-                                        </div>
+
 
                                         <div class="col-span-12 font-medium text-base pt-3 pb-3">Educational Qualification</div>
                                         <div class="intro-y col-span-12 sm:col-span-3">
@@ -176,7 +162,7 @@
                                         </div>
                                         <div class="intro-y col-span-12 sm:col-span-3 eduQuals">
                                             <label for="award_date" class="form-label inline-flex">Award Date <span class="text-danger"> *</span></label>
-                                            <input id="award_date" type="text" placeholder="DD-MM-YYYY" autocomplete="off" class="form-control datepicker require" name="award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                            <input id="award_date" type="text" placeholder="MM-YYYY" autocomplete="off" class="form-control datepicker monthYearMask require" name="award_date" data-format="MM-YYYY" data-single-mode="true">
                                             <div class="acc__input-error error-award_date text-danger mt-2"></div>
                                         </div>
 
@@ -324,7 +310,7 @@
                                     <div class="grid grid-cols-12 gap-4 gap-y-3 mt-5">
                                         <div class="intro-y col-span-12 sm:col-span-6">
                                             <label for="emergency_contact_name" class="form-label inline-flex">Name <span class="text-danger">*</span></label>
-                                            <input id="emergency_contact_name" type="text" class="form-control inputUppercase"  name="emergency_contact_name" aria-label="default input example">
+                                            <input id="emergency_contact_name" type="text" class="form-control inputUppercase require"  name="emergency_contact_name" aria-label="default input example">
                                             <div class="acc__input-error error-emergency_contact_name text-danger mt-2"></div>
                                         </div>              
                                         <div class="intro-y col-span-12 sm:col-span-6">
@@ -352,30 +338,15 @@
                                         </div>
 
                                         <div class="col-span-12 font-medium text-base pt-3 pb-3">Address</div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="emc_address_line_1" class="form-label inline-flex">Number and street name <span class="text-danger">*</span></label>
-                                            <input id="emc_address_line_1" type="text" class="form-control require" name="emc_address_line_1">
+                                        <div class="col-span-6 addressWrap" id="emcAddressWrap">
+                                            <div class="addresses mb-2" style="display: none;"></div>
+                                            <div>
+                                                <button type="button" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
+                                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
+                                                </button>
+                                                <input type="hidden" name="address_prfix" class="address_prfix_field" value="emc_"/>
+                                            </div>
                                             <div class="acc__input-error error-emc_address_line_1 text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="emc_address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                            <input id="emc_address_line_2" type="text" class="form-control" name="emc_address_line_2">
-                                            <div class="acc__input-error error-emc_address_line_2 text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="emc_city" class="form-label inline-flex">Locality <span class="text-danger">*</span></label>
-                                            <input id="emc_city" type="text" class="form-control require" name="emc_city">
-                                            <div class="acc__input-error error-emc_city text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="emc_state" class="form-label inline-flex">County</label>
-                                            <input id="emc_state" type="text" class="form-control" name="emc_state">
-                                            <div class="acc__input-error error-emc_state text-danger mt-2"></div>
-                                        </div>
-                                        <div class="intro-y col-span-12 sm:col-span-4">
-                                            <label for="emc_post_code" class="form-label inline-flex">Post Code <span class="text-danger">*</span></label>
-                                            <input id="emc_post_code" type="text" class="form-control require" name="emc_post_code">
-                                            <div class="acc__input-error error-emc_post_code text-danger mt-2"></div>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between sm:justify-end mt-5">
@@ -466,6 +437,73 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
+
+    <!-- BEGIN: Address Modal -->
+    <div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Add Address</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                                <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
+                                <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="address_line_1">
+                                <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
+                                <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full" name="address_line_2">
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="student_address_city" class="form-label">Town/City <span class="text-danger">*</span></label>
+                                <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full" name="city">
+                                <div class="acc__input-error error-city text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="student_address_postal_zip_code" class="form-label">Postcode <span class="text-danger">*</span></label>
+                                <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full" name="post_code">
+                                <div class="acc__input-error error-post_code text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                                <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="country">
+                                <div class="acc__input-error error-country text-danger mt-2"></div>
+                            </div>
+                            <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key={{ $postcode_api }}" />
+                            <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key={{ $postcode_api }}"></script>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="insertAddress" class="btn btn-primary w-auto">     
+                            Add Address                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="place" value=""/>
+                        <input type="hidden" name="prfix" value=""/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Address Modal -->
 @endsection
 
 @section('script')

@@ -216,6 +216,11 @@
                             <input type="text" value="{{ isset($employment->works_number) ? $employment->works_number : '' }}" placeholder="" id="works_number" class="form-control" name="works_number">
                             <div class="acc__input-error error-works_number text-danger mt-2"></div>
                         </div>
+                        <div class="col-span-12 sm:col-span-4 contractorFields" style="{{ (isset($employment->employee_work_type_id) && $employment->employee_work_type_id == 2 ? '' : 'display: none;') }}">
+                            <label for="utr_number" class="form-label">UTR Number<span class="text-danger">*</span></label>
+                            <input type="text" value="{{ isset($employment->utr_number) ? $employment->utr_number : '' }}" placeholder="" id="utr_number" class="form-control" name="utr_number">
+                            <div class="acc__input-error error-utr_number text-danger mt-2"></div>
+                        </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="punch_number" class="form-label">Punch Number<span class="text-danger">*</span></label>
                             <input type="text" value="{{ isset($employment->punch_number) ? $employment->punch_number : '' }}" placeholder="" id="punch_number" class="form-control" name="punch_number">
@@ -661,7 +666,7 @@
                     </div>
                     <div class="mt-3 eduQuals">
                         <label for="award_date" class="form-label inline-flex">Award Date <span class="text-danger"> *</span></label>
-                        <input value="{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('d-m-Y', strtotime($employee->education->award_date)) : '') }}" id="award_date" type="text" placeholder="DD-MM-YYYY" autocomplete="off" class="form-control datepicker" name="award_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                        <input value="{{ (isset($employee->education->award_date) && !empty($employee->education->award_date) ? date('m-Y', strtotime($employee->education->award_date)) : '') }}" id="award_date" type="text" placeholder="MM-YYYY" autocomplete="off" class="form-control datepicker monthYearMask" name="award_date" data-format="MM-YYYY" data-single-mode="true">
                         <div class="acc__input-error error-award_date text-danger mt-2"></div>
                     </div>
                 </div>
