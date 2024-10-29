@@ -1,4 +1,4 @@
-@extends('../layout/' . $layout)
+@extends('../layout/noauth')
 
 @section('head')
     <title>{{ $title }}</title>
