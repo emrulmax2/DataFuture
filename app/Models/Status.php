@@ -18,6 +18,7 @@ class Status extends Model
         'signatory_id',
         'active',
         'email_template_id',
+        'eligible_for_award',
         'created_by',
         'updated_by',
     ];

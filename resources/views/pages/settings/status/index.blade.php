@@ -145,6 +145,14 @@
                                 @endif
                             </select>
                         </div>
+                        <div class="mt-3">
+                            <label for="eligible_for_award" class="form-label">Eligible for Award?</label>
+                            <div>
+                                <div class="form-check form-switch">
+                                    <input name="eligible_for_award" value="1" id="eligible_for_award" class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -234,6 +242,14 @@
                                     @endforeach
                                 @endif
                             </select>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_eligible_for_award" class="form-label">Eligible for Award?</label>
+                            <div>
+                                <div class="form-check form-switch">
+                                    <input name="eligible_for_award" value="1" id="edit_eligible_for_award" class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

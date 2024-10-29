@@ -133,6 +133,17 @@ import { createIcons, icons } from "lucide";
         }
     });
 
+    $('#highest_qualification_on_entry_id').on('change', function() {
+        let $this = $(this)
+        var highest_qualification_on_entry_id = $this.val();
+        
+        if(highest_qualification_on_entry_id == 1) {
+            $('.eduQuals .text-danger').fadeOut();
+        }else{
+            $('.eduQuals .text-danger').fadeIn();
+        }
+    });
+
     /*$('#editAdmissionPersonalDetailsForm #status').on('change', function(){
         if($(this).prop('checked')){
             $('#editAdmissionPersonalDetailsForm .statusDisplay').text('Active').addClass('text-success').removeClass('text-danger');
@@ -154,6 +165,7 @@ import { createIcons, icons } from "lucide";
     const editTermDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTermDetailsModal"));
     //const editAddressUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAddressUpdateModal"));
     const editEmergencyContactDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmergencyContactDetailsModal"));
+    const storeEducationalQualisModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#storeEducationalQualisModal"));
     $('.save').on('click', function (e) {
         e.preventDefault();
 
@@ -188,6 +200,7 @@ import { createIcons, icons } from "lucide";
                     editTermDetailsModal.hide();
                     //editAddressUpdateModal.hide();
                     editEmergencyContactDetailsModal.hide();
+                    storeEducationalQualisModal.hide();
                     successModal.show();
 
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {

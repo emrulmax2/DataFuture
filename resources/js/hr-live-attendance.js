@@ -162,6 +162,27 @@ import tippy, { roundArrow } from "tippy.js";
                         "stroke-width": 1.5,
                         nameAttr: "data-lucide",
                     });
+
+                    setTimeout(() => {
+                        $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+                            let thTippyOptions = {
+                                content: $(this).attr("title"),
+                            };
+                            if ($(this).data("tooltip-content") !== undefined) {
+                                thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                            }
+                    
+                            $(this).removeAttr("title");
+                    
+                            tippy(this, {
+                                arrow: roundArrow,
+                                animation: "shift-away",
+                                theme: 'light',
+                                placement: 'top-start',
+                                ...thTippyOptions,
+                            });
+                        })
+                    }, 10);
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
@@ -172,13 +193,65 @@ import tippy, { roundArrow } from "tippy.js";
         }
     });
 
+    let liveAjaxRequest = null;
     $('#liveAttendanceEmp').on('keyup', function(e){
         var departement = $('#liveAttendanceDept').val();
         var date = $('#liveAttendanceDate').val();
         var emp = $('#liveAttendanceEmp').val();
 
         $('.leaveTableLoader').addClass('active');
-        axios({
+        liveAjaxRequest = $.ajax({
+            type: 'POST',
+            data: {departement : departement, date : date, emp : emp},
+            url: route('hr.portal.live.attedance.ajax'),
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            beforeSend : function()    {           
+                if(liveAjaxRequest != null) {
+                    liveAjaxRequest.abort();
+                }
+                $('.leaveTableLoader').addClass('active');
+            },
+            success: function(data) {
+                $('.leaveTableLoader').removeClass('active');
+
+                let res = data.res;
+                $('.theDateHolder').html(res.the_date);
+                $('#liveAttendanceTable tbody').html(res.htm);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+
+                setTimeout(() => {
+                    $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+                        let thTippyOptions = {
+                            content: $(this).attr("title"),
+                        };
+                        if ($(this).data("tooltip-content") !== undefined) {
+                            thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                        }
+                
+                        $(this).removeAttr("title");
+                
+                        tippy(this, {
+                            arrow: roundArrow,
+                            animation: "shift-away",
+                            theme: 'light',
+                            placement: 'top-start',
+                            ...thTippyOptions,
+                        });
+                    })
+                }, 10);
+            },
+            error:function(e){
+                $('.leaveTableLoader').removeClass('active');
+                console.log('Error');
+            }
+        });
+
+        /*axios({
             method: "post",
             url: route('hr.portal.live.attedance.ajax'),
             data: {departement : departement, date : date, emp : emp},
@@ -195,13 +268,34 @@ import tippy, { roundArrow } from "tippy.js";
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+
+                setTimeout(() => {
+                    $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+                        let thTippyOptions = {
+                            content: $(this).attr("title"),
+                        };
+                        if ($(this).data("tooltip-content") !== undefined) {
+                            thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                        }
+                
+                        $(this).removeAttr("title");
+                
+                        tippy(this, {
+                            arrow: roundArrow,
+                            animation: "shift-away",
+                            theme: 'light',
+                            placement: 'top-start',
+                            ...thTippyOptions,
+                        });
+                    })
+                }, 10);
             }
         }).catch(error => {
             $('.leaveTableLoader').removeClass('active');
             if (error.response) {
                 console.log('error');
             }
-        });
+        });*/
     });
 
     $('#senMailModal #sendMailsDocument').on('change', function(){
