@@ -153,6 +153,10 @@ class Employee extends Model
         return $banks;
     }
 
+    public function bank(){
+        return $this->hasOne(EmployeeBankDetail::class, 'employee_id', 'id')->where('active', 1)->latestOfMany();
+    }
+
     public function education(){
         return $this->hasOne(EmployeeEducationalQualification::class, 'employee_id', 'id')->latestOfMany();
     }

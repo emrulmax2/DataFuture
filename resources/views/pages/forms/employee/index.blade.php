@@ -77,6 +77,16 @@
                                             <div class="acc__input-error error-sex text-danger mt-2"></div>
                                         </div>
                                         <div class="intro-y col-span-12 sm:col-span-4">
+                                            <label for="nationality_id" class="form-label inline-flex">Nationality <span class="text-danger"> *</span></label>
+                                            <select id="nationality_id" name="nationality_id" class="tom-selects w-full lccToms tomRequire">
+                                                <option value="">Please Select</option>
+                                                @foreach($country as $ctry)
+                                                    <option  value="{{ $ctry->id }}">{{ $ctry->name }}</option>              
+                                                @endforeach
+                                            </select>
+                                            <div class="acc__input-error error-nationality_id text-danger mt-2"></div>
+                                        </div>
+                                        <div class="intro-y col-span-12 sm:col-span-4">
                                             <label for="vertical-form-12" class="form-label inline-flex">Ethnic Origin <span class="text-danger"> *</span></label>
                                             <select id="vertical-form-12" name="ethnicity" class="tom-selects w-full lccToms tomRequire">
                                                 <option value="">Please Select</option>
