@@ -213,6 +213,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagementController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
@@ -3011,7 +3012,6 @@ Route::middleware('auth')->group(function() {
         Route::post('student/results/award/edit', 'edit')->name('student.edit.award'); 
     });
 
-    
     Route::controller(EmployeeEducationalQualificationController::class)->group(function() {
         Route::post('employee-educationa-qualification/store/','store')->name('employee.edu.qual.store');
     });
@@ -3020,9 +3020,26 @@ Route::middleware('auth')->group(function() {
 Route::controller(LibraryManagementController::class)->group(function(){
     Route::get('library/management', 'index')->name('library.management.index'); 
     Route::get('library/settings', 'settings')->name('library.settings'); 
+    
+    
 });
 
 Route::controller(EmployeeFormController::class)->group(function(){
     Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
     Route::post('forms/employee/store', 'store')->name('forms.employee.store'); 
+});
+
+// GET /library-locations -> index
+// GET /library-locations/create -> create
+// POST /library-locations -> store
+// GET /library-locations/{library_location} -> show
+// GET /library-locations/{library_location}/edit -> edit
+// PUT/PATCH /library-locations/{library_location} -> update
+// DELETE /library-locations/{library_location} -> destroy
+Route::resource('library-locations', LibraryLocationController::class,[
+    'except' => ['index','create','show']
+]);
+Route::controller(LibraryLocationController::class)->group(function(){
+    Route::get('library-locations', 'index')->name('library-locations'); 
+    Route::get('library-locations-list', 'list')->name('library-locations.list'); 
 });
