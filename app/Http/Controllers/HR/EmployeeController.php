@@ -31,6 +31,7 @@ use App\Models\Employment;
 use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
 use App\Models\HighestQualificationOnEntry;
+use App\Models\Option;
 use App\Models\SexIdentifier;
 use App\Models\StudentArchive;
 use App\Models\User;
@@ -174,6 +175,7 @@ class EmployeeController extends Controller
         $documentTypes = EmployeeWorkDocumentType::all();
         $workPermitTypes = EmployeeWorkPermitType::all();
         $qualEntries = HighestQualificationOnEntry::all();
+        $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
         
         return view('pages.employee.create',[
             'title' => 'HR Portal - London Churchill College',
@@ -197,7 +199,8 @@ class EmployeeController extends Controller
             'qualEntries' => $qualEntries,
             'employee' => (!empty($id) && $id > 0 ? Employee::find($id) : null),
             'emp_dis' => (!empty($id) && $id > 0 ? DB::table('employee_disability')->where('employee_id', $id)->pluck('disability_id')->toArray() : []),
-            'emp_venue' => (!empty($id) && $id > 0 ? DB::table('employee_venue')->where('employee_id', $id)->pluck('venue_id')->toArray() : [])
+            'emp_venue' => (!empty($id) && $id > 0 ? DB::table('employee_venue')->where('employee_id', $id)->pluck('venue_id')->toArray() : []),
+            'postcode_api' => $PostCodeAPI,
         ]);
     }
     public function save(EmployeeDataSaveRequest $request)
