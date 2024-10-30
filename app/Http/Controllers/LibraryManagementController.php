@@ -56,7 +56,7 @@ class LibraryManagementController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Library Settings', 'href' => 'javascript:void(0);']
             ],
-            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
         ]);
     }
 }

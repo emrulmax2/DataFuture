@@ -27,30 +27,31 @@
                             <label for="payment_method" class="form-label">Payment Method <span class="text-danger">*</span></label>
                             <select id="payment_method" name="payment_method" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option {{ (isset($employee->bank->id) && $employee->bank->id > 0 ? 'Selected' : '') }} value="Bank Transfer">Bank Transfer</option>
                                 <option value="Cash">Cash</option>
                                 <option value="Cheque">Cheque</option>
                             </select>
                             <div class="acc__input-error error-payment_method text-danger mt-2"></div>
                         </div>
                         {{-- Bank Details --}}
-                        <div class="col-span-12 bankDetailsArea" style="display: none;">
+                        <div class="col-span-12 bankDetailsArea" style="display: {{ (isset($employee->bank->id) && $employee->bank->id > 0 ? 'block' : 'none') }};">
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-6 sm:col-span-4">
                                     <label for="beneficiary" class="form-label">Beneficiary Name <span class="text-danger">*</span></label>
-                                    <input type="text" value="" id="beneficiary" name="beneficiary" class="form-control w-full">
+                                    <input type="text" value="{{ (isset($employee->bank->beneficiary) && !empty($employee->bank->beneficiary) ? $employee->bank->beneficiary : '') }}" id="beneficiary" name="beneficiary" class="form-control w-full">
                                     <div class="acc__input-error error-beneficiary text-danger mt-2"></div>
                                 </div>
                                 <div class="col-span-6 sm:col-span-4">
                                     <label for="sort_code" class="form-label">Sort Code <span class="text-danger">*</span></label>
-                                    <input type="text" value="" id="sort_code" name="sort_code" class="form-control w-full">
+                                    <input type="text" value="{{ (isset($employee->bank->sort_code) && !empty($employee->bank->sort_code) ? $employee->bank->sort_code : '') }}" id="sort_code" name="sort_code" class="form-control w-full">
                                     <div class="acc__input-error error-sort_code text-danger mt-2"></div>
                                 </div>
                                 <div class="col-span-6 sm:col-span-4">
                                     <label for="ac_no" class="form-label">Account Number <span class="text-danger">*</span></label>
-                                    <input type="text" value="" id="ac_no" name="ac_no" maxlength="8" minlength="8" class="form-control w-full">
+                                    <input type="text" value="{{ (isset($employee->bank->ac_no) && !empty($employee->bank->ac_no) ? $employee->bank->ac_no : '') }}" id="ac_no" name="ac_no" maxlength="8" minlength="8" class="form-control w-full">
                                     <div class="acc__input-error error-ac_no text-danger mt-2"></div>
                                 </div>
+                                <input type="hidden" name="employee_bank_detail_id" value="{{ (isset($employee->bank->id) && $employee->bank->id > 0 ? $employee->bank->id : '0') }}"/>
                             </div>
                         </div>
                         {{-- Bank Details --}}

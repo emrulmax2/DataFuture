@@ -661,8 +661,8 @@
                                 <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="country">
                                 <div class="acc__input-error error-country text-danger mt-2"></div>
                             </div>
-                            <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-                            <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
+                            <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key={{$postcode_api}}" />
+                            <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key={{$postcode_api}}"></script>
                         </div>
                     </div>
                     <div class="modal-footer">
