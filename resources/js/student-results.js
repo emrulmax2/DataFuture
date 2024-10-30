@@ -1262,7 +1262,6 @@ var studentNotesListTable = (function () {
             'stroke-width': 1.5,
             nameAttr: 'data-lucide',
         });
-        paginateTable();
     });
     if ($('#sortable-table').length > 0) {
         // Initialize an empty object to store the frequency of each grade
@@ -1304,32 +1303,6 @@ var studentNotesListTable = (function () {
         $('#frequency-distribution').html(frequencyHtml);
     }
 
-    function paginateTable() {
-        const rowsPerPage = 10;
-        const rows = $('#sortable-table tbody tr');
-        const rowsCount = rows.length;
-        const pageCount = Math.ceil(rowsCount / rowsPerPage);
-        const numbers = $('#pagination-container');
-
-        numbers.html('');
-
-        for (let i = 0; i < pageCount; i++) {
-            numbers.append('<a href="#">' + (i + 1) + '</a>');
-        }
-
-        rows.hide();
-        rows.slice(0, rowsPerPage).show();
-
-        numbers.find('a').click(function (e) {
-            e.preventDefault();
-            const index = $(this).index();
-            const start = index * rowsPerPage;
-            const end = start + rowsPerPage;
-
-            rows.hide();
-            rows.slice(start, end).show();
-        });
-    }
     function comparer(index) {
         return function (a, b) {
             var valA = getCellValue(a, index);
