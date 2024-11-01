@@ -284,7 +284,7 @@ class AmazonBookInformationController extends Controller
     public function validateIsbn(Request $request){
         $isbn = $request->isbn;
         $isbn = str_replace(["-", "ï¿½"], '', $isbn);
-        $isbnKey = 'AIzaSyBhq4_TNLflalkV3ViA16kP3Yfj0MrUOXg';
+        $isbnKey = config('services.google_books.api_key');
 
         $response = Http::get('https://www.googleapis.com/books/v1/volumes?q='.$isbn.'&key='.$isbnKey);
         if($response->ok()):

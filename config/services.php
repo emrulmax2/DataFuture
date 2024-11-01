@@ -37,4 +37,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URL'),
     ],
 
+    // Other configurations...
+
+    'google_books' => [
+        'api_key' => env('GOOGLE_BOOKS_API_KEY'),
+    ],
+
 ];
