@@ -304,6 +304,8 @@ export default defineConfig({
                 'resources/js/amazon-add-book-information.js',
 
                 'resources/js/library-management-dashboard.js',
+
+                'resources/js/location-settings.js',
             ],
             refresh: true,
         }),
