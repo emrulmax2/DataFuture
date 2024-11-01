@@ -299,6 +299,11 @@ export default defineConfig({
                 'resources/js/student-award.js',
 
                 'resources/js/employee-data-collection-form.js',
+                
+                'resources/js/amazon-book-information.js',
+                'resources/js/amazon-add-book-information.js',
+
+                'resources/js/library-management-dashboard.js',
             ],
             refresh: true,
         }),
