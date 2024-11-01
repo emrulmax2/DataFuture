@@ -777,6 +777,11 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
 
         Route::get('course-management/plans/tree/assigned-list', 'assignedList')->name('plans.tree.assigned.list');
+
+        Route::post('course-management/plans/tree/get-theories', 'getTheories')->name('plans.tree.get.theories');
+        Route::post('course-management/plans/tree/sync-tutorial', 'syncTutorial')->name('plans.tree.sync.tutorial');
+        Route::post('course-management/plans/tree/get-tutorial', 'getTutorial')->name('plans.tree.get.tutorial');
+        Route::post('course-management/plans/tree/store-tutorial', 'storeTutorial')->name('plans.tree.store.tutorial');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
