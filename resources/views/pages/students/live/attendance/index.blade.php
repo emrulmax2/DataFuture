@@ -77,12 +77,17 @@
                                     <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                             </div>
                             @php
+                            if(isset($planDetails[$termId][$planId]->start_time) && isset($planDetails[$termId][$planId]->end_time)){
+
                                 $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
                                 $start_time = date('h:i A', strtotime($start_time));
                                 
                                 $end_time = date("Y-m-d ".$planDetails[$termId][$planId]->end_time);
                                 $end_time = date('h:i A', strtotime($end_time));  
-                                
+                            } else {
+                                $start_time = "N/A";
+                                $end_time = "N/A";
+                            }
                             @endphp
                             <div class="ml-4 mr-auto toggle-heading">
                                 <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span></a>

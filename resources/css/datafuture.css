@@ -2179,7 +2179,8 @@ input[type=number] {
     .modal#viewAssignedStudentModal .modal-dialog.modal-xl ,
     .modal#viewElearnincTrackingModal .modal-dialog.modal-xl,
     .modal#viewUnknownEntryModal .modal-dialog.modal-xl ,
-    .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl {
+    .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl ,
+    .modal#viewQtyModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }
