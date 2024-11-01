@@ -214,6 +214,8 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\LibraryLocationController;
+use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
+use App\Http\Controllers\LibraryManagement\LibraryBookController;
 use App\Http\Controllers\LibraryManagementController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
@@ -3015,31 +3017,49 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeEducationalQualificationController::class)->group(function() {
         Route::post('employee-educationa-qualification/store/','store')->name('employee.edu.qual.store');
     });
-    
-});
-Route::controller(LibraryManagementController::class)->group(function(){
-    Route::get('library/management', 'index')->name('library.management.index'); 
-    Route::get('library/settings', 'settings')->name('library.settings'); 
-    
+
+    Route::controller(LibraryManagementController::class)->group(function(){
+        Route::get('library/management', 'index')->name('library.management.index'); 
+        Route::get('library/settings', 'settings')->name('library.settings'); 
+
+        Route::get('library/management/books/list', 'list')->name('library.management.books.list'); 
+        Route::get('library/management/books/location-list', 'locationList')->name('library.management.books.location.list'); 
+    });
+
+    Route::resource('library-locations', LibraryLocationController::class,[
+        'except' => ['index','create','show']
+    ]);
+    Route::controller(LibraryLocationController::class)->group(function(){
+        Route::get('library-locations', 'index')->name('library-locations'); 
+        Route::get('library-locations-list', 'list')->name('library-locations.list'); 
+    });
+
+
+    Route::controller(LibraryBookController::class)->group(function(){
+        
+    });
+
+    Route::controller(AmazonBookInformationController::class)->group(function(){
+        Route::get('library/books', 'index')->name('library.books'); 
+        Route::get('library/books/list', 'list')->name('library.books.list'); 
+        Route::get('library/books/create', 'create')->name('library.books.create'); 
+        Route::post('library/books/store', 'store')->name('library.books.store'); 
+        Route::post('library/books/edit', 'edit')->name('library.books.edit'); 
+        Route::post('library/books/update', 'update')->name('library.books.update'); 
+        Route::delete('library/books/delete/{id}', 'destroy')->name('library.books.destory');
+        Route::post('library/books/restore/{id}', 'restore')->name('library.books.restore');
+
+        Route::get('library/books/location-list', 'locationList')->name('library.books.location.list'); 
+        Route::delete('library/books/location-delete/{id}', 'destroyLocation')->name('library.books.location.destory');
+
+        Route::post('library/books/validate-location', 'validateLocation')->name('library.books.validate.location'); 
+        Route::post('library/books/validate-isbn', 'validateIsbn')->name('library.books.validate.isbn'); 
+        Route::post('library/books/validate-barcode', 'validateBarcode')->name('library.books.validate.barcode'); 
+    });
     
 });
 
 Route::controller(EmployeeFormController::class)->group(function(){
     Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
     Route::post('forms/employee/store', 'store')->name('forms.employee.store'); 
-});
-
-// GET /library-locations -> index
-// GET /library-locations/create -> create
-// POST /library-locations -> store
-// GET /library-locations/{library_location} -> show
-// GET /library-locations/{library_location}/edit -> edit
-// PUT/PATCH /library-locations/{library_location} -> update
-// DELETE /library-locations/{library_location} -> destroy
-Route::resource('library-locations', LibraryLocationController::class,[
-    'except' => ['index','create','show']
-]);
-Route::controller(LibraryLocationController::class)->group(function(){
-    Route::get('library-locations', 'index')->name('library-locations'); 
-    Route::get('library-locations-list', 'list')->name('library-locations.list'); 
 });
