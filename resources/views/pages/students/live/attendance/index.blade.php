@@ -68,7 +68,8 @@
             </div>
             <div class="w-full py-3  {{ ($attendanceIndicator[$termId]===0 ? "border-red-600" : "border-teal-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
                 @foreach($dataStartPoint as $planId => $data)
-                
+                    @if(!isset($planDetails[$termId][$planId]))
+                        @continue
                     <div class="p-5 ">
 
                         <div class="relative flex items-center mb-5">
