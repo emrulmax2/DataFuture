@@ -72,6 +72,7 @@ class SlcRecordReportController extends Controller
                                 .table.slcRecordReportTable tr th, .table.slcRecordReportTable tr td{ text-align: left;}
                                 .table.slcRecordReportTable tr th a{ text-decoration: none; color: #1e293b; }
                                 .table.slcRecordReportTable tr a{ text-decoration: none; color: #1e293b; }
+                                .table.slcRecordReportTable tr svg{ display: none !important; }
                                 .table.slcRecordReportTable tr th.exportAction, .table.slcRecordReportTable tr td.exportAction{ display: none !important; }
                             </style>';
             $PDFHTML .= '</head>';
@@ -112,6 +113,7 @@ class SlcRecordReportController extends Controller
     public function getHtml($semester_ids){
         $res = $this->refineResult($semester_ids);
 
+        $theLoader = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(22,78,99)" class="w-3 h-3 ml-2 theLoader"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
         $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
         $html = '';
         $html .= '<table class="table table-bordered slcRecordReportTable  table-sm" id="slcRecordReportTable">';
@@ -140,12 +142,12 @@ class SlcRecordReportController extends Controller
                         $html .= '<tr>';
                             $html .= '<td class="w-1/6">'.$row['name'].'</td>';
                             $html .= '<td>'.$row['slc_sms_registered'].'</td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_awb_registered_std'].'">'.$row['slc_awb_registered'].'</a></td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['year_1_registered_std'].'">'.$row['year_1_registered'].'</a></td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['year_1_attendance_std'].'">'.$row['year_1_attendance'].'</a></td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_withdrawn_std'].'">'.$row['slc_withdrawn'].'</a></td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_interminate_std'].'">'.$row['slc_interminate'].'</a></td>';
-                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_self_funded_std'].'">'.$row['slc_self_funded'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_awb_registered_std'].'">'.$row['slc_awb_registered'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_registered_std'].'">'.$row['year_1_registered'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_attendance_std'].'">'.$row['year_1_attendance'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_withdrawn_std'].'">'.$row['slc_withdrawn'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_interminate_std'].'">'.$row['slc_interminate'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_self_funded_std'].'">'.$row['slc_self_funded'].$theLoader.'</a></td>';
                             $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', $semester_id).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
                         $html .= '</tr>';
                     endforeach;
@@ -449,52 +451,35 @@ class SlcRecordReportController extends Controller
         return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
 
-    public function getStudentList(Request $request){
+    public function exportStudentList(Request $request){
         $student_ids = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', $request->student_ids) : [0]);
+        $Query = Student::whereIn('id', $student_ids)->orderBy('id', 'DESC')->get();
 
-        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
-        $sorts = [];
-        foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
-        endforeach;
-        $Query = Student::whereIn('id', $student_ids)->orderByRaw(implode(',', $sorts));
+        $row = 1;
+        $theCollection[$row][] = "Reg. No";
+        $theCollection[$row][] = "First Name";
+        $theCollection[$row][] = "Last Name";
+        $theCollection[$row][] = "Semester";
+        $theCollection[$row][] = "Course";
+        $theCollection[$row][] = "Status";
+        $row += 1;
 
-        $total_rows = $Query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
-        
-        $Query = $Query->orderByRaw(implode(',', $sorts))->skip($offset)
-               ->take($limit)
-               ->get();
-
-        $data = array();
-
-        if(!empty($Query)):
-            $i = 1;
+        if($Query->count() > 0):
             foreach($Query as $list):
-                $data[] = [
-                    'id' => $list->id,
-                    'sl' => $i,
-                    'disability' =>  (isset($list->other->disability_status) && $list->other->disability_status > 0 ? $list->other->disability_status : 0),
-                    'full_time' => (isset($list->activeCR->propose->full_time) && $list->activeCR->propose->full_time > 0) ? $list->activeCR->propose->full_time : 0, 
-                    'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
-                    'first_name' => $list->first_name,
-                    'last_name' => $list->last_name,
-                    'course'=> (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : ''),
-                    'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
-                    'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
-                    'url' => route('student.show', $list->id),
-                    'photo_url' => $list->photo_url,
-                    'flag_html' => (isset($list->flag_html) && !empty($list->flag_html) ? $list->flag_html : ''),
-                    'due' => $list->due
-                ];
-                $i++;
+                $theCollection[$row][] = (!empty($list->registration_no) ? $list->registration_no : $list->application_no);
+                $theCollection[$row][] = $list->first_name;
+                $theCollection[$row][] = $list->last_name;
+                $theCollection[$row][] = (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : '');
+                
+                $row += 1;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
+
+        $fileName = 'Slc_record_student_lists.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
     }
+
+    
 }
