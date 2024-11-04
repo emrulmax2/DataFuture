@@ -2992,7 +2992,7 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/slc-report/export-slc-record/{semesters?}', 'exportReport')->name('reports.slc.record.export.report'); 
         Route::get('reports/slc-report/export-slc-record-details/{semester?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
 
-        Route::get('reports/slc-report/get-student-list', 'getStudentList')->name('reports.slc.record.student.list'); 
+        Route::post('reports/slc-report/export-student-list', 'exportStudentList')->name('reports.slc.record.export.student.list'); 
     });
 
     Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){

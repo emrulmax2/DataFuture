@@ -305,27 +305,6 @@
         </div>
     </div>
 
-    <div id="reportsSTDListModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Student List</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="reportssSTDListTable" class="table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
