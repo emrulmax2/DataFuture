@@ -2180,7 +2180,8 @@ input[type=number] {
     .modal#viewElearnincTrackingModal .modal-dialog.modal-xl,
     .modal#viewUnknownEntryModal .modal-dialog.modal-xl ,
     .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl ,
-    .modal#viewQtyModal .modal-dialog.modal-xl {
+    .modal#viewQtyModal .modal-dialog.modal-xl ,
+    .modal#reportsSTDListModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }
