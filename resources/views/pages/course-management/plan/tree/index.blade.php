@@ -118,6 +118,51 @@
     </div>
     <!-- END: Assign Manager Or Co-Ordinator Modal -->
 
+    <!-- BEGIN: Sync Tutorial Plan Modal -->
+    <div id="syncTutorialModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="syncTutorialForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Sync Tutorial with Theories</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="sync_plan_id" class="form-label">Parent Plan <span class="text-danger">*</span></label>
+                            <select id="sync_plan_id" name="sync_plan_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                            </select>
+                            <div class="acc__input-error error-sync_plan_id text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="syncPlanBtn" class="btn btn-primary w-auto">
+                            Syncronise
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Sync Tutorial Plan Modal -->
+
     <!-- BEGIN: Add Modal -->
     <div id="editPlanModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
@@ -294,6 +339,156 @@
         </div>
     </div>
     <!-- END: Add Modal -->
+
+    <!-- BEGIN: Tutorial Modal -->
+    <div id="tutorialDetailsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="tutorialDetailsForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto tutorial_modal_title">Plan Details</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Term</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold termName">Term Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Course</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold courseName">Course Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Module</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold moduleName">Module Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Group</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold groupName">Group Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <label class="col-span-4"><div class="text-left text-slate-500 font-medium">Venue</div></label>
+                                    <div class="col-span-8"><div class="text-left font-medium font-bold venueName">Group Name</div></div>
+                                </div>
+                            </div>
+                            <div class="col-span-6"></div>
+
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="tutorial_rooms_id" class="form-label">Room <span class="text-danger">*</span></label>
+                                <select id="tutorial_rooms_id" name="rooms_id" class="tom-selects w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($room))
+                                        @foreach($room as $rm)
+                                            <option value="{{ $rm->id }}">{{ $rm->name }} - {{ $rm->venue->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-rooms_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4 PersonalTutorWrap">
+                                <label for="tutorial_personal_tutor_id" class="form-label">Personal Tutor <span class="text-danger">*</span></label>
+                                <select id="tutorial_personal_tutor_id" name="personal_tutor_id" class="tom-selects w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($ptutor))
+                                        @foreach($ptutor as $ptr)
+                                            <option value="{{ $ptr->id }}">{{ $ptr->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-personal_tutor_id text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="tutorial_start_time" class="form-label">Start Time <span class="text-danger">*</span></label>
+                                <input id="tutorial_start_time" type="text" name="start_time" class="form-control w-full theTimeField" placeholder="00:00">
+                                <div class="acc__input-error error-start_time text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6 sm:col-span-4">
+                                <label for="tutorial_end_time" class="form-label">End Time <span class="text-danger">*</span></label>
+                                <input id="tutorial_end_time" type="text" name="end_time" class="form-control w-full theTimeField" placeholder="00:00">
+                                <div class="acc__input-error error-end_time text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-8">
+                                <label class="form-label">Class Day <span class="text-danger">*</span></label>
+                                <div class="flex flex-col sm:flex-row mt-2">
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_mon" class="form-check-input" type="radio" name="class_day" value="mon">
+                                        <label class="form-check-label" for="tutorial_day_mon">Mon</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_tue" class="form-check-input" type="radio" name="class_day" value="tue">
+                                        <label class="form-check-label" for="tutorial_day_tue">Tue</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_wed" class="form-check-input" type="radio" name="class_day" value="wed">
+                                        <label class="form-check-label" for="tutorial_day_wed">Wed</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_thu" class="form-check-input" type="radio" name="class_day" value="thu">
+                                        <label class="form-check-label" for="tutorial_day_thu">Thu</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_fri" class="form-check-input" type="radio" name="class_day" value="fri">
+                                        <label class="form-check-label" for="tutorial_day_fri">Fri</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_sat" class="form-check-input" type="radio" name="class_day" value="sat">
+                                        <label class="form-check-label" for="tutorial_day_sat">Sat</label>
+                                    </div>
+                                    <div class="form-check mr-3">
+                                        <input id="tutorial_day_sun" class="form-check-input" type="radio" name="class_day" value="sun">
+                                        <label class="form-check-label" for="tutorial_day_sun">Sun</label>
+                                    </div>
+                                </div>
+                                <div class="acc__input-error error-class_day text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="tutorial_virtual_room" class="form-label">Virtual Room</label>
+                                <textarea id="tutorial_virtual_room" name="virtual_room" class="form-control w-full"></textarea>
+                                <div class="acc__input-error error-virtual_room text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="tutorial_note" class="form-label">Note</label>
+                                <textarea id="tutorial_note" name="note" class="form-control w-full"></textarea>
+                                <div class="acc__input-error error-note text-danger mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="tutorialPlanSVBtn" class="btn btn-primary w-auto">
+                            Save
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="theory_id" value="0"/>
+                        <input type="hidden" name="tutorial_id" value="0"/>
+                        <input type="hidden" name="class_type" value="Tutorial"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Tutorial Modal -->
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModalCP" class="modal" tabindex="-1" aria-hidden="true">

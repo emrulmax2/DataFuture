@@ -5,8 +5,11 @@ namespace App\Http\Controllers\CourseManagement;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PlanAssignParticipantRequest;
 use App\Http\Requests\PlansUpdateRequest;
+use App\Http\Requests\StoreTutorialPlanRequest;
+use App\Http\Requests\SyncTutorialRequest;
 use App\Models\AcademicYear;
 use App\Models\Assign;
+use App\Models\BankHoliday;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
@@ -15,6 +18,7 @@ use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanParticipant;
+use App\Models\PlansDateList;
 use App\Models\Room;
 use App\Models\Student;
 use App\Models\TermDeclaration;
@@ -284,7 +288,7 @@ class PlanTreeController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Plan::orderByRaw(implode(',', $sorts))->where('course_id', $courses)
+        $query = Plan::orderByRaw(implode(',', $sorts))->where('parent_id', 0)->where('course_id', $courses)
                 ->where('academic_year_id', $year)->where('term_declaration_id', $termDeclarion)
                 ->whereIn('group_id', $group);
 
@@ -328,9 +332,19 @@ class PlanTreeController extends Controller
                             $iActiveStudentCount++;
                 endforeach;
 
+                $tutorialSet = [];
+                if(isset($list->tutorial) && $list->tutorial->id > 0):
+                    $tutorialSet['id'] = $list->tutorial->id;
+                    $tutorialSet['parent_id'] = $list->tutorial->parent_id;
+                    $tutorialSet['day'] = $list->tutorial->plan_day;
+                    $tutorialSet['dates'] = (isset($list->tutorial->dates) && $list->tutorial->dates->count() > 0 ? $list->tutorial->dates->count() : 0);
+                    $tutorialSet['time'] = (!empty($list->tutorial->start_time) ? date('H:i', strtotime($list->tutorial->start_time)) : '').' - '.(!empty($list->tutorial->end_time) ? date('H:i', strtotime($list->tutorial->end_time)) : '');
+                endif;
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'parent_id' => $list->parent_id,
                     'course_id' => $list->course_id ,
                     'module_creation_id'=> $list->module_creation_id,
                     'module'=> isset($list->creations->module_name) ? $list->creations->module_name : '',
@@ -348,6 +362,8 @@ class PlanTreeController extends Controller
                     'assigned_count' => $assignStudentListForPlans->count(),
                     'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count(),
                     'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
+                    'tutorial' => (!empty($tutorialSet) ? $tutorialSet : 0),
+                    'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0)
                 ];
                 $i++;
             endforeach;
@@ -658,5 +674,174 @@ class PlanTreeController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function getTheories(Request $request){
+        $plan_id = $request->plan_id;
+        $plan = Plan::find($plan_id);
+        $theGroup = Group::find($plan->group_id);
+        $sameNameGroupIds = Group::where('term_declaration_id', $plan->term_declaration_id)->where('course_id', $plan->course_id)
+                            ->where('name', $theGroup->name)->pluck('id')->unique()->toArray();
+        $modules = Plan::where('course_id', $plan->course_id)->where('term_declaration_id', $plan->term_declaration_id)->where('academic_year_id', $plan->academic_year_id)
+                   ->whereIn('group_id', $sameNameGroupIds)->where('class_type', 'Theory')->get();
+
+        $html = '<option value="">Please Select</option>';
+        if($modules->count()):
+            foreach($modules as $mod):
+                $html .= '<option '.($plan->module_creation_id == $mod->module_creation_id ? 'Selected' : '').' value="'.$mod->id.'">'.$mod->id.' - '.$mod->creations->module_name.'</option>';
+            endforeach;
+        endif;
+
+        return response()->json(['htm' => $html], 200);
+    }
+
+    public function syncTutorial(SyncTutorialRequest $request){
+        $tutorial_id = $request->id;
+        $theory_id = $request->sync_plan_id;
+
+        Plan::where('id', $tutorial_id)->update(['parent_id' => $theory_id]);
+        return response()->json(['msg' => 'Successfully synced'], 200);
+    }
+
+    public function getTutorial(Request $request){
+        $theory_id = $request->theory_id;
+        $tutorial_id = (isset($request->tutorial_id) && $request->tutorial_id > 0 ? $request->tutorial_id : 0);
+
+        $theory = Plan::find($theory_id);
+        $tutorial = Plan::find($tutorial_id);
+        $start_time = (isset($tutorial->start_time) && !empty($tutorial->start_time) ? substr($tutorial->start_time, 0, 5) : '');
+        $end_time = (isset($tutorial->end_time) && !empty($tutorial->end_time) ? substr($tutorial->end_time, 0, 5) : '');
+
+        $data = [];
+        $data['term'] = (isset($theory->attenTerm->name) && !empty($theory->attenTerm->name) ? $theory->attenTerm->name : '---');
+        $data['course'] = (isset($theory->course->name) ? $theory->course->name : '---');
+        $data['group'] = (isset($theory->group->name) ? $theory->group->name : '---');
+        $data['module'] = (isset($theory->creations->module_name) && !empty($theory->creations->module_name) ? $theory->creations->module_name : '');
+        $data['venue'] = (isset($theory->venu->name) && !empty($theory->venu->name) ? $theory->venu->name : '---');
+        $data['group_id'] = $theory->group_id;
+        $data['venue_id'] = $theory->venue_id;
+        $data['pt_id'] = $theory->personal_tutor_id;
+
+        $data['rooms_id'] = (isset($tutorial->rooms_id) && $tutorial->rooms_id > 0 ? $tutorial->rooms_id : '');
+        $data['start_time'] = $start_time;
+        $data['end_time'] = $end_time;
+        $data['personal_tutor_id'] = (isset($tutorial->personal_tutor_id) && $tutorial->personal_tutor_id > 0 ? $tutorial->personal_tutor_id : '');
+        $data['virtual_room'] = (isset($tutorial->virtual_room) && !empty($tutorial->virtual_room) ? $tutorial->virtual_room : '');
+        $data['note'] = (isset($tutorial->note) && !empty($tutorial->note) ? $tutorial->note : '');
+        $data['sat'] = (isset($tutorial->sat) && $tutorial->sat > 0 ? $tutorial->sat : 0);
+        $data['sun'] = (isset($tutorial->sun) && $tutorial->sun > 0 ? $tutorial->sun : 0);
+        $data['mon'] = (isset($tutorial->mon) && $tutorial->mon > 0 ? $tutorial->mon : 0);
+        $data['tue'] = (isset($tutorial->tue) && $tutorial->tue > 0 ? $tutorial->tue : 0);
+        $data['wed'] = (isset($tutorial->wed) && $tutorial->wed > 0 ? $tutorial->wed : 0);
+        $data['thu'] = (isset($tutorial->thu) && $tutorial->thu > 0 ? $tutorial->thu : 0);
+        $data['fri'] = (isset($tutorial->fri) && $tutorial->fri > 0 ? $tutorial->fri : 0);
+
+        return response()->json(['plan' => $data], 200);
+    }
+
+    public function storeTutorial(StoreTutorialPlanRequest $request){
+        $theory_id = $request->theory_id;
+        $tutorial_id = (isset($request->tutorial_id) && $request->tutorial_id > 0 ? $request->tutorial_id : 0);
+        $theory = Plan::find($theory_id);
+
+        $classDay = $request->class_day;
+        $start_time = !empty($request->start_time) ? $request->start_time.':00' : '';
+        $end_time = !empty($request->end_time) ? $request->end_time.':00' : '';
+        $room = ($request->rooms_id > 0 ? Room::find($request->rooms_id) : []);
+        $day = [ 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+        $data = [];
+        $data['parent_id'] = $theory_id;
+        $data['venue_id'] = (isset($room->venue->id) ? $room->venue->id : null);
+        $data['rooms_id'] = (isset($room->id) ? $room->id : null);
+        $data['start_time'] = $start_time;
+        $data['end_time'] = $end_time;
+        foreach($day as $d):
+            $data[$d] = ($d == $classDay ? 1 : 0);
+        endforeach;
+        $data['personal_tutor_id'] = (isset($request->personal_tutor_id) ? $request->personal_tutor_id : null);
+        $data['virtual_room'] = (isset($request->virtual_room) ? $request->virtual_room : null);
+        $data['note'] = (isset($request->note) ? $request->note : null);
+        $data['class_type'] = (isset($request->class_type) ? $request->class_type : 'Tutorial');
+
+        if($tutorial_id > 0):
+            $data['updated_by'] = auth()->user()->id;
+            Plan::where('id', $tutorial_id)->update($data);
+        else:
+            $data['term_declaration_id'] = $theory->term_declaration_id;
+            $data['academic_year_id'] = $theory->academic_year_id;
+            $data['course_creation_id'] = $theory->course_creation_id;
+            $data['instance_term_id'] = $theory->instance_term_id;
+            $data['course_id'] = $theory->course_id;
+            $data['module_creation_id'] = $theory->module_creation_id;
+            $data['group_id'] = $theory->group_id;
+            $data['created_by'] = auth()->user()->id;
+
+            $tutorialPlan = Plan::create($data);
+            if($tutorialPlan->id):
+                $thePlan = Plan::find($tutorialPlan->id);
+
+                /* Generate Days */
+                $term = $thePlan->creations->term;
+                $courseCreationInstance = CourseCreationInstance::find($term->course_creation_instance_id);
+                $academic_year_id = $courseCreationInstance->academic_year_id;
+                $bankHolidays = BankHoliday::where('academic_year_id', $academic_year_id)->get();
+
+                $submission_date = (isset($thePlan->submission_date) ? $thePlan->submission_date : '');
+                $teaching_start_date = $start = (isset($term->teaching_start_date) && !empty($term->teaching_start_date) ? date('Y-m-d', strtotime($term->teaching_start_date)) : '');
+                $teaching_end_date = $end = (isset($term->teaching_end_date) && !empty($term->teaching_end_date) ? date('Y-m-d', strtotime($term->teaching_end_date)) : '');
+                $revision_start_date = (isset($term->revision_start_date) && !empty($term->revision_start_date) ? date('Y-m-d', strtotime($term->revision_start_date)) : '');
+                $revision_end_date = (isset($term->revision_end_date) && !empty($term->revision_end_date) ? date('Y-m-d', strtotime($term->revision_end_date)) : '');
+
+                $term_start_date = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : $teaching_start_date);
+                $term_end_date = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : $teaching_end_date);
+                
+                if($term_start_date != '' && $term_end_date != ''):
+                    $start = $term_start_date;
+                    $end = $term_end_date;
+
+                    while(strtotime($start) <= strtotime($end)):
+                        $dayName = strtolower(date('D', strtotime($start)));
+                        $bankHolidays = BankHoliday::where('academic_year_id', $academic_year_id)->where('start_date', '>=', $start)->where('end_date', '<=', $start)->get();
+                        if(isset($thePlan->$dayName) && $thePlan->$dayName == 1 && $bankHolidays->count() == 0):
+                            $name = '';
+                            if($start == $submission_date):
+                                $name = 'Submission';
+                            elseif($start >= $revision_start_date && $start <= $revision_end_date):
+                                $name = 'Revision';
+                            else:
+                                $name = 'Teaching';
+                            endif;
+                            $data = [];
+                            $data['plan_id'] = $thePlan->id;
+                            $data['name'] = $name;
+                            $data['date'] = $start;
+                            $data['status'] = 'Scheduled';
+                            $data['created_by'] = auth()->user()->id;
+
+                            $plandateList = PlansDateList::create($data);
+                        endif;
+                        $start = date("Y-m-d", strtotime("+1 day", strtotime($start)));
+                    endwhile;
+                endif;
+                /* Generate Days */
+
+                /* Copy Assigns */
+                $theoryAssigns = Assign::where('plan_id', $theory_id)->orderBy('id', 'ASC')->get();
+                if($theoryAssigns->count() > 0):
+                    foreach($theoryAssigns as $ta):
+                        $data = [];
+                        $data['plan_id'] = $thePlan->id;
+                        $data['student_id'] = $ta->student_id;
+                        $data['attendance'] = $ta->attendance;
+                        $data['created_by'] = auth()->user()->id;
+
+                        Assign::create($data);
+                    endforeach;
+                endif;
+                /* Copy Assigns */
+            endif;
+        endif;
+        return response()->json(['msg' => 'Successfully updated!'], 200);
     }
 }

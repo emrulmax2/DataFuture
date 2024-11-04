@@ -35,7 +35,7 @@ var classPlanTreeListTable = (function () {
                     titleFormatter: "rowSelection", 
                     hozAlign: "left", 
                     headerHozAlign: "left",
-                    width: "60",
+                    width: "50",
                     headerSort: false, 
                     download: false,
                     cellClick:function(e, cell){
@@ -45,8 +45,15 @@ var classPlanTreeListTable = (function () {
                 {
                     title: "ID",
                     field: "id",
-                    width: 110,
+                    width: 120,
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<div>';
+                                html += cell.getData().id;
+                                html += (cell.getData().child_id > 0 ? ' - '+cell.getData().child_id : '');
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Module",
@@ -85,26 +92,61 @@ var classPlanTreeListTable = (function () {
                     }
                 },
                 {
-                    title: "Class Days",
-                    field: "dates",
+                    title: "Theory Days",
+                    field: "id",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) {  
-                        if(cell.getData().dates > 0){
-                            return '<a target="_blank" href="'+route('plan.dates', cell.getData().id)+'" class="text-primary font-medium"><u>'+cell.getData().dates+'</u></a>';
-                        }else{
-                            return '<span>0</span>';
-                        }
-                    }
-                },
-                {
-                    title: "Day - Time",
-                    field: "day",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        var html = '<div>';
+                        var html = '';
+                        if(cell.getData().class_type != 'Tutorial' && cell.getData().parent_id == 0){
+                            if(cell.getData().dates > 0){
+                                html += '<a target="_blank" href="'+route('plan.dates', cell.getData().id)+'" class="text-primary font-medium"><u>'+cell.getData().dates+'</u></a>';
+                            }else{
+                                html += '<span>0</span>';
+                            }
+                            html += '<div>';
                                 html += '<span>'+cell.getData().day+'</span><br/>';
                                 html += '<span>'+cell.getData().time+'</span>';
                             html += '</div>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
+                    title: "Tutorial Days",
+                    field: "id",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        var html = '';
+                        var tutorials = (cell.getData().tutorial ? cell.getData().tutorial : false);
+                        if(cell.getData().class_type == 'Tutorial' && cell.getData().parent_id == 0){
+                            if(cell.getData().dates > 0){
+                                html += '<a target="_blank" href="'+route('plan.dates', cell.getData().id)+'" class="text-primary font-medium"><u>'+cell.getData().dates+'</u></a>';
+                            }else{
+                                html += '<span>0</span>';
+                            }
+                            html += '<div>';
+                                html += '<span>'+cell.getData().day+'</span><br/>';
+                                html += '<span>'+cell.getData().time+'</span>';
+                            html += '</div>';
+
+                            if(cell.getData().parent_id == 0){
+                                html += '<button  data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#syncTutorialModal" type="button" class="syncBtn btn btn-twitter rounded-full w-6 h-6 inline-flex justify-center items-center p-0"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>'
+                            }
+                        }else if(tutorials){
+                            if(tutorials.dates > 0){
+                                html += '<a target="_blank" href="'+route('plan.dates', tutorials.id)+'" class="text-primary font-medium"><u>'+tutorials.dates+'</u></a>';
+                            }else{
+                                html += '<span>0</span>';
+                            }
+                            html += '<div>';
+                                html += '<span>'+tutorials.day+'</span><br/>';
+                                html += '<span>'+tutorials.time+'</span>';
+                            html += '</div>';
+                            html += '<input type="hidden" class="classPlanId" name="classPlanIds[]" value="'+tutorials.id+'"/>';
+                        }else if(cell.getData().class_type == 'Theory' && cell.getData().parent_id == 0 && !tutorials){
+                            html += '<button data-theory="'+cell.getData().id +'" data-tutorial="0" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-success text-xs text-white px-2 py-1"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add Tutorial</a>';
+                        }
 
                         return html;
                     }
@@ -116,10 +158,14 @@ var classPlanTreeListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "left",
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {  
+                        var tutorials = (cell.getData().tutorial ? cell.getData().tutorial : false);                      
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 ml-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</a>';
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</a>';
+                            if(tutorials){
+                                btns += '<button data-theory="'+cell.getData().id +'" data-tutorial="'+tutorials.id+'" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</a>';
+                            }
                             //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
                         }  else if (cell.getData().deleted_at != null) {
                             //btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -342,10 +388,37 @@ var assignedStudentModalListTable = (function () {
         },
     };
 
+    $('.theTimeField').each(function(){
+        var timeMaskModal = IMask(this, {
+                overwrite: true,
+                autofix: true,
+                mask: 'HH:MM',
+                blocks: {
+                    HH: {
+                        mask: IMask.MaskedRange,
+                        placeholderChar: 'HH',
+                        from: 0,
+                        to: 23,
+                        maxLength: 2
+                    },
+                    MM: {
+                        mask: IMask.MaskedRange,
+                        placeholderChar: 'MM',
+                        from: 0,
+                        to: 59,
+                        maxLength: 2
+                    }
+                }
+        });
+    });
+
     let tomOptionMult;
     let assigned_user_ids = new TomSelect(document.getElementById('assigned_user_ids'), tomOptions);
     let tutorId = new TomSelect(document.getElementById('tutor_id'), tomOptionsSingle);
     let personalTutorId = new TomSelect(document.getElementById('personal_tutor_id'), tomOptionsSingle);
+
+    let tutorial_rooms_id = new TomSelect('#tutorial_rooms_id', tomOptionsSingle);
+    let tutorial_personal_tutor_id = new TomSelect('#tutorial_personal_tutor_id', tomOptionsSingle);
 
     const warningModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModalCP"));
     const successModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalCP"));
@@ -353,6 +426,8 @@ var assignedStudentModalListTable = (function () {
     const confirmModalCP = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModalCP"));
     const assignManagerOrCoOrdinatorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#assignManagerOrCoOrdinatorModal"));
     const viewAssignedStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAssignedStudentModal"));
+    const syncTutorialModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#syncTutorialModal"));
+    const tutorialDetailsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#tutorialDetailsModal"));
 
     const assignManagerOrCoOrdinatorModalEl = document.getElementById('assignManagerOrCoOrdinatorModal')
     assignManagerOrCoOrdinatorModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -375,9 +450,29 @@ var assignedStudentModalListTable = (function () {
         personalTutorId.clear(true);
     });
 
+    const tutorialDetailsModalEl = document.getElementById('tutorialDetailsModal')
+    tutorialDetailsModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#tutorialDetailsModal .tutorial_modal_title').html('Plan Details');
+        $('#tutorialDetailsModal .acc__input-error').html('');
+        $('#tutorialDetailsModal .modal-body select').val('');
+        $('#tutorialDetailsModal .modal-body textarea').val('');
+        $('#tutorialDetailsModal .modal-body input:not([type="radio"])').val('');
+        $('#tutorialDetailsModal input[type="radio"]').prop('checked', false);
+        $('#tutorialDetailsModal input[name="theory_id"]').val('0');
+        $('#tutorialDetailsModal input[name="tutorial_id"]').val('0');
+        tutorial_rooms_id.clear(true);
+        tutorial_personal_tutor_id.clear(true);
+    });
+
     const viewAssignedStudentModalEl = document.getElementById('viewAssignedStudentModal')
     viewAssignedStudentModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#assignedStudentModalListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+    });
+
+    const syncTutorialModalEl = document.getElementById('syncTutorialModal')
+    syncTutorialModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#syncTutorialModal #sync_plan_id').html('<option value="">Please Select</option>');
+        $('#syncTutorialModal [name="id"]').val('0');
     });
 
 
@@ -850,7 +945,10 @@ var assignedStudentModalListTable = (function () {
         
         $('#classPlanTreeListTable').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
-            ids.push($row.find('.classPlanId').val());
+            $row.find('.classPlanId').each(function(){
+                ids.push($(this).val());
+            })
+            //ids.push($row.find('.classPlanId').val());
         });
 
         if(ids.length > 0){
@@ -1126,7 +1224,9 @@ var assignedStudentModalListTable = (function () {
         
         $('#classPlanTreeListTable').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
-            ids.push($row.find('.classPlanId').val());
+            $row.find('.classPlanId').each(function(){
+                ids.push($(this).val());
+            })
         });
 
         if(ids.length > 0){
@@ -1141,5 +1241,195 @@ var assignedStudentModalListTable = (function () {
         }
     });
     /* Bulk Communication End */
+
+    /* Sync Plan */
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .syncBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var plan_id = $theBtn.attr('data-id');
+
+        axios({
+            method: "post",
+            url: route("plans.tree.get.theories"),
+            data: {plan_id : plan_id},
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                $('#syncTutorialModal #sync_plan_id').html(response.data.htm);
+                $('#syncTutorialModal [name="id"]').val(plan_id);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    })
+
+    $('#syncTutorialForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('syncTutorialForm');
+    
+        document.querySelector('#syncPlanBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#syncPlanBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('plans.tree.sync.tutorial'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                document.querySelector('#syncPlanBtn').removeAttribute('disabled');
+                document.querySelector("#syncPlanBtn svg").style.cssText = "display: none;";
+
+                syncTutorialModal.hide();
+
+                successModalCP.show();
+                document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                    $("#successModalCP .successModalDescCP").html('Tutorial successfully sync with selected theories.');
+                });                
+                
+                setTimeout(function(){
+                    successModalCP.hide();
+                }, 2000);
+            }
+            classPlanTreeListTable.init();
+        }).catch(error => {
+            document.querySelector('#syncPlanBtn').removeAttribute('disabled');
+            document.querySelector("#syncPlanBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#syncTutorialForm .${key}`).addClass('border-danger');
+                        $(`#syncTutorialForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+    /* Sync Plan */
+
+
+    /* Add or Edit Tutorial Plan */
+    $('.classPlanTreeResultWrap').on('click', '#classPlanTreeListTable .tutorial_btn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var theory_id = $theBtn.attr('data-theory');
+        var tutorial_id = $theBtn.attr('data-tutorial');
+
+        $('#tutorialDetailsModal .tutorial_modal_title').text(tutorial_id > 0 ? 'Edit Tutorial' : 'Add Tutorial');
+
+        axios({
+            method: "post",
+            url: route("plans.tree.get.tutorial"),
+            data: {theory_id : theory_id, tutorial_id : tutorial_id},
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                let dataset = response.data;
+
+                $('#tutorialDetailsModal .termName').html(dataset.plan.term ? dataset.plan.term : '');
+                $('#tutorialDetailsModal .courseName').html(dataset.plan.course ? dataset.plan.course : '');
+                $('#tutorialDetailsModal .moduleName').html(dataset.plan.module ? dataset.plan.module : '');
+                $('#tutorialDetailsModal .groupName').html(dataset.plan.group ? dataset.plan.group : '');
+                $('#tutorialDetailsModal .venueName').html(dataset.plan.venue ? dataset.plan.venue : '');
+
+                if(dataset.plan.rooms_id > 0){
+                    tutorial_rooms_id.addItem(dataset.plan.rooms_id)
+                }else{
+                    tutorial_rooms_id.clear(true);
+                }
+                if(dataset.plan.pt_id > 0){
+                    tutorial_personal_tutor_id.addItem(dataset.plan.pt_id);
+                }else if(dataset.plan.personal_tutor_id > 0){
+                    tutorial_personal_tutor_id.addItem(dataset.plan.personal_tutor_id);
+                }else{
+                    tutorial_personal_tutor_id.clear(true);
+                }
+                $('#tutorialDetailsModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
+                $('#tutorialDetailsModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');
+                $('#tutorialDetailsModal textarea[name="virtual_room"]').val(dataset.plan.virtual_room ? dataset.plan.virtual_room : '');
+                $('#tutorialDetailsModal textarea[name="note"]').val(dataset.plan.note ? dataset.plan.note : '');
+
+                if(dataset.plan.sat == 1){
+                    $('#tutorialDetailsModal #tutorial_day_sat').prop('checked', true);
+                }else if(dataset.plan.sun == 1){
+                    $('#tutorialDetailsModal #tutorial_day_sun').prop('checked', true);
+                }else if(dataset.plan.mon == 1){
+                    $('#tutorialDetailsModal #tutorial_day_mon').prop('checked', true);
+                }else if(dataset.plan.tue == 1){
+                    $('#tutorialDetailsModal #tutorial_day_tue').prop('checked', true);
+                }else if(dataset.plan.wed == 1){
+                    $('#tutorialDetailsModal #tutorial_day_wed').prop('checked', true);
+                }else if(dataset.plan.thu == 1){
+                    $('#tutorialDetailsModal #tutorial_day_thu').prop('checked', true);
+                }else if(dataset.plan.fri == 1){
+                    $('#tutorialDetailsModal #tutorial_day_fri').prop('checked', true);
+                }
+
+                $('#tutorialDetailsModal input[name="theory_id"]').val(theory_id);
+                $('#tutorialDetailsModal input[name="tutorial_id"]').val(tutorial_id);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    })
+
+    
+    $('#tutorialDetailsForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('tutorialDetailsForm');
+    
+        document.querySelector('#tutorialPlanSVBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#tutorialPlanSVBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('plans.tree.store.tutorial'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                document.querySelector('#tutorialPlanSVBtn').removeAttribute('disabled');
+                document.querySelector("#tutorialPlanSVBtn svg").style.cssText = "display: none;";
+
+                tutorialDetailsModal.hide();
+
+                successModalCP.show();
+                document.getElementById("successModalCP").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModalCP .successModalTitleCP").html("Congratulation!" );
+                    $("#successModalCP .successModalDescCP").html('Tutorial plan data successfully saved.');
+                });                
+                
+                setTimeout(function(){
+                    successModalCP.hide();
+                }, 2000);
+            }
+            classPlanTreeListTable.init();
+        }).catch(error => {
+            document.querySelector('#tutorialPlanSVBtn').removeAttribute('disabled');
+            document.querySelector("#tutorialPlanSVBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#tutorialDetailsForm .${key}`).addClass('border-danger');
+                        $(`#tutorialDetailsForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+    /* Add or Edit Tutorial Plan */
 
 })();

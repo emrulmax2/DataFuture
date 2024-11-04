@@ -11,6 +11,7 @@ class Plan extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'parent_id',
         'course_id',
         'module_creation_id',
         'instance_term_id',
@@ -83,6 +84,26 @@ class Plan extends Model
     public function dates(){
         return $this->hasMany(PlansDateList::class, 'plan_id', 'id');
     }
+    public function getPlanDayAttribute($value) {
+        $day = '';
+        if($this->sat == 1){
+            $day = 'Sat';
+        }elseif($this->sun == 1){
+            $day = 'Sun';
+        }elseif($this->mon == 1){
+            $day = 'Mon';
+        }elseif($this->tue == 1){
+            $day = 'Tue';
+        }elseif($this->wed == 1){
+            $day = 'Wed';
+        }elseif($this->thu == 1){
+            $day = 'Thu';
+        }elseif($this->fri == 1){
+            $day = 'Fri';
+        }
+
+        return $day;
+    }
 
     public function setSubmissionDateAttribute($value) {  
         $this->attributes['submission_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
@@ -111,6 +132,10 @@ class Plan extends Model
 
     public function attendance(){
         return $this->hasMany(Attendance::class, 'plan_id', 'id');
+    }
+
+    public function tutorial(){
+        return $this->hasOne(Plan::class, 'parent_id', 'id')->where('class_type', 'Tutorial')->latestOfMany();
     }
     
 }

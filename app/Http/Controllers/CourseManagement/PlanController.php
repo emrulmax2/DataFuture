@@ -505,6 +505,7 @@ class PlanController extends Controller
                            ->where('course_id', $courseCreation->course_id)
                            ->whereIn('group_id', $sameNameGroupIds)
                            ->where($day, 1)->where('rooms_id', $rms->id)
+                           ->whereNot('class_type', 'Tutorial')
                            ->get();
                     if(!empty($cps)):
                         $r = 1;
@@ -591,7 +592,7 @@ class PlanController extends Controller
                                         $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
                                             $html .= '<li data-value="Theory">Theory</li>';
                                             $html .= '<li data-value="Practical">Practical</li>';
-                                            $html .= '<li data-value="Tutorial">Tutorial</li>';
+                                            //$html .= '<li data-value="Tutorial">Tutorial</li>';
                                             $html .= '<li data-value="Seminar">Seminar</li>';
                                         $html .= '</ul>';
                                     $html .= '</div>';
@@ -753,7 +754,7 @@ class PlanController extends Controller
                     $html .= '<ul class="dropdownMenus overflow-y-auto mh-32">';
                         $html .= '<li data-value="Theory">Theory</li>';
                         $html .= '<li data-value="Practical">Practical</li>';
-                        $html .= '<li data-value="Tutorial">Tutorial</li>';
+                        //$html .= '<li data-value="Tutorial">Tutorial</li>';
                         $html .= '<li data-value="Seminar">Seminar</li>';
                     $html .= '</ul>';
                 $html .= '</div>';

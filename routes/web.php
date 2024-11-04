@@ -777,6 +777,11 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/tree/update-visibility', 'updateVisibility')->name('plans.update.visibility');
 
         Route::get('course-management/plans/tree/assigned-list', 'assignedList')->name('plans.tree.assigned.list');
+
+        Route::post('course-management/plans/tree/get-theories', 'getTheories')->name('plans.tree.get.theories');
+        Route::post('course-management/plans/tree/sync-tutorial', 'syncTutorial')->name('plans.tree.sync.tutorial');
+        Route::post('course-management/plans/tree/get-tutorial', 'getTutorial')->name('plans.tree.get.tutorial');
+        Route::post('course-management/plans/tree/store-tutorial', 'storeTutorial')->name('plans.tree.store.tutorial');
     });
 
     Route::controller(PlansDateListController::class)->group(function() {
@@ -2986,6 +2991,8 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/slc-report/print-slc-record/{semesters?}', 'printReport')->name('reports.slc.record.print.report'); 
         Route::get('reports/slc-report/export-slc-record/{semesters?}', 'exportReport')->name('reports.slc.record.export.report'); 
         Route::get('reports/slc-report/export-slc-record-details/{semester?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
+
+        Route::get('reports/slc-report/get-student-list', 'getStudentList')->name('reports.slc.record.student.list'); 
     });
 
     Route::controller(TermSubmissionPerformanceReportController::class)->group(function(){

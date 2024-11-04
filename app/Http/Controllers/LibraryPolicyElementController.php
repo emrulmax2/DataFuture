@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\LibraryPolicyElement;
 use App\Http\Requests\StoreLibraryPolicyElementRequest;
 use App\Http\Requests\UpdateLibraryPolicyElementRequest;
+use AWS\CRT\HTTP\Request;
 
 class LibraryPolicyElementController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function list()
+    public function list(Request $request)
     {
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);

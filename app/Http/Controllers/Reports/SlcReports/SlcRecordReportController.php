@@ -71,6 +71,7 @@ class SlcRecordReportController extends Controller
                                 .w-2/6{width: 33.333333%;}
                                 .table.slcRecordReportTable tr th, .table.slcRecordReportTable tr td{ text-align: left;}
                                 .table.slcRecordReportTable tr th a{ text-decoration: none; color: #1e293b; }
+                                .table.slcRecordReportTable tr a{ text-decoration: none; color: #1e293b; }
                                 .table.slcRecordReportTable tr th.exportAction, .table.slcRecordReportTable tr td.exportAction{ display: none !important; }
                             </style>';
             $PDFHTML .= '</head>';
@@ -111,6 +112,7 @@ class SlcRecordReportController extends Controller
     public function getHtml($semester_ids){
         $res = $this->refineResult($semester_ids);
 
+        $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
         $html = '';
         $html .= '<table class="table table-bordered slcRecordReportTable  table-sm" id="slcRecordReportTable">';
             $html .= '<thead>';
@@ -129,15 +131,21 @@ class SlcRecordReportController extends Controller
             $html .= '<tbody>';
                 if(!empty($res)):
                     foreach($res as $semester_id => $row):
+                        $awbTotal += $row['slc_awb_registered'];
+                        $year1Total += $row['year_1_registered'];
+                        $year2Total += $row['year_1_attendance'];
+                        $withdrawnTotal += $row['slc_withdrawn'];
+                        $interminateTotal += $row['slc_interminate'];
+                        $selfFunedTotal += $row['slc_self_funded'];
                         $html .= '<tr>';
                             $html .= '<td class="w-1/6">'.$row['name'].'</td>';
                             $html .= '<td>'.$row['slc_sms_registered'].'</td>';
-                            $html .= '<td>'.$row['slc_awb_registered'].'</td>';
-                            $html .= '<td>'.$row['year_1_registered'].'</td>';
-                            $html .= '<td>'.$row['year_1_attendance'].'</td>';
-                            $html .= '<td>'.$row['slc_withdrawn'].'</td>';
-                            $html .= '<td>'.$row['slc_interminate'].'</td>';
-                            $html .= '<td>'.$row['slc_self_funded'].'</td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_awb_registered_std'].'">'.$row['slc_awb_registered'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['year_1_registered_std'].'">'.$row['year_1_registered'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['year_1_attendance_std'].'">'.$row['year_1_attendance'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_withdrawn_std'].'">'.$row['slc_withdrawn'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_interminate_std'].'">'.$row['slc_interminate'].'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="subPerfmStdBtn text-primary font-medium underline" data-ids="'.$row['slc_self_funded_std'].'">'.$row['slc_self_funded'].'</a></td>';
                             $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', $semester_id).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
                         $html .= '</tr>';
                     endforeach;
@@ -145,6 +153,21 @@ class SlcRecordReportController extends Controller
                     $html .= '<tr><td colspan="8" class="text-center font-medium">Data not available</td></tr>';
                 endif;
             $html .= '</tbody>';
+            if(!empty($res)):
+                $html .= '<tfoot>';
+                    $html .= '<tr>';
+                        $html .= '<th>Overall</th>';
+                        $html .= '<th></th>';
+                        $html .= '<th>'.$awbTotal.'</th>';
+                        $html .= '<th>'.$year1Total.'</th>';
+                        $html .= '<th>'.$year2Total.'</th>';
+                        $html .= '<th>'.$withdrawnTotal.'</th>';
+                        $html .= '<th>'.$interminateTotal.'</th>';
+                        $html .= '<th>'.$selfFunedTotal.'</th>';
+                        $html .= '<th class="exportAction"></th>';
+                    $html .= '</tr>';
+                $html .= '</tfoot>';
+            endif;
         $html .= '</table>';
 
         return $html;
@@ -167,8 +190,16 @@ class SlcRecordReportController extends Controller
         $row += 1;
 
         
+        $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
         if(!empty($res)):
             foreach($res as $ro):
+                $awbTotal += $ro['slc_awb_registered'];
+                $year1Total += $ro['year_1_registered'];
+                $year2Total += $ro['year_1_attendance'];
+                $withdrawnTotal += $ro['slc_withdrawn'];
+                $interminateTotal += $ro['slc_interminate'];
+                $selfFunedTotal += $ro['slc_self_funded'];
+
                 $theCollection[$row][] = $ro['name'];
                 $theCollection[$row][] = ($ro['slc_sms_registered'] > 0 ? $ro['slc_sms_registered'] : '0');
                 $theCollection[$row][] = ($ro['slc_awb_registered'] > 0 ? $ro['slc_awb_registered'] : '0');
@@ -180,6 +211,15 @@ class SlcRecordReportController extends Controller
 
                 $row += 1;
             endforeach;
+
+            $theCollection[$row][] = 'Overall';
+            $theCollection[$row][] = '';
+            $theCollection[$row][] = $awbTotal;
+            $theCollection[$row][] = $year1Total;
+            $theCollection[$row][] = $year2Total;
+            $theCollection[$row][] = $withdrawnTotal;
+            $theCollection[$row][] = $interminateTotal;
+            $theCollection[$row][] = $selfFunedTotal;
         endif;
 
         return Excel::download(new ArrayCollectionExport($theCollection), 'slc_Record_report.xlsx');
@@ -188,7 +228,7 @@ class SlcRecordReportController extends Controller
     public function refineResult($semester_ids){
         $res = [];
         if(!empty($semester_ids)):
-            $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43];
+            $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 15];
             $slc_withdrawn_satuses = [30, 31, 43];
             $slc_interminate_satuses = [27, 42];
             $slc_self_funded_satuses = [15];
@@ -197,18 +237,31 @@ class SlcRecordReportController extends Controller
                 $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
                 $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();
 
+                $slc_awb_registered = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($creations){
+                                        $q->whereIn('course_creation_id', $creations);
+                                    })->pluck('student_id')->unique()->toArray();
+                $year_1_registered = SlcRegistration::whereIn('student_id', $student_ids)->where('registration_year', 1)->whereIn('slc_registration_status_id', [1, 3])
+                                    ->pluck('student_id')->unique()->toArray();
+                $year_1_attendance = SlcAttendance::whereIn('student_id', $student_ids)->where('attendance_year', 1)->where('attendance_code_id', 1)
+                                    ->pluck('student_id')->unique()->toArray();
+                $slc_withdrawn = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_withdrawn_satuses)->pluck('id')->unique()->toArray();
+                $slc_interminate = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_interminate_satuses)->pluck('id')->unique()->toArray();
+                $slc_self_funded = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_self_funded_satuses)->pluck('id')->unique()->toArray();
+
                 $res[$semester_id]['name'] = $semester->name;
                 $res[$semester_id]['slc_sms_registered'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)->get()->count();
-                $res[$semester_id]['slc_awb_registered'] = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($creations){
-                                                                $q->whereIn('course_creation_id', $creations);
-                                                            })->pluck('student_id')->unique()->count();
-                $res[$semester_id]['year_1_registered'] = SlcRegistration::whereIn('student_id', $student_ids)->where('registration_year', 1)->whereIn('slc_registration_status_id', [1, 3])
-                                                          ->pluck('student_id')->unique()->count();
-                $res[$semester_id]['year_1_attendance'] = SlcAttendance::whereIn('student_id', $student_ids)->where('attendance_year', 1)->where('attendance_code_id', 1)
-                                                          ->pluck('student_id')->unique()->count();
-                $res[$semester_id]['slc_withdrawn'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_withdrawn_satuses)->get()->count();
-                $res[$semester_id]['slc_interminate'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_interminate_satuses)->get()->count();
-                $res[$semester_id]['slc_self_funded'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_self_funded_satuses)->get()->count();
+                $res[$semester_id]['slc_awb_registered'] = (!empty($slc_awb_registered) ? count($slc_awb_registered) : 0);
+                $res[$semester_id]['slc_awb_registered_std'] = (!empty($slc_awb_registered) ? implode(',', $slc_awb_registered) : '');
+                $res[$semester_id]['year_1_registered'] = (!empty($year_1_registered) ? count($year_1_registered) : 0);
+                $res[$semester_id]['year_1_registered_std'] = (!empty($year_1_registered) ? implode(',', $year_1_registered) : '');
+                $res[$semester_id]['year_1_attendance'] = (!empty($year_1_attendance) ? count($year_1_attendance) : 0);
+                $res[$semester_id]['year_1_attendance_std'] = (!empty($year_1_attendance) ? implode(',', $year_1_attendance) : '');
+                $res[$semester_id]['slc_withdrawn'] = (!empty($slc_withdrawn) ? count($slc_withdrawn): 0);
+                $res[$semester_id]['slc_withdrawn_std'] = (!empty($slc_withdrawn) ? implode(',', $slc_withdrawn): '');
+                $res[$semester_id]['slc_interminate'] = (!empty($slc_interminate) ? count($slc_interminate): 0);
+                $res[$semester_id]['slc_interminate_std'] = (!empty($slc_interminate) ? implode(',', $slc_interminate): '');
+                $res[$semester_id]['slc_self_funded'] = (!empty($slc_self_funded) ? count($slc_self_funded): 0);
+                $res[$semester_id]['slc_self_funded_std'] = (!empty($slc_self_funded) ? implode(',', $slc_self_funded): '');
             endforeach;
         endif;
 
@@ -216,7 +269,7 @@ class SlcRecordReportController extends Controller
     }
 
     public function exportDetailsReport($semester_id){
-        $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43];
+        $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 15];
         $slc_withdrawn_satuses = [30, 31, 43];
         $slc_interminate_satuses = [27, 42];
         $slc_self_funded_satuses = [15];
@@ -394,5 +447,54 @@ class SlcRecordReportController extends Controller
 
         $fileName = str_replace(' ', '_', $semester->name).'_slc_record_details_report.xlsx';
         return Excel::download(new ArrayCollectionExport($theCollection), $fileName);
+    }
+
+    public function getStudentList(Request $request){
+        $student_ids = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', $request->student_ids) : [0]);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+        $Query = Student::whereIn('id', $student_ids)->orderByRaw(implode(',', $sorts));
+
+        $total_rows = $Query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 50));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+        
+        $Query = $Query->orderByRaw(implode(',', $sorts))->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'disability' =>  (isset($list->other->disability_status) && $list->other->disability_status > 0 ? $list->other->disability_status : 0),
+                    'full_time' => (isset($list->activeCR->propose->full_time) && $list->activeCR->propose->full_time > 0) ? $list->activeCR->propose->full_time : 0, 
+                    'registration_no' => (!empty($list->registration_no) ? $list->registration_no : $list->application_no),
+                    'first_name' => $list->first_name,
+                    'last_name' => $list->last_name,
+                    'course'=> (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : ''),
+                    'semester'=> (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : ''),
+                    'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
+                    'url' => route('student.show', $list->id),
+                    'photo_url' => $list->photo_url,
+                    'flag_html' => (isset($list->flag_html) && !empty($list->flag_html) ? $list->flag_html : ''),
+                    'due' => $list->due
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 }
