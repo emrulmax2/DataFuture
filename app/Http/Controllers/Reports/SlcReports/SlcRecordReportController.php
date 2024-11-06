@@ -114,7 +114,7 @@ class SlcRecordReportController extends Controller
         $res = $this->refineResult($semester_ids);
 
         $theLoader = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(22,78,99)" class="w-3 h-3 ml-2 theLoader"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
-        $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
+        $nitialTotal = $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
         $html = '';
         $html .= '<table class="table table-bordered slcRecordReportTable  table-sm" id="slcRecordReportTable">';
             $html .= '<thead>';
@@ -133,6 +133,7 @@ class SlcRecordReportController extends Controller
             $html .= '<tbody>';
                 if(!empty($res)):
                     foreach($res as $semester_id => $row):
+                        $nitialTotal += $row['slc_sms_registered'];
                         $awbTotal += $row['slc_awb_registered'];
                         $year1Total += $row['year_1_registered'];
                         $year2Total += $row['year_1_attendance'];
@@ -159,7 +160,7 @@ class SlcRecordReportController extends Controller
                 $html .= '<tfoot>';
                     $html .= '<tr>';
                         $html .= '<th>Overall</th>';
-                        $html .= '<th></th>';
+                        $html .= '<th>'.$nitialTotal.'</th>';
                         $html .= '<th>'.$awbTotal.'</th>';
                         $html .= '<th>'.$year1Total.'</th>';
                         $html .= '<th>'.$year2Total.'</th>';
@@ -192,9 +193,10 @@ class SlcRecordReportController extends Controller
         $row += 1;
 
         
-        $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
+        $nitialTotal = $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
         if(!empty($res)):
             foreach($res as $ro):
+                $nitialTotal += $ro['slc_sms_registered'];
                 $awbTotal += $ro['slc_awb_registered'];
                 $year1Total += $ro['year_1_registered'];
                 $year2Total += $ro['year_1_attendance'];
@@ -215,7 +217,7 @@ class SlcRecordReportController extends Controller
             endforeach;
 
             $theCollection[$row][] = 'Overall';
-            $theCollection[$row][] = '';
+            $theCollection[$row][] = $nitialTotal;
             $theCollection[$row][] = $awbTotal;
             $theCollection[$row][] = $year1Total;
             $theCollection[$row][] = $year2Total;

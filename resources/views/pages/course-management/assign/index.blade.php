@@ -107,14 +107,19 @@
                             </div>
                         </div>
                         <div class="col-span-6">
-                            <div class="text-slate-500 font-medium mb-2">Modules</div>
-                            <div class="relative">
+                            <div class="text-slate-500 font-medium mb-2 flex justify-start items-center">
+                                <div class="form-check mr-3">
+                                    <input checked id="checkUnCheckAll" class="form-check-input" name="checkUnCheckAll" type="checkbox" value="1">
+                                </div>
+                                Modules
+                            </div>
+                            <div class="relative moduleListWrap">
                                 @if($selectedModules->count() > 0)
                                     @foreach($selectedModules as $smd)
                                         <div class="form-check mb-2">
                                             <input checked id="assignToModuleIds_{{ $smd->id }}" class="form-check-input assignToModuleIds" name="assignToModuleIds[]" type="checkbox" value="{{ $smd->id }}">
                                             <label class="form-check-label" for="assignToModuleIds_{{ $smd->id }}">
-                                                {!! $smd->creations->module_name. (isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
+                                                {!! $smd->id.' - '.$smd->creations->module_name. (isset($smd->class_type) && !empty($smd->class_type) ? ' - '.$smd->class_type.' ' : '') . (isset($smd->assign) ? ' <strong>('.$smd->assign->count().')</strong>' : ' <strong>(0)</strong>') !!}
                                             </label>
                                         </div>
                                     @endforeach

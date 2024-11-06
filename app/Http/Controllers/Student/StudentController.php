@@ -181,7 +181,7 @@ class StudentController extends Controller
                         });
                     endif;
                     if(!empty($student_mobile)):
-                        $qr->where('mobile', $student_post_code);
+                        $qr->where('mobile', $student_mobile);
                     endif;
                 });
             endif;

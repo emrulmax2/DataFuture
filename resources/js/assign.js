@@ -56,6 +56,14 @@ import TomSelect from "tom-select";
         });
     });
 
+    $('#checkUnCheckAll').on('change', function(e){
+        if($(this).prop('checked')){
+            $('.moduleListWrap').find('input[type="checkbox"]').prop('checked', true);
+        }else{
+            $('.moduleListWrap').find('input[type="checkbox"]').prop('checked', false);
+        }
+    })
+
     /* Filter Existing Student List By Module Start*/
     $('.assignToModuleIds').on('change', function(e){
         e.preventDefault();

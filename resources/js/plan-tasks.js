@@ -122,23 +122,23 @@ var classPlanDateListsTutorTable = (function () {
                         let class_type = cell.getData().class_type;
                         let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
                         if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
-                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><i data-lucide="plus-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Add Feed</a>';
+                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" class="lucide lucide-plus-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>Add Feed</a>';
                         }else{
                             if(cell.getData().status == 'Scheduled'){
                                 btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
                             }else if(cell.getData().status == 'Canceled'){
-                                btn = '<span class="btn btn-danger w-auto"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>Canceled</span>';
+                                btn = '<span class="btn btn-danger w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Canceled</span>';
                             }else if(cell.getData().status == 'Unknown'){
                                 btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
                             }else{
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" class="lucide lucide-activity stroke-1.5 mr-2 h-4 w-4"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>Feed Attendance</a>';
                                 }
                                 if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
-                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
+                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>End Class</button>';
                                 }
                                 if(cell.getData().status == 'Completed' && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view stroke-1.5 mr-2 h-4 w-4"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg>View Feed</a>';
                                 }
                             }
                         }
@@ -209,6 +209,215 @@ var classPlanDateListsTutorTable = (function () {
 
         // Print
         $("#tabulator-print").on("click", function (event) {
+            tableContent.print();
+        });
+    };
+    return {
+        init: function () {
+            _tableGen();
+        },
+    };
+})();
+
+var classPlanDateListsTutorialTable = (function () {
+    var _tableGen = function () {
+        // Setup Tabulator
+        let planid = $('#classPlanDateListsTutorialTable').attr('data-tutorialid');
+        let dates = $("#dates-TPD").val() != "" ? $("#dates-TPD").val() : "";
+        let statusu = $("#status-TPD").val() != "" ? $("#status-TPD").val() : "";
+        
+        let tableContent = new Tabulator("#classPlanDateListsTutorialTable", {
+            ajaxURL: route("plan.dates.list"),
+            ajaxParams: { planid: planid, dates: dates, status: statusu },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 20,
+            paginationSizeSelector: [true, 10, 20, 30, 40],
+            layout: "fitColumns",
+            responsiveLayout: "collapse",
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "#",
+                    field: "sl",
+                    
+                    headerSort: false,
+                    width: "180",
+                },
+                {
+                    title: "DATE",
+                    field: "date",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "ROOM",
+                    field: "room",
+                    vertAlign: "middle",
+                    headerHozAlign: "center",
+                    hozAlign:  "center",
+                    width:200,
+                    formatter(cell, formatterParams) {
+                        return `<div>
+                            <div class="font-medium whitespace-nowrap">${
+                                cell.getData().venue
+                            }</div>
+                            <div class="text-slate-500 text-xs whitespace-nowrap">${
+                                cell.getData().room
+                            }</div>
+                        </div>`;
+                    },
+                },
+                {
+                    title: "TIME",
+                    field: "time",
+                    vertAlign: "middle",
+                    headerHozAlign: "center",
+                    hozAlign:"center",
+                    width:150,
+                    formatter(cell, formatterParams) {
+                        return `<div>
+                            <div class="font-medium whitespace-nowrap">${
+                                cell.getData().start_time
+                            } TO </div>
+                            <div class="text-slate-500 text-xs whitespace-nowrap">${
+                                cell.getData().end_time
+                            }</div>
+                        </div>`;
+                    },
+                },
+                {
+                    title: "STATUS",
+                    field: "status",
+                    width: 150,
+                    vertAlign: "middle",
+                    hozAlign:  "center",
+                    headerSort: false,
+                    headerHozAlign: "center",
+                    formatter(cell, formatterParams) {
+                        let labels = '';
+                        if(cell.getData().status == 'Scheduled'){
+                            labels = '<span class="btn btn-outline-secondary text-info border-info w-24 inline-block">Scheduled</span>';
+                        }else if(cell.getData().status == 'Ongoing'){
+                            labels = '<span class="btn btn-outline-primary w-24 inline-block">Ongoing</span>';
+                        }else if(cell.getData().status == 'Completed'){
+                            labels = '<span class="btn btn-outline-success w-24 inline-block">Completed</span>';
+                        }else if(cell.getData().status == 'Canceled'){
+                            labels = '<span class="btn btn-outline-danger w-24 inline-block">Canceled</span>';
+                        }else{
+                            labels = '<span class="btn btn-outline-warning w-24 inline-block">Unknown</span>';
+                        }
+                        return labels;
+                    },
+                },
+                {
+                    title: "ACTIONS",
+                    minWidth: 200,
+                    field: "actions",
+                    responsive: 1,
+                    hozAlign: "center",
+                    vertAlign: "middle",
+                    headerHozAlign: "center",
+                    headerSort: false,
+                    print: false,
+                    download: false,
+                    formatter(cell, formatterParams) {
+                        let btn = '';
+                        let attendanceInformation = cell.getData().attendance_information;
+                        let personal_tutor_id = cell.getData().personal_tutor_id;
+                        let tutor_id = cell.getData().tutor_id;
+                        let class_type = cell.getData().class_type;
+                        let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
+                        if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
+                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" class="lucide lucide-plus-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>Add Feed</a>';
+                        }else{
+                            if(cell.getData().status == 'Scheduled'){
+                                btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
+                            }else if(cell.getData().status == 'Canceled'){
+                                btn = '<span class="btn btn-danger w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Canceled</span>';
+                            }else if(cell.getData().status == 'Unknown'){
+                                btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
+                            }else{
+                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" class="lucide lucide-activity stroke-1.5 mr-2 h-4 w-4"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>Feed Attendance</a>';
+                                }
+                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
+                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>End Class</button>';
+                                }
+                                if(cell.getData().status == 'Completed' && the_id > 0){
+                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view stroke-1.5 mr-2 h-4 w-4"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg>View Feed</a>';
+                                }
+                            }
+                        }
+
+                        return btn;
+                        
+                        /*let attendanceInformation = cell.getData().attendance_information;
+                        if(attendanceInformation != null) {
+                            if(attendanceInformation.end_time == null) { 
+                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
+                                   
+                                
+                                if(cell.getData().feed_given == 1){
+                                    dropdown +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
+                                }
+                            } else {
+                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
+                            }
+                        }else {
+                            if(cell.getData().upcomming_status!="Upcomming") {
+                                dropdown =`<div class="flex justify-center items-center mr-3">N/A</div>`;
+                            }
+                        }
+                        return dropdown;*/
+                    },
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            },
+        });
+
+        // Redraw table onresize
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
+
+        // Export
+        $("#tabulator-export-csv-TPD").on("click", function (event) {
+            tableContent.download("csv", "data.csv");
+        });
+
+        $("#tabulator-export-json-TPD").on("click", function (event) {
+            tableContent.download("json", "data.json");
+        });
+
+        $("#tabulator-export-xlsx-TPD").on("click", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "data.xlsx", {
+                sheetName: "Plan Date List Details",
+            });
+        });
+
+        $("#tabulator-export-html-TPD").on("click", function (event) {
+            tableContent.download("html", "data.html", {
+                style: true,
+            });
+        });
+
+        // Print
+        $("#tabulator-print-TPD").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -854,6 +1063,113 @@ var classPlanAssessmentModuleTable = (function () {
         });
         /*End Class Btn*/
     }
+
+    if ($("#classPlanDateListsTutorialTable").length) {
+        // Init Table
+        classPlanDateListsTutorialTable.init();
+
+        // Filter function
+        function tutorialFilterHTMLForm() {
+            classPlanDateListsTutorialTable.init();
+        }
+
+        // On submit filter form
+        $("#tabulatorFilterForm-TPD")[0].addEventListener(
+            "keypress",
+            function (event) {
+                let keycode = event.keyCode ? event.keyCode : event.which;
+                if (keycode == "13") {
+                    event.preventDefault();
+                    tutorialFilterHTMLForm();
+                }
+            }
+        );
+
+        // On click go button
+        $("#tabulator-html-filter-go-TPD").on("click", function (event) {
+            tutorialFilterHTMLForm();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-reset-TPD").on("click", function (event) {
+            $("#dates-TPD").val("");
+            $("#status-TPD").val("1");
+            tutorialFilterHTMLForm();
+        });
+
+        /*End Class Btn*/
+        $('#classPlanDateListsTutorialTable').on('click', '.endClassBtns', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            var infoId = $theBtn.attr('data-attendanceinfo');
+            var plandDateId = $theBtn.attr('data-id');
+
+            $('#endClassModal [name="plan_date_list_id"]').val(plandDateId);
+        });
+        /*End Class Btn*/
+    }
+
+    /* Start End Class Form Submission */
+    $('#endClassModalForm').on('submit', function(e){
+        e.preventDefault();
+        let $form = $(this);
+        const form = document.getElementById('endClassModalForm');
+
+        $('#endClassModalForm').find('input').removeClass('border-danger')
+        $('#endClassModalForm').find('.acc__input-error').html('')
+
+        document.querySelector('#endClassSave').setAttribute('disabled', 'disabled');
+        document.querySelector('#endClassSave svg').style.cssText = 'display: inline-block;';
+
+        let url = $form.find("input[name=url]").val();
+        let form_data = new FormData(form);
+
+        axios({
+            method: "post",
+            url: url,
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#endClassSave').removeAttribute('disabled');
+            document.querySelector('#endClassSave svg').style.cssText = 'display: none;';
+            
+            if (response.status == 200) {
+                endClassModal.hide();
+
+                succModal.show();
+                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                    $('#successModal .successModalTitle').html('WOW!');
+                    $('#successModal .successModalDesc').html('Class successfully ended.');
+                });
+
+                setTimeout(() => {
+                    succModal.hide();
+                    window.location.reload();
+                }, 1000);
+            }
+            
+        }).catch(error => {
+            document.querySelector('#endClassSave').removeAttribute('disabled');
+            document.querySelector('#endClassSave svg').style.cssText = 'display: none;';
+            if(error.response){
+                endClassModal.hide();
+                if(error.response.status == 422 || error.response.status == 322){   
+                    warningModal.show();
+                    document.getElementById('warningModal').addEventListener('shown.tw.modal', function(event){
+                        $('#warningModal .warningModalTitle').html('Oops!');
+                        $('#warningModal .warningModalDesc').html(error.response.data.data);
+                    });
+
+                    setTimeout(() => {
+                        warningModal.hide();
+                    }, 2000);
+                }else{
+                    console.log('error');
+                }
+            }
+        });
+    });
+    /* End End Class Form Submission */
 
     if ($("#classStudentListTutorModuleTable").length) {
         // Init Table

@@ -282,6 +282,7 @@ class Student extends Model
                           ->leftJoin('student_flags as sf', 'sn.student_flag_id', 'sf.id')
                           ->where('sn.student_id', $this->id)
                           ->where('sn.is_flaged', 'Yes')->where('sn.flaged_status', 'Active')
+                          ->whereNull('sn.deleted_at')
                           ->groupBy('sf.color')->get();
         if($studentNotFlag->count() > 0):
             $html .= '<div class="inline-flex justify-end items-center mr-1">';

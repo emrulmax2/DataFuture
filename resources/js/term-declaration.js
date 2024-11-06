@@ -371,7 +371,7 @@ var table = (function () {
             if(action == 'DELETE'){
                 axios({
                     method: 'delete',
-                    url: route('semester.destory', recordID),
+                    url: route('term-declaration.destroy', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {

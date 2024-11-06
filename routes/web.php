@@ -2419,12 +2419,14 @@ Route::middleware('auth')->group(function() {
 
 
     Route::resource('term-declaration', TermDeclarationController::class,[
-        'except' => ['create','update']
+        'except' => ['create','update', 'destroy']
     ]);
     Route::controller(TermDeclarationController::class)->group(function() {
 
         Route::get('term-declaration-list', 'list')->name('term-declaration.list'); 
         Route::post('term-declaration/{term}/update', 'update')->name('term-declaration.update'); 
+        Route::delete('term-declaration/{term}/destroy', 'destroy')->name('term-declaration.destroy'); 
+        Route::post('term-declaration/restore/{term}', 'restore')->name('term-declaration.restore'); 
         
     });
 
