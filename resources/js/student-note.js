@@ -591,6 +591,12 @@ var studentNotesListTable = (function () {
                 }else{
                     $('#editNoteForm .theFlagCover').removeClass('active');
                 }
+
+                if(dataset.flaged_status == 'Active'){
+                    $('#editNoteForm [name="flaged_status"]').prop('checked', false);
+                }else{
+                    $('#editNoteForm [name="flaged_status"]').prop('checked', true);
+                }
             }else{
                 $('#editNoteForm [name="is_flaged"]').prop('checked', false);
                 $('#editNoteForm .flagedWrap').fadeOut('fast', function(){
