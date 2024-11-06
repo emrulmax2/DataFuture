@@ -135,6 +135,7 @@ class DashboardController extends Controller
                     $classLabel .= '<span class="text-danger font-medium">Not Started</span>';
                 endif;
 
+                $parent_id = (isset($pln->plan->parent_id) && $pln->plan->parent_id > 0 ? $pln->plan->parent_id : $pln->plan_id);
                 $html .= '<tr class="intro-x" data-planListId="'.$pln->id.'">';
                     $html .= '<td>';
                         $html .= '<span class="font-fedium">'.date('H:i', strtotime($theDate.' '.$pln->plan->start_time)).'</span>';
@@ -142,7 +143,7 @@ class DashboardController extends Controller
                     $html .= '<td>';
                         $html .= '<div class="flex items-center">';
                             $html .= '<div>';
-                                $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $pln->plan_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
+                                $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $parent_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
                                 $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
                                 if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
                                     $html .= '<div class="flex flex-start pt-1">';
@@ -301,7 +302,7 @@ class DashboardController extends Controller
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->unique()->toArray();
+                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';

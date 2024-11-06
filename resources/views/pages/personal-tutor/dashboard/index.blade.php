@@ -240,7 +240,10 @@
                             @if($modules->count() > 0)
                                 @php $i = 1; @endphp
                                 @foreach($modules as $mod)
-                                    <a class="{{ $i > 4 ? 'more hidden' : 'block' }}" href="{{ route('tutor-dashboard.plan.module.show', $mod->id) }}" target="_blank">
+                                    @php 
+                                        $module_id = (isset($mod->parent_id) && $mod->parent_id > 0 ? $mod->parent_id : $mod->id)
+                                    @endphp
+                                    <a class="{{ $i > 4 ? 'more hidden' : 'block' }}" href="{{ route('tutor-dashboard.plan.module.show', $module_id) }}" target="_blank">
                                         <div id="moduleset-{{ $mod->id }}" class="intro-y module-details_{{ $mod->id }}">
                                             <div class="box px-4 py-4 mb-3 zoom-in {{ (isset($mod->tutor_id) && $mod->tutor_id > 0 ? 'pl-5' : '') }}">
                                                 @if(isset($mod->tutor_id) && $mod->tutor_id > 0)

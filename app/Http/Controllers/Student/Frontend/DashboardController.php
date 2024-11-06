@@ -267,6 +267,7 @@ class DashboardController extends Controller
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
+                        'parent_id' => $list->parent_id,
                         'course' => $list->course_name,
                         'tutor_photo' => isset($tutor->employee->photo_url) ? $tutor->employee->photo_url : "",
                         'personal_tutor_photo' => isset($pTutor->employee->photo_url) ? $pTutor->employee->photo_url : "",
