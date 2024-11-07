@@ -28,7 +28,7 @@ class SlcRegistrationUpdateRequest extends FormRequest
             'confirmation_date' => 'required',
             'academic_year_id' => 'required',
             'registration_year' => 'required',
-            'course_creation_instance_id' => 'required',
+            //'course_creation_instance_id' => 'required',
             'slc_registration_status_id' => 'required',
         ];
     }
@@ -40,7 +40,7 @@ class SlcRegistrationUpdateRequest extends FormRequest
             'confirmation_date.required' => 'This field is required.',
             'academic_year_id.required' => 'This field is required.',
             'registration_year.required' => 'This field is required.',
-            'course_creation_instance_id.required' => 'This field is required.',
+            //'course_creation_instance_id.required' => 'This field is required.',
             'slc_registration_status_id.required' => 'This field is required.'
         ];
     }

@@ -499,7 +499,7 @@
                                 <div class="acc__input-error error-registration_year text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-3">
-                                <label for="course_creation_instance_id" class="form-label">Instance Year <span class="text-danger">*</span></label>
+                                <label for="course_creation_instance_id" class="form-label">Instance Year </label><!-- <span class="text-danger">*</span> -->
                                 <select id="course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
                                     <option value="">Please Select</option>
                                     @if(!empty($instances) && $instances->count())
@@ -680,7 +680,7 @@
                                 <div class="acc__input-error error-registration_year text-danger mt-2"></div>
                             </div>
                             <div class="col-span-6 sm:col-span-4">
-                                <label for="reg_course_creation_instance_id" class="form-label">Instance Year <span class="text-danger">*</span></label>
+                                <label for="reg_course_creation_instance_id" class="form-label">Instance Year</label><!-- <span class="text-danger">*</span> -->
                                 <select id="reg_course_creation_instance_id" class="form-control w-full" name="course_creation_instance_id">
                                     <option value="">Please Select</option>
                                     @if(!empty($instances) && $instances->count())
