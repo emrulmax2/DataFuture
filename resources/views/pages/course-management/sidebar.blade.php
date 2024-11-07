@@ -73,16 +73,20 @@
                     <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Plans <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
                 <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'groups' || Route::currentRouteName() == 'assign' || Route::currentRouteName() == 'plans.tree' || Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'block' : 'none' }};">
+                    @if(isset(auth()->user()->priv()['plans_list']) && auth()->user()->priv()['plans_list'] == 1)
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'class.plan.builder' || Route::currentRouteName() == 'class.plan.add' || Route::currentRouteName() == 'plan.dates' || Route::currentRouteName() == 'class.plan' ? 'active text-primary' : '' }}" href="{{ route('class.plan') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Plans
                         </a>
                     </li>
+                    @endif
+                    @if(isset(auth()->user()->priv()['plans_tree']) && auth()->user()->priv()['plans_tree'] == 1)
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'plans.tree' ? 'active text-primary' : '' }}" href="{{ route('plans.tree') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Plan Tree View
                         </a>
                     </li>
+                    @endif
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'groups' ? 'active text-primary' : '' }} " href="{{ route('groups') }}">
                             <i data-lucide="check-circle" class="w-3 h-3 mr-2"></i> Groups
