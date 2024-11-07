@@ -75,7 +75,7 @@
                 </div>
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Is this employee has disabilities?</div>
+                        <div class="col-span-4 text-slate-500 font-medium">Does this employee have a disability?</div>
                         <div class="col-span-8 font-medium">{{ isset($employee->disability_status) ? $employee->disability_status : '' }}</div>
                     </div>
                 </div>
