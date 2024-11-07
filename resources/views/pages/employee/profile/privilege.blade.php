@@ -85,9 +85,17 @@
                                 <input {{ (isset($priv['course_managements']['terms_and_modules']) && $priv['course_managements']['terms_and_modules'] == 1 ? 'checked' : '') }} id="permission_course_management_2" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][terms_and_modules]">
                                 <label class="form-check-label ml-4" for="permission_course_management_2">Terms & Modules</label>
                             </div>
-                            <div class="form-check form-switch">
+                            <div class="form-check form-switch mb-4">
                                 <input {{ (isset($priv['course_managements']['plans']) && $priv['course_managements']['plans'] == 1 ? 'checked' : '') }} id="permission_course_management_3" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][plans]">
                                 <label class="form-check-label ml-4" for="permission_course_management_3">Plans</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['course_managements']['plans_list']) && $priv['course_managements']['plans_list'] == 1 ? 'checked' : '') }} id="permission_course_management_4" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][plans_list]">
+                                <label class="form-check-label ml-4" for="permission_course_management_4">Plan List</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['course_managements']['plans_tree']) && $priv['course_managements']['plans_tree'] == 1 ? 'checked' : '') }} id="permission_course_management_5" class="form-check-input" type="checkbox" value="1" name="permission[course_managements][plans_tree]">
+                                <label class="form-check-label ml-4" for="permission_course_management_5">Plan Tree</label>
                             </div>
                         </div>
                     </div>
