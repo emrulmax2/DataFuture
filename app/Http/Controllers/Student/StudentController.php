@@ -691,7 +691,9 @@ class StudentController extends Controller
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
-            //$courseRelationActiveCourseId = $student->crel->creation->id;
+            $courseRelationActiveCourseId = $student->crel->creation->id;
+            $academicYearSet = CourseCreationInstance::where('course_creation_id', $courseRelationActiveCourseId)->pluck('academic_year_id')->toArray();
+            $termSet = TermDeclaration::whereIn('academic_year_id', $academicYearSet)->pluck('id')->toArray();
             $termData = [];
             $lastAttendanceDate = [];
             $data = [];
@@ -721,6 +723,7 @@ class StudentController extends Controller
                             ->leftJoin('module_creations as mc', 'mc.id', 'plan.module_creation_id')
                             ->leftJoin('groups as gp', 'gp.id', 'plan.group_id')
                             ->where('assign.student_id', $student->id)
+                            ->whereIn('td.id',$termSet)
                             ->orderBy("pdl.date",'desc')
                             ->get();
                             
