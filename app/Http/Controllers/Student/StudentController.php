@@ -723,7 +723,7 @@ class StudentController extends Controller
                             ->leftJoin('module_creations as mc', 'mc.id', 'plan.module_creation_id')
                             ->leftJoin('groups as gp', 'gp.id', 'plan.group_id')
                             ->where('assign.student_id', $student->id)
-                            ->whereIn('td.id',$termSet)
+                            //->whereIn('td.id',$termSet)
                             ->orderBy("pdl.date",'desc')
                             ->get();
                             
