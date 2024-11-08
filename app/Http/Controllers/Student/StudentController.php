@@ -691,7 +691,7 @@ class StudentController extends Controller
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
-            $courseRelationActiveCourseId = $student->crel->creation->id;
+            //$courseRelationActiveCourseId = $student->crel->creation->id;
             $termData = [];
             $lastAttendanceDate = [];
             $data = [];
@@ -721,7 +721,6 @@ class StudentController extends Controller
                             ->leftJoin('module_creations as mc', 'mc.id', 'plan.module_creation_id')
                             ->leftJoin('groups as gp', 'gp.id', 'plan.group_id')
                             ->where('assign.student_id', $student->id)
-                            ->where('plan.course_creation_id', $courseRelationActiveCourseId)
                             ->orderBy("pdl.date",'desc')
                             ->get();
                             
