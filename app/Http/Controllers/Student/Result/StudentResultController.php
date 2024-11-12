@@ -31,7 +31,7 @@ class StudentResultController extends Controller
     {
         $grades = Grade::all();
         $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
-            
+        sort($courseCreationIds);
         $courseRelationActiveCourseId = $student->crel->creation->id;
         $maxCourseCreationId = max($courseCreationIds);
         $minCourseCreationId = min($courseCreationIds);
@@ -46,7 +46,9 @@ class StudentResultController extends Controller
 
             if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
 
-                $QueryPart->where('course_creation_id','<',$maxCourseCreationId);
+                $arrayCurrentKey = array_search($courseRelationActiveCourseId, $courseCreationIds);
+                $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
+                $QueryPart->where('plan.course_creation_id','<',$nextCourseCreationId);
 
             }
             $QueryPart->orderBy('id','DESC');
