@@ -34,4 +34,12 @@ class StudentAttendanceTermStatus extends Model
     public function term(){
         return $this->belongsTo(TermDeclaration::class, 'term_declaration_id');
     }
+
+    public function status(){
+        return $this->belongsTo(Status::class, 'status_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

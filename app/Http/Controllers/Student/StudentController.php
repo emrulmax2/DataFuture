@@ -691,9 +691,23 @@ class StudentController extends Controller
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
+
+            $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
+            
             $courseRelationActiveCourseId = $student->crel->creation->id;
-            $academicYearSet = CourseCreationInstance::where('course_creation_id', $courseRelationActiveCourseId)->pluck('academic_year_id')->toArray();
-            $termSet = TermDeclaration::whereIn('academic_year_id', $academicYearSet)->pluck('id')->toArray();
+            $maxCourseCreationId = max($courseCreationIds);
+            $minCourseCreationId = min($courseCreationIds);
+
+            $planSet= Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray();
+
+        
+            //$courseCreationInstanceIds = CourseCreationInstance::where('course_creation_id', $courseRelationActiveCourseId)->pluck('id')->toArray();
+            //$instanceTermIds = InstanceTerm::whereIn('course_creation_instance_id', $courseCreationInstanceIds)->pluck('id')->toArray();
+            //$instanceTermIds = array_unique($instanceTermIds);
+            // $plans = Plan::whereIn('instance_term_id', $instanceTermIds)->pluck('id')->toArray();
+            // $plandDateList = PlansDateList::whereIn('plan_id', $plans)->pluck('id')->toArray();
+
+            // dd($plandDateList);
             $termData = [];
             $lastAttendanceDate = [];
             $data = [];
@@ -706,7 +720,7 @@ class StudentController extends Controller
             $moduleNameList = [];
             $ClassType = [];
             $arryBox = [];
-                $QueryInner = DB::table('plans_date_lists as pdl')
+                $QueryPart = DB::table('plans_date_lists as pdl')
                             ->select( 'pdl.*','td.id as term_id',
                                         'td.name as term_name',
                                         'instance_terms.start_date',
@@ -715,7 +729,7 @@ class StudentController extends Controller
                                         'mc.module_name','mc.code as module_code', 
                                         'plan.id as plan_id' , 
                                         'gp.name as group_name', 
-                                        'gp.id as group_id','assign.attendance as indicator')
+                                        'gp.id as group_id','assign.attendance as indicator', 'instance_terms.id as instance_term_id')
                             ->leftJoin('plans as plan', 'plan.id', 'pdl.plan_id')
                             ->leftJoin('instance_terms', 'instance_terms.id', 'plan.instance_term_id')
                             ->leftJoin('assigns as assign', 'plan.id', 'assign.plan_id')
@@ -723,17 +737,24 @@ class StudentController extends Controller
                             ->leftJoin('module_creations as mc', 'mc.id', 'plan.module_creation_id')
                             ->leftJoin('groups as gp', 'gp.id', 'plan.group_id')
                             ->where('assign.student_id', $student->id)
-                            //->whereIn('td.id',$termSet)
-                            ->orderBy("pdl.date",'desc')
-                            ->get();
+                            ->whereIn('plan.id',$planSet)
+                            ->where('plan.course_creation_id','>=',$courseRelationActiveCourseId);
+
+                            if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
+
+                                $QueryPart->where('plan.course_creation_id','<',$maxCourseCreationId);
+
+                            }
+                            $QueryInner = $QueryPart->orderBy("pdl.date",'desc')->get();
                             
                             $attendanceFeedStatus = AttendanceFeedStatus::all();
                 $termAttendanceFound = [];
                 $attendanceIndicator = [];
                 $i=0;
+                 
                 if($QueryInner->isNotEmpty())
                 foreach($QueryInner as $list):
-                    
+                    // if(in_array($list->instance_term_id, $instanceTermIds)) {
                     
                     $attendance = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->where("plans_date_list_id",$list->id)->get()->first();
                     $attendanceIndicator[$list->term_id]  = ($list->indicator===0) ? 0:1;
@@ -932,6 +953,7 @@ class StudentController extends Controller
                             $avarageTermDetails[$list->term_id] = 0;
                         }
                     }
+                // }
                 endforeach;
 
                 $attendance4prev = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->WhereNotNull("prev_plan_id")->get();   
@@ -2105,6 +2127,32 @@ class StudentController extends Controller
     }
 
 
+    public function studentCheckStatus(Request $request){
+        $student_id = $request->student_id;
+        $status_id = $request->theStatus;
+        $term_id = $request->theTerm;
+
+        $term = TermDeclaration::find($term_id);
+
+        $status = Status::find($status_id);
+        $status_indicator = (isset($status->active) && $status->active == 0 ? 0 : 1);
+
+        $res = [];
+        $res['indicator'] = $status_indicator;
+        $res['notice'] = 0;
+        $term_status = StudentAttendanceTermStatus::where('student_id', $student_id)->where('term_declaration_id', $term_id)->orderBy('id', 'DESC')->get()->first();
+        $term_indicator = (isset($term_status->id) && $term_status->id > 0 && isset($term_status->status->active) ? ($term_status->status->active == 0 ? 0 : 1) : $status_indicator);
+
+        if($status_indicator != $term_indicator):
+            $res['notice'] = 1;
+            $res['term_indicator'] = $term_indicator;
+            $res['msg'] = $term->name.' attendance indicator was <span class="font-medium underline">'.($term_indicator == 1 ? 'Enabled' : 'Disabled').'</span>. But the selected status indicator is <span class="font-medium underline">'.($status_indicator == 1 ? 'Enabled' : 'Disabled').'</span>. Please, make sure you want to continue with that or Change the indicator as per your requirements.';
+        endif;
+
+        return response()->json(['res' => $res], 200);
+    }
+
+
     public function studentUpdateStatus(StudentUpdateStatusRequest $request){
         $student_id = $request->student_id;
         $studentOld = Student::find($student_id);
@@ -2120,6 +2168,7 @@ class StudentController extends Controller
 
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
         $statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
+        $attendance_indicator = (isset($request->attendance_indicator) && $request->attendance_indicator > 0 ? $request->attendance_indicator : 0);
         
 
         $student = Student::find($student_id);
@@ -2167,7 +2216,8 @@ class StudentController extends Controller
             StudentAttendanceTermStatus::create($data);
 
             if(!empty($plan_ids)):
-                $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
+                //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
+                $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
             endif;
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
