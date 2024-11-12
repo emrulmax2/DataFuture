@@ -7,6 +7,7 @@ use App\Http\Requests\StoreAgentApplicationChecktRequest;
 use App\Http\Requests\UpdateAgenApplicationChecktRequest;
 use App\Mail\ApplicantAgentBasisEmailVerification;
 use App\Models\AgentApplicationCheck;
+use App\Models\Applicant;
 use App\Models\Option;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -239,9 +240,19 @@ class ApplicationCheckController extends Controller
      */
     public function destroy($id)
     {
-        $data = AgentApplicationCheck::find($id)->forceDelete();
+        
+        $data = AgentApplicationCheck::find($id);
 
         if($data) {
+
+            $dataApplicant = Applicant::where('status_id',1)
+            ->where('first_name',$data->first_name)
+            ->where('last_name',$data->last_name)
+            ->whereNull("application_no")->get()->first();
+            if(isset($dataApplicant->id)) {
+                $dataApplicant->forceDelete();
+            } 
+            $data->forceDelete();
             $data = AgentApplicationCheck::where('agent_user_id',auth('agent')->user()->id)->whereNull("applicant_id")->get();
 
         }
