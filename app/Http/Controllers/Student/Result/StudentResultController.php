@@ -14,6 +14,7 @@ use App\Models\Result;
 use App\Models\Semester;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\StudentCourseRelation;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Barryvdh\DomPDF\PDF as DomPDFPDF;
@@ -29,14 +30,28 @@ class StudentResultController extends Controller
     public function index(Student $student)
     {
         $grades = Grade::all();
-        
+        $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
+            
+        $courseRelationActiveCourseId = $student->crel->creation->id;
+        $maxCourseCreationId = max($courseCreationIds);
+        $minCourseCreationId = min($courseCreationIds);
+            
             $termData = [];
-
             $data = [];
             $resultPrimarySet = [];
             $planList = Result::where('student_id', $student->id)->get()->pluck('plan_id')->unique()->toArray();
-            $QueryInner = Plan::whereIn('id',$planList)->orderBy('id','DESC')->get();
+            $QueryPart = Plan::whereIn('id',$planList);
             
+            $QueryPart->where('course_creation_id','>=',$courseRelationActiveCourseId);
+
+            if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
+
+                $QueryPart->where('course_creation_id','<',$maxCourseCreationId);
+
+            }
+            $QueryPart->orderBy('id','DESC');
+            $QueryInner = $QueryPart->get();
+
             foreach($QueryInner as $list):
                 $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
                 $checkPrimaryResult = Result::with([
@@ -57,7 +72,6 @@ class StudentResultController extends Controller
                         $data[$moduleCreation->module->name][] = $result;
                         $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
                     }
-
                 }
                 $resultPrimarySet[$result->id] = null;
             endforeach;
