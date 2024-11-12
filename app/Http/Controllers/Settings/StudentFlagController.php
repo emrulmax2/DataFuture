@@ -102,7 +102,7 @@ class StudentFlagController extends Controller
         if(!empty($flagRaisers) && $flagRaisers->count() > 0):
             $i = 1;
             foreach($flagRaisers as $fr):
-                $raisers[$i] = $fr->id;
+                $raisers[$i] = $fr->user_id;
                 $i++;
             endforeach;
         endif;
