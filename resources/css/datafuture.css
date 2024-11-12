@@ -2181,7 +2181,8 @@ input[type=number] {
     .modal#viewUnknownEntryModal .modal-dialog.modal-xl ,
     .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl ,
     .modal#viewQtyModal .modal-dialog.modal-xl ,
-    .modal#reportsSTDListModal .modal-dialog.modal-xl {
+    .modal#reportsSTDListModal .modal-dialog.modal-xl,
+    .modal#stdAtnTermStatusHistoryModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }
@@ -2218,4 +2219,7 @@ input[type=number] {
 
 .dataCollectionFormWrap{
     padding: 120px 0;
+}
+#changeStudentModal .dotLoader{
+    display: none;
 }

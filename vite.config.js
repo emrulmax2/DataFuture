@@ -306,6 +306,7 @@ export default defineConfig({
                 'resources/js/library-management-dashboard.js',
 
                 'resources/js/location-settings.js',
+                'resources/js/student-attendance-term-status.js',
             ],
             refresh: true,
         }),

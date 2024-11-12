@@ -227,7 +227,7 @@ class Student extends Model
         if(!empty($cp_ids)):
             $term_decs = Plan::whereIn('id', $cp_ids)->pluck('term_declaration_id')->unique()->toArray();
             if(!empty($term_decs)):
-                return TermDeclaration::whereIn('id', $term_decs)->get();
+                return TermDeclaration::whereIn('id', $term_decs)->orderBy('id', 'DESC')->get();
             else:
                 return false;
             endif;

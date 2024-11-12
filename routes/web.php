@@ -253,6 +253,7 @@ use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectControl
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\AttendanceTermStatusController;
 use App\Http\Controllers\Student\AwardController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\Result\StudentResultController;
@@ -846,6 +847,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/preint-communications/{student_id}/{type}','printStudentCommunications')->name('student.print.communications');
 
+        Route::post('student/check-status','studentCheckStatus')->name('student.check.status');
         Route::post('student/update-status','studentUpdateStatus')->name('student.update.status');
 
         Route::post('student/email/verifyupdate','verifyEmail')->name('student.verify.email');
@@ -854,8 +856,7 @@ Route::middleware('auth')->group(function() {
         
 
     });
-    
-    
+
     Route::controller(StudentResultController::class)->group(function() {
         Route::get('student-results/{student}', 'index')->name('student-results.index'); 
         Route::get('student-results/{student}/print', 'print')->name('student-results.print');
@@ -3065,6 +3066,11 @@ Route::middleware('auth')->group(function() {
         Route::post('library/books/validate-isbn', 'validateIsbn')->name('library.books.validate.isbn'); 
         Route::post('library/books/validate-barcode', 'validateBarcode')->name('library.books.validate.barcode'); 
     });
+    
+    
+    Route::controller(AttendanceTermStatusController::class)->group(function() {
+        Route::get('student/attendance-term-status-list', 'list')->name('student.attendance.term.status.list'); 
+    }); 
     
 });
 
