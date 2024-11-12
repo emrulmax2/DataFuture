@@ -48,7 +48,7 @@ class StudentResultController extends Controller
 
                 $arrayCurrentKey = array_search($courseRelationActiveCourseId, $courseCreationIds);
                 $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
-                $QueryPart->where('plan.course_creation_id','<',$nextCourseCreationId);
+                $QueryPart->where('course_creation_id','<',$nextCourseCreationId);
 
             }
             $QueryPart->orderBy('id','DESC');
