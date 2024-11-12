@@ -283,7 +283,7 @@ var settingsListTable = (function () {
                         edit_user_ids.clear(true);
 
                         $.each(dataset.raiser_ids, function(index, id) {
-                            edit_user_ids.addItem(id, true); 
+                            edit_user_ids.addItem(id); 
                         });
                     }else{
                         edit_user_ids.clear(true);

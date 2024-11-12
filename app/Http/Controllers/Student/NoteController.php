@@ -7,6 +7,7 @@ use App\Http\Requests\ApplicantNoteRequest;
 use App\Http\Requests\StudentNoteRequest;
 use App\Models\Student;
 use App\Models\StudentDocument;
+use App\Models\StudentFlagRaiser;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentNotesDocument;
@@ -115,6 +116,11 @@ class NoteController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $is_ownere = (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0);
+                if($list->is_flaged == 'Yes' && isset($list->student_flag_id) && $list->student_flag_id > 0):
+                    $raisers = StudentFlagRaiser::where('student_flag_id', $list->student_flag_id)->pluck('user_id')->unique()->toArray();
+                    $is_ownere = (!empty($raisers) && in_array(auth()->user()->id, $raisers) ? 1 : $is_ownere);
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -137,7 +143,7 @@ class NoteController extends Controller
                     'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : (isset($list->user->name) && !empty($list->user->name) ? $list->user->name : '')),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'is_ownere' => (isset($list->created_by) && $list->created_by == auth()->user()->id ? 1 : 0)
+                    'is_ownere' => $is_ownere
                 ];
                 $i++;
             endforeach;
