@@ -693,21 +693,13 @@ class StudentController extends Controller
     protected function PlanWithAttendanceSet(Student $student) {
 
             $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
-            
+            sort($courseCreationIds);
             $courseRelationActiveCourseId = $student->crel->creation->id;
             $maxCourseCreationId = max($courseCreationIds);
             $minCourseCreationId = min($courseCreationIds);
 
             $planSet= Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray();
 
-        
-            //$courseCreationInstanceIds = CourseCreationInstance::where('course_creation_id', $courseRelationActiveCourseId)->pluck('id')->toArray();
-            //$instanceTermIds = InstanceTerm::whereIn('course_creation_instance_id', $courseCreationInstanceIds)->pluck('id')->toArray();
-            //$instanceTermIds = array_unique($instanceTermIds);
-            // $plans = Plan::whereIn('instance_term_id', $instanceTermIds)->pluck('id')->toArray();
-            // $plandDateList = PlansDateList::whereIn('plan_id', $plans)->pluck('id')->toArray();
-
-            // dd($plandDateList);
             $termData = [];
             $lastAttendanceDate = [];
             $data = [];
@@ -742,7 +734,9 @@ class StudentController extends Controller
 
                             if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
 
-                                $QueryPart->where('plan.course_creation_id','<',$maxCourseCreationId);
+                                $arrayCurrentKey = array_search($courseRelationActiveCourseId, $courseCreationIds);
+                                $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
+                                $QueryPart->where('plan.course_creation_id','<',$nextCourseCreationId);
 
                             }
                             $QueryInner = $QueryPart->orderBy("pdl.date",'desc')->get();
