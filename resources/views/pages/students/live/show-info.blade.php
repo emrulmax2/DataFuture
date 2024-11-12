@@ -179,7 +179,10 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="change_status_id" class="form-label">Status <span class="text-danger">*</span></label>
+                            <label for="change_status_id" class="form-label">
+                                Status <span class="text-danger">*</span>
+                                <i data-loading-icon="three-dots" class="w-6 h-3 ml-3 inline-flex dotLoader"></i>
+                            </label>
                             <select id="change_status_id" name="status_id" class="tom-selects w-full">
                                 <option value="">Please Select</option>
                                 @if(isset($statuses))
@@ -191,7 +194,10 @@
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
+                            <label for="term_declaration_id" class="form-label">
+                                Term <span class="text-danger">*</span>
+                                <i data-loading-icon="three-dots" class="w-6 h-3 ml-3 inline-flex dotLoader"></i>
+                            </label>
                             <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
                                 <option value="">Please Select</option>
                                 @if($student->assigned_terms && !empty($student->assigned_terms) && $student->assigned_terms->count() > 0)
@@ -200,6 +206,12 @@
                                     @endforeach
                                 @endif
                             </select>
+                        </div>
+                        <div class="mt-3 attenIndicatorWrap" style="display: none;">
+                            <label for="status_change_reason" class="form-label">Attendance Indicator</label>
+                            <div class="form-check form-switch">
+                                <input id="attendance_indicator" class="form-check-input" name="attendance_indicator" value="1" type="checkbox">
+                            </div>
                         </div>
                         <div class="mt-3">
                             <label for="status_change_reason" class="form-label">Change Reason</label>
@@ -213,7 +225,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateStatusBtn" class="btn btn-primary w-auto">
+                        <button disabled type="submit" id="updateStatusBtn" class="btn btn-primary w-auto">
                             Update Status
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">

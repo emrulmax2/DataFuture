@@ -18,9 +18,6 @@ import Dropzone from "dropzone";
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
-    if($("#change_status_id").length > 0){
-        let change_status_id = new TomSelect('#change_status_id', tomOptionsGlobal);
-    }
 
     /* Start Dropzone */
     if($("#addStudentPhotoModal").length > 0){
@@ -139,8 +136,57 @@ import Dropzone from "dropzone";
 
     /* Student Status Update */
     if($("#changeStudentModal").length > 0) {
+        let change_status_id = new TomSelect('#change_status_id', tomOptionsGlobal);
         const changeStudentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#changeStudentModal"));
         const successModalInfo = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModalInfo"));
+
+        $('#changeStudentModal #change_status_id, #changeStudentModal #term_declaration_id').on('change', function(){
+            var $theStatus = $('#changeStudentModal #change_status_id');
+            var $theTerm = $('#changeStudentModal #term_declaration_id');
+
+            var theStatus = $theStatus.val();
+            var theTerm = $theTerm.val();
+            var student_id = $('#changeStudentModal [name="student_id"]').val();
+            $('#changeStudentModal').find('dotLoader').fadeIn();
+
+            if(theStatus > 0 && theTerm > 0){
+                axios({
+                    method: "post",
+                    url: route('student.check.status'),
+                    data: {student_id : student_id, theStatus : theStatus, theTerm : theTerm},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        let res = response.data.res;
+                        if(res.indicator == 1){
+                            $('#changeStudentModal .attenIndicatorWrap #attendance_indicator').prop('checked', true);
+                        }else{
+                            $('#changeStudentModal .attenIndicatorWrap #attendance_indicator').prop('checked', false);
+                        }
+                        if(res.notice == 1){
+                            $('#changeStudentModal .attenIndicatorWrap').fadeIn('fast', function(){
+                                $('#changeStudentModal .attenIndicatorWrap .indNotice').remove();
+                                $('#changeStudentModal .attenIndicatorWrap').append('<div class="indNotice alert alert-warning-soft show flex items-center mt-3" role="alert"><span>'+res.msg+'</span></div>')
+                            });
+                        }else{
+                            $('#changeStudentModal .attenIndicatorWrap').fadeOut('fast', function(){
+                                $('#changeStudentModal .attenIndicatorWrap .indNotice').remove();
+                            });
+                        }
+
+                        $('#changeStudentModal').find('dotLoader').fadeOut();
+                        $('#changeStudentForm #updateStatusBtn').removeAttr('disabled');
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        console.log('error');
+                    }
+                });
+            }else{
+                $('#changeStudentModal').find('dotLoader').fadeOut();
+                $('#changeStudentForm #updateStatusBtn').attr('disabled', 'disabled');
+            }
+        })
 
         $('#changeStudentForm').on('submit', function(e){
             e.preventDefault();
