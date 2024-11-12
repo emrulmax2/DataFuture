@@ -124,8 +124,9 @@ class DashboardController extends Controller
 
             foreach($Query as $list):
                 $newApply =false;
-                if($list->status->name=="Rejected") {
+                if($list->status->id==8) {
                     $applicationList = Applicant::where('applicant_user_id',$list->applicant_user_id)->orderBy('id', 'DESC')->get()->first();
+                    
                     if($applicationList->status_id==8)
                         $newApply = true;
                     
