@@ -793,9 +793,15 @@ class UserHolidayController extends Controller
         $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
         $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $psd, $ped);
         $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
-        $taken_holiday = 0;
+        //$taken_holiday = 0;
 
-        $balance = (($holiday_entitlement - $taken_holiday) > 0 ? ($holiday_entitlement - $taken_holiday) : ($holiday_entitlement - $taken_holiday));
+        $existingLeaveHours = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $psd, $ped);
+        $leave_taken = $existingLeaveHours['taken'];
+        $leave_booked = $existingLeaveHours['booked'];
+        $leave_requested = $existingLeaveHours['requested'];
+        $total_taken = $existingLeaveHours['totalTaken'];
+
+        $balance = (($holiday_entitlement - $total_taken) > 0 ? ($holiday_entitlement - $total_taken) : ($holiday_entitlement - $total_taken));
         if($adjustmentOpt == 1):
             $balance = $balance + $adjustmentHour;
         elseif($adjustmentOpt == 2):
@@ -924,7 +930,7 @@ class UserHolidayController extends Controller
             $res['html'] = '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong> You do not have sufficient allowance to book holidays.</span></div>';
         endif;
 
-        return response()->json(['res' => $res], 200);
+        return response()->json(['res' => $res, 'balance' => $balance_left], 200);
     }
 
     public function employeeLeaveSubmission(Request $request){

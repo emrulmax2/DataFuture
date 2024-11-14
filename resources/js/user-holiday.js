@@ -111,10 +111,10 @@ import 'litepicker/dist/plugins/multiselect';
                         let dataset = response.data.res;
                         if(dataset.suc == 2){
                             $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').attr('disabled', 'disabled');
+                            $('#confirmRequest').attr('disabled', 'disabled').fadeOut();
                         }else{
                             $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').removeAttr('disabled');
+                            $('#confirmRequest').removeAttr('disabled').fadeIn();
                         }
                         createIcons({
                             icons,
@@ -136,7 +136,7 @@ import 'litepicker/dist/plugins/multiselect';
                 });
             }else{
                 $('.leaveFormStep2').fadeOut('fast').html('');
-                $('#confirmRequest').attr('disabled', 'disabled');
+                $('#confirmRequest').attr('disabled', 'disabled').fadeOut();
             }
         });
         leaveCalendar.on('multiselect.deselect', (date) => {
@@ -171,10 +171,10 @@ import 'litepicker/dist/plugins/multiselect';
                         let dataset = response.data.res;
                         if(dataset.suc == 2){
                             $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').attr('disabled', 'disabled');
+                            $('#confirmRequest').attr('disabled', 'disabled').fadeOut();
                         }else{
                             $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').removeAttr('disabled');
+                            $('#confirmRequest').removeAttr('disabled').fadeIn();
                         }
                         createIcons({
                             icons,
@@ -196,7 +196,7 @@ import 'litepicker/dist/plugins/multiselect';
                 });
             }else{
                 $('.leaveFormStep2').fadeOut('fast').html('');
-                $('#confirmRequest').attr('disabled', 'disabled');
+                $('#confirmRequest').attr('disabled', 'disabled').fadeOut();
             }
         });
 
@@ -213,7 +213,7 @@ import 'litepicker/dist/plugins/multiselect';
 
             leaveCalendar.clearSelection();
             $('.leaveFormStep2').fadeOut('fast').html('');
-            $('#confirmRequest').attr('disabled', 'disabled');
+            $('#confirmRequest').attr('disabled', 'disabled').fadeOut();
             
             if($LeaveYear.val() == '' || $LeavePattern.val() == '' || $LeaveType.val() == ''){
                 $('.holidayStatistics').html('<div class="alert alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <div><strong>Holiday Year, Work Pattern, or Type </strong> can not be empty.</div></div>');
