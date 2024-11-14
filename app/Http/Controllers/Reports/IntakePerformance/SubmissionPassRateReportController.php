@@ -170,8 +170,7 @@ class SubmissionPassRateReportController extends Controller
 
                                         $ASUB = $TOTAL - $A;
                                         $RATE = ($ASUB > 0 ? ($ASUB / $TOTAL) * 100 : 0);
-                                        //$PASSRATE = ($TOTALPASS > 0 ? ($TOTALPASS / $TOTAL) * 100 : 0);
-                                        $PASSRATE = ($TOTALPASS > 0 ? ($TOTALPASS / $ASUB) * 100 : 0);
+                                        $PASSRATE = ($TOTALPASS > 0 ? ($TOTALPASS / $TOTAL) * 100 : 0);
                                         
                                         $html .= '<tr class="termRow semesterTermRow_'.$semesterId.' termRow_'.$semesterId.'_'.$theCourseId.'" style="display: none;">';
                                             $html .= '<td style="padding-left: 35px">'.$termResult->term_name.'</td>';
@@ -191,8 +190,7 @@ class SubmissionPassRateReportController extends Controller
                                 endif;
                                 $CASUB = $CTOTAL - $CA;
                                 $CRATE = ($CASUB > 0 ? ($CASUB / $CTOTAL) * 100 : 0);
-                                //$CPASSRATE = ($CPASS > 0 ? ($CPASS / $CTOTAL) * 100 : 0);
-                                $CPASSRATE = ($CPASS > 0 ? ($CPASS / $CASUB) * 100 : 0);
+                                $CPASSRATE = ($CPASS > 0 ? ($CPASS / $CTOTAL) * 100 : 0);
 
                                 $courseReplace['[CRS_EXP_SUB_'.$semesterId.'_'.$theCourseId.']'] = $CTOTAL;
                                 $courseReplace['[CRS_ACT_SUB_'.$semesterId.'_'.$theCourseId.']'] = $CASUB;
@@ -203,8 +201,7 @@ class SubmissionPassRateReportController extends Controller
                         endif;
                         $SASUB = $STOTAL - $SA;
                         $SRATE = ($SASUB > 0 ? ($SASUB / $STOTAL) * 100 : 0);
-                        //$SPASSRATE = ($SPASS > 0 ? ($SPASS / $STOTAL) * 100 : 0);
-                        $SPASSRATE = ($SPASS > 0 ? ($SPASS / $SASUB) * 100 : 0);
+                        $SPASSRATE = ($SPASS > 0 ? ($SPASS / $STOTAL) * 100 : 0);
 
                         $semesterReplace['[SEM_EXP_SUB_'.$semesterId.']'] = $STOTAL;
                         $semesterReplace['[SEM_ACT_SUB_'.$semesterId.']'] = $SASUB;
@@ -225,8 +222,7 @@ class SubmissionPassRateReportController extends Controller
                 $html .= '<tfoot>';
                     $OASUB = $OTOTAL - $OA;
                     $ORATE = ($OASUB > 0 ? ($OASUB / $OTOTAL) * 100 : 0);
-                    //$OPASSRATE = ($OPASS > 0 ? ($OPASS / $OTOTAL) * 100 : 0);
-                    $OPASSRATE = ($OPASS > 0 ? ($OPASS / $OASUB) * 100 : 0);
+                    $OPASSRATE = ($OPASS > 0 ? ($OPASS / $OTOTAL) * 100 : 0);
                     
                     $html .= '<tr>';
                         $html .= '<th>Overall</th>';
