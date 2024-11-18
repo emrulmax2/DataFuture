@@ -144,8 +144,8 @@ class EmployeeWorkingPatternController extends Controller
                         $configuration['from_email'] = 'hr@lcc.ac.uk';
                         UserMailerJob::dispatch($configuration, [$employee->employment->email], new CommunicationSendMail('Canceled Leave Days', $empMessage, []));
 
-                        $hrMessage = 'Hi Dear, <br/><br/>';
-                        $hrMessage .= "Some of ".$employee->full_name."'s leave days have been canceled due to new working pattern creation. Here are the details:";
+                        //$hrMessage = 'Hi Dear, <br/><br/>';
+                        $hrMessage = "Some of ".$employee->full_name."'s leave days have been canceled due to new working pattern creation. Here are the details:";
                         $hrMessage .= '<ul>';
                             foreach($days as $day):
                                 $hrMessage .= '<li>'.date('jS F, Y', strtotime($day->leave_date)).'</li>';
