@@ -237,7 +237,8 @@ class Student extends Model
     }
 
     public function termStatus(){
-        return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->latestOfMany();
+        return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->orderBy('term_declaration_id', 'DESC');
+        //return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->latestOfMany();
     }
 
     public function award(){
