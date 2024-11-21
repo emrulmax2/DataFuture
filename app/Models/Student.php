@@ -207,7 +207,8 @@ class Student extends Model
     
     public function activeCR(){
 
-        return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1)->latestOfMany();
+        return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
+        //return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1)->latestOfMany();
         
     }
     public function ProofOfIdLatest() {
