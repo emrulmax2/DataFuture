@@ -184,6 +184,7 @@ class DashboardController extends Controller
         $theDate = Date('Y-m-d'); //'2023-11-24';
 
         $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
+        if(isset($dateTerm->plan)):
         $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',"Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $id){
             
             
@@ -195,7 +196,9 @@ class DashboardController extends Controller
         })->get();
 
         $undecidedUploads =  $planDates->count();
-
+    else:
+        $undecidedUploads = 0;
+    endif;  
         return $undecidedUploads;
 
     }
@@ -305,22 +308,25 @@ class DashboardController extends Controller
         $html = '';
 
         $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
+        if(isset($dateTerm->plan)):
+            $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',$uploadedType)->where('status','Completed')->whereHas('plan', function($q) use($dateTerm,$course_id, $personalTutorId){
+                
+                if($course_id > 0):
+                    $q->where('course_id', $course_id);
+                endif;
+                    $q->where('personal_tutor_id', $personalTutorId);
+                    $q->where('class_type', "Theory");
+                    $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
 
-        $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found',$uploadedType)->where('status','Completed')->whereHas('plan', function($q) use($dateTerm,$course_id, $personalTutorId){
-            
-            if($course_id > 0):
-                $q->where('course_id', $course_id);
-            endif;
-                $q->where('personal_tutor_id', $personalTutorId);
-                $q->where('class_type', "Theory");
-                $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
 
+            })->get()->sortBy(function($planDates, $key) {
 
-        })->get()->sortBy(function($planDates, $key) {
+                return date("Y-m-d H:i", strtotime($planDates->date." ".$planDates->plan->start_time));
 
-            return date("Y-m-d H:i", strtotime($planDates->date." ".$planDates->plan->start_time));
-
-        });
+            });
+        else:
+            $planDates = [];
+        endif;
 
         if(!empty($planDates) && $planDates->count() > 0):
             foreach($planDates as $pln):
