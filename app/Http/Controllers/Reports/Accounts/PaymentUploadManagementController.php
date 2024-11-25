@@ -469,7 +469,11 @@ class PaymentUploadManagementController extends Controller
             $student_course_id = (isset($student->activeCR->creation->course_id) && $student->activeCR->creation->course_id > 0 ? $student->activeCR->creation->course_id : false);
             $student_course_relation_id = (isset($student->activeCR->id) && $student->activeCR->id > 0 ? $student->activeCR->id : 0);
 
-            $slcAgreement = SlcAgreement::where('year', $history->year)->where('slc_coursecode', $history->course_code)->where('student_id', $history->student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->first();
+            if($student_course_id):
+                $slcAgreement = SlcAgreement::where('year', $history->year)->where('slc_coursecode', $history->course_code)->where('student_id', $history->student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->first();
+            else:
+                $slcAgreement = SlcAgreement::where('year', $history->year)->where('slc_coursecode', $history->course_code)->where('student_id', $history->student_id)->orderBy('student_course_relation_id', 'DESC')->get()->first();
+            endif;
 
             $invoice += 1;
             $invoice_no = '';
