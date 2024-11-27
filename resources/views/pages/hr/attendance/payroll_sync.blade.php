@@ -78,6 +78,15 @@
             </table>
         </form>
     </div>
+
+    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
+        <h2 class="text-lg font-medium mr-auto"></h2>
+        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
+            
+            <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+        </div>
+    </div>
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
