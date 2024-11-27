@@ -102,5 +102,22 @@ class EmployeeProfileController extends Controller
             "qualEntries" => $qualEntries,
         ]);
     }
+
+    public function storeProfileSetting(Request $request){
+        $employee_id = $request->employee_id;
+        $can_access_all = (isset($request->can_access_all) && $request->can_access_all > 0 ? $request->can_access_all : 0);
+        $locked_profile = (isset($request->locked_profile) && $request->locked_profile > 0 ? $request->locked_profile : 0);
+
+        if($employee_id > 0):
+            Employee::where('id', $employee_id)->update([
+                'can_access_all' => $can_access_all,
+                'locked_profile' => $locked_profile,
+            ]);
+
+            return response()->json(['msg' => 'Profile settings successfully updated.'], 200);
+        else:
+            return response()->json(['msg' => 'Something went wrong. Please try later or contact with the administrator.'], 422);
+        endif;
+    }
     
 }

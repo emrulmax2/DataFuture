@@ -96,6 +96,44 @@ if($("#addStudentPhotoModal").length > 0){
     });
 }
 /* End Dropzone */
+
+if($('#profileSettingsForm').length > 0){
+    const profileSettingsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#profileSettingsDropdown"));
+
+    $(document).on('click', '.dismisProfSetDropdown', function(e){
+        e.preventDefault();
+        profileSettingsDropdown.hide();
+    });
+    
+    $('#profileSettingsForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('profileSettingsForm');
+    
+        document.querySelector('#saveProfileSettingBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveProfileSettingBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('profile.employee.store.settings'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveProfileSettingBtn').removeAttribute('disabled');
+            document.querySelector("#saveProfileSettingBtn svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                profileSettingsDropdown.hide();
+            }
+        }).catch(error => {
+            document.querySelector('#saveProfileSettingBtn').removeAttribute('disabled');
+            document.querySelector("#saveProfileSettingBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
+}
     
 })();
 
