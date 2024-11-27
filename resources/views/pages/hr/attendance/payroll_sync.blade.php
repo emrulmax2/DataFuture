@@ -12,6 +12,10 @@
             <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
         </div>
     </div>
+    @php
+       $danger ="alert relative border rounded-md px-5 py-4 bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 mb-2 flex items-center";
+       $success ="relative border rounded-md px-5 py-4 bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 mb-2 flex items-center"
+    @endphp
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         {{-- <div class="overflow-x-auto scrollbar-hidden">
@@ -27,18 +31,19 @@
                         <th class="border-b-2 whitespace-no-wrap">Payslip Month</th>
                     </tr>
                 </thead>
+                
                 <tbody>
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
-                        <tr >
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                        <tr class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td>
                                 {{-- implent employee form dropdown list --}}
                                         <select id="employee_id" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
@@ -49,7 +54,7 @@
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                                     
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->month_year }}</div>
                             </td>
                         </tr>
