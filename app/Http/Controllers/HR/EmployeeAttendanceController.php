@@ -58,7 +58,7 @@ class EmployeeAttendanceController extends Controller
             $zip->close();
             // Get all extracted files
             $files = File::files($extractPath);
-
+            dd($files);
             // Loop through the files and store them in the desired location
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
