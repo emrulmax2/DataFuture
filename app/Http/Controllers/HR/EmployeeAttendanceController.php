@@ -41,7 +41,7 @@ class EmployeeAttendanceController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:zip|max:14048',
+            'file' => 'required|file|mimes:zip|max:200480',
         ]);
         $type = $request->type;
         $file = $request->file('file');
@@ -102,7 +102,7 @@ class EmployeeAttendanceController extends Controller
                     
                         
                     }
-                    
+
                     // payslipuploadSync table data insert if file_name and month_year not exist
                     $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                         [
