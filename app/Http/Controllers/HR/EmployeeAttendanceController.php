@@ -68,6 +68,7 @@ class EmployeeAttendanceController extends Controller
             
             // Get all extracted files
             foreach ($directories as $directoryName) {
+                dd($directoryName);
                 $files = File::files($extractPath.DIRECTORY_SEPARATOR.$directoryName);
                 
                 // Loop through the files and store them in the desired location
