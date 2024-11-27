@@ -67,8 +67,9 @@ class EmployeeAttendanceController extends Controller
             $directories = $this->getDirectories($extractPath);
             
             // Get all extracted files
-            foreach ($directories as $directoryName) {
-                dd($directoryName);
+            foreach ($directories as $path) {
+                
+                $directoryName = basename($path);
                 $files = File::files($extractPath.DIRECTORY_SEPARATOR.$directoryName);
                 
                 // Loop through the files and store them in the desired location
@@ -159,7 +160,7 @@ class EmployeeAttendanceController extends Controller
 
             // }
             // // Delete the temporary zip file
-            Storage::delete($tempPath);
+            //Storage::delete($tempPath);
             // //
             // array_map('unlink', glob("$extractPath/*"));
             // rmdir($extractPath);
