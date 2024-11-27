@@ -57,7 +57,7 @@ class EmployeeAttendanceController extends Controller
             
             $zip->extractTo($extractPath);
             $zip->close();
-            dd($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
+            
             // Get all extracted files
             $files = File::files($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
             
