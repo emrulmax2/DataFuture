@@ -15,7 +15,7 @@ class CountryExport implements FromCollection, WithHeadings
     public function collection()
     {
         return new Collection([
-            ['','','','','',]
+            ['','','','','','',]
         ]);
     }
 
@@ -26,7 +26,8 @@ class CountryExport implements FromCollection, WithHeadings
             'Is Hesa',
             'Hesa Code',
             'Is DF',
-            'DF Code'
+            'DF Code',
+            'Status'
         ];
     }
 }

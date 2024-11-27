@@ -145,7 +145,7 @@ class StudentDataReportController extends Controller
         $studentIds = [];
 
 
-        $QueryInner = StudentCourseRelation::with('creation');
+        $QueryInner = StudentCourseRelation::with('activeCreation');
         $QueryInner->where('active','=',1);
         if(!empty($evening_weekends) && ($evening_weekends==0 || $evening_weekends==1))
             $QueryInner->where('full_time',$evening_weekends);
@@ -153,7 +153,7 @@ class StudentDataReportController extends Controller
             $QueryInner->where('academic_year_id',$academic_years);
         
 
-            $studentIds =  $QueryInner->whereHas('creation', function($q) use($intake_semesters,$courses){
+            $studentIds =  $QueryInner->whereHas('activeCreation', function($q) use($intake_semesters,$courses){
                     if(!empty($intake_semesters))
                         $q->whereIn('semester_id', $intake_semesters);
                     if(!empty($courses))
@@ -484,6 +484,9 @@ class StudentDataReportController extends Controller
                             $rel = key($value);
                             $theCollection[$row][$j++] = (isset($student->termStatus->$rel)) ?$student->termStatus->$rel->name : "";
                         }else {
+                            // if($student->id == 16968) {
+                            //     dd($student->termStatus);
+                            // }
                             $theCollection[$row][$j++] = (isset($student->termStatus)) ? $student->termStatus->$key : "";
                         }
                     endforeach; 

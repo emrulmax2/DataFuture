@@ -217,6 +217,7 @@ use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
 use App\Http\Controllers\LibraryManagement\LibraryBookController;
 use App\Http\Controllers\LibraryManagementController;
+use App\Http\Controllers\PaySlipUploadSyncController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
@@ -270,6 +271,7 @@ use App\Http\Controllers\WblProfileController;
 use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
 use App\Models\HesaQualificationSubject;
+use App\Models\PaySlipUploadSync;
 
 /*
 |--------------------------------------------------------------------------
@@ -1212,6 +1214,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeProfileController::class)->group(function(){
         
         Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
+        Route::post('employee-profile/store-settings', 'storeProfileSetting')->name('profile.employee.store.settings'); 
     });
 
     Route::controller(EmployeeAddressController::class)->group(function() {
@@ -1366,6 +1369,14 @@ Route::middleware('auth')->group(function() {
         Route::delete('hr/attendance/delete', 'destroy')->name('hr.attendance.destroy.all');
         
         Route::post('hr/attendance/resyncronise', 'reSyncronise')->name('hr.attendance.re.sync');
+
+        Route::post('hr/attendance/upload', 'upload')->name('hr.attendance.payslip.upload');
+        Route::get('hr/attendance/payroll-sync/{month_year}', 'payrollSyncShow')->name('hr.attendance.payroll.sync');
+        
+    });
+    Route::resource('hr/payslip-upload', PaySlipUploadSyncController::class);
+    Route::controller(PaySlipUploadSyncController::class)->group(function(){
+        Route::post('hr/payslip-upload/list', 'list')->name('hr.payslip.sync.list');
     });
 
     Route::controller(EmployeePortalController::class)->group(function(){
@@ -2263,6 +2274,11 @@ Route::middleware('auth')->group(function() {
 
         Route::get('site-settings/holiday-year/leave-options/{id}', 'leaveOptions')->name('holiday.year.leave.option'); 
         Route::post('site-settings/holiday-year/leave-options', 'updateLeaveOptions')->name('holiday.year.update.leave.option'); 
+
+        Route::get('site-settings/holiday-year-month/{hr_holiday}', 'holidayMonthList')->name('holiday.month.list'); 
+        
+
+        
     });
     
     Route::controller(HrBankHolidayController::class)->group(function() {

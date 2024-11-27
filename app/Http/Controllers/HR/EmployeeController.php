@@ -62,6 +62,8 @@ class EmployeeController extends Controller
     }
 
     public function list(Request $request){
+        $currentEmp = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $can_access_all = (isset($currentEmp->id) && $currentEmp->id > 0 ? (isset($currentEmp->can_access_all) && $currentEmp->can_access_all > 0 ? $currentEmp->can_access_all : 0) : 0);
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
 
@@ -76,7 +78,8 @@ class EmployeeController extends Controller
         $query = DB::table('employees as emp')
                  ->select(
                     'emp.id', 'emp.first_name', 'emp.last_name', 'emp.mobile', 'emp.email', 'emp.deleted_at', 'emp.status', 'emp.photo','emp.user_id',
-                    'ttl.name as emp_title',
+                    'emp.can_access_all', 'emp.locked_profile', 
+                    'ttl.name as emp_title', 
                     'empt.works_number as empt_works_number', 
                     'ejt.name as ejt_name',
                     'dpt.name as dpt_name', 'ewt.name as ewt_name'
@@ -142,6 +145,8 @@ class EmployeeController extends Controller
                     'empt_works_number' => (isset($list->empt_works_number) ? $list->empt_works_number : ''),
                     'status' => $list->status,
                     'deleted_at' => $list->deleted_at,
+                    'emp_can_access_all' => $can_access_all,
+                    'locked_profile' => (isset($list->locked_profile) && $list->locked_profile > 0 ? $list->locked_profile : 0),
                     'url' => $url,
                     
                 ];
