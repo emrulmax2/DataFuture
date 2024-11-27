@@ -133,7 +133,7 @@
                                         <div class="dz-message" data-dz-message>
                                             <div class="text-lg font-medium">Drop files here or click to upload.</div>
                                             <div class="text-slate-500">
-                                                Upload pdf files.
+                                                Upload zip files.
                                             </div>
                                         </div>
                                         <input type="hidden" name="dir_name" value=""/>
