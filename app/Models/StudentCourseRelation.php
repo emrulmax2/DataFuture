@@ -37,6 +37,9 @@ class StudentCourseRelation extends Model
         return $this->belongsTo(CourseCreation::class, 'course_creation_id');
     }
 
+    public function activeCreation(){
+        return $this->belongsTo(CourseCreation::class, 'course_creation_id')->where('active', 1);
+    }
     public function course(): HasOneThrough
     {
         return $this->hasOneThrough(Course::class, CourseCreation::class,'id','id','course_creation_id','course_id');
