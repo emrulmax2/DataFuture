@@ -130,7 +130,16 @@ class EmployeeAttendanceController extends Controller
             }
 
             // Clean up the temporary files
+            //clean up any folder files in the zip extraction
+            
+            $macosxPath = $extractPath.DIRECTORY_SEPARATOR.'__MACOSX';
+            if (file_exists($macosxPath)) {
+                array_map('unlink', glob("$macosxPath/*"));
+                rmdir($macosxPath);
+            }
+            
             Storage::delete($tempPath);
+            //
             array_map('unlink', glob("$extractPath/*"));
             rmdir($extractPath);
         }
