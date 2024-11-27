@@ -22,7 +22,8 @@ class HesaGenderImport implements ToModel, WithHeadingRow
             'hesa_code' => (isset($row['is_hesa']) && $row['is_hesa'] == 1 && !empty($row['hesa_code']) ? $row['hesa_code'] : null),
             'is_df' => isset($row['is_df']) ? $row['is_df'] : 0,
             'df_code' => (isset($row['is_df']) && $row['is_df'] == 1 && !empty($row['df_code']) ? $row['df_code'] : null),
-            'created_by' => Auth::id()
+            'active' => (isset($row['status']) && $row['status'] > 0 ? $row['status'] : 0),
+            'created_by' => Auth::user()->id,
         ]);
     }
 }

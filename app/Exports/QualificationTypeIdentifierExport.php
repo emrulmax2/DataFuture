@@ -26,7 +26,8 @@ class QualificationTypeIdentifierExport implements FromCollection, WithHeadings
             'Is Hesa',
             'Hesa Code',
             'Is DF',
-            'DF Code'
+            'DF Code',
+            'Status'
         ];
     }
 }
