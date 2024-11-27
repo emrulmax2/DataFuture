@@ -117,7 +117,7 @@ import Toastify from 'toastify-js';
         drzn1.on('error', function (file, response) {
             dzError = true;
             errorData = response;
-            //console.log(response);
+            console.log(response);
         });
 
         drzn1.on('success', function (file, response) {
@@ -163,40 +163,14 @@ import Toastify from 'toastify-js';
                     ).val();
                     location.href = route('hr.attendance.payroll.sync',month_year);
                 }, 2000);
-            } else {
-                errorData.message;
-                const errorDataSet = errorData.errors;
-                let html =
-                    '<ul class=" list-decimal pl-5 font-medium text-sm">';
-
-                errorData.errors.forEach((element) => {
-                    html += '<li>' + element + '</li>';
-                });
-                html += '</ul>';
-                $('#displayError').removeClass('hidden');
-
-                $('#displayError .errorList').html('Students Data Not Found!');
-                $('#displayError .errorMessage').html(errorData.message);
-
-                $('#displayError .error-students').html(html);
-
-                document
-                    .getElementById('warningModal')
-                    .addEventListener('shown.tw.modal', function (event) {
-                        $('#warningModal .warningModalTitle').html(
-                            'Upload Failed!'
-                        );
-                        $('#warningModal .warningModalDesc').html(
-                            "Data Couldn't be uploaded due to mismatched data."
-                        );
-                        $('#warningModal .warningCloser').attr(
-                            'data-action',
-                            'DISMISS'
-                        );
-                    });
-
+            }else{
                 warningModal.show();
-                setTimeout(function () {
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html("Error Found!" );
+                    $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
+                    $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
+                });
+                setTimeout(function(){
                     warningModal.hide();
                     //window.location.reload();
                 }, 2000);

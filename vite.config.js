@@ -307,6 +307,9 @@ export default defineConfig({
 
                 'resources/js/location-settings.js',
                 'resources/js/student-attendance-term-status.js',
+
+                'resources/js/hr-payslipsync.js',
+                'resources/js/hr-payslipsync-show.js',
             ],
             refresh: true,
         }),
