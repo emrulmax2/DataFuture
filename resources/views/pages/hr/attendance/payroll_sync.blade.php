@@ -31,14 +31,14 @@
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
                         <tr >
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
                                 {{-- implent employee form dropdown list --}}
                                         <select id="employee_id" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
@@ -49,7 +49,7 @@
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                                     
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : '' }}">
+                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->month_year }}</div>
                             </td>
                         </tr>
