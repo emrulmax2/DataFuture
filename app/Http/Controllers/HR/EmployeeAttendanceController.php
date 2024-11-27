@@ -45,7 +45,7 @@ class EmployeeAttendanceController extends Controller
         ]);
         $type = $request->type;
         $file = $request->file('file');
-        $fileOriginalName = $file->getClientOriginalName();
+        $fileOriginalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $dirName = $request->dir_name;
         // Define a temporary location to store the uploaded zip file
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
