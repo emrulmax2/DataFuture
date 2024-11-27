@@ -50,11 +50,11 @@
                                                 @php
                                                 $html = '<div class="flex justify-start items-center">';
                                                     $html .= '<div class="w-10 h-10 intro-x image-fit mr-5">';
-                                                        $html .= '<img alt="#" class="rounded-full shadow" src="'.{{ $data->photo_url }}.'">';
+                                                        $html .= '<img alt="#" class="rounded-full shadow" src="'.$data->photo_url.'">';
                                                     $html .= '</div>';
                                                     $html .= '<div>';
-                                                        $html .= '<div class="font-medium whitespace-nowrap">'.{{ $data->full_name }}.'</div>';
-                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.{{ $data->status!=1 ? "InActive" : "Active" }}. ' - ' .{{ $data->id }}.'</div>';
+                                                        $html .= '<div class="font-medium whitespace-nowrap">'.$data->full_name.'</div>';
+                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.($data->status!=1 ? "InActive" : "Active" ). ' - ' .($data->id).'</div>';
                                                     $html .= '</div>';
                                                 $html .= '</div>';
                                                 @endphp
