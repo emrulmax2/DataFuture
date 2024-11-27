@@ -2273,6 +2273,11 @@ Route::middleware('auth')->group(function() {
 
         Route::get('site-settings/holiday-year/leave-options/{id}', 'leaveOptions')->name('holiday.year.leave.option'); 
         Route::post('site-settings/holiday-year/leave-options', 'updateLeaveOptions')->name('holiday.year.update.leave.option'); 
+
+        Route::get('site-settings/holiday-year-month/{hr_holiday}', 'holidayMonthList')->name('holiday.month.list'); 
+        
+
+        
     });
     
     Route::controller(HrBankHolidayController::class)->group(function() {
