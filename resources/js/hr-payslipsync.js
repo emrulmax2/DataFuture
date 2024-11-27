@@ -148,11 +148,7 @@ import Toastify from 'toastify-js';
                             'Congratulation!'
                         );
                         $('#successModal .successModalDesc').html(
-                            'Applicant document successfully uploaded.'
-                        );
-                        $('#successModal .successCloser').attr(
-                            'data-action',
-                            'RELOAD'
+                            'Payslip successfully uploaded.'
                         );
                     });
 
