@@ -13,8 +13,8 @@
         </div>
     </div>
     @php
-       $danger ="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 [&:hover:not(:disabled)]:bg-opacity-10 [&:hover:not(:disabled)]:border-opacity-10";
-       $success ="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 [&:hover:not(:disabled)]:bg-opacity-10 [&:hover:not(:disabled)]:border-opacity-10"
+       $danger ="alert relative border rounded-md px-5 py-4 bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 mb-2 flex items-center";
+       $success ="relative border rounded-md px-5 py-4 bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 mb-2 flex items-center"
     @endphp
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
@@ -35,7 +35,7 @@
                 <tbody>
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
-                        <tr {{ isset($paySlip->employee) ?  $success : $danger }}>
+                        <tr class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
                             <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
