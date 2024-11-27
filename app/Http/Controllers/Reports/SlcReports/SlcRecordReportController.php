@@ -239,15 +239,21 @@ class SlcRecordReportController extends Controller
             foreach($semester_ids as $semester_id):
                 $semester = Semester::find($semester_id);
                 $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
-                $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();
+                $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->pluck('student_id')->unique()->toArray();//->where('active', 1)
 
-                $slc_awb_registered = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($creations){
+                $slc_awb_registered = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->where(function($q){
+                                        $q->whereNotNull('reference')->where('reference', '!=', '');
+                                    })->whereHas('studentcrel', function($q) use($creations){
                                         $q->whereIn('course_creation_id', $creations);
                                     })->pluck('student_id')->unique()->toArray();
                 $year_1_registered = SlcRegistration::whereIn('student_id', $student_ids)->where('registration_year', 1)->whereIn('slc_registration_status_id', [1, 3])
-                                    ->pluck('student_id')->unique()->toArray();
+                                    ->whereHas('crel', function($q) use($creations){
+                                        $q->whereIn('course_creation_id', $creations);
+                                    })->pluck('student_id')->unique()->toArray();
                 $year_1_attendance = SlcAttendance::whereIn('student_id', $student_ids)->where('attendance_year', 1)->where('attendance_code_id', 1)
-                                    ->pluck('student_id')->unique()->toArray();
+                                    ->whereHas('crel', function($q) use($creations){
+                                        $q->whereIn('course_creation_id', $creations);
+                                    })->pluck('student_id')->unique()->toArray();
                 $slc_withdrawn = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_withdrawn_satuses)->pluck('id')->unique()->toArray();
                 $slc_interminate = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_interminate_satuses)->pluck('id')->unique()->toArray();
                 $slc_self_funded = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_self_funded_satuses)->pluck('id')->unique()->toArray();

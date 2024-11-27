@@ -150,7 +150,7 @@ class HesaGenderController extends Controller
     public function import(Request $request) {
         $file = $request->file('file');
         
-        Excel::import(new HesaGenderImport(),$file);
+        Excel::import(new HesaGenderImport(), $file);
         return response()->json(['message' => 'Data Uploaded!'], 202);
     }
 }
