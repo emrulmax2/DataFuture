@@ -13,8 +13,8 @@
         </div>
     </div>
     @php
-       $danger ="alert relative border rounded-md px-5 py-4 bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 mb-2 flex items-center";
-       $success ="relative border rounded-md px-5 py-4 bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 mb-2 flex items-center"
+       $danger ="relative border-none rounded-md bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 ";
+       $success ="relative border-none bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20"
     @endphp
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
@@ -25,10 +25,10 @@
             <table class="table table-report table-report--tabulator">
                 <thead>
                     <tr>
-                        <th class="border-b-2 whitespace-no-wrap">ID</th>
-                        <th class="border-b-2 whitespace-no-wrap">Payslip Name</th>
-                        <th class="border-b-2 whitespace-no-wrap">Designated Employee</th>
-                        <th class="border-b-2 whitespace-no-wrap">Payslip Month</th>
+                        <th class="border-none whitespace-no-wrap">ID</th>
+                        <th class="border-none whitespace-no-wrap">Payslip Name</th>
+                        <th class="border-none whitespace-no-wrap">Designated Employee</th>
+                        <th class="border-none whitespace-no-wrap">Payslip Month</th>
                     </tr>
                 </thead>
                 
