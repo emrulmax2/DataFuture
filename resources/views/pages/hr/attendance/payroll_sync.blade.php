@@ -44,7 +44,7 @@
                             </td>
                             <td>
                                 {{-- implent employee form dropdown list --}}
-                                        <select id="employee_id" class="lccTom lcc-tom-select w-full " name="employee_id[]">
+                                        <select id="employee_id_{{ $paySlip->id }}" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
                                                 @foreach($employees as $data)
                                                 @php
