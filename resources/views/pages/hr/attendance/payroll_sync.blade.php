@@ -12,6 +12,10 @@
             <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
         </div>
     </div>
+    @php
+       $danger ="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 [&:hover:not(:disabled)]:bg-opacity-10 [&:hover:not(:disabled)]:border-opacity-10";
+       $success ="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20 [&:hover:not(:disabled)]:bg-opacity-10 [&:hover:not(:disabled)]:border-opacity-10"
+    @endphp
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         {{-- <div class="overflow-x-auto scrollbar-hidden">
@@ -27,18 +31,19 @@
                         <th class="border-b-2 whitespace-no-wrap">Payslip Month</th>
                     </tr>
                 </thead>
+                
                 <tbody>
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
-                        <tr >
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
+                        <tr {{ isset($paySlip->employee) ?  $success : $danger }}>
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
+                            <td>
                                 {{-- implent employee form dropdown list --}}
                                         <select id="employee_id" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
@@ -49,7 +54,7 @@
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                                     
                             </td>
-                            <td class="border-b {{ isset($paySlip->employee) ? 'border-teal-400 text-teal-800' : 'border-red-600 text-red-700' }}">
+                            <td>
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->month_year }}</div>
                             </td>
                         </tr>
