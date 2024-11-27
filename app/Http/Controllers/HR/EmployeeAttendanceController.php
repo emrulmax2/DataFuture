@@ -57,7 +57,7 @@ class EmployeeAttendanceController extends Controller
             
             $zip->extractTo($extractPath);
             $zip->close();
-            
+
             // Get all extracted files
             $files = File::files($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
             
@@ -68,7 +68,7 @@ class EmployeeAttendanceController extends Controller
                     $fileName = $file->getFilename();
                     // Get the original name without extension
                     $originalNameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
-                    $destinationPath = 'public/uploads/employee_payslips/'.$dirName ;// Define the destination path
+                    $destinationPath = 'employee_payslips/'.$dirName ;// Define the destination path
                     
                     Storage::disk('public')->put($destinationPath . '/' . $fileName, File::get($file));
                     
