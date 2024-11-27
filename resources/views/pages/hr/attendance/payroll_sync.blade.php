@@ -58,7 +58,7 @@
                                                     $html .= '</div>';
                                                     $html .= '<div>';
                                                         $html .= '<div class="font-medium whitespace-nowrap">'.$data->full_name.'</div>';
-                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.($data->status!=1 ? "InActive" : "Active" ). ' - ' .($data->id).'</div>';
+                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.($data->status!=1 ? "- InActive" : "- Active" ). ' - ' .($data->id).'</div>';
                                                     $html .= '</div>';
                                                 $html .= '</div>';
                                                 @endphp
