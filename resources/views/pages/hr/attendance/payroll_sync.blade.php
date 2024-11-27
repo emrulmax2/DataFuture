@@ -4,8 +4,12 @@
     <title>{{ $title }}</title>
 @endsection
 @section('subcontent')
+@php
+    $date = DateTime::createFromFormat('Y-m', $month_year);
+    $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
+@endphp
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Payslips Month Of <u>{{ $month_year }}</u></h2>
+        <h2 class="text-lg font-medium mr-auto">Payslips for <u>{{ $formattedDate }}</u></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
