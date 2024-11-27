@@ -138,6 +138,7 @@ class EmployeeAttendanceController extends Controller
                 rmdir($macosxPath);
             }
             $macosxPath = $extractPath.DIRECTORY_SEPARATOR.'__MACOSX'.DIRECTORY_SEPARATOR.$fileOriginalName;
+            dd($macosxPath);
             if (file_exists($macosxPath)) {
                 array_map('unlink', glob("$macosxPath/*"));
                 rmdir($macosxPath);
