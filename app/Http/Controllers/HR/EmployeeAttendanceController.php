@@ -51,7 +51,7 @@ class EmployeeAttendanceController extends Controller
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
         
         $zip = new ZipArchive();
-        
+        $updated = false;
         if ($zip->open(storage_path('app/' . $tempPath)) === TRUE) {
             $extractPath = storage_path('app/temp/extracted');
             
@@ -124,7 +124,9 @@ class EmployeeAttendanceController extends Controller
                         'is_file_uploaded' => 1,
 
                     ]);
-                    
+                    if($paySlipUploadSync){
+                        $updated = true;
+                    }
                 
                 }
             }
@@ -150,12 +152,8 @@ class EmployeeAttendanceController extends Controller
             rmdir($extractPath);
         }
 
-       
         
-        
-        
-        
-        if($paySlipUploadSync){
+        if($updated) {
             return response()->json(['success' => 'File uploaded successfully']);
         }else{
             return response()->json(['error' => 'Failed to upload the file'], 500);
