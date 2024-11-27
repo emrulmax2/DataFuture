@@ -5,7 +5,7 @@
 @endsection
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">PaySlip Sync Of <u>{{ $month_year }}</u></h2>
+        <h2 class="text-lg font-medium mr-auto">Payslips Month Of <u>{{ $month_year }}</u></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
@@ -27,8 +27,7 @@
                     <tr>
                         <th class="border-none whitespace-no-wrap">ID</th>
                         <th class="border-none whitespace-no-wrap">Payslip Name</th>
-                        <th class="border-none whitespace-no-wrap">Designated Employee</th>
-                        <th class="border-none whitespace-no-wrap">Payslip Month</th>
+                        <th class="border-none whitespace-no-wrap">Employee</th>
                     </tr>
                 </thead>
                 
@@ -48,14 +47,26 @@
                                         <select id="employee_id" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
                                                 @foreach($employees as $data)
-                                                    <option {{ isset($paySlip->employee) && ($paySlip->employee->id ==$data->id) ? "selected" : ""  }} value="{{ $data->id }}">{{ $data->full_name }}</option>
+                                                @php
+                                                $html = '<div class="flex justify-start items-center">';
+                                                    $html .= '<div class="w-10 h-10 intro-x image-fit mr-5">';
+                                                        $html .= '<img alt="'.{{ $data->full_name }}.'" class="rounded-full shadow" src="'.{{ $data->photo_url }}.'">';
+                                                    $html .= '</div>';
+                                                    $html .= '<div>';
+                                                        $html .= '<div class="font-medium whitespace-nowrap">'.{{ $data->full_name }}.'</div>';
+                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.{{ $data->status!=1 ? "InActive" : "Active" }}. ' - ' .{{ $data->id }}'</div>';
+                                                    $html .= '</div>';
+                                                $html .= '</div>';
+                                                @endphp
+                                                    <option {{ isset($paySlip->employee) && ($paySlip->employee->id ==$data->id) ? "selected" : ""  }} value="{{ $data->id }}">
+                                                        
+                                                            {!! $html !!}
+
+                                                    </option>
                                                 @endforeach
                                         </select>
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                                     
-                            </td>
-                            <td>
-                                <div class="font-medium whitespace-no-wrap">{{ $paySlip->month_year }}</div>
                             </td>
                         </tr>
                     @endforeach
