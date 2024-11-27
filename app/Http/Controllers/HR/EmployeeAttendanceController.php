@@ -37,9 +37,15 @@ class EmployeeAttendanceController extends Controller
             'holiday_years' => $holidayList,
         ]);
     }
-
+    function getDirectories($path) {
+        $directories = array_filter(glob($path . '/*'), function($dir) {
+            return is_dir($dir) && basename($dir) !== '__MACOSX';
+        });
+        return $directories;
+    }
     public function upload(Request $request)
     {
+
         $request->validate([
             'file' => 'required|file|mimes:zip|max:200480',
         ]);
@@ -54,83 +60,87 @@ class EmployeeAttendanceController extends Controller
         $updated = false;
         if ($zip->open(storage_path('app/' . $tempPath)) === TRUE) {
             $extractPath = storage_path('app/temp/extracted');
-            
             $zip->extractTo($extractPath);
             $zip->close();
 
-            // Get all extracted files
-            $files = File::files($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
+            // Get the list of directories in app/temp/extracted, excluding __MACOSX
+            $directories = $this->getDirectories($extractPath);
             
-            // Loop through the files and store them in the desired location
-            foreach ($files as $file) {
-                if ($file !== '.' && $file !== '..') {
-                    // Store the file in the 'public' disk with its original name
-                    $fileName = $file->getFilename();
-                    // Get the original name without extension
-                    $originalNameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
-                    $destinationPath = 'employee_payslips/'.$dirName ;// Define the destination path
-                    
-                    Storage::disk('public')->put($destinationPath . '/' . $fileName, File::get($file));
-                    
-                    // Get the file path after storage
-                    $filePath = Storage::disk('public')->url($destinationPath . '/' . $fileName);
-                    
-                    $paySlipUploadSync = [];
-                    $employeeList =Employee::all();
-
-                    foreach($employeeList as $employee) {
-                        // find employee first_name and last_name from $fileName string
-                        // Extract first_name and last_name from the filename
-
-                        $fileNameArray = explode(' ', strtoupper($originalNameWithoutExtension));
-                        
-                        if(in_array(strtoupper(trim($employee->first_name)), $fileNameArray) && in_array(strtoupper(trim($employee->last_name)), $fileNameArray)){
-
-                            $employeeFound = $employee->id;
-                            break;
-
-                        } else {
-                                $employeeFound = 0;
-                                $paySync=PaySlipUploadSync::all();
-                                foreach($paySync as $pay) {
+            // Get all extracted files
+            foreach ($directories as $directoryName) {
+                $files = File::files($extractPath.DIRECTORY_SEPARATOR.$directoryName);
                 
-                                    if($pay->file_name == $fileName && $pay->employe_id != null) {
-                
-                                        $employeeFound = $employee->id;
-                                        break;
-                                    }
-                                }
-                        }   
-                    
+                // Loop through the files and store them in the desired location
+                foreach ($files as $file) {
+                    if ($file !== '.' && $file !== '..') {
+                        // Store the file in the 'public' disk with its original name
+                        $fileName = $file->getFilename();
+                        // Get the original name without extension
+                        $originalNameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
+                        $destinationPath = 'employee_payslips/'.$dirName ;// Define the destination path
                         
-                    }
+                        Storage::disk('public')->put($destinationPath . '/' . $fileName, File::get($file));
+                        
+                        // Get the file path after storage
+                        $filePath = Storage::disk('public')->url($destinationPath . '/' . $fileName);
+                        
+                        $paySlipUploadSync = [];
+                        $employeeList =Employee::all();
 
-                    // payslipuploadSync table data insert if file_name and month_year not exist
-                    $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
-                        [
+                        foreach($employeeList as $employee) {
+                            // find employee first_name and last_name from $fileName string
+                            // Extract first_name and last_name from the filename
+
+                            $fileNameArray = explode(' ', strtoupper($originalNameWithoutExtension));
                             
+                            if(in_array(strtoupper(trim($employee->first_name)), $fileNameArray) && in_array(strtoupper(trim($employee->last_name)), $fileNameArray)){
+
+                                $employeeFound = $employee->id;
+                                break;
+
+                            } else {
+                                    $employeeFound = 0;
+                                    $paySync=PaySlipUploadSync::all();
+                                    foreach($paySync as $pay) {
+                    
+                                        if($pay->file_name == $fileName && $pay->employe_id != null) {
+                    
+                                            $employeeFound = $employee->id;
+                                            break;
+                                        }
+                                    }
+                            }   
+                        
+                            
+                        }
+
+                        // payslipuploadSync table data insert if file_name and month_year not exist
+                        $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
+                            [
+                                
+                                'file_name' => $fileName,
+                                'month_year' => $dirName,
+
+                            ],[
+                            'employee_id' => ($employeeFound) ? $employeeFound : NULL,
                             'file_name' => $fileName,
+                            'file_path' => $filePath,
                             'month_year' => $dirName,
+                            'type' => isset($type) ? $type : 'Payslip',
+                            'is_file_exist' => ($employeeFound) ? 1 : 0,
+                            'file_transffered' => 0,
+                            'file_transffered_at' => null,
+                            'is_file_uploaded' => 1,
 
-                        ],[
-                        'employee_id' => ($employeeFound) ? $employeeFound : NULL,
-                        'file_name' => $fileName,
-                        'file_path' => $filePath,
-                        'month_year' => $dirName,
-                        'type' => isset($type) ? $type : 'Payslip',
-                        'is_file_exist' => ($employeeFound) ? 1 : 0,
-                        'file_transffered' => 0,
-                        'file_transffered_at' => null,
-                        'is_file_uploaded' => 1,
-
-                    ]);
-                    if($paySlipUploadSync){
-                        $updated = true;
+                        ]);
+                        if($paySlipUploadSync){
+                            $updated = true;
+                        }
+                    
                     }
-                
                 }
+                break;
             }
-
             // Clean up the temporary files
             //clean up any folder files in the zip extraction
 
@@ -148,7 +158,7 @@ class EmployeeAttendanceController extends Controller
 
             // }
             // // Delete the temporary zip file
-            //Storage::delete($tempPath);
+            Storage::delete($tempPath);
             // //
             // array_map('unlink', glob("$extractPath/*"));
             // rmdir($extractPath);
