@@ -45,20 +45,22 @@ class EmployeeAttendanceController extends Controller
         ]);
         $type = $request->type;
         $file = $request->file('file');
-        
+        $fileOriginalName = $file->getClientOriginalName();
         $dirName = $request->dir_name;
         // Define a temporary location to store the uploaded zip file
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
         
         $zip = new ZipArchive();
-
+        
         if ($zip->open(storage_path('app/' . $tempPath)) === TRUE) {
             $extractPath = storage_path('app/temp/extracted');
+            
             $zip->extractTo($extractPath);
             $zip->close();
+            dd($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
             // Get all extracted files
-            $files = File::files($extractPath);
-            dd($files);
+            $files = File::files($extractPath.DIRECTORY_SEPARATOR.$fileOriginalName);
+            
             // Loop through the files and store them in the desired location
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
