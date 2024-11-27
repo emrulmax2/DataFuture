@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\HolidayYearRequest;
 use App\Models\HrHolidayYear;
 use App\Models\HrHolidayYearLeaveOption;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class HolidayYearController extends Controller
@@ -70,6 +71,31 @@ class HolidayYearController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
+
+    public function holidayMonthList(HrHolidayYear $hr_holiday){
+        
+        $holidayYear = HrHolidayYear::where('id', $hr_holiday->id)->get()->first();
+    
+        $directoryNames = $this->getMonthYearList($holidayYear->start_date,$holidayYear->end_date);
+        
+        return response()->json($directoryNames);
+    }
+
+    public function getMonthYearList($start_date, $end_date)
+    {
+        $start = Carbon::parse($start_date);
+        $end = Carbon::parse($end_date);
+        $months = [];
+
+        while ($start->lte($end)) {
+            $months[] = ['value'=>$start->format('Y-m'), 'text'=>$start->format('M-Y')]; 
+            
+            $start->addMonth();
+        }
+
+        return $months;
+    }
+
 
     public function store(HolidayYearRequest $request){
         $data = HrHolidayYear::create([
