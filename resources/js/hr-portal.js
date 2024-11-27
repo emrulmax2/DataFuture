@@ -82,7 +82,7 @@ var employeeListTable = (function () {
                 });
             },
             rowClick:function(e, row){
-                if(row.getData().status == 1 || row.getData().status == 0 || row.getData().status == 4){
+                if((row.getData().locked_profile == 0 || row.getData().emp_can_access_all == 1) && (row.getData().status == 1 || row.getData().status == 0 || row.getData().status == 4)){
                     window.open(row.getData().url, '_blank');
                 }
             }
@@ -178,7 +178,7 @@ var employeeListTable = (function () {
     });
 
     const addTempEmployeeModalEl = document.getElementById('addTempEmployeeModal')
-    addTempEmployeeModalEl.addEventListener('hide.tw.modal', function(event) {
+    addTempEmployeeModalEl.addEventListener('hide.tw.modal', function(event){
         $('#addTempEmployeeModal .modal-body input').val('');
     });
 

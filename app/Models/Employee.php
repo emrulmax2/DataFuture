@@ -35,6 +35,8 @@ class Employee extends Model
         'disability_status',
         "photo",
         "status",
+        "can_access_all",
+        "locked_profile",
     ];
 
     /**
