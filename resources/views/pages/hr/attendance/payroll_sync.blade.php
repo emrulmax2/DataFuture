@@ -4,12 +4,16 @@
     <title>{{ $title }}</title>
 @endsection
 @section('subcontent')
+@php
+    $date = DateTime::createFromFormat('Y-m', $month_year);
+    $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
+@endphp
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Payslips Month Of <u>{{ $month_year }}</u></h2>
+        <h2 class="text-lg font-medium mr-auto">Payslips for <u>{{ $formattedDate }}</u></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
-            <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+            
         </div>
     </div>
     @php
@@ -48,19 +52,25 @@
                                             <option value="">Please Select</option>
                                                 @foreach($employees as $data)
                                                 @php
-                                                $html = '<div class="flex justify-start items-center">';
-                                                    $html .= '<div class="w-10 h-10 intro-x image-fit mr-5">';
-                                                        $html .= '<img alt="#" class="rounded-full shadow" src="'.{{ $data->photo_url }}.'">';
-                                                    $html .= '</div>';
-                                                    $html .= '<div>';
-                                                        $html .= '<div class="font-medium whitespace-nowrap">'.{{ $data->full_name }}.'</div>';
-                                                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.{{ $data->status!=1 ? "InActive" : "Active" }}. ' - ' .{{ $data->id }}.'</div>';
-                                                    $html .= '</div>';
-                                                $html .= '</div>';
+                                                // $html = '<div class="flex justify-start items-center">';
+                                                //     $html .= '<div class="w-10 h-10 intro-x image-fit mr-5">';
+                                                //         $html .= '<img alt="#" class="rounded-full shadow" src="'.$data->photo_url.'">';
+                                                //     $html .= '</div>';
+                                                //     $html .= '<div>';
+                                                //         $html .= '<div class="font-medium whitespace-nowrap">'.$data->full_name.'</div>';
+                                                //         $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.($data->status!=1 ? " - InActive" : " - Active" ). ' - ' .($data->id).'</div>';
+                                                //     $html .= '</div>';
+                                                // $html .= '</div>';
                                                 @endphp
-                                                    <option {{ isset($paySlip->employee) && ($paySlip->employee->id ==$data->id) ? "selected" : ""  }} value="{{ $data->id }}">
-                                                        
-                                                            {!! $html !!}
+                                                    <option {{ isset($paySlip->employee) && ($paySlip->employee->id ==$data->id) ? "selected" : ""  }} value="{{ $data->id }}"
+                                                        data-photo-url="{{ $data->photo_url }}" 
+                                                        data-status="{{ $data->status }}" 
+                                                        data-id="{{ $data->id }}" 
+                                                        {{ isset($paySlip->employee) && ($paySlip->employee->id == $data->id) ? "selected" : "" }} 
+                                                        value="{{ $data->id }}"
+                                                    >
+                                                        {{ $data->full_name }}
+                                                    </option>
 
                                                     </option>
                                                 @endforeach
@@ -73,6 +83,15 @@
                 </tbody>
             </table>
         </form>
+    </div>
+
+    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
+        <h2 class="text-lg font-medium mr-auto"></h2>
+        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
+            
+            <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+        </div>
     </div>
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">

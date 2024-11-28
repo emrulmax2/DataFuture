@@ -156,19 +156,55 @@ var hrPayslipListTable = (function () {
         },
     };
 
-    $('.lccTom').each(function () {
-        if ($(this).attr('multiple') !== undefined) {
-            tomOptions = {
-                ...tomOptions,
-                plugins: {
-                    ...tomOptions.plugins,
-                    remove_button: {
-                        title: 'Remove this item',
-                    },
+    // $('.lccTom').each(function () {
+    //     if ($(this).attr('multiple') !== undefined) {
+    //         tomOptions = {
+    //             ...tomOptions,
+    //             plugins: {
+    //                 ...tomOptions.plugins,
+    //                 remove_button: {
+    //                     title: 'Remove this item',
+    //                 },
+    //             },
+    //         };
+    //     }
+    //     new TomSelect(this, tomOptions);
+    // });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.lcc-tom-select').forEach(function(selectElement) {
+            new TomSelect(selectElement, {
+                render: {
+                    option: function(data, escape) {
+                        console.log(data);
+                        return '<div class="flex justify-start items-center">' +
+                            '<div class="w-10 h-10 intro-x image-fit mr-5">' +
+                                '<img alt="' + escape(data.text) + '" class="rounded-full shadow" src="' + escape(data.photo_url) + '">' +
+                            '</div>' +
+                            '<div>' +
+                                '<div class="font-medium whitespace-nowrap">' + escape(data.text) + '</div>' +
+                                '<div class="text-slate-500 text-xs whitespace-nowrap">' + (data.status != 1 ? "InActive" : "Active") + ' - ' + escape(data.id) + '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }
                 },
-            };
-        }
-        new TomSelect(this, tomOptions);
+                placeholder: 'Search Here...',
+                allowEmptyOption: true,
+                onChange: function(value) {
+                    // Find the closest table row
+                    var row = selectElement.closest('tr');
+                    if (value) {
+                        // Change the row color to success (green) if a value is selected
+                        row.style.backgroundColor = '#d4edda'; // Bootstrap success background color
+                        row.style.color = '#155724'; // Bootstrap success text color
+                    } else {
+                        // Change the row color to danger (red) if no value is selected
+                        row.style.backgroundColor = '#f8d7da'; // Bootstrap danger background color
+                        row.style.color = '#721c24'; // Bootstrap danger text color
+                    }
+                }
+            });
+        });
     });
     $('#hrPaySlipBtn').on('click', function (event) {
         $(".loading").removeClass('hidden');
@@ -207,7 +243,7 @@ var hrPayslipListTable = (function () {
                 }, 2000);
             }
         }).catch(error => {
-            $(".loading").removeClass('hidden');
+            $(".loading").addClass('hidden');
             
             if (error.response) {
                 if (error.response.status == 422) {

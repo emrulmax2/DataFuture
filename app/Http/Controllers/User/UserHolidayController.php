@@ -16,6 +16,7 @@ use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\Employment;
 use App\Models\HrBankHoliday;
 use App\Models\HrHolidayYear;
+use App\Models\HrVacancy;
 use App\Models\Option;
 use App\Models\User;
 use DateTime;
@@ -63,6 +64,7 @@ class UserHolidayController extends Controller
                 'disableDates' => $empLeaveDisableDates,
                 'disableDays' => $empLeaveDisableDays,
             ],
+            'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
     }
 

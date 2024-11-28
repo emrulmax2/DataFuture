@@ -30,4 +30,11 @@
             </a>
         </li>
     @endif
+    @if(isset($vacanties) && $vacanties > 0)
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('user.account.vacancy') }}" class="nav-link py-4 {{ Route::currentRouteName() == 'user.account.vacancy' ? 'active' : '' }}">
+            Vacancies
+        </a>
+    </li>
+    @endif
 </ul>

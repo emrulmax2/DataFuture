@@ -17,6 +17,7 @@ use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\Employment;
 use App\Models\HrBankHoliday;
 use App\Models\HrHolidayYear;
+use App\Models\HrVacancy;
 use App\Models\User;
 use DateTime;
 use Illuminate\Http\Request;
@@ -49,7 +50,8 @@ class MyStaffController extends Controller
             'appraisal' => EmployeeAppraisal::whereIn('employee_id', $auth_emp_ids)->where('due_on', '<=', $expireDate)->whereNull('completed_on')
                           ->whereHas('employee', function($q){
                                $q->where('status', 1);
-                          })->orderBy('due_on', 'ASC')->skip(0)->limit(5)->get()
+                          })->orderBy('due_on', 'ASC')->skip(0)->limit(5)->get(),
+            'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
     }
 

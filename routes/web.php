@@ -210,6 +210,7 @@ use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\EmployeeEducationalQualificationController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
+use App\Http\Controllers\HR\portal\VacancyController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\InternalLinkController;
@@ -267,6 +268,7 @@ use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
 use App\Http\Controllers\TutorModuleActivityController;
 use App\Http\Controllers\User\MyGroupController;
 use App\Http\Controllers\User\MyStaffController;
+use App\Http\Controllers\User\MyVacancyController;
 use App\Http\Controllers\WblProfileController;
 use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
@@ -3087,6 +3089,23 @@ Route::middleware('auth')->group(function() {
     Route::controller(AttendanceTermStatusController::class)->group(function() {
         Route::get('student/attendance-term-status-list', 'list')->name('student.attendance.term.status.list'); 
     }); 
+
+    Route::controller(VacancyController::class)->group(function(){
+        Route::get('hr/portal/vacancies', 'index')->name('hr.portal.vacancy'); 
+        Route::get('hr/portal/vacancies/list', 'list')->name('hr.portal.vacancy.list'); 
+        Route::post('hr/portal/vacancies/store', 'store')->name('hr.portal.vacancy.store'); 
+        Route::get('hr/portal/vacancies/edit/{vacancy}', 'edit')->name('hr.portal.vacancy.edit'); 
+        Route::post('hr/portal/vacancies/update', 'update')->name('hr.portal.vacancy.update'); 
+
+        Route::delete('hr/portal/vacancies/delete/{id}', 'destroy')->name('hr.portal.vacancy.destory');
+        Route::post('hr/portal/vacancies/restore/{id}', 'restore')->name('hr.portal.vacancy.restore');
+        Route::post('hr/portal/vacancies/update-status/{id}', 'updateStatus')->name('hr.portal.vacancy.update.status');
+    });
+
+    Route::controller(MyVacancyController::class)->group(function(){
+        Route::get('my-account/vacancies', 'index')->name('user.account.vacancy'); 
+        Route::get('my-account/vacancies/list', 'list')->name('user.account.vacancy.list'); 
+    });
     
 });
 

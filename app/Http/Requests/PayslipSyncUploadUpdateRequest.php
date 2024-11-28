@@ -34,9 +34,9 @@ class PayslipSyncUploadUpdateRequest extends FormRequest
         // Loop through the possible indices and create custom messages
         foreach (range(0, 100) as $index) {
             $textIndex = "top"; //$this->numberToText($index);
-            $messages["employee_id.$index.required"] = "The employee at position $textIndex row is required.";
-            $messages["employee_id.$index.integer"] = "The employee at position $textIndex row must be an integer.";
-            $messages["employee_id.$index.exists"] = "The employee at position $textIndex row does not exist.";
+            $messages["employee_id.$index.required"] = "The employee at $textIndex row position is required.";
+            $messages["employee_id.$index.integer"] = "The employee at $textIndex row position must be an integer.";
+            $messages["employee_id.$index.exists"] = "The employee at $textIndex row position does not exist.";
         }
 
         return $messages;
