@@ -21,7 +21,10 @@ class AccCategoryController extends Controller
             'categories' => $this->catTree(0, 0),
             'inflows' => $this->catTreeGraphicInflow(0, 0),
             'outflows' => $this->catTreeGraphicOutflow(0, 1),
-            'lavel' => 1
+            'lavel' => 1,
+            
+            'inflow_parents' => AccCategory::where('trans_type', 0)->where('status', 1)->where('parent_id', 0)->orderBy('category_name', 'ASC')->get(),
+            'outflow_parents' => AccCategory::where('trans_type', 1)->where('status', 1)->where('parent_id', 0)->orderBy('category_name', 'ASC')->get()
         ]);
     }
 
@@ -168,5 +171,32 @@ class AccCategoryController extends Controller
     public function destroy($id){
         $data = AccCategory::find($id)->delete();
         return response()->json($data);
+    }
+
+    public function getTreeHtml(Request $request){
+        $type = $request->type;
+        $category_id = $request->category_id;
+
+        $html = '';
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $category_id)->where('status', 1)->orderBy('category_name', 'ASC')->get();
+        if($categories->count() > 0):
+            $html .= '<ul class="theChild">';
+                foreach($categories as $cat):
+                    $html .= '<li class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : '').' relative">';
+                        $html .= '<a href="javascript:void(0);" data-type="'.$type.'" data-category="'.$cat->id.'" class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '').' flex items-center text-primary font-medium">'.$cat->category_name.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '').' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                        $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
+                            $html .= '<button data-id="'.$cat->id.'" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>';
+                            $html .= '<button data-id="'.$cat->id.'" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>';
+                        $html .= '</div>';
+                    $html .= '</li>';
+                endforeach;
+            $html .= '</ul>';
+        else:
+            $html .= '<ul class="errorUL theChild">';
+                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Child Categories not found!</div></li>';
+            $html .= '</ul>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
     }
 }

@@ -69,32 +69,38 @@
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3 lg:col-span-3">
-                            <select class="w-full form-control" id="acc_category_id_in" name="acc_category_id_in">
-                                <option value="">Please Select Category</option>
-                                @if(!empty($in_categories))
-                                    @foreach($in_categories as $cat)
-                                        <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <select class="w-full form-control" id="acc_category_id_out" name="acc_category_id_out" style="display: none;">
-                                <option value="">Please Select Category</option>
-                                @if(!empty($out_categories))
-                                    @foreach($out_categories as $cat)
-                                        <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <select class="w-full form-control" id="acc_bank_id" name="acc_bank_id" style="display: none;">
-                                <option value="">Please Select Storage</option>
-                                @if(!empty($banks))
-                                    @foreach($banks as $bnk)
-                                        @if($bnk->id != $bank->id)
-                                        <option value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
-                                        @endif
-                                    @endforeach
-                                @endif
-                            </select>
+                            <div id="acc_category_id_in_wrap">
+                                <select class="w-full tom-selects" id="acc_category_id_in" name="acc_category_id_in">
+                                    <option value="">Please Select Category</option>
+                                    @if(!empty($in_categories))
+                                        @foreach($in_categories as $cat)
+                                            <option {{ (isset($cat['disabled']) && $cat['disabled'] == 1 ? 'disabled' : '') }} value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div id="acc_category_id_out_wrap" style="display: none;">
+                                <select class="w-full  tom-selects" id="acc_category_id_out" name="acc_category_id_out">
+                                    <option value="">Please Select Category</option>
+                                    @if(!empty($out_categories))
+                                        @foreach($out_categories as $cat)
+                                            <option {{ (isset($cat['disabled']) && $cat['disabled'] == 1 ? 'disabled' : '') }} value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div id="acc_bank_id_wrap" style="display: none;">
+                                <select class="w-full tom-selects" id="acc_bank_id" name="acc_bank_id">
+                                    <option value="">Please Select Storage</option>
+                                    @if(!empty($banks))
+                                        @foreach($banks as $bnk)
+                                            @if($bnk->id != $bank->id)
+                                            <option value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3 lg:col-span-3">
                             <div class="grid grid-cols-12 gap-4">

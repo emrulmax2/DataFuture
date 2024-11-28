@@ -25,7 +25,22 @@
             <div class="grid grid-cols-2 gap-6">
                 <div class="intro-y box p-5 mt-5">
                     <h2 class="text-lg font-medium mr-auto pb-5">Inflow</h2>
-                    <div class="overflow-x-auto scrollbar-hidden">
+                    <div class="overflow-x-auto scrollbar-hidden planTreeWrap categoryTreeWrap" id="inflowCategoryWrap">
+                        @if(!empty($inflow_parents))
+                            <ul class="classPlanTree">
+                                @foreach($inflow_parents as $cat)
+                                    <li class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : 'notHasChild') }} relative">
+                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                        <div class="settingBtns flex justify-end items-center absolute"> 
+                                            <button data-id="{{$cat->id}}" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>
+                                            <button data-id="{{$cat->id}}" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    {{--<div class="overflow-x-auto scrollbar-hidden">
                         <table class="table table-sm table-striped table-bordered tbl_catagoryType">
                             <thead>
                                 <tr>                                       
@@ -43,11 +58,26 @@
                                 @endif
                             </tbody>
                         </table>
-                    </div>
+                    </div>--}}
                 </div>
                 <div class="intro-y box p-5 mt-5">
                     <h2 class="text-lg font-medium mr-auto pb-5">Outflow</h2>
-                    <div class="overflow-x-auto scrollbar-hidden">
+                    <div class="overflow-x-auto scrollbar-hidden planTreeWrap categoryTreeWrap" id="outflowCategoryWrap">
+                        @if(!empty($outflow_parents))
+                            <ul class="classPlanTree">
+                                @foreach($outflow_parents as $cat)
+                                    <li class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : 'notHasChild') }} relative">
+                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                        <div class="settingBtns flex justify-end items-center absolute"> 
+                                            <button data-id="{{$cat->id}}" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>
+                                            <button data-id="{{$cat->id}}" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                    {{--<div class="mt-5 overflow-x-auto scrollbar-hidden">
                         <table class="table table-sm table-striped table-bordered tbl_catagoryType">
                             <thead>
                                 <tr>                                       
@@ -65,7 +95,7 @@
                                 @endif
                             </tbody>
                         </table>
-                    </div>
+                    </div>--}}
                 </div>
             </div>
         </div>
