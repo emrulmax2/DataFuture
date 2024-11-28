@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\EmployeeGroup;
 use App\Models\EmployeeGroupMember;
 use App\Models\Employment;
+use App\Models\HrVacancy;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -25,7 +26,8 @@ class MyGroupController extends Controller
             'user' => $userData,
             'employee' => $employee,
             'employment' => $employment,
-            'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
+            'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
+            'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
     }
 

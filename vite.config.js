@@ -310,6 +310,8 @@ export default defineConfig({
 
                 'resources/js/hr-payslipsync.js',
                 'resources/js/hr-payslipsync-show.js',
+                'resources/js/hr-portal-vacancy.js',
+                'resources/js/user-vacancy.js',
             ],
             refresh: true,
         }),

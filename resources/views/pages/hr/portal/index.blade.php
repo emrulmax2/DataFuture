@@ -216,8 +216,8 @@
             </div>
         </div>
         <div class="col-span-12 2xl:col-span-3">
-            <div class="2xl:border-l -mb-10 pb-10">
-                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6">
+            <div class="2xl:border-l 2xl:h-full -mb-10 pb-10">
+                <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6 relative">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Passport Expiry</h2>
@@ -345,8 +345,9 @@
                             @endif
                         </div>
                     </div>
-
                 </div>
+
+                <a href="{{ route('hr.portal.vacancy') }}" class="btn btn-twitter w-auto justify-center absolute b-0 r-0 mb-6 mr-6"><i data-lucide="list-todo" class="w-4 h-4 mr-2"></i> Vacancies</a>
             </div>
         </div> 
     </div>
