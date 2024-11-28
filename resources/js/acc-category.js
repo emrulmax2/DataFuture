@@ -18,6 +18,7 @@ import TomSelect from "tom-select";
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
+    
     const addCategoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCategoryModal"));
     const editCategoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCategoryModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -113,7 +114,7 @@ import TomSelect from "tom-select";
         });
     });
 
-    $(".tbl_catagoryType").on("click", ".edit_btn", function () {      
+    $(".categoryTreeWrap").on("click", ".edit_btn", function () {      
         let $editBtn = $(this);
         let editId = $editBtn.attr("data-id");
 
@@ -203,7 +204,7 @@ import TomSelect from "tom-select";
         });
     });
 
-    $('.tbl_catagoryType').on('click', '.delete_btn', function(){
+    $('.categoryTreeWrap').on('click', '.delete_btn', function(){
         let $statusBTN = $(this);
         let rowID = $statusBTN.attr('data-id');
 
@@ -251,4 +252,44 @@ import TomSelect from "tom-select";
         }
     })
 
+    /* Get Tree HTML By Parent Start */
+    $('.classPlanTree').on('click', '.parent_category', function(e){
+        e.preventDefault();
+        var $link = $(this);
+        var $parent = $link.parent('li');
+
+        if($parent.hasClass('hasData')){
+            $('> .theChild', $parent).slideToggle();
+            $parent.toggleClass('opened');
+        }else{
+            $('svg', $link).fadeIn();
+            var type = $link.attr('data-type');
+            var category_id = $link.attr('data-category');
+            axios({
+                method: "post",
+                url: route('site.settings.category.get.tree.html'),
+                data: {type : type, category_id : category_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                $('svg', $link).fadeOut();
+                if (response.status == 200) {
+                    $parent.addClass('hasData opened');
+                    $parent.append(response.data.htm);
+
+                    tailwind.svgLoader();
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                }
+            }).catch(error => {
+                if (error.response) {
+                    $('svg', $link).fadeOut();
+                    console.log('error');
+                }
+            });
+        }
+    });
+    /* Get Tree HTML By Parent END */
 })();

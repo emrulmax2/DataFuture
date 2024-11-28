@@ -2743,6 +2743,8 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/category/update', 'update')->name('site.settings.category.update');
 
         Route::delete('site-settings/category/delete/{id}', 'destroy')->name('site.settings.category.destory');
+
+        Route::post('site-settings/category/get-tree-html', 'getTreeHtml')->name('site.settings.category.get.tree.html');
     });
 
     Route::controller(SummaryController::class)->group(function() {

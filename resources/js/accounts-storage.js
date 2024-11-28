@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var storageTransList = (function () {
@@ -257,7 +258,33 @@ var storageTransList = (function () {
 
     }
 
+    let accTomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
 
+    let accTomOptionsMul = {
+        ...accTomOptions,
+        plugins: {
+            ...accTomOptions.plugins,
+            remove_button: {
+                title: "Remove this item",
+            },
+        }
+    };
+
+
+    let acc_category_id_in = new TomSelect('#acc_category_id_in', accTomOptions);
+    let acc_category_id_out = new TomSelect('#acc_category_id_out', accTomOptions);
+    let acc_bank_id = new TomSelect('#acc_bank_id', accTomOptions);
     
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
@@ -285,16 +312,25 @@ var storageTransList = (function () {
         let trans_type = $trans_type.val();
 
         if(trans_type == 2){
-            $('#acc_category_id_in, #acc_category_id_out').val('').fadeOut('fast', function(){
-                $('#acc_bank_id').fadeIn().val('');
+            $('#acc_category_id_in_wrap, #acc_category_id_out_wrap').fadeOut('fast', function(){
+                $('#acc_bank_id_wrap').fadeIn();
+                acc_bank_id.clear(true);
+                acc_category_id_in.clear(true);
+                acc_category_id_out.clear(true);
             });
         }else if(trans_type == 1){
-            $('#acc_category_id_in, #acc_bank_id').val('').fadeOut('fast', function(){
-                $('#acc_category_id_out').fadeIn().val('');
+            $('#acc_category_id_in_wrap, #acc_bank_id_wrap').fadeOut('fast', function(){
+                acc_category_id_out.clear(true);
+                $('#acc_category_id_out_wrap').fadeIn();
+                acc_bank_id.clear(true);
+                acc_category_id_in.clear(true);
             });
         }else{
-            $('#acc_category_id_out, #acc_bank_id').val('').fadeOut('fast', function(){
-                $('#acc_category_id_in').fadeIn().val('');
+            $('#acc_category_id_out_wrap, #acc_bank_id_wrap').fadeOut('fast', function(){
+                $('#acc_category_id_in_wrap').fadeIn();
+                acc_bank_id.clear(true);
+                acc_category_id_in.clear(true);
+                acc_category_id_out.clear(true);
             });
         }
     });
@@ -310,8 +346,12 @@ var storageTransList = (function () {
                 $('#transaction_document').val('');
                 $('#storageTransactionForm input[type="checkbox"]').prop('checked', true);
                 $('#trans_type').val('0');
-                $('#acc_category_id_out, #acc_bank_id').val('').fadeOut();
-                $('#acc_category_id_in').fadeIn().val('');
+
+                $('#acc_category_id_out_wrap, #acc_bank_id_wrap').val('').fadeOut();
+                $('#acc_category_id_in_wrap').fadeIn();
+                acc_bank_id.clear(true);
+                acc_category_id_in.clear(true);
+                acc_category_id_out.clear(true);
 
                 $('#income').val('');
                 $('#expense').val('');
@@ -467,27 +507,37 @@ var storageTransList = (function () {
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
-                        $('#acc_category_id_in').fadeIn().val(row.acc_category_id);
-                        $('#acc_category_id_out').fadeOut().val('');
-                        $('#acc_bank_id').fadeOut().val('');
+                        $('#acc_category_id_in_wrap').fadeIn();
+                        acc_category_id_in.addItem(row.acc_category_id)
+
+                        acc_category_id_out.clear(true);
+                        acc_bank_id.clear(true);
+                        $('#acc_category_id_out_wrap').fadeOut();
+                        $('#acc_bank_id_wrap').fadeOut();
 
                         $('#storeTransaction').fadeIn();
                     }else if(row.transaction_type == 1){
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
-                        $('#acc_category_id_in').fadeOut().val('');
-                        $('#acc_category_id_out').fadeIn().val(row.acc_category_id);
-                        $('#acc_bank_id').fadeOut().val('');
+                        acc_category_id_in.clear(true)
+                        $('#acc_category_id_in_wrap').fadeOut();
+                        $('#acc_category_id_out_wrap').fadeIn();
+                        acc_category_id_out.addItem(row.acc_category_id);
+                        acc_bank_id.clear(true)
+                        $('#acc_bank_id_wrap').fadeOut();
 
                         $('#storeTransaction').fadeIn();
                     }else if(row.transaction_type == 2){
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
-                        $('#acc_category_id_in').fadeOut().val('');
-                        $('#acc_category_id_out').fadeOut().val('');
-                        $('#acc_bank_id').fadeIn().val(row.transfer_bank_id);
+                        acc_category_id_in.clear(true);
+                        acc_category_id_out.clear(true);
+                        $('#acc_category_id_in_wrap').fadeOut();
+                        $('#acc_category_id_out_wrap').fadeOut();
+                        $('#acc_bank_id').fadeIn();
+                        acc_bank_id.addItem(row.transfer_bank_id);
 
                         $('#storeTransaction').fadeOut();
                     }

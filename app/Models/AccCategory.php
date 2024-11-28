@@ -31,6 +31,10 @@ class AccCategory extends Model
         return $this->hasMany(AccCategory::class, 'parent_id', 'id');
     }
 
+    public function activechildrens(){
+        return $this->hasMany(AccCategory::class, 'parent_id', 'id')->where('status', 1);
+    }
+
     public function childrenRecursive(){
         return $this->childrens()->with('childrenRecursive');
     }

@@ -622,10 +622,12 @@
     cursor: pointer;
     margin: 0 0 11px;
 }
-.planTreeWrap ul li.hasChildren{
+.planTreeWrap ul li.hasChildren, 
+.planTreeWrap ul li.notHasChild{
     padding: 0 0 0 22px;
 }
-.planTreeWrap ul li.hasChildren::before{
+.planTreeWrap ul li.hasChildren::before,
+.planTreeWrap ul li.notHasChild::before{
     content: '+';
     width: 14px;
     height: 14px;
@@ -641,6 +643,12 @@
     position: absolute;
     left: 0;
     top: 2px;
+}
+.planTreeWrap ul li.notHasChild::before{
+    content: 'x';
+    color: rgb(185, 28, 28);
+    border: 1px solid rgb(185, 28, 28);
+    font-size: 11px;
 }
 .planTreeWrap ul li.hasChildren.opened::before{
     content: '-';
