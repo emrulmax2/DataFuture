@@ -23,6 +23,11 @@ class HrVacancyTypeSeeder extends Seeder
                 'name' => 'External',
                 'created_by' => 1,
                 'created_at' => date("Y-m-d", time())
+            ],
+            [ 
+                'name' => 'Both',
+                'created_by' => 1,
+                'created_at' => date("Y-m-d", time())
             ]
         ]);
     }
