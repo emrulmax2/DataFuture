@@ -66,6 +66,7 @@ class AccCategoryController extends Controller
     public function store(AccCategoryStoreRequest $request){
         $category = AccCategory::create([
             'category_name' => $request->category_name,
+            'code' => (isset($request->code) && !empty($request->code) ? $request->code : null),
             'trans_type' => (isset($request->trans_type) && !empty($request->trans_type) ? $request->trans_type : 0),
             'parent_id' => (isset($request->parent_id) && !empty($request->parent_id) ? $request->parent_id : 0),
             'status' => (isset($request->status) && $request->status > 0 ? $request->status : 2),
@@ -158,6 +159,7 @@ class AccCategoryController extends Controller
         $id = $request->id;
         $category = AccCategory::where('id', $id)->update([
             'category_name' => $request->category_name,
+            'code' => (isset($request->code) && !empty($request->code) ? $request->code : null),
             'trans_type' => (isset($request->trans_type) && !empty($request->trans_type) ? $request->trans_type : 0),
             'parent_id' => (isset($request->parent_id) && !empty($request->parent_id) ? $request->parent_id : 0),
             'status' => (isset($request->status) && $request->status > 0 ? $request->status : 2),
@@ -183,7 +185,7 @@ class AccCategoryController extends Controller
             $html .= '<ul class="theChild">';
                 foreach($categories as $cat):
                     $html .= '<li class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : '').' relative">';
-                        $html .= '<a href="javascript:void(0);" data-type="'.$type.'" data-category="'.$cat->id.'" class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '').' flex items-center text-primary font-medium">'.$cat->category_name.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '').' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
+                        $html .= '<a href="javascript:void(0);" data-type="'.$type.'" data-category="'.$cat->id.'" class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '').' flex items-center text-primary font-medium">'.$cat->category_name.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '').(isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '').' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
                         $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
                             $html .= '<button data-id="'.$cat->id.'" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>';
                             $html .= '<button data-id="'.$cat->id.'" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>';
