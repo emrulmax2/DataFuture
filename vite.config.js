@@ -312,6 +312,7 @@ export default defineConfig({
                 'resources/js/hr-payslipsync-show.js',
                 'resources/js/hr-portal-vacancy.js',
                 'resources/js/user-vacancy.js',
+                'resources/js/accounts-management-report.js',
             ],
             refresh: true,
         }),

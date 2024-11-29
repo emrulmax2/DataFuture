@@ -45,7 +45,7 @@
                 <div class="box p-5 mt-5">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3 lg:col-span-2">
-                            <input type="text" placeholder="DD-MM-YYYY" value="{{ date('d-m-Y') }}" class="w-full form-control datepicker" id="transaction_date" name="transaction_date" data-format="DD-MM-YYYY" data-single-mode="true" />
+                            <input type="text" placeholder="DD-MM-YYYY" data-today="{{ date('d-m-Y') }}" value="{{ date('d-m-Y') }}" class="w-full form-control datepicker" id="transaction_date" name="transaction_date" data-format="DD-MM-YYYY" data-single-mode="true" />
                         </div>
                         <div class="col-span-12 sm:col-span-3 lg:col-span-6">
                             <input type="text" placeholder="Details" class="w-full form-control" id="detail" name="detail" />
