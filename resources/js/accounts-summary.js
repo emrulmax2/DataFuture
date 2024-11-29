@@ -86,7 +86,8 @@ import Litepicker from "litepicker";
                 let theDates = $('#reportPicker').val();
                 if(theDates != '' && theDates.length == 23){
                     let theDatesArr = theDates.split(' - ');
-                    window.location.href = route('accounts.report', theDatesArr);
+                    //window.location.href = route('accounts.report', theDatesArr);
+                    window.location.href = route('accounts.management.report', theDatesArr);
                 }
             });
         }

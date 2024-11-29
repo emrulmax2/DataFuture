@@ -2231,3 +2231,39 @@ input[type=number] {
 #changeStudentModal .dotLoader{
     display: none;
 }
+
+.table.table-borderless.managementReportTable td{
+    border-bottom-width: 0;
+}
+.table.table-borderless.managementReportTable .cosHeadingRow td{
+    padding-top: 1.25rem;
+}
+.table.table-borderless.managementReportTable .gpHeadingRow td:last-child{
+    border-top-width: 1px;
+    border-top-color: #000;
+}
+.table.table-borderless.managementReportTable .oiHeadingRow td{
+    padding-top: 1.25rem;
+}
+.table.table-borderless.managementReportTable .aoiHeadingRow td:last-child{
+    border-top-width: 1px;
+    border-top-color: #000;
+}
+.table.table-borderless.managementReportTable .expdHeadingRow td{
+    padding-top: 1.25rem;
+}
+.table.table-borderless.managementReportTable .texpdHeadingRow td:last-child{
+    border-bottom-width: 1px;
+    border-bottom-color: #000;
+}
+.table.table-borderless.managementReportTable .npHeadingRow td:last-child{
+    border-bottom-width: 4px;
+    border-bottom-style: double;
+    border-bottom-color: #000;
+}
+.table.table-borderless.managementReportTable .child_row td:first-child{
+    padding-left: 2rem;
+}
+.table.table-borderless.managementReportTable .sales_child_row td:first-child{
+    padding-left: 2rem;
+}

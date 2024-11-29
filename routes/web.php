@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounts\AccCsvTransactionController;
+use App\Http\Controllers\Accounts\ManagementReportController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
 use Illuminate\Support\Facades\Route;
@@ -3107,6 +3108,11 @@ Route::middleware('auth')->group(function() {
     Route::controller(MyVacancyController::class)->group(function(){
         Route::get('my-account/vacancies', 'index')->name('user.account.vacancy'); 
         Route::get('my-account/vacancies/list', 'list')->name('user.account.vacancy.list'); 
+    });
+
+    Route::controller(ManagementReportController::class)->group(function() {
+        Route::get('accounts/management-report/{start}/{end}', 'index')->name('accounts.management.report'); 
+        Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
     });
     
 });

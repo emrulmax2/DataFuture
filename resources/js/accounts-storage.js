@@ -356,7 +356,8 @@ var storageTransList = (function () {
                 $('#income').val('');
                 $('#expense').val('');
                 $('#storageTransactionForm #transaction_id').val('0');
-                $('#storageTransactionForm #deleteTransaction').fadeOut().attr('data-id', '0')
+                $('#storageTransactionForm #deleteTransaction').fadeOut().attr('data-id', '0');
+                $('#storageTransactionForm #transaction_date').val($('#storageTransactionForm #transaction_date').attr('data-today'));
             })
         }else{
             $theBtn.addClass('active');
@@ -399,6 +400,8 @@ var storageTransList = (function () {
             },
         }).then((response) => {
             if (response.status == 200) {
+                $('#addTransactionToggle').trigger('click');
+
                 let msg = response.data.msg;
                 document.querySelector("#storeTransaction").removeAttribute("disabled");
                 document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
@@ -407,14 +410,15 @@ var storageTransList = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulation!");
                     $("#successModal .successModalDesc").html(msg);
-                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    $("#successModal .successCloser").attr('data-action', 'NONE');
                 });
 
                 setTimeout(function(){
                     successModal.hide();
-                    window.location.reload();
+                    //window.location.reload();
                 }, 2000)
             }
+            storageTransList.init();
         }).catch((error) => {
             document.querySelector("#storeTransaction").removeAttribute("disabled");
             document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
