@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-            <div class="intro-y box mt-5 p-5 editTransactionFormWrap" id="editTransactionFormWrap">
+            <div class="intro-y box mt-5 p-5 editTransactionFormWrap" id="editTransactionFormWrap" style="display: none;">
                 <form method="post" action="#" id="storageTransactionForm" enctype="multipart/form-data">
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3 lg:col-span-2">
@@ -92,12 +92,12 @@
 
                         <div class="col-span-12 sm:col-span-3 lg:col-span-2"></div>
                         <div class="col-span-12 sm:col-span-6 lg:col-span-6">
-                            <input type="text" class="w-full form-control" id="description" name="description" placeholder="Descriptions"/>
+                            <input type="{{ ($is_auditor ? 'hidden' : 'text') }}" class="w-full form-control" id="description" name="description" placeholder="Descriptions"/>
                         </div>
                         
                         
                         <div class="col-span-12 sm:col-span-3 lg:col-span-4 text-right flex items-center justify-end">
-                            <div class="form-check inline-flex mr-3">
+                            <div class="form-check inline-flex mr-3" style="{{ ($is_auditor ? 'opacity: 0; visibility: hidden;' : '') }}">
                                 <input id="audit_status" checked class="form-check-input" name="audit_status" type="checkbox" value="1">
                             </div>
                             <input type="hidden" id="storage_id" name="storage_id" value="0"/>
@@ -119,11 +119,6 @@
                                     </g>
                                 </svg>
                             </button>
-                            @if(auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3]))
-                            <button data-id="0" style="display: none;" type="button" id="deleteTransaction" class="btn btn-danger text-white w-auto ml-2"> 
-                                <i class="w-4 h-4" data-lucide="trash-2"></i>
-                            </button>
-                            @endif
                             <button type="button" id="cancelEdit" class="btn btn-warning text-white w-auto ml-2"> 
                                 <i class="w-4 h-4 mr-2" data-lucide="x-circle"></i> Cancel
                             </button>

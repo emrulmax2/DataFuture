@@ -64,7 +64,7 @@
                             <tbody>
                                 @if(!empty($csv_transactions) && $csv_transactions->count() > 0)
                                     @foreach($csv_transactions as $trns)
-                                        <tr class="transaction_row {{ $trns->transaction_type == 1 ? 'bg-danger-soft' : 'bg-success-soft' }}" id="transaction_row_{{ $trns->id }}">
+                                        <tr data-fileid="{{ $csv_file_id }}" data-transid="{{ $trns->id }}" class="transaction_row {{ $trns->transaction_type == 1 ? 'bg-danger-soft' : 'bg-success-soft' }}" id="transaction_row_{{ $trns->id }}">
                                             <td>
                                                 <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_transactiontype" class="w-28 form-control transaction_type">
                                                     <option {{ ($trns->transaction_type == 0 ? 'selected' : '') }} value="0">Income</option>
@@ -78,30 +78,36 @@
                                             <td><textarea name="trans_{{ $csv_file_id }}_{{ $trns->id }}_detail" class="form-control w-full" rows="1">{{ $trns->description }}</textarea></td>
                                             <td><textarea name="trans_{{ $csv_file_id }}_{{ $trns->id }}_description" class="form-control w-full" rows="1"></textarea></td>
                                             <td>
-                                                <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_inccategory" class="w-48 form-control inc_category" style="display: {{ $trns->transaction_type == 0 ? 'block' : 'none' }};">
-                                                    <option value="">Category</option>
-                                                    @if(!empty($inCategories))
-                                                        @foreach($inCategories as $cat)
-                                                            <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                                <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_expcategory" class="w-48 form-control exp_category" style="display: {{ $trns->transaction_type == 1 ? 'block' : 'none' }};">
-                                                    <option value="">Category</option>
-                                                    @if(!empty($outCategories))
-                                                        @foreach($outCategories as $cat)
-                                                            <option value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
-                                                <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_transstorage" class="w-48 form-control trans_storage" style="display: {{ $trns->transaction_type == 2 ? 'block' : 'none' }};">
-                                                    <option value="">Storage</option>
-                                                    @if(!empty($banks))
-                                                        @foreach($banks as $bnk)
-                                                            <option {{ ($bank->id == $bnk->id ? 'disabled' : '') }} value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
-                                                        @endforeach
-                                                    @endif
-                                                </select>
+                                                <div class="inTomWrap" style="display: {{ $trns->transaction_type == 0 ? 'block' : 'none' }};">
+                                                    <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_inccategory" class="w-48 csvInToms tom-selects inc_category" >
+                                                        <option value="">Category</option>
+                                                        @if(!empty($inCategories))
+                                                            @foreach($inCategories as $cat)
+                                                                <option {{ (isset($cat['disabled']) && $cat['disabled'] == 1 ? 'disabled' : '') }} value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="outTomWrap" style="display: {{ $trns->transaction_type == 1 ? 'block' : 'none' }};">
+                                                    <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_expcategory" class="w-48 csvOutToms tom-selects exp_category" >
+                                                        <option value="">Category</option>
+                                                        @if(!empty($outCategories))
+                                                            @foreach($outCategories as $cat)
+                                                                <option {{ (isset($cat['disabled']) && $cat['disabled'] == 1 ? 'disabled' : '') }} value="{{ $cat['id'] }}">{!! $cat['category_name'] !!}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                                <div class="strgTomWrap" style="display: {{ $trns->transaction_type == 2 ? 'block' : 'none' }};">
+                                                    <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_transstorage" class="w-48 csvStrToms tom-selects trans_storage" >
+                                                        <option value="">Storage</option>
+                                                        @if(!empty($banks))
+                                                            @foreach($banks as $bnk)
+                                                                <option {{ ($bank->id == $bnk->id ? 'disabled' : '') }} value="{{ $bnk->id }}">{{ $bnk->bank_name }}</option>
+                                                            @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
                                             </td>
                                             <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_expense" class="w-24 form-control rowExpense text-right" value="{{ ($trns->flow == 1 ? $trns->amount : '') }}"/></td>
                                             <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_income" class="w-24 form-control rowIncome text-right" value="{{ ($trns->flow == 0 ? $trns->amount : '') }}"/></td>
