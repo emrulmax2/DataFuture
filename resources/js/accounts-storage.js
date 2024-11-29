@@ -29,7 +29,7 @@ var storageTransList = (function () {
                     width: '160',
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';
-                                html += '<div class="font-medium whitespace-nowrap '+(cell.getData().audit_status == 1 ? 'text-danger' : 'text-success')+'">';
+                                html += '<div class="font-medium whitespace-nowrap '+(cell.getData().audit_status != 1 ? 'text-danger' : 'text-success')+'">';
                                     if(cell.getData().can_eidt == 1){
                                         html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="editTransaction underline">';
                                     }
@@ -342,7 +342,7 @@ var storageTransList = (function () {
         if($theBtn.hasClass('active')){
             $theBtn.removeClass('active');
             $('#storageTransactionForm').fadeOut('fast', function(){
-                $('#storageTransactionForm input:not([type="checkbox"]):not("#transaction_date"):not([type="file"])').val('');
+                $('#storageTransactionForm input:not([type="checkbox"]):not("#transaction_date"):not([type="file"]):not([name="storage_id"])').val('');
                 $('#transaction_document').val('');
                 $('#storageTransactionForm input[type="checkbox"]').prop('checked', true);
                 $('#trans_type').val('0');
