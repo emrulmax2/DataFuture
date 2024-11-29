@@ -238,4 +238,15 @@ class ManagementReportController extends Controller
         $level --;
         return $categs;
     }
+
+    public function exportIncomes($startDate, $endDate){
+        $startDate = date('Y-m-d', strtotime($startDate));
+        $endDate = date('Y-m-d', strtotime($endDate));
+    }
+
+    public function exportExpenses($startDate, $endDate){
+        $startDate = date('Y-m-d', strtotime($startDate));
+        $endDate = date('Y-m-d', strtotime($endDate));
+
+    }
 }

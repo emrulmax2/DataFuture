@@ -3113,6 +3113,8 @@ Route::middleware('auth')->group(function() {
     Route::controller(ManagementReportController::class)->group(function() {
         Route::get('accounts/management-report/{start}/{end}', 'index')->name('accounts.management.report'); 
         Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
+        Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
+        Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); 
     });
     
 });
