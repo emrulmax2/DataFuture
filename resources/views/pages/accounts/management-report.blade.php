@@ -43,7 +43,7 @@
                         @if(isset($sales['categories']) && !empty($sales['categories']))
                             @foreach($sales['categories'] as $cate_id => $slct)
                                 <tr class="sales_child_row" style="display: none;">
-                                    <td><a href="{{ route('accounts.management.report.show', [$startDate, $endDate, $cate_id]) }}" class="text-primary underline">{{ $slct['name'] }}</a></td>
+                                    <td><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $cate_id]) }}" class="text-primary underline">{{ $slct['name'] }}</a></td>
                                     <td class="w-[180px] text-right">{{ number_format($slct['amount'], 2) }}</td>
                                     <td class="w-[180px] text-right"></td>
                                     <td class="w-[180px] text-right"></td>
@@ -58,7 +58,7 @@
                             @foreach($cos as $cs_id => $cs)
                                 @php $COS_TOTAL += $cs['amount']; @endphp
                                 <tr>
-                                    <td colspan="3"><a href="{{ route('accounts.management.report.show', [$startDate, $endDate, $cs_id]) }}" class="text-primary underline">{{ $cs['name'] }}</a></td>
+                                    <td colspan="3"><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $cs_id]) }}" class="text-primary underline">{{ $cs['name'] }}</a></td>
                                     <td class="w-[180px] text-right">{{ number_format($cs['amount'], 2) }}</td>
                                 </tr>
                             @endforeach
@@ -71,7 +71,7 @@
                             <td class="w-[180px] text-right">{{ number_format($GROSS_PROFIT, 2) }}</td>
                         </tr>
                         <tr class="oiHeadingRow">
-                            <td colspan="3"><a href="{{ route('accounts.management.report.show', [$startDate, $endDate, 52]) }}" class="text-primary underline font-medium">Other Income</a></td>
+                            <td colspan="3"><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, 52]) }}" class="text-primary underline font-medium">Other Income</a></td>
                             <td class="w-[180px] text-right">{{ number_format($otherincome, 2) }}</td>
                         </tr>
                         @php 
@@ -96,7 +96,7 @@
                                 @if($expd['childs'] && !empty($expd['childs']))
                                     @foreach($expd['childs'] as $exped_id => $child)
                                         <tr class="child_row child_of_{{ $perent_id }}" style="display: none;">
-                                            <td><a href="{{ route('accounts.management.report.show', [$startDate, $endDate, $exped_id]) }}" class="text-primary underline">{{ $child['name'] }}</a></td>
+                                            <td><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $exped_id]) }}" class="text-primary underline">{{ $child['name'] }}</a></td>
                                             <td class="w-[180px] text-right">{{ number_format($child['amount'], 2) }}</td>
                                             <td class="w-[180px] text-right"></td>
                                             <td class="w-[180px] text-right"></td>

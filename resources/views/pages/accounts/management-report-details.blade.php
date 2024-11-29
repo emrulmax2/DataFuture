@@ -21,7 +21,7 @@
 
             <div class="intro-y box mt-5 p-5">
                 @if($transactions->count() > 0)
-                    <table class="table table-bordered table-striped table-sm">
+                    <table class="table table-bordered table-striped table-sm" id="transactionListTable">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -29,7 +29,9 @@
                                 <th>Invoice</th>
                                 <th>Storage</th>
                                 <th>Details</th>
+                                @if(!$is_auditor)
                                 <th>Description</th>
+                                @endif
                                 <th class="text-right">Withdrawl</th>
                                 <th class="text-right">Deposit</th>
                             </tr>
@@ -41,11 +43,23 @@
                             @foreach($transactions as $trns)
                                 <tr>
                                     <td>{{ date('jS F, Y', strtotime($trns->transaction_date_2)) }}</td>
-                                    <td>{{ $trns->transaction_code }}</td>
+                                    <td>
+                                        <div class="flex justify-start items-center">
+                                            @if(isset($trns->transaction_doc_name) && $trns->transaction_doc_name != '')
+                                                <a data-id="{{ $trns->id }}" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>
+                                            @endif
+                                            {{ $trns->transaction_code }}
+                                            @if(isset($trns->receipts) && $trns->receipts->count() > 0)
+                                                <a target="_blank" href="{{ route('reports.accounts.transaction.connection', $trns->id) }}" class="text-success ml-2" style="position: relative; top: -1px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></a>
+                                            @endif
+                                        </div>
+                                    </td>
                                     <td>{!! $trns->invoice_no.(!empty($trns->invoice_date) ? '<br/>'.date('jS M, Y', strtotime($trns->invoice_date)) : '') !!}</td>
                                     <td>{{ (isset($trns->bank->bank_name) ? $trns->bank->bank_name : '') }}</td>
                                     <td>{{ $trns->detail }}</td>
+                                    @if(!$is_auditor)
                                     <td>{{ $trns->description }}</td>
+                                    @endif
                                     <td class="text-right">{{ ($trns->flow == 1 ? '£'.number_format($trns->transaction_amount, 2) : '') }}</td>
                                     <td class="text-right">{{ ($trns->flow != 1 ? '£'.number_format($trns->transaction_amount, 2) : '') }}</td>
                                 </tr>
@@ -60,7 +74,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="6">Sub Total</th>
+                                <th colspan="{{ ($is_auditor ? 5 : 6) }}">Sub Total</th>
                                 <th colspan="2" class="text-right">{{ ($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)) }}</th>
                             </tr>
                         </tfoot>
@@ -96,5 +110,5 @@
 
 @section('script')
     @vite('resources/js/accounts.js')
-    @vite('resources/js/accounts-management-report.js')
+    @vite('resources/js/accounts-management-report-details.js')
 @endsection

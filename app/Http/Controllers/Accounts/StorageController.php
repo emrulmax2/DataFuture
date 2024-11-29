@@ -486,7 +486,7 @@ class StorageController extends Controller
 
     public function documentDownloadUrl(Request $request){
         $trans = AccTransaction::find($request->row_id);
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/transactions/'.$trans->transaction_doc_name, now()->addMinutes(5));
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/transactions/'.$trans->transaction_doc_name, now()->addMinutes(15));
         return response()->json(['res' => $tmpURL], 200);
     }
 }
