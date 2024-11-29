@@ -20,7 +20,7 @@ class ManagementReportController extends Controller
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Report', 'href' => 'javascript:void(0);']
             ],
-            'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
             'startDate' => $startDate,
             'endDate' => $endDate,
 
@@ -180,12 +180,62 @@ class ManagementReportController extends Controller
                 ['label' => 'Report', 'href' => 'javascript:void(0);'],
                 ['label' => 'Details', 'href' => 'javascript:void(0);'],
             ],
-            'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
+            'in_categories' => $this->catTreeInc(0, 0),
+            'out_categories' => $this->catTreeExp(0, 1),
+
             'startDate' => $startDate,
             'endDate' => $endDate,
             'category' => $category,
             'transactions' => AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->get(),
-            'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false)
+            'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false),
+            'can_edit' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0)
         ]);
+    }
+
+    public function catTreeInc($id = 0, $type = 0){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        static $categs = array ();
+        static $level = 0;
+        $level ++;
+
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
+
+        if($categories):
+            foreach ($categories as $cat):
+                $categs[$cat['id']]['category_name'] = str_repeat('|&nbsp;&nbsp;&nbsp;', $level-1) . '|__'. $cat['category_name'];
+                $categs[$cat['id']]['id'] = $cat['id'];
+                $categs[$cat['id']]['status'] = $cat['status'];
+                $categs[$cat['id']]['disabled'] = (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 1 : 0);
+    
+                $this->catTreeInc($cat['id'], $type);
+            endforeach;
+        endif;
+
+        $level --;
+        return $categs;
+    }
+
+    public function catTreeExp($id = 0, $type = 1){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        static $categs = array ();
+        static $level = 0;
+        $level ++;
+
+        $categories = AccCategory::where('trans_type', $type)->where('parent_id', $id)->where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('category_name', 'ASC')->get();
+
+        if($categories):
+            foreach ($categories as $cat):
+                $categs[$cat['id']]['category_name'] = str_repeat('|&nbsp;&nbsp;&nbsp;', $level-1) . '|__'. $cat['category_name'];
+                $categs[$cat['id']]['id'] = $cat['id'];
+                $categs[$cat['id']]['status'] = $cat['status'];
+                $categs[$cat['id']]['disabled'] = (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 1 : 0);
+    
+                $this->catTreeExp($cat['id'], $type);
+            endforeach;
+        endif;
+
+        $level --;
+        return $categs;
     }
 }
