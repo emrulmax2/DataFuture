@@ -184,7 +184,8 @@ class ManagementReportController extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
             'category' => $category,
-            'transactions' => AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->get()
+            'transactions' => AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->get(),
+            'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false)
         ]);
     }
 }

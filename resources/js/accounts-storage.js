@@ -29,9 +29,9 @@ var storageTransList = (function () {
                     width: '160',
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block relative">';
-                                html += '<div class="font-medium whitespace-nowrap">';
+                                html += '<div class="font-medium whitespace-nowrap '+(cell.getData().audit_status == 1 ? 'text-danger' : 'text-success')+'">';
                                     if(cell.getData().can_eidt == 1){
-                                        html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="editTransaction text-success underline">';
+                                        html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="editTransaction underline">';
                                     }
                                         html += cell.getData().transaction_date_2;
                                     if(cell.getData().can_eidt == 1){
