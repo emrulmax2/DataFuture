@@ -116,12 +116,12 @@
 
                         <div class="col-span-12 sm:col-span-3 lg:col-span-2"></div>
                         <div class="col-span-12 sm:col-span-6 lg:col-span-6">
-                            <input type="text" class="w-full form-control" id="description" name="description" placeholder="Descriptions"/>
+                            <input type="{{ ($is_auditor ? 'hidden' : 'text') }}" class="w-full form-control" id="description" name="description" placeholder="Descriptions"/>
                         </div>
                         
                         
                         <div class="col-span-12 sm:col-span-3 lg:col-span-4 text-right flex items-center justify-end">
-                            <div class="form-check inline-flex mr-3">
+                            <div class="form-check inline-flex mr-3" style="{{ ($is_auditor ? 'opacity: 0; visibility: hidden;' : '') }}">
                                 <input id="audit_status" checked class="form-check-input" name="audit_status" type="checkbox" value="1">
                             </div>
                             <input type="hidden" name="storage_id" value="{{ $bank->id }}"/>
@@ -156,7 +156,7 @@
             <div class="intro-y box mt-5">
                 <div class="p-5">
                     <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="storageTransList" data-storage="{{ $bank->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                        <div id="storageTransList" data-auditor="{{ $is_auditor }}" data-storage="{{ $bank->id }}" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
                 </div>
             </div>

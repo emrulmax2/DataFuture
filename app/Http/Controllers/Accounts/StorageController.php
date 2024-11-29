@@ -31,11 +31,13 @@ class StorageController extends Controller
             'in_categories' => $this->catTreeInc(0, 0),
             'out_categories' => $this->catTreeExp(0, 1),
             'csf_trans' => (!empty($csvfiles) ? AccCsvTransaction::whereIn('acc_csv_file_id', $csvfiles)->get()->count() : 0),
-            'csv_file' => AccCsvFile::where('acc_bank_id', $bank)->get()->first()
+            'csv_file' => AccCsvFile::where('acc_bank_id', $bank)->get()->first(),
+            'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false),
         ]);
     }
 
     public function store(StorageRequest $request){
+        $is_auditor = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false);
         $storage_id = $request->storage_id;
         $transaction_date = (isset($request->transaction_date) && !empty($request->transaction_date) ? date('Y-m-d', strtotime($request->transaction_date)) : date('Y-m-d'));
         $detail = (isset($request->detail) && !empty($request->detail) ? $request->detail : null);
@@ -71,7 +73,7 @@ class StorageController extends Controller
         $data['detail'] = $detail;
         $data['description'] = $description;
         $data['transaction_amount'] = $transaction_amount;
-        $data['audit_status'] = $audit_status;
+        $data['audit_status'] = ($is_auditor ? 1 : $audit_status);
         if($trans_type == 2):
             $data['transfer_bank_id'] = ($transfer_bank_id > 0 ? $transfer_bank_id : null);
         endif;
@@ -284,6 +286,7 @@ class StorageController extends Controller
     }
 
     public function update(StorageRequest $request){
+        $is_auditor = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false);
         $transaction_id = $request->transaction_id;
         $storage_id = $request->storage_id;
         $oleTransaction = AccTransaction::find($transaction_id);
@@ -317,7 +320,7 @@ class StorageController extends Controller
         $data['detail'] = $detail;
         $data['description'] = $description;
         $data['transaction_amount'] = $transaction_amount;
-        $data['audit_status'] = $audit_status;
+        $data['audit_status'] = ($is_auditor ? 1 : $audit_status);
         if($trans_type == 2):
             $data['transfer_bank_id'] = ($transfer_bank_id > 0 ? $transfer_bank_id : null);
         endif;
@@ -384,6 +387,7 @@ class StorageController extends Controller
     }
 
     public function export($querystr, $storage_id){
+        $is_auditor = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false);
         $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $storage = AccBank::find($storage_id);
         $openingDate = (isset($storage->opening_date) && !empty($storage->opening_date) ? date('Y-m-d', strtotime($storage->opening_date)) : '');
@@ -396,7 +400,9 @@ class StorageController extends Controller
         $theCollection[1][] = 'Invoice No';
         $theCollection[1][] = 'Invoice Date';
         $theCollection[1][] = 'Detail';
-        $theCollection[1][] = 'Description';
+        if(!$is_auditor):
+            $theCollection[1][] = 'Description';
+        endif;
         $theCollection[1][] = 'Category';
         $theCollection[1][] = 'Withdrawl (£)';
         $theCollection[1][] = 'Deposit (£)';
@@ -445,7 +451,9 @@ class StorageController extends Controller
                 $theCollection[$row][] = $trns->invoice_no;
                 $theCollection[$row][] = (!empty($trns->invoice_date) ? date('d-m-Y', strtotime($trns->invoice_date)) : '');
                 $theCollection[$row][] = $trns->detail;
-                $theCollection[$row][] = $trns->description;
+                if(!$is_auditor):
+                    $theCollection[$row][] = $trns->description;
+                endif;
                 $theCollection[$row][] = $category_html;
                 $theCollection[$row][] = ($flow == 1 ? number_format($transaction_amount, 2, '.', '') : '');
                 $theCollection[$row][] = ($flow != 1 ? number_format($transaction_amount, 2, '.', '') : '');

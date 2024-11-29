@@ -181,6 +181,66 @@ import TomSelect from "tom-select";
         });
     });
 
+    
+
+    $("#storageTransactionForm").on("submit", function (e) {
+        e.preventDefault();
+        let $form = $(this);
+        const form = document.getElementById("storageTransactionForm");
+        let theId = $('#storageTransactionForm #transaction_id').val();
+        //let url = 'accounts.storage.trans.store';
+        //if(theId != '' && theId != undefined && theId > 0){
+        let url = 'accounts.storage.trans.update';
+        //}
+
+        document.querySelector('#storeTransaction').setAttribute('disabled', 'disabled');
+        document.querySelector('#storeTransaction svg').style.cssText = 'display: inline-block;';
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#storageTransactionForm input[name="document"]')[0].files[0]); 
+        axios({
+            method: "post",
+            url: route(url),
+            data: form_data,
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                $('#editTransactionFormWrap').fadeOut('fast');
+
+                let msg = response.data.msg;
+                document.querySelector("#storeTransaction").removeAttribute("disabled");
+                document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!");
+                    $("#successModal .successModalDesc").html(msg);
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });
+
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000)
+            }
+            storageTransList.init();
+        }).catch((error) => {
+            document.querySelector("#storeTransaction").removeAttribute("disabled");
+            document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#storageTransactionForm #${key}`).addClass('border-danger')
+                    }
+                }else {
+                    console.log("error");
+                }
+            }
+        });
+    });
+
     $('#transactionListTable').on('click', '.downloadTransDoc', function(e){
         e.preventDefault();
         var $theLink = $(this);

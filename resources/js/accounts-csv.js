@@ -1,5 +1,48 @@
+import TomSelect from "tom-select";
 
 (function(){
+    let accTomOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: false,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+
+    let accTomOptionsMul = {
+        ...accTomOptions,
+        plugins: {
+            ...accTomOptions.plugins,
+            remove_button: {
+                title: "Remove this item",
+            },
+        }
+    };
+
+    let inToms = [];
+    let outToms = [];
+    let strToms = [];
+    $('#csvTransTable .csvInToms').each(function(){
+        var $theSelect = $(this);
+        var theName = $theSelect.attr('name');
+        inToms[theName] = new TomSelect(this, accTomOptions);
+    })
+    $('#csvTransTable .csvOutToms').each(function(){
+        var $theSelect = $(this);
+        var theName = $theSelect.attr('name');
+        outToms[theName] = new TomSelect(this, accTomOptions);
+    })
+    $('#csvTransTable .csvStrToms').each(function(){
+        var $theSelect = $(this);
+        var theName = $theSelect.attr('name');
+        strToms[theName] = new TomSelect(this, accTomOptions);
+    })
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
 
@@ -29,15 +72,46 @@
         let $theTr = $trans_type.closest('tr.transaction_row');
         let tr_id = $theTr.attr('id');
 
+        let file_id = $theTr.attr('data-fileid');
+        let trns_id = $theTr.attr('data-transid');
+
+        let in_select = 'trans_'+file_id+'_'+trns_id+'_inccategory';
+        let inTom = inToms[in_select];
+        let out_select = 'trans_'+file_id+'_'+trns_id+'_expcategory';
+        let outTom = outToms[out_select];
+        let str_select = 'trans_'+file_id+'_'+trns_id+'_transstorage';
+        let strTom = strToms[str_select];
+
         if(trans_type == 2){
-            $theTr.find('.inc_category, .exp_category').val('').fadeOut();
-            $theTr.find('.trans_storage').val('').fadeIn();
+            $theTr.find('.inTomWrap').fadeOut();
+            $theTr.find('.outTomWrap').fadeOut();
+            $theTr.find('.strgTomWrap').fadeIn();
+
+            inTom.clear(true);
+            outTom.clear(true);
+            strTom.clear(true);
+            //$theTr.find('.inc_category, .exp_category').val('').fadeOut();
+            //$theTr.find('.trans_storage').val('').fadeIn();
         }else if(trans_type == 1){
-            $theTr.find('.inc_category, .trans_storage').val('').fadeOut();
-            $theTr.find('.exp_category').val('').fadeIn();
+            $theTr.find('.inTomWrap').fadeOut();
+            $theTr.find('.strgTomWrap').fadeOut();
+            $theTr.find('.outTomWrap').fadeIn();
+
+            inTom.clear(true);
+            outTom.clear(true);
+            strTom.clear(true);
+            //$theTr.find('.inc_category, .trans_storage').val('').fadeOut();
+            //$theTr.find('.exp_category').val('').fadeIn();
         }else{
-            $theTr.find('.exp_category, .trans_storage').val('').fadeOut();
-            $theTr.find('.inc_category').val('').fadeIn();
+            $theTr.find('.inTomWrap').fadeIn();
+            $theTr.find('.strgTomWrap').fadeOut();
+            $theTr.find('.outTomWrap').fadeOut();
+
+            inTom.clear(true);
+            outTom.clear(true);
+            strTom.clear(true);
+            //$theTr.find('.exp_category, .trans_storage').val('').fadeOut();
+            //$theTr.find('.inc_category').val('').fadeIn();
         }
 
         validateRow(tr_id);

@@ -7,6 +7,7 @@ import TomSelect from "tom-select";
 var storageTransList = (function () {
     var _tableGen = function () {
         let storage = $('#storageTransList').attr('data-storage');
+        let is_auditor = $('#storageTransList').attr('data-auditor');
         let queryStr = $('#searchTransaction').val();
 
         let tableContent = new Tabulator("#storageTransList", {
@@ -70,7 +71,7 @@ var storageTransList = (function () {
                                         //html += (cell.getData().invoice_no != '' && cell.getData().description != '' ? ' - ' : '');
                                         txts += (cell.getData().invoice_no != '' && cell.getData().description != '' ? ' - ' : '');
                                         //html += (cell.getData().description != '' ? cell.getData().description : '');
-                                        txts += (cell.getData().description != '' ? cell.getData().description : '');
+                                        txts += (cell.getData().description != '' && is_auditor == 0 ? cell.getData().description : '');
                                     //html += '</div>';
                                 }
                                 if(txts.length > 150){

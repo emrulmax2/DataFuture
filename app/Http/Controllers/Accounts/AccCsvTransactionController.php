@@ -114,6 +114,7 @@ class AccCsvTransactionController extends Controller
                 $categs[$cat['id']]['category_name'] = str_repeat('|&nbsp;&nbsp;&nbsp;', $level-1) . '|__'. $cat['category_name'];
                 $categs[$cat['id']]['id'] = $cat['id'];
                 $categs[$cat['id']]['status'] = $cat['status'];
+                $categs[$cat['id']]['disabled'] = (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 1 : 0);
     
                 $this->catTreeInc($cat['id'], $type);
             endforeach;
@@ -135,6 +136,7 @@ class AccCsvTransactionController extends Controller
                 $categs[$cat['id']]['category_name'] = str_repeat('|&nbsp;&nbsp;&nbsp;', $level-1) . '|__'. $cat['category_name'];
                 $categs[$cat['id']]['id'] = $cat['id'];
                 $categs[$cat['id']]['status'] = $cat['status'];
+                $categs[$cat['id']]['disabled'] = (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 1 : 0);
     
                 $this->catTreeExp($cat['id'], $type);
             endforeach;
