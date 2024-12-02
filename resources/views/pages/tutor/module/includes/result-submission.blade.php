@@ -132,7 +132,7 @@
         <div id="log" class="tab-pane" role="tabpanel" aria-labelledby="log-tab">
             <div class="intro-y box">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Module Submission List</h2>
+                    <h2 class="font-medium text-base mr-auto">Module Submission List By Staff</h2>
                 </div>
                 <div class="p-5 pt-0">
                     <div class="grid grid-cols-12 gap-4">        
@@ -153,6 +153,66 @@
                                             </thead>
                                             <tbody>
                                                 @foreach ($submissionAssessment as $key => $submission)
+                                                
+                                                <tr>
+                                                    <td class="border-b dark:border-darkmode-500 ">
+                                                        <div class="mt-3">
+                                                            <div class="mt-2">
+                                                                {{-- <div data-tw-merge class="flex items-center"><input data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50 w-[38px] h-[24px] p-px rounded-full relative before:w-[20px] before:h-[20px] before:shadow-[1px_1px_3px_rgba(0,0,0,0.25)] before:transition-[margin-left] before:duration-200 before:ease-in-out before:absolute before:inset-y-0 before:my-auto before:rounded-full before:dark:bg-darkmode-600 checked:bg-primary checked:border-primary checked:bg-none before:checked:ml-[14px] before:checked:bg-white" id="checkbox-switch-{{ $key+1 }}" />
+                                                                    <label data-tw-merge for="checkbox-switch-{{ $key+1 }}" class="cursor-pointer ml-2">{{ $key+1 }}</label>
+                                                                </div> --}}
+                                                                <div data-tw-merge class="flex items-center mt-2">{{ $key+1 }}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        </div>
+                                                    </td>
+                                                    <td class="border-b dark:border-darkmode-500">{{ $submission->courseModuleBase->assesment_name }} - {{ $submission->courseModuleBase->assesment_code }}</td>
+                                                    
+                                                    <td class="border-b dark:border-darkmode-500">{{ isset($submission->createdBy->employee) ? $submission->createdBy->employee->full_name : "" }}</td>
+                                                    <td class="border-b dark:border-darkmode-500">{{ $submission->created_at }}</td>
+                                                    <td class="border-b dark:border-darkmode-500">
+                                                        @if($submission->is_it_final > 0)
+                                                        <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
+                                                        @endif
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                            
+                                        </table>
+                                        @else
+                                        <div class="text-center w-full text-xl">No Submission Found</div>
+                                        @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="intro-y box">
+                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                    <h2 class="font-medium text-base mr-auto">Module Submission List By Tutor</h2>
+                </div>
+                <div class="p-5 pt-0">
+                    <div class="grid grid-cols-12 gap-4">        
+                        <div class="col-span-12">
+                            <div class="mt-3"> 
+                                @if($submissionAssessmentTutor->count() > 0)
+                                        <table class="table table-report -mt-2">
+                                            <thead>
+                                                <tr>
+                                                    <th class="whitespace-nowrap"><div data-tw-merge class="flex items-center mt-2">S.N.
+                                                    </div></th>
+                                                    <th class="whitespace-nowrap">Assessment</th>
+                                                    <th class="whitespace-nowrap">Uploaded By</th>
+                                                    <th class="whitespace-nowrap">Submission Date</th>
+                                                    <th class="whitespace-nowrap">Action</th>
+                                                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($submissionAssessmentTutor as $key => $submission)
                                                 
                                                 <tr>
                                                     <td class="border-b dark:border-darkmode-500 ">

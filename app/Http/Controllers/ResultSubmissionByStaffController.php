@@ -155,7 +155,8 @@ class ResultSubmissionByStaffController extends Controller
 
         $resultSubmission = ResultSubmissionByStaff::with('createdBy')->where('plan_id', $plan->id)->where('upload_user_type','staff')->whereNull('is_it_final')->orderBy('created_at','DESC')->get();
         $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get();
-        
+        $submissionAssessmentTutor = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','personal_tutor')->orderBy('created_at','DESC')->get();
+       
         return view('pages.tutor.module.result-submission', [
             'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
@@ -176,6 +177,7 @@ class ResultSubmissionByStaffController extends Controller
             'assessmentlist' => $assessmentlist, 
             'resultSubmission' => $resultSubmission,
             'submissionAssessment' => $submissionAssessment,
+            'submissionAssessmentTutor' => $submissionAssessmentTutor,
 
             
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
