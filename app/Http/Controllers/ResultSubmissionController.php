@@ -107,7 +107,8 @@ class ResultSubmissionController extends Controller
 
             Excel::import(new ResultSubmissionImport($courseMoudleBaseAssessment, $plan), $document);
             $assessmentPlan = AssessmentPlan::where('course_module_base_assesment_id',$courseMoudleBaseAssessment)->where('plan_id',$plan->id)->orderBy('id','DESC')->get()->first();
-        
+            $assessmentPlan->is_it_final = 1;
+            $assessmentPlan->save();
             $submittedStudents = ResultSubmission::where('assessment_plan_id', $assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
 
             $studentIds = Assign::where('plan_id', $plan->id)->where(function($q){
