@@ -72,6 +72,7 @@ class ResultSubmissionByStaffImport implements ToModel, WithHeadingRow
                     'grade_id' => $grade->id,
                     'paper_id' => !empty($row['paper_id']) ? $row['paper_id'] : null,
                     'is_student_matched' => 1,
+                    'is_it_final' => 1,
                     'module_creation_id' => $this->plan->module_creation_id,
                     'module_code' => $row['module_code'] ?? $this->plan->creations->code,
                     'upload_user_type' => 'staff',

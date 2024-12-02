@@ -207,8 +207,15 @@ class ResultSubmissionByStaffController extends Controller
         } else {
             
             Excel::import(new ResultSubmissionByStaffImport($courseMoudleBaseAssessment, $plan), $document);
-            $assessmentPlan = AssessmentPlan::where('course_module_base_assesment_id',$courseMoudleBaseAssessment)->where('plan_id',$plan->id)->orderBy('id','DESC')->get()->first();
-        
+            
+            $assessmentPlan = AssessmentPlan::where('course_module_base_assesment_id',$courseMoudleBaseAssessment)
+                ->where('upload_user_type','staff')
+                ->where('plan_id',$plan->id)
+                ->whereNull('is_it_final')
+                ->orderBy('created_at','DESC')->get()->first();
+            $assessmentPlan->is_it_final = 1;
+            $assessmentPlan->save();
+
             $submittedStudents = ResultSubmissionByStaff::where('assessment_plan_id', $assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
 
             $studentIds = Assign::where('plan_id', $plan->id)->where(function($q){
@@ -257,7 +264,7 @@ class ResultSubmissionByStaffController extends Controller
                         $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
                         $resultSubmission->is_student_matched = 1;
                         $resultSubmission->is_excel_missing = 1;
-                        
+                        $resultSubmission->is_it_final = 1;
                         $resultSubmission->module_creation_id = $plan->module_creation_id;
                         $resultSubmission->module_code = $plan->creations->code;
                         $resultSubmission->upload_user_type = 'staff';
