@@ -105,11 +105,13 @@
                 </li>
             @endif
         @endif
+        @if(isset(auth()->user()->priv()['result_management_pt']) && auth()->user()->priv()['result_management_pt'] == 1)
         <li id="submission-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 " data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
                 <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Submission
             </a>
         </li>
+        @endif
     </ul>
 </div>
 <div class="intro-y tab-content mt-5">
@@ -156,11 +158,13 @@
         <!-- END: HTML Table Data -->
     </div>
     @endif
-    <div id="submission"  class="tab-pane " role="tabpanel"  aria-labelledby="submission-tab">
-        <!-- BEGIN: HTML Table Data -->
-        @include('pages.tutor.module.includes.submission')
-        <!-- END: HTML Table Data -->
-    </div>
+    @if(isset(auth()->user()->priv()['result_management_pt']) && auth()->user()->priv()['result_management_pt'] == 1)
+        <div id="submission"  class="tab-pane " role="tabpanel"  aria-labelledby="submission-tab">
+            <!-- BEGIN: HTML Table Data -->
+            @include('pages.tutor.module.includes.submission')
+            <!-- END: HTML Table Data -->
+        </div>
+    @endif
 </div>
 @include('pages.tutor.module.component.modal')
 @endsection
@@ -168,5 +172,7 @@
 @section('script')
     @vite('resources/js/plan-tasks.js')
     @vite('resources/js/plan-tasks-analytics.js')
-    @vite('resources/js/results-submission.js')
+    @if(isset(auth()->user()->priv()['result_management_pt']) && auth()->user()->priv()['result_management_pt'] == 1)
+        @vite('resources/js/results-submission.js')
+    @endif
 @endsection
