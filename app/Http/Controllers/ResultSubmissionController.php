@@ -174,19 +174,25 @@ class ResultSubmissionController extends Controller
             if(count($missingStudents) > 0){
                 // add those missing student to the result submission table
                 foreach($missingStudents as $studentId){
-                    $student = Student::find($studentId);
-                    $resultSubmission = new ResultSubmission();
-                    $resultSubmission->assessment_plan_id = $assessmentPlan->id;
-                    $resultSubmission->plan_id = $plan->id;
-                    $resultSubmission->student_id = $studentId;
-                    $resultSubmission->student_course_relation_id = $student->crel->id;
-                    $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
-                    $resultSubmission->is_student_matched = 1;
-                    $resultSubmission->module_creation_id = $plan->module_creation_id;
-                    $resultSubmission->module_code = $plan->creations->code;
-                    $resultSubmission->upload_user_type = 'personal_tutor';
-                    $resultSubmission->created_by = Auth::id();
-                    $resultSubmission->save();
+
+                    $assigns = Assign::where('student_id', $studentId)->where('plan_id', $plan->id)->get()->first();
+                    if($assigns->attendance ===1 || $assigns->attendance === null) {
+                        
+                        $student = Student::find($studentId);
+                        $resultSubmission = new ResultSubmission();
+                        $resultSubmission->assessment_plan_id = $assessmentPlan->id;
+                        $resultSubmission->plan_id = $plan->id;
+                        $resultSubmission->student_id = $studentId;
+                        $resultSubmission->student_course_relation_id = $student->crel->id;
+                        $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
+                        $resultSubmission->is_student_matched = 1;
+                        $resultSubmission->is_it_final = 1;
+                        $resultSubmission->module_creation_id = $plan->module_creation_id;
+                        $resultSubmission->module_code = $plan->creations->code;
+                        $resultSubmission->upload_user_type = 'personal_tutor';
+                        $resultSubmission->created_by = Auth::id();
+                        $resultSubmission->save();
+                    }
                 }
             }
             return response()->json(['message' => 'Document successfully uploaded.'], 200);
