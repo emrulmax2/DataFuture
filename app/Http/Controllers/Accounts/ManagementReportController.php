@@ -582,7 +582,7 @@ class ManagementReportController extends Controller
                                 body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
                                 table{margin-left: 0px; width: 100%; border-collapse: collapse;}
                                 figure{margin: 0;}
-                                @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
+                                @page{margin-top: 110px;margin-left: 65px !important; margin-right:65px !important; }
 
                                 header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
                                 .headerTable tr td{vertical-align: top; padding: 0; line-height: 13px;}
@@ -634,11 +634,9 @@ class ManagementReportController extends Controller
                 $PDFHTML .= '<table class="table table-bordered table-sm attenRateReportTable">';
                     $PDFHTML .= '<thead>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th>TC No</th>';
-                            $PDFHTML .= '<th>Date</th>';
+                            $PDFHTML .= '<th>Transaction</th>';
                             $PDFHTML .= '<th>Details</th>';
                             $PDFHTML .= '<th>Invoice</th>';
-                            $PDFHTML .= '<th>Invoice Date</th>';
                             if(!$is_audior):
                                 $PDFHTML .= '<th>Description</th>';
                             endif;
@@ -664,11 +662,17 @@ class ManagementReportController extends Controller
                                 endif;
 
                                 $PDFHTML .= '<tr>';
-                                    $PDFHTML .= '<td>'.$trans->transaction_code.'</td>';
-                                    $PDFHTML .= '<td>'.date('d-m-Y', strtotime($trans->transaction_date_2)).'</td>';
+                                    $PDFHTML .= '<td>';
+                                        $PDFHTML .= $trans->transaction_code;
+                                        $PDFHTML .= (!empty($trans->transaction_code) && !empty($trans->transaction_date_2) ? '<br/>' : '');
+                                        $PDFHTML .= date('d-m-Y', strtotime($trans->transaction_date_2));
+                                    $PDFHTML .= '</td>';
                                     $PDFHTML .= '<td>'.(!empty($trans->detail) ? $trans->detail : '').'</td>';
-                                    $PDFHTML .= '<td>'.(!empty($trans->invoice_no) ? $trans->invoice_no : '').'</td>';
-                                    $PDFHTML .= '<td>'.(!empty($trans->invoice_date) ? date('d-m-Y', strtotime($trans->invoice_date)) : '').'</td>';
+                                    $PDFHTML .= '<td style="word-break: break-all; white-space: normal;">';
+                                        $PDFHTML .= (!empty($trans->invoice_no) ? $trans->invoice_no : '');
+                                        $PDFHTML .= (!empty($trans->invoice_no) && !empty($trans->invoice_date) ? '<br/>' : '');
+                                        $PDFHTML .= (!empty($trans->invoice_date) ? date('d-m-Y', strtotime($trans->invoice_date)) : '');
+                                    $PDFHTML .= '</td>';
                                     if(!$is_audior):
                                         $PDFHTML .= '<td>'.(!empty($trans->description) ? $trans->description : '').'</td>';
                                     endif;
@@ -683,7 +687,7 @@ class ManagementReportController extends Controller
                     $PDFHTML .= '</tbody>';
                     $PDFHTML .= '<tfoot>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th colspan="'.(!$is_audior ? 9 : 8).'">Total</th>';
+                            $PDFHTML .= '<th colspan="'.(!$is_audior ? 7 : 6).'">Total</th>';
                             $PDFHTML .= '<th colspan="2" class="text-right" style="text-align: right;">'.($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)).'</th>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</tfoot>';
