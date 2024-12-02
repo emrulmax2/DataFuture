@@ -277,13 +277,15 @@ var titleListTable = (function () {
                     addTitleModal.hide();
 
                     succModal.show();
+                    titleListTable.init();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                             $("#successModal .successModalTitle").html( "Congratulations!" );
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
                     });     
                 }
-                titleListTable.init();
+                
             }).catch(error => {
+                titleListTable.init();
                 document.querySelector('#saveTitle').removeAttribute('disabled');
                 document.querySelector("#saveTitle svg").style.cssText = "display: none;";
                 if (error.response) {

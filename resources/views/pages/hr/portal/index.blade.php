@@ -68,6 +68,7 @@
                                 </div>
                                 <a href="{{ route('employee.create') }}" class="btn btn-success text-white w-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Employee</a>
                                 <button data-tw-toggle="modal" data-tw-target="#addTempEmployeeModal" type="button" class="btn btn-facebook text-white w-auto ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Temp Employee</button>
+                                
                             </div>
                         </div>
                         <div class="overflow-x-auto scrollbar-hidden">
@@ -453,7 +454,7 @@
     <!-- BEGIN: Add Temporary Employee Modal -->
     <div id="addTempEmployeeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="#" id="addTempEmployeeForm" enctype="multipart/form-data">
+            <form method="POST" action="#" id="addPaySlipForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Temporary Employee</h2>
@@ -468,7 +469,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="tempEmpBtn" class="btn btn-primary w-auto">     
+                        <button type="submit" id="EmpPaySlipBtn" class="btn btn-primary w-auto">     
                             Save                  
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
@@ -490,6 +491,8 @@
     </div>
     <!-- END: addTempEmployeeModal Modal -->
 
+
+    
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

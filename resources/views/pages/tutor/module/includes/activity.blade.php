@@ -7,11 +7,11 @@
         <div class="grid grid-cols-12 gap-4">
             @foreach ($planTasks as $task) 
                 @php
-                    if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
-                        $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$task->task->logo, now()->addMinutes(120));
-                    } else {
+                    //if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
+                    //    $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$task->task->logo, now()->addMinutes(120));
+                    //} else {
                         $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
-                    }
+                    //}
 
                     $FullName = isset($task->task->user) ? $task->task->user->employee->full_name : '';
                     $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;

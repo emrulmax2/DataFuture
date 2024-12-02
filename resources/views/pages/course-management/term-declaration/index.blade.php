@@ -153,6 +153,26 @@
                                 <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
                                 <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
                             </div>
+                            <div class="col-span-6">
+                                <label for="exam_publish_date" class="form-label">Exam Publish Date </label>
+                                <input id="exam_publish_date" name="exam_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-exam_publish_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_publish_time" class="form-label">Exam Publish Time </label>
+                                <input id="exam_publish_time" name="exam_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM">    
+                                <div class="acc__input-error error-exam_publish_time text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_resubmission_publish_date" class="form-label">Resubmission Publish Date </label>
+                                <input id="exam_resubmission_publish_date" name="exam_resubmission_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-exam_resubmission_publish_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_resubmission_publish_time" class="form-label">Resubmission Publish Time </label>
+                                <input id="exam_resubmission_publish_time" name="exam_resubmission_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM" >    
+                                <div class="acc__input-error error-exam_resubmission_publish_time text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -253,6 +273,26 @@
                                 <label for="revision_end_date" class="form-label">Revision End Date <span class="text-danger">*</span></label>
                                 <input id="revision_end_date" name="revision_end_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
                                 <div class="acc__input-error error-revision_end_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_publish_date" class="form-label">Exam Publish Date </label>
+                                <input id="exam_publish_date" name="exam_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-exam_publish_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_publish_time" class="form-label">Exam Publish Time </label>
+                                <input id="exam_publish_time" name="exam_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM">    
+                                <div class="acc__input-error error-exam_publish_time text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_resubmission_publish_date" class="form-label">Resubmission Publish Date </label>
+                                <input id="exam_resubmission_publish_date" name="exam_resubmission_publish_date" type="text" class="form-control datepicker itdp" data-format="DD-MM-YYYY" placeholder="DD-MM-YYYY" data-single-mode="true">    
+                                <div class="acc__input-error error-exam_resubmission_publish_date text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-6">
+                                <label for="exam_resubmission_publish_time" class="form-label">Resubmission Publish Time </label>
+                                <input id="exam_resubmission_publish_time" name="exam_resubmission_publish_time" type="text" class="form-control theTimeField" placeholder="HH:MM" >    
+                                <div class="acc__input-error error-exam_resubmission_publish_time text-danger mt-2"></div>
                             </div>
                         </div>
                     </div>

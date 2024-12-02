@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tutor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSingleAttendanceRequest;
+use App\Models\AssessmentPlan;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\AttendanceFeedStatus;
@@ -22,6 +23,7 @@ use App\Models\PlanParticipant;
 use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
+use App\Models\ResultSubmission;
 use App\Models\SmsTemplate;
 use App\Models\TermDeclaration;
 use App\Models\User;
@@ -504,7 +506,7 @@ class DashboardController extends Controller
         $moduleCreation = ModuleCreation::find($plan->module_creation_id);
         
         $assessmentlist = $moduleCreation->module->assesments;
-  
+        
         $userData = User::find(Auth::user()->id);
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
@@ -559,7 +561,8 @@ class DashboardController extends Controller
                         'personalTutor'=> ($personalTutor->full_name) ?? null,           
                     ];
 
-                
+        $resultSubmission = ResultSubmission::with('createdBy')->where('plan_id', $plan->id)->where('is_it_final',0)->orderBy('created_at','DESC')->get();
+        $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->get();
        
         return view('pages.tutor.module.view', [
             'title' => 'Attendance - London Churchill College',
@@ -571,12 +574,105 @@ class DashboardController extends Controller
             "employee" => $employee,
             "data" => $data,
             'planTasks' => $allPlanTasks, 
-
+            'studentAssignArray' => $studentAssign->pluck('student_id')->toArray(),
             'planDates' => $planDateWiseContent,
             'planDateList' => $planDateList,
             'eLearningActivites' => $eLearningActivites,
             'studentCount' => $studentListCount,
             'assessmentlist' => $assessmentlist, 
+            'resultSubmission' => $resultSubmission,
+            'submissionAssessment' => $submissionAssessment,
+
+            
+            'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'smtps' => ComonSmtp::where('is_default', 1)->get()->first(),
+
+            'attendanceStatus' => AttendanceFeedStatus::orderBy('id', 'ASC')->get(),
+            'attendance_rate' => $this->getModuleAttendanceRate($plan->id),
+            'attendance_trend' => $this->getModuleAttendanceTrend($plan->id)
+        ]);
+    }
+    public function showResultSubmission(Plan $plan) {
+        $moduleCreation = ModuleCreation::find($plan->module_creation_id);
+        
+        $assessmentlist = $moduleCreation->module->assesments;
+        
+        $userData = User::find(Auth::user()->id);
+        $employee = Employee::where("user_id",$userData->id)->get()->first();
+
+        $tutor = (isset($plan->tutor_id) && $plan->tutor_id > 0 ? Employee::where('user_id', $plan->tutor_id)->get()->first() : '');
+        $personalTutor = isset($plan->personal_tutor_id) && $plan->personal_tutor_id > 0 ? Employee::where('user_id', $plan->personal_tutor_id)->get()->first() : "";
+        
+        $planTask = PlanTask::where("plan_id",$plan->id)
+                    ->where('module_creation_id',$moduleCreation->id)->get();  
+        
+        $studentAssign = Assign::where('plan_id', $plan->id)->get();
+        $studentListCount = $studentAssign->count();
+        
+        $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
+        $eLearningActivites = ELearningActivitySetting::all();
+        $planDateWiseContent = [];
+        foreach($planDates as $classDate) {
+            $content = PlanContent::where("plans_date_list_id", $classDate->id)->get();
+            foreach($content as $singleContent){
+                $uploads = PlanContentUpload::where("plan_content_id",$singleContent->id)->get();
+    
+                $planDateWiseContent[$classDate->id] = (object) [
+                    "task" => $content,
+                    "taskUploads" => $uploads,
+                ];
+            }
+            
+        }
+        
+        $allPlanTasks = [];
+
+            foreach($planTask as $task){
+                $uploads = PlanTaskUpload::with(['createdBy','updatedBy'])->where("plan_task_id",$task->id)->get();
+
+                $allPlanTasks[$task->id] = (object) [
+                    "task"=> $task,
+                    "taskUploads" => $uploads
+                ]; 
+            }
+        
+        $moduleCreations = ModuleCreation::find($plan->creations->id);
+                    $data = (object) [
+                        'id' => $plan->id,
+                        'term_name' => $moduleCreations->term->name,
+                        'course' => $plan->course->name,
+                        
+                        'classType' => $plan->creations->class_type,
+                        'module' => $plan->creations->module_name,
+                        'group'=> $plan->group->name,           
+                        'room'=> $plan->room->name,           
+                        'venue'=> $plan->venu->name,           
+                        'tutor'=> ($tutor->full_name) ?? null,           
+                        'personalTutor'=> ($personalTutor->full_name) ?? null,           
+                    ];
+
+        $resultSubmission = ResultSubmission::with('createdBy')->where('plan_id', $plan->id)->where('is_it_final',0)->orderBy('created_at','DESC')->get();
+        $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->get();
+       
+        return view('pages.tutor.module.result-submission', [
+            'title' => 'Attendance - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Attendance', 'href' => 'javascript:void(0);']
+            ],
+            "plan" => $plan,
+            "user" => $userData,
+            "employee" => $employee,
+            "data" => $data,
+            'planTasks' => $allPlanTasks, 
+            'studentAssignArray' => $studentAssign->pluck('student_id')->toArray(),
+            'planDates' => $planDateWiseContent,
+            'planDateList' => $planDateList,
+            'eLearningActivites' => $eLearningActivites,
+            'studentCount' => $studentListCount,
+            'assessmentlist' => $assessmentlist, 
+            'resultSubmission' => $resultSubmission,
+            'submissionAssessment' => $submissionAssessment,
 
             
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),

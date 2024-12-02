@@ -16,6 +16,7 @@ class AssessmentPlan extends Model
      protected $fillable = [
         'plan_id',
         'course_module_base_assesment_id',
+        'upload_user_type',
         'published_at',
         'visible_at',
         'resubmission_at',
@@ -28,13 +29,26 @@ class AssessmentPlan extends Model
     }
     
     public function getPublishedAtAttribute($value) {  
-        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+        return (!empty($value) ? date('d-m-Y H:i', strtotime($value)) : '');
     }
+
+
+    
+    
+    public function setResubmissionAtAttribute($value) {  
+        $this->attributes['resubmission_at'] =  (!empty($value) ? date('Y-m-d H:i:s', strtotime($value)) : '');
+    }
+
+    public function getResubmissionAtAttribute($value) {  
+        return (!empty($value) ? date('d-m-Y  H:i', strtotime($value)) : '');
+    }
+
 
     public function courseModuleBase(): BelongsTo
     {
         return $this->belongsTo(CourseModuleBaseAssesment::class,'course_module_base_assesment_id','id');
     }
+
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
@@ -44,5 +58,21 @@ class AssessmentPlan extends Model
     {
         return $this->hasMany(Result::class);
     }
+
+    public function resultSubmissions(): HasMany
+    {
+        return $this->hasMany(ResultSubmission::class);
+    }
+
+    public function resultSubmissionByStaffs(): HasMany
+    {
+        return $this->hasMany(ResultSubmissionByStaff::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+    
     
 }

@@ -24,6 +24,10 @@ class TermDeclaration extends Model
         'teaching_end_date',
         'revision_start_date',
         'revision_end_date',
+        'exam_publish_date',
+        'exam_publish_time',
+        'exam_resubmission_publish_date',
+        'exam_resubmission_publish_time',
         'created_by',
         'updated_by',
     ];
@@ -92,4 +96,22 @@ class TermDeclaration extends Model
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 
+    public function setExamPublishDateAttribute($value) {  
+        $this->attributes['exam_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+    public function getExamPublishDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setExamResubmissionPublishDateAttribute($value) {  
+        $this->attributes['exam_resubmission_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+    public function getExamResubmissionPublishDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+
+    public function publishDate() {
+        return $this->hasMany(TermPublishDate::class, 'term_declaration_id', 'id');
+    }
 }
