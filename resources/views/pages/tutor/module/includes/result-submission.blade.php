@@ -190,7 +190,7 @@
                 </div>
             </div>
 
-            <div class="intro-y box">
+            <div class="intro-y box my-3">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Module Submission List By Tutor</h2>
                 </div>
