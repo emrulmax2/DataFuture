@@ -572,7 +572,7 @@ class ManagementReportController extends Controller
         $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
 
         $subTotal = 0;
-        $report_title = 'Transactions of '.preg_replace("/[^a-z0-9\_\-\.\ ]/i", '', $category->category_name);
+        $report_title = 'Category: '.preg_replace("/[^a-z0-9\_\-\.\ ]/i", '', $category->category_name);
         $PDFHTML = '';
         $PDFHTML .= '<html>';
             $PDFHTML .= '<head>';
@@ -683,8 +683,8 @@ class ManagementReportController extends Controller
                     $PDFHTML .= '</tbody>';
                     $PDFHTML .= '<tfoot>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th colspan="'.($is_audior ? 5 : 6).'">Sub Total</th>';
-                            $PDFHTML .= '<th colspan="2" class="text-right">'.($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)).'</th>';
+                            $PDFHTML .= '<th colspan="'.(!$is_audior ? 9 : 8).'">Total</th>';
+                            $PDFHTML .= '<th colspan="2" class="text-right" style="text-align: right;">'.($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)).'</th>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</tfoot>';
                 $PDFHTML .= '</table>';

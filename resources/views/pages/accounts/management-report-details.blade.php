@@ -215,7 +215,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="{{ ($is_auditor ? 5 : 6) }}">Sub Total</th>
+                                <th colspan="{{ ($is_auditor ? 5 : 6) }}">Total</th>
                                 <th colspan="2" class="text-right">{{ ($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)) }}</th>
                             </tr>
                         </tfoot>
