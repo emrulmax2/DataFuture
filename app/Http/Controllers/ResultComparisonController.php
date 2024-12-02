@@ -125,21 +125,22 @@ class ResultComparisonController extends Controller
             $resultSet[$key]['tutor_given_paper_ID'] = isset($resultSubmissionByStaff->paper_id) ? $resultSubmissionByStaff->paper_id : '';
             $resultSet[$key]['attendance'] = $value->attendance;
             $resultSet[$key]['grade_matched'] = ($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) ? "Matched" : "Not Matched";
-            
-            if(($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) && ($resultSet[$key]['staff_given_grade']!="N/A" || $resultSet[$key]['tutor_given_grade']!="N/A") && count($resultIds) == 0) {
-                
-                $resultSet[$key]['grade'] = $resultSubmissionByStaff->grade->id;
+            $resultSet[$key]['grade'] = '';
+            if(($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) && ($resultSet[$key]['staff_given_grade']!="N/A" || $resultSet[$key]['tutor_given_grade']!="N/A")) {
+                if(isset($result->id)):
+                    $resultSet[$key]['grade'] = $result->grade_id;
+                else:
+                    $resultSet[$key]['grade'] = $resultSubmissionByStaff->grade->id;
+                endif;
             } else {
 
-                if(count($resultIds) > 0)
+                if(count($resultIds) > 0):
                     if(isset($result->id)):
                         $resultSet[$key]['grade'] = $result->grade_id;
                     else:
                         $resultSet[$key]['grade'] = '';
                     endif;
-                else
-
-                    $resultSet[$key]['grade'] = '';
+                endif;
 
             }
             if(count($resultIds) > 0):
