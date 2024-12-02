@@ -15,6 +15,7 @@ class ResultSubmission extends Model
         'student_id',
         'student_course_relation_id',
         'assessment_plan_id',
+        'is_it_final',
         'grade_id',
         'paper_id',
         'module_creation_id',
