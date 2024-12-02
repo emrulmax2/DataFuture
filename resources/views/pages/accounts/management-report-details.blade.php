@@ -101,7 +101,14 @@
                                 <input id="audit_status" checked class="form-check-input" name="audit_status" type="checkbox" value="1">
                             </div>
                             <input type="hidden" id="storage_id" name="storage_id" value="0"/>
-
+                            
+                            <div class="inline-flex mr-2 relative">
+                                <input type="checkbox" id="is_assets" name="is_assets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible" />
+                                <label for="is_assets" class="assetsChecker cursor-pointer btn btn-outline-secondary h-[38px] text-success">
+                                    <i data-lucide="package-plus" class="w-5 h-5 unCheckedIcon"></i>
+                                    <i data-lucide="package-check" class="w-5 h-5 checkedIcon"></i>
+                                </label>
+                            </div>
                             <input type="file" name="document" id="transaction_document" value="" style="opacity: 0; visibility: hidden; width: 0; height: 0; position: absolute;"/>
                             <label for="transaction_document" class="btn btn-primary text-white w-auto mr-2"><i data-lucide="hard-drive-upload" class="w-4 h-4"></i></label>
                             <button type="submit" id="storeTransaction" class="btn btn-success text-white w-auto px-4">     

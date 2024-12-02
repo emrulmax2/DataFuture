@@ -247,6 +247,15 @@ class AccCsvTransactionController extends Controller
             endif;
         endif;
 
+        if($transaction->id && isset($request->isassets) && $request->isassets == 1):
+            AccAssetRegister::create([
+                'acc_transaction_id' => $transaction->id,
+                'description' => null,
+                'active' => 1,
+                'created_by' => auth()->user()->id,
+            ]);
+        endif;
+
         return response()->json(['msg' => 'CSV transaction successfully inserted to transaction.', 'red' => $redirect], 200);
     }
 

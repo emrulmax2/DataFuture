@@ -129,7 +129,7 @@
                             
                             <div class="inline-flex mr-2 relative">
                                 <input type="checkbox" id="is_assets" name="is_assets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible" />
-                                <label for="is_assets" class="assetsChecker cursor-pointer btn btn-twitter h-[38px] text-white">
+                                <label for="is_assets" class="assetsChecker cursor-pointer btn btn-outline-secondary h-[38px] text-success">
                                     <i data-lucide="package-plus" class="w-5 h-5 unCheckedIcon"></i>
                                     <i data-lucide="package-check" class="w-5 h-5 checkedIcon"></i>
                                 </label>

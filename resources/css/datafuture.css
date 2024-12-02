@@ -2278,9 +2278,21 @@ input[type=number] {
 .assetsChecker svg.checkedIcon{
     display: none;
 }
-#is_assets:checked + .assetsChecker svg.unCheckedIcon{
+#is_assets:checked + .assetsChecker svg.unCheckedIcon,
+.is_assets:checked + .assetsChecker svg.unCheckedIcon{
     display: none;
 }
-#is_assets:checked + .assetsChecker svg.checkedIcon{
+#is_assets:checked + .assetsChecker svg.checkedIcon,
+.is_assets:checked + .assetsChecker svg.checkedIcon{
     display: inline-flex;
+}
+#is_assets:checked + .assetsChecker,
+.is_assets:checked + .assetsChecker{
+    border-color: rgb(13, 148, 136);
+    background-color: rgb(13, 148, 136);
+    color: rgb(255, 255, 255);
+}
+#is_assets:checked + .assetsChecker svg,
+.is_assets:checked + .assetsChecker svg{
+    stroke: #FFF;
 }

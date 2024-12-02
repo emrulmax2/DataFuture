@@ -25,7 +25,7 @@
             <div class="intro-y box lg:mt-5">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Banks</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addAssetTypeModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Banks</button>
+                    <button data-tw-toggle="modal" data-tw-target="#addAssetTypeModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Type</button>
                 </div>
                 <div class="p-5">
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">

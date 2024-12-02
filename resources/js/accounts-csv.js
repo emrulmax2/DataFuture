@@ -243,7 +243,7 @@ import TomSelect from "tom-select";
                     }else{
                         window.location.reload();
                     }*/
-                }, 500);
+                }, 1000);
             }
         }).catch(error => {
             $('#csvTransTable').find('.saveCsvTransRow').removeAttr('disabled');
