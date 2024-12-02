@@ -321,6 +321,7 @@ export default defineConfig({
                 'resources/js/accounts-management-report-details.js',
                 'resources/js/accounts-assets-register-new.js',
                 'resources/js/accounts-assets-register.js',
+                'resources/js/acc-asset-type.js',
             ],
             refresh: true,
         }),

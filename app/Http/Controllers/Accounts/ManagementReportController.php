@@ -32,7 +32,7 @@ class ManagementReportController extends Controller
             'cos' => $this->getCostOfSales($startDate, $endDate, $audit_status),
             'all_other_income' => $this->getAllIncomes($startDate, $endDate, $audit_status, [], [112]),
             'expenditure' => $this->getAllExpenditure($startDate, $endDate, $audit_status),
-            'openedAssetList' => AccAssetRegister::where('active', 1)->get(),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count()
         ]);
     }
 
@@ -246,7 +246,7 @@ class ManagementReportController extends Controller
             'transactions' => AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->get(),
             'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false),
             'can_edit' => ((auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && in_array(auth()->user()->priv()['access_account_type'], [1, 3])) ? 1 : 0),
-            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count(),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count()
         ]);
     }
 
