@@ -110,6 +110,13 @@
                                                     <div class="form-check inline-flex mr-2">
                                                         <input checked class="form-check-input audit_status" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_auditstatus" type="checkbox" value="1">
                                                     </div>
+                                                    <div class="inline-flex mr-2 relative">
+                                                        <input type="checkbox" id="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible is_assets" />
+                                                        <label for="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" class="assetsChecker cursor-pointer btn btn-twitter h-[30px] w-[30px] p-0 text-white">
+                                                            <i data-lucide="package-plus" class="w-4 h-4 unCheckedIcon"></i>
+                                                            <i data-lucide="package-check" class="w-4 h-4 checkedIcon"></i>
+                                                        </label>
+                                                    </div>
                                                     <label for="trans_up_{{$trns->id}}" class="btn btn-linkedin btn-sm"><i data-lucide="hard-drive-upload" class="w-4 h-4"></i></label>
                                                     <input type="file" id="trans_up_{{$trns->id}}" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_doument" style="opacity: 0; visibility: hidden; width: 0; height: 0; position: absolute;"/>
                                                     <button data-file-id="{{ $trns->acc_csv_file_id }}" data-id="{{ $trns->id }}" style="display: none;" type="button" class="btn btn-success saveCsvTransRow text-white btn-sm ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>

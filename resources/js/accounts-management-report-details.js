@@ -169,6 +169,11 @@ import TomSelect from "tom-select";
                     }else{
                         $('#storageTransactionForm #audit_status').prop('checked', false);
                     }
+                    if(row.has_assets == 1){
+                        $('#storageTransactionForm #is_assets').prop('checked', true);
+                    }else{
+                        $('#storageTransactionForm #is_assets').prop('checked', false);
+                    }
                     $('#storageTransactionForm #transaction_id').val(row.id);
                     $('#storageTransactionForm #storage_id').val(row.acc_bank_id);
                 });

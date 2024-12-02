@@ -215,6 +215,7 @@ class StorageController extends Controller
                     'balance' => (empty($queryStr) ? ($balance >= 0 ? '£'.$balance : '-£'.str_replace('-', '', $balance)) : ''),
                     'deleted_at' => $list->deleted_at,
                     'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? $list->transaction_doc_name : ''),
+                    'has_assets' => (isset($list->assets->id) && $list->assets->id > 0 ? 1 : 0),
                     'can_eidt' => $canEdit,
                 ];
                 $i++;

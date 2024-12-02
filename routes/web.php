@@ -3167,9 +3167,11 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/assets-register/list', 'list')->name('accounts.assets.register.list'); 
         Route::get('accounts/assets-register/new', 'newRegisters')->name('accounts.assets.register.new'); 
         Route::post('accounts/assets-register/update', 'update')->name('accounts.assets.register.update'); 
-        /*Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
-        Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
-        Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); */
+        Route::post('accounts/assets-register/edit', 'edit')->name('accounts.assets.register.edit'); 
+        Route::post('accounts/assets-register/update-single', 'updateSingle')->name('accounts.assets.register.update.single'); 
+
+        Route::delete('accounts/assets-register/delete/{id}', 'destroy')->name('accounts.assets.register.destory');
+        Route::post('accounts/assets-register/restore/{id}', 'restore')->name('accounts.assets.register.restore');
     });
 
     Route::controller(AccAssetTypeController::class)->group(function() {

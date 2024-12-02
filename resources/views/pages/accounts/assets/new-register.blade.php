@@ -6,12 +6,12 @@
 
 @section('subcontent')
     <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 xl:col-span-3 2xl:col-span-3 relative z-10">
+        {{--<div class="col-span-12 xl:col-span-3 2xl:col-span-3 relative z-10">
             <!-- BEGIN: Profile Info -->
             @include('pages.accounts.sidebar')
             <!-- END: Profile Info -->
-        </div>
-        <div class="col-span-12 xl:col-span-9 2xl:col-span-9 z-10 pt-6">
+        </div>--}}
+        <div class="col-span-12 xl:col-span-12 2xl:col-span-12 z-10 pt-6">
             <div class="flex items-center">
                 <div class="mr-auto inline-flex justify-start items-center">
                     <h2 class="font-medium text-lg mr-auto">
@@ -24,7 +24,7 @@
             </div>
             <div class="intro-y box mt-5 p-5">
                 <div class="overflow-x-auto">
-                    <table class="table table-bordered table-xsm" id="newAssetsRegTable">
+                    <table class="table table-bordered" id="newAssetsRegTable">
                         <thead>
                             <tr>
                                 <th>Purchase Date</th>
@@ -43,7 +43,17 @@
                             @if($openedAssetList->count() > 0)
                                 @foreach($openedAssetList as $list)
                                     <tr class="assets_row assets_row_{{ $list->id }}" id="assets_row_{{ $list->id }}" data-id="{{ $list->id }}">
-                                        <td class="whitespace-nowrap text-xs text-slate-500">{{ isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : ''}}</td>
+                                        <td class="whitespace-nowrap text-xs">
+                                            <div class="font-medium text-success mb-1">
+                                                {{ isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : ''}}
+                                            </div>
+                                            <div class="text-slate-500 flex justify-start items-center">
+                                                @if(isset($list->trans->transaction_doc_name) && !empty($list->trans->transaction_doc_name))
+                                                    <a data-id="{{ $list->acc_transaction_id }}" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>
+                                                @endif
+                                                {{ isset($list->trans->transaction_code) && !empty($list->trans->transaction_code) ? $list->trans->transaction_code : ''}}
+                                            </div>
+                                        </td>
                                         <td class="text-xs font-medium text-slate-500">{{ isset($list->trans->transaction_amount) && $list->trans->transaction_amount > 0 ? '£'.number_format($list->trans->transaction_amount, 2) : '£0.00'}}</td>
                                         <td class="text-xs text-slate-500">{{ isset($list->trans->detail) && !empty($list->trans->detail) ? $list->trans->detail : ''}}</td>
                                         <td>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssetsRegisterUpdateRequest;
 use App\Models\AccAssetRegister;
 use App\Models\AccAssetType;
 use App\Models\AccBank;
@@ -71,10 +72,12 @@ class AssetsRegisterController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'acc_transaction_id ' => (isset($list->acc_transaction_id ) && $list->acc_transaction_id > 0 ? $list->acc_transaction_id : ''),
                     'transaction_date_2' => (isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : ''),
                     'transaction_code' => (isset($list->trans->transaction_code) && !empty($list->trans->transaction_code) ? $list->trans->transaction_code : ''),
                     'detail' => (isset($list->trans->detail) && !empty($list->trans->detail) ? $list->trans->detail : ''),
                     'transaction_amount' => (isset($list->trans->transaction_amount) && $list->trans->transaction_amount > 0 ? '£'.number_format($list->trans->transaction_amount, 2) : '£0.00'),
+                    'transaction_doc_name' => (isset($list->trans->transaction_doc_name) && !empty($list->trans->transaction_doc_name) ? $list->trans->transaction_amount : ''),
                     'acc_asset_type_id' => (isset($list->type->name) && !empty($list->type->name) ? $list->type->name : ''),
                     'description' => (isset($list->description) && !empty($list->description) ? $list->description : ''),
                     'location' => (isset($list->location) && !empty($list->location) ? $list->location : ''),
@@ -106,15 +109,23 @@ class AssetsRegisterController extends Controller
         ]);
     }
 
+    public function edit(Request $request){
+        $row_id = $request->row_id;
+        $AccAssets = AccAssetRegister::find($row_id);
+
+        return response()->json(['row' => $AccAssets], 200);
+    }
+
     public function update(Request $request){
         $id = $request->id;
+        $oldRow = AccAssetRegister::find($id);
         $description = $request->description;
         $acc_asset_type_id = $request->acc_asset_type_id;
         $location = (isset($request->location) && !empty($request->location) ? $request->location : null);
         $serial = (isset($request->serial) && !empty($request->serial) ? $request->serial : null);
-        $barcode = (isset($request->barcode) && !empty($request->barcode) ? $request->barcode : random_int(10000000, 99999999));
+        $barcode = (isset($request->barcode) && !empty($request->barcode) ? $request->barcode : (isset($oldRow->barcode) && !empty($oldRow->barcode) ? $oldRow->barcode : random_int(10000000, 99999999)));
         $life = (isset($request->life) && !empty($request->life) ? $request->life : null);
-
+        
         $register = AccAssetRegister::where('id', $id)->update([
             'description' => $description,
             'acc_asset_type_id' => $acc_asset_type_id,
@@ -127,5 +138,41 @@ class AssetsRegisterController extends Controller
         ]);
 
         return response()->json(['msg' => 'Register successfully updated.'], 200);
+    }
+
+    public function updateSingle(AssetsRegisterUpdateRequest $request){
+        $id = $request->id;
+        $oldRow = AccAssetRegister::find($id);
+        $description = $request->description;
+        $acc_asset_type_id = $request->acc_asset_type_id;
+        $location = (isset($request->location) && !empty($request->location) ? $request->location : null);
+        $serial = (isset($request->serial) && !empty($request->serial) ? $request->serial : null);
+        $barcode = (isset($request->barcode) && !empty($request->barcode) ? $request->barcode : (isset($oldRow->barcode) && !empty($oldRow->barcode) ? $oldRow->barcode : random_int(10000000, 99999999)));
+        $life = (isset($request->life) && !empty($request->life) ? $request->life : null);
+        $active = (isset($request->active) ? $request->active : 2);
+
+        $register = AccAssetRegister::where('id', $id)->update([
+            'description' => $description,
+            'acc_asset_type_id' => $acc_asset_type_id,
+            'location' => $location,
+            'serial' => $serial,
+            'barcode' => $barcode,
+            'life' => $life,
+            'active' => $active,
+            'updated_by' => auth()->user()->id,
+        ]);
+
+        return response()->json(['msg' => 'Register successfully updated.'], 200);
+    }
+
+    public function destroy($id){
+        $data = AccAssetRegister::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function restore($id) {
+        $data = AccAssetRegister::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
     }
 }
