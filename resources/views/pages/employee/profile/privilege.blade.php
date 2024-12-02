@@ -489,6 +489,33 @@
                 </div>
             </div>
         </div>
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 gap-0 items-center">
+                <div class="col-span-6">
+                    <div class="font-medium text-base">Result Manament Privileges</div>
+                </div>
+                <div class="col-span-6 text-right relative">
+                    <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
+                </div>
+            </div>
+            <div class="intro-y mt-5">
+                <div class="grid grid-cols-12 gap-4 items-start">
+                    <div class="col-span-12 sm:col-span-3">
+
+                        <div class="form-check form-switch mb-3">
+                            <input {{ (isset($priv['result_management']['result_management_staff']) && $priv['result_management']['result_management_staff'] == 1 ? 'checked' : '') }} id="permission_result_management_1" class="form-check-input" type="checkbox" value="1" name="permission[result_management][result_management_staff]">
+                            <label class="form-check-label ml-4" for="permission_result_management_1">Staff Upload Permission</label>
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['result_management']['result_management_pt']) && $priv['result_management']['result_management_pt'] == 1 ? 'checked' : '') }} id="permission_result_management_2" class="form-check-input" type="checkbox" value="1" name="permission[result_management][result_management_pt]">
+                            <label class="form-check-label ml-4" for="permission_library_management_2">PT Upload Permission</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">

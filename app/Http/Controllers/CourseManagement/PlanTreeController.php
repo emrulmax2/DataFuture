@@ -346,6 +346,13 @@ class PlanTreeController extends Controller
                 $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
                 $assesmentPlanByTutorAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','personal_tutor')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
                
+                if((isset(auth()->user()->priv()['result_management_staff']) && auth()->user()->priv()['result_management_staff'] == 1)) {
+                        $submissionAvailable = isset($assesmentPlanByStaffAssesment->course_module_base_assesment_id) && isset($assesmentPlanByTutorAssesment->course_module_base_assesment_id) && $assesmentPlanByStaffAssesment->course_module_base_assesment_id == $assesmentPlanByTutorAssesment->course_module_base_assesment_id ? 1 : 0;
+                        $uploadAssesment= 1;
+                } else {
+                    $submissionAvailable = 0;
+                    $uploadAssesment= 0;
+                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -369,7 +376,8 @@ class PlanTreeController extends Controller
                     'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
                     'tutorial' => (!empty($tutorialSet) ? $tutorialSet : 0),
                     'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0),
-                    'submissionAvailable' => isset($assesmentPlanByStaffAssesment->course_module_base_assesment_id) && isset($assesmentPlanByTutorAssesment->course_module_base_assesment_id) && $assesmentPlanByStaffAssesment->course_module_base_assesment_id == $assesmentPlanByTutorAssesment->course_module_base_assesment_id ? 1 : 0,
+                    'submissionAvailable' => $submissionAvailable,
+                    'uploadAssesment' => $uploadAssesment,
                 ];
                 $i++;
             endforeach;
