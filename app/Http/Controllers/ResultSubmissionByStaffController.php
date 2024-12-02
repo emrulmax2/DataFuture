@@ -221,19 +221,31 @@ class ResultSubmissionByStaffController extends Controller
             if(count($missingStudents) > 0){
                 // add those missing student to the result submission table
                 foreach($missingStudents as $studentId){
-                    $resultSubmissionFound = ResultSubmissionByStaff::where('plan_id', $plan->id)->where('student_id', $studentId)
-                    ->whereHas('assessmentPlan', function($q) use($courseMoudleBaseAssessment){
-                        $q->where('course_module_base_assesment_id', $courseMoudleBaseAssessment);
-                    })->whereNull('is_it_final')
-                    ->orderBy('created_at','DESC')->first();
+                    // $resultSubmissionFound = ResultSubmissionByStaff::where('plan_id', $plan->id)->where('student_id', $studentId)
+                    // ->whereHas('assessmentPlan', function($q) use($courseMoudleBaseAssessment){
+                    //     $q->where('course_module_base_assesment_id', $courseMoudleBaseAssessment);
+                    // })->orderBy('created_at','DESC')->get()->first();
                     
 
-                    if($resultSubmissionFound) {
+                    // if($resultSubmissionFound) {
 
-                        $resultSubmissionFound->assessment_plan_id = $assessmentPlan->id;
-                        $resultSubmissionFound->save();
-
-                    } else {
+                    //     $student = Student::find($studentId);
+                    //     $resultSubmission = new ResultSubmissionByStaff();
+                    //     $resultSubmission->assessment_plan_id = $assessmentPlan->id;
+                    //     $resultSubmission->plan_id = $plan->id;
+                    //     $resultSubmission->student_id = $studentId;
+                    //     $resultSubmission->student_course_relation_id = $student->crel->id;
+                    //     $resultSubmission->grade_id = $resultSubmissionFound->grade_id;
+                    //     $resultSubmission->is_student_matched = 1;
+                    //     $resultSubmission->is_excel_missing = 1;
+                        
+                    //     $resultSubmission->module_creation_id = $plan->module_creation_id;
+                    //     $resultSubmission->module_code = $plan->creations->code;
+                    //     $resultSubmission->upload_user_type = 'staff';
+                    //     $resultSubmission->created_by = Auth::id();
+                    //     $resultSubmission->save();
+                        
+                    // } else {
                         $student = Student::find($studentId);
                         $resultSubmission = new ResultSubmissionByStaff();
                         $resultSubmission->assessment_plan_id = $assessmentPlan->id;
@@ -249,7 +261,7 @@ class ResultSubmissionByStaffController extends Controller
                         $resultSubmission->upload_user_type = 'staff';
                         $resultSubmission->created_by = Auth::id();
                         $resultSubmission->save();
-                    }
+                    //}
                 }
             }
             return response()->json(['message' => 'Document successfully uploaded.'], 200);
