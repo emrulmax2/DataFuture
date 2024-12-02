@@ -2681,7 +2681,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(ResultSubmissionByStaffController::class)->group(function() {
 
         Route::get('staff-result-submission/{plan}', 'showResultSubmission')->name('results-staff-submission.show'); 
-        Route::post('staff-results-submission/{plan}', 'upload')->name('results-staff-submission.upload'); 
+        Route::post('staff-result-submission/{plan}', 'upload')->name('results-staff-submission.upload'); 
         Route::get('staff-results-submission-list', 'list')->name('results-staff-submission.list'); 
         Route::get('staff-sample-download-excel/{plan}', 'sampleDownload')->name('results-staff-submission.sample.download');
         
