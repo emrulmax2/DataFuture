@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreResultComparisonRequest;
 use App\Http\Requests\StoreResultRequest;
+use App\Http\Requests\UpdateResultComparisonRequest;
 use App\Http\Requests\UpdateResultRequest;
 use App\Models\Assessment;
 use App\Models\AssessmentPlan;
@@ -52,8 +53,6 @@ class ResultComparisonController extends Controller
         $studentListCount = $studentAssign->count();
         
         $eLearningActivites = ELearningActivitySetting::all();
-        
-        
         
             $moduleCreations = ModuleCreation::find($plan->creations->id);
 
@@ -113,6 +112,7 @@ class ResultComparisonController extends Controller
             if(isset($result->id)):
                 $resultSet[$key]['id'] = $result->id;
             endif;  
+            
             $resultSet[$key]['full_name'] = $value->student->full_name;
             $resultSet[$key]['student_id'] = $value->student->id;
             $resultSet[$key]['registration_no'] = $value->student->registration_no;
@@ -125,10 +125,37 @@ class ResultComparisonController extends Controller
             $resultSet[$key]['tutor_given_paper_ID'] = isset($resultSubmissionByStaff->paper_id) ? $resultSubmissionByStaff->paper_id : '';
             $resultSet[$key]['attendance'] = $value->attendance;
             $resultSet[$key]['grade_matched'] = ($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) ? "Matched" : "Not Matched";
-            $resultSet[$key]['grade'] = ($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) && ($resultSet[$key]['staff_given_grade']!="N/A" || $resultSet[$key]['tutor_given_grade']!="N/A") ? $resultSubmissionByStaff->grade->id : "";
-            $resultSet[$key]['publish_at'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('d-m-Y', strtotime($AssessmentPlanStaff->published_at)) : '';
-            $resultSet[$key]['publish_time'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('H:i', strtotime($AssessmentPlanStaff->published_at)) : '';
+            
+            if(($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) && ($resultSet[$key]['staff_given_grade']!="N/A" || $resultSet[$key]['tutor_given_grade']!="N/A") && count($resultIds) == 0) {
+                
+                $resultSet[$key]['grade'] = $resultSubmissionByStaff->grade->id;
+            } else {
+
+                if(count($resultIds) > 0)
+                    if(isset($result->id)):
+                        $resultSet[$key]['grade'] = $result->grade_id;
+                    else:
+                        $resultSet[$key]['grade'] = '';
+                    endif;
+                else
+
+                    $resultSet[$key]['grade'] = '';
+
+            }
+            if(count($resultIds) > 0):
+                if(isset($result->id)):
+                    $resultSet[$key]['publish_at'] = (isset($result->id) && !empty($result->published_at)) ? date('d-m-Y', strtotime($result->published_at)) : '';
+                    $resultSet[$key]['publish_time'] = (isset($result->id) && !empty($result->published_at)) ? date('H:i', strtotime($result->published_at)) : ''; 
+                else:
+                    $resultSet[$key]['publish_at'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('d-m-Y', strtotime($AssessmentPlanStaff->published_at)) : '';
+                    $resultSet[$key]['publish_time'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('H:i', strtotime($AssessmentPlanStaff->published_at)) : ''; 
+                endif;
+            else:
+                $resultSet[$key]['publish_at'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('d-m-Y', strtotime($AssessmentPlanStaff->published_at)) : '';
+                $resultSet[$key]['publish_time'] = (isset($AssessmentPlanStaff->id) && !empty($AssessmentPlanStaff->published_at)) ? date('H:i', strtotime($AssessmentPlanStaff->published_at)) : ''; 
+            endif;
         }
+        
         return view('pages.tutor.module.result-comparison', [
             'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
@@ -158,14 +185,12 @@ class ResultComparisonController extends Controller
 
         
         $gradeList = $request->input('grade_id');
-        foreach($gradeList as $grade) {
-            if($grade==null) {
-                return response()->json(['message' => 'Grade field required',"errors"=>["grade_id[]"=>"This field is required."]], 422);
-            }
-        }
-        if(is_array($request->input('grade_id')))
+        $noId = $request->input('noId');
+        $student_id = $request->input('student_id');
+        $ids = $request->input('id');
+        if(is_array($request->input('grade_id')) && isset($noId))
         {
-
+            
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
             $assessment_plan_id = $request->input('assessment_plan_id');
@@ -173,15 +198,20 @@ class ResultComparisonController extends Controller
             $published_at = $request->input('publish_at');
             $published_time = $request->input('publish_time');
             $created_by = Auth::user()->id;
-
-            for($count = 0; $count < count($grade_id); $count++)
+            $insert_schedule = [];
+            foreach($noId as $key => $value)
             {
+                $planId = Plan::find($plan_id);
+                //get the index number of selected row and pusht the data to the array
+                $index = array_search($value, $student_id);
+                
                 $data = array(
-                        'grade_id' => $grade_id[$count],
-                        'assessment_plan_id'  => $assessment_plan_id[$count],
-                        'student_id'  => $student_id[$count],
+                        'grade_id' => $grade_id[$index],
+                        'assessment_plan_id'  => $assessment_plan_id[$index],
+                        'student_id'  => $student_id[$index],
                         'plan_id' =>$plan_id,
-                        'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$count]." ".$published_time[$count])),
+                        'term_declaration_id' => $planId->term_declaration_id,
+                        'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
                         'created_by'  => $created_by,
                     );
 
@@ -206,108 +236,105 @@ class ResultComparisonController extends Controller
 
             return $insertedIds;
 
-        } else {
-            $result = new Result();
-            $result->fill($request->all());
-            $result->save();
+        }elseif(is_array($request->input('grade_id')) && isset($ids)) {
 
-            if($result->id)
-                return response()->json(['message' => 'Result successfully created.',"data"=>['result'=>$result]], 200);
-            else
-                return response()->json(['message' => 'Result could not be saved'], 302);
+            $grade_id = $request->input('grade_id');
+            $plan_id = $request->input('plan_id');
+            $assessment_plan_id = $request->input('assessment_plan_id');
+            $student_id = $request->input('student_id');
+            $published_at = $request->input('publish_at');
+            $published_time = $request->input('publish_time');
+            $created_by = Auth::user()->id;
+            $insert_schedule = [];
+            foreach($ids as $key => $id)
+            {
+                $result = Result::find($id);
+                //get the index number of selected row and pusht the data to the array
+                $index = array_search($result->student_id, $student_id);
+                
+                $data = array(
+                        'grade_id' => $grade_id[$index],
+                        'assessment_plan_id'  => $assessment_plan_id[$index],
+                        'student_id'  => $student_id[$index],
+                        'plan_id' =>$plan_id,
+                        'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
+                        'created_by'  => $created_by,
+                    );
+
+                $insert_schedule[] = $data; 
+            }
+            DB::transaction(function () use ($insert_schedule, &$insertedIds) {
+                foreach ($insert_schedule as $schedule) {
+                    $insertedIds[] = Result::insertGetId($schedule);
+                }
+            });
+            $resultComparison = ResultComparison::where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[0])->get()->first();
+            
+            $previousResultIds = $resultComparison->result_Ids;
+            $previousResultIds = json_decode($previousResultIds);
+            $previousResultIds = array_diff($previousResultIds, $ids);
+            $insertedIds = array_merge($previousResultIds, $insertedIds);
+
+            ResultComparison::updateOrCreate([
+                'plan_id' => $plan_id,
+                'assessment_plan_id' => $assessment_plan_id[0]
+            ],
+            [
+                'plan_id' => $plan_id,
+                'assessment_plan_id' => $assessment_plan_id[0],
+                'result_Ids' => json_encode($insertedIds),
+                'created_by' => $created_by,
+                'updated_by' => $created_by,
+            ]);
+
+            return $insertedIds;
         }
     }
 
-    public function update(UpdateResultRequest $request) {
+    public function update(UpdateResultComparisonRequest $request) {
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
-            $term_declaration_id = $request->input('term_declaration_id');
             $student_id = $request->input('student_id');
-            $published_at = $request->input('published_at');
-            $created_at = $request->input('created_at');
-            $id = $request->input('id');
+            $published_at = $request->input('publish_at');
+            $published_time = $request->input('publish_time');
+            $ids = $request->input('id');
 
-            for($count = 0; $count < count($grade_id); $count++)
+            foreach($ids as $index => $id)
             {
                 
-
-
-                if($id[$count] == null) {
-
-                    $data = [
-                        'grade_id' => $grade_id[$count],
-                        'term_declaration_id'  => $term_declaration_id[$count],
-                        'student_id'  => $student_id[$count],
-                        'plan_id' =>$plan_id[$count],
-                        'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$count])),
-                        'created_at'  => ($created_at[$count]!=null) ? date("Y-m-d H:i:s",strtotime($created_at[$count])) : date("Y-m-d H:i:s"),
-                        'created_by'  => auth()->user()->id,
-
-                    ];
-                    $resultCreate = Result::create($data);
-                   
-                } else {
-                    //(isset($result->createdBy->employee->full_name) ? $result->createdBy->employee->full_name: $result->createdBy->name) 
-                    
+                $ResultOldRow = Result::find($id);
+                $result = Result::find($id);
                     
 
-                    $ResultOldRow = Result::find($id[$count]);
-                    $result = Result::find($id[$count]);
+                $result->published_at = $published_at[$index]." ".$published_time[$index];
+                $result->grade_id = $grade_id[$index];
+
+                $changes = $result->getDirty();
+
+                if(!empty($changes)) {
+
+                    //FacadesDebugbar::info($changes);
+                    $result->updated_by = auth()->user()->id;
                     
-                    // Normalize the datetime values
-                    $publishedAt = Carbon::parse($published_at[$count])->format('Y-m-d H:i:s');
-                    $currentPublishedAt = $result->published_at ? Carbon::parse($result->published_at)->format('Y-m-d H:i:s'): null;
+                    $result->save();
 
-                    // Assign the normalized value to the model
-                    if ($currentPublishedAt != $publishedAt) {
-                        $result->published_at = $publishedAt;
-                    }
-                    // Normalize the datetime values for created_at
-                    $createdAt = Carbon::parse($created_at[$count])->format('Y-m-d H:i:s');
-                    $currentCreatedAt = $result->created_at ? Carbon::parse($result->created_at)->format('Y-m-d H:i:s') : null;
-
-                    // Assign the normalized value to the model if they are different
-                    if ($currentCreatedAt != $createdAt) {
-                        $result->created_at = $createdAt;
-                    }
-                    
-                    $result->grade_id = $grade_id[$count];
-                    $result->term_declaration_id  = $term_declaration_id[$count];
-                    $result->student_id  = $student_id[$count];
-                    $result->plan_id = $plan_id[$count];
-
-                    $changes = $result->getDirty();
-
-                    if(!empty($changes)) {
-
-                        FacadesDebugbar::info($changes);
-                        $result->updated_by = auth()->user()->id;
-                        
-                        $result->save();
-
-                        if($result->wasChanged() && !empty($changes)):
-                            foreach($changes as $field => $value):
-                                $data = [];
-                                $data['student_id'] = $result->student_id;
-                                $data['table'] = 'results';
-                                $data['field_name'] = $field;
-                                $data['field_value'] = $ResultOldRow->$field;
-                                $data['field_new_value'] = $value;
-                                $data['created_by'] = auth()->user()->id;
-                                StudentArchive::create($data);
-                            endforeach;
-                        endif;
-                    }
-
-                    
+                    if($result->wasChanged() && !empty($changes)):
+                        foreach($changes as $field => $value):
+                            $data = [];
+                            $data['student_id'] = $result->student_id;
+                            $data['table'] = 'results';
+                            $data['field_name'] = $field;
+                            $data['field_value'] = $ResultOldRow->$field;
+                            $data['field_new_value'] = $value;
+                            $data['created_by'] = auth()->user()->id;
+                            StudentArchive::create($data);
+                        endforeach;
+                    endif;
                 }
-                
             }
             
             if($result->id)
                 return response()->json(['message' => 'Result successfully updated.',"data"=>['result'=>$result]], 200);
-            else if($resultCreate->id)
-                return response()->json(['message' => 'Result successfully created.',"data"=>['result'=>$resultCreate]], 200);
             else
                 return response()->json(['message' => 'Result could not be saved'], 302);
 

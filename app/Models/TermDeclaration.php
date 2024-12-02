@@ -111,7 +111,4 @@ class TermDeclaration extends Model
     }
 
 
-    public function publishDate() {
-        return $this->hasMany(TermPublishDate::class, 'term_declaration_id', 'id');
-    }
 }
