@@ -653,7 +653,7 @@ class DashboardController extends Controller
                     ];
 
         $resultSubmission = ResultSubmission::with('createdBy')->where('plan_id', $plan->id)->where('is_it_final',0)->orderBy('created_at','DESC')->get();
-        $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->get();
+        $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->upload_user_type('upload_user_type')->get();
        
         return view('pages.tutor.module.result-submission', [
             'title' => 'Attendance - London Churchill College',
