@@ -250,6 +250,7 @@ use App\Http\Controllers\ResultController;
 use App\Http\Controllers\ResultPreviousController;
 use App\Http\Controllers\ResultSubmissionByStaffController;
 use App\Http\Controllers\ResultSubmissionController;
+use App\Http\Controllers\Settings\AccAssetTypeController;
 use App\Http\Controllers\Settings\AccBankController;
 use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
@@ -3169,6 +3170,18 @@ Route::middleware('auth')->group(function() {
         /*Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
         Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
         Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); */
+    });
+
+    Route::controller(AccAssetTypeController::class)->group(function() {
+        Route::get('site-settings/asset-type', 'index')->name('site.settings.asset.type'); 
+        Route::get('site-settings/asset-type/list', 'list')->name('site.settings.asset.type.list'); 
+        Route::post('site-settings/asset-type/store', 'store')->name('site.settings.asset.type.store');
+        Route::post('site-settings/asset-type/edit', 'edit')->name('site.settings.asset.type.edit');
+        Route::post('site-settings/asset-type/update', 'update')->name('site.settings.asset.type.update');
+
+        Route::delete('site-settings/asset-type/delete/{id}', 'destroy')->name('site.settings.asset.type.destory');
+        Route::post('site-settings/asset-type/restore/{id}', 'restore')->name('site.settings.asset.type.restore');
+        Route::post('site-settings/asset-type/update-status/{id}', 'updateStatus')->name('site.settings.asset.type.update.status');
     });
     
 });

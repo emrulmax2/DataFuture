@@ -232,16 +232,17 @@ import TomSelect from "tom-select";
                 document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                     $('#successModal .successModalTitle').html('Congratulations!');
                     $('#successModal .successModalDesc').html('CSV transaction successfully inserted to transaction.');
-                    $('#successModal .successCloser').attr('data-action', 'RELOAD').attr('data-redirect', red);
+                    //$('#successModal .successCloser').attr('data-action', 'RELOAD').attr('data-redirect', red);
+                    $('#successModal .successCloser').attr('data-action', 'NONE').attr('data-redirect', '');
                 });
 
                 setTimeout(function(){
                     successModal.hide();
-                    if(red != 'NONE'){
+                    /*if(red != 'NONE'){
                         window.location.href = red;
                     }else{
                         window.location.reload();
-                    }
+                    }*/
                 }, 500);
             }
         }).catch(error => {
