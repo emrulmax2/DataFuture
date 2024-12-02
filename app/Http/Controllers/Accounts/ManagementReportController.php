@@ -10,7 +10,11 @@ use Illuminate\Http\Request;
 
 use App\Exports\ArrayCollectionExport;
 use App\Models\AccAssetRegister;
+use App\Models\Option;
+use App\Models\User;
+use Google\Service\Books\Category;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ManagementReportController extends Controller
 {
@@ -504,5 +508,422 @@ class ManagementReportController extends Controller
         endif;
 
 	    return $tmp;
+    }
+
+    public function exportDetails($startDate, $endDate, AccCategory $category){
+        $startDate = date('Y-m-d', strtotime($startDate));
+        $endDate = date('Y-m-d', strtotime($endDate));
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        $is_audior = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false);
+
+        $theCollection = [];
+        $theCollection[1][] = "TC No";
+        $theCollection[1][] = "Date";
+        $theCollection[1][] = "Details";
+        $theCollection[1][] = "Invoice";
+        $theCollection[1][] = "Invoice Date";
+        if(!$is_audior):
+            $theCollection[1][] = "Description";
+        endif;
+        $theCollection[1][] = "Category";
+        $theCollection[1][] = "Code";
+        $theCollection[1][] = "Storage";
+        $theCollection[1][] = "Deposit";
+        $theCollection[1][] = "Withdraw";
+
+        $row = 2;
+        $transactions = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->orderBy('transaction_date_2', 'DESC')->get();
+        if($transactions->count() > 0):
+            foreach($transactions as $trans):
+                $transaction_type = ($trans->transaction_type > 0 ? $trans->transaction_type : 0);
+                $flow = (isset($trans->flow) && $trans->flow != '' ? $trans->flow : 0);
+                $transaction_amount = (isset($trans->transaction_amount) && $trans->transaction_amount > 0 ? $trans->transaction_amount : 0);
+
+                $theCollection[$row][] = $trans->transaction_code;
+                $theCollection[$row][] = date('d-m-Y', strtotime($trans->transaction_date_2));
+                $theCollection[$row][] = !empty($trans->detail) ? $trans->detail : '';
+                $theCollection[$row][] = !empty($trans->invoice_no) ? $trans->invoice_no : '';
+                $theCollection[$row][] = !empty($trans->invoice_date) ? date('d-m-Y', strtotime($trans->invoice_date)) : '';
+                if(!$is_audior):
+                    $theCollection[$row][] = !empty($trans->description) ? $trans->description : '';
+                endif;
+                $theCollection[$row][] = isset($trans->category->category_name) && !empty($trans->category->category_name) ? $trans->category->category_name : '';
+                $theCollection[$row][] = isset($trans->category->code) && !empty($trans->category->code) ? $trans->category->code : '';
+                $theCollection[$row][] = isset($trans->bank->bank_name) && !empty($trans->bank->bank_name) ? $trans->bank->bank_name : '';
+                $theCollection[$row][] = ($flow != 1 ? $transaction_amount : '');
+                $theCollection[$row][] = ($flow == 1 ? $transaction_amount : '');
+
+                $row += 1;
+            endforeach;
+        endif;
+
+        $report_title = 'Transactions_'.date('d_m_Y', strtotime($startDate)).'_to_'.date('d_m_Y', strtotime($endDate)).'.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $report_title);
+    }
+
+    public function printDetails($startDate, $endDate, AccCategory $category){
+        $startDate = date('Y-m-d', strtotime($startDate));
+        $endDate = date('Y-m-d', strtotime($endDate));
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        $is_audior = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false);
+
+        $user = User::find(auth()->user()->id);
+        $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
+        $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+
+        $subTotal = 0;
+        $report_title = 'Transactions of '.preg_replace("/[^a-z0-9\_\-\.\ ]/i", '', $category->category_name);
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>'.$report_title.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
+                                table{margin-left: 0px; width: 100%; border-collapse: collapse;}
+                                figure{margin: 0;}
+                                @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
+
+                                header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
+                                .headerTable tr td{vertical-align: top; padding: 0; line-height: 13px;}
+                                .headerTable img{height: 70px; width: auto;}
+                                .headerTable tr td.reportTitle{font-size: 16px; line-height: 16px; font-weight: bold;}
+
+                                footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                .pageCounter{position: relative;}
+                                .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                .pinRow td{border-bottom: 1px solid gray;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
+                                
+                                .mb-15{margin-bottom: 15px;}
+                                .mb-10{margin-bottom: 10px;}
+                                .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
+                                .table-sm th, .table-sm td{padding: 5px 10px;}
+                                .w-1/6{width: 16.666666%;}
+                                .w-2/6{width: 33.333333%;}
+                                .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
+                                .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
+                            </style>';
+            $PDFHTML .= '</head>';
+
+            $PDFHTML .= '<body>';
+                $PDFHTML .= '<header>';
+                    $PDFHTML .= '<table class="headerTable">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="2" class="reportTitle">'.$report_title.'</td>';
+                            $PDFHTML .= '<td rowspan="3" class="text-right"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>Date</td>';
+                            $PDFHTML .= '<td>'.date('jS M, Y', strtotime($startDate)).' - '.date('jS M, Y', strtotime($endDate)).'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>Cereated By</td>';
+                            $PDFHTML .= '<td>';
+                                $PDFHTML .= (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name);
+                                $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</table>';
+                $PDFHTML .= '</header>';
+
+                $PDFHTML .= '<table class="table table-bordered table-sm attenRateReportTable">';
+                    $PDFHTML .= '<thead>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th>TC No</th>';
+                            $PDFHTML .= '<th>Date</th>';
+                            $PDFHTML .= '<th>Details</th>';
+                            $PDFHTML .= '<th>Invoice</th>';
+                            $PDFHTML .= '<th>Invoice Date</th>';
+                            if(!$is_audior):
+                                $PDFHTML .= '<th>Description</th>';
+                            endif;
+                            $PDFHTML .= '<th>Category</th>';
+                            $PDFHTML .= '<th>Code</th>';
+                            $PDFHTML .= '<th>Storage</th>';
+                            $PDFHTML .= '<th>Deposit</th>';
+                            $PDFHTML .= '<th>Withdraw</th>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</thead>';
+                    $PDFHTML .= '<tbody>';
+                        $transactions = AccTransaction::whereBetween('transaction_date_2', [$startDate, $endDate])->where('parent', 0)->where('acc_category_id', $category->id)->whereIn('audit_status', $audit_status)->orderBy('transaction_date_2', 'DESC')->get();
+                        if($transactions->count() > 0):
+                            foreach($transactions as $trans):
+                                $transaction_type = ($trans->transaction_type > 0 ? $trans->transaction_type : 0);
+                                $flow = (isset($trans->flow) && $trans->flow != '' ? $trans->flow : 0);
+                                $transaction_amount = (isset($trans->transaction_amount) && $trans->transaction_amount > 0 ? $trans->transaction_amount : 0);
+                
+                                if($trans->flow == 1):
+                                    $subTotal -= $trans->transaction_amount;
+                                else:
+                                    $subTotal += $trans->transaction_amount;
+                                endif;
+
+                                $PDFHTML .= '<tr>';
+                                    $PDFHTML .= '<td>'.$trans->transaction_code.'</td>';
+                                    $PDFHTML .= '<td>'.date('d-m-Y', strtotime($trans->transaction_date_2)).'</td>';
+                                    $PDFHTML .= '<td>'.(!empty($trans->detail) ? $trans->detail : '').'</td>';
+                                    $PDFHTML .= '<td>'.(!empty($trans->invoice_no) ? $trans->invoice_no : '').'</td>';
+                                    $PDFHTML .= '<td>'.(!empty($trans->invoice_date) ? date('d-m-Y', strtotime($trans->invoice_date)) : '').'</td>';
+                                    if(!$is_audior):
+                                        $PDFHTML .= '<td>'.(!empty($trans->description) ? $trans->description : '').'</td>';
+                                    endif;
+                                    $PDFHTML .= '<td>'.(isset($trans->category->category_name) && !empty($trans->category->category_name) ? $trans->category->category_name : '').'</td>';
+                                    $PDFHTML .= '<td>'.(isset($trans->category->code) && !empty($trans->category->code) ? $trans->category->code : '').'</td>';
+                                    $PDFHTML .= '<td>'.(isset($trans->bank->bank_name) && !empty($trans->bank->bank_name) ? $trans->bank->bank_name : '').'</td>';
+                                    $PDFHTML .= '<td>'.($flow != 1 ? $transaction_amount : '').'</td>';
+                                    $PDFHTML .= '<td>'.($flow == 1 ? $transaction_amount : '').'</td>';
+                                $PDFHTML .= '<tr>';
+                            endforeach;
+                        endif;
+                    $PDFHTML .= '</tbody>';
+                    $PDFHTML .= '<tfoot>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th colspan="'.($is_audior ? 5 : 6).'">Sub Total</th>';
+                            $PDFHTML .= '<th colspan="2" class="text-right">'.($subTotal >= 0 ? '£'.number_format($subTotal, 2) : '-£'.number_format(str_replace('-', '', $subTotal), 2)).'</th>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</tfoot>';
+                $PDFHTML .= '</table>';
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = str_replace(' ', '_', $report_title).'.pdf';
+        $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'landscape')//portrait
+            ->setWarnings(false);
+        return $pdf->download($fileName);
+    }
+
+    public function printReport($startDate, $endDate){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        $startDate = date('Y-m-d', strtotime($startDate));
+        $endDate = date('Y-m-d', strtotime($endDate));
+
+        $all_sales = $this->getAllIncomes($startDate, $endDate, $audit_status, [112]);
+        $cos = $this->getCostOfSales($startDate, $endDate, $audit_status);
+        $all_other_income = $this->getAllIncomes($startDate, $endDate, $audit_status, [], [112]);
+        $expenditure = $this->getAllExpenditure($startDate, $endDate, $audit_status);
+
+        $user = User::find(auth()->user()->id);
+        $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
+        $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+
+        $report_title = 'Management Report';
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>'.$report_title.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
+                                table{margin-left: 0px; width: 100%; border-collapse: collapse;}
+                                figure{margin: 0;}
+                                @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
+
+                                header{position: fixed;left: 0px;right: 0px;height: 80px;margin-top: -90px;}
+                                .headerTable tr td{vertical-align: top; padding: 0; line-height: 13px;}
+                                .headerTable img{height: 70px; width: auto;}
+                                .headerTable tr td.reportTitle{font-size: 16px; line-height: 16px; font-weight: bold;}
+
+                                footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
+                                .pageCounter{position: relative;}
+                                .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
+                                .pinRow td{border-bottom: 1px solid gray;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
+                                .underline{text-decoration: underline;}
+                                .text-primary{color: #164e63;}
+                                .font-medium{font-weight: 700;}
+                                
+                                .mb-15{margin-bottom: 15px;}
+                                .mb-10{margin-bottom: 10px;}
+                                .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
+                                .table-sm th, .table-sm td{padding: 5px 10px;}
+                                .w-1/6{width: 16.666666%;}
+                                .w-2/6{width: 33.333333%;}
+                                .table.managementReportTable tr td{padding: 5px 0;}
+                                .table.managementReportTable tr td.w-150px{ width: 120px; }
+                                .cursor-pointer{ cursor: pointer; }
+
+                                .table.table-borderless.managementReportTable .cosHeadingRow td{padding-top: 1.25rem;}
+                                .table.table-borderless.managementReportTable .gpHeadingRow td:last-child{ border-top: 1px solid #000; }
+                                .table.table-borderless.managementReportTable .oiHeadingRow td,
+                                .table.table-borderless.managementReportTable .oiFirstHeadingRow td{ padding-top: 1.25rem; }
+                                .table.table-borderless.managementReportTable .aoiHeadingRow td:last-child{ border-top: 1px solid #000; }
+                                .table.table-borderless.managementReportTable .expdHeadingRow td{ padding-top: 1.25rem; }
+                                .table.table-borderless.managementReportTable .texpdHeadingRow td:last-child{ border-bottom: 1px solid #000;}
+                                .table.table-borderless.managementReportTable .npHeadingRow td:last-child{ border-bottom: 4px double #000; }
+                                .table.table-borderless.managementReportTable .child_row td:first-child{ padding-left: 1rem; }
+                                .table.table-borderless.managementReportTable .sales_parent_row td:first-child{ padding-left: 1rem; }
+                                .table.table-borderless.managementReportTable .sales_child_row td:first-child{ padding-left: 2rem; }
+                                .table.table-borderless.managementReportTable .other_child_row td:first-child{ padding-left: 1rem; }
+                            </style>';
+            $PDFHTML .= '</head>';
+
+            $PDFHTML .= '<body>';
+                $PDFHTML .= '<header>';
+                    $PDFHTML .= '<table class="headerTable">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="2" class="reportTitle">'.$report_title.'</td>';
+                            $PDFHTML .= '<td rowspan="3" class="text-right"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>Date</td>';
+                            $PDFHTML .= '<td>'.date('jS M, Y', strtotime($startDate)).' - '.date('jS M, Y', strtotime($endDate)).'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td>Cereated By</td>';
+                            $PDFHTML .= '<td>';
+                                $PDFHTML .= (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name);
+                                $PDFHTML .= '<br/>'.date('jS M, Y').' at '.date('h:i A');
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</table>';
+                $PDFHTML .= '</header>';
+
+                $PDFHTML .= '<table class="table table-borderless table-sm managementReportTable" id="managementReportTable">';
+                    $PROFIT = $all_sales['total_sale'];
+                    $COS_TOTAL = 0;
+                    $GROSS_PROFIT = 0;
+                    $EXPENDITURE_TOTAL = 0;
+                    $PDFHTML .= '<tbody>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<td colspan="3">';
+                                $PDFHTML .= '<span class="font-medium"><span style="font-family: DejaVu Sans, sans-serif;">&dArr;</span> Sales</span>';
+                            $PDFHTML .= '</td>';
+                            $PDFHTML .= '<td class="w-150px text-right">';
+                                $PDFHTML .= number_format($all_sales['total_sale'], 2);
+                            $PDFHTML .= '</td>';
+                        $PDFHTML .= '</tr>';
+                        if(!empty($all_sales['incomes'])):
+                            foreach($all_sales['incomes'] as $perent_id => $sale):
+                                $PDFHTML .= '<tr class="sales_parent_row">';
+                                    $PDFHTML .= '<td colspan="2">';
+                                        //$PDFHTML .= '<a href="javascript:void(0);" class="cursor-pointer text-primary underline">';
+                                            if(isset($sale['has_children']) && $sale['has_children'] == 1):
+                                                $PDFHTML .= '<span style="font-family: DejaVu Sans, sans-serif;">&dArr;</span> ';
+                                            endif;
+                                            $PDFHTML .= $sale['name'];
+                                        //$PDFHTML .= '</a>';
+                                    $PDFHTML .= '</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right">'.number_format($sale['amount'], 2).'</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                $PDFHTML .= '</tr>';
+                                if(isset($sale['childs']) && !empty($sale['childs'])):
+                                    foreach($sale['childs'] as $sale_id => $child):
+                                        $PDFHTML .= '<tr class="sales_child_row sales_child_of_'.$perent_id.'">';
+                                            $PDFHTML .= '<td>'.$child['name'].'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right">'.number_format($child['amount'], 2).'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                        $PDFHTML .= '</tr>';
+                                    endforeach;
+                                endif;
+                            endforeach;
+                        endif;
+
+                        if(!empty($cos)):
+                            $PDFHTML .= '<tr class="cosHeadingRow">';
+                                $PDFHTML .= '<td colspan="3" class="font-medium">Cose Of Sales</td>';
+                                $PDFHTML .= '<td></td>';
+                            $PDFHTML .= '</tr>';
+                            foreach($cos as $cs_id => $cs):
+                                $COS_TOTAL += $cs['amount'];
+                                $PDFHTML .= '<tr>';
+                                    $PDFHTML .= '<td colspan="3">'.$cs['name'].'</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right">'.number_format($cs['amount'], 2).'</td>';
+                                $PDFHTML .= '</tr>';
+                            endforeach;
+                        endif; 
+                        $GROSS_PROFIT = ($PROFIT - $COS_TOTAL);
+                        $PDFHTML .= '<tr class="gpHeadingRow">';
+                            $PDFHTML .= '<td colspan="3" class="font-medium uppercase">Gross Profit</td>';
+                            $PDFHTML .= '<td class="w-150px text-right">'.number_format($GROSS_PROFIT, 2).'</td>';
+                        $PDFHTML .= '</tr>';
+
+                        if(!empty($all_other_income['incomes'])):
+                            $lp = 1;
+                            foreach($all_other_income['incomes'] as $perent_id => $sale):
+                                $PDFHTML .= '<tr class="other_income_parent_row '.($lp == 1 ? 'oiFirstHeadingRow' : '').'">';
+                                    $PDFHTML .= '<td colspan="3">';
+                                        //$PDFHTML .= '<a href="javascript:void(0);" class="cursor-pointer text-primary font-medium underline">';
+                                            if(isset($sale['has_children']) && $sale['has_children'] == 1):
+                                                $PDFHTML .= '<span style="font-family: DejaVu Sans, sans-serif;">&dArr;</span> ';
+                                            endif;
+                                            $PDFHTML .= $sale['name'];
+                                        //$PDFHTML .= '</a>';
+                                    $PDFHTML .= '</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right">'.number_format($sale['amount'], 2).'</td>';
+                                $PDFHTML .= '</tr>';
+                                if(isset($sale['childs']) && !empty($sale['childs'])):
+                                    foreach($sale['childs'] as $sale_id => $child):
+                                        $PDFHTML .= '<tr class="other_child_row">';
+                                            $PDFHTML .= '<td colspan="2">'.$child['name'].'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right">'.number_format($child['amount'], 2).'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                        $PDFHTML .= '</tr>';
+                                    endforeach;
+                                endif;
+                                $lp++;
+                            endforeach;
+                        endif;
+
+                        $GROSS_PROFIT += $all_other_income['total_sale'];
+                        $PDFHTML .= '<tr class="aoiHeadingRow">';
+                            $PDFHTML .= '<td colspan="3" class="font-medium"></td>';
+                            $PDFHTML .= '<td class="w-150px text-right">'.number_format($GROSS_PROFIT, 2).'</td>';
+                        $PDFHTML .= '</tr>';
+
+                        if(!empty($expenditure)):
+                        $PDFHTML .= '<tr class="expdHeadingRow">';
+                            $PDFHTML .= '<td colspan="3" class="font-medium">Expenditure</td>';
+                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                        $PDFHTML .= '</tr>';
+                            foreach($expenditure as $perent_id => $expd):
+                                $EXPENDITURE_TOTAL += $expd['amount'];
+                                $PDFHTML .= '<tr class="parent_row">';
+                                    $PDFHTML .= '<td colspan="2"><span style="font-family: DejaVu Sans, sans-serif;">&dArr;</span> '.$expd['name'].'</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right">'.number_format($expd['amount'], 2).'</td>';
+                                    $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                $PDFHTML .= '</tr>';
+                                if($expd['childs'] && !empty($expd['childs'])):
+                                    foreach($expd['childs'] as $exped_id => $child):
+                                        $PDFHTML .= '<tr class="child_row">';
+                                            $PDFHTML .= '<td>'.$child['name'].'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right">'.number_format($child['amount'], 2).'</td>';
+                                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                            $PDFHTML .= '<td class="w-150px text-right"></td>';
+                                        $PDFHTML .= '</tr>';
+                                    endforeach;
+                                endif;
+                            endforeach;
+                            $GROSS_PROFIT -= $EXPENDITURE_TOTAL;
+                            $PDFHTML .= '<tr class="texpdHeadingRow">';
+                                $PDFHTML .= '<td colspan="3" class="font-medium"></td>';
+                                $PDFHTML .= '<td class="w-150px text-right">'.number_format($EXPENDITURE_TOTAL, 2).'</td>';
+                            $PDFHTML .= '</tr>';
+                            $PDFHTML .= '<tr class="npHeadingRow">';
+                                $PDFHTML .= '<td colspan="3" class="font-medium">NET PROFIT</td>';
+                                $PDFHTML .= '<td class="w-150px text-right">'.number_format($GROSS_PROFIT, 2).'</td>';
+                            $PDFHTML .= '</tr>';
+                        endif;
+                    $PDFHTML .= '</tbody>';
+                $PDFHTML .= '</table>';
+
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = str_replace(' ', '_', $report_title).'.pdf';
+        $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'portrait')//landscape
+            ->setWarnings(false);
+        return $pdf->download($fileName);
     }
 }
