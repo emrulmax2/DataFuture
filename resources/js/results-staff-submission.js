@@ -257,8 +257,7 @@ var submissionTable = (function () {
 
                 setTimeout(function () {
                     successModal.hide();
-                    let planId = $("#resultFinalForm [name='plan_id']").val();
-                    window.location.href = route('result.comparison',planId);
+                    window.location.reload();
                 }, 2000);
             } else {
                 errorData.message;
@@ -463,7 +462,7 @@ var submissionTable = (function () {
 
                     setTimeout(function () {
                         successModal.hide();
-                        window.location.reload();
+                        window.location.href = route('result.comparison',planId);
                     }, 3000);
                 }
             })
