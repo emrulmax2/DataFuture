@@ -2242,7 +2242,8 @@ input[type=number] {
     border-top-width: 1px;
     border-top-color: #000;
 }
-.table.table-borderless.managementReportTable .oiHeadingRow td{
+.table.table-borderless.managementReportTable .oiHeadingRow td,
+.table.table-borderless.managementReportTable .oiFirstHeadingRow td{
     padding-top: 1.25rem;
 }
 .table.table-borderless.managementReportTable .aoiHeadingRow td:last-child{
@@ -2264,6 +2265,22 @@ input[type=number] {
 .table.table-borderless.managementReportTable .child_row td:first-child{
     padding-left: 2rem;
 }
-.table.table-borderless.managementReportTable .sales_child_row td:first-child{
+.table.table-borderless.managementReportTable .sales_parent_row td:first-child{
     padding-left: 2rem;
+}
+.table.table-borderless.managementReportTable .sales_child_row td:first-child{
+    padding-left: 4rem;
+}
+.table.table-borderless.managementReportTable .other_child_row td:first-child{
+    padding-left: 2rem;
+}
+
+.assetsChecker svg.checkedIcon{
+    display: none;
+}
+#is_assets:checked + .assetsChecker svg.unCheckedIcon{
+    display: none;
+}
+#is_assets:checked + .assetsChecker svg.checkedIcon{
+    display: inline-flex;
 }

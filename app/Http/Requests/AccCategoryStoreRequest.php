@@ -24,7 +24,8 @@ class AccCategoryStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'category_name' => 'required'
+            'category_name' => 'required',
+            'trans_type' => 'required',
         ];
     }
 }

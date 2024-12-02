@@ -359,6 +359,7 @@ var storageTransList = (function () {
                 $('#storageTransactionForm #transaction_id').val('0');
                 $('#storageTransactionForm #deleteTransaction').fadeOut().attr('data-id', '0');
                 $('#storageTransactionForm #transaction_date').val($('#storageTransactionForm #transaction_date').attr('data-today'));
+                $('#storageTransactionForm #is_assets').prop('checked', false);
             })
         }else{
             $theBtn.addClass('active');
@@ -553,6 +554,11 @@ var storageTransList = (function () {
                         $('#storageTransactionForm #audit_status').prop('checked', true);
                     }else{
                         $('#storageTransactionForm #audit_status').prop('checked', false);
+                    }
+                    if(row.has_assets == 1){
+                        $('#storageTransactionForm #is_assets').prop('checked', true);
+                    }else{
+                        $('#storageTransactionForm #is_assets').prop('checked', false);
                     }
                     $('#storageTransactionForm #transaction_id').val(row.id);
                 });

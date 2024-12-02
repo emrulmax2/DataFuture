@@ -44,4 +44,27 @@ import { createIcons, icons } from "lucide";
 
         $('#managementReportTable .sales_child_row').fadeToggle();
     });
+
+    $('#managementReportTable .toggleSalesParentRows').on('click', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+
+        $('#managementReportTable .sales_parent_row').fadeToggle();
+    });
+
+    $('#managementReportTable .toggleSalesChildRows').on('click', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var parent_id = $theLink.attr('data-parent');
+
+        $('#managementReportTable .sales_child_of_'+parent_id).fadeToggle();
+    });
+
+    $('#managementReportTable .toggleOtherChildRows').on('click', function(e){
+        e.preventDefault();
+        var $theLink = $(this);
+        var parent_id = $theLink.attr('data-parent');
+
+        $('#managementReportTable .other_child_of_'+parent_id).fadeToggle();
+    });
 })()

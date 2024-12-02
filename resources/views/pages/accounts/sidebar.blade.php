@@ -22,7 +22,13 @@
             </div>
         </li>
         <li class="mb-2 pt-1">
-            <a href="{{ route('reports.accounts') }}" class="text-lg font-medium truncate flex justify-start items-center"><i data-lucide="badge-pound-sterling" class="w-5 h-5 mr-4"></i> Student Accounts</a>
+            <a href="{{ route('reports.accounts') }}" class="{{ Route::currentRouteName() == 'reports.accounts' ? 'active text-primary' : '' }} text-lg font-medium truncate flex justify-start items-center"><i data-lucide="badge-pound-sterling" class="w-5 h-5 mr-4"></i> Student Accounts</a>
+        </li>
+        <li class="mb-2 pt-1">
+            <a href="{{ route('accounts.assets.register') }}" class="{{ Route::currentRouteName() == 'accounts.assets.register.new' || Route::currentRouteName() == 'accounts.assets.register' ? 'active text-primary' : '' }} text-lg font-medium truncate flex justify-start items-center">
+                <i data-lucide="package" class="w-5 h-5 mr-4"></i> Assets Register
+                {!! ($openedAssets > 0 ? '<span data-count="'.$openedAssets.'" class="py-1 px-2 assetsRegCounter rounded-full text-xs bg-danger text-white cursor-pointer font-medium ml-3">'.$openedAssets.'</span>' : '') !!}
+            </a>
         </li>
     </ul>
 

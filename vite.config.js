@@ -319,6 +319,8 @@ export default defineConfig({
                 'resources/js/user-vacancy.js',
                 'resources/js/accounts-management-report.js',
                 'resources/js/accounts-management-report-details.js',
+                'resources/js/accounts-assets-register-new.js',
+                'resources/js/accounts-assets-register.js',
             ],
             refresh: true,
         }),

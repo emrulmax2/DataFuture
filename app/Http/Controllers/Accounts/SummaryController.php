@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccAssetRegister;
 use App\Models\AccBank;
 use App\Models\AccCategory;
 use App\Models\AccTransaction;
@@ -19,7 +20,8 @@ class SummaryController extends Controller
             ],
             'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
             'categories' => AccCategory::orderBy('category_name', 'ASC')->whereIn('audit_status', $audit_status)->where('status', 1)->get(),
-            'chartData' => $this->chartData()
+            'chartData' => $this->chartData(),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count(),
         ]);
     }
 
@@ -212,7 +214,8 @@ class SummaryController extends Controller
             'startDate' => date('Y-m-d', strtotime($startDate)),
             'endDate' => date('Y-m-d', strtotime($endDate)),
             'inflows' => $this->inflowReport(date('Y-m-d', strtotime($startDate)), date('Y-m-d', strtotime($endDate))),
-            'outflows' => $this->outflowReport(date('Y-m-d', strtotime($startDate)), date('Y-m-d', strtotime($endDate)))
+            'outflows' => $this->outflowReport(date('Y-m-d', strtotime($startDate)), date('Y-m-d', strtotime($endDate))),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count(),
         ]);
     }
 

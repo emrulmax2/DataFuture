@@ -63,4 +63,8 @@ class AccTransaction extends Model
     public function receipts(){
         return $this->hasMany(SlcMoneyReceipt::class, 'acc_transaction_id', 'id');
     }
+
+    public function assets(){
+        return $this->hasOne(AccAssetRegister::class, 'acc_transaction_id', 'id');
+    }
 }

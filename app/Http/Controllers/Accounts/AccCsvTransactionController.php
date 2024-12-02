@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Accounts;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AccCsvUploadRequest;
+use App\Models\AccAssetRegister;
 use App\Models\AccBank;
 use App\Models\AccCategory;
 use App\Models\AccCsvFile;
@@ -37,6 +38,7 @@ class AccCsvTransactionController extends Controller
             'csv_transactions' => AccCsvTransaction::where('acc_csv_file_id', $file->id)->orderBy('id', 'ASC')->get(),
             'inCategories' => $this->catTreeInc(),
             'outCategories' => $this->catTreeExp(),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count(),
         ]);
     }
     
