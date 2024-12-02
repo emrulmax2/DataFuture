@@ -18,6 +18,7 @@ class ResultSubmissionByStaff extends Model
         'grade_id',
         'module_creation_id',
         'is_excel_missing',
+        'is_it_final',
         'published_at',
         'module_code',
         'upload_user_type',
