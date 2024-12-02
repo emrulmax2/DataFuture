@@ -130,6 +130,7 @@ class ResultSubmissionController extends Controller
                     $resultSubmission->student_course_relation_id = $student->crel->id;
                     $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
                     $resultSubmission->is_student_matched = 1;
+                    $resultSubmission->is_it_final = 1;
                     $resultSubmission->module_creation_id = $plan->module_creation_id;
                     $resultSubmission->module_code = $plan->creations->code;
                     $resultSubmission->upload_user_type = 'personal_tutor';
