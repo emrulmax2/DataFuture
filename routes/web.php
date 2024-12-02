@@ -2685,7 +2685,7 @@ Route::middleware('auth')->group(function() {
         Route::get('staff-results-submission-list', 'list')->name('results-staff-submission.list'); 
         Route::get('staff-sample-download-excel/{plan}', 'sampleDownload')->name('results-staff-submission.sample.download');
         
-        Route::post('staff-results-submission/{plan}/final', 'finalSubmission')->name('results-staff-submission.final');
+        Route::post('staff-result-submission/{plan}/final', 'finalSubmission')->name('results-staff-submission.final');
     }); 
 
     Route::controller(ResultComparisonController::class)->group(function() {
