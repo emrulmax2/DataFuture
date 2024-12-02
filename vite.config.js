@@ -310,10 +310,17 @@ export default defineConfig({
 
                 'resources/js/hr-payslipsync.js',
                 'resources/js/hr-payslipsync-show.js',
+
+                
+                'resources/js/results-submission.js',
+                'resources/js/results-staff-submission.js',
+                'resources/js/result-comparison.js',
                 'resources/js/hr-portal-vacancy.js',
                 'resources/js/user-vacancy.js',
                 'resources/js/accounts-management-report.js',
                 'resources/js/accounts-management-report-details.js',
+                'resources/js/accounts-assets-register-new.js',
+                'resources/js/accounts-assets-register.js',
             ],
             refresh: true,
         }),

@@ -50,47 +50,48 @@ class AccBank extends Model
     protected $dates = ['deleted_at'];
 
     public function incomes(){
-        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        //$audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 0)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 0)->where('parent', 0);//->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 0)->whereNot('transaction_type', 2)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 0)->whereNot('transaction_type', 2)->where('parent', 0);//->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function expenses(){
-        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        //$audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 1)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->whereNot('transaction_type', 2)->where('flow', 1)->where('parent', 0);//->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 1)->whereNot('transaction_type', 2)->where('parent', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('flow', 1)->whereNot('transaction_type', 2)->where('parent', 0);//->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function deposits(){
-        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        //$audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 0);//->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 0)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 0);//->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function withdrawls(){
-        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
+        //$audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if(!empty($this->opening_date)):
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 1)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_date_2', '>=', date('Y-m-d', strtotime($this->opening_date)))->where('transaction_type', 2)->where('flow', 1);//->whereIn('audit_status', $audit_status);
         else:
-            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 1)->whereIn('audit_status', $audit_status);
+            return $this->hasMany(AccTransaction::class, 'acc_bank_id', 'id')->where('transaction_type', 2)->where('flow', 1);//->whereIn('audit_status', $audit_status);
         endif;
     }
 
     public function getBalanceAttribute(){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         $openingBalance = (isset($this->opening_balance) && $this->opening_balance > 0 ? $this->opening_balance : 0);
-        $incomes = $this->incomes()->sum('transaction_amount');
-        $deposits = $this->deposits()->sum('transaction_amount');
-        $expenses = $this->expenses()->sum('transaction_amount');
-        $withdrawls = $this->withdrawls()->sum('transaction_amount');
+        $incomes = $this->incomes()->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+        $deposits = $this->deposits()->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+        $expenses = $this->expenses()->whereIn('audit_status', $audit_status)->sum('transaction_amount');
+        $withdrawls = $this->withdrawls()->whereIn('audit_status', $audit_status)->sum('transaction_amount');
 
         return (($openingBalance + $incomes + $deposits) - ($expenses + $withdrawls));
     }

@@ -246,7 +246,29 @@ var table = (function () {
                 }
             });
         });
-
+        $('.theTimeField').each(function(){
+            var timeMaskModal = IMask(this, {
+                    overwrite: true,
+                    autofix: true,
+                    mask: 'HH:MM',
+                    blocks: {
+                        HH: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'HH',
+                            from: 0,
+                            to: 23,
+                            maxLength: 2
+                        },
+                        MM: {
+                            mask: IMask.MaskedRange,
+                            placeholderChar: 'MM',
+                            from: 0,
+                            to: 59,
+                            maxLength: 2
+                        }
+                    }
+            });
+        });
         $("#termTableId").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
@@ -273,6 +295,11 @@ var table = (function () {
                         $('#editModal input[name="teaching_end_date"]').val(dataset.teaching_end_date ? dataset.teaching_end_date : '');
                         $('#editModal input[name="revision_start_date"]').val(dataset.revision_start_date ? dataset.revision_start_date : '');
                         $('#editModal input[name="revision_end_date"]').val(dataset.revision_end_date ? dataset.revision_end_date : '');
+
+                        $('#editModal input[name="exam_publish_date"]').val(dataset.exam_publish_date ? dataset.exam_publish_date : '');
+                        $('#editModal input[name="exam_publish_time"]').val(dataset.exam_publish_time ? dataset.exam_publish_time : '');
+                        $('#editModal input[name="exam_resubmission_publish_date"]').val(dataset.exam_resubmission_publish_date ? dataset.exam_resubmission_publish_date : '');
+                        $('#editModal input[name="exam_resubmission_publish_time"]').val(dataset.exam_resubmission_publish_time ? dataset.exam_resubmission_publish_time : '');
                         
                         $('#editModal input[name="id"]').val(editId);
                     }

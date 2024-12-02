@@ -13,6 +13,7 @@ class AccCategory extends Model
     protected $fillable = [
         'parent_id',
         'category_name',
+        'code',
         'trans_type',
         'status',
         'audit_status',

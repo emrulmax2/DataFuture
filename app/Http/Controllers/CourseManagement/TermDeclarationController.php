@@ -114,6 +114,11 @@ class TermDeclarationController extends Controller
             'teaching_end_date'=> $request->teaching_end_date,
             'revision_start_date'=> $request->revision_start_date,
             'revision_end_date'=> $request->revision_end_date,
+            'exam_publish_date'=> $request->exam_publish_date,
+            'exam_publish_time'=> $request->exam_publish_time,
+            'exam_resubmission_publish_date'=> $request->exam_resubmission_publish_date,
+            'exam_resubmission_publish_time'=> $request->exam_resubmission_publish_time,
+            
             'created_by' => auth()->user()->id
         ]);
 

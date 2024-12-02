@@ -118,9 +118,14 @@ class AssessmentPlanController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, AssessmentPlan $plan_assessment)
     {
-        //
+        $plan_assessment->update($request->all());
+        if($plan_assessment->wasChanged())     
+
+            return response()->json(["msg"=>"Updated"],200);
+        else
+            return response()->json(["msg"=>"Nothing Changed"],422);
     }
 
     /**

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounts\AccCsvTransactionController;
+use App\Http\Controllers\Accounts\AssetsRegisterController;
 use App\Http\Controllers\Accounts\ManagementReportController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
@@ -242,10 +243,13 @@ use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReport
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
+use App\Http\Controllers\ResultComparisonController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\ResultPreviousController;
+use App\Http\Controllers\ResultSubmissionByStaffController;
+use App\Http\Controllers\ResultSubmissionController;
 use App\Http\Controllers\Settings\AccBankController;
 use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
@@ -867,6 +871,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student-results/{student}/print', 'print')->name('student-results.print');
     }); 
 
+    
     Route::controller(PersonalDetailController::class)->group(function() {
         Route::post('student/update-personal-details', 'update')->name('student.update.personal.details'); 
         Route::post('student/update-personal-identification-details', 'updateOtherIdentificationDetails')->name('student.update.other.identification'); 
@@ -2341,6 +2346,8 @@ Route::middleware('auth')->group(function() {
         Route::get('tutor-dashboard/plan/{plan}', 'showCourseContent')->name('tutor-dashboard.plan.module.show'); 
         Route::get('tutor-dashboard/show/{tutor}/attendance/{plandate}/{type?}', 'attendanceFeedShow')->name('tutor-dashboard.attendance'); 
         
+        
+
         Route::get('tutor-dashboard/show-new', 'showNew')->name('tutor-dashboard.show.new');  
     });
 
@@ -2652,7 +2659,44 @@ Route::middleware('auth')->group(function() {
         
         
     });
-    
+
+    Route::resource('results-submission', ResultSubmissionController::class,[
+        'except' => ['create']
+    ]);
+
+    Route::controller(ResultSubmissionController::class)->group(function() {
+
+        Route::post('results-submission/{plan}', 'upload')->name('result-submission.upload'); 
+        Route::get('results-submission-list', 'list')->name('result-submission.list'); 
+        Route::get('sample-download-excel/{plan}', 'sampleDownload')->name('result-submission.sample.download');
+        
+        Route::post('results-submission/{plan}/final', 'finalSubmission')->name('result-submission.final');
+    }); 
+
+    Route::resource('results-staff-submission', ResultSubmissionByStaffController::class,[
+        'except' => ['create']
+    ]);
+
+    Route::controller(ResultSubmissionByStaffController::class)->group(function() {
+
+        Route::get('staff-result-submission/{plan}', 'showResultSubmission')->name('results-staff-submission.show'); 
+        Route::post('staff-results-submission/{plan}', 'upload')->name('results-staff-submission.upload'); 
+        Route::get('staff-results-submission-list', 'list')->name('results-staff-submission.list'); 
+        Route::get('staff-sample-download-excel/{plan}', 'sampleDownload')->name('results-staff-submission.sample.download');
+        
+        Route::post('results-submission/{plan}/final', 'finalSubmission')->name('results-staff-submission.final');
+    }); 
+
+    Route::controller(ResultComparisonController::class)->group(function() {
+        Route::get('result-comparison/{plan}', 'index')->name('result.comparison'); 
+        // Route::get('result-comparison/list', 'list')->name('result.comparison.list'); 
+        Route::post('result-comparison/{plan}/store', 'store')->name('result.comparison.store');
+        // Route::get('result-comparison/edit/{id}', 'edit')->name('result.comparison.edit');
+        Route::post('result-comparison/{plan}/update', 'update')->name('result.comparison.update');
+        // Route::delete('result-comparison/delete/{id}', 'destroy')->name('result.comparison.destory');
+        // Route::post('result-comparison/restore/{id}', 'restore')->name('result.comparison.restore');
+    });
+
 
     Route::controller(CompanyController::class)->group(function() {
         Route::get('companies/list', 'list')->name('companies.list'); 
@@ -3113,6 +3157,18 @@ Route::middleware('auth')->group(function() {
     Route::controller(ManagementReportController::class)->group(function() {
         Route::get('accounts/management-report/{start}/{end}', 'index')->name('accounts.management.report'); 
         Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
+        Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
+        Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); 
+    });
+
+    Route::controller(AssetsRegisterController::class)->group(function() {
+        Route::get('accounts/assets-register', 'index')->name('accounts.assets.register'); 
+        Route::get('accounts/assets-register/list', 'list')->name('accounts.assets.register.list'); 
+        Route::get('accounts/assets-register/new', 'newRegisters')->name('accounts.assets.register.new'); 
+        Route::post('accounts/assets-register/update', 'update')->name('accounts.assets.register.update'); 
+        /*Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
+        Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
+        Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); */
     });
     
 });

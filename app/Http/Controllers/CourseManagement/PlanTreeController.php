@@ -8,6 +8,7 @@ use App\Http\Requests\PlansUpdateRequest;
 use App\Http\Requests\StoreTutorialPlanRequest;
 use App\Http\Requests\SyncTutorialRequest;
 use App\Models\AcademicYear;
+use App\Models\AssessmentPlan;
 use App\Models\Assign;
 use App\Models\BankHoliday;
 use App\Models\Course;
@@ -234,9 +235,10 @@ class PlanTreeController extends Controller
 
         if($plans->count() > 0):
             $html .= '<div class="grid grid-cols-12 gap-0 gap-x-4">';
-                $html .= '<div class="col-span-6"></div>';
-                $html .= '<div class="col-span-6 text-right">';
+                $html .= '<div class="col-span-3"></div>';
+                $html .= '<div class="col-span-9 text-right">';
                     $html .= '<div class="flex mt-5 sm:mt-0 justify-end">';
+                        
                         $html .= '<button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md mr-2 w-auto">
                             Generate Days
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
@@ -341,6 +343,9 @@ class PlanTreeController extends Controller
                     $tutorialSet['time'] = (!empty($list->tutorial->start_time) ? date('H:i', strtotime($list->tutorial->start_time)) : '').' - '.(!empty($list->tutorial->end_time) ? date('H:i', strtotime($list->tutorial->end_time)) : '');
                 endif;
 
+                $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
+                $assesmentPlanByTutorAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','personal_tutor')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
+               
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -363,7 +368,8 @@ class PlanTreeController extends Controller
                     'on_of_student' => $iActiveStudentCount.'/'.$assignStudentListForPlans->count(),
                     'class_type' => (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : '')),
                     'tutorial' => (!empty($tutorialSet) ? $tutorialSet : 0),
-                    'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0)
+                    'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0),
+                    'submissionAvailable' => isset($assesmentPlanByStaffAssesment->course_module_base_assesment_id) && isset($assesmentPlanByTutorAssesment->course_module_base_assesment_id) && $assesmentPlanByStaffAssesment->course_module_base_assesment_id == $assesmentPlanByTutorAssesment->course_module_base_assesment_id ? 1 : 0,
                 ];
                 $i++;
             endforeach;

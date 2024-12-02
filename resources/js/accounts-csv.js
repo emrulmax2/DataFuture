@@ -24,7 +24,7 @@ import TomSelect from "tom-select";
         }
     };
 
-    let inToms = [];
+    /*let inToms = [];
     let outToms = [];
     let strToms = [];
     $('#csvTransTable .csvInToms').each(function(){
@@ -41,7 +41,7 @@ import TomSelect from "tom-select";
         var $theSelect = $(this);
         var theName = $theSelect.attr('name');
         strToms[theName] = new TomSelect(this, accTomOptions);
-    })
+    })*/
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
 
@@ -75,43 +75,43 @@ import TomSelect from "tom-select";
         let file_id = $theTr.attr('data-fileid');
         let trns_id = $theTr.attr('data-transid');
 
-        let in_select = 'trans_'+file_id+'_'+trns_id+'_inccategory';
+        /*let in_select = 'trans_'+file_id+'_'+trns_id+'_inccategory';
         let inTom = inToms[in_select];
         let out_select = 'trans_'+file_id+'_'+trns_id+'_expcategory';
         let outTom = outToms[out_select];
         let str_select = 'trans_'+file_id+'_'+trns_id+'_transstorage';
-        let strTom = strToms[str_select];
+        let strTom = strToms[str_select];*/
 
         if(trans_type == 2){
-            $theTr.find('.inTomWrap').fadeOut();
+            /*$theTr.find('.inTomWrap').fadeOut();
             $theTr.find('.outTomWrap').fadeOut();
             $theTr.find('.strgTomWrap').fadeIn();
 
             inTom.clear(true);
             outTom.clear(true);
-            strTom.clear(true);
-            //$theTr.find('.inc_category, .exp_category').val('').fadeOut();
-            //$theTr.find('.trans_storage').val('').fadeIn();
+            strTom.clear(true);*/
+            $theTr.find('.inc_category, .exp_category').val('').fadeOut();
+            $theTr.find('.trans_storage').val('').fadeIn();
         }else if(trans_type == 1){
-            $theTr.find('.inTomWrap').fadeOut();
+            /*$theTr.find('.inTomWrap').fadeOut();
             $theTr.find('.strgTomWrap').fadeOut();
             $theTr.find('.outTomWrap').fadeIn();
 
             inTom.clear(true);
             outTom.clear(true);
-            strTom.clear(true);
-            //$theTr.find('.inc_category, .trans_storage').val('').fadeOut();
-            //$theTr.find('.exp_category').val('').fadeIn();
+            strTom.clear(true);*/
+            $theTr.find('.inc_category, .trans_storage').val('').fadeOut();
+            $theTr.find('.exp_category').val('').fadeIn();
         }else{
-            $theTr.find('.inTomWrap').fadeIn();
+            /*$theTr.find('.inTomWrap').fadeIn();
             $theTr.find('.strgTomWrap').fadeOut();
             $theTr.find('.outTomWrap').fadeOut();
 
             inTom.clear(true);
             outTom.clear(true);
-            strTom.clear(true);
-            //$theTr.find('.exp_category, .trans_storage').val('').fadeOut();
-            //$theTr.find('.inc_category').val('').fadeIn();
+            strTom.clear(true);*/
+            $theTr.find('.exp_category, .trans_storage').val('').fadeOut();
+            $theTr.find('.inc_category').val('').fadeIn();
         }
 
         validateRow(tr_id);
@@ -182,7 +182,7 @@ import TomSelect from "tom-select";
         let uploads = $('#trans_up_'+id)[0].files[0];
 
         let formData = new FormData();
-        $theTr.find('input:not([type="file"]):not([type="checkbox"])').each(function(){
+        $theTr.find('input:not([type="file"]):not([type="checkbox"]):not(.dropdown-input)').each(function(){
             var theNameOrg = $(this).attr('name');
             var theNameArr = theNameOrg.split('_');
             var theName = theNameArr[theNameArr.length - 1];
