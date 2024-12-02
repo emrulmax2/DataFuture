@@ -18,6 +18,11 @@ import TomSelect from "tom-select";
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
+
+    let parent_id = new TomSelect('#parent_id', tomOptions);
+    parent_id.disable();
+    let edit_parent_id = new TomSelect('#edit_parent_id', tomOptions);
+    edit_parent_id.disable();
     
     const addCategoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCategoryModal"));
     const editCategoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editCategoryModal"));
@@ -29,9 +34,26 @@ import TomSelect from "tom-select";
     addCategoryModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addCategoryModal .acc__input-error').html('');
         $('#addCategoryModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
-        $('#addCategoryModal .modal-body select').val('');
         $('#addCategoryModal input[name="audit_status"]').prop('checked', false);
         $('#addCategoryModal input[name="status"]').prop('checked', true);
+
+        $('#addCategoryModal input[name="trans_type"]').prop('checked', false);
+        parent_id.clear(true);
+        parent_id.clearOptions();
+        parent_id.disable();
+    });
+
+    const editCategoryModalEl = document.getElementById('editCategoryModal')
+    editCategoryModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editCategoryModal .acc__input-error').html('');
+        $('#editCategoryModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
+        $('#editCategoryModal input[name="audit_status"]').prop('checked', false);
+        $('#editCategoryModal input[name="status"]').prop('checked', true);
+
+        $('#editCategoryModal input[name="trans_type"]').prop('checked', false);
+        edit_parent_id.clear(true);
+        edit_parent_id.clearOptions();
+        edit_parent_id.disable();
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -46,7 +68,8 @@ import TomSelect from "tom-select";
     // Toggle Trans Type Add Form
     $('#addCategoryForm').on('change', 'input[name="trans_type"]', function(e){
         var trans_type = document.querySelector('#addCategoryForm input[name="trans_type"]:checked').value;
-        $('#addCategoryForm select[name="parent_id"]').attr('disabled', 'disabled');
+        parent_id.clearOptions();
+        parent_id.disable();
         $('#addCategoryForm #saveCategory').attr('disabled', 'disabled');
 
         axios({
@@ -56,10 +79,16 @@ import TomSelect from "tom-select";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                $('#addCategoryForm select[name="parent_id"]').removeAttr('disabled');
                 $('#addCategoryForm #saveCategory').removeAttr('disabled');
                 
-                $('#addCategoryForm select[name="parent_id"]').html(response.data.html).val('');
+                parent_id.enable();
+                $.each(response.data.cats, function(index, row) {
+                    parent_id.addOption({
+                        value: row.id,
+                        text: row.category_name,
+                    });
+                });
+                parent_id.refreshOptions();
             }
         }).catch(error =>{
             console.log(error);
@@ -118,6 +147,8 @@ import TomSelect from "tom-select";
         let $editBtn = $(this);
         let editId = $editBtn.attr("data-id");
 
+        edit_parent_id.clearOptions();
+        edit_parent_id.disable();
         axios({
             method: "post",
             url: route("site.settings.category.edit"),
@@ -129,11 +160,19 @@ import TomSelect from "tom-select";
             if (response.status == 200) {
                 let dataset = response.data.row;
                 let options = response.data.options;
-                $('#editCategoryModal select[name="parent_id"]').html(options).val('');
+                
+                edit_parent_id.enable();
+                $.each(options, function(index, row) {
+                    edit_parent_id.addOption({
+                        value: row.id,
+                        text: row.category_name,
+                    });
+                });
+                edit_parent_id.clear(true);
+                (dataset.parent_id ? edit_parent_id.addItem(dataset.parent_id) : edit_parent_id.clear(true));
 
                 $('#editCategoryModal input[name="category_name"]').val(dataset.category_name ? dataset.category_name : '');
                 $('#editCategoryModal input[name="code"]').val(dataset.code ? dataset.code : '');
-                $('#editCategoryModal select[name="parent_id"]').val(dataset.parent_id ? dataset.parent_id : '');
 
                 if(dataset.trans_type == 1){
                     $('#editCategoryModal #edit_outflow').prop('checked', true);
@@ -153,6 +192,35 @@ import TomSelect from "tom-select";
                 $('#editCategoryModal input[name="id"]').val(editId);
             }
         }).catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $('#editCategoryForm').on('change', 'input[name="trans_type"]', function(e){
+        var trans_type = document.querySelector('#editCategoryForm input[name="trans_type"]:checked').value;
+        edit_parent_id.clearOptions();
+        edit_parent_id.disable();
+        $('#editCategoryForm #updateCategory').attr('disabled', 'disabled');
+
+        axios({
+            method: "post",
+            url: route('site.settings.category.filter.dropdown'),
+            data: {trans_type : trans_type},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#editCategoryForm #updateCategory').removeAttr('disabled');
+                
+                edit_parent_id.enable();
+                $.each(response.data.cats, function(index, row) {
+                    edit_parent_id.addOption({
+                        value: row.id,
+                        text: row.category_name,
+                    });
+                });
+                edit_parent_id.refreshOptions();
+            }
+        }).catch(error =>{
             console.log(error);
         });
     });

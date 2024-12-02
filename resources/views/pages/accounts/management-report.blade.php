@@ -47,7 +47,7 @@
             <div class="intro-y box mt-5 p-5">
                 <table class="table table-borderless table-sm managementReportTable" id="managementReportTable">
                     @php 
-                        $PROFIT = $sales['total_sale'];
+                        $PROFIT = $all_sales['total_sale'];
                         $COS_TOTAL = 0;
                         $GROSS_PROFIT = 0;
                         $EXPENDITURE_TOTAL = 0;
@@ -55,22 +55,39 @@
                     <tbody>
                         <tr>
                             <td colspan="3">
-                                <a href="javascript:void(0);" class="cursor-pointer toggleSalesRows font-medium text-primary underline inline-flex items-center"><i data-lucide="arrow-up-down" class="w-3 h-3 mr-1"></i> Sales</a>
+                                <a href="javascript:void(0);" class="cursor-pointer toggleSalesParentRows font-medium text-primary underline inline-flex items-center"><i data-lucide="arrow-up-down" class="w-3 h-3 mr-1"></i> Sales</a>
                             </td>
                             <td class="w-[180px] text-right">
-                                {{ number_format($sales['total_sale'], 2) }}
+                                {{ number_format($all_sales['total_sale'], 2) }}
                             </td>
                         </tr>
-                        @if(isset($sales['categories']) && !empty($sales['categories']))
-                            @foreach($sales['categories'] as $cate_id => $slct)
-                                <tr class="sales_child_row" style="display: none;">
-                                    <td><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $cate_id]) }}" class="text-primary underline">{{ $slct['name'] }}</a></td>
-                                    <td class="w-[180px] text-right">{{ number_format($slct['amount'], 2) }}</td>
-                                    <td class="w-[180px] text-right"></td>
+                        @if(!empty($all_sales['incomes']))
+                            @foreach($all_sales['incomes'] as $perent_id => $sale)
+                                <tr class="sales_parent_row" data-id="{{ $perent_id }}" style="display: none;">
+                                    <td colspan="2">
+                                        <a href="{{ (isset($sale['has_children']) && $sale['has_children'] == 1 ? 'javascript:void(0);' : route('accounts.management.report.show', [$startDate, $endDate, $perent_id]))}}" data-parent="{{ $perent_id }}" class="cursor-pointer {{ (isset($sale['has_children']) && $sale['has_children'] == 1 ? 'toggleSalesChildRows' : '')}} text-primary underline inline-flex items-center">
+                                            @if(isset($sale['has_children']) && $sale['has_children'] == 1)
+                                            <i data-lucide="arrow-up-down" class="w-3 h-3 mr-1"></i> 
+                                            @endif
+                                            {{ $sale['name'] }}
+                                        </a>
+                                    </td>
+                                    <td class="w-[180px] text-right">{{ number_format($sale['amount'], 2) }}</td>
                                     <td class="w-[180px] text-right"></td>
                                 </tr>
+                                @if(isset($sale['childs']) && !empty($sale['childs']))
+                                    @foreach($sale['childs'] as $sale_id => $child)
+                                        <tr class="sales_child_row sales_child_of_{{ $perent_id }}" style="display: none;">
+                                            <td><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $sale_id]) }}" class="text-primary underline">{{ $child['name'] }}</a></td>
+                                            <td class="w-[180px] text-right">{{ number_format($child['amount'], 2) }}</td>
+                                            <td class="w-[180px] text-right"></td>
+                                            <td class="w-[180px] text-right"></td>
+                                        </tr>
+                                    @endforeach
+                                @endif
                             @endforeach
                         @endif
+
                         @if(!empty($cos))
                             <tr class="cosHeadingRow">
                                 <td colspan="3" class="font-medium">Cose Of Sales</td>
@@ -91,17 +108,40 @@
                             <td colspan="3" class="font-medium uppercase">Gross Profit</td>
                             <td class="w-[180px] text-right">{{ number_format($GROSS_PROFIT, 2) }}</td>
                         </tr>
-                        <tr class="oiHeadingRow">
-                            <td colspan="3"><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, 52]) }}" class="text-primary underline font-medium">Other Income</a></td>
-                            <td class="w-[180px] text-right">{{ number_format($otherincome, 2) }}</td>
-                        </tr>
+
+                        @if(!empty($all_other_income['incomes']))
+                            @foreach($all_other_income['incomes'] as $perent_id => $sale)
+                                <tr class="other_income_parent_row {{ ($loop->first ? 'oiFirstHeadingRow' : '') }}" data-id="{{ $perent_id }}">
+                                    <td colspan="3">
+                                        <a href="{{ (isset($sale['has_children']) && $sale['has_children'] == 1 ? 'javascript:void(0);' : route('accounts.management.report.show', [$startDate, $endDate, $perent_id]))}}" data-parent="{{ $perent_id }}" class="cursor-pointer {{ (isset($sale['has_children']) && $sale['has_children'] == 1 ? 'toggleOtherChildRows' : '')}} text-primary font-medium underline inline-flex items-center">
+                                            @if(isset($sale['has_children']) && $sale['has_children'] == 1)
+                                            <i data-lucide="arrow-up-down" class="w-3 h-3 mr-1"></i> 
+                                            @endif
+                                            {{ $sale['name'] }}
+                                        </a>
+                                    </td>
+                                    <td class="w-[180px] text-right">{{ number_format($sale['amount'], 2) }}</td>
+                                </tr>
+                                @if(isset($sale['childs']) && !empty($sale['childs']))
+                                    @foreach($sale['childs'] as $sale_id => $child)
+                                        <tr class="other_child_row other_child_of_{{ $perent_id }}" style="display: none;">
+                                            <td colspan="2"><a target="_blank" href="{{ route('accounts.management.report.show', [$startDate, $endDate, $sale_id]) }}" class="text-primary underline">{{ $child['name'] }}</a></td>
+                                            <td class="w-[180px] text-right">{{ number_format($child['amount'], 2) }}</td>
+                                            <td class="w-[180px] text-right"></td>
+                                        </tr>
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        @endif
+
                         @php 
-                            $GROSS_PROFIT += $otherincome;
+                            $GROSS_PROFIT += $all_other_income['total_sale'];
                         @endphp
                         <tr class="aoiHeadingRow">
                             <td colspan="3" class="font-medium"></td>
                             <td class="w-[180px] text-right">{{ number_format($GROSS_PROFIT, 2) }}</td>
                         </tr>
+
                         @if(!empty($expenditure))
                         <tr class="expdHeadingRow">
                             <td colspan="3" class="font-medium">Expenditure</td>

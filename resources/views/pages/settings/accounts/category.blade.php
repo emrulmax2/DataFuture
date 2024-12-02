@@ -30,7 +30,7 @@
                             <ul class="classPlanTree">
                                 @foreach($inflow_parents as $cat)
                                     <li class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : 'notHasChild') }} relative">
-                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} {{ (isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                        <a href="javascript:void(0);" data-type="0" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} {{ (isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
                                         <div class="settingBtns flex justify-end items-center absolute"> 
                                             <button data-id="{{$cat->id}}" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>
                                             <button data-id="{{$cat->id}}" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
@@ -40,25 +40,6 @@
                             </ul>
                         @endif
                     </div>
-                    {{--<div class="overflow-x-auto scrollbar-hidden">
-                        <table class="table table-sm table-striped table-bordered tbl_catagoryType">
-                            <thead>
-                                <tr>                                       
-                                    <th>Category Name</th>
-                                    <th>Audit</th>
-                                    <th>Status</th>
-                                    <th class="text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(!empty($inflows))
-                                    @foreach($inflows as $tr)
-                                        {!! $tr['graphic']; !!}
-                                    @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>--}}
                 </div>
                 <div class="intro-y box p-5 mt-5">
                     <h2 class="text-lg font-medium mr-auto pb-5">Outflow</h2>
@@ -77,25 +58,6 @@
                             </ul>
                         @endif
                     </div>
-                    {{--<div class="mt-5 overflow-x-auto scrollbar-hidden">
-                        <table class="table table-sm table-striped table-bordered tbl_catagoryType">
-                            <thead>
-                                <tr>                                       
-                                    <th>Category Name</th>
-                                    <th>Audit</th>
-                                    <th>Status</th>
-                                    <th class="text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if(!empty($outflows))
-                                    @foreach($outflows as $tr)
-                                        {!! $tr['graphic']; !!}
-                                    @endforeach
-                                @endif
-                            </tbody>
-                        </table>
-                    </div>--}}
                 </div>
             </div>
         </div>
@@ -125,7 +87,7 @@
                             <div class="flex flex-col sm:flex-row mt-2">
                                 <label class="mr-2">Type <span class="text-danger">*</span></label>
                                 <div class="form-check mr-2">
-                                    <input id="inflow" class="form-check-input" checked name="trans_type" type="radio" value="0">
+                                    <input id="inflow" class="form-check-input" name="trans_type" type="radio" value="0">
                                     <label class="form-check-label" for="inflow">Inflow</label>
                                 </div>
                                 <div class="form-check mr-2 mt-2 sm:mt-0">
@@ -137,11 +99,11 @@
                         </div>
                         <div class="mt-3">
                             <label for="parent_id" class="form-label">Parent Category</label>
-                            <select id="parent_id" name="parent_id" class="w-full form-control">
+                            <select id="parent_id" name="parent_id" class="w-full tom-selects">
                                 <option value="">Select Parent Category</option>
-                                @foreach($categories as $category)
+                                {{--@foreach($categories as $category)
                                     <option value="{{ $category['id'] }}">{!! $category['category_name'] !!}</option>
-                                @endforeach
+                                @endforeach--}}
                             </select>
                             <div class="acc__input-error error-parent_id text-danger mt-2"></div>
                         </div>
@@ -217,7 +179,7 @@
                         </div>
                         <div class="mt-3">
                             <label for="edit_parent_id" class="form-label">Parent Category</label>
-                            <select id="edit_parent_id" name="parent_id" class="w-full form-controll">
+                            <select id="edit_parent_id" name="parent_id" class="w-full tom-selects">
                                 <option value="">Select Parent Category</option>
                             </select>
                         </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Accounts;
 use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorageRequest;
+use App\Models\AccAssetRegister;
 use App\Models\AccBank;
 use App\Models\AccCategory;
 use App\Models\AccCsvFile;
@@ -33,6 +34,7 @@ class StorageController extends Controller
             'csf_trans' => (!empty($csvfiles) ? AccCsvTransaction::whereIn('acc_csv_file_id', $csvfiles)->get()->count() : 0),
             'csv_file' => AccCsvFile::where('acc_bank_id', $bank)->get()->first(),
             'is_auditor' => (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? true : false),
+            'openedAssets' => AccAssetRegister::where('active', 1)->get()->count()
         ]);
     }
 
@@ -114,6 +116,15 @@ class StorageController extends Controller
             //$data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
+        endif;
+
+        if($transaction->id && isset($request->is_assets) && $request->is_assets == 1):
+            AccAssetRegister::create([
+                'acc_transaction_id' => $transaction->id,
+                'description' => null,
+                'active' => 1,
+                'created_by' => auth()->user()->id,
+            ]);
         endif;
 
         return response()->json(['msg' => 'Storage transaction successfully inserted.'], 200);
@@ -281,6 +292,7 @@ class StorageController extends Controller
         $transaction = AccTransaction::find($transaction_id);
         $transaction['transaction_date_2'] = (isset($transaction->transaction_date_2) && !empty($transaction->transaction_date_2) ? date('d-m-Y', strtotime($transaction->transaction_date_2)) : date('d-m-Y'));
         $transaction['invoice_date'] = (isset($transaction->invoice_date) && !empty($transaction->invoice_date) ? date('d-m-Y', strtotime($transaction->invoice_date)) : date('d-m-Y'));
+        $transaction['has_assets'] = (isset($transaction->assets->id) && $transaction->assets->id > 0 ? 1 : 0);
 
         return response()->json(['res' => $transaction], 200);
     }
@@ -365,6 +377,25 @@ class StorageController extends Controller
             //$data['transaction_doc_url'] = $docURL;
 
             $trnfTrans = AccTransaction::create($data);
+        endif;
+
+        if(isset($request->is_assets) && $request->is_assets == 1):
+            $asset = AccAssetRegister::where('acc_transaction_id', $transaction_id)->withTrashed()->get()->first();
+            
+            if(isset($asset->id) && $asset->id > 0):
+                if($asset->trashed()):
+                    AccAssetRegister::where('id', $asset->id)->withTrashed()->restore();
+                endif;
+            else:
+                AccAssetRegister::create([
+                    'acc_transaction_id' => $transaction_id,
+                    'description' => null,
+                    'active' => 1,
+                    'created_by' => auth()->user()->id,
+                ]);
+            endif;
+        else:
+            AccAssetRegister::where('acc_transaction_id', $transaction_id)->delete();
         endif;
 
         return response()->json(['msg' => 'Storage transaction successfully updated.'], 200);

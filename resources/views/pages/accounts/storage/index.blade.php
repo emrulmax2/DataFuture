@@ -126,8 +126,16 @@
                             </div>
                             <input type="hidden" name="storage_id" value="{{ $bank->id }}"/>
 
+                            
+                            <div class="inline-flex mr-2 relative">
+                                <input type="checkbox" id="is_assets" name="is_assets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible" />
+                                <label for="is_assets" class="assetsChecker cursor-pointer btn btn-twitter h-[38px] text-white">
+                                    <i data-lucide="package-plus" class="w-5 h-5 unCheckedIcon"></i>
+                                    <i data-lucide="package-check" class="w-5 h-5 checkedIcon"></i>
+                                </label>
+                            </div>
                             <input type="file" name="document" id="transaction_document" value="" style="opacity: 0; visibility: hidden; width: 0; height: 0; position: absolute;"/>
-                            <label for="transaction_document" class="btn btn-primary text-white w-auto mr-2"><i data-lucide="hard-drive-upload" class="w-4 h-4"></i></label>
+                            <label for="transaction_document" class="btn btn-primary h-[38px] text-white w-auto mr-2"><i data-lucide="hard-drive-upload" class="w-5 h-5"></i></label>
                             <button type="submit" id="storeTransaction" class="btn btn-success text-white w-auto px-4">     
                                 Save                      
                                 <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

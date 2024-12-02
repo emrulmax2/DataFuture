@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounts\AccCsvTransactionController;
+use App\Http\Controllers\Accounts\AssetsRegisterController;
 use App\Http\Controllers\Accounts\ManagementReportController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
@@ -3115,6 +3116,16 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
         Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
         Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); 
+    });
+
+    Route::controller(AssetsRegisterController::class)->group(function() {
+        Route::get('accounts/assets-register', 'index')->name('accounts.assets.register'); 
+        Route::get('accounts/assets-register/list', 'list')->name('accounts.assets.register.list'); 
+        Route::get('accounts/assets-register/new', 'newRegisters')->name('accounts.assets.register.new'); 
+        Route::post('accounts/assets-register/update', 'update')->name('accounts.assets.register.update'); 
+        /*Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
+        Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
+        Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); */
     });
     
 });
