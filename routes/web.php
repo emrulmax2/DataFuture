@@ -2674,7 +2674,7 @@ Route::middleware('auth')->group(function() {
     }); 
 
     Route::resource('results-staff-submission', ResultSubmissionByStaffController::class,[
-        'except' => ['create']
+        'except' => ['create','show']
     ]);
 
     Route::controller(ResultSubmissionByStaffController::class)->group(function() {
