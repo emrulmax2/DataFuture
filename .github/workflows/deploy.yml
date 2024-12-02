@@ -1,0 +1,89 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  
+env:
+  APP_NAME: "London Churchill College (SMS) App"
+  APP_ENV: production
+  TIME_ZONE: 'Europe/London'
+  APP_KEY: ${{ secrets.APP_KEY }} 
+  APP_DEBUG: false
+
+  APP_URL: ${{ secrets.APP_URL }} 
+  ASSET_URL: ${{ secrets.ASSET_URL }} 
+  VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }} 
+  
+  DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
+  DB_HOST: ${{ secrets.DB_HOST }}
+  DB_DATABASE: ${{ secrets.DB_DATABASE }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_PORT: 3306
+
+  BROADCAST_DRIVER: log
+  CACHE_DRIVER: file
+  FILESYSTEM_DISK: local
+  QUEUE_CONNECTION: sync
+  SESSION_DRIVER: file
+  SESSION_LIFETIME: 120
+  
+  MAIL_MAILER: smtp
+  MAIL_HOST: ${{ secrets.MAIL_HOST }}
+  MAIL_PORT: 587
+  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+  MAIL_ENCRYPTION: tls
+  MAIL_FROM_ADDRESS: ${{ secrets.MAIL_FROM_ADDRESS }}
+  MAIL_FROM_NAME: "${APP_NAME}"
+
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} 
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+  AWS_BUCKET: ${{ secrets.AWS_BUCKET }}
+  AWS_USE_PATH_STYLE_ENDPOINT: false
+  
+  GOOGLE_REDIRECT_URL : ${{ secrets.GOOGLE_REDIRECT_URL }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+  GOOGLE_STUDENT_REDIRECT_URL : ${{ secrets.GOOGLE_STUDENT_REDIRECT_URL }}
+  GOOGLE_STUDENT_CLIENT_ID: ${{ secrets.GOOGLE_STUDENT_CLIENT_ID }}
+  GOOGLE_STUDENT_CLIENT_SECRET: ${{ secrets.GOOGLE_STUDENT_CLIENT_SECRET }}
+
+  DOCUSEAL_API_KEY: ${{ secrets.DOCUSEAL_API_KEY }}
+  OFFER_ACCEPTANCE_FORM_TEMPLATE_ID: 172859
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16.15.1'
+
+    
+      
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh/
+        echo "${{ secrets.SSH_PRIVATE_SMS_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.SSH_PUBLIC_SMS_KEY }}" > ~/.ssh/id_rsa.pub
+        chmod 600 ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa.pub
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    - name: Deploy
+      run: |
+        ssh smslccuk@${{ secrets.SERVER_IP }} 'bash -s' < ${{ github.workspace }}/.github/workflows/deploy.sh

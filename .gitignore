@@ -26,4 +26,8 @@ pnpm-lock.yaml
 *.lock
 
 pnpm-lock.yaml
+
 package-lock.json
+
+.github/workflows
+
