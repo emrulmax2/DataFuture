@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class AccCsvTransactionController extends Controller
 {
     public function index($bank, $id = 0){
+        $audit_status = (auth()->user()->remote_access && isset(auth()->user()->priv()['access_account_type']) && auth()->user()->priv()['access_account_type'] == 3 ? ['1'] : ['0', '1']);
         if($id > 0):
             $file = AccCsvFile::find($id);
         else:
@@ -27,7 +28,8 @@ class AccCsvTransactionController extends Controller
                 ['label' => 'Accounts Summary', 'href' => route('accounts')],
                 ['label' => 'Storage', 'href' => 'javascript:void(0);']
             ],
-            'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
+            //'banks' => AccBank::where('status', 1)->orderBy('bank_name', 'ASC')->get(),
+            'banks' => AccBank::where('status', 1)->whereIn('audit_status', $audit_status)->orderBy('bank_name', 'ASC')->get(),
             'bank' => AccBank::find($bank),
             'csv_file_id' => $id,
             'csv_file' => $file,

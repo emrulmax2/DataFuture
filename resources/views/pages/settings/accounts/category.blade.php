@@ -30,7 +30,7 @@
                             <ul class="classPlanTree">
                                 @foreach($inflow_parents as $cat)
                                     <li class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : 'notHasChild') }} relative">
-                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} {{ (isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
                                         <div class="settingBtns flex justify-end items-center absolute"> 
                                             <button data-id="{{$cat->id}}" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>
                                             <button data-id="{{$cat->id}}" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
@@ -67,7 +67,7 @@
                             <ul class="classPlanTree">
                                 @foreach($outflow_parents as $cat)
                                     <li class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : 'notHasChild') }} relative">
-                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
+                                        <a href="javascript:void(0);" data-type="1" data-category="{{ $cat->id }}" class="{{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '') }} flex items-center text-primary font-medium">{{ $cat->category_name }} {{ (isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '') }} {{ (isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '') }} <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>
                                         <div class="settingBtns flex justify-end items-center absolute"> 
                                             <button data-id="{{$cat->id}}" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>
                                             <button data-id="{{$cat->id}}" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
@@ -115,6 +115,11 @@
                             <label for="category_name" class="form-label">Category Name <span class="text-danger">*</span></label>
                             <input id="category_name" name="category_name" type="text" class="form-control" placeholder="Category Name">
                             <div class="acc__input-error error-category_name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="code" class="form-label">Code</label>
+                            <input id="code" name="code" type="text" class="form-control" placeholder="Code">
+                            <div class="acc__input-error error-code text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <div class="flex flex-col sm:flex-row mt-2">
@@ -190,6 +195,11 @@
                             <label for="edit_category_name" class="form-label">Category Name <span class="text-danger">*</span></label>
                             <input id="edit_category_name" name="category_name" type="text" class="form-control" placeholder="Category Name">
                             <div class="acc__input-error error-category_name text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_code" class="form-label">Code</label>
+                            <input id="edit_code" name="code" type="text" class="form-control" placeholder="Code">
+                            <div class="acc__input-error error-code text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <div class="flex flex-col sm:flex-row mt-2">

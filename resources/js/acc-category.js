@@ -132,6 +132,7 @@ import TomSelect from "tom-select";
                 $('#editCategoryModal select[name="parent_id"]').html(options).val('');
 
                 $('#editCategoryModal input[name="category_name"]').val(dataset.category_name ? dataset.category_name : '');
+                $('#editCategoryModal input[name="code"]').val(dataset.code ? dataset.code : '');
                 $('#editCategoryModal select[name="parent_id"]').val(dataset.parent_id ? dataset.parent_id : '');
 
                 if(dataset.trans_type == 1){

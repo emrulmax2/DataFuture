@@ -182,7 +182,7 @@ import TomSelect from "tom-select";
         let uploads = $('#trans_up_'+id)[0].files[0];
 
         let formData = new FormData();
-        $theTr.find('input:not([type="file"]):not([type="checkbox"])').each(function(){
+        $theTr.find('input:not([type="file"]):not([type="checkbox"]):not(.dropdown-input)').each(function(){
             var theNameOrg = $(this).attr('name');
             var theNameArr = theNameOrg.split('_');
             var theName = theNameArr[theNameArr.length - 1];

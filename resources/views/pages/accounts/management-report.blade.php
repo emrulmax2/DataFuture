@@ -16,9 +16,30 @@
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Report from <strong><u>{{ date('jS F, Y', strtotime($startDate)) }}</u></strong> to <strong><u>{{ date('jS F, Y', strtotime($endDate)) }}</u></strong></h2>
                     {{--<a href="#" class="add_btn btn btn-primary shadow-md ml-auto">Add New SMTP</a>--}}
-                    <div class="sm:ml-auto mt-3 sm:mt-0 border relative text-slate-500">
-                        <i data-lucide="calendar" class="w-4 h-4 z-10 absolute my-auto inset-y-0 ml-3 left-0"></i>
-                        <input type="text" id="reportPicker" class="form-control sm:w-56 box pl-10">
+                    <div class="sm:ml-auto mt-3 sm:mt-0 flex items-center justify-end">
+                        <div class="btn btn-outline-secondary flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                            <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
+                            <input type="text" id="reportPicker" class="w-full form-control border-0">
+                        </div>
+                        <div class="dropdown w-1/2 sm:w-auto ml-2">
+                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Exports <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            </button>
+                            <div class="dropdown-menu w-48">
+                                <ul class="dropdown-content">
+                                    <li>
+                                        <a href="{{ route('accounts.management.report.export.incomes', [$startDate, $endDate]) }}" class="dropdown-item">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Incomes
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('accounts.management.report.export.expenses', [$startDate, $endDate]) }}" class="dropdown-item">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Expenditure
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
