@@ -125,7 +125,7 @@
                                                     @php $studentClass="bg-red-100 text-red-600"; @endphp
                                                 @endif
                                                 @if($data['attendance'] ===0)
-                                                    @php $studentClass="bg-warning-100 text-warning-600"; @endphp
+                                                    @php $studentClass="bg-orange-100 text-orange-600"; @endphp
                                                 @endif
                                                 <tr id="row{{ $serial }}" class="{{ $studentClass }}">
                                                     <td class="">
