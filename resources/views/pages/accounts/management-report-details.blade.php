@@ -15,7 +15,28 @@
             <div class="intro-y box mt-2">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto"><strong><u>{{ $category->category_name }}</u></strong> Report from <strong><u>{{ date('jS F, Y', strtotime($startDate)) }}</u></strong> to <strong><u>{{ date('jS F, Y', strtotime($endDate)) }}</u></strong></h2>
-                    <a href="{{ route('accounts.management.report', [$startDate, $endDate]) }}" class="add_btn btn btn-primary shadow-md ml-auto">Back To Report</a>
+                    <div class="ml-auto inline-flex justify-end">
+                        <a href="{{ route('accounts.management.report', [$startDate, $endDate]) }}" class="add_btn btn btn-primary shadow-md">Back To Report</a>
+                        <div class="dropdown w-auto ml-2">
+                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export or Print <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            </button>
+                            <div class="dropdown-menu w-48">
+                                <ul class="dropdown-content">
+                                    <li>
+                                        <a href="{{ route('accounts.management.report.export.details', [$startDate, $endDate, $category->id]) }}" class="dropdown-item">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('accounts.management.report.print.details', [$startDate, $endDate, $category->id]) }}" class="dropdown-item">
+                                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print PDF
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -101,7 +122,7 @@
                                 <input id="audit_status" checked class="form-check-input" name="audit_status" type="checkbox" value="1">
                             </div>
                             <input type="hidden" id="storage_id" name="storage_id" value="0"/>
-                            
+
                             <div class="inline-flex mr-2 relative">
                                 <input type="checkbox" id="is_assets" name="is_assets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible" />
                                 <label for="is_assets" class="assetsChecker cursor-pointer btn btn-outline-secondary h-[38px] text-success">

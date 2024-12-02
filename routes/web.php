@@ -3161,6 +3161,10 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/management-report/show/{start}/{end}/{category}', 'show')->name('accounts.management.report.show'); 
         Route::get('accounts/management-report/export-incomes/{start}/{end}', 'exportIncomes')->name('accounts.management.report.export.incomes'); 
         Route::get('accounts/management-report/export-expenses/{start}/{end}', 'exportExpenses')->name('accounts.management.report.export.expenses'); 
+        Route::get('accounts/management-report/print-report/{start}/{end}', 'printReport')->name('accounts.management.report.print'); 
+
+        Route::get('accounts/management-report/export-details/{start}/{end}/{category}', 'exportDetails')->name('accounts.management.report.export.details'); 
+        Route::get('accounts/management-report/print-details/{start}/{end}/{category}', 'printDetails')->name('accounts.management.report.print.details'); 
     });
 
     Route::controller(AssetsRegisterController::class)->group(function() {

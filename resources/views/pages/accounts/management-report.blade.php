@@ -23,7 +23,7 @@
                         </div>
                         <div class="dropdown w-1/2 sm:w-auto ml-2">
                             <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Exports <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export or Print <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                             </button>
                             <div class="dropdown-menu w-48">
                                 <ul class="dropdown-content">
@@ -35,6 +35,11 @@
                                     <li>
                                         <a href="{{ route('accounts.management.report.export.expenses', [$startDate, $endDate]) }}" class="dropdown-item">
                                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Expenditure
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{{ route('accounts.management.report.print', [$startDate, $endDate]) }}" class="dropdown-item">
+                                            <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print PDF
                                         </a>
                                     </li>
                                 </ul>
