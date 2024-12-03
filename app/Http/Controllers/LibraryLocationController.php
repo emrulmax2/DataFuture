@@ -126,7 +126,7 @@ class LibraryLocationController extends Controller
                 'success' => true,
                 'message' => 'Library location created successfully.',
                 'data' => $libraryLocation,
-            ], 201);
+            ], 200);
 
         } catch (\Exception $e) {
             // Return an error response
