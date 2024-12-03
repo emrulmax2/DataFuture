@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import Litepicker from "litepicker";
 
 ("use strict");
 var assetsRegisterListTable = (function () {
@@ -9,10 +10,11 @@ var assetsRegisterListTable = (function () {
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let type = $("#acc_asset_type_id").val() != "" ? $("#acc_asset_type_id").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+        let queryDate = $('#query_date').val() != "" ? $("#query_date").val() : "";
 
         let tableContent = new Tabulator("#assetsRegisterListTable", {
             ajaxURL: route("accounts.assets.register.list"),
-            ajaxParams: { querystr: querystr, status: status, type: type },
+            ajaxParams: { querystr: querystr, status: status, type: type, queryDate : queryDate},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -141,32 +143,7 @@ var assetsRegisterListTable = (function () {
             });
         });
 
-        // Export
-        $("#tabulator-export-csv-TITLE").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-TITLE").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-TITLE").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Title Details",
-            });
-        });
-
-        $("#tabulator-export-html-TITLE").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-TITLE").on("click", function (event) {
-            tableContent.print();
-        });
+        
     };
     return {
         init: function () {
@@ -202,11 +179,41 @@ var assetsRegisterListTable = (function () {
 
     // On reset filter form
     $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#query_date").val("");
         $("#query").val("");
         $("#acc_asset_type_id").val("");
         $("#status").val("2");
 
         filterHTMLForm();
+    });
+
+    
+    let pickerOptions = {
+        autoApply: true,
+        singleMode: false,
+        numberOfColumns: 1,
+        numberOfMonths: 1,
+        showWeekNumbers: true,
+        format: "DD-MM-YYYY",
+        dropdowns: {
+            minYear: 1900,
+            maxYear: 2050,
+            months: true,
+            years: true,
+        },
+    };
+
+    let theQueryDate = new Litepicker({
+        element: document.getElementById('query_date'),
+        ...pickerOptions,
+        setup: (picker) => {
+            picker.on('selected', (date1, date2) => {
+                let theDates = $('#query_date').val();
+                if(theDates != '' && theDates.length == 23){
+                    assetsRegisterListTable.init();
+                }
+            });
+        }
     });
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -417,4 +424,82 @@ var assetsRegisterListTable = (function () {
             }
         });
     });
+
+    $('#tabulator-export-xl').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theLoader = $theBtn.find('.loadingIcon');
+
+        if(!$theBtn.hasClass('disabled')){
+            let querystr = $("#query").val() != "" ? $("#query").val() : "";
+            let type = $("#acc_asset_type_id").val() != "" ? $("#acc_asset_type_id").val() : "";
+            let status = $("#status").val() != "" ? $("#status").val() : "";
+            let queryDate = $('#query_date').val() != "" ? $("#query_date").val() : "";
+
+            $theBtn.addClass('disabled');
+            $theLoader.removeClass('hidden');
+
+            axios({
+                method: "post",
+                url: route("accounts.assets.register.export"),
+                params:{ querystr: querystr, type: type, status: status, queryDate: queryDate },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                responseType: 'blob',
+            }).then((response) => {
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Assets_register.xlsx'); 
+                document.body.appendChild(link);
+                link.click();
+            }).catch((error) => {
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                console.log(error);
+            });
+        }
+    })
+
+    $('#tabulator-print-pdf').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theLoader = $theBtn.find('.loadingIcon');
+
+        if(!$theBtn.hasClass('disabled')){
+            let querystr = $("#query").val() != "" ? $("#query").val() : "";
+            let type = $("#acc_asset_type_id").val() != "" ? $("#acc_asset_type_id").val() : "";
+            let status = $("#status").val() != "" ? $("#status").val() : "";
+            let queryDate = $('#query_date').val() != "" ? $("#query_date").val() : "";
+
+            $theBtn.addClass('disabled');
+            $theLoader.removeClass('hidden');
+
+            axios({
+                method: "post",
+                url: route("accounts.assets.register.print"),
+                params:{ querystr: querystr, type: type, status: status, queryDate: queryDate },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                responseType: 'blob',
+            }).then((response) => {
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Assets_register.pdf'); 
+                document.body.appendChild(link);
+                link.click();
+            }).catch((error) => {
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                console.log(error);
+            });
+        }
+    })
 })()

@@ -3177,6 +3177,9 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('accounts/assets-register/delete/{id}', 'destroy')->name('accounts.assets.register.destory');
         Route::post('accounts/assets-register/restore/{id}', 'restore')->name('accounts.assets.register.restore');
+
+        Route::post('accounts/assets-register/export', 'exportRegisters')->name('accounts.assets.register.export');
+        Route::post('accounts/assets-register/print', 'printRegisters')->name('accounts.assets.register.print');
     });
 
     Route::controller(AccAssetTypeController::class)->group(function() {
