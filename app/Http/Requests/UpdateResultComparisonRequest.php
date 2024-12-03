@@ -26,9 +26,9 @@ class UpdateResultComparisonRequest extends FormRequest
         return [
             "student_id"=> 'required|array',
             "assessment_plan_id"=> 'required|array',
-            'grade_id.*' => 'required_with:noId.*,id.*|integer|exists:grades,id',
-            'noId.*' => 'nullable|integer',
-            'id.*' => 'nullable|integer',
+            'grade_id.*' => 'required_with:noId.*,id.*',
+            'noId.*' => 'nullable',
+            'id.*' => 'nullable',
         ];
     }
 
