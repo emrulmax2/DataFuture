@@ -5,11 +5,30 @@
 @endsection
 @section('subcontent')
 @php
-    $date = DateTime::createFromFormat('Y-m', $month_year);
-    $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
+    // Check if the $month_year contains 'P45' or 'P60'
+    $containsP45 = strpos($month_year, 'P45') !== false;
+    $containsP60 = strpos($month_year, 'P60') !== false;
+    if ($containsP45 || $containsP60) {
+        $content = explode('_', $month_year);
+        $formattedDate = $month_year;
+        $holidayYear = App\Models\HolidayYear::find($content[1]);
+    } else {
+        $date = DateTime::createFromFormat('Y-m', $month_year);
+        $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
+    }
+    
+    
+
+    
 @endphp
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
+        @if ($containsP45 || $containsP60) 
+        
+        <h2 class="text-lg font-medium mr-auto">{{ $content[0] }} for <u>{{ date('Y', strtotime($holidayYear->start_date)).' - '.date('Y', strtotime($holidayYear->end_date)) }}</u></h2>
+        @else
+        
         <h2 class="text-lg font-medium mr-auto">Payslips for <u>{{ $formattedDate }}</u></h2>
+        @endif
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
