@@ -189,18 +189,20 @@ import Toastify from 'toastify-js';
                 var payslips = $(
                     '#synPaySlipModal [name="type_of_payslip"]'
                 ).val();
-                if(payslips != 'Payslips'){
-                    const date = new Date();
-                    const year = date.getFullYear();
-            
+                var holiday_year = $(
+                    '#synPaySlipModal [name="holiday_year"]'
+                ).val();
+                if(payslips != 'Payslips' && holiday_year != '') {
+                    
+                    $('#synPaySlipModal [name="holiday_month"]').val(payslips+'_'+holiday_year);
+
                     $('#synPaySlipModal [name="dir_name"]').val(
-                        payslips+'_'+year
+                        payslips+'_'+holiday_year
                     );
                     $('#synPaySlipModal [name="type"]').val(
                         payslips
                     );
 
-                    $('#synPaySlipModal [name="holiday_month"]').val(payslips+'_'+year);
                     drzn1.processQueue();
                 }else if (monthYear != '') {
                     $('#synPaySlipModal [name="dir_name"]').val(
