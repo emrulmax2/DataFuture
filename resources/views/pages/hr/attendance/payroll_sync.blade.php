@@ -5,14 +5,14 @@
 @endsection
 @section('subcontent')
 @php
-    use App\Models\HolidayYear;
+    use App\Models\HrHolidayYear;
     // Check if the $month_year contains 'P45' or 'P60'
     $containsP45 = strpos($month_year, 'P45') !== false;
     $containsP60 = strpos($month_year, 'P60') !== false;
     if ($containsP45 || $containsP60) {
         $content = explode('_', $month_year);
         $formattedDate = $month_year;
-        $holidayYear = HolidayYear::find($content[1]);
+        $holidayYear = HrHolidayYear::find($content[1]);
     } else {
         $date = DateTime::createFromFormat('Y-m', $month_year);
         $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
