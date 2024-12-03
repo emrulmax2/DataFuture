@@ -97,14 +97,14 @@ class TermDeclaration extends Model
     }
 
     public function setExamPublishDateAttribute($value) {  
-        $this->attributes['exam_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['exam_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : NULL);
     }
     public function getExamPublishDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 
     public function setExamResubmissionPublishDateAttribute($value) {  
-        $this->attributes['exam_resubmission_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['exam_resubmission_publish_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : NULL);
     }
     public function getExamResubmissionPublishDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
