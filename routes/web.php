@@ -1385,10 +1385,8 @@ Route::middleware('auth')->group(function() {
     });
     Route::resource('hr/payslip-upload', PaySlipUploadSyncController::class);
     Route::controller(PaySlipUploadSyncController::class)->group(function(){
-        Route::post('hr/payslip-upload/list', 'list')->name('hr.payslip.sync.list');
-    });
-    Route::controller(PaySlipUploadSyncController::class)->group(function(){
-        Route::post('hr/payslip-upload/restore', 'restore')->name('payslip-upload.restore');
+        Route::post('hr/payslip-upload-list', 'list')->name('hr.payslip.sync.list');
+        Route::post('hr/payslip-upload-restore', 'restore')->name('payslip-upload.restore');
     });
     
 
