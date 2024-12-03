@@ -132,7 +132,7 @@ var submissionTableTutor = (function () {
     var _tableGen = function ($id) {
         // Setup Tabulator
         let assessmentPlanId = $id;
-        let tableContent = new Tabulator('#submissionListTableTutor', {
+        let tableContent = new Tabulator('#submissionListTable', {
             ajaxURL: route('result-submission.list'),
             ajaxParams: { assessmentPlanId: assessmentPlanId },
             ajaxFiltering: true,
@@ -140,8 +140,8 @@ var submissionTableTutor = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: 'remote',
-            paginationSize: 25,
-            paginationSizeSelector: [25, 50, 100],
+            paginationSize: 100,
+            paginationSizeSelector: [100],
             layout: 'fitColumns',
             responsiveLayout: 'collapse',
             placeholder: 'No matching records found',
