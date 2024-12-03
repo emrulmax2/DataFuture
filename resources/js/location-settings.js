@@ -290,7 +290,7 @@ var locationListTable = (function () {
 
             axios({
                 method: 'post',
-                url: route('locations.store'),
+                url: route('library-locations.store'),
                 data: form_data,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
