@@ -172,7 +172,8 @@ import Toastify from 'toastify-js';
                 }, 2000);
             }
         });
-
+        
+        // Function to get the current month and year in 'MM-YYYY' format
         $('#uploadEmpDocBtn').on('click', function (e) {
             e.preventDefault();
             document
@@ -182,18 +183,29 @@ import Toastify from 'toastify-js';
                 'display: inline-block;';
 
             if (drzn1.files.length > 0) {
-                var hardCopyChecked = $(
+                var monthYear = $(
                     '#synPaySlipModal [name="holiday_month"]'
                 ).val();
-                var payslip = $(
+                var payslips = $(
                     '#synPaySlipModal [name="type_of_payslip"]'
                 ).val();
-                if (hardCopyChecked != '') {
+                if(payslips != 'Payslips'){
+                    const date = new Date();
+                    const year = date.getFullYear();
+            
                     $('#synPaySlipModal [name="dir_name"]').val(
-                        hardCopyChecked
+                        payslips+'_'+year
                     );
                     $('#synPaySlipModal [name="type"]').val(
-                        payslip
+                        payslips
+                    );
+                    drzn1.processQueue();
+                }else if (monthYear != '') {
+                    $('#synPaySlipModal [name="dir_name"]').val(
+                        monthYear
+                    );
+                    $('#synPaySlipModal [name="type"]').val(
+                        payslips
                     );
                     drzn1.processQueue();
                 } else {

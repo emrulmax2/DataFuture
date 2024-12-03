@@ -170,7 +170,15 @@
                                         <input type="hidden" name="type" value=""/>
                                     </form>
                                 </div>
-                                
+                                <div class="intro-y intro-y w-90 mx-auto my-3">
+                                    <select id="type" name="type" class="lccTom lcc-tom-select w-full  text-left">
+                                        <option value="">Please Select Type</option>
+                                        <option value="Payslips">Payslips</option>
+                                        <option value="P45">P45</option>
+                                        <option value="P60">P60</option>
+                                    </select> 
+                                    <div class="acc__input-error error-type text-danger mt-2"></div>
+                                </div>
                                 <div class="intro-y intro-y w-90 mx-auto my-3">
                                     <select id="holiday_year" name="holiday_year_id" class="lccTom lcc-tom-select w-full text-left">
                                         <option value="">Please Select Year</option>
@@ -186,14 +194,6 @@
                                        
                                     </select> 
                                     <div class="acc__input-error error-employee_work_type text-danger mt-2"></div>
-                                </div>
-                                <div class="intro-y intro-y w-90 mx-auto my-3">
-                                    <select id="type" name="type" class="lccTom lcc-tom-select w-full  text-left">
-                                        <option value="">Please Select Type</option>
-                                        <option value="Payslip">Payslip</option>
-                                        <option value="PGT">PGT</option>
-                                    </select> 
-                                    <div class="acc__input-error error-type text-danger mt-2"></div>
                                 </div>
                             </div>
                             <div class="px-5 pb-8 text-center">
