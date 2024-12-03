@@ -27,7 +27,7 @@ class EmployeeAttendanceController extends Controller
     public function index(Request $request){
         
         $holidayList = HrHolidayYear::orderBy('start_date','desc')->get();
-      
+
         return view('pages.hr.attendance.index', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
@@ -35,6 +35,7 @@ class EmployeeAttendanceController extends Controller
             ],
             'html_table' => $this->listHtml(date('d-m-Y')),
             'holiday_years' => $holidayList,
+            'RemainpaySlips' => PaySlipUploadSync::whereNull('file_transffered_at')->pluck('month_year')->unique()->toArray(),
         ]);
     }
     function getDirectories($path) {

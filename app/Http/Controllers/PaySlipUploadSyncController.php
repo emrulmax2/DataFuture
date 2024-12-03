@@ -40,6 +40,7 @@ class PaySlipUploadSyncController extends Controller
                 ],
                 [
                     'employee_id' => $employee_ids[$index],
+                    'file_transferred_at' => now(),
                     'updated_at' => now(),
                     'updated_by' => auth()->id(),
                 ]

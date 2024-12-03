@@ -38,8 +38,38 @@
                     <button type="button" id="generateReport" class="btn btn-success text-white w-auto ml-2">Generage Report</button>
                 </div>
             </form>
-            <div class="mt-2 flex w-full sm:mt-0 sm:w-auto  ml-2">
-                <button id="uploadSync" data-tw-toggle="modal" data-tw-target="#synPaySlipModal" type="button" class="w-48 btn btn-pending text-white ml-auto"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Upload Payslips</button>
+            <div class="col-span-6 text-right relative">
+                <div class="dropdown" id="uploadsDropdown">
+                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Upload PaySlips <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                    <div class="dropdown-menu w-72">
+                        <ul class="dropdown-content">
+                            <li><h6 class="dropdown-header">Pending PaySlip</h6></li>
+                            <li><hr class="dropdown-divider mt-0"></li>
+                            @if(isset($RemainpaySlips) && !empty($RemainpaySlips) && count($RemainpaySlips) > 0)
+                                @foreach($RemainpaySlips as $month_year)
+                                    <li>
+                                        <div class="form-check dropdown-item">
+                                            <a href="{{ route('hr.attendance.payroll.sync',$month_year) }}" class="inline-flex items-center cursor-pointer" for="employee_doc_{{ $month_year }}"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> {{ $month_year }}</a>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            @else 
+                                <li>
+                                    <div class="alert alert-pending-soft show flex items-top mb-1 mt-1" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are no settings found!
+                                    </div>
+                                </li>
+                            @endif
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <div class="flex p-1">
+                                    <button id="uploadSync" data-tw-toggle="modal" data-tw-target="#synPaySlipModal" type="button" class="w-auto btn-sm px-1 py-2 btn btn-primary text-white mr-auto"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Upload Payslips</button>
+                                    <button type="button" id="closeUploadsDropdown" class="btn btn-secondary py-1 px-2 ml-auto">Close</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden mt-5 " id="attendanceSyncListTable">

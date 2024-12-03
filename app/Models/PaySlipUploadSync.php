@@ -9,6 +9,7 @@ class PaySlipUploadSync extends Model
 {
     use HasFactory;
 
+    protected $table = 'pay_slip_upload_syncs';
 
     protected $fillable = [
         'employee_id',
