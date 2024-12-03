@@ -172,7 +172,7 @@ import Toastify from 'toastify-js';
                 }, 2000);
             }
         });
-        
+
         // Function to get the current month and year in 'MM-YYYY' format
         $('#uploadEmpDocBtn').on('click', function (e) {
             e.preventDefault();
@@ -199,6 +199,8 @@ import Toastify from 'toastify-js';
                     $('#synPaySlipModal [name="type"]').val(
                         payslips
                     );
+
+                    $('#synPaySlipModal [name="holiday_month"]').val(payslips+'_'+year);
                     drzn1.processQueue();
                 }else if (monthYear != '') {
                     $('#synPaySlipModal [name="dir_name"]').val(
