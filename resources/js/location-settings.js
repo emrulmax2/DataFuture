@@ -281,9 +281,9 @@ var locationListTable = (function () {
             const form = document.getElementById('addLocationsForm');
 
             document
-                .querySelector('#saveUser')
+                .querySelector('#saveLocation')
                 .setAttribute('disabled', 'disabled');
-            document.querySelector('#saveUser svg').style.cssText =
+            document.querySelector('#saveLocation svg').style.cssText =
                 'display: inline-block;';
 
             let form_data = new FormData(form);
@@ -300,9 +300,9 @@ var locationListTable = (function () {
             })
                 .then((response) => {
                     document
-                        .querySelector('#saveUser')
+                        .querySelector('#saveLocation')
                         .removeAttribute('disabled');
-                    document.querySelector('#saveUser svg').style.cssText =
+                    document.querySelector('#saveLocation svg').style.cssText =
                         'display: none;';
                     //console.log(response.data.message);
                     //return false;
@@ -329,9 +329,9 @@ var locationListTable = (function () {
                 })
                 .catch((error) => {
                     document
-                        .querySelector('#saveUser')
+                        .querySelector('#saveLocation')
                         .removeAttribute('disabled');
-                    document.querySelector('#saveUser svg').style.cssText =
+                    document.querySelector('#saveLocation svg').style.cssText =
                         'display: none;';
                     if (error.response) {
                         if (error.response.status == 422) {
