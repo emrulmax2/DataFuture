@@ -122,6 +122,7 @@
                                         <label for="venue_id" class="form-label">Venue <span class="text-danger">*</span></label>
                                         <option value="">Please Select</option>
                                         <select id="venue_id" name="venue_id" data-placeholder="Please Select" class="tom-selects w-full" >
+                                            <option value="">Please Select</option>
                                             @if(!empty($venues))
                                                 @foreach($venues as $rl)
                                                     <option value="{{ $rl->id }}">{{ $rl->name }}</option>

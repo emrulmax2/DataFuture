@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class LibraryLocation extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $guarded = ['id'];
 
     protected $table = "book_location";
 

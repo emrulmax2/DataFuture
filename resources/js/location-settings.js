@@ -275,7 +275,7 @@ var locationListTable = (function () {
         $('#editLocationsForm').on('change', '#locationPhotoEdit', function () {
             showPreview('locationPhotoEdit', 'locationImageEdit');
         });
-
+      
         $('#addLocationsForm').on('submit', function (e) {
             e.preventDefault();
             const form = document.getElementById('addLocationsForm');
@@ -304,9 +304,9 @@ var locationListTable = (function () {
                         .removeAttribute('disabled');
                     document.querySelector('#saveLocation svg').style.cssText =
                         'display: none;';
-                    //console.log(response.data.message);
+                    console.log(response.status);
                     //return false;
-
+                    
                     if (response.status == 200) {
                         addLocationsModal.hide();
 
