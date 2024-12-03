@@ -96,7 +96,7 @@
     <!-- BEGIN: Add Modal -->
     <div id="addLocationsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog  modal-lg">
-            <form method="POST" action="#" id="addLocationForm" enctype="multipart/form-data">
+            <form method="POST" action="#" id="addLocationsForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Add Location</h2>
