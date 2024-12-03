@@ -55,7 +55,7 @@ class PaySlipUploadSyncController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(PaySlipUploadSync $paySlipUploadSync)
+    public function show(PaySlipUploadSync $payslip_upload)
     {
         //
     }
@@ -63,7 +63,7 @@ class PaySlipUploadSyncController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PaySlipUploadSync $paySlipUploadSync)
+    public function edit(PaySlipUploadSync $payslip_upload)
     {
         //
     }
@@ -71,7 +71,7 @@ class PaySlipUploadSyncController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PaySlipUploadSync $paySlipUploadSync)
+    public function update(Request $request, PaySlipUploadSync $payslip_upload)
     {
         //
     }
@@ -79,21 +79,21 @@ class PaySlipUploadSyncController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PaySlipUploadSync $paySlipUploadSync)
+    public function destroy(PaySlipUploadSync $payslip_upload)
     {
 
         // Assuming the file path is stored in a column named 'file_path'
-        $filePath = $paySlipUploadSync->file_path;
+        $filePath = $payslip_upload->file_path;
 
         // Delete the file from storage
         if (Storage::exists($filePath)) {
 
             Storage::delete($filePath);
-            
+
         }
 
         // Delete the record from the database
-        $paySlipUploadSync->forceDelete();
+        $payslip_upload->forceDelete();
 
         return response()->json(['message' => 'Payslip deleted successfully.']);
 
@@ -103,7 +103,7 @@ class PaySlipUploadSyncController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function restore(PaySlipUploadSync $paySlipUploadSync)
+    public function restore(PaySlipUploadSync $payslip_upload)
     {
         //
     }
