@@ -11,7 +11,7 @@
     if ($containsP45 || $containsP60) {
         $content = explode('_', $month_year);
         $formattedDate = $month_year;
-        $holidayYear = App\Models\HolidayYear::find($content[1]);
+        $holidayYear = \App\Models\HolidayYear::find($content[1]);
     } else {
         $date = DateTime::createFromFormat('Y-m', $month_year);
         $formattedDate = $date->format('F Y'); // 'F' for full month name, 'Y' for full year
