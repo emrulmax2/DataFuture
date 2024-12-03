@@ -2249,6 +2249,10 @@ input[type=number] {
 .table.table-borderless.managementReportTable .aoiHeadingRow td:last-child{
     border-top-width: 1px;
     border-top-color: #000;
+    
+    border-bottom-width: 4px;
+    border-bottom-style: double;
+    border-bottom-color: #000;
 }
 .table.table-borderless.managementReportTable .expdHeadingRow td{
     padding-top: 1.25rem;

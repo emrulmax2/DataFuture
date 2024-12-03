@@ -140,8 +140,10 @@ class ManagementReportController extends Controller
                 $inf = $inflows->sum('transaction_amount');
                 $otf = $outflows->sum('transaction_amount');
 
-                $costOfSlaes[$cat->id]['name'] = $cat->category_name;
-                $costOfSlaes[$cat->id]['amount'] = ($otf - $inf);
+                if(($otf - $inf) != 0):
+                    $costOfSlaes[$cat->id]['name'] = $cat->category_name;
+                    $costOfSlaes[$cat->id]['amount'] = ($otf - $inf);
+                endif;
             endforeach;
         endif;
 
