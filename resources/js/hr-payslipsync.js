@@ -157,7 +157,17 @@ import Toastify from 'toastify-js';
                     let month_year = $(
                         '#synPaySlipModal [name="holiday_month"]'
                     ).val();
-                    location.href = route('hr.attendance.payroll.sync',month_year);
+                    var payslips = $(
+                        '#synPaySlipModal [name="typePaySlip"]'
+                    ).val();
+                    var holiday_year = $(
+                        '#synPaySlipModal [name="holiday_year_id"]'
+                    ).val();
+                    if(month_year != ''){
+                        location.href = route('hr.attendance.payroll.sync',month_year);
+                    } else {
+                        location.href = route('hr.attendance.payroll.sync',payslips+'_'+holiday_year);
+                    }
                 }, 2000);
             }else{
                 warningModal.show();
