@@ -233,7 +233,7 @@
                                                     <td class="border-b dark:border-darkmode-500">{{ $submission->created_at }}</td>
                                                     <td class="border-b dark:border-darkmode-500">
                                                         @if($submission->is_it_final > 0)
-                                                        <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
+                                                        <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission_tutor btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
                                                         @endif
                                                     </td>
                                                 </tr>

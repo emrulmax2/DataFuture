@@ -128,9 +128,129 @@ var submissionTable = (function () {
         },
     };
 })();
+var submissionTableTutor = (function () {
+    var _tableGen = function ($id) {
+        // Setup Tabulator
+        let assessmentPlanId = $id;
+        let tableContent = new Tabulator('#submissionListTableTutor', {
+            ajaxURL: route('result-submission.list'),
+            ajaxParams: { assessmentPlanId: assessmentPlanId },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: 'remote',
+            paginationSize: 25,
+            paginationSizeSelector: [25, 50, 100],
+            layout: 'fitColumns',
+            responsiveLayout: 'collapse',
+            placeholder: 'No matching records found',
+            columns: [
+                {
+                    title: 'S/N',
+                    field: 'sl',
+                    headerSort: false,
+                    width: '30',
+                },
+                {
+                    title: 'Student',
+                    field: 'registration_no',
+                    headerHozAlign: 'left',
+                    width: '220',
+                    formatter(cell, formatterParams) {
+                        var html =
+                            '<a href="' +
+                            route('student.show', cell.getData().student_id) +
+                            '" class="block">';
+                        html +=
+                            '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
+                        html +=
+                            '<img alt="' +
+                            cell.getData().first_name +
+                            '" class="rounded-full shadow" src="' +
+                            cell.getData().student_photo +
+                            '">';
+                        html += '</div>';
+                        html +=
+                            '<div class="inline-block relative" style="top: -4px;">';
+                        html +=
+                            '<div class="font-medium whitespace-nowrap uppercase">' +
+                            cell.getData().registration_no +
+                            '</div>';
+                        html +=
+                            '<div class="text-slate-500 text-xs whitespace-nowrap">' +
+                            (cell.getData().first_name != ''
+                                ? cell.getData().first_name
+                                : '') +
+                            ' ' +
+                            (cell.getData().last_name != ''
+                                ? cell.getData().last_name
+                                : '') +
+                            '</div>';
+                        html += '</div>';
+                        html += '</a>';
+                        return html;
+                    },
+                },
+                {
+                    title: 'Module Code',
+                    field: 'module_code',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Paper Id',
+                    field: 'paper_id',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Grade',
+                    field: 'grade',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Submission date',
+                    field: 'created_at',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Publish Date',
+                    field: 'publish_at',
+                    headerHozAlign: 'left',
+                },
+                {
+                    title: 'Uploaded By',
+                    field: 'created_by',
+                    headerHozAlign: 'left',
+                },
+            ],
+            renderComplete() {
+                createIcons({
+                    icons,
+                    'stroke-width': 1.5,
+                    nameAttr: 'data-lucide',
+                });
+            },
+        });
 
+        // Redraw table onresize
+        window.addEventListener('resize', () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                'stroke-width': 1.5,
+                nameAttr: 'data-lucide',
+            });
+        });
+    };
+    return {
+        init: function ($id) {
+            _tableGen($id);
+        },
+    };
+})();
 (function () {
     submissionTable.init(1);
+    submissionTableTutor.init(1);
     const successModal = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#successModal')
     );
@@ -395,6 +515,13 @@ var submissionTable = (function () {
         let rowID = $statusBTN.attr('data-assesmentPlanId');
         submissionTable.init(rowID);
     });
+
+    $('.edit_btn_submission_tutor').on('click', function () {
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-assesmentPlanId');
+        submissionTableTutor.init(rowID);
+    });
+
     $('#checkbox-switch-all').on('change', function () {
         var checked = $(this).is(':checked');
         if (checked) {

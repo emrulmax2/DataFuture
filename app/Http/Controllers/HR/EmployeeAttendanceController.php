@@ -108,7 +108,7 @@ class EmployeeAttendanceController extends Controller
                     
                                         if($pay->file_name == $fileName && $pay->employe_id != null) {
                     
-                                            $employeeFound = $employee->id;
+                                            $employeeFound = $pay->employe_id;
                                             break;
                                         }
                                     }
