@@ -1387,6 +1387,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(PaySlipUploadSyncController::class)->group(function(){
         Route::post('hr/payslip-upload/list', 'list')->name('hr.payslip.sync.list');
     });
+    Route::controller(PaySlipUploadSyncController::class)->group(function(){
+        Route::post('hr/payslip-upload/restore', 'restore')->name('payslip-upload.restore');
+    });
+    
 
     Route::controller(EmployeePortalController::class)->group(function(){
         Route::get('hr/portal', 'index')->name('hr.portal');

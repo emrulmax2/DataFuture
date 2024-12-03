@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PayslipSyncUploadUpdateRequest;
 use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PaySlipUploadSyncController extends Controller
 {
@@ -79,6 +80,30 @@ class PaySlipUploadSyncController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(PaySlipUploadSync $paySlipUploadSync)
+    {
+
+        // Assuming the file path is stored in a column named 'file_path'
+        $filePath = $paySlipUploadSync->file_path;
+
+        // Delete the file from storage
+        if (Storage::exists($filePath)) {
+
+            Storage::delete($filePath);
+            
+        }
+
+        // Delete the record from the database
+        $paySlipUploadSync->forceDelete();
+
+        return response()->json(['message' => 'Payslip deleted successfully.']);
+
+    }
+
+    
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function restore(PaySlipUploadSync $paySlipUploadSync)
     {
         //
     }

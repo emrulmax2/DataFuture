@@ -101,7 +101,7 @@ var hrPayslipListTable = (function () {
 
     
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-
+    const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     if ($('#hrHolidayYearsListTable').length) {
         // Init Table
         hrHolidayYearsListTable.init();
@@ -263,4 +263,67 @@ var hrPayslipListTable = (function () {
             }
         });
     });
+
+    $('#hrPayslipSyncTable').on('click', '.delete_btn', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
+        1});
+    });
+
+    // Confirm Modal Action
+    $('#confirmModal .agreeWith').on('click', function(){
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'DELETE'){
+            axios({
+                method: 'delete',
+                url: route('payslip-upload.destroy', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confModal.hide();
+
+                    succModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Academic year successfully deleted!');
+                    });
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'RESTORE'){
+            axios({
+                method: 'post',
+                url: route('payslip-upload.restore', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confModal.hide();
+
+                    succModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Success!');
+                        $('#successModal .successModalDesc').html('Academic Year Data Successfully Restored!');
+                    });
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    })
+
+    
 })();
