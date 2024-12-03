@@ -179,7 +179,7 @@ var hrPayslipListTable = (function () {
                         console.log(data);
                         return '<div class="flex justify-start items-center">' +
                             '<div class="w-10 h-10 intro-x image-fit mr-5">' +
-                                '<img alt="' + escape(data.text) + '" class="rounded-full shadow" src="' + escape(data.photo_url) + '">' +
+                                '<img alt="' + escape(data.text) + '" class="rounded-full shadow" src="' + data.photoUrl + '">' +
                             '</div>' +
                             '<div>' +
                                 '<div class="font-medium whitespace-nowrap">' + escape(data.text) + '</div>' +
