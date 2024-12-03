@@ -299,10 +299,9 @@ var hrPayslipListTable = (function () {
                         $('#successModal .successModalTitle').html('Done!');
                         $('#successModal .successModalDesc').html('Academic year successfully deleted!');
                     });
-
+                    $("#employee_id_"+recordID).remove();
                     setTimeout(() => {
                         succModal.hide();
-                        location.reload();
                     }, 2000);
                 }
             }).catch(error =>{
