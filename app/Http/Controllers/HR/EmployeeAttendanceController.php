@@ -129,7 +129,7 @@ class EmployeeAttendanceController extends Controller
                             'file_name' => $fileName,
                             'file_path' => $filePath,
                             'month_year' => $dirName,
-                            'type' => isset($type) ? $type : 'Payslip',
+                            'type' => isset($type) ? $type : 'Payslips',
                             'is_file_exist' => ($employeeFound) ? 1 : 0,
                             'file_transffered' => 0,
                             'file_transffered_at' => null,
