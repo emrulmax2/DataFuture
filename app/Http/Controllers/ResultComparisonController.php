@@ -126,6 +126,8 @@ class ResultComparisonController extends Controller
             $resultSet[$key]['attendance'] = $value->attendance;
             $resultSet[$key]['grade_matched'] = ($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) ? "Matched" : "Not Matched";
             $resultSet[$key]['grade'] = '';
+            $resultSet[$key]['paper_id'] =  ($resultSet[$key]['staff_paper_ID'] == $resultSet[$key]['tutor_given_paper_ID']) ? $resultSet[$key]['staff_paper_ID'] : '';
+            
             if(($resultSet[$key]['staff_given_grade'] == $resultSet[$key]['tutor_given_grade']) && ($resultSet[$key]['staff_given_grade']!="N/A" || $resultSet[$key]['tutor_given_grade']!="N/A")) {
                 if(isset($result->id)):
                     $resultSet[$key]['grade'] = $result->grade_id;
@@ -186,6 +188,7 @@ class ResultComparisonController extends Controller
 
         
         $gradeList = $request->input('grade_id');
+        $paper_id = $request->input('paper_id');
         $noId = $request->input('noId');
         $student_id = $request->input('student_id');
         $ids = $request->input('id');
@@ -211,6 +214,7 @@ class ResultComparisonController extends Controller
                         'assessment_plan_id'  => $assessment_plan_id[$index],
                         'student_id'  => $student_id[$index],
                         'plan_id' =>$plan_id,
+                        'paper_id'=>$paper_id[$index],
                         'term_declaration_id' => $planId->term_declaration_id,
                         'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
                         'created_by'  => $created_by,
@@ -242,6 +246,7 @@ class ResultComparisonController extends Controller
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
             $assessment_plan_id = $request->input('assessment_plan_id');
+            $paper_id = $request->input('paper_id');
             $student_id = $request->input('student_id');
             $published_at = $request->input('publish_at');
             $published_time = $request->input('publish_time');
@@ -258,6 +263,7 @@ class ResultComparisonController extends Controller
                         'assessment_plan_id'  => $assessment_plan_id[$index],
                         'student_id'  => $student_id[$index],
                         'plan_id' =>$plan_id,
+                        'paper_id'=>$paper_id[$index],
                         'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
                         'created_by'  => $created_by,
                     );
@@ -295,6 +301,7 @@ class ResultComparisonController extends Controller
     public function update(UpdateResultComparisonRequest $request) {
             $grade_id = $request->input('grade_id');
             $plan_id = $request->input('plan_id');
+            $paper_id = $request->input('paper_id');
             $student_id = $request->input('student_id');
             $published_at = $request->input('publish_at');
             $published_time = $request->input('publish_time');
@@ -309,6 +316,7 @@ class ResultComparisonController extends Controller
 
                 $result->published_at = $published_at[$index]." ".$published_time[$index];
                 $result->grade_id = $grade_id[$index];
+                $result->paper_id = $paper_id[$index];
 
                 $changes = $result->getDirty();
 

@@ -1387,6 +1387,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(PaySlipUploadSyncController::class)->group(function(){
         Route::post('hr/payslip-upload/list', 'list')->name('hr.payslip.sync.list');
     });
+    Route::controller(PaySlipUploadSyncController::class)->group(function(){
+        Route::post('hr/payslip-upload/restore', 'restore')->name('payslip-upload.restore');
+    });
+    
 
     Route::controller(EmployeePortalController::class)->group(function(){
         Route::get('hr/portal', 'index')->name('hr.portal');
@@ -3177,6 +3181,9 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('accounts/assets-register/delete/{id}', 'destroy')->name('accounts.assets.register.destory');
         Route::post('accounts/assets-register/restore/{id}', 'restore')->name('accounts.assets.register.restore');
+
+        Route::post('accounts/assets-register/export', 'exportRegisters')->name('accounts.assets.register.export');
+        Route::post('accounts/assets-register/print', 'printRegisters')->name('accounts.assets.register.print');
     });
 
     Route::controller(AccAssetTypeController::class)->group(function() {

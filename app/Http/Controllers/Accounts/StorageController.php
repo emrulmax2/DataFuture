@@ -292,7 +292,7 @@ class StorageController extends Controller
         $transaction_id = $request->transaction_id;
         $transaction = AccTransaction::find($transaction_id);
         $transaction['transaction_date_2'] = (isset($transaction->transaction_date_2) && !empty($transaction->transaction_date_2) ? date('d-m-Y', strtotime($transaction->transaction_date_2)) : date('d-m-Y'));
-        $transaction['invoice_date'] = (isset($transaction->invoice_date) && !empty($transaction->invoice_date) ? date('d-m-Y', strtotime($transaction->invoice_date)) : date('d-m-Y'));
+        $transaction['invoice_date'] = (isset($transaction->invoice_date) && !empty($transaction->invoice_date) ? date('d-m-Y', strtotime($transaction->invoice_date)) : '');
         $transaction['has_assets'] = (isset($transaction->assets->id) && $transaction->assets->id > 0 ? 1 : 0);
 
         return response()->json(['res' => $transaction], 200);

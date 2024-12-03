@@ -26,12 +26,13 @@
             <div id="hrPayslipListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div> --}}
         <form action="{{ route('payslip-upload.store') }}" method="post" id="hrPayslipSyncForm">
-            <table class="table table-report table-report--tabulator">
+            <table id="hrPayslipSyncTable" class="table table-report table-report--tabulator">
                 <thead>
                     <tr>
                         <th class="border-none whitespace-no-wrap">ID</th>
                         <th class="border-none whitespace-no-wrap">Payslip Name</th>
                         <th class="border-none whitespace-no-wrap">Employee</th>
+                        <th class="border-none whitespace-no-wrap">Action</th>
                     </tr>
                 </thead>
                 
@@ -39,15 +40,15 @@
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
                         <tr class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
-                            <td>
+                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
                             </td>
-                            <td>
+                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td>
-                                {{-- implent employee form dropdown list --}}
+                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+
                                         <select id="employee_id_{{ $paySlip->id }}" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
                                                 @foreach($employees as $data)
@@ -76,7 +77,9 @@
                                                 @endforeach
                                         </select>
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
-                                    
+                            </td>
+                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                                <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $paySlip->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
                             </td>
                         </tr>
                     @endforeach
@@ -84,7 +87,6 @@
             </table>
         </form>
     </div>
-
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto"></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
@@ -110,6 +112,25 @@
             </div>
         </div>
     </div>
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
     <!-- END: Success Modal Content -->
 @endsection
 
