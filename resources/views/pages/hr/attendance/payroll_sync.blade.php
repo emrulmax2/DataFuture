@@ -58,7 +58,7 @@
                 <tbody>
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
-                        <tr class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
+                        <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
                             <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
