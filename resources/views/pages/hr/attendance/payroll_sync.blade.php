@@ -39,6 +39,7 @@
     @php
        $danger ="relative border-none rounded-md bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 ";
        $success ="relative border-none bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20"
+       
     @endphp
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
@@ -60,14 +61,14 @@
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
                         <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
-                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : text-danger }} dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
                                 <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
                             </td>
-                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : text-danger }} dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : text-danger }} dark:border-darkmode-300  border-r border-b">
 
                                         <select id="employee_id_{{ $paySlip->id }}" class="lccTom lcc-tom-select w-full " name="employee_id[]">
                                             <option value="">Please Select</option>
@@ -98,7 +99,7 @@
                                         </select>
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                             </td>
-                            <td class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : text-danger }} dark:border-darkmode-300  border-r border-b">
                                 <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $paySlip->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
                             </td>
                         </tr>
