@@ -101,7 +101,7 @@ var hrPayslipListTable = (function () {
 
     
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     if ($('#hrHolidayYearsListTable').length) {
         // Init Table
         hrHolidayYearsListTable.init();
@@ -270,7 +270,7 @@ var hrPayslipListTable = (function () {
 
         confirmModal.show();
         document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModTitle').html('Are you sure?');
             $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
             $('#confirmModal .agreeWith').attr('data-id', rowID);
             $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
@@ -292,7 +292,7 @@ var hrPayslipListTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     $('#confirmModal button').removeAttr('disabled');
-                    confModal.hide();
+                    confirmModal.hide();
 
                     succModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
@@ -316,7 +316,7 @@ var hrPayslipListTable = (function () {
             }).then(response => {
                 if (response.status == 200) {
                     $('#confirmModal button').removeAttr('disabled');
-                    confModal.hide();
+                    confirmModal.hide();
 
                     succModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
