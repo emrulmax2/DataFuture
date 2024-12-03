@@ -171,7 +171,7 @@
                                     </form>
                                 </div>
                                 <div class="intro-y intro-y w-90 mx-auto my-3">
-                                    <select id="type" name="type" class="lccTom lcc-tom-select w-full  text-left">
+                                    <select id="type" name="typePaySlip" class="lccTom lcc-tom-select w-full  text-left">
                                         <option value="">Please Select Type</option>
                                         <option value="Payslips">Payslips</option>
                                         <option value="P45">P45</option>
@@ -191,7 +191,6 @@
                                 <div class="intro-y intro-y w-90 mx-auto my-3">
                                     <select id="holiday_month" name="holiday_month" class="lccTom lcc-tom-select w-full  text-left">
                                         <option value="">Please Select Month</option>
-                                       
                                     </select> 
                                     <div class="acc__input-error error-employee_work_type text-danger mt-2"></div>
                                 </div>

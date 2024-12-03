@@ -187,15 +187,13 @@ import Toastify from 'toastify-js';
                     '#synPaySlipModal [name="holiday_month"]'
                 ).val();
                 var payslips = $(
-                    '#synPaySlipModal [name="type_of_payslip"]'
+                    '#synPaySlipModal [name="typePaySlip"]'
                 ).val();
                 var holiday_year = $(
-                    '#synPaySlipModal [name="holiday_year"]'
+                    '#synPaySlipModal [name="holiday_year_id"]'
                 ).val();
                 if(payslips != 'Payslips' && holiday_year != '') {
                     
-                    $('#synPaySlipModal [name="holiday_month"]').val(payslips+'_'+holiday_year);
-
                     $('#synPaySlipModal [name="dir_name"]').val(
                         payslips+'_'+holiday_year
                     );
