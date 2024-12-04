@@ -20,6 +20,7 @@ use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanParticipant;
 use App\Models\PlansDateList;
+use App\Models\Result;
 use App\Models\ResultComparison;
 use App\Models\Room;
 use App\Models\Student;
@@ -329,10 +330,14 @@ class PlanTreeController extends Controller
                     $day = 'Fri';
                 }
                 $iActiveStudentCount = 0;
+                $studentDataSet = [];
                 $assignStudentListForPlans = Assign::where('plan_id',$list->id)->get();
-                foreach($assignStudentListForPlans as $student):
-                        if($student->attendance!==0)
+                foreach($assignStudentListForPlans as $assign):
+
+                        if($assign->attendance!==0) {
+                            $studentDataSet[] = $assign->student_id;
                             $iActiveStudentCount++;
+                        }
                 endforeach;
 
                 $tutorialSet = [];
@@ -346,7 +351,20 @@ class PlanTreeController extends Controller
 
                 $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
                 $assesmentPlanByTutorAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','personal_tutor')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
-                $SubmissionDone = isset($assesmentPlanByStaffAssesment->id) ?ResultComparison::where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->get()->first() : "No";
+                $resultData = [];
+                if(isset($assesmentPlanByStaffAssesment->id)) {
+                    $resultDataStudent = Result::whereIn('student_id',$studentDataSet)->where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->pluck('student_id')->unique()->toArray();
+                    $comparisonDataStudent = ResultComparison::where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->pluck('student_id')->unique()->toArray();
+                   // Get the missing student IDs
+                   $missingStudentIds = array_diff($resultDataStudent, $comparisonDataStudent);
+                   
+                    // Do something with the missing student IDs
+                    $SubmissionDone = count($missingStudentIds) <= 0 ? "Yes" : "No";
+                    
+                } else {
+                    $SubmissionDone = "No";
+                }
+
                 if((isset(auth()->user()->priv()['result_management_staff']) && auth()->user()->priv()['result_management_staff'] == 1)) {
                         $submissionAvailable = isset($assesmentPlanByStaffAssesment->course_module_base_assesment_id) && isset($assesmentPlanByTutorAssesment->course_module_base_assesment_id) && $assesmentPlanByStaffAssesment->course_module_base_assesment_id == $assesmentPlanByTutorAssesment->course_module_base_assesment_id ? 1 : 0;
                         $uploadAssesment= 1;
@@ -379,7 +397,7 @@ class PlanTreeController extends Controller
                     'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0),
                     'submissionAvailable' => $submissionAvailable,
                     'uploadAssesment' => $uploadAssesment,
-                    'submissionDone' => isset($SubmissionDone->publish_done) ? $SubmissionDone->publish_done : "No",
+                    'submissionDone' => isset($SubmissionDone) ? $SubmissionDone : "No",
                 ];
                 $i++;
             endforeach;
