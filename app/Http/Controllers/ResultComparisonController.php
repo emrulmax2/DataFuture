@@ -75,16 +75,16 @@ class ResultComparisonController extends Controller
         
         $AssessmentPlan = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','personal_tutor')->orderBy('created_at','DESC')->get()->first();
         
-        $resultComparison = ResultComparison::where('plan_id', $plan->id)->where('assessment_plan_id', $AssessmentPlanStaff->id)->get()->first();
+        $resultComparison = ResultComparison::where('plan_id', $plan->id)->where('assessment_plan_id', $AssessmentPlanStaff->id)->pluck('result_id')->toArray();
 
-        if(isset($resultComparison->id)) {
-            $resultIds = json_decode($resultComparison->result_Ids);
+        if(isset($resultComparison)) {
+            $resultIds = $resultComparison;
         } else {
             $resultIds = [];
         }
         $resultSet = [];
 
-        foreach($studentAssign as $key => $value){
+        foreach($studentAssign as $key => $value) {
 
             $resultSubmissionByStaff = ResultSubmissionByStaff::with('createdBy')
                             ->where('plan_id', $plan->id)
@@ -244,27 +244,27 @@ class ResultComparisonController extends Controller
                 }
             });
             if(isset($insertedIds) && count($insertedIds) > 0) {
-                $resultComparison = ResultComparison::where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->get()->first();
                 
-                $previousResultIds = isset($resultComparison->result_Ids) ? $resultComparison->result_Ids : json_encode([]);
-                $previousResultIds = json_decode($previousResultIds);
-                $insertedIds = array_merge($previousResultIds, $insertedIds);
-                $resultSet = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->pluck('id')->toArray();
-
-                $publishDone = count($resultSet) >= $studentListCount  ? "Yes" : "No";
-                
-                ResultComparison::updateOrCreate([
-                    'plan_id' => $plan_id,
-                    'assessment_plan_id' => $assessment_plan_id[1]
-                ],
-                [
-                    'plan_id' => $plan_id,
-                    'assessment_plan_id' => $assessment_plan_id[1],
-                    'result_Ids' => json_encode($insertedIds),
-                    'created_by' => $created_by,
-                    'updated_by' => $created_by,
-                    'publish_done' => $publishDone,
-                ]);
+                $resultSet = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->get();
+                $studentListResult = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->pluck('student_id')->unique()->toArray();
+                //dd($resultSet);
+                $publishDone = count($studentListResult) >= $studentListCount  ? "Yes" : "No";
+                foreach($resultSet as $result) {
+                    ResultComparison::updateOrCreate([
+                        'plan_id' => $plan_id,
+                        'assessment_plan_id' => $assessment_plan_id[1],
+                        'result_id' => $result->id
+                    ],
+                    [
+                        'plan_id' => $plan_id,
+                        'assessment_plan_id' => $assessment_plan_id[1],
+                        'result_id' => $result->id,
+                        'student_id' => $result->student_id,
+                        'created_by' => $created_by,
+                        'updated_by' => $created_by,
+                        'publish_done' => $publishDone,
+                    ]);
+                }
     
                 return $insertedIds;
             }
@@ -274,61 +274,6 @@ class ResultComparisonController extends Controller
         } else {
             return response()->json(['message' => 'Result could not be saved'], 302);
         }
-            // }elseif(is_array($request->input('grade_id')) && isset($ids)) {
-
-        //     $grade_id = $request->input('grade_id');
-        //     $plan_id = $request->input('plan_id');
-        //     $assessment_plan_id = $request->input('assessment_plan_id');
-        //     $paper_id = $request->input('paper_id');
-        //     $student_id = $request->input('student_id');
-        //     $published_at = $request->input('publish_at');
-        //     $published_time = $request->input('publish_time');
-        //     $created_by = Auth::user()->id;
-        //     $insert_schedule = [];
-        //     foreach($ids as $key => $id)
-        //     {
-        //         $result = Result::find($id);
-        //         //get the index number of selected row and pusht the data to the array
-        //         $index = array_search($result->student_id, $student_id);
-                
-        //         $data = array(
-        //                 'grade_id' => $grade_id[$index],
-        //                 'assessment_plan_id'  => $assessment_plan_id[$index],
-        //                 'student_id'  => $student_id[$index],
-        //                 'plan_id' =>$plan_id,
-        //                 'paper_id'=>$paper_id[$index],
-        //                 'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
-        //                 'created_by'  => $created_by,
-        //             );
-
-        //         $insert_schedule[] = $data; 
-        //     }
-        //     DB::transaction(function () use ($insert_schedule, &$insertedIds) {
-        //         foreach ($insert_schedule as $schedule) {
-        //             $insertedIds[] = Result::insertGetId($schedule);
-        //         }
-        //     });
-        //     $resultComparison = ResultComparison::where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[0])->get()->first();
-            
-        //     $previousResultIds = $resultComparison->result_Ids;
-        //     $previousResultIds = json_decode($previousResultIds);
-        //     $previousResultIds = array_diff($previousResultIds, $ids);
-        //     $insertedIds = array_merge($previousResultIds, $insertedIds);
-
-        //     ResultComparison::updateOrCreate([
-        //         'plan_id' => $plan_id,
-        //         'assessment_plan_id' => $assessment_plan_id[0]
-        //     ],
-        //     [
-        //         'plan_id' => $plan_id,
-        //         'assessment_plan_id' => $assessment_plan_id[0],
-        //         'result_Ids' => json_encode($insertedIds),
-        //         'created_by' => $created_by,
-        //         'updated_by' => $created_by,
-        //     ]);
-
-        //     return $insertedIds;
-        // }
 
     }
 

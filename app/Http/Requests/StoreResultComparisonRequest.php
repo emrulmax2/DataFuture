@@ -30,6 +30,8 @@ class StoreResultComparisonRequest extends FormRequest
             if ($this->has("id.$index")) {
                 
                 $rules["grade_id.$index"] = 'required|integer|exists:grades,id';
+                $rules["publish_at.$index"] = 'required|date';
+
             }
         }
         return $rules;
@@ -40,6 +42,7 @@ class StoreResultComparisonRequest extends FormRequest
     {
         return [
             'grade_id.*.required' => 'The grade ID is required when either the corresponding Serial or ID is selected.',
+            'publish_at.*.required' => 'The Publish date field is required.',
         ];
     }
 

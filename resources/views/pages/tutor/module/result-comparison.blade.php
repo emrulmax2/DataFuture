@@ -174,7 +174,7 @@
                                                             <input type="text" value="{{ $data['publish_at'] }}" placeholder="DD-MM-YYYY" id="publish_at" class="form-control datepicker flex-inline w-28" name="publish_at[{{ $serial }}]" data-format="DD-MM-YYYY" data-single-mode="true">
                                                             <input type="text" value="{{ $data['publish_time'] }}" placeholder="HH:MM" id="publish_time" class="theTimeField form-control flex-inline w-24" name="publish_time[{{ $serial }}]">
                                                         </div>
-                                                        <div  class="acc__input-error error-publish_at text-danger mt-2"></div>
+                                                        <div  class="acc__input-error error-publish_at-{{ $serial }} text-danger mt-2"></div>
                                                         @endif
                                                     </td>
                                                 </tr>
