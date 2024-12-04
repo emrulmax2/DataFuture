@@ -58,6 +58,11 @@
     </div>
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
         <li id="submission-tab" class="nav-item mr-5 " role="presentation">
+            <a href="{{ route('results-staff-submission.show',$plan->id) }} " class="nav-link py-4 inline-flex px-0" data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
+                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Submission
+            </a>
+        </li>
+        <li id="comparison-tab" class="nav-item mr-5 " role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
                 <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Comparison
             </a>
@@ -117,7 +122,7 @@
                                     </thead>
                                     <tbody>
                                             @php $serial=1; @endphp
-                                            
+                                            <input type="hidden" name="plan_id" value="{{ $plan->id }}" />
                                             @foreach ($resultSet as $key => $data)
                                                 @if($data['grade_matched'] == "Matched")
                                                     @php $studentClass="bg-success-100 text-success-600"; @endphp
@@ -127,30 +132,22 @@
                                                 @if($data['attendance'] ===0)
                                                     @php $studentClass="bg-orange-100 text-orange-600"; @endphp
                                                 @endif
+                                                @php
+                                                    $warningCheck = "transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-warning focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-warning [&[type='radio']]:checked:border-warning [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-warning [&[type='checkbox']]:checked:border-warning [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                                                    $primaryCheck ="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                                                    $checkboxCssClass = (isset($data['id'])) ? $warningCheck : $primaryCheck ; 
+                                                @endphp
                                                 <tr id="row{{ $serial }}" class="{{ $studentClass }}">
                                                     <td class="">
-                                                                <div data-tw-merge class="flex items-center">
-                                                                    @if($data['staff_given_grade'] != "N/A" && !isset($data['id']))
-                                                                        <input type="hidden" name="paper_id[]" value="{{ $data['paper_id'] }}" />
-                                                                        <input type="hidden" name="student_id[]" value="{{ $data['student_id'] }}" />
-                                                                        <input type="hidden" name="assessment_plan_id[]" value="{{ $data['assessment_plan_id'] }}" />
-                                                                        <input type="hidden" name="plan_id" value="{{ $plan->id }}" />
-                                                                        <input data-tw-merge type="checkbox" name="noId[]" class="fill-box transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-{{ $serial }}" value="{{ $data['student_id'] }}" />
-                                                                        <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
-                                                                    @elseif($data['staff_given_grade'] != "N/A")
-                                                                        
-                                                                        <input type="hidden" name="paper_id[]" value="{{ $data['paper_id'] }}" />
-                                                                        <input type="hidden" name="student_id[]" value="{{ $data['student_id'] }}" />
-                                                                        <input type="hidden" name="assessment_plan_id[]" value="{{ $data['assessment_plan_id'] }}" />
-                                                                        <input type="hidden" name="plan_id" value="{{ $plan->id }}" />
-                                                                        <input data-tw-merge type="checkbox" name="id[]" class="fill-box transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-warning [&[type='radio']]:checked:border-warning [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-warning [&[type='checkbox']]:checked:border-warning [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-{{ $data['id'] }}" value="{{ $data['id'] }}" />
-                                                                        <label data-tw-merge for="checkbox-switch-{{ $data['id'] }}" class="cursor-pointer ml-2">{{ $data['id'] }}</label>
-                                                                    @else
-                                                                        <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
-                                                                    @endif
-                                                                    
-                                                                </div>
-                                                           
+                                                        <div data-tw-merge class="flex items-center">
+                                                            <input type="hidden" name="paper_id[{{ $serial }}]" value="{{ $data['paper_id'] }}" />
+                                                            <input type="hidden" name="student_id[{{ $serial }}]" value="{{ $data['student_id'] }}" />
+                                                            <input type="hidden" name="assessment_plan_id[{{ $serial }}]" value="{{ $data['assessment_plan_id'] }}" />
+                                                            <input type="hidden" name="result_id[{{ $serial }}]" value="{{ isset($data['id']) ? $data['id'] : '' }}" />
+                                                            <input data-tw-merge type="checkbox" {{ ($data['attendance']===null || $data['attendance']===1) ? '' : 'disabled' }} name="id[{{ $serial }}]" 
+                                                            class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ isset($data['id']) ? $data['id'] : $serial }}" />
+                                                            <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ isset($data['id']) ? $data['id'] : $serial }}</label>
+                                                        </div>
                                                     </td>
                                                     <td class="">{{ $data['registration_no'] }}</td>
                                                     <td class="">{{ $data['full_name']}}</td>
@@ -160,7 +157,7 @@
                                                     <td class="">{{ $data['tutor_given_grade'] }}</td>
                                                     <td class="">
                                                         @if($data['attendance'] !==0)
-                                                        <select id="grade_id" class="lccTom lcc-tom-select w-full" name="grade_id[]">
+                                                        <select id="grade_id" class="lccTom lcc-tom-select w-full" name="grade_id[{{ $serial }}]">
                                                             <option value="" selected>Please Select</option>
                                                             @if(!empty($grades))
                                                                 @foreach($grades as $grade)
@@ -168,16 +165,16 @@
                                                                 @endforeach 
                                                             @endif 
                                                         </select>
-                                                        <div class="acc__input-error error-grade_id text-danger mt-2"></div>
+                                                        <div class="acc__input-error error-grade_id-{{ $serial }} text-danger mt-2"></div>
                                                         @endif
                                                     </td>
                                                     <td class="">
                                                         @if($data['attendance'] !==0)
                                                         <div class="flex">
-                                                            <input type="text" value="{{ $data['publish_at'] }}" placeholder="DD-MM-YYYY" id="publish_at" class="form-control datepicker flex-inline w-28" name="publish_at[]" data-format="DD-MM-YYYY" data-single-mode="true">
-                                                            <input type="text" value="{{ $data['publish_time'] }}" placeholder="HH:MM" id="publish_time" class="theTimeField form-control flex-inline w-24" name="publish_time[]">
+                                                            <input type="text" value="{{ $data['publish_at'] }}" placeholder="DD-MM-YYYY" id="publish_at" class="form-control datepicker flex-inline w-28" name="publish_at[{{ $serial }}]" data-format="DD-MM-YYYY" data-single-mode="true">
+                                                            <input type="text" value="{{ $data['publish_time'] }}" placeholder="HH:MM" id="publish_time" class="theTimeField form-control flex-inline w-24" name="publish_time[{{ $serial }}]">
                                                         </div>
-                                                        <div class="acc__input-error error-publish_at text-danger mt-2"></div>
+                                                        <div  class="acc__input-error error-publish_at text-danger mt-2"></div>
                                                         @endif
                                                     </td>
                                                 </tr>

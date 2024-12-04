@@ -231,7 +231,8 @@ var classPlanTreeListTable = (function () {
                             : false;
                         var submissionAvailable = cell.getData().submissionAvailable;
                         var uploadAssesment = cell.getData().uploadAssesment;
-                        console.log(submissionAvailable)
+                        var SubmissionDone = cell.getData().submissionDone;
+                        
                         var btns = '';
                         if (cell.getData().deleted_at == null) {
                             btns +=
@@ -247,15 +248,22 @@ var classPlanTreeListTable = (function () {
                                     '" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
                             }
                             if(uploadAssesment==1) {
+                                let btnColor = '';
+                                if(SubmissionDone=="Yes") {
+                                    btnColor = 'btn-success';
+                                }else {
+                                    btnColor = 'btn-pending';
+                                }
                             btns +=
                                 '<a href="' +
                                 route(
                                     'results-staff-submission.show',
                                     cell.getData().id
                                 ) +
-                                '" type="button" class=" btn-round btn btn-pending text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Upload Submission</a>';
+                                '" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Upload Submission</a>';
                             }
                             if(submissionAvailable==1) {
+                                if(SubmissionDone!="Yes") {
                                 btns +=
                                     '<a href="' +
                                     route(
@@ -263,6 +271,7 @@ var classPlanTreeListTable = (function () {
                                         cell.getData().id
                                     ) +
                                     '" type="button" class=" btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
+                                }
                             }
                             //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
                         } else if (cell.getData().deleted_at != null) {

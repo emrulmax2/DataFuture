@@ -60,6 +60,19 @@
                 <tbody>
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
+                    @php
+                        $employeeFound = 0;
+                        $employeeList =Employee::all();
+                        foreach($employeeList as $employee) {
+                            
+                            if($paySlip->file_name == $fileName && $paySlip->employe_id != null) {
+        
+                                $employeeFound = $pay->employe_id;
+                                break;
+                            }
+                            
+                        }
+                    @endphp
                         <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
