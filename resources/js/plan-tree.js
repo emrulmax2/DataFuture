@@ -249,10 +249,13 @@ var classPlanTreeListTable = (function () {
                             }
                             if(uploadAssesment==1) {
                                 let btnColor = '';
+                                let btnText = '';
                                 if(SubmissionDone=="Yes") {
                                     btnColor = 'btn-success';
+                                    btnText = 'View Result';
                                 }else {
                                     btnColor = 'btn-pending';
+                                    btnText = 'Upload Submission';
                                 }
                             btns +=
                                 '<a href="' +
@@ -260,7 +263,7 @@ var classPlanTreeListTable = (function () {
                                     'results-staff-submission.show',
                                     cell.getData().id
                                 ) +
-                                '" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Upload Submission</a>';
+                                '" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
                             }
                             if(submissionAvailable==1) {
                                 if(SubmissionDone!="Yes") {
