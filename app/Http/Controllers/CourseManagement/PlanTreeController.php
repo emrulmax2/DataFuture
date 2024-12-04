@@ -20,6 +20,7 @@ use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanParticipant;
 use App\Models\PlansDateList;
+use App\Models\ResultComparison;
 use App\Models\Room;
 use App\Models\Student;
 use App\Models\TermDeclaration;
@@ -345,7 +346,7 @@ class PlanTreeController extends Controller
 
                 $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
                 $assesmentPlanByTutorAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','personal_tutor')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
-               
+                $SubmissionDone = isset($assesmentPlanByStaffAssesment->id) ?ResultComparison::where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->get()->first() : "No";
                 if((isset(auth()->user()->priv()['result_management_staff']) && auth()->user()->priv()['result_management_staff'] == 1)) {
                         $submissionAvailable = isset($assesmentPlanByStaffAssesment->course_module_base_assesment_id) && isset($assesmentPlanByTutorAssesment->course_module_base_assesment_id) && $assesmentPlanByStaffAssesment->course_module_base_assesment_id == $assesmentPlanByTutorAssesment->course_module_base_assesment_id ? 1 : 0;
                         $uploadAssesment= 1;
@@ -378,6 +379,7 @@ class PlanTreeController extends Controller
                     'child_id' => (isset($list->tutorial->id) && $list->tutorial->id > 0 ? $list->tutorial->id : 0),
                     'submissionAvailable' => $submissionAvailable,
                     'uploadAssesment' => $uploadAssesment,
+                    'submissionDone' => isset($SubmissionDone->publish_done) ? $SubmissionDone->publish_done : "No",
                 ];
                 $i++;
             endforeach;

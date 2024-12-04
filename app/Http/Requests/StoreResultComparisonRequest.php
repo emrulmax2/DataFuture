@@ -23,19 +23,23 @@ class StoreResultComparisonRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            "student_id"=> 'required|array',
-            "assessment_plan_id"=> 'required|array',
-            'noId.*' => 'nullable',
-            'id.*' => 'nullable',
-            'grade_id.*' => 'required_with:noId.*,id.*',
-        ];
+        $rules = [];
+
+        // Loop through the inputs to add conditional rules
+        foreach ($this->input('id', []) as $index => $value) {
+            if ($this->has("id.$index")) {
+                
+                $rules["grade_id.$index"] = 'required|integer|exists:grades,id';
+            }
+        }
+        return $rules;
+        
     }
 
     public function messages()
     {
         return [
-            'grade_id.*.required_with' => 'The grade ID is required when either Serial or ID is selected.',
+            'grade_id.*.required' => 'The grade ID is required when either the corresponding Serial or ID is selected.',
         ];
     }
 

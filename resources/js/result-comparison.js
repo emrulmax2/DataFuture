@@ -184,7 +184,7 @@ var submissionTable = (function () {
         var checked = $(this).is(':checked');
         let selectCount = 0;
         if (checked) {
-            $.each($('.fill-box'), function () {
+            $.each($('.fill-box:not(:disabled)'), function () {
                 $(this).prop('checked', true);
                 selectCount++;
             });
@@ -194,7 +194,7 @@ var submissionTable = (function () {
             $('.savedSubmission').removeClass('hidden');
             $('.updateSubmission').removeClass('hidden');
         } else {
-            $.each($('.fill-box'), function () {
+            $.each($('.fill-box:not(:disabled)'), function () {
                 $(this).prop('checked', false);
             });
 
@@ -430,8 +430,19 @@ var submissionTable = (function () {
 
                         // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
                         let keyWithoutIndex = key.replace(/\.\d+/, '');
-                        $(`#resultComparisonForm .${keyWithoutIndex}`).addClass('border-danger')
-                        $(`#resultComparisonForm  .error-${keyWithoutIndex}`).eq(index).html(val)
+                        $(`#resultComparisonForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#resultComparisonForm  .error-${keyWithoutIndex}-${index}`).html(val)
+                    }
+                }else if (error.response.status == 302) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        // Extract the index from the key (e.g., employee_id.0 -> 0)
+                        let indexMatch = key.match(/\d+/);
+                        let index = indexMatch ? indexMatch[0] : '';
+
+                        // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
+                        let keyWithoutIndex = key.replace(/\.\d+/, '');
+                        $(`#resultComparisonForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#resultComparisonForm  .error-${keyWithoutIndex}-${index}`).html(val)
                     }
                 } else {
                     console.log('resultComparisonForm error', error.response.data);

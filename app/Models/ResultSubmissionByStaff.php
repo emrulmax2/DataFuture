@@ -16,6 +16,7 @@ class ResultSubmissionByStaff extends Model
         'student_course_relation_id',
         'assessment_plan_id',
         'grade_id',
+        'paper_id',
         'module_creation_id',
         'is_excel_missing',
         'is_it_final',

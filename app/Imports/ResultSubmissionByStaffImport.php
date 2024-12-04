@@ -52,7 +52,6 @@ class ResultSubmissionByStaffImport implements ToModel, WithHeadingRow
 
         $studentUserId = StudentUser::where('email', $row["email"])->get()->first();
             if($studentUserId!=null){
-                
                 $student = Student::where('student_user_id',$studentUserId->id)->get()->first();
                 if($row['grade'] == '' && $row['paper_id'] == ""){
                     $row['grade'] = 'A';

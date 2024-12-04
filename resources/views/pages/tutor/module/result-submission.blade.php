@@ -65,8 +65,16 @@
                 <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Submission
             </a>
         </li>
+        @if($submissionAssessment->count()>0)
+        <li id="comparison-tab" class="nav-item mr-5 " role="presentation">
+            <a href="{{ route('result.comparison',$plan->id) }}" class="nav-link py-4 inline-flex px-0" >
+                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Comparison
+            </a>
+        </li>
+        @endif
     </ul>
 </div>
+
 <div class="intro-y tab-content mt-5">
 
     <div id="submission"  class="tab-pane active" role="tabpanel"  aria-labelledby="submission-tab">
