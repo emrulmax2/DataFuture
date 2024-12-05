@@ -75,7 +75,7 @@
                                     @php
                                     if(isset($submission->published_at) && !empty($submission->published_at)):
                                         $submission->published_at =  $submission->published_at; //->format('js M y h:i A');
-                                        $publishDate = \Carbon\Carbon::parse($submission->published_at)->format('jS M y h:i A');
+                                        $publishDate = \Carbon\Carbon::parse($submission->published_at)->format('jS M y H:i');
                                         
                                         $published_at = $publishDate;
                                     else:
