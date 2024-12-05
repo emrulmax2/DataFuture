@@ -38,6 +38,7 @@ class ResultComparisonController extends Controller
     public function index(Request $request, Plan $plan)
     {
  
+       
         $moduleCreation = ModuleCreation::find($plan->module_creation_id);
         
         $assessmentlist = $moduleCreation->module->assesments;
@@ -69,13 +70,40 @@ class ResultComparisonController extends Controller
                 'tutor'=> ($tutor->full_name) ?? null,           
                 'personalTutor'=> ($personalTutor->full_name) ?? null,           
             ];
+        $studentSet =    $studentAssign->pluck('student_id')->toArray();
+
+
+        // $maxAssessmentPlanId = AssessmentPlan::where('upload_user_type', 'staff')
+        //     ->where('plan_id', $plan->id)
+        //     ->whereNotNull('published_at')
+        //     //->where('course_module_base_assesment_id', $module_assessment)
+        //     ->max('id');
+
         
+        // dd($resultComparisons);
         $AssessmentPlanStaff = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get()->first();
         
-        
+        // $AssessmentPlanStaffPrevious = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')
+        //                                 ->where('course_module_base_assesment_id', $AssessmentPlanStaff->course_module_base_assesment_id)
+        //                                 ->orderBy('created_at','DESC')
+        //                                 ->skip(1)
+        //                                 ->take(1)
+        //                                 ->first();
+
+        // $resultOldComparisons = ResultComparison::where('plan_id', $plan->id)
+        //     ->where('publish_done', 'Yes')
+        //     ->whereHas('assessmentPlan', function($query) use ($AssessmentPlanStaffPrevious) {
+        //         $query->where('id', $AssessmentPlanStaffPrevious->id);
+        //     })
+        //     ->pluck('student_id')->unique()->toArray();
+
         $AssessmentPlan = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','personal_tutor')->orderBy('created_at','DESC')->get()->first();
         
         $resultComparison = ResultComparison::where('plan_id', $plan->id)->where('assessment_plan_id', $AssessmentPlanStaff->id)->pluck('result_id')->toArray();
+
+
+
+        //$resultComparison = array_diff($resultOldComparisons, $resultComparison);
 
         if(isset($resultComparison)) {
             $resultIds = $resultComparison;
@@ -85,7 +113,6 @@ class ResultComparisonController extends Controller
         $resultSet = [];
 
         foreach($studentAssign as $key => $value) {
-
             $resultSubmissionByStaff = ResultSubmissionByStaff::with('createdBy')
                             ->where('plan_id', $plan->id)
                             ->where('student_id', $value->student->id)

@@ -64,4 +64,8 @@ class Result extends Model
         return (!empty($value) ? date('d-m-Y H:i', strtotime($value)) : '');
     }
 
+    public function assessmentPlan() {
+        return $this->belongsTo(AssessmentPlan::class,'assessment_plan_id');
+    }
+
 }
