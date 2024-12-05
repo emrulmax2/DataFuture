@@ -35,7 +35,7 @@ use Illuminate\Support\Facades\DB;
 
 class ResultComparisonController extends Controller
 {
-    public function index(Request $request, Plan $plan)
+    public function index(Request $request, Plan $plan,$module_assessment=null)
     {
  
        
