@@ -31,6 +31,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
+use Google\Service\CloudAsset\Asset;
 use Illuminate\Support\Facades\DB;
 
 class ResultComparisonController extends Controller
@@ -82,6 +83,7 @@ class ResultComparisonController extends Controller
         
         // dd($resultComparisons);
         $AssessmentPlanStaff = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get()->first();
+        $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get();
         
         // $AssessmentPlanStaffPrevious = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')
         //                                 ->where('course_module_base_assesment_id', $AssessmentPlanStaff->course_module_base_assesment_id)
@@ -204,7 +206,7 @@ class ResultComparisonController extends Controller
             'AssessmentPlan' => $AssessmentPlanStaff,
             'grades' => Grade::all(),
             'resultIds' => $resultIds,
-
+            'submissionAssessment' => $submissionAssessment,
         ]);
        
         

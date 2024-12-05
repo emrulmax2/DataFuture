@@ -221,12 +221,14 @@ class ResultSubmissionByStaffController extends Controller
             $studentIds = Assign::where('plan_id', $plan->id)->where(function($q){
                 $q->where('attendance', 1)->orWhereNull('attendance');
             })->pluck('student_id')->toArray();
-
+            
             // compare and get the missing stuedents
             $missingStudents = array_diff($studentIds, $submittedStudents);
-            $resultStudents = Result::whereIn('student_id', $missingStudents)->where('assessment_plan_id',$assessmentPlan->id)->where('plan_id', $plan->id)->get();
-            $studentFounds = $resultStudents->pluck('student_id')->toArray();
-            $missingStudents = array_diff($studentFounds, $missingStudents);
+            
+            $resultStudents = Result::whereIn('student_id', $missingStudents)->where('assessment_plan_id',$assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
+            
+            $missingStudents = array_diff($missingStudents, $resultStudents);
+            
             sort($missingStudents);
             // if($resultStudents->count()>0) {
             //     foreach($resultStudents as $result) {
