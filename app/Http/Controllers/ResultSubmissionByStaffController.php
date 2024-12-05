@@ -24,6 +24,7 @@ use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
 use App\Models\Result;
+use App\Models\ResultComparison;
 use App\Models\ResultSubmission;
 use App\Models\ResultSubmissionByStaff;
 use App\Models\SmsTemplate;
@@ -217,6 +218,16 @@ class ResultSubmissionByStaffController extends Controller
 
             $assessmentPlan->is_it_final = 1;
             $assessmentPlan->save();
+
+            $allAssessmentPlan = AssessmentPlan::where('course_module_base_assesment_id', $courseMoudleBaseAssessment)
+            ->where('upload_user_type', 'staff')
+            ->where('plan_id', $plan->id)
+            ->where('is_it_final',1)
+            ->orderBy('created_at', 'DESC')
+            ->pluck('id')->toArray();
+
+            $resultComparison = ResultComparison::whereIn('assessment_plan_id', $allAssessmentPlan)->pluck('student_id')->unique()->toArray();
+
             $submittedStudents = ResultSubmissionByStaff::where('assessment_plan_id', $assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
             $studentIds = Assign::where('plan_id', $plan->id)->where(function($q){
                 $q->where('attendance', 1)->orWhereNull('attendance');
@@ -224,33 +235,16 @@ class ResultSubmissionByStaffController extends Controller
             
             // compare and get the missing stuedents
             $missingStudents = array_diff($studentIds, $submittedStudents);
-            
-            $resultStudents = Result::whereIn('student_id', $missingStudents)->where('assessment_plan_id',$assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
-            
-            $missingStudents = array_diff($missingStudents, $resultStudents);
+
+            if(isset( $resultComparison) && count($resultComparison) > 0){
+                $missingStudents = array_diff($missingStudents, $resultComparison);
+            } else {
+                $resultStudents = Result::whereIn('student_id', $missingStudents)->where('assessment_plan_id',$assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
+                $missingStudents = array_diff($missingStudents, $resultStudents);
+            }
             
             sort($missingStudents);
-            // if($resultStudents->count()>0) {
-            //     foreach($resultStudents as $result) {
-                    
-            //         $student = Student::find($result->student_id);
-            //         $resultSubmission = new ResultSubmissionByStaff();
-            //         $resultSubmission->assessment_plan_id = $assessmentPlan->id;
-            //         $resultSubmission->plan_id = $plan->id;
-            //         $resultSubmission->student_id = $student->id;
-            //         $resultSubmission->student_course_relation_id = $student->crel->id;
-            //         $resultSubmission->grade_id = $result->grade->id;
-            //         $resultSubmission->is_student_matched = 1;
-            //         $resultSubmission->is_excel_missing = 1;
-            //         $resultSubmission->is_it_final = 1;
-            //         $resultSubmission->module_creation_id = $plan->module_creation_id;
-            //         $resultSubmission->module_code = $plan->creations->code;
-            //         $resultSubmission->upload_user_type = 'staff';
-            //         $resultSubmission->created_by = Auth::id();
-            //         $resultSubmission->save();
-                
-            //     }
-            // } else 
+            
             if(count($missingStudents) > 0) {
                 // add those missing student to the result submission table
                 foreach($missingStudents as $studentId) {
