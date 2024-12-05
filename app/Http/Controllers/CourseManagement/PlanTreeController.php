@@ -350,18 +350,25 @@ class PlanTreeController extends Controller
                 endif;
 
                 $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
+                $getAllAssessmentPlan = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->pluck('id')->toArray();
                 $assesmentPlanByTutorAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','personal_tutor')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
                 $resultData = [];
                 if(isset($assesmentPlanByStaffAssesment->id)) {
-                    $resultDataStudent = Result::whereIn('student_id',$studentDataSet)->where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->pluck('student_id')->unique()->toArray();
-                    $comparisonDataStudent = ResultComparison::where('assessment_plan_id', $assesmentPlanByStaffAssesment->id)->where('plan_id',$list->id)->pluck('student_id')->unique()->toArray();
+                    
+                    $resultDataStudent = Result::whereIn('student_id',$studentDataSet)
+                    ->whereIn('assessment_plan_id', $getAllAssessmentPlan)->where('plan_id',$list->id)->pluck('student_id')->unique()->toArray();
+                    
+                    $studentIds = Assign::where('plan_id', $list->id)->where(function($q){
+                        $q->where('attendance', 1)->orWhereNull('attendance');
+                    })->pluck('student_id')->toArray();
                    // Get the missing student IDs
-                   $missingStudentIds = array_diff($resultDataStudent, $comparisonDataStudent);
+                   $missingStudentIds = array_diff($studentIds,$resultDataStudent);
                    
                     // Do something with the missing student IDs
                     $SubmissionDone = count($missingStudentIds) <= 0 ? "Yes" : "No";
                     
                 } else {
+
                     $SubmissionDone = "No";
                 }
 

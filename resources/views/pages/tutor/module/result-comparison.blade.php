@@ -59,13 +59,38 @@
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
         <li id="submission-tab" class="nav-item mr-5 " role="presentation">
             <a href="{{ route('results-staff-submission.show',$plan->id) }} " class="nav-link py-4 inline-flex px-0" data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
-                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Submission
+                <i data-lucide="files" class="w-4 h-4 mr-2  mt-1"></i> Result Submission
             </a>
         </li>
         <li id="comparison-tab" class="nav-item mr-5 " role="presentation">
-            <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
-                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Comparison
-            </a>
+            <div class="nav-link py-4 inline-flex px-0 align-center active">
+                <div class="dropdown" id="uploadsDropdown">
+                    <button class="dropdown-toggle btn-sm btn-default border-none; shadow-none flex py-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Result Comparison <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                    <div class="dropdown-menu w-72">
+                        <ul class="dropdown-content">
+                            <li><h6 class="dropdown-header">View Submission List</h6></li>
+                            <li><hr class="dropdown-divider mt-0"></li>
+                            @if($submissionAssessment->count() > 0)
+                                @foreach ($submissionAssessment as $key => $submission)
+                                
+                                    <li>
+                                        <div class="form-check dropdown-item">
+                                            <a href="{{ route('result.comparison',$submission->plan_id) }}" class="inline-flex items-center cursor-pointer" for="employee_doc_{{ $submission->plan_id }}"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> {{  $submission->courseModuleBase->assesment_code }}- {{  $submission->courseModuleBase->assesment_name }}</a>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            @else 
+                                <li>
+                                    <div class="alert alert-pending-soft show flex items-top mb-1 mt-1" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are no Data found!
+                                    </div>
+                                </li>
+                            @endif
+                            
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </li>
     </ul>
 </div>

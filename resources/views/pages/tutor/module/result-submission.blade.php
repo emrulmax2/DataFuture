@@ -62,13 +62,13 @@
     <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
         <li id="submission-tab" class="nav-item mr-5 " role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#submission" aria-controls="submission" aria-selected="true" role="tab" >
-                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Submission
+                <i data-lucide="files" class="w-4 h-4 mr-2  mt-1"></i> Result Submission
             </a>
         </li>
         @if($submissionAssessment->count()>0)
         <li id="comparison-tab" class="nav-item mr-5 " role="presentation">
             <a href="{{ route('result.comparison',$plan->id) }}" class="nav-link py-4 inline-flex px-0" >
-                <i data-lucide="files" class="w-4 h-4 mr-2"></i> Result Comparison
+                <i data-lucide="plus-circle" class="w-4 h-4 mr-2 mt-1"></i> Result Comparison
             </a>
         </li>
         @endif
