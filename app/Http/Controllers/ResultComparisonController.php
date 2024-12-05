@@ -82,7 +82,12 @@ class ResultComparisonController extends Controller
 
         
         // dd($resultComparisons);
-        $AssessmentPlanStaff = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get()->first();
+        if(isset($module_assessment)) {
+            $AssessmentPlanStaff = AssessmentPlan::find($module_assessment);
+        } else {
+            $AssessmentPlanStaff = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get()->first();
+        }
+        
         $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get();
         
         // $AssessmentPlanStaffPrevious = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')

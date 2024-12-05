@@ -72,10 +72,19 @@
                             <li><hr class="dropdown-divider mt-0"></li>
                             @if($submissionAssessment->count() > 0)
                                 @foreach ($submissionAssessment as $key => $submission)
-                                
+                                    @php
+                                    if(isset($submission->published_at) && !empty($submission->published_at)):
+                                        $submission->published_at =  $submission->published_at; //->format('js M y h:i A');
+                                        $publishDate = \Carbon\Carbon::parse($submission->published_at)->format('jS M y h:i A');
+                                        
+                                        $published_at = $publishDate;
+                                    else:
+                                    $published_at = "Not Published";
+                                    endif;
+                                    @endphp
                                     <li>
                                         <div class="form-check dropdown-item">
-                                            <a href="{{ route('result.comparison',$submission->plan_id) }}" class="inline-flex items-center cursor-pointer" for="employee_doc_{{ $submission->plan_id }}"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> {{  $submission->courseModuleBase->assesment_code }}- {{  $submission->courseModuleBase->assesment_name }}</a>
+                                            <a href="{{ route('result.comparison',[$submission->plan_id,$submission->id]) }}" class="inline-flex items-center cursor-pointer" for="employee_doc_{{ $submission->plan_id }}"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> {{  $submission->courseModuleBase->assesment_code }}- {{  $submission->courseModuleBase->assesment_name }} - {{ $published_at }}</a>
                                         </div>
                                     </li>
                                 @endforeach
