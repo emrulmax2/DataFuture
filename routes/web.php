@@ -2692,7 +2692,7 @@ Route::middleware('auth')->group(function() {
 
     
     Route::controller(ResultComparisonController::class)->group(function() {
-        Route::get('result-comparison/{plan}', 'index')->name('result.comparison'); 
+        Route::get('result-comparison/{plan}/{module_assessment?}', 'index')->name('result.comparison'); 
         // Route::get('result-comparison/list', 'list')->name('result.comparison.list'); 
         Route::post('result-comparison/{plan}/store', 'store')->name('result.comparison.store');
         // Route::get('result-comparison/edit/{id}', 'edit')->name('result.comparison.edit');

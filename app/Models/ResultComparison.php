@@ -9,4 +9,9 @@ class ResultComparison extends Model
 {
     use HasFactory;
     protected $guarded = [ "id" ];
+
+    public function assessmentPlan(){
+        
+        return $this->belongsTo(AssessmentPlan::class);
+    }
 }
