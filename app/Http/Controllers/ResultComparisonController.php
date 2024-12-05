@@ -282,7 +282,7 @@ class ResultComparisonController extends Controller
                 $resultSet = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->get();
                 $studentListResult = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->pluck('student_id')->unique()->toArray();
                 //dd($resultSet);
-                $publishDone = count($studentListResult) >= $studentListCount  ? "Yes" : "No";
+                $publishDone =  "Yes";
                 foreach($resultSet as $result) {
                     ResultComparison::updateOrCreate([
                         'plan_id' => $plan_id,
