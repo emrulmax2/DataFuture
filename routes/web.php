@@ -2633,6 +2633,7 @@ Route::middleware('auth')->group(function() {
         Route::get('result-index/{assessmentPlan}', 'index')->name('result.index'); 
         //Route::post('result/update-all', 'updateAll')->name('result.update.all');
         
+        Route::delete('result/{id}/delete', 'destroy')->name('result.delete');
         Route::post('result/resubmit', 'resubmit')->name('result.resubmit');
         Route::post('result/resubmit-all', 'resubmitAll')->name('result.resubmit.all');
         Route::post('result/{id}/restore', 'restore')->name('result.restore');
@@ -2688,6 +2689,7 @@ Route::middleware('auth')->group(function() {
         Route::get('staff-sample-download-excel/{plan}', 'sampleDownload')->name('results-staff-submission.sample.download');
         
         Route::post('staff-result-submission/{plan}/final', 'finalSubmission')->name('results-staff-submission.final');
+        
     }); 
 
     
@@ -2697,7 +2699,7 @@ Route::middleware('auth')->group(function() {
         Route::post('result-comparison/{plan}/store', 'store')->name('result.comparison.store');
         // Route::get('result-comparison/edit/{id}', 'edit')->name('result.comparison.edit');
         Route::post('result-comparison/{plan}/update', 'update')->name('result.comparison.update');
-        // Route::delete('result-comparison/delete/{id}', 'destroy')->name('result.comparison.destory');
+        Route::post('result-comparison/{plan}/delete', 'deleteResultBulk')->name('result.comparison.deleteAll');
         // Route::post('result-comparison/restore/{id}', 'restore')->name('result.comparison.restore');
     });
 

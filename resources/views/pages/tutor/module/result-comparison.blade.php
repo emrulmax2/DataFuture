@@ -134,8 +134,7 @@
                                     <div class="mt-3 error-students">TEST TDATA</div>
                                 </div>
                             </div>
-                                @if($studentAssign->count() > 0)
-                                
+                            @if($studentAssign->count() > 0)
                                 <table class="table border-none">
                                     <thead>
                                         <tr class="bg-slate-100">
@@ -234,9 +233,9 @@
                                         </tr>
                                     </tfoot>
                                 </table>
-                                @else
+                            @else
                                 <div class="text-center w-full text-xl">No Submission Found</div>
-                                @endif
+                            @endif
                         </div>
                     </div>
             </div>

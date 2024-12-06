@@ -274,6 +274,14 @@ var submissionTableTutor = (function () {
         'uploadSubmissionDocumentModal'
     );
 
+    const confirmDeleteModal = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#confirmDeleteModal')
+    );
+    
+    const confirmModalSingle = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#confirmModalSingle')
+    );
+    
     /* Start Dropzone */
     if ($('#uploadDocumentForm').length > 0) {
         let dzError = false;
@@ -528,35 +536,41 @@ var submissionTableTutor = (function () {
             $.each($('.fill-box'), function () {
                 $(this).prop('checked', true);
             });
-            $('#savedSubmission').removeClass('hidden');
+            $('#deleteBtnAll').removeClass('hidden');
         } else {
             $.each($('.fill-box'), function () {
                 $(this).prop('checked', false);
             });
 
-            $('#savedSubmission').addClass('hidden');
+            $('#deleteBtnAll').addClass('hidden');
         }
     });
 
-    $('#savedSubmission').on('click', function () {
+    $('#deleteBtnAll').on('click', function () {
         $('div.append-input').html('');
         $.each($('.fill-box'), function () {
             let tthis = $(this);
+            let planAssessment = tthis.data('assessment_plan_id');
             if (tthis.is(':checked')) {
-                $('#resultFinalForm div.append-input').append(
+                $('#resultDeleteAllForm div.append-input').append(
                     "<input type='hidden' name='ids[]' value='" +
                         tthis.val() +
+                        "'>"
+                );
+                $('#resultDeleteAllForm div.append-second').append(
+                    "<input type='hidden' name='assessment_plan_ids[]' value='" +
+                    planAssessment +
                         "'>"
                 );
             }
         });
     });
 
-    $('#resultFinalForm').on('submit', function (e) {
+    $('#resultDeleteAllForm').on('submit', function (e) {
         e.preventDefault();
-        let planId = $("#resultFinalForm [name='plan_id']").val();
+        let planId = $("#resultDeleteAllForm [name='plan_id']").val();
 
-        const form = document.getElementById('resultFinalForm');
+        const form = document.getElementById('resultDeleteAllForm');
         let form_data = new FormData(form);
 
         $('.update').attr('disabled', 'disabled');
@@ -564,7 +578,7 @@ var submissionTableTutor = (function () {
 
         axios({
             method: 'post',
-            url: route('results-staff-submission.final', planId),
+            url: route('result.comparison.deleteAll', planId),
             data: form_data,
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -574,17 +588,16 @@ var submissionTableTutor = (function () {
                 if (response.status == 200) {
                     $('.update').removeAttr('disabled', 'disabled');
                     $('.update svg').addClass('hidden');
-                    finalConfirmUploadTask.hide();
-
+                    confirmDeleteModal.hide();
                     successModal.show();
                     document
                         .getElementById('successModal')
                         .addEventListener('shown.tw.modal', function (event) {
                             $('#successModal .successModalTitle').html(
-                                'Congratulations!'
+                                'Delete Done'
                             );
                             $('#successModal .successModalDesc').html(
-                                'Academic years data successfully updated.'
+                                'Data Deleted successfully.'
                             );
                         });
 
@@ -616,5 +629,70 @@ var submissionTableTutor = (function () {
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
                 $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
             });
+    });
+
+    $('.delete_btn').on('click',function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let url = $statusBTN.attr('data-url');
+
+        confirmModalSingle.show();
+
+        document.getElementById('confirmModalSingle').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModalSingle .confModTitle').html('Are you sure?');
+            $('#confirmModalSingle .confModDesc').html('Do you really want to delete these record? If yes, the please click on agree btn.');
+            $('#confirmModalSingle .agreeWith').attr('data-id', rowID);
+            $('#confirmModalSingle .agreeWith').attr('data-action', 'DELETE');
+            $('#confirmModalSingle .agreeWith').attr('data-url', url);
+        });
+
+    });
+
+    $('#confirmModalSingle .agreeWith').on('click', function () {
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+        let type = $statusBTN.attr('data-url');
+        let action = $statusBTN.attr('data-action');
+        let url = "";
+        if(type=="staff") {
+            url =route('results-staff-submission.destroy',rowID)
+        } else if(type="result") {
+            url =route('result.delete',rowID)
+        }else {
+            url =route('result-submission.destroy',rowID) 
+        }
+
+        if (action == 'DELETE') {
+            axios({
+                method: "delete",
+                url: url,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            })
+                .then((response) => {
+                    if (response.status == 200) {
+                        
+                        confirmModalSingle.hide();
+                        successModal.show();
+                        document
+                            .getElementById('successModal')
+                            .addEventListener('shown.tw.modal', function (event) {
+                                $('#successModal .successModalTitle').html(
+                                    'Delete Done'
+                                );
+                                $('#successModal .successModalDesc').html(
+                                    'Data Deleted successfully.'
+                                );
+                            });
+
+                        setTimeout(function () {
+                            successModal.hide();
+                            window.location.reload();
+                        }, 3000);
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
     });
 })();

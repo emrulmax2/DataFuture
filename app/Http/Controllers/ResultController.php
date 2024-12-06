@@ -509,10 +509,12 @@ class ResultController extends Controller
      * @param  \App\Models\Result  $result
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Result $result)
+    public function destroy($id)
     {
-        
+        $result = Result::find($id);
         $result->delete();
+
+        return response()->json(['message' => 'Result successfully deleted.'], 200);
     }
 
     public function destroyByAssessmentPlan(AssessmentPlan $assessmentPlan)

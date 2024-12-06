@@ -79,7 +79,7 @@
 
     <div id="submission"  class="tab-pane active" role="tabpanel"  aria-labelledby="submission-tab">
         <!-- BEGIN: HTML Table Data -->
-        @include('pages.tutor.module.includes.result-submission')
+        @include('pages.tutor.module.includes.submission-result')
         <!-- END: HTML Table Data -->
     </div>
 </div>
