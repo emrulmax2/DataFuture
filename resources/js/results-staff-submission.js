@@ -654,9 +654,10 @@ var submissionTableTutor = (function () {
         let type = $statusBTN.attr('data-url');
         let action = $statusBTN.attr('data-action');
         let url = "";
+        
         if(type=="staff") {
             url =route('results-staff-submission.destroy',rowID)
-        } else if(type="result") {
+        } else if(type=="result") {
             url =route('result.delete',rowID)
         }else {
             url =route('result-submission.destroy',rowID) 
