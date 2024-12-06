@@ -26,6 +26,10 @@ class Result extends Model
         'updated_by'
     ];
     
+    public function student(){
+        return $this->belongsTo(Student::class);
+    }
+
     public function plan(){
         return $this->belongsTo(Plan::class);
     }

@@ -73,15 +73,6 @@ class ResultComparisonController extends Controller
             ];
         $studentSet =    $studentAssign->pluck('student_id')->toArray();
 
-
-        // $maxAssessmentPlanId = AssessmentPlan::where('upload_user_type', 'staff')
-        //     ->where('plan_id', $plan->id)
-        //     ->whereNotNull('published_at')
-        //     //->where('course_module_base_assesment_id', $module_assessment)
-        //     ->max('id');
-
-        
-        // dd($resultComparisons);
         if(isset($module_assessment)) {
             $AssessmentPlanStaff = AssessmentPlan::find($module_assessment);
         } else {
@@ -90,27 +81,12 @@ class ResultComparisonController extends Controller
         
         $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get();
         
-        // $AssessmentPlanStaffPrevious = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')
-        //                                 ->where('course_module_base_assesment_id', $AssessmentPlanStaff->course_module_base_assesment_id)
-        //                                 ->orderBy('created_at','DESC')
-        //                                 ->skip(1)
-        //                                 ->take(1)
-        //                                 ->first();
 
-        // $resultOldComparisons = ResultComparison::where('plan_id', $plan->id)
-        //     ->where('publish_done', 'Yes')
-        //     ->whereHas('assessmentPlan', function($query) use ($AssessmentPlanStaffPrevious) {
-        //         $query->where('id', $AssessmentPlanStaffPrevious->id);
-        //     })
-        //     ->pluck('student_id')->unique()->toArray();
 
         $AssessmentPlan = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','personal_tutor')->orderBy('created_at','DESC')->get()->first();
         
         $resultComparison = ResultComparison::where('plan_id', $plan->id)->where('assessment_plan_id', $AssessmentPlanStaff->id)->pluck('result_id')->toArray();
 
-
-
-        //$resultComparison = array_diff($resultOldComparisons, $resultComparison);
 
         if(isset($resultComparison)) {
             $resultIds = $resultComparison;
@@ -263,6 +239,7 @@ class ResultComparisonController extends Controller
                             'student_id'  => $student_id[$index],
                             'plan_id' =>$plan_id,
                             'paper_id'=>$paper_id[$index],
+                            'module_code'=> isset($planId->creations->code) ? $planId->creations->code : $planId->creations->module->code ,
                             'term_declaration_id' => $planId->term_declaration_id,
                             'published_at'  => date("Y-m-d H:i:s",strtotime($published_at[$index]." ".$published_time[$index])),
                             'created_by'  => $created_by,
@@ -282,7 +259,7 @@ class ResultComparisonController extends Controller
                 $resultSet = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->get();
                 $studentListResult = Result::whereIn('student_id', $studentList)->where('plan_id', $plan_id)->where('assessment_plan_id', $assessment_plan_id[1])->pluck('student_id')->unique()->toArray();
                 //dd($resultSet);
-                $publishDone = count($studentListResult) >= $studentListCount  ? "Yes" : "No";
+                $publishDone =  "Yes";
                 foreach($resultSet as $result) {
                     ResultComparison::updateOrCreate([
                         'plan_id' => $plan_id,
@@ -372,5 +349,27 @@ class ResultComparisonController extends Controller
 
         //}
     
+    }
+
+    public function deleteResultBulk(Request $request)
+    {
+        
+        $resultIds = array_filter(array_unique($request->input('ids')));
+        $plan_id = $request->input('plan_id');
+        $assessment_plan_ids = array_filter(array_unique($request->input('assessment_plan_ids')));
+
+        $courseModuleBaseAssesmentId = AssessmentPlan::whereIn('id',$assessment_plan_ids)->pluck('course_module_base_assesment_id')->unique()->toArray();
+        
+        $baseResultDelete = Result::whereIn('id', $resultIds)->delete();
+
+        $prevResultDelete = Result::where('plan_id',$plan_id)->whereHas('assementPlan', function($query) use ($courseModuleBaseAssesmentId){
+            $query->whereIn('course_module_base_assesment_id', $courseModuleBaseAssesmentId);
+        })->delete();
+
+        if($baseResultDelete||$prevResultDelete)
+            return response()->json(['message' => 'Result successfully deleted.'], 200);
+        else
+            return response()->json(['message' => 'Result could not be deleted'], 302);
+        
     }
 }

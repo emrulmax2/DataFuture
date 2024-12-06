@@ -233,4 +233,15 @@ class ResultSubmissionController extends Controller
 
         return response()->json(['message' => 'Final submission successfully done.'], 200);
     }
+
+    public function destroy($id)
+    {
+        $data = ResultSubmission::whereHas('assessmentPlan', function($q) use($id){
+            $q->where('id', $id);
+        })->delete();
+        
+        AssessmentPlan::find($id)->delete();
+        return response()->json($data);
+        
+    }
 }

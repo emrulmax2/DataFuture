@@ -158,7 +158,16 @@ class ResultSubmissionByStaffController extends Controller
         $resultSubmission = ResultSubmissionByStaff::with('createdBy')->where('plan_id', $plan->id)->where('upload_user_type','staff')->whereNull('is_it_final')->orderBy('created_at','DESC')->get();
         $submissionAssessment = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','staff')->orderBy('created_at','DESC')->get();
         $submissionAssessmentTutor = AssessmentPlan::where('plan_id', $plan->id)->where('upload_user_type','personal_tutor')->orderBy('created_at','DESC')->get();
-       
+        //$results = Result::with('student','assementPlan')->where('plan_id', $plan->id)->get();
+        $resultSet = [];
+        $studentAssignWithouAttendance = Assign::where('plan_id', $plan->id)->where(function($q){
+            $q->where('attendance', 1)->orWhereNull('attendance');
+        })->get();
+        foreach($studentAssignWithouAttendance as $assigns){
+            $resultSet[$assigns->student_id]["latest"] = Result::where('plan_id', $plan->id)->where('student_id', $assigns->student_id)->orderBy('published_at','DESC')->first();
+            $resultSet[$assigns->student_id]["all"] = Result::where('plan_id', $plan->id)->where('student_id', $assigns->student_id)->orderBy('published_at','DESC')->get();
+        }
+
         return view('pages.tutor.module.result-submission', [
             'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
@@ -172,6 +181,7 @@ class ResultSubmissionByStaffController extends Controller
             'studentAssignArray' => $studentAssign->pluck('student_id')->toArray(),
             'studentResultSubmissionArray' => $resultSubmission->pluck('student_id')->toArray(),
             'studentAssign' => $studentAssign,
+            'studentAssignActiveOnly' => $studentAssignWithouAttendance,
             'planDates' => $planDateWiseContent,
             'planDateList' => $planDateList,
             'eLearningActivites' => $eLearningActivites,
@@ -180,12 +190,10 @@ class ResultSubmissionByStaffController extends Controller
             'resultSubmission' => $resultSubmission,
             'submissionAssessment' => $submissionAssessment,
             'submissionAssessmentTutor' => $submissionAssessmentTutor,
-
-            
+            'resultSet' => isset($resultSet) ? $resultSet : null,
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'smtps' => ComonSmtp::where('is_default', 1)->get()->first(),
-
             'attendanceStatus' => AttendanceFeedStatus::orderBy('id', 'ASC')->get(),
             'attendance_rate' => [],
             'attendance_trend' => []
@@ -327,8 +335,7 @@ class ResultSubmissionByStaffController extends Controller
         }
 
     }
-
-
+    
     public function finalSubmission(Request $request , Plan $plan) {
         $ids = $request->ids;
         $plan_id = $plan->id;
@@ -349,5 +356,16 @@ class ResultSubmissionByStaffController extends Controller
         }
 
         return response()->json(['message' => 'Final submission successfully done.'], 200);
+    }
+
+    public function destroy($id)
+    {
+        $data = ResultSubmissionByStaff::whereHas('assessmentPlan', function($q) use($id){
+            $q->where('id', $id);
+        })->delete();
+        
+        AssessmentPlan::find($id)->delete();
+        return response()->json($data);
+        
     }
 }

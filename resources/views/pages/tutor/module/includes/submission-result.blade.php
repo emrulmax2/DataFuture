@@ -21,7 +21,7 @@
                     <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#uploadSubmissionDocumentModal" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} class="callModalPlanTask ml-auto transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2"><i data-lucide="activity" class="w-4 h-4 mr-1"></i> Upload Submission</button>
                     
                     <a href="{{ route('results-staff-submission.sample.download',$plan->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-warning text-warning dark:border-warning [&:hover:not(:disabled)]:bg-warning/10 mb-2 mr-1 inline-block w-48  ml-2"> Sample Excel</a>
-                    <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmUploadTask" id="savedSubmission" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&:hover:not(:disabled)]:bg-success/10 mb-2 mr-1 inline-block w-48">Confirm Submission</button>
+                    <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1 inline-block w-48">Delete All</button>
                 </div>
                 <div class="p-5 pt-0">
                     <div class="grid grid-cols-12 gap-4">        
@@ -42,86 +42,70 @@
                                             <div class="mt-3 error-students">TEST TDATA</div>
                                         </div>
                                     </div>
-                                        @if($resultSubmission->count() > 0)
-                                        <table class="table table-report -mt-2">
-                                            <thead>
-                                                <tr>
-                                                    <th class="whitespace-nowrap"><div data-tw-merge class="flex items-center mt-2"><input data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-all" value="" />
-                                                        <label data-tw-merge for="checkbox-switch-all" class="cursor-pointer ml-2">S.N.</label>
-                                                    </div></th>
-                                                    <th class="whitespace-nowrap">Reg. No</th>
-                                                    <th class="whitespace-nowrap">Name</th>
-                                                    <th class="whitespace-nowrap">Status</th>
-                                                    <th class="whitespace-nowrap">Assessment</th>
-                                                    <th class="whitespace-nowrap">Paper ID</th>
-                                                    <th class="whitespace-nowrap">Submission Date</th>
-                                                    <th class="whitespace-nowrap">Grade</th>
-                                                    
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                    @php $serial=1; $missingIds = array_diff($studentAssignArray, $studentResultSubmissionArray); @endphp
-                                                    @if (!empty($missingIds)) 
-                                                        @foreach ($missingIds as $key => $missingId)
-                                                            @php $student = \App\Models\Student::find($missingId); @endphp
-                                                            <tr class="text-red-600 bg-danger">
+                                        @if((isset($resultSet) && count($resultSet) > 0))
+                                        <form id="resultActiveData" method="POST" >
+                                            <table class="table table-report -mt-2">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="whitespace-nowrap"><div data-tw-merge class="flex items-center mt-2"><input data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-all" value="" />
+                                                            <label data-tw-merge for="checkbox-switch-all" class="cursor-pointer ml-2">S.N.</label>
+                                                        </div></th>
+                                                        <th class="whitespace-nowrap">Reg. No</th>
+                                                        <th class="whitespace-nowrap">Status</th>
+                                                        <th class="whitespace-nowrap">Assessment</th>
+                                                        <th class="whitespace-nowrap">Grade</th>   
+                                                        <th class="whitespace-nowrap">Attempted</th>  
+                                                        <th class="whitespace-nowrap">Updated By</th>  
+                                                        <th class="whitespace-nowrap">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                        @php $serial=1; @endphp
+                                                        
+                                                        @foreach($studentAssignActiveOnly as $assign)
+                                                        @php $result = isset($assign->student_id) ? $resultSet[$assign->student_id]['latest'] : null; @endphp
+                                                        @php
+                                                            $warningCheck = "transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-warning focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-warning [&[type='radio']]:checked:border-warning [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-warning [&[type='checkbox']]:checked:border-warning [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                                                            $primaryCheck ="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                                                            $checkboxCssClass = (isset($result->id)) ? $warningCheck : $primaryCheck ; 
+                                                        @endphp
+                                                        @if($result!=null)    
+                                                        <tr>
                                                                 <td class="">
-                                                                    <div class="mt-3">
-                                                                        <div class="mt-2">
-                                                                            <div data-tw-merge class="flex items-center mt-2"><input disabled data-tw-merge type="checkbox" name="id[]" class="fill-box transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-{{ $serial }}" value="" />
-                                                                                <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
-                                                                            </div>
-                                                                        </div>
+                                                                    <div data-tw-merge class="flex items-center">
+                                                                        <input type="hidden" name="student_id[{{ $serial }}]" value="{{ $result->student->id }}" />
+                                                                        <input type="hidden" name="assessment_plan_id[{{ $serial }}]" value="{{ $result->assessment_plan_id }}" />
+                                                                        <input type="hidden" name="result_id[{{ $serial }}]" value="{{ isset($result->id) ? $result->id : '' }}" />
+                                                                        <input data-tw-merge type="checkbox" {{ $assign->attendance===null || $assign->attendance===1 ? '' : 'disabled' }} name="id[{{ $serial }}]" 
+                                                                        class="fill-box {{ $checkboxCssClass }}" data-assessment_plan_id={{ $result->assessment_plan_id  }} id="checkbox-switch-{{ $serial }}" value="{{ isset($result->id) ? $result->id : $serial }}" />
+                                                                        <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ isset($result->id) ? $result->id : $serial }}</label>
                                                                     </div>
                                                                 </td>
-                                                                <td class="">{{ $student->registration_no }}</td>
-                                                                <td class="">{{ $student->full_name }}</td>
-                                                                <td class="">{{ $student->status->name }}</td>
-                                                                <td colspan="5" class="text-center">Inactive Student</td>
-                                                            </tr>
-                                                            @php $serial++; @endphp
-                                                        @endforeach
-                                                    @endif
-                                                    @foreach ($resultSubmission as $key => $submission)
-                                                        @php $studentClass="";  $misMatched=false; @endphp
-                                                        @if($submission->is_student_matched==0)
-                                                                @php $studentClass="text-orange-600"; $misMatched=true; @endphp
-                                                        @endif
-
-                                                        @if($submission->is_excel_missing > 0)
-                                                            @php $studentClass="text-orange-600"; @endphp
-                                                        @endif
-                                                        <tr class="{{ $studentClass }}">
-                                                            <td class="">
-                                                                <div class="mt-3">
-                                                                    <div class="mt-2">
-                                                                        {{-- <div data-tw-merge class="flex items-center"><input data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50 w-[38px] h-[24px] p-px rounded-full relative before:w-[20px] before:h-[20px] before:shadow-[1px_1px_3px_rgba(0,0,0,0.25)] before:transition-[margin-left] before:duration-200 before:ease-in-out before:absolute before:inset-y-0 before:my-auto before:rounded-full before:dark:bg-darkmode-600 checked:bg-primary checked:border-primary checked:bg-none before:checked:ml-[14px] before:checked:bg-white" id="checkbox-switch-{{ $key+1 }}" />
-                                                                            <label data-tw-merge for="checkbox-switch-{{ $key+1 }}" class="cursor-pointer ml-2">{{ $key+1 }}</label>
-                                                                        </div> --}}
-                                                                        <div data-tw-merge class="flex items-center mt-2"><input data-tw-merge type="checkbox" name="id[]" class="fill-box transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" id="checkbox-switch-{{ $serial }}" value=" {{ $submission->id }}" />
-                                                                            <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
-                                                                        </div>
+                                                                <td class="">
+                                                                    <div class="text-lg">
+                                                                        <div class="font-medium whitespace-nowrap">{{ $result->student->registration_no }}</div>
+                                                                        <div class="text-slate-500 text-xs whitespace-nowrap">{{ $result->student->full_name }} </div>
                                                                     </div>
+                                                                </td>
+                                                                <td class="">{{ $result->student->status->name }}</td>
+                                                                <td class=""> {{ (isset($result->assementPlan)) ? $result->assementPlan->courseModuleBase->assesment_code .'-'. $result->assementPlan->courseModuleBase->assesment_name : '' }}</td>
+                                                                <td class=""> {{ $result->grade->code }} - {{ $result->grade->name }} </td>
+                                                                <td>
+                                                                    <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $result->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet[$assign->student_id]['all']) }}</a>
+                                                                </td>
+                                                                <td class="">{{ isset($result->updatedBy) ? $result->updatedBy->full_name : $result->createdBy->full_name }}</td>
+                                                                <td class="">
+                                                                    <button type="button" data-id="{{ $result->id }}" data-action="delete" data-url="result" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i> Delete</button>
                                                                     
-                                                                </div>
-                                                            </td>
-                                                            <td class="">{{ $submission->student->registration_no }}</td>
-                                                            <td class="">{{ $submission->student->full_name }}</td>
-                                                            <td class="">{{ $submission->student->status->name }}</td>
-                                                            <td class="">{{ $submission->AssessmentPlan->courseModuleBase->assesment_name }} - {{ $submission->assessmentPlan->courseModuleBase->assesment_code }}</td>
-                                                            <td class="">{{ $submission->paper_id }}</td>
-                                                            <td class="">{{ $submission->created_at }}</td>
-                                                            <td class="">{{ $submission->grade->code }} - {{ $submission->grade->name }}</td>
-                                                            <td class="">{{ $submission->published_at }}</td>
-                                                            
-                                                        </tr>
-                                                        @php $serial++; @endphp
-                                                    @endforeach
-                                            </tbody>
-                                            
-                                        </table>
+                                                                </td>
+                                                            </tr>
+                                                        @endif
+                                                        @endforeach                                                    
+                                                </tbody>
+                                            </table>
+                                        </form>
                                         @else
-                                        <div class="text-center w-full text-xl">No Submission Found</div>
+                                            <div class="text-center w-full text-xl">No Result Found Yet</div>
                                         @endif
                                 </div>
                             </div>
@@ -139,7 +123,7 @@
                         <div class="col-span-12">
                             <div class="mt-3"> 
                                 @if($submissionAssessment->count() > 0)
-                                        <table class="table table-report -mt-2">
+                                        <table id="staff-submission" class="table table-report -mt-2">
                                             <thead>
                                                 <tr>
                                                     <th class="whitespace-nowrap"><div data-tw-merge class="flex items-center mt-2">S.N.
@@ -174,6 +158,7 @@
                                                     <td class="border-b dark:border-darkmode-500">
                                                         @if($submission->is_it_final > 0)
                                                         <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
+                                                        <button data-id="{{$submission->id}}" data-action="delete" data-url="staff" class="delete_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9 ml-1"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -199,7 +184,7 @@
                         <div class="col-span-12">
                             <div class="mt-3"> 
                                 @if($submissionAssessmentTutor->count() > 0)
-                                        <table class="table table-report -mt-2">
+                                        <table id="tutor-submission" class="table table-report -mt-2">
                                             <thead>
                                                 <tr>
                                                     <th class="whitespace-nowrap"><div data-tw-merge class="flex items-center mt-2">S.N.
@@ -234,6 +219,7 @@
                                                     <td class="border-b dark:border-darkmode-500">
                                                         @if($submission->is_it_final > 0)
                                                         <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission_tutor btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
+                                                        <button data-id="{{$submission->id}}" data-action="delete" data-url="tutor" class="delete_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9 ml-1"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
                                                         @endif
                                                     </td>
                                                 </tr>
@@ -321,7 +307,26 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWithPlanTask btn btn-primary w-auto">Yes, I agree</button>
+                        <button type="button" data-id="0" data-action="none" data-url="no" class="agreeWith btn btn-primary w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Plan Task Confirm Modal Content -->
+    <!-- BEGIN: Plan Task  Confirm Modal Content -->
+    <div id="confirmModalSingle" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="info" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" data-url="no" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
                     </div>
                 </div>
             </div>
@@ -329,6 +334,36 @@
     </div>
     <!-- END: Plan Task Confirm Modal Content -->
     
+    <!-- BEGIN: Plan Task  Confirm Modal Content -->
+    <div id="confirmDeleteModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="info" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Do you want to Delete?</div>
+                        <div class="text-slate-500 mt-2 confModDesc">Please make sure before deletion. it is parmanent.</div>
+                    </div>
+                    <form id="resultDeleteAllForm" method="post">
+                        @csrf
+                        <input type="hidden" name="plan_id" value="{{ $plan->id }}"/>
+                        <div class="append-input">
+                            <input type="hidden" name="ids[]" value=""/>
+                        </div>
+                        <div class="append-second">
+                            <input type="hidden" name="assessment_plan_ids[]" value=""/>
+                        </div>
+                        <div class="px-5 pb-8 text-center">
+                            <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                            <button type="submit" data-id="0" data-action="none" class="update btn btn-danger w-auto">Yes, I agree <i data-loading-icon="oval" class="w-4 h-4 ml-2 hidden " ></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Plan Task Confirm Modal Content -->
+
      <!-- BEGIN: Plan Task  Confirm Modal Content -->
      <div id="finalConfirmUploadTask" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -378,6 +413,91 @@
             </div>
         </div>
     </div>
+
+
+    <!-- BEGIN: Student Profile Lock Modal -->
+   @if($resultSet)
+   @foreach($resultSet as $key => $data)
+    @php  $resultDataSet = $data['all']; @endphp
+        @if($resultDataSet->count()>0)
+        <div id="callLockModal{{ $resultDataSet[0]->id  }}" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="font-medium text-base mr-auto">Attempt List</h2>
+                            <a data-tw-dismiss="modal" href="javascript:;">
+                                <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                            </a>
+                        </div>
+                        <div class="modal-body  overflow-x-auto"> 
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead data-tw-merge class="">
+                                    <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Term
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Code
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Created At
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Published At
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Grade
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Status
+                                        </th>
+                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
+                                            Last Updated By
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($resultDataSet as $result)
+                                    @php
+                                        if(isset($result->term_declaration_id) && !empty($result->term_declaration_id))
+                                                $termData = $result->term->name;
+                                            else
+                                                $termData = $result->plan->attenTerm->name;
+                                        @endphp
+                                        <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                {{ $termData }} 
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t relative">
+                                                {{ ($result->module_code)? $result->module_code : $result->plan->creations->code  }}
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                {{ date('d F,Y h:i a',strtotime($result->created_at))  }}
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                {{ date('d F,Y h:i a',strtotime($result->published_at))  }}
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                {{ $result->grade->code }} 
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                {{ $result->grade->name }}
+                                            </td>
+                                            <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                {{ isset($result->updatedBy->employee->full_name)  ? $result->updatedBy->employee->full_name : (isset($result->createdBy->employee->full_name) ? $result->createdBy->employee->full_name: $result->createdBy->name)  }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+            </div>
+        </div>
+       @endif
+   @endforeach
+@endif
+<!-- END: Student Profile Lock Modal -->
     
     
     
