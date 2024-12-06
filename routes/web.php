@@ -2664,7 +2664,7 @@ Route::middleware('auth')->group(function() {
         
     });
 
-    Route::resource('results-submission', ResultSubmissionController::class,[
+    Route::resource('result-submission', ResultSubmissionController::class,[
         'except' => ['create']
     ]);
 
