@@ -329,5 +329,40 @@ var hrPayslipListTable = (function () {
         }
     })
 
+    $('#checkbox-switch-all').on('change', function () {
+        var checked = $(this).is(':checked');
+        if (checked) {
+            $.each($('.fill-box'), function () {
+                $(this).prop('checked', true);
+            });
+            $('#deleteBtnAll').removeClass('hidden');
+        } else {
+            $.each($('.fill-box'), function () {
+                $(this).prop('checked', false);
+            });
+
+            $('#deleteBtnAll').addClass('hidden');
+        }
+    });
+
+    $('#deleteBtnAll').on('click', function () {
+        $('div.append-input').html('');
+        $.each($('.fill-box'), function () {
+            let tthis = $(this);
+            let planAssessment = tthis.data('assessment_plan_id');
+            if (tthis.is(':checked')) {
+                $('#resultDeleteAllForm div.append-input').append(
+                    "<input type='hidden' name='ids[]' value='" +
+                        tthis.val() +
+                        "'>"
+                );
+                $('#resultDeleteAllForm div.append-second').append(
+                    "<input type='hidden' name='assessment_plan_ids[]' value='" +
+                    planAssessment +
+                        "'>"
+                );
+            }
+        });
+    });
     
 })();
