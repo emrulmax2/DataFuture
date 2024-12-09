@@ -30,6 +30,11 @@
                 {!! ($openedAssets > 0 ? '<span data-count="'.$openedAssets.'" class="py-1 px-2 assetsRegCounter rounded-full text-xs bg-danger text-white cursor-pointer font-medium ml-3">'.$openedAssets.'</span>' : '') !!}
             </a>
         </li>
+        <li class="mb-2 pt-1">
+            <a href="{{ route('budget.management') }}" class="text-lg font-medium truncate flex justify-start items-center">
+                <i data-lucide="pie-chart" class="w-5 h-5 mr-4"></i> Budget Management
+            </a>
+        </li>
     </ul>
 
 

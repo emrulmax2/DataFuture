@@ -2300,3 +2300,20 @@ input[type=number] {
 .is_assets:checked + .assetsChecker svg{
     stroke: #FFF;
 }
+
+.agentRefListWrap.loading{
+    position: relative;
+}
+.agentRefListWrap.loading::after{
+    content: 'Loading...';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, .75);
+}

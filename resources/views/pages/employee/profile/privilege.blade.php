@@ -180,6 +180,22 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['dashboard']['budget_manager']) && $priv['dashboard']['budget_manager'] == 1 ? 'checked' : '') }} id="permission_dashboard_9" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[dashboard][budget_manager]">
+                            <label class="form-check-label ml-4" for="permission_dashboard_9">Budget Management</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['budget_settings']) && $priv['programme_dashboard']['budget_settings'] == 1 ? 'checked' : '') }} id="permission_dashboard_10" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][budget_settings]">
+                                <label class="form-check-label ml-4" for="permission_dashboard_10">Budget Settings</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['budget_reports']) && $priv['programme_dashboard']['budget_reports'] == 1 ? 'checked' : '') }} id="permission_dashboard_11" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][budget_reports]">
+                                <label class="form-check-label ml-4" for="permission_dashboard_11">Budget Reports</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
