@@ -122,6 +122,8 @@
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
             <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+            <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1 inline-block w-48">Delete All</button>
+                   
         </div>
     </div>
     <!-- BEGIN: Success Modal Content -->
@@ -160,6 +162,33 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
+
+        <!-- BEGIN: Plan Task  Confirm Modal Content -->
+        <div id="confirmDeleteModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="p-5 text-center">
+                            <i data-lucide="info" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                            <div class="text-3xl mt-5 confModTitle">Do you want to Delete?</div>
+                            <div class="text-slate-500 mt-2 confModDesc">Please make sure before deletion. it is parmanent.</div>
+                        </div>
+                        <form id="resultDeleteAllForm" method="post">
+                            @csrf
+                            <div class="append-input">
+                                <input type="hidden" name="ids[]" value=""/>
+                            </div>
+                            <div class="px-5 pb-8 text-center">
+                                <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                                <button type="submit" data-id="0" data-action="none" class="update btn btn-danger w-auto">Yes, I agree <i data-loading-icon="oval" class="w-4 h-4 ml-2 hidden " ></i></button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END: Plan Task Confirm Modal Content -->
+
     <!-- END: Success Modal Content -->
 @endsection
 
