@@ -524,9 +524,13 @@
                             <label class="form-check-label ml-4" for="permission_result_management_1">Staff Upload Permission</label>
                         </div>
 
+                        <div class="form-check form-switch mb-3">
+                            <input {{ (isset($priv['result_management']['result_management_staff_delete']) && $priv['result_management_staff_delete']['result_management_staff_delete'] == 1 ? 'checked' : '') }} id="permission_result_management_2" class="form-check-input" type="checkbox" value="1" name="permission[result_management][result_management_staff_delete]">
+                            <label class="form-check-label ml-4" for="permission_result_management_2">Staff Delete Permission</label>
+                        </div>
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['result_management']['result_management_pt']) && $priv['result_management']['result_management_pt'] == 1 ? 'checked' : '') }} id="permission_result_management_2" class="form-check-input" type="checkbox" value="1" name="permission[result_management][result_management_pt]">
-                            <label class="form-check-label ml-4" for="permission_library_management_2">PT Upload Permission</label>
+                            <input {{ (isset($priv['result_management']['result_management_pt']) && $priv['result_management']['result_management_pt'] == 1 ? 'checked' : '') }} id="permission_result_management_3" class="form-check-input" type="checkbox" value="1" name="permission[result_management][result_management_pt]">
+                            <label class="form-check-label ml-4" for="permission_library_management_3">PT Upload Permission</label>
                         </div>
                     </div>
                 </div>
