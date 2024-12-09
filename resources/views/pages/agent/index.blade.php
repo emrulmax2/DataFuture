@@ -8,6 +8,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Agent List</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+            <a href="{{ route('agent.management') }}" class="add_btn btn btn-success shadow-md text-white mr-2"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Agent Management</a>
             <button data-tw-toggle="modal" data-tw-target="#addAgentModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add Agent</button>
         </div>
     </div>

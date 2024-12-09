@@ -67,6 +67,11 @@
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/library.png') }}">
                         </a>
                         @endif 
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['budget_manager']) && auth()->user()->priv()['budget_manager'] == 1)
+                        <a href="{{ route('budget.management') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/Budget.png') }}">
+                        </a>
+                        @endif 
                     </div>
                 </div>
             </div>

@@ -21,6 +21,7 @@ use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Agent\AgentController;
 use App\Http\Controllers\Agent\AgentDocumentsController;
+use App\Http\Controllers\Agent\AgentManagementController;
 use App\Http\Controllers\Agent\AgentMyAccountController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\CourseManagement\GroupController;
@@ -105,6 +106,14 @@ use App\Http\Controllers\AssessmentTypeController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\Attendance\TutorAttendanceController;
 use App\Http\Controllers\AttendanceLiveController;
+use App\Http\Controllers\Budget\BudgetManagementController;
+use App\Http\Controllers\Budget\BudgetReportController;
+use App\Http\Controllers\Budget\RequisitionDocumentController;
+use App\Http\Controllers\Budget\RequisitionItemController;
+use App\Http\Controllers\Budget\Settings\BudgetNameController;
+use App\Http\Controllers\Budget\Settings\BudgetSetController;
+use App\Http\Controllers\Budget\Settings\BudgetYearController;
+use App\Http\Controllers\Budget\Settings\VendorController;
 use App\Http\Controllers\Communication\BulkCommunicationController;
 use App\Http\Controllers\ConsoleController;
 use App\Http\Controllers\CourseManagement\AssignController;
@@ -2515,16 +2524,6 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/time-keeper/download-pdf/{id}/{month}/{year}', 'downloadPdf')->name('employee.time.keeper.download.pdf'); 
         Route::post('employee-profile/time-keeper/generate-recored', 'generateRecored')->name('employee.time.keeper.generate.recored'); 
     });
-
-    // GET............agent-user....................agent-user.index.............App\Http\Controllers\Agent\AgentController@index
-    // GET............agent-user/create.............agent-user.create............App\Http\Controllers\Agent\AgentController@create
-    // POST...........agent-user....................agent-user.store.............App\Http\Controllers\Agent\AgentController@store
-    // GET............agent-user/{agent_user}.......agent-user.show..............App\Http\Controllers\Agent\AgentController@show
-    // GET............agent-user/{agent_user}/edit..agent-user.edit..............App\Http\Controllers\Agent\AgentController@edit
-    // POST............agent-user/{agent_user}.......agent-user.update............App\Http\Controllers\Agent\AgentController@update
-    // DELETE.........agent-user/{agent_user}.......agent-user.destroy...........App\Http\Controllers\Agent\AgentController@destroy
-    // GET............agent-user-list...............agent-user.list..............App\Http\Controllers\Agent\AgentController@list
-    
     Route::resource('agent-user', AgentController::class,[
         'except' => ['update']
     ]);
@@ -2543,13 +2542,7 @@ Route::middleware('auth')->group(function() {
         
 
     });
-    // GET|HEAD        sub-agent ............................. sub-agent.index › Agent\SubAgentController@index  
-    // POST            sub-agent ............................. sub-agent.store › Agent\SubAgentController@store  
-    // GET|HEAD        sub-agent-list ........................ sub-agent.list › Agent\AgentController@list  
-    // GET|HEAD        sub-agent/create ...................... sub-agent.create › Agent\SubAgentController@create  
-    // GET|HEAD        sub-agent/{sub_agent} ................. sub-agent.show › Agent\SubAgentController@show  
-    // DELETE          sub-agent/{sub_agent} ................. sub-agent.destroy › Agent\SubAgentController@destroy  
-    // GET|HEAD        sub-agent/{sub_agent}/edit ............ sub-agent.edit › Agent\SubAgentController@edit  
+    
     Route::resource('sub-agent', SubAgentController::class,[
         'except' => ['update']
     ]);
@@ -3196,6 +3189,104 @@ Route::middleware('auth')->group(function() {
         Route::delete('site-settings/asset-type/delete/{id}', 'destroy')->name('site.settings.asset.type.destory');
         Route::post('site-settings/asset-type/restore/{id}', 'restore')->name('site.settings.asset.type.restore');
         Route::post('site-settings/asset-type/update-status/{id}', 'updateStatus')->name('site.settings.asset.type.update.status');
+    });
+
+    Route::controller(AgentManagementController::class)->group(function() {
+        Route::get('agent-management', 'index')->name('agent.management'); 
+        Route::post('agent-management/list', 'list')->name('agent.management.list'); 
+        Route::post('agent-management/list-details', 'listDetails')->name('agent.management.list.details'); 
+    });
+
+    Route::controller(BudgetManagementController::class)->group(function() {
+        Route::get('budget-management', 'index')->name('budget.management'); 
+        Route::get('budget-management/list', 'list')->name('budget.management.list'); 
+        Route::post('budget-management/store-requisition', 'storeRequisition')->name('budget.management.store.req'); 
+        Route::post('budget-management/edit-requisition', 'editRequisition')->name('budget.management.edit.req'); 
+        Route::post('budget-management/update-requisition', 'updateRequisition')->name('budget.management.update.req'); 
+        Route::get('budget-management/requisition/{requisition}', 'showRequisition')->name('budget.management.show.req'); 
+        Route::post('budget-management/update-requisition-status', 'updateRequisitionStatus')->name('budget.management.update.req.status'); 
+        Route::post('budget-management/get-filtered-transactions', 'getFilteredTransactions')->name('budget.management.get.filtered.transactions'); 
+        Route::post('budget-management/get-transaction', 'getTransaction')->name('budget.management.get.transaction'); 
+        Route::post('budget-management/mark-as-completed', 'markAsCompleted')->name('budget.management.req.mark.completed'); 
+        Route::get('budget-management/requisition-trans-list', 'transactionList')->name('budget.management.req.trans.list'); 
+    });
+
+    Route::controller(BudgetYearController::class)->group(function() {
+        Route::get('budget-management/settings/budget-years', 'index')->name('budget.settings.year'); 
+
+        Route::get('budget-management/settings/budget-years/list', 'list')->name('budget.settings.year.list'); 
+        Route::post('budget-management/settings/budget-years/store', 'store')->name('budget.settings.year.store'); 
+        Route::get('budget-management/settings/budget-years/edit/{id}', 'edit')->name('budget.settings.year.edit');
+        Route::post('budget-management/settings/budget-years/update', 'update')->name('budget.settings.year.update');
+        Route::delete('budget-management/settings/budget-years/delete/{id}', 'destroy')->name('budget.settings.year.destory');
+        Route::post('budget-management/settings/budget-years/restore/{id}', 'restore')->name('budget.settings.year.restore');
+        Route::post('budget-management/settings/budget-years/update-status/{id}', 'updateStatus')->name('budget.settings.year.update.status');
+    });
+
+    Route::controller(BudgetNameController::class)->group(function() {
+        Route::get('budget-management/settings/budget-names', 'index')->name('budget.settings.name'); 
+
+        Route::get('budget-management/settings/budget-names/list', 'list')->name('budget.settings.name.list'); 
+        Route::post('budget-management/settings/budget-names/store', 'store')->name('budget.settings.name.store'); 
+        Route::get('budget-management/settings/budget-names/edit/{id}', 'edit')->name('budget.settings.name.edit');
+        Route::post('budget-management/settings/budget-names/update', 'update')->name('budget.settings.name.update');
+        Route::delete('budget-management/settings/budget-names/delete/{id}', 'destroy')->name('budget.settings.name.destory');
+        Route::post('budget-management/settings/budget-names/restore/{id}', 'restore')->name('budget.settings.name.restore');
+        Route::post('budget-management/settings/budget-names/update-status/{id}', 'updateStatus')->name('budget.settings.name.update.status');
+    });
+
+    Route::controller(BudgetSetController::class)->group(function() {
+        Route::get('budget-management/settings/budget-set', 'index')->name('budget.settings.set'); 
+
+        Route::get('budget-management/settings/budget-set/list', 'list')->name('budget.settings.set.list'); 
+        Route::post('budget-management/settings/budget-set/store', 'store')->name('budget.settings.set.store'); 
+        Route::get('budget-management/settings/budget-set/edit/{id}', 'edit')->name('budget.settings.set.edit');
+        Route::post('budget-management/settings/budget-set/update', 'update')->name('budget.settings.set.update');
+        Route::delete('budget-management/settings/budget-set/delete/{id}', 'destroy')->name('budget.settings.set.destory');
+        Route::post('budget-management/settings/budget-set/restore/{id}', 'restore')->name('budget.settings.set.restore');
+        Route::post('budget-management/settings/budget-set/update-status/{id}', 'updateStatus')->name('budget.settings.set.update.status');
+
+        Route::post('budget-management/settings/budget-set/get-budget-row', 'getBudgetRow')->name('budget.settings.set.get.budget');
+    });
+
+    Route::controller(VendorController::class)->group(function() {
+        Route::get('budget-management/settings/vendors', 'index')->name('budget.settings.vendors'); 
+
+        Route::get('budget-management/settings/vendors/list', 'list')->name('budget.settings.vendors.list'); 
+        Route::post('budget-management/settings/vendors/store', 'store')->name('budget.settings.vendors.store'); 
+        Route::get('budget-management/settings/vendors/edit/{id}', 'edit')->name('budget.settings.vendors.edit');
+        Route::post('budget-management/settings/vendors/update', 'update')->name('budget.settings.vendors.update');
+        Route::delete('budget-management/settings/vendors/delete/{id}', 'destroy')->name('budget.settings.vendors.destory');
+        Route::post('budget-management/settings/vendors/restore/{id}', 'restore')->name('budget.settings.vendors.restore');
+        Route::post('budget-management/settings/vendors/update-status/{id}', 'updateStatus')->name('budget.settings.vendors.update.status');
+    });
+
+    Route::controller(RequisitionItemController::class)->group(function() {
+        Route::post('budget-management/requisition/items/store', 'store')->name('budget.management.req.item.store'); 
+        Route::get('budget-management/requisition/items/list', 'list')->name('budget.management.req.item.list'); 
+        Route::get('budget-management/requisition/items/edit/{item}', 'edit')->name('budget.management.req.item.edit'); 
+        Route::post('budget-management/requisition/items/update', 'update')->name('budget.management.req.item.update'); 
+
+        Route::delete('budget-management/requisition/items/delete/{id}', 'destroy')->name('budget.management.req.item.destory');
+        Route::post('budget-management/requisition/items/restore/{id}', 'restore')->name('budget.management.req.item.restore');
+        Route::post('budget-management/requisition/items/update-status/{id}', 'updateStatus')->name('budget.management.req.item.update.status');
+    });
+
+    Route::controller(RequisitionDocumentController::class)->group(function() {
+        Route::get('budget-management/requisition/documents/list', 'list')->name('budget.management.req.doc.list'); 
+        Route::post('budget-management/requisition/documents/store', 'store')->name('budget.management.req.doc.store'); 
+        Route::post('budget-management/requisition/documents/download', 'downloadDoc')->name('budget.management.req.doc.download'); 
+
+        Route::delete('budget-management/requisition/documents/delete/{id}', 'destroy')->name('budget.management.req.doc.destory');
+        Route::post('budget-management/requisition/documents/restore/{id}', 'restore')->name('budget.management.req.doc.restore');
+        Route::post('budget-management/requisition/documents/update-status/{id}', 'updateStatus')->name('budget.management.req.doc.update.status');
+    });
+
+    Route::controller(BudgetReportController::class)->group(function() {
+        Route::get('budget-management/reports', 'index')->name('budget.management.reports'); 
+        Route::post('budget-management/reports/generate', 'generate')->name('budget.management.reports.generate'); 
+        Route::get('budget-management/reports/details/{year}/{set}/{set_detail}', 'details')->name('budget.management.reports.details'); 
+        Route::get('budget-management/reports/details-list', 'detailsList')->name('budget.management.reports.details.list'); 
     });
     
 });
