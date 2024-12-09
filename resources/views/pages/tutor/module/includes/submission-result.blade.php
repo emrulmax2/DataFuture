@@ -21,7 +21,10 @@
                     <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#uploadSubmissionDocumentModal" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} class="callModalPlanTask ml-auto transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2"><i data-lucide="activity" class="w-4 h-4 mr-1"></i> Upload Submission</button>
                     
                     <a href="{{ route('results-staff-submission.sample.download',$plan->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-warning text-warning dark:border-warning [&:hover:not(:disabled)]:bg-warning/10 mb-2 mr-1 inline-block w-48  ml-2"> Sample Excel</a>
+                    @if((isset(auth()->user()->priv()['result_management_staff_delete']) && auth()->user()->priv()['result_management_staff_delete'] == 1))
+                                                       
                     <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1 inline-block w-48">Delete All</button>
+                    @endif
                 </div>
                 <div class="p-5 pt-0">
                     <div class="grid grid-cols-12 gap-4">        
@@ -95,8 +98,10 @@
                                                                 </td>
                                                                 <td class="">{{ isset($result->updatedBy) ? $result->updatedBy->full_name : $result->createdBy->full_name }}</td>
                                                                 <td class="">
+                                                                    @if((isset(auth()->user()->priv()['result_management_staff_delete']) && auth()->user()->priv()['result_management_staff_delete'] == 1))
+                    
                                                                     <button type="button" data-id="{{ $result->id }}" data-action="delete" data-url="result" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i> Delete</button>
-                                                                    
+                                                                    @endif
                                                                 </td>
                                                             </tr>
                                                             @php $serial++; @endphp
@@ -159,6 +164,8 @@
                                                     <td class="border-b dark:border-darkmode-500">
                                                         @if($submission->is_it_final > 0)
                                                         <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
+                                                        
+                                                        @if((isset(auth()->user()->priv()['result_management_staff_delete']) && auth()->user()->priv()['result_management_staff_delete'] == 1))
                                                         <button data-id="{{$submission->id}}" data-action="delete" data-url="staff" class="delete_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9 ml-1"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
                                                         @endif
                                                     </td>

@@ -349,20 +349,65 @@ var hrPayslipListTable = (function () {
         $('div.append-input').html('');
         $.each($('.fill-box'), function () {
             let tthis = $(this);
-            let planAssessment = tthis.data('assessment_plan_id');
+            let planAssessment = tthis.data('id');
             if (tthis.is(':checked')) {
                 $('#resultDeleteAllForm div.append-input').append(
                     "<input type='hidden' name='ids[]' value='" +
                         tthis.val() +
                         "'>"
                 );
-                $('#resultDeleteAllForm div.append-second').append(
-                    "<input type='hidden' name='assessment_plan_ids[]' value='" +
-                    planAssessment +
-                        "'>"
-                );
+                $('#deleteBtnAll').removeClass('hidden');
             }
         });
+    });
+
+    
+    $('#resultDeleteAllForm').on('submit', function (e) {
+        e.preventDefault();
+        let planId = $("#resultDeleteAllForm [name='plan_id']").val();
+
+        const form = document.getElementById('resultDeleteAllForm');
+        let form_data = new FormData(form);
+
+        $('.update').attr('disabled', 'disabled');
+        $('.update svg').removeClass('hidden');
+
+        axios({
+            method: 'post',
+            url: route('payslip-upload.deleteAll', planId),
+            data: form_data,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+        })
+            .then((response) => {
+                if (response.status == 200) {
+                    $('.update').removeAttr('disabled', 'disabled');
+                    $('.update svg').addClass('hidden');
+                    confirmDeleteModal.hide();
+                    successModal.show();
+                    document
+                        .getElementById('successModal')
+                        .addEventListener('shown.tw.modal', function (event) {
+                            $('#successModal .successModalTitle').html(
+                                'Delete Done'
+                            );
+                            $('#successModal .successModalDesc').html(
+                                'Data Deleted successfully.'
+                            );
+                        });
+
+                    setTimeout(function () {
+                        successModal.hide();
+                        window.location.href = route('result.comparison',planId);
+                    }, 3000);
+                }
+            })
+            .catch((error) => {
+                $('.update').removeAttr('disabled', 'disabled');
+                $('.update svg').addClass('hidden');
+                console.log(error);
+            });
     });
     
 })();

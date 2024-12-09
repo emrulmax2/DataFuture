@@ -47,6 +47,7 @@
             <div id="hrPayslipListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div> --}}
         <form action="{{ route('payslip-upload.store') }}" method="post" id="hrPayslipSyncForm">
+            
             <table id="hrPayslipSyncTable" class="table table-report table-report--tabulator">
                 <thead>
                     <tr>
@@ -68,8 +69,7 @@
                     @endphp
                         <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
-                                <input data-tw-merge type="checkbox" name="id[{{ $serial }}]" 
-                                class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ $paySlip->id }}" />
+                                <input data-tw-merge data-id={{ $paySlip->id}} type="checkbox" name="id[{{ $serial }}]" class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ $paySlip->id }}" />
                                 <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
                                @php $serial++; @endphp
                             </td>
@@ -108,7 +108,7 @@
                                         <div class="acc__input-error error-employee_id text-danger mt-2"></div>
                             </td>
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
-                                <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $paySlip->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
+                                <span data-tw-target="#confirmModal" data-tw-toggle="modal"  class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
                             </td>
                         </tr>
                     @endforeach

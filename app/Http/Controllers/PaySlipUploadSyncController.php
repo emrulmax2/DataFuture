@@ -108,4 +108,24 @@ class PaySlipUploadSyncController extends Controller
     {
         //
     }
+
+    public function deleteResultBulk(Request $request)
+    {
+        
+        $resultIds = array_filter(array_unique($request->input('ids')));
+        
+        PaySlipUploadSync::whereIn('id', $resultIds)->get()->each(function($result){
+            if (Storage::exists($result->file_path)) {
+                Storage::delete($result->file_path);
+            }
+        });
+        
+        $baseResultDelete = PaySlipUploadSync::whereIn('id', $resultIds)->delete();
+
+        if($baseResultDelete)
+            return response()->json(['message' => 'Result successfully deleted.'], 200);
+        else
+            return response()->json(['message' => 'Result could not be deleted'], 302);
+        
+    }
 }
