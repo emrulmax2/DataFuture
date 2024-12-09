@@ -70,7 +70,7 @@
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
                                 <input data-tw-merge type="checkbox" name="id[{{ $serial }}]" 
                                 class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ $paySlip->id }}" />
-                                <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ isset($data['id']) ? $data['id'] : $serial }}</label>
+                                <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
                                @php $serial++; @endphp
                             </td>
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
