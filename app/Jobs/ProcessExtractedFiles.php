@@ -19,17 +19,19 @@ class ProcessExtractedFiles implements ShouldQueue
     protected $extractPath;
     protected $dirName;
     protected $type;
+    protected $holiday_year_Id;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($extractPath,$dirName,$type)
+    public function __construct($extractPath,$dirName,$type,$holiday_year_Id)
     {
         $this->extractPath = $extractPath;
         $this->dirName = $dirName;
         $this->type = $type;
+        $this->holiday_year_Id = $holiday_year_Id;
     }
 
     /**
@@ -103,6 +105,7 @@ class ProcessExtractedFiles implements ShouldQueue
                         'employee_id' => ($employeeFound) ? $employeeFound : NULL,
                         'file_name' => $fileName,
                         'file_path' => $filePath,
+                        'holiday_year_id' => $this->holiday_year_Id,
                         'month_year' => $this->dirName,
                         'type' => isset($type) ? $type : 'Payslips',
                         'is_file_exist' => ($employeeFound) ? 1 : 0,

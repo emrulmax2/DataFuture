@@ -168,6 +168,7 @@
                                         </div>
                                         <input type="hidden" name="dir_name" value=""/>
                                         <input type="hidden" name="type" value=""/>
+                                        <input type="hidden" name="holiday_year_info" value=""/>
                                     </form>
                                 </div>
                                 <div class="intro-y intro-y w-90 mx-auto my-3">
