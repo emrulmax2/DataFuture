@@ -15,6 +15,7 @@ class PaySlipUploadSync extends Model
         'employee_id',
         'file_name',
         'file_path',
+        'holiday_year_id',
         'type',
         'month_year',
         'is_file_exist',

@@ -210,9 +210,14 @@ import Toastify from 'toastify-js';
                     $('#synPaySlipModal [name="type"]').val(
                         payslips
                     );
+                    $(
+                        '#synPaySlipModal [name="holiday_year_info"]'
+                    ).val(
+                        holiday_year
+                    );
 
                     drzn1.processQueue();
-                }else if (monthYear != '') {
+                }else if (monthYear != '' && payslips != '') {
                     $('#synPaySlipModal [name="dir_name"]').val(
                         monthYear
                     );
@@ -222,9 +227,9 @@ import Toastify from 'toastify-js';
                     drzn1.processQueue();
                 } else {
                     $(
-                        '#uploadSubmissionDocumentModal .modal-content .uploadError'
+                        '#synPaySlipModal .modal-content .uploadError'
                     ).remove();
-                    $('#uploadSubmissionDocumentModal .modal-content').prepend(
+                    $('#synPaySlipModal .modal-content').prepend(
                         '<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the Assessment.</div>'
                     );
 
@@ -236,7 +241,7 @@ import Toastify from 'toastify-js';
 
                     setTimeout(function () {
                         $(
-                            '#uploadSubmissionDocumentModal .modal-content .uploadError'
+                            '#synPaySlipModal .modal-content .uploadError'
                         ).remove();
                         document
                             .querySelector('#uploadEmpDocBtn')
@@ -247,8 +252,8 @@ import Toastify from 'toastify-js';
                     }, 2000);
                 }
             } else {
-                $('#uploadDocumentModal .modal-content .uploadError').remove();
-                $('#uploadDocumentModal .modal-content').prepend(
+                $('#synPaySlipModal .modal-content .uploadError').remove();
+                $('#synPaySlipModal .modal-content').prepend(
                     '<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select at least one file.</div>'
                 );
 
@@ -260,7 +265,7 @@ import Toastify from 'toastify-js';
 
                 setTimeout(function () {
                     $(
-                        '#uploadDocumentModal .modal-content .uploadError'
+                        '#synPaySlipModal .modal-content .uploadError'
                     ).remove();
                     document
                         .querySelector('#uploadEmpDocBtn')

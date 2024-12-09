@@ -52,6 +52,7 @@ class EmployeeAttendanceController extends Controller
             'file' => 'required|file|mimes:zip|max:200480',
         ]);
         $type = $request->type;
+        $holiday_year_Id = $request->holiday_year_info;
         $file = $request->file('file');
         $fileOriginalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $dirName = $request->dir_name;
@@ -66,7 +67,7 @@ class EmployeeAttendanceController extends Controller
             $zip->close();
 
             // Dispatch the job to process the extracted files
-            ProcessExtractedFiles::dispatch($extractPath, $dirName, $type);
+            ProcessExtractedFiles::dispatch($extractPath, $dirName, $type,$holiday_year_Id);
             return response()->json(['success' => 'File Process Started. Please wait few min for the process to complete.'], 200);
         }
         
