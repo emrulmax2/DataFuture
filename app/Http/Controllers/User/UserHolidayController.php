@@ -332,7 +332,8 @@ class UserHolidayController extends Controller
             $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
             $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
-            $sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
+            //$sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
+            $sd = ($effective_from != '' && $year_start < $effective_from && ($effective_from <= date('Y-m-d') || $effective_from <= $year_end) ? $effective_from : $year_start);
             $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
 
             $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
