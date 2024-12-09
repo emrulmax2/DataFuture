@@ -62,7 +62,7 @@
                     @foreach ($paySlipUploadSync as $paySlip)
                     @php
                         $employeeFound = 0;
-                        $employeeList =Employee::all();
+                        $employeeList = \App\Models\Employee::all();
                         foreach($employeeList as $employee) {
                             
                             if($paySlip->file_name == $fileName && $paySlip->employe_id != null) {
