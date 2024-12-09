@@ -102,6 +102,7 @@ var hrPayslipListTable = (function () {
     
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const confirmDeleteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmDeleteModal"));
     if ($('#hrHolidayYearsListTable').length) {
         // Init Table
         hrHolidayYearsListTable.init();
@@ -385,7 +386,7 @@ var hrPayslipListTable = (function () {
                     $('.update').removeAttr('disabled', 'disabled');
                     $('.update svg').addClass('hidden');
                     confirmDeleteModal.hide();
-                    successModal.show();
+                    succModal.show();
                     document
                         .getElementById('successModal')
                         .addEventListener('shown.tw.modal', function (event) {
@@ -398,8 +399,8 @@ var hrPayslipListTable = (function () {
                         });
 
                     setTimeout(function () {
-                        successModal.hide();
-                        window.location.href = route('result.comparison',planId);
+                        succModal.hide();
+                        location.reload();
                     }, 3000);
                 }
             })
