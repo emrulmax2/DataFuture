@@ -92,7 +92,8 @@ class UserHolidayController extends Controller
                             || 
                             ($end_to == '' && $effective_from < $yearEnd)
                         ):
-                            $psd = ($yearStart < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $yearStart);
+                            //$psd = ($yearStart < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $yearStart);
+                            $psd = ($yearStart < $effective_from && ($effective_from <= $yearEnd || $effective_from <= date('Y-m-d')) ? $effective_from : $yearStart);
                             $ped = (($end_to != '' && $end_to != '0000-00-00') && $end_to < $yearEnd ? $end_to : $yearEnd);
                             $pattern['pattern_start'] = $psd;
                             $pattern['pattern_end'] = $ped;
