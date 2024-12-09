@@ -217,12 +217,17 @@ import Toastify from 'toastify-js';
                     );
 
                     drzn1.processQueue();
-                }else if (monthYear != '' && payslips != '') {
+                }else if (monthYear != '') {
                     $('#synPaySlipModal [name="dir_name"]').val(
                         monthYear
                     );
                     $('#synPaySlipModal [name="type"]').val(
                         payslips
+                    );
+                    $(
+                        '#synPaySlipModal [name="holiday_year_info"]'
+                    ).val(
+                        holiday_year
                     );
                     drzn1.processQueue();
                 } else {
