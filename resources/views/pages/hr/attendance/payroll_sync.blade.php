@@ -50,7 +50,8 @@
             <table id="hrPayslipSyncTable" class="table table-report table-report--tabulator">
                 <thead>
                     <tr>
-                        <th class="border-none whitespace-no-wrap">ID</th>
+                        <th class="border-none whitespace-no-wrap"><input id="checkbox-switch-all" data-tw-merge type="checkbox" class="checkbox-switch-all transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  value="" />
+                            <label data-tw-merge for="checkbox-switch-all" class="cursor-pointer ml-2">S.N.</label></th>
                         <th class="border-none whitespace-no-wrap">Payslip Name</th>
                         <th class="border-none whitespace-no-wrap">Employee</th>
                         <th class="border-none whitespace-no-wrap">Action</th>
@@ -61,12 +62,16 @@
                     @php $i = 0; $serial=1; @endphp
                     @foreach ($paySlipUploadSync as $paySlip)
                     @php
-                        
+                        $warningCheck = "transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-warning focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-warning [&[type='radio']]:checked:border-warning [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-warning [&[type='checkbox']]:checked:border-warning [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                        $primaryCheck ="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
+                        $checkboxCssClass = (isset($data['id'])) ? $warningCheck : $primaryCheck ; 
                     @endphp
                         <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
-                                <div class="font-medium whitespace-no-wrap">{{ $serial++ }}</div>
-                                <input type="hidden" name="id[]" value="{{ $paySlip->id }}">
+                                <input data-tw-merge type="checkbox" name="id[{{ $serial }}]" 
+                                class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ $paySlip->id }}" />
+                                <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ isset($data['id']) ? $data['id'] : $serial }}</label>
+                               @php $serial++; @endphp
                             </td>
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
