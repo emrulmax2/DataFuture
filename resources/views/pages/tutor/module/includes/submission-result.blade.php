@@ -228,7 +228,10 @@
                                                     <td class="border-b dark:border-darkmode-500">
                                                         @if($submission->is_it_final > 0)
                                                         <a href="javascript:void(0);" data-plan="{{ $plan->id }}" data-assesmentPlanId="{{ $submission->id }}" data-tw-toggle="modal" data-tw-target="#student-preview-modal"  class="edit_btn_submission_tutor btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>
-                                                        <button data-id="{{$submission->id}}" data-action="delete" data-url="tutor" class="delete_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9 ml-1"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
+                                                            @if((isset(auth()->user()->priv()['result_management_staff_delete']) && auth()->user()->priv()['result_management_staff_delete'] == 1))
+                                                            
+                                                            <button data-id="{{$submission->id}}" data-action="delete" data-url="tutor" class="delete_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9 ml-1"><i class="w-4 h-4" data-lucide="trash-2"></i></button>
+                                                            @endif
                                                         @endif
                                                     </td>
                                                 </tr>
