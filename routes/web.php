@@ -588,6 +588,12 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::post('attendance-excuse/store', 'store')->name('excuse.store');
         });
 
+        Route::controller(StudentResultController::class)->group(function() {
+            Route::get('student-results/{student}/frontend', 'frontEndIndex')->name('results.frontend.index'); 
+            Route::get('student-results/{student}/print', 'print')->name('results.print');
+        }); 
+    
+
     });
     
     /**
