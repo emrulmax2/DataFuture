@@ -127,6 +127,7 @@ class ClassStatusByTermController extends Controller
                     'schedule'=> isset($totalSchedule[$list->plan->course->name]) ? $totalSchedule[$list->plan->course->name] :'',
                     'future_schedule'=> isset($futureScheduleCount[$list->plan->course->name]) ? $futureScheduleCount[$list->plan->course->name] : '',
                     'held'  => isset($held[$list->plan->course->name]) ? $held[$list->plan->course->name] : '',
+                    'unheld' => (isset($totalSchedule[$list->plan->course->name]) && isset($held[$list->plan->course->name]) ? $totalSchedule[$list->plan->course->name] - $held[$list->plan->course->name] : ''),
                     'cancelled' => isset($cancelled[$list->plan->course->name]) ? $cancelled[$list->plan->course->name] : '',
                     'unknown' => isset($unknown[$list->plan->course->name]) ? $unknown[$list->plan->course->name] : '',
                     'proxy' => isset($proxy[$list->plan->course->name]) ? $proxy[$list->plan->course->name] : '',
@@ -173,6 +174,7 @@ class ClassStatusByTermController extends Controller
                                     'schedule' => $groupInfo[$key][$group_id]['schedule'] ? $groupInfo[$key][$group_id]['schedule'] : '',
                                     'future_schedule' => $groupInfo[$key][$group_id]['future_schedule'] ? $groupInfo[$key][$group_id]['future_schedule'] : '',
                                     'held' => $groupInfo[$key][$group_id]['held'] ? $groupInfo[$key][$group_id]['held'] : '',
+                                    'unheld' => ($groupInfo[$key][$group_id]['schedule'] && $groupInfo[$key][$group_id]['held'] ? $groupInfo[$key][$group_id]['schedule'] - $groupInfo[$key][$group_id]['held'] : ''),
                                     'cancelled' => $groupInfo[$key][$group_id]['cancelled'] ? $groupInfo[$key][$group_id]['cancelled'] : '',
                                     'unknown' => $groupInfo[$key][$group_id]['unknown'] ? $groupInfo[$key][$group_id]['unknown'] : '',
                                     'proxy' => $groupInfo[$key][$group_id]['proxy'] ? $groupInfo[$key][$group_id]['proxy'] : '',
@@ -274,10 +276,10 @@ class ClassStatusByTermController extends Controller
                 $tutorEmployeeId = (isset($pln->plan->tutor->employee->id) && $pln->plan->tutor->employee->id > 0 ? $pln->plan->tutor->employee->id : 0);
                 $PerTutorEmployeeId = (isset($pln->plan->personalTutor->employee->id) && $pln->plan->personalTutor->employee->id > 0 ? $pln->plan->personalTutor->employee->id : 0);
                 $classTutor = ($tutorEmployeeId > 0 ? $tutorEmployeeId : ($PerTutorEmployeeId > 0 ? $PerTutorEmployeeId : 0));
-                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', $pln->date)->where('attendance_type', 1)->get();
+                $empAttendanceLive = EmployeeAttendanceLive::where('employee_id', $classTutor)->where('date', date('Y-m-d', strtotime($pln->date)))->where('attendance_type', 1)->get();
 
                 $proxyEmployeeId = (isset($pln->proxy->employee->id) && $pln->proxy->employee->id > 0 ? $pln->proxy->employee->id : 0);
-                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', $pln->date)->where('attendance_type', 1)->get();
+                $proxyAttendanceLive = EmployeeAttendanceLive::where('employee_id', $proxyEmployeeId)->where('date', date('Y-m-d', strtotime($pln->date)))->where('attendance_type', 1)->get();
 
                 $classStatus = 0;
                 $classLabel = '';

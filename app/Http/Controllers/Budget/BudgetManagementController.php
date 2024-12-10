@@ -8,6 +8,9 @@ use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\AccTransaction;
 use App\Models\BudgetName;
+use App\Models\BudgetNameApprover;
+use App\Models\BudgetNameHolder;
+use App\Models\BudgetNameRequester;
 use App\Models\BudgetRequisition;
 use App\Models\BudgetRequisitionDocument;
 use App\Models\BudgetRequisitionItem;
@@ -25,6 +28,11 @@ use Illuminate\Http\Request;
 class BudgetManagementController extends Controller
 {
     public function index(){
+        $holders = BudgetNameHolder::pluck('user_id')->unique()->toArray();
+        $requester = BudgetNameRequester::pluck('user_id')->unique()->toArray();
+        $approver = BudgetNameApprover::pluck('user_id')->unique()->toArray();
+        $allApprover = array_merge($requester, $holders, $approver);
+        $allApprover = (!empty($allApprover) ? array_unique($allApprover) : [0]);
         return view('pages.budget.index', [
             'title' => 'Budget Management - London Churchill College',
             'breadcrumbs' => [
@@ -37,6 +45,7 @@ class BudgetManagementController extends Controller
                 $q->where('start_date', '<=', date('Y-m-d'))->where('end_date', '>=', date('Y-m-d'))->where('active', 1);
             })->get()->first(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'approvers' => User::whereIn('id', $allApprover)->where('active', 1)->orderBy('name', 'ASC')->get(),
             'venues' => Venue::orderBy('name', 'ASC')->get()
         ]);
     }

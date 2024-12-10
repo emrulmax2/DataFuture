@@ -189,7 +189,7 @@
                                         <td class="w-[160px]"><input type="number" step="1" name="items[quantity][]" class="quantity form-control w-full"/></td>
                                         <td class="w-[160px]"><input type="number" step="any" name="items[price][]" class="price form-control w-full"/></td>
                                         <td class="w-[160px] relative">
-                                            <input type="number" step="any" name="items[total][]" class="total form-control w-full"/>
+                                            <input type="number" readonly step="any" name="items[total][]" class="total form-control w-full"/>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -207,8 +207,8 @@
                                 <label for="first_approver" class="form-label">First Approver <span class="text-danger">*</span></label>
                                 <select name="first_approver" class="w-full tom-selects" id="first_approver">
                                     <option value="">Please Select</option>
-                                    @if($users->count() > 0)
-                                        @foreach($users as $usr)
+                                    @if($approvers->count() > 0)
+                                        @foreach($approvers as $usr)
                                             <option value="{{ $usr->id }}">{{ (isset($usr->employe->full_name) && !empty($usr->employe->full_name) ? $usr->employe->full_name : $usr->name) }}</option>
                                         @endforeach
                                     @endif
@@ -219,8 +219,8 @@
                                 <label for="final_approver" class="form-label">Final Approver <span class="text-danger">*</span></label>
                                 <select name="final_approver" class="w-full tom-selects" id="final_approver">
                                     <option value="">Please Select</option>
-                                    @if($users->count() > 0)
-                                        @foreach($users as $usr)
+                                    @if($approvers->count() > 0)
+                                        @foreach($approvers as $usr)
                                             <option value="{{ $usr->id }}">{{ (isset($usr->employe->full_name) && !empty($usr->employe->full_name) ? $usr->employe->full_name : $usr->name) }}</option>
                                         @endforeach
                                     @endif
@@ -361,8 +361,8 @@
                                 <label for="edit_first_approver" class="form-label">First Approver <span class="text-danger">*</span></label>
                                 <select name="first_approver" class="w-full tom-selects" id="edit_first_approver">
                                     <option value="">Please Select</option>
-                                    @if($users->count() > 0)
-                                        @foreach($users as $usr)
+                                    @if($approvers->count() > 0)
+                                        @foreach($approvers as $usr)
                                             <option value="{{ $usr->id }}">{{ (isset($usr->employe->full_name) && !empty($usr->employe->full_name) ? $usr->employe->full_name : $usr->name) }}</option>
                                         @endforeach
                                     @endif
@@ -373,8 +373,8 @@
                                 <label for="edit_final_approver" class="form-label">Final Approver <span class="text-danger">*</span></label>
                                 <select name="final_approver" class="w-full tom-selects" id="edit_final_approver">
                                     <option value="">Please Select</option>
-                                    @if($users->count() > 0)
-                                        @foreach($users as $usr)
+                                    @if($approvers->count() > 0)
+                                        @foreach($approvers as $usr)
                                             <option value="{{ $usr->id }}">{{ (isset($usr->employe->full_name) && !empty($usr->employe->full_name) ? $usr->employe->full_name : $usr->name) }}</option>
                                         @endforeach
                                     @endif
@@ -442,12 +442,12 @@
                             <div class="acc__input-error error-email text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                            <label for="phone" class="form-label">Phone</label>
                             <input id="phone" type="text" name="phone" class="form-control w-full">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                            <label for="address" class="form-label">Address</label>
                             <textarea id="address" name="address" class="form-control w-full" rows="3"></textarea>
                             <div class="acc__input-error error-address text-danger mt-2"></div>
                         </div>

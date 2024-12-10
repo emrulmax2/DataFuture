@@ -3008,7 +3008,6 @@ Route::middleware('auth')->group(function() {
         
     });
     Route::controller(ClassStatusByTermController::class)->group(function(){
-
         Route::get('reports/class-status-report', 'index')->name('reports.class-status.index'); 
         Route::any('reports/class-status-report/list', 'list')->name('reports.class-status.list'); 
         Route::any('reports/class-status-report/schedule-list/{group}/{course}/{term}', 'scheduleList')->name('reports.class-status.schedule'); 

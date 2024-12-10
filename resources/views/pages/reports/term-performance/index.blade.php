@@ -74,7 +74,7 @@
                 </div>
                 <div id="termPerformanceReportAccordion-collapse-5" class="accordion-collapse collapse" aria-labelledby="termPerformanceReportAccordion-5" data-tw-parent="#termPerformanceReportAccordion">
                     <div class="accordion-body">
-                        <div class="intro-y p-5 mt-5">
+                        <div class="intro-y">
                             <form action="#" method="post" id="classStatusForm">
                                 @csrf
                                 <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
