@@ -103,12 +103,12 @@
                             <div class="acc__input-error error-email text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                            <label for="edit_phone" class="form-label">Phone</label>
                             <input id="edit_phone" type="text" name="phone" class="form-control w-full">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_address" class="form-label">Address <span class="text-danger">*</span></label>
+                            <label for="edit_address" class="form-label">Address</label>
                             <textarea id="edit_address" name="address" class="form-control w-full" rows="3"></textarea>
                             <div class="acc__input-error error-address text-danger mt-2"></div>
                         </div>
@@ -165,12 +165,12 @@
                             <div class="acc__input-error error-email text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                            <label for="phone" class="form-label">Phone</label>
                             <input id="phone" type="text" name="phone" class="form-control w-full">
                             <div class="acc__input-error error-phone text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
+                            <label for="address" class="form-label">Address</label>
                             <textarea id="address" name="address" class="form-control w-full" rows="3"></textarea>
                             <div class="acc__input-error error-address text-danger mt-2"></div>
                         </div>

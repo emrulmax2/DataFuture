@@ -349,7 +349,7 @@ var requisitionListTable = (function () {
                         <td class="w-[160px]"><input type="number" step="1" name="items[quantity][]" class="quantity form-control w-full"/></td>\
                         <td class="w-[160px]"><input type="number" step="any" name="items[price][]" class="price form-control w-full"/></td>\
                         <td class="w-[160px] relative">\
-                            <input type="number" step="any" name="items[total][]" class="total form-control w-full"/>\
+                            <input readonly type="number" step="any" name="items[total][]" class="total form-control w-full"/>\
                             <button type="button" class="remove_req_row btn btn-danger w-[25px] h-[25px] btn-sm text-white rounded-full absolute t-0 r-0 b-0 m-auto p-0" style="margin-right: -4px;"><i data-lucide="trash-2" class="w-3 h-3"></i></button>\
                         </td>\
                     </tr>';
@@ -375,7 +375,7 @@ var requisitionListTable = (function () {
                         <td class="w-[160px]"><input type="number" step="1" name="items['+theSerial+'][quantity]" class="quantity form-control w-full"/></td>\
                         <td class="w-[160px]"><input type="number" step="any" name="items['+theSerial+'][price]" class="price form-control w-full"/></td>\
                         <td class="w-[160px] relative">\
-                            <input type="number" step="any" name="items['+theSerial+'][total]" class="total form-control w-full"/>\
+                            <input readonly type="number" step="any" name="items['+theSerial+'][total]" class="total form-control w-full"/>\
                             <input type="hidden" name="items['+theSerial+'][id]" value="0" class="form-control w-full"/>\
                             <button type="button" class="remove_req_row btn btn-danger w-[25px] h-[25px] btn-sm text-white rounded-full absolute t-0 r-0 b-0 m-auto p-0" style="margin-right: -4px;"><i data-lucide="trash-2" class="w-3 h-3"></i></button>\
                         </td>\
@@ -643,7 +643,7 @@ var requisitionListTable = (function () {
                             html += '<td class="w-[160px]"><input type="number" value="'+(item.quantity)+'" step="1" name="items['+serial+'][quantity]" class="quantity form-control w-full"/></td>';
                             html += '<td class="w-[160px]"><input type="number" value="'+(item.price)+'" step="any" name="items['+serial+'][price]" class="price form-control w-full"/></td>';
                             html += '<td class="w-[160px] relative">';
-                                html += '<input type="number" step="any" value="'+(item.total)+'" name="items['+serial+'][total]" class="total form-control w-full"/>';
+                                html += '<input readonly type="number" step="any" value="'+(item.total)+'" name="items['+serial+'][total]" class="total form-control w-full"/>';
                                 html += '<input type="hidden" name="items['+serial+'][id]" value="'+(item.id)+'" class="form-control w-full"/>';
                                 html += '<button type="button" class="remove_req_row btn btn-danger w-[25px] h-[25px] btn-sm text-white rounded-full absolute t-0 r-0 b-0 m-auto p-0" style="margin-right: -4px;"><i data-lucide="trash-2" class="w-3 h-3"></i></button>';
                             html += '</td>';

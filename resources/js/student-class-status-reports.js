@@ -113,6 +113,20 @@ var statusListTable = (function () {
                     },
                 },
                 {
+                    title: 'Unheld',
+                    field: 'unheld',
+                    headerHozAlign: 'center',
+                    hozAlign: 'center',
+                    headerSort: false,
+                    formatter(cell, formatterParams) {
+                        return (
+                            '<div class="text-xs">' +
+                            (cell.getData().unheld > 0 ? cell.getData().unheld : '') +
+                            '</div>'
+                        );
+                    },
+                },
+                {
                     title: 'Cancel',
                     field: 'cancelled',
                     headerHozAlign: 'center',
@@ -257,8 +271,14 @@ var statusListTable = (function () {
         } else {
             $('#classStatusForm .reportAlert').remove();
             $('#classStatusForm').append(
-                '<div class="reportAlert alert alert-warning mt-5 w-96 ">Please select an attendance term to proceed.</div>'
+                '<div class="reportAlert alert alert-pending-soft show flex items-center mt-5" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select an attendance term to proceed.</div>'
             );
+
+            createIcons({
+                icons,
+                'stroke-width': 1.5,
+                nameAttr: 'data-lucide',
+            });
 
             setTimeout(function () {
                 $('#classStatusForm .reportAlert').fadeOut();
