@@ -126,6 +126,8 @@ export default defineConfig({
                 'resources/js/student-frontend-dashboard.js',
                 'resources/js/student-frontend-profile.js',
                 'resources/js/student-frontend-consent.js',
+                'resources/js/student-results-frontend.js',
+                
 
                 'resources/js/employee-payment-setting.js',
                 'resources/js/employee-penssion-scheem.js',
