@@ -170,5 +170,81 @@ class StudentResultController extends Controller
         
     }
 
- 
+ /**
+     * Display a listing of the resource.
+     */
+    public function frontEndIndex(Student $student)
+    {
+        $grades = Grade::all();
+        $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
+        sort($courseCreationIds);
+        $courseRelationActiveCourseId = $student->crel->creation->id;
+        $maxCourseCreationId = max($courseCreationIds);
+        $minCourseCreationId = min($courseCreationIds);
+            
+            $termData = [];
+            $data = [];
+            $resultPrimarySet = [];
+            $planList = Result::where('student_id', $student->id)->get()->pluck('plan_id')->unique()->toArray();
+            $QueryPart = Plan::whereIn('id',$planList);
+            
+            $QueryPart->where('course_creation_id','>=',$courseRelationActiveCourseId);
+
+            if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
+
+                $arrayCurrentKey = array_search($courseRelationActiveCourseId, $courseCreationIds);
+                $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
+                $QueryPart->where('course_creation_id','<',$nextCourseCreationId);
+
+            }
+            $QueryPart->orderBy('id','DESC');
+            $QueryInner = $QueryPart->get();
+
+            foreach($QueryInner as $list):
+                $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
+                $checkPrimaryResult = Result::with([
+                "grade",
+                "createdBy",
+                "updatedBy",
+                "plan",
+                "plan.creations",
+                "plan.course.body",
+                "plan.creations.module"])->where("student_id", $student->id)
+                ->whereHas('plan', function($query) use ($list) {
+                    $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
+                })
+                ->orderBy('id','DESC')->get();
+                
+                if($checkPrimaryResult->isNotEmpty()) {
+                    foreach ($checkPrimaryResult as $key => $result) {
+                        $data[$moduleCreation->module->name][] = $result;
+                        $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
+                    }
+                }
+                $resultPrimarySet[$result->id] = null;
+            endforeach;
+
+
+        $subQuery = ExamResultPrev::select('id')->where('student_id', $student->id)->groupBy('student_id', 'course_module_id')->havingRaw('MAX(created_at)');
+        $prevResultCount = ExamResultPrev::whereIn('id', $subQuery)->where('student_id', $student->id)->get()->count();
+        
+        return view('pages.students.frontend.result.index', [
+            'title' => 'Students - Results',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Results', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'dataSet' => ($data) ?? null,
+            'termSet'=> ($termSet) ?? null,
+            "grades" =>$grades,
+            "terms" =>TermDeclaration::orderBy('id','DESC')->get(),
+            "resultPrimarySet" =>$resultPrimarySet,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'prev_result_count' => $prevResultCount,
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'award' => isset($student->awarded) && isset($student->awarded->id) && $student->awarded->id > 0 ? $student->awarded : null
+        ]);
+    }
 }

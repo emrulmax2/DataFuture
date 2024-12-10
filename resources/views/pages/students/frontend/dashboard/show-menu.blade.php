@@ -12,7 +12,7 @@
     </li>
     
     <li class="nav-item" role="presentation">
-        <a href="javascript::void()" class="nav-link py-4">
+        <a href="{{ route('students.results.frontend.index',$student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'students.results.frontend.index' ? 'active' : '' }}">
             Result
         </a>
     </li>
