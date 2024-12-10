@@ -324,7 +324,7 @@
                                             </div>
                                         </td> --}}
                                     </tr>
-                                    @php $index++; @endphp
+                                    @php $index++;  @endphp
                                 @endforeach
                             </tbody>
                         </table>

@@ -228,7 +228,7 @@ class StudentResultController extends Controller
         $subQuery = ExamResultPrev::select('id')->where('student_id', $student->id)->groupBy('student_id', 'course_module_id')->havingRaw('MAX(created_at)');
         $prevResultCount = ExamResultPrev::whereIn('id', $subQuery)->where('student_id', $student->id)->get()->count();
         
-        return view('pages.students.frontend.result.index', [
+        return view('pages.students.frontend.resultset.index', [
             'title' => 'Students - Results',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
