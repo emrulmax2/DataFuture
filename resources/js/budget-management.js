@@ -440,18 +440,24 @@ var requisitionListTable = (function () {
                             html += '<div class="col-span-4 text-slate-500 font-medium">Vendor Name</div>';
                             html += '<div class="col-span-8 font-medium">'+row.name+'</div>';
                         html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
-                        html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
-                        html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
-                        html += '</div>';
+                        if(row.email != '' && row.email != null){
+                            html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
+                            html += '</div>';
+                        }
+                        if(row.phone != '' && row.phone != null){
+                            html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
+                            html += '</div>';
+                        }
+                        if(row.address != '' && row.address != null){
+                            html += '<div class="grid grid-cols-12 gap-0">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
+                            html += '</div>';
+                        }
     
                     $('#addRequisitionModal .vendorDetailsWrap').html(html).fadeIn();
                 }
@@ -481,18 +487,24 @@ var requisitionListTable = (function () {
                             html += '<div class="col-span-4 text-slate-500 font-medium">Vendor Name</div>';
                             html += '<div class="col-span-8 font-medium">'+row.name+'</div>';
                         html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
-                        html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
-                        html += '</div>';
-                        html += '<div class="grid grid-cols-12 gap-0">';
-                            html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
-                            html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
-                        html += '</div>';
+                        if(row.email != '' && row.email != null){
+                            html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
+                            html += '</div>';
+                        }
+                        if(row.phone != '' && row.phone != null){
+                            html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
+                            html += '</div>';
+                        }
+                        if(row.address != '' && row.address != null){
+                            html += '<div class="grid grid-cols-12 gap-0">';
+                                html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
+                                html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
+                            html += '</div>';
+                        }
     
                     $('#editRequisitionModal .vendorDetailsWrap').html(html).fadeIn();
                 }
@@ -820,18 +832,24 @@ var requisitionListTable = (function () {
                         html += '<div class="col-span-4 text-slate-500 font-medium">Vendor Name</div>';
                         html += '<div class="col-span-8 font-medium">'+row.name+'</div>';
                     html += '</div>';
-                    html += '<div class="grid grid-cols-12 gap-0">';
-                        html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
-                        html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
-                    html += '</div>';
-                    html += '<div class="grid grid-cols-12 gap-0">';
-                        html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
-                        html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
-                    html += '</div>';
-                    html += '<div class="grid grid-cols-12 gap-0">';
-                        html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
-                        html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
-                    html += '</div>';
+                    if(row.email != '' && row.email != null){
+                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                            html += '<div class="col-span-4 text-slate-500 font-medium">Email</div>';
+                            html += '<div class="col-span-8 font-medium">'+row.email+'</div>';
+                        html += '</div>';
+                    }
+                    if(row.phone != '' && row.phone != null){
+                        html += '<div class="grid grid-cols-12 gap-0 mb-2">';
+                            html += '<div class="col-span-4 text-slate-500 font-medium">Phone</div>';
+                            html += '<div class="col-span-8 font-medium">'+row.phone+'</div>';
+                        html += '</div>';
+                    }
+                    if(row.address != '' && row.address != null){
+                        html += '<div class="grid grid-cols-12 gap-0">';
+                            html += '<div class="col-span-4 text-slate-500 font-medium">Address</div>';
+                            html += '<div class="col-span-8 font-medium">'+row.address+'</div>';
+                        html += '</div>';
+                    }
 
                     $(modal_id+' .vendorDetailsWrap').html(html).fadeIn();
                 }

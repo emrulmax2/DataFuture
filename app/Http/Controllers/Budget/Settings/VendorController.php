@@ -90,9 +90,9 @@ class VendorController extends Controller
         if(isset($request->active) && $request->active == 1):
             $row['id'] = $data->id;
             $row['name'] = $request->name;
-            $row['email'] = (isset($request->email) && !empty($request->email) ? $request->email : null);
-            $row['phone'] = (isset($request->phone) && !empty($request->phone) ? $request->phone : null);
-            $row['address'] = (isset($request->address) && !empty($request->address) ? $request->address : null);
+            $row['email'] = (isset($request->email) && !empty($request->email) ? $request->email : '');
+            $row['phone'] = (isset($request->phone) && !empty($request->phone) ? $request->phone : '');
+            $row['address'] = (isset($request->address) && !empty($request->address) ? $request->address : '');
         endif;
         return response()->json(['msg' => 'Inserted Successfully.', 'row' => $row]);
     }
