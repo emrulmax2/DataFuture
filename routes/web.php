@@ -2703,6 +2703,7 @@ Route::middleware('auth')->group(function() {
         // Route::get('result-comparison/edit/{id}', 'edit')->name('result.comparison.edit');
         Route::post('result-comparison/{plan}/update', 'update')->name('result.comparison.update');
         Route::post('result-comparison/{plan}/delete', 'deleteResultBulk')->name('result.comparison.deleteAll');
+        Route::post('result-comparison/{plan}/delete-submission', 'deleteResultSubmissionByStaffBulk')->name('result.comparison.deleteStaffSubmission');
         // Route::post('result-comparison/restore/{id}', 'restore')->name('result.comparison.restore');
     });
 
