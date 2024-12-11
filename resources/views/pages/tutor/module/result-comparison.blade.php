@@ -114,6 +114,7 @@
                 <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmUploadTask" id="updateSubmission" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="updateSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-warning text-warning dark:border-warning [&:hover:not(:disabled)]:bg-warning/10 mb-2 mr-1 w-48">Update Result</button>
             @endif
             <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmUploadTask" id="savedSubmission" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="savedSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&:hover:not(:disabled)]:bg-success/10 mb-2 mr-1  w-48">Save as New</button>
+            <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmDeleteTask" id="deleteSubmission" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="deleteSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1 w-48">Delete Selected</button>
         </div>
         <div class="p-5 pt-0">
             <div class="grid grid-cols-12 gap-4">        
@@ -178,7 +179,9 @@
                                                                 <input type="hidden" name="student_id[{{ $serial }}]" value="{{ $data['student_id'] }}" />
                                                                 <input type="hidden" name="assessment_plan_id[{{ $serial }}]" value="{{ $data['assessment_plan_id'] }}" />
                                                                 <input type="hidden" name="result_id[{{ $serial }}]" value="{{ isset($data['id']) ? $data['id'] : '' }}" />
-                                                                <input data-tw-merge type="checkbox" {{ ($data['attendance']===null || $data['attendance']===1) ? '' : 'disabled' }} name="id[{{ $serial }}]" 
+                                                                <input type="hidden" name="result_submission_staff_id[{{ $serial }}]" value="{{ $data['result_submission_staff_id'] }}" />
+                                                                
+                                                                <input data-tw-merge type="checkbox" data-result_submission_staff_id="{{ $data['result_submission_staff_id'] }}" {{ ($data['attendance']===null || $data['attendance']===1) ? '' : 'disabled' }} name="id[{{ $serial }}]" 
                                                                 class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ isset($data['id']) ? $data['id'] : $serial }}" />
                                                                 <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ isset($data['id']) ? $data['id'] : $serial }}</label>
                                                             </div>
@@ -229,7 +232,7 @@
                                             <th class="whitespace-nowrap border ">Grade By Staff</th>
                                             <th class="whitespace-nowrap border ">Grade By P.T</th>
                                             <th class="whitespace-nowrap border ">Final Grade</th>
-                                            <th class="whitespace-nowrap border ">Action</th>
+                                            <th class="whitespace-nowrap border ">Publish At</th>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -247,6 +250,7 @@
                 <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmUploadTask" id="updateSubmission1" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="updateSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-warning text-warning dark:border-warning [&:hover:not(:disabled)]:bg-warning/10 mr-1 w-48">Update Result</button>
             @endif
             <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmUploadTask" id="savedSubmission1" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="savedSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&:hover:not(:disabled)]:bg-success/10  mr-1 w-48">Save as New</button>
+            <button type="button" data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#finalConfirmDeleteTask" id="deleteSubmission1" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} data-planid={{ $plan->id }} class="deleteSubmission hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10  mr-1 w-48">Delete Selected</button>
         </div>
     </div>
     </form>
@@ -343,7 +347,7 @@
                         <div class="append-input"></div>
                         <div class="px-5 pb-8 text-center">
                             <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                            <button type="button" data-action="SAVE" class="updateResult btn btn-primary w-auto">Yes, I agree
+                            <button type="submit" data-action="SAVE" class="updateResult btn btn-primary w-auto">Yes, I agree
                                 <i data-loading-icon="oval" class="w-4 h-4 ml-2 hidden " ></i>
                             </button>
                         </div>
@@ -352,6 +356,33 @@
         </div>
     </div>
     <!-- END: Plan Task Confirm Modal Content -->
+
+        <!-- BEGIN: Plan Task  Confirm Modal Content -->
+        <div id="finalConfirmDeleteTask" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="p-5 text-center">
+                            <i data-lucide="info" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                            <div class="text-3xl mt-5 title">Are you sure?</div>
+                            <div class="text-slate-500 mt-2 description">Result will save as New</div>
+                        </div>
+                        <form id="deleteStaffSubmissionForm" method="post" >
+                            @csrf
+                            <input type="hidden" name="id[]" value="" />
+                            <div class="append-input"></div>
+                            <div class="px-5 pb-8 text-center">
+                                <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                                <button type="submit" data-action="SAVE" class="updateResult btn btn-danger w-auto">Yes, I agree
+                                    <i data-loading-icon="oval" class="w-4 h-4 ml-2 hidden " ></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- END: Plan Task Confirm Modal Content -->
 
     <!-- BEGIN: PublishDateConfirmUploadTask Task  Confirm Modal Content -->
     <div id="PublishDateConfirmUploadTask" class="modal" tabindex="-1" aria-hidden="true">

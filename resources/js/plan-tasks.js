@@ -575,12 +575,23 @@ var classStudentListTutorModuleTable = (function () {
                     titleFormatter: "rowSelection", 
                     hozAlign: "left", 
                     headerHozAlign: "left",
-                    width: "160",
+                    width: "48",
                     headerSort: false, 
                     download: false,
-                    cellClick:function(e, cell){
+                    cellClick: function(e, cell) {
                         cell.getRow().toggleSelect();
                     }
+                },
+                {
+                    title: "S/N",
+                    formatter: function(cell, formatterParams, onRendered) {
+                        return cell.getRow().getPosition(true) + 1; // Add 1 to make it 1-based index
+                    },
+                    hozAlign: "left",
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false,
+                    download: false
                 },
                 {
                     title: "Reg. No",

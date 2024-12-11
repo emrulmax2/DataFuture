@@ -178,8 +178,10 @@ var submissionTable = (function () {
     const PublishDateConfirmUploadTask = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#PublishDateConfirmUploadTask')
     );
-
-
+    
+    const finalConfirmDeleteTask = tailwind.Modal.getOrCreateInstance(
+        document.querySelector('#finalConfirmDeleteTask')
+    );
     $('.checkbox-switch-all').on('change', function () {
         var checked = $(this).is(':checked');
         let selectCount = 0;
@@ -193,6 +195,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').removeClass('hidden');
             $('.updateSubmission').removeClass('hidden');
+            //$('.deleteSubmission').removeClass('hidden');
         } else {
             $.each($('.fill-box:not(:disabled)'), function () {
                 $(this).prop('checked', false);
@@ -203,6 +206,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
+            //$('.deleteSubmission').addClass('hidden');
         }
     });
 
@@ -220,12 +224,14 @@ var submissionTable = (function () {
                 checkFound = true;
                 $('.savedSubmission').removeClass('hidden');
                 $('.updateSubmission').removeClass('hidden');
+                //$('.deleteSubmission').removeClass('hidden');
             }
         });
 
         if (!checkFound) {
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
+            //$('.deleteSubmission').addClass('hidden');
         }
     });
 
@@ -329,6 +335,130 @@ var submissionTable = (function () {
                 $('#finalConfirmUploadTask .updateResult').removeClass('btn-pending');
                  
             });
+    });
+
+    $('.deleteSubmission').on('click', function () {
+        $('#finalConfirmDeleteTask  div.append-input').html('');
+        $.each($('.fill-box'), function () {
+            let tthis = $(this);
+            let result_submission_staff_id = tthis.data('result_submission_staff_id');
+            if (tthis.is(':checked')) {
+                $('#finalConfirmDeleteTask  div.append-input').append(
+                    "<input type='hidden' name='id[]' value='" +
+                        result_submission_staff_id +
+                        "'>"
+                );
+            }
+        });
+        let rowID = [];
+
+        document
+            .getElementById('finalConfirmDeleteTask')
+            .addEventListener('shown.tw.modal', function (event) {
+                $('#finalConfirmDeleteTask .title').html(
+                    'Do you really want to delete?'
+                );
+                $('#finalConfirmDeleteTask .description').html(
+                    'Do you really want to delete these selected submission? If yes then please click on the delete btn.'
+                );
+                $('#finalConfirmDeleteTask .updateResult').attr('data-action', 'DELETE');
+            });
+
+            $('#finalConfirmDeleteTask .updateResult').removeClass('btn-primary');
+            $('#finalConfirmDeleteTask .updateResult').addClass('btn-pending');
+
+    });
+
+    $('#deleteStaffSubmissionForm').on('submit', function (e) {
+        e.preventDefault();
+        
+        let planId = $(".deleteSubmission").data('planid');
+        
+        let action = $('#finalConfirmDeleteTask .updateResult').attr('data-action');
+        const form = document.getElementById('deleteStaffSubmissionForm');
+        let form_data = new FormData(form);
+
+        $('#finalConfirmDeleteTask .updateResult').attr('disabled', 'disabled');
+        $('#finalConfirmDeleteTask .updateResult svg').removeClass('hidden');
+        let url = '';
+        url = route('result.comparison.deleteStaffSubmission',planId);
+        
+        axios({
+            method: 'post',
+            url: url,
+            data: form_data,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            },
+        })
+        .then((response) => {
+            if (response.status == 200) {
+                $('#finalConfirmDeleteTask .updateResult').removeAttr('disabled', 'disabled');
+                $('#finalConfirmDeleteTask .updateResult svg').addClass('hidden');
+                finalConfirmDeleteTask.hide();
+                successModal.show();
+                document
+                    .getElementById('successModal')
+                    .addEventListener('shown.tw.modal', function (event) {
+                        $('#successModal .successModalTitle').html(
+                            'Congratulations!'
+                        );
+                        $('#successModal .successModalDesc').html(
+                            'Result Successfully updated.'
+                        );
+                    });
+
+                setTimeout(function () {
+                    successModal.hide();
+                    window.location.reload();
+                }, 3000);
+            }
+        })
+        .catch((error) => {
+            $('#finalConfirmDeleteTask .updateResult').removeAttr('disabled', 'disabled');
+            $('#finalConfirmDeleteTask .updateResult svg').addClass('hidden');
+            finalConfirmDeleteTask.hide();
+            warningModal.show();
+
+            document
+                    .getElementById('warningModal')
+                    .addEventListener('shown.tw.modal', function (event) {
+                        $('#warningModal .warningModalTitle').html(
+                            'Result Data missing!'
+                        );
+                        $('#warningModal .warningModalDesc').html(
+                            'Result Data missing.'
+                        );
+                    });
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        // Extract the index from the key (e.g., employee_id.0 -> 0)
+                        let indexMatch = key.match(/\d+/);
+                        let index = indexMatch ? indexMatch[0] : '';
+
+                        // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
+                        let keyWithoutIndex = key.replace(/\.\d+/, '');
+                        $(`#resultComparisonForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#resultComparisonForm  .error-${keyWithoutIndex}-${index}`).html(val)
+                    }
+                }else if (error.response.status == 302) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        // Extract the index from the key (e.g., employee_id.0 -> 0)
+                        let indexMatch = key.match(/\d+/);
+                        let index = indexMatch ? indexMatch[0] : '';
+
+                        // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
+                        let keyWithoutIndex = key.replace(/\.\d+/, '');
+                        $(`#resultComparisonForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#resultComparisonForm  .error-${keyWithoutIndex}-${index}`).html(val)
+                    }
+                } else {
+                    console.log('resultComparisonForm error', error.response.data);
+                }
+            }
+            
+        });
     });
 
     $('#finalConfirmUploadTask .updateResult').on('click', function () {
@@ -531,5 +661,5 @@ var submissionTable = (function () {
         });
     });
      
-    
+
 })();

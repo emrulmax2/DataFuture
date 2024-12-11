@@ -123,6 +123,8 @@ class ResultComparisonController extends Controller
                 $resultSet[$key]['id'] = $result->id;
             endif;  
             
+            
+            $resultSet[$key]['result_submission_staff_id'] = isset($resultSubmissionByStaff->id) ? $resultSubmissionByStaff->id : null;
             $resultSet[$key]['full_name'] = $value->student->full_name;
             $resultSet[$key]['student_id'] = $value->student->id;
             $resultSet[$key]['registration_no'] = $value->student->registration_no;
@@ -367,6 +369,23 @@ class ResultComparisonController extends Controller
         })->delete();
 
         if($baseResultDelete||$prevResultDelete)
+            return response()->json(['message' => 'Result successfully deleted.'], 200);
+        else
+            return response()->json(['message' => 'Result could not be deleted'], 302);
+        
+    }
+
+
+    public function deleteResultSubmissionByStaffBulk(Request $request)
+    {
+        
+        $SubmissionIds = array_filter(array_unique($request->input('id')));
+        //$query1 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->get();
+
+        $query2 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->delete();
+
+
+        if($query2)
             return response()->json(['message' => 'Result successfully deleted.'], 200);
         else
             return response()->json(['message' => 'Result could not be deleted'], 302);
