@@ -223,7 +223,9 @@ class StudentResultController extends Controller
                         $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
                     }
                 }
-                $resultPrimarySet[$result->id] = null;
+                if(isset($result->id))
+                    $resultPrimarySet[$result->id] = null;
+                
             endforeach;
 
 
