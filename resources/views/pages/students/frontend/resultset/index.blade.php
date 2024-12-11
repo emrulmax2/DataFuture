@@ -17,9 +17,9 @@
         </h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0 items-center">
             <h4 id="frequency-distribution" class="text-sm font-medium mr-2 py-5">[  ]</h4>
-            <a href="{{ route('students.results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
+            {{-- <a href="{{ route('students.results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-            </a>
+            </a> --}}
         </div>
     </div>
     <!-- END: Page Title -->
