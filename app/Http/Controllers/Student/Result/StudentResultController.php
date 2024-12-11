@@ -214,7 +214,7 @@ class StudentResultController extends Controller
                 ->whereHas('plan', function($query) use ($list) {
                     $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
                 })
-                ->where('published_at','>=',Carbon::now())
+                ->where('published_at','<',Carbon::now())
                 ->orderBy('id','DESC')->get();
                 
                 if($checkPrimaryResult->isNotEmpty()) {
