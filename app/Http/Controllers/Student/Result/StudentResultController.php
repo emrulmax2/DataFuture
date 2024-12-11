@@ -18,6 +18,7 @@ use App\Models\StudentCourseRelation;
 use App\Models\TermDeclaration;
 use App\Models\User;
 use Barryvdh\DomPDF\PDF as DomPDFPDF;
+use Carbon\Carbon;
 use FontLib\Table\Type\name;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -213,6 +214,7 @@ class StudentResultController extends Controller
                 ->whereHas('plan', function($query) use ($list) {
                     $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
                 })
+                ->where('published_at','>=',Carbon::now())
                 ->orderBy('id','DESC')->get();
                 
                 if($checkPrimaryResult->isNotEmpty()) {
