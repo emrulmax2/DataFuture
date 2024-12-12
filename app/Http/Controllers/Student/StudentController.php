@@ -542,6 +542,14 @@ class StudentController extends Controller
         $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
         $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
 
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id', $courseCreationID)
+                        ->where('student_course_relation_id', $courseRelationId)
+                        ->get()
+                        ->first();
+        $venue_id = (isset($currentCourse->venue_id) && $currentCourse->venue_id > 0 ? $currentCourse->venue_id : 0);
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id', $courseCreationID)->where('venue_id', $venue_id)->get()->first();
+
         return view('pages.students.live.accounts', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
@@ -557,7 +565,8 @@ class StudentController extends Controller
             'lastAssigns' => Assign::where('student_id', $student_id)->orderBy('id', 'desc')->get()->first(),
             'paymentMethods' => SlcPaymentMethod::orderBy('name', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
-            'registrations' => SlcRegistration::where('student_course_relation_id', $courseRelationId)->where('student_id', $student_id)->get()
+            'registrations' => SlcRegistration::where('student_course_relation_id', $courseRelationId)->where('student_id', $student_id)->get(),
+            "slcCode" =>(isset($CourseCreationVenue->slc_code) && !empty($CourseCreationVenue->slc_code) ? $CourseCreationVenue->slc_code : ''),
         ]);
     }
 

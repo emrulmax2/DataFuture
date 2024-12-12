@@ -279,7 +279,7 @@
                             </div>
                             <div class="col-span-6 sm:col-span-3">
                                 <label for="agr_add_slc_coursecode" class="form-label">SLC Course Code <span class="text-danger">*</span></label>
-                                <input type="text" value="" id="agr_add_slc_coursecode" class="form-control" name="slc_coursecode">
+                                <input data-code="{{ $slcCode }}" type="text" value="{{ $slcCode }}" id="agr_add_slc_coursecode" class="form-control" name="slc_coursecode">
                                 <div class="acc__input-error error-slc_coursecode text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-3">
