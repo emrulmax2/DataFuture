@@ -111,13 +111,18 @@ class SlcInstallmentController extends Controller
         $slc_agreement_id = $request->slc_agreement_id;
         $student_id = $request->student_id;
 
-        $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $slc_agreement_id)
-                        ->where('session_term', $theSession)->orderBy('id', 'DESC')
-                        ->get()->first();
-        if(isset($existingInst->id) && $existingInst->id > 0):
-            return response()->json(['res' => 0], 200);
-        else:
+        $theAgreement = SlcAgreement::find($slc_agreement_id);
+        if(isset($theAgreement->is_self_funded) && $theAgreement->is_self_funded == 1):
             return response()->json(['res' => 1], 200);
+        else:
+            $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $slc_agreement_id)
+                            ->where('session_term', $theSession)->orderBy('id', 'DESC')
+                            ->get()->first();
+            if(isset($existingInst->id) && $existingInst->id > 0):
+                return response()->json(['res' => 0], 200);
+            else:
+                return response()->json(['res' => 1], 200);
+            endif;
         endif;
     }
 
@@ -127,13 +132,18 @@ class SlcInstallmentController extends Controller
         $theSession = $request->theSession;
 
         $theInstallment = SlcInstallment::find($slc_installment_id);
-        $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $theInstallment->slc_agreement_id)
-                        ->where('session_term', $theSession)->orderBy('id', 'DESC')
-                        ->get()->first();
-        if(isset($existingInst->id) && $existingInst->id > 0):
-            return response()->json(['res' => 0, 'inst' => $theInstallment], 200);
-        else:
+        $theAgreement = SlcAgreement::find($theInstallment->slc_agreement_id);
+        if(isset($theAgreement->is_self_funded) && $theAgreement->is_self_funded == 1):
             return response()->json(['res' => 1, 'inst' => $theInstallment], 200);
+        else:
+            $existingInst = SlcInstallment::where('student_id', $student_id)->where('slc_agreement_id', $theInstallment->slc_agreement_id)
+                            ->where('session_term', $theSession)->orderBy('id', 'DESC')
+                            ->get()->first();
+            if(isset($existingInst->id) && $existingInst->id > 0):
+                return response()->json(['res' => 0, 'inst' => $theInstallment], 200);
+            else:
+                return response()->json(['res' => 1, 'inst' => $theInstallment], 200);
+            endif;
         endif;
     }
 
