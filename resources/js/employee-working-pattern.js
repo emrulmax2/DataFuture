@@ -446,7 +446,7 @@ var employeePatternListTable = (function () {
         copied_unpaidBr = $theRow.find('.unpaidBr').val();
         copied_rowTotal = $theRow.find('.rowTotal').val();
 
-        $('.staffPayInfoTable').find('.pasteRow').removeAttr('disabled');
+        $('.staffPayInfoTable').find('.pasteRow').removeClass('hidden');
     });
 
     $('.staffPayInfoTable').on('click', '.pasteRow', function(e){
@@ -489,6 +489,7 @@ var employeePatternListTable = (function () {
         $('#addCalendarModal input[name="weekTotal"]').val('');
 
         copied = false;
+        $('#addCalendarModal .staffPayInfoTable').find('.pasteRow').addClass('hidden');
     });
 
     const editCalendarModalEl = document.getElementById('editCalendarModal')
@@ -502,6 +503,7 @@ var employeePatternListTable = (function () {
         $('#editCalendarModal input[name="weekTotal"]').val('');
 
         copied = false;
+        $('#editCalendarModal .staffPayInfoTable').find('.pasteRow').addClass('hidden');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -851,7 +853,7 @@ var employeePatternListTable = (function () {
                     rowHtml += '<div class="relative">';
                         rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
                         rowHtml += '<button type="button" class="copyRow btn btn-success rounded-full text-white absolute r-0 t-0 p-0"><i data-lucide="copy" class="w-3 h-3"></i></button>';
-                        rowHtml += '<button type="button" '+(copied ? '' : 'disabled')+' class="pasteRow btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
+                        rowHtml += '<button type="button" class="pasteRow '+(copied ? '' : 'hidden')+' btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
                     rowHtml += '</div>';
                 rowHtml += '</td>';
             rowHtml += '</tr>';
@@ -1140,7 +1142,7 @@ var employeePatternListTable = (function () {
                     rowHtml += '<div class="relative">';
                         rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
                         rowHtml += '<button type="button" class="copyRow btn btn-success rounded-full text-white absolute r-0 t-0 p-0"><i data-lucide="copy" class="w-3 h-3"></i></button>';
-                        rowHtml += '<button type="button" '+(copied ? '' : 'disabled')+' class="pasteRow btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
+                        rowHtml += '<button type="button" class="pasteRow '+(copied ? '' : 'hidden')+' btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
                     rowHtml += '</div>';
                 rowHtml += '</td>';
             rowHtml += '</tr>';

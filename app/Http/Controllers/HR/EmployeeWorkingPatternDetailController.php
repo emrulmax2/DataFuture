@@ -134,7 +134,7 @@ class EmployeeWorkingPatternDetailController extends Controller
                         $html .= '<div class="relative">';
                             $html .= '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" value="'.$ptd->total.'" name="pattern['.$ptd->day.'][total]"/>';
                             $html .= '<button type="button" class="copyRow btn btn-success rounded-full text-white absolute r-0 t-0 p-0"><i data-lucide="copy" class="w-3 h-3"></i></button>';
-                            $html .= '<button type="button" disabled class="pasteRow btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
+                            $html .= '<button type="button" class="pasteRow hidden btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
                         $html .= '</td>';
                     $html .= '</td>';
                 $html .= '</tr>';
