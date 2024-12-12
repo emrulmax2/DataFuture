@@ -120,6 +120,7 @@ class PaySlipUploadSyncController extends Controller
             }
         });
         
+        
         $baseResultDelete = PaySlipUploadSync::whereIn('id', $resultIds)->delete();
 
         if($baseResultDelete)
