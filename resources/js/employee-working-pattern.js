@@ -427,6 +427,39 @@ var employeePatternListTable = (function () {
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
     let confModalDelTitle = 'Are you sure?';
+    let copied = false;
+    let copied_startTime = ''; 
+    let copied_endTime = ''; 
+    let copied_paidBr = ''; 
+    let copied_unpaidBr = ''; 
+    let copied_rowTotal = '';
+
+    $('.staffPayInfoTable').on('click', '.copyRow', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theRow = $theBtn.closest('.patternRow');
+
+        copied = true;
+        copied_startTime = $theRow.find('.startTime').val();
+        copied_endTime = $theRow.find('.endTime').val();
+        copied_paidBr = $theRow.find('.paidBr').val();
+        copied_unpaidBr = $theRow.find('.unpaidBr').val();
+        copied_rowTotal = $theRow.find('.rowTotal').val();
+
+        $('.staffPayInfoTable').find('.pasteRow').removeAttr('disabled');
+    });
+
+    $('.staffPayInfoTable').on('click', '.pasteRow', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theRow = $theBtn.closest('.patternRow');
+
+        $theRow.find('.startTime').val(copied_startTime);
+        $theRow.find('.endTime').val(copied_endTime);
+        $theRow.find('.paidBr').val(copied_paidBr);
+        $theRow.find('.unpaidBr').val(copied_unpaidBr).trigger('change');
+        $theRow.find('.rowTotal').val(copied_rowTotal);
+    });
 
     const addEmployeeWorkingPatternModalEl = document.getElementById('addEmployeeWorkingPatternModal')
     addEmployeeWorkingPatternModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -454,6 +487,8 @@ var employeePatternListTable = (function () {
         $('#addCalendarModal input[name="employee_working_pattern_id"]').val('0');
         $('#addCalendarModal input[name="contracted_hour"]').val('0');
         $('#addCalendarModal input[name="weekTotal"]').val('');
+
+        copied = false;
     });
 
     const editCalendarModalEl = document.getElementById('editCalendarModal')
@@ -465,6 +500,8 @@ var employeePatternListTable = (function () {
         $('#editCalendarModal input[name="employee_working_pattern_id"]').val('0');
         $('#editCalendarModal input[name="contracted_hour"]').val('0');
         $('#editCalendarModal input[name="weekTotal"]').val('');
+
+        copied = false;
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -810,13 +847,18 @@ var employeePatternListTable = (function () {
                 rowHtml += '<td>';
                     rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask unpaidBr" minlength="5" maxlength="5" name="pattern['+dayId+'][unpaid_br]"/>';
                 rowHtml += '</td>';
-                rowHtml += '<td>';
-                    rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
+                rowHtml += '<td class="workPatrnTotalCol">';
+                    rowHtml += '<div class="relative">';
+                        rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
+                        rowHtml += '<button type="button" class="copyRow btn btn-success rounded-full text-white absolute r-0 t-0 p-0"><i data-lucide="copy" class="w-3 h-3"></i></button>';
+                        rowHtml += '<button type="button" '+(copied ? '' : 'disabled')+' class="pasteRow btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
+                    rowHtml += '</div>';
                 rowHtml += '</td>';
             rowHtml += '</tr>';
 
             $('#addCalendarModal table tbody .errorRow').fadeOut('fast');
             $('#addCalendarModal  table tbody').append(rowHtml);
+            createIcons({icons, "stroke-width": 2, nameAttr: "data-lucide"});
 
             var maskOptionsNew = {
                 mask: '00:00'
@@ -1037,6 +1079,7 @@ var employeePatternListTable = (function () {
                     if(dataset.html != ''){
                         $('#edit_staff_pay_info_table .errorRow').fadeOut('fast');
                         $('#edit_staff_pay_info_table tbody').append(dataset.html);
+                        createIcons({icons, "stroke-width": 2, nameAttr: "data-lucide"});
 
                         var maskOptionsNew = {
                             mask: '00:00'
@@ -1093,13 +1136,18 @@ var employeePatternListTable = (function () {
                 rowHtml += '<td>';
                     rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask unpaidBr" minlength="5" maxlength="5" name="pattern['+dayId+'][unpaid_br]"/>';
                 rowHtml += '</td>';
-                rowHtml += '<td>';
-                    rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
+                rowHtml += '<td class="workPatrnTotalCol">';
+                    rowHtml += '<div class="relative">';
+                        rowHtml += '<input type="text" placeholder="00:00" class="form-control w-full timeMask rowTotal" minlength="5" readonly maxlength="5" name="pattern['+dayId+'][total]"/>';
+                        rowHtml += '<button type="button" class="copyRow btn btn-success rounded-full text-white absolute r-0 t-0 p-0"><i data-lucide="copy" class="w-3 h-3"></i></button>';
+                        rowHtml += '<button type="button" '+(copied ? '' : 'disabled')+' class="pasteRow btn btn-primary rounded-full text-white absolute r-0 b-0 p-0"><i data-lucide="clipboard-list" class="w-3 h-3"></i></button>';
+                    rowHtml += '</div>';
                 rowHtml += '</td>';
             rowHtml += '</tr>';
 
             $('#editCalendarModal table tbody .errorRow').fadeOut('fast');
             $('#editCalendarModal  table tbody').append(rowHtml);
+            createIcons({icons, "stroke-width": 2, nameAttr: "data-lucide"});
 
             var maskOptionsNew = {
                 mask: '00:00'

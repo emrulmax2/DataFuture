@@ -2317,3 +2317,21 @@ input[type=number] {
     align-items: center;
     background-color: rgba(255, 255, 255, .75);
 }
+
+
+.table.staffPayInfoTable td.workPatrnTotalCol{
+    padding-right: .5rem;
+}
+.table.staffPayInfoTable td.workPatrnTotalCol > div input{
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0;
+}
+.table.staffPayInfoTable td.workPatrnTotalCol > div{
+    padding-right: 19px;
+}
+.table.staffPayInfoTable td.workPatrnTotalCol > div .btn{
+    width: 19px;
+    height: 19px;
+    border-radius: 0;
+    border: 0;
+}
