@@ -338,6 +338,7 @@ export default defineConfig({
                 'resources/js/budget-requisition-show.js',
                 'resources/js/budget-report.js',
                 'resources/js/budget-report-details.js',
+                'resources/js/agent-management-comission.js',
             ],
             refresh: true,
         }),

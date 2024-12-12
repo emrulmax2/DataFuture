@@ -55,7 +55,82 @@
     </div>
     <!-- END: HTML Table Data -->
 
+    <!-- BEGIN: Agent Rule Modal -->
+    <div id="agentRulesModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="agentRulesForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Agent Rule</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="comission_mode" class="form-label">Comission <span class="text-danger">*</span></label>
+                            <select id="comission_mode" name="comission_mode" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                <option value="1">Percentage</option>
+                                <option value="2">Fixed Amount</option>
+                            </select>
+                            <div class="acc__input-error error-comission_mode text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 percentageWrap" style="display: none;">
+                            <label for="percentage" class="form-label">Percentage <span class="text-danger">*</span></label>
+                            <input id="percentage" step="1" type="number" name="percentage" class="form-control w-full">
+                            <div class="acc__input-error error-percentage text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 fixedAmountWrap" style="display: none;">
+                            <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                            <input id="amount" step="any" type="number" name="amount" class="form-control w-full">
+                            <div class="acc__input-error error-amount text-danger mt-2"></div>
+                        </div>
+                        <div>
+                            <label for="period" class="form-label">Period <span class="text-danger">*</span></label>
+                            <select id="period" name="period" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                <option value="1">Full Course</option>
+                                <option value="2">Year 1</option>
+                            </select>
+                            <div class="acc__input-error error-period text-danger mt-2"></div>
+                        </div>
+                        <div>
+                            <label for="payment_type" class="form-label">Payment <span class="text-danger">*</span></label>
+                            <select id="payment_type" name="payment_type" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                <option value="1">Single Payment</option>
+                                <option value="2">On Receipt</option>
+                            </select>
+                            <div class="acc__input-error error-payment_type text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="saveRuleBtn" class="btn btn-primary w-auto">     
+                            Save                    
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="agent_user_id" value="0"/>
+                        <input type="hidden" name="code" value="'"/>
+                        <input type="hidden" name="semester_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Agent Rule Modal -->
 
+    
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

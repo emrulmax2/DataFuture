@@ -3205,6 +3205,11 @@ Route::middleware('auth')->group(function() {
         Route::get('agent-management', 'index')->name('agent.management'); 
         Route::post('agent-management/list', 'list')->name('agent.management.list'); 
         Route::post('agent-management/list-details', 'listDetails')->name('agent.management.list.details'); 
+
+        Route::post('agent-management/get-rule', 'getRule')->name('agent.management.get.rule'); 
+        Route::post('agent-management/store-rule', 'storeRules')->name('agent.management.store.rule'); 
+        Route::get('agent-management/comission/{semester}/{agent_user}', 'comission')->name('agent.management.comission'); 
+        Route::get('agent-management/comission/list', 'comissionList')->name('agent.management.comission.list'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {

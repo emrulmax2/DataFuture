@@ -733,7 +733,7 @@
                             </div>
                         </div>
                         <div class="col-span-12">
-                            <table class="table table-bordered table-hover" id="staff_pay_info_table">
+                            <table class="table table-bordered table-hover staffPayInfoTable" id="staff_pay_info_table">
                                 <thead>
                                     <tr>
                                         <th class="whitespace-nowrap">Day</th>
@@ -864,7 +864,7 @@
                             </div>
                         </div>
                         <div class="col-span-12">
-                            <table class="table table-bordered table-hover" id="edit_staff_pay_info_table">
+                            <table class="table table-bordered table-hover staffPayInfoTable" id="edit_staff_pay_info_table">
                                 <thead>
                                     <tr>
                                         <th class="whitespace-nowrap">Day</th>
