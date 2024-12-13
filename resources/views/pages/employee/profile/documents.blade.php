@@ -178,7 +178,7 @@
                             <div class="accordion-item bg-slate-100">
                                 <div id="employeeHolidayAccordion-{{ $yearDetails->id }}" class="accordion-header">
                                     <button class="accordion-button {{ $yearDetails->is_active == 1 ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $yearDetails->id }}" aria-expanded="{{ $yearDetails->is_active == 1 ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $yearDetails->id }}">
-                                        <span class="font-normal">Holiday Year:</span> {{ date('Y', strtotime($yearDetails->start_date)) }} - {{ date('Y', strtotime($yearDetails->end_date)) }}
+                                        <span class="font-normal">Year:</span> {{ date('Y', strtotime($yearDetails->start_date)) }} - {{ date('Y', strtotime($yearDetails->end_date)) }}
                                         <span class="accordionCollaps"></span>
                                     </button>
                                 </div>
