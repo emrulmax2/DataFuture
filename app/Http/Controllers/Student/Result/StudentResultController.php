@@ -37,9 +37,7 @@ class StudentResultController extends Controller
         $maxCourseCreationId = max($courseCreationIds);
         $minCourseCreationId = min($courseCreationIds);
             
-            $termData = [];
             $data = [];
-            $resultPrimarySet = [];
             $planList = Result::where('student_id', $student->id)->get()->pluck('plan_id')->unique()->toArray();
             $QueryPart = Plan::whereIn('id',$planList);
             
@@ -54,6 +52,7 @@ class StudentResultController extends Controller
             }
             $QueryPart->orderBy('id','DESC');
             $QueryInner = $QueryPart->get();
+
 
             foreach($QueryInner as $list):
                 $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
@@ -76,9 +75,7 @@ class StudentResultController extends Controller
                         $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
                     }
                 }
-                $resultPrimarySet[$result->id] = null;
             endforeach;
-
 
         $subQuery = ExamResultPrev::select('id')->where('student_id', $student->id)->groupBy('student_id', 'course_module_id')->havingRaw('MAX(created_at)');
         $prevResultCount = ExamResultPrev::whereIn('id', $subQuery)->where('student_id', $student->id)->get()->count();
@@ -94,7 +91,6 @@ class StudentResultController extends Controller
             'termSet'=> ($termSet) ?? null,
             "grades" =>$grades,
             "terms" =>TermDeclaration::orderBy('id','DESC')->get(),
-            "resultPrimarySet" =>$resultPrimarySet,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'prev_result_count' => $prevResultCount,
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),

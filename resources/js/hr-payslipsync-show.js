@@ -157,21 +157,6 @@ var hrPayslipListTable = (function () {
         },
     };
 
-    // $('.lccTom').each(function () {
-    //     if ($(this).attr('multiple') !== undefined) {
-    //         tomOptions = {
-    //             ...tomOptions,
-    //             plugins: {
-    //                 ...tomOptions.plugins,
-    //                 remove_button: {
-    //                     title: 'Remove this item',
-    //                 },
-    //             },
-    //         };
-    //     }
-    //     new TomSelect(this, tomOptions);
-    // });
-
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.lcc-tom-select').forEach(function(selectElement) {
             new TomSelect(selectElement, {
@@ -207,7 +192,7 @@ var hrPayslipListTable = (function () {
             });
         });
     });
-    $('#hrPaySlipBtn').on('click', function (event) {
+    $('.hrPaySlipBtn').on('click', function (event) {
         $(".loading").removeClass('hidden');
         //implement form submit
         $('#hrPayslipSyncForm').submit();
@@ -240,7 +225,7 @@ var hrPayslipListTable = (function () {
                 
                 setTimeout(() => {
                     succModal.hide();
-                    location.reload();
+                    location.href = route('hr.attendance');
                 }, 2000);
             }
         }).catch(error => {
@@ -255,11 +240,22 @@ var hrPayslipListTable = (function () {
 
                         // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
                         let keyWithoutIndex = key.replace(/\.\d+/, '');
-                        $(`#hrPayslipSyncForm .${keyWithoutIndex}`).addClass('border-danger')
-                        $(`#hrPayslipSyncForm  .error-${keyWithoutIndex}`).eq(index).html(val)
+                        $(`#hrPayslipSyncForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#hrPayslipSyncForm  .error-${keyWithoutIndex}-${index}`).html(val)
+                    }
+                }else if (error.response.status == 302) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        // Extract the index from the key (e.g., employee_id.0 -> 0)
+                        let indexMatch = key.match(/\d+/);
+                        let index = indexMatch ? indexMatch[0] : '';
+
+                        // Remove the index number from the key (e.g., employee_id.0 -> employee_id)
+                        let keyWithoutIndex = key.replace(/\.\d+/, '');
+                        $(`#hrPayslipSyncForm .${keyWithoutIndex}-${index}`).addClass('border-danger')
+                        $(`#hrPayslipSyncForm  .error-${keyWithoutIndex}-${index}`).html(val)
                     }
                 } else {
-                    console.log('hrPayslipSyncForm error', error.response.data);
+                    console.log('#hrPayslipSyncForm error', error.response.data);
                 }
             }
         });
@@ -330,23 +326,53 @@ var hrPayslipListTable = (function () {
         }
     })
 
-    $('#checkbox-switch-all').on('change', function () {
+    $('#typePaySlip').on('change', function(){
+        let type = $(this).val();
+        if(type != 'Payslips'){
+            $('#hrPayslipSyncForm .holiday_month').addClass('hidden');
+        } else {
+
+            $('#hrPayslipSyncForm .holiday_month').removeClass('hidden');
+        }
+    });
+    $('.checkbox-switch-all').on('change', function () {
         var checked = $(this).is(':checked');
         if (checked) {
             $.each($('.fill-box'), function () {
                 $(this).prop('checked', true);
             });
-            $('#deleteBtnAll').removeClass('hidden');
+            
+            $('.hrPaySlipBtn').removeClass('hidden');
+            $('.deleteBtnAll').removeClass('hidden');
         } else {
             $.each($('.fill-box'), function () {
                 $(this).prop('checked', false);
             });
 
-            $('#deleteBtnAll').addClass('hidden');
+            $('.hrPaySlipBtn').addClass('hidden');
+            $('.deleteBtnAll').addClass('hidden');
         }
     });
 
-    $('#deleteBtnAll').on('click', function () {
+    $('.fill-box').on('change', function () {
+        let checkedFound = false;
+        $.each($('.fill-box'), function (index,) {
+            if($(this).is(':checked'))
+            {
+                checkedFound = true;
+            }
+        });
+        if(checkedFound){
+            $('.hrPaySlipBtn').removeClass('hidden');
+            $('.deleteBtnAll').removeClass('hidden');
+        } else {
+            
+            $('.hrPaySlipBtn').addClass('hidden');
+            $('.deleteBtnAll').addClass('hidden');
+        }
+    });
+
+    $('.deleteBtnAll').on('click', function () {
         $('div.append-input').html('');
         $.each($('.fill-box'), function () {
             let tthis = $(this);
@@ -357,7 +383,7 @@ var hrPayslipListTable = (function () {
                         tthis.val() +
                         "'>"
                 );
-                $('#deleteBtnAll').removeClass('hidden');
+                $('.deleteBtnAll').removeClass('hidden');
             }
         });
     });
