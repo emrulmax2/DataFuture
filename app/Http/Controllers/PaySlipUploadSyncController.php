@@ -130,4 +130,18 @@ class PaySlipUploadSyncController extends Controller
             return response()->json(['message' => 'Result could not be deleted'], 302);
         
     }
+
+
+    public function downloadPaySlip($id)
+    {
+        $paySlip = PaySlipUploadSync::find($id);
+
+        if (Storage::exists($paySlip->file_path)) {
+            return Storage::download($paySlip->file_path);
+        }
+
+        return response()->json(['message' => 'File not found.'], 404);
+    }
+   
+    
 }

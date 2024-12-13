@@ -1407,6 +1407,7 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/payslip-upload-restore', 'restore')->name('payslip-upload.restore');
 
         Route::post('hr/payslip-upload-delete', 'deleteResultBulk')->name('payslip-upload.deleteAll');
+        Route::get('hr/payslip-download/{id}', 'downloadPaySlip')->name('payslip-upload.download');
         
     });
     
