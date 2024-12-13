@@ -162,7 +162,9 @@
             </div>
         </div>
     </div>
-
+    @php
+        use Carbon\Carbon;
+    @endphp
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
@@ -201,8 +203,7 @@
                                                 <tbody>
                                                     @foreach($paySlips as $payslip)
                                                         <tr>
-                                                            <td class="border-b border-r border-slate-200">{{ $payslip->type }}</td>
-                                                            <td class="border-b border-r border-slate-200">{{ $payslip->month_year }}</td>
+                                                            <td class="border-b border-r border-slate-200">{{ $payslip->type }}</td><td class="border-b border-r border-slate-200">{{ Carbon::createFromFormat('Y-m', $payslip->month_year)->format('F Y') }} ({{ $payslip->month_year }})</td>
                                                             <td class="border-b border-r border-slate-200">{{ $payslip->file_name }}</td>
                                                             <td class="border-b border-r border-slate-200">
                                                                 <a href="{{ route('payslip-upload.download', ['id' => $payslip->id]) }}" class="btn btn-primary"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
