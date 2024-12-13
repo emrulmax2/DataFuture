@@ -10,6 +10,7 @@ use App\Models\CourseCreation;
 use App\Models\ReferralCode;
 use App\Models\Semester;
 use App\Models\SlcInstallment;
+use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -216,6 +217,25 @@ class AgentManagementController extends Controller
                     });
                 endif;
                 $installments = $installments->get();
+
+                $moneyReceipts = SlcMoneyReceipt::where('student_id', $list->id)->where('student_course_relation_id', $std_course_relation_id);
+                if($period == 2):
+                    $moneyReceipts->whereHas('agreement', function($q){
+                        $q->where('year', 1);
+                    });
+                endif;
+                $moneyReceipts = $moneyReceipts->get();
+                $refundReceipts = $moneyReceipts->filter(function ($value, $key) {
+                                    return $value['payment_type'] == 'Refund';
+                                });
+                $courseFeesReceipts = $moneyReceipts->filter(function ($value, $key) {
+                                    return $value['payment_type'] == 'Course Fee';
+                                });
+                $refunds = $refundReceipts->sum('amount');
+                $courseFees = $courseFeesReceipts->sum('amount');
+                $allReceiptsCount = $moneyReceipts->count();
+
+                $receivedAmount = ($refunds > $courseFees ? '-£'.number_format(($refunds - $courseFees), 2) : '£'.number_format(($courseFees - $refunds), 2));
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -229,6 +249,8 @@ class AgentManagementController extends Controller
                     'status' => (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'claimed_amount' => ($installments->count() > 0 && $installments->sum('amount') > 0 ? '£'.number_format($installments->sum('amount'), 2) : '£0.00'),
                     'claimed_count' => ($installments->count() > 0 ? $installments->count() : '0'),
+                    'receipt_amount' => $receivedAmount,
+                    'receipt_count' => ($allReceiptsCount > 0 ? $allReceiptsCount : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;

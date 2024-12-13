@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\CourseManagement;
 
+use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Plan;
@@ -25,6 +26,7 @@ use App\Models\CourseCreationInstance;
 use App\Models\PlansDateList;
 use App\Models\TermDeclaration;
 use App\Models\TermType;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PlanController extends Controller
 {
@@ -1173,5 +1175,126 @@ class PlanController extends Controller
         endif;
 
         return response()->json(['res' => $res], 200);
+    }
+
+    public function exportPlans(Request $request){
+        $courses = (isset($request->courses) && !empty($request->courses) ? $request->courses : 0);
+        $term_declaration_id = (isset($request->term_declaration_id) && $request->term_declaration_id > 0 ? $request->term_declaration_id : 0);
+        $group = (isset($request->groups) && !empty($request->groups) ? $request->groups : 0);
+        $room = (isset($request->rooms) && !empty($request->rooms) ? $request->rooms : []);
+        $tutor = (isset($request->tutors) && !empty($request->tutors) ? $request->tutors : []);
+        $ptutor = (isset($request->ptutors) && !empty($request->ptutors) ? $request->ptutors : []);
+        $days = (isset($request->days) && !empty($request->days) ? $request->days : []);
+        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+
+        $sameNameGroupIds = [];
+        if($group > 0):
+            $groups = Group::find($group);
+            $samegroups = Group::where('name', $groups->name);
+            if($term_declaration_id > 0):
+                $samegroups->where('term_declaration_id', $term_declaration_id);
+            else:
+                if(isset($groups->term_declaration_id) && $groups->term_declaration_id > 0):
+                    $samegroups->where('term_declaration_id', $groups->term_declaration_id);
+                endif;
+            endif;
+            if($courses > 0):
+                $samegroups->where('course_id', $courses);
+            else:
+                if(isset($groups->course_id) && $groups->course_id > 0):
+                    $samegroups->where('course_id', $groups->course_id);
+                endif;
+            endif;
+            $sameNameGroupIds = $samegroups->pluck('id')->unique()->toArray();
+        endif;
+
+        $datesCPIds = [];
+        if(isset($request->date_cpl) && !empty($request->date_cpl)):
+            $datesCPIds = PlansDateList::where('date', date('Y-m-d', strtotime($request->date_cpl)))->pluck('plan_id')->unique()->toArray();
+        endif;
+        $query = Plan::orderBy('id', 'DESC');
+        if($courses > 0): $query->where('course_id', $courses); endif;
+        if($term_declaration_id > 0): $query->where('term_declaration_id', $term_declaration_id); endif;
+        if(!empty($sameNameGroupIds)): $query->whereIn('group_id', $sameNameGroupIds); endif;
+        
+        if(!empty($room)): $query->whereIn('rooms_id', $room); endif;
+        if(!empty($tutor)): $query->whereIn('tutor_id', $tutor); endif;
+        if(!empty($ptutor)): $query->whereIn('personal_tutor_id', $ptutor); endif;
+        if(!empty($days)):
+            $query->where(function($q) use ($days){
+                foreach($days as $day):
+                    $q->orWhere($day, 1);
+                endforeach;
+            });
+        endif;
+        if(!empty($datesCPIds)): $query->whereIn('id', $datesCPIds); endif;
+        if($status == 2): $query->onlyTrashed(); endif;
+
+        $Query = $query->get();
+        //$theQuery = $query->toSql();
+        //dd($theQuery);
+
+        $row = 1;
+        $theCollection = [];
+        $theCollection[$row][] = "Attendance Term";
+        $theCollection[$row][] = "Course";
+        $theCollection[$row][] = "Semester";
+        $theCollection[$row][] = "Module";
+        $theCollection[$row][] = "Venue";
+        $theCollection[$row][] = "Room";
+        $theCollection[$row][] = "Group";
+        $theCollection[$row][] = "Start Time";
+        $theCollection[$row][] = "End Time";
+        $theCollection[$row][] = "Day";
+        $theCollection[$row][] = "Submission Date";
+        $theCollection[$row][] = "Class Type";
+        $theCollection[$row][] = "Tutor";
+        $theCollection[$row][] = "Personal Tutor";
+        $theCollection[$row][] = "Virtual Room";
+        $theCollection[$row][] = "Note";
+
+        $row = 2;
+        if(!empty($Query)):
+            foreach($Query as $list):
+                $day = '';
+                if($list->sat == 1){
+                    $day = 'Sat';
+                }elseif($list->sun == 1){
+                    $day = 'Sun';
+                }elseif($list->mon == 1){
+                    $day = 'Mon';
+                }elseif($list->tue == 1){
+                    $day = 'Tue';
+                }elseif($list->wed == 1){
+                    $day = 'Wed';
+                }elseif($list->thu == 1){
+                    $day = 'Thu';
+                }elseif($list->fri == 1){
+                    $day = 'Fri';
+                }
+
+                $theCollection[$row][] = (isset($list->attenTerm->name) && !empty($list->attenTerm->name) ? $list->attenTerm->name : '');
+                $theCollection[$row][] = (isset($list->course->name) && !empty($list->course->name) ? $list->course->name : '');
+                $theCollection[$row][] = (isset($list->cCreation->semester->name) && !empty($list->cCreation->semester->name) ? $list->cCreation->semester->name : '');
+                $theCollection[$row][] = (isset($list->creations->module_name) ? $list->creations->module_name : '');
+                $theCollection[$row][] = (isset($list->venu->name) && !empty($list->venu->name) ? $list->venu->name : '');
+                $theCollection[$row][] = (isset($list->room->name) && !empty($list->room->name) ? $list->room->name : '');
+                $theCollection[$row][] = (isset($list->group->name) && !empty($list->group->name) ? $list->group->name : '');
+                $theCollection[$row][] = (!empty($list->start_time) ? date('H:i', strtotime($list->start_time)) : '');
+                $theCollection[$row][] = (!empty($list->end_time) ? date('H:i', strtotime($list->end_time)) : '');
+                $theCollection[$row][] = $day;
+                $theCollection[$row][] = (isset($list->submission_date) && !empty($list->submission_date) ? date('jS F, Y', strtotime($list->submission_date)) : '');
+                $theCollection[$row][] = (isset($list->class_type) && !empty($list->class_type) ? $list->class_type : (isset($list->creations->class_type) && !empty($list->creations->class_type) ? $list->creations->class_type : ''));
+                $theCollection[$row][] = (isset($list->tutor->name) && !empty($list->tutor->name) ? $list->tutor->name : '');
+                $theCollection[$row][] = (isset($list->personalTutor->name) && !empty($list->personalTutor->name) ? $list->personalTutor->name : '');
+                $theCollection[$row][] = (isset($list->virtual_room) && !empty($list->virtual_room) ? $list->virtual_room : '');
+                $theCollection[$row][] = (isset($list->note) && !empty($list->note) ? $list->note : '');
+
+                $row++;
+            endforeach;
+        endif;
+
+        $report_title = 'Plan_list.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $report_title);
     }
 }

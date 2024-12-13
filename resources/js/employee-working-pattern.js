@@ -428,18 +428,26 @@ var employeePatternListTable = (function () {
 
     let confModalDelTitle = 'Are you sure?';
     let copied = false;
+    let copied_row = null;
     let copied_startTime = ''; 
     let copied_endTime = ''; 
     let copied_paidBr = ''; 
     let copied_unpaidBr = ''; 
     let copied_rowTotal = '';
 
+    /*$(document).on('contextmenu', '.patternRow', function(){
+        var $theRow = $(this);
+        alert($theRow.attr('data-order'))
+    })*/
+   
     $('.staffPayInfoTable').on('click', '.copyRow', function(e){
         e.preventDefault();
         var $theBtn = $(this);
         var $theRow = $theBtn.closest('.patternRow');
+        var day_id = $theRow.attr('data-order');
 
         copied = true;
+        copied_row = day_id;
         copied_startTime = $theRow.find('.startTime').val();
         copied_endTime = $theRow.find('.endTime').val();
         copied_paidBr = $theRow.find('.paidBr').val();
@@ -447,6 +455,7 @@ var employeePatternListTable = (function () {
         copied_rowTotal = $theRow.find('.rowTotal').val();
 
         $('.staffPayInfoTable').find('.pasteRow').removeClass('hidden');
+        $('.staffPayInfoTable').find('.patternRow_'+copied_row+' .pasteRow').addClass('hidden');
     });
 
     $('.staffPayInfoTable').on('click', '.pasteRow', function(e){

@@ -102,11 +102,11 @@
                             </div>
                             <div class="col-span-2">
                                 <label class="form-label">Date</label>
-                                <input type="text" name="date-CPL" id="date-CPL" class="w-full form-control datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                <input type="text" name="date_cpl" id="date-CPL" class="w-full form-control datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
                             </div>
                             <div class="col-span-2">
                                 <label class="form-label">Status</label>
-                                <select id="status-CPL" name="status" class="w-full form-control">
+                                <select id="statusCPL" name="status" class="w-full form-control">
                                     <option value="1" selected>Active</option>
                                     <option value="2">Archived</option>
                                 </select>
@@ -126,29 +126,22 @@
                             </div>
                             <div class="col-span-6 text-right">
                                 <div class="flex mt-5 sm:mt-0 justify-end">
-                                    <button id="tabulator-print-CPL" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                                    <button type="button" id="exportPlansXLSX" class="btn btn-outline-secondary w-1/2 sm:w-auto">
+                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XL 
+                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                            stroke="#164e63e6" class="w-4 h-4 ml-2 theLoader">
+                                            <g fill="none" fill-rule="evenodd">
+                                                <g transform="translate(1 1)" stroke-width="4">
+                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                    </path>
+                                                </g>
+                                            </g>
+                                        </svg>
                                     </button>
-                                    <div class="dropdown w-1/2 sm:w-auto mr-2" id="tabulator-export-CPL">
-                                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                        </button>
-                                        <div class="dropdown-menu w-40">
-                                            <ul class="dropdown-content">
-                                                <li>
-                                                    <a id="tabulator-export-csv-CPL" href="javascript:;" class="dropdown-item">
-                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a id="tabulator-export-xlsx-CPL" href="javascript:;" class="dropdown-item">
-                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md mr-2 w-auto">
+                                    <button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md ml-2 w-auto">
                                         Generate Days
                                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                             stroke="white" class="w-4 h-4 ml-2">
