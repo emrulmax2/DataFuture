@@ -2190,7 +2190,8 @@ input[type=number] {
     .modal#submissionPerformanceSTDListModal .modal-dialog.modal-xl ,
     .modal#viewQtyModal .modal-dialog.modal-xl ,
     .modal#reportsSTDListModal .modal-dialog.modal-xl,
-    .modal#stdAtnTermStatusHistoryModal .modal-dialog.modal-xl {
+    .modal#stdAtnTermStatusHistoryModal .modal-dialog.modal-xl ,
+    .modal#comissionGenerateModal .modal-dialog.modal-xl {
         width: 80%;
     }
 }

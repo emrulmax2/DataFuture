@@ -115,8 +115,8 @@
                 </div>
             </form>
             <div class="flex mt-5 sm:mt-0">
-                <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                <button data-comissionruleid="{{ $rule->id }}" data-tw-toggle="modal" style="display: none;" data-tw-target="#comissionGenerateModal" id="generateComissionBtn" class="text-white btn btn-success w-1/2 sm:w-auto">
+                    <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Generate Comission
                 </button>
             </div>
         </div>
@@ -126,6 +126,58 @@
     </div>
     <!-- END: HTML Table Data -->
 
+    <!-- BEGIN: Comission Modal -->
+    <div id="comissionGenerateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="agentRulesForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Agent Comission</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered table-sm" id="comissionsPaymentTable">
+                            <thead>
+                                <tr>
+                                    <th>Receipt ID</th>
+                                    <th>Date</th>
+                                    <th>Year</th>
+                                    <th>Receipt Amount</th>
+                                    <th>Comission Payable</th>
+                                    <th>Paid Date</th>
+                                    <th>Paid Amount</th>
+                                    <th>Remittance Ref.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="saveRuleBtn" class="btn btn-primary w-auto">     
+                            Save                    
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="agent_comission_rule_id" value="{{ $rule->id }}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Comission Modal -->
     
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">

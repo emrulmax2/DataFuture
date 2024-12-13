@@ -3213,6 +3213,8 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-management/store-rule', 'storeRules')->name('agent.management.store.rule'); 
         Route::get('agent-management/comission/{semester}/{agent_user}', 'comission')->name('agent.management.comission'); 
         Route::get('agent-management/comission/list', 'comissionList')->name('agent.management.comission.list'); 
+
+        Route::post('agent-management/payable/comissions', 'payableComissions')->name('agent.management.get.payable.comissions'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {

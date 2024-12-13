@@ -24,11 +24,30 @@ var agentComissionListTable = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            selectable:true,
             columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
                 {
                     title: "#ID",
                     field: "id",
                     width: "80",
+                    formatter(cell, formatterParams){
+                        var html = cell.getData().id;
+                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().id+'"/>';
+
+                        return html;
+                    }
                 },
                 {
                     title: "REG. No",
@@ -114,6 +133,16 @@ var agentComissionListTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
+            rowSelectionChanged:function(data, rows){
+                if(rows.length > 0){
+                    $('#generateComissionBtn').fadeIn();
+                }else{
+                    $('#generateComissionBtn').fadeOut();
+                }
+            },
+            selectableCheck:function(row){
+                return row.getData().id > 0; //allow selection of rows where the age is greater than 18
+            }
         });
 
         // Redraw table onresize
@@ -136,4 +165,47 @@ var agentComissionListTable = (function () {
 
 (function(){
     agentComissionListTable.init();
+
+    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const comissionGenerateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#comissionGenerateModal"));
+
+    const comissionGenerateModalEl = document.getElementById('comissionGenerateModal')
+    comissionGenerateModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#comissionGenerateModal .acc__input-error').html('');
+        $('#comissionGenerateModal #comissionsPaymentTable tbody').html('');
+        $('#comissionGenerateModal [name="agent_comission_rule_id"]').val('0');
+    });
+
+    $('#generateComissionBtn').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var agentcomissionruleid = $theBtn.attr('data-comissionruleid');
+
+        var studentids = [];
+        $('#agentComissionListTable').find('.tabulator-row.tabulator-selected').each(function(){
+            var $row = $(this);
+            studentids.push($row.find('.ids').val());
+        });
+
+        if(studentids.length > 0){
+            axios({
+                method: "post",
+                url: route("agent.management.get.payable.comissions"),
+                data: { agentcomissionruleid : agentcomissionruleid, studentids : studentids },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+            }).then((response) => {
+                if (response.status == 200) {
+                    $('#comissionGenerateModal #comissionsPaymentTable tbody').html(response.data.html);
+                    $('#comissionGenerateModal [name="agent_comission_rule_id"]').val(agentcomissionruleid);
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+        }else{
+
+        }
+    })
 })()
