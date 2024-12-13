@@ -170,52 +170,59 @@
             </div>
         </div>
         <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-UP" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-EDC" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+            <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12">
+                    @if(!empty($holidayDetails))
+                    <div id="employeeHolidayAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
+                        @foreach($holidayDetails  as $yearDetails)
+                            <div class="accordion-item bg-slate-100">
+                                <div id="employeeHolidayAccordion-{{ $yearDetails->id }}" class="accordion-header">
+                                    <button class="accordion-button {{ $yearDetails->is_active == 1 ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $yearDetails->id }}" aria-expanded="{{ $yearDetails->is_active == 1 ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $yearDetails->id }}">
+                                        <span class="font-normal">Holiday Year:</span> {{ date('Y', strtotime($yearDetails->start_date)) }} - {{ date('Y', strtotime($yearDetails->end_date)) }}
+                                        <span class="accordionCollaps"></span>
+                                    </button>
+                                </div>
+                                <div id="employeeHolidayAccordion-collapse-{{ $yearDetails->id }}" class="accordion-collapse collapse {{ $yearDetails->is_active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayAccordion-{{ $yearDetails->index }}" data-tw-parent="#employeeHolidayAccordion">
+                                    <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
+                                        <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
+                                            @php
+                                               $paySlips = \App\Models\PaySlipUploadSync::where('employee_id', $employee->id)->where('holiday_year_id', $yearDetails->id)->get();
+                                                
+                                            @endphp
+                                            <table class="table table-report table-report--tabulator box">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="border border-slate-200">Type</th>
+                                                        <th class="border border-slate-200">Month</th>
+                                                        <th class="border border-slate-200">File Name</th>
+                                                        <th class="border border-slate-200">Download</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($paySlips as $payslip)
+                                                        <tr>
+                                                            <td class="border-b border-r border-slate-200">{{ $payslip->type }}</td>
+                                                            <td class="border-b border-r border-slate-200">{{ $payslip->month_year }}</td>
+                                                            <td class="border-b border-r border-slate-200">{{ $payslip->file_name }}</td>
+                                                            <td class="border-b border-r border-slate-200">
+                                                                <a href="{{ route('payslip-upload.download', ['id' => $payslip->id]) }}" class="btn btn-primary"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach 
                     </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-EDC" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-EDC" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-EDC" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button data-tw-toggle="modal" data-tw-target="#addCommunicationModal" type="button" class="btn btn-primary w-auto mr-2" >Send Email</button>
-                    <button id="tabulator-print-EDC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-EDC" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx-EDC" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
+                    @else
+                        <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holiday data not found!
                         </div>
-                    </div>
+                    @endif
                 </div>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="employeePaySlipListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>

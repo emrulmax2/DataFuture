@@ -11,6 +11,8 @@ use App\Models\EmailTemplate;
 use App\Models\EmployeeDocuments;
 use App\Models\Employee;
 use App\Models\Employment;
+use App\Models\HrHolidayYear;
+use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,11 +26,18 @@ class EmployeeDocumentsController extends Controller
     public function index($id){
         $employee = Employee::find($id);
         $employment = Employment::where("employee_id",$id)->get()->first();
-
+        $holidayList = PaySlipUploadSync::where('employee_id', $id)->whereNotNull('file_transffered_at')->pluck('holiday_year_id')->toArray();
+        if(count($holidayList) > 0):
+            $holidayList = array_unique($holidayList);
+            $holidayDetails = HrHolidayYear::whereIn('id', $holidayList)->orderBy('id', 'DESC')->get();
+        else:
+            $holidayDetails = [];
+        endif;
         return view('pages.employee.profile.documents',[
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [],
             "employee" => $employee,
+            "holidayDetails" => $holidayDetails,
             "employment" => $employment,
             'docSettings' => DocumentSettings::where('staff', '1')->get(),
             'emailTemplates' => EmailTemplate::where('hr', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
