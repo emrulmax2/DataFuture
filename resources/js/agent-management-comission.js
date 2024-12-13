@@ -94,6 +94,18 @@ var agentComissionListTable = (function () {
                         return html;
                     }
                 },
+                {
+                    title: "Received",
+                    field: "receipt_amount",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = cell.getData().receipt_amount;
+                        if(cell.getData().receipt_count > 0){
+                            html += ' ('+cell.getData().receipt_count+')';
+                        }
+                        return html;
+                    }
+                },
             ],
             renderComplete() {
                 createIcons({

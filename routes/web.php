@@ -784,6 +784,8 @@ Route::middleware('auth')->group(function() {
         Route::post('course-management/plans/get-instanceterm-list', 'getInstanceTermsListByAcademicTermCourse')->name('instanceterm.list.by.academic.term.course');
 
         Route::post('course-management/plans/get-filtered-group', 'getFilteredGroup')->name('class.plan.get.group.filter');
+
+        Route::post('course-management/plans/export', 'exportPlans')->name('class.plan.export'); 
     });
 
     Route::controller(PlanTreeController::class)->group(function() {

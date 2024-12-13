@@ -157,33 +157,6 @@ var classPlanListTable = (function () {
                 nameAttr: "data-lucide",
             });
         });
-
-        // Export
-        $("#tabulator-export-csv-CPL").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-CPL").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CPL").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Plans Details",
-            });
-        });
-
-        $("#tabulator-export-html-CPL").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-CPL").on("click", function (event) {
-            tableContent.print();
-        });
     };
     return {
         init: function () {
@@ -673,6 +646,39 @@ var classPlanListTable = (function () {
                     console.log(error)
                 });
             }
+        });
+
+        $('#exportPlansXLSX').on('click', function(e){
+            e.preventDefault();
+            var $theBtn = $(this);
+            const form = document.getElementById('tabulatorFilterForm-CPL');
+
+            $theBtn.attr('disabled', 'disabled');
+            $theBtn.find('svg.theLoader').fadeIn();
+
+            let form_data = new FormData(form);
+            axios({
+                method: "POST",
+                url: route('class.plan.export'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                responseType: 'blob',
+            }).then(response => {
+                $theBtn.removeAttr('disabled');
+                $theBtn.find('svg.theLoader').fadeOut();
+                if (response.status == 200) {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', 'Plan_List.xlsx'); 
+                    document.body.appendChild(link);
+                    link.click();
+                }
+            }).catch(error => {
+                $theBtn.removeAttr('disabled');
+                $theBtn.find('svg.theLoader').fadeOut();
+                console.log('error');
+            });
         })
     }
 
