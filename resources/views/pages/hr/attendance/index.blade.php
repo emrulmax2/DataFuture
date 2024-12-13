@@ -43,7 +43,7 @@
                     <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Upload PaySlips <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
                         <ul class="dropdown-content">
-                            <li><h6 class="dropdown-header">Pending PaySlip</h6></li>
+                            <li><h6 class="dropdown-header">Pending Payslips</h6></li>
                             <li><hr class="dropdown-divider mt-0"></li>
                             @if(isset($RemainpaySlips) && !empty($RemainpaySlips) && count($RemainpaySlips) > 0)
                                 @foreach($RemainpaySlips as $month_year)

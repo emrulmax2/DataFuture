@@ -19,37 +19,29 @@ class PayslipSyncUploadUpdateRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+
+    public function rules()
+    {
+        $rules = [];
+
+        // Loop through the inputs to add conditional rules
+        foreach ($this->input('id', []) as $index => $value) {
+            if ($this->has("id.$index")) {
+                
+                $rules["id.$index"] = 'required|integer';
+                $rules["employee_id.$index"] = 'required|integer|exists:employees,id';
+
+            }
+        }
+        return $rules;
+        
+    }
+
+    public function messages()
     {
         return [
-            'employee_id.*' => 'required|integer|exists:employees,id',
+            'id.*.required' => 'The ID is required. Please refresh the page and try again.',
+            'employee_id.*.required' => 'Employee Selection of this position is required.',
         ];
-    }
-
-    
-    public function messages(): array
-    {
-        $messages = [];
-
-        // Loop through the possible indices and create custom messages
-        foreach (range(0, 100) as $index) {
-            $textIndex = "top"; //$this->numberToText($index);
-            $messages["employee_id.$index.required"] = "The employee at $textIndex row position is required.";
-            $messages["employee_id.$index.integer"] = "The employee at $textIndex row position must be an integer.";
-            $messages["employee_id.$index.exists"] = "The employee at $textIndex row position does not exist.";
-        }
-
-        return $messages;
-    }
-
-    private function numberToText($number): string
-    {
-        $textNumbers = [
-            'top', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
-            'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty',
-            // Add more as needed
-        ];
-
-        return $textNumbers[$number] ?? $number;
     }
 }

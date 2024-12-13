@@ -32,7 +32,9 @@
         @endif
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
-            
+            <button id="hrPaySlipBtn1"  class="btn hidden hrPaySlipBtn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm Selected <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+            <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll" class="hidden deleteBtnAll transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mr-1 inline-block w-48">Delete Selected</button>
+              
             
         </div>
     </div>
@@ -50,12 +52,12 @@
             
             <table id="hrPayslipSyncTable" class="table table-report table-report--tabulator">
                 <thead>
-                    <tr>
-                        <th class="border-none whitespace-no-wrap"><input id="checkbox-switch-all" data-tw-merge type="checkbox" class="checkbox-switch-all transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  value="" />
+                    <tr class="bg-slate-100">
+                        <th class="border whitespace-no-wrap"><input id="checkbox-switch-all" data-tw-merge type="checkbox" class="checkbox-switch-all transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  value="" />
                             <label data-tw-merge for="checkbox-switch-all" class="cursor-pointer ml-2">S.N.</label></th>
-                        <th class="border-none whitespace-no-wrap">Payslip Name</th>
-                        <th class="border-none whitespace-no-wrap">Employee</th>
-                        <th class="border-none whitespace-no-wrap">Action</th>
+                        <th class="border whitespace-no-wrap">Payslip Name</th>
+                        <th class="border whitespace-no-wrap">Employee</th>
+                        <th class="border whitespace-no-wrap">Action</th>
                     </tr>
                 </thead>
                 
@@ -65,20 +67,20 @@
                     @php
                         $warningCheck = "transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-warning focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-warning [&[type='radio']]:checked:border-warning [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-warning [&[type='checkbox']]:checked:border-warning [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
                         $primaryCheck ="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50";
-                        $checkboxCssClass = (isset($data['id'])) ? $warningCheck : $primaryCheck ; 
+                        $checkboxCssClass = (isset($paySlip->id)) ? $warningCheck : $primaryCheck ; 
                     @endphp
                         <tr id="tr_id_{{ $paySlip->id }}" class="{{ isset($paySlip->employee) ?  $success : $danger }}" >
-                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300 border-slate-300 border-r border-b ">
                                 <input data-tw-merge data-id={{ $paySlip->id}} type="checkbox" name="id[{{ $serial }}]" class="fill-box {{ $checkboxCssClass }}" id="checkbox-switch-{{ $serial }}" value="{{ $paySlip->id }}" />
                                 <label data-tw-merge for="checkbox-switch-{{ $serial }}" class="cursor-pointer ml-2">{{ $serial }}</label>
-                               @php $serial++; @endphp
+                               
                             </td>
-                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger ' }} dark:border-darkmode-300 border-slate-300 border-r border-b">
                                 <div class="font-medium whitespace-no-wrap">{{ $paySlip->file_name }}</div>
                             </td>
-                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300 border-slate-300 border-r border-b">
 
-                                        <select id="employee_id_{{ $paySlip->id }}" class="lccTom lcc-tom-select w-full " name="employee_id[]">
+                                        <select id="employee_id_{{ $paySlip->id }}" class="lccTom lcc-tom-select w-full " name="employee_id[{{ $serial }}]">
                                             <option value="">Please Select</option>
                                                 @foreach($employees as $data)
                                                 @php
@@ -105,14 +107,25 @@
                                                     </option>
                                                 @endforeach
                                         </select>
-                                        <div class="acc__input-error error-employee_id text-danger mt-2"></div>
+                                        <div class="acc__input-error error-employee_id-{{ $serial }} text-danger mt-2"></div>
                             </td>
-                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800' : 'text-danger' }} dark:border-darkmode-300  border-r border-b">
+                            <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800 ' : 'text-dange' }} dark:border-darkmode-300 border-slate-300 border-r border-b">
                                 <span data-tw-target="#confirmModal" data-tw-toggle="modal"  class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
                             </td>
                         </tr>
+                        @php $serial++; @endphp
                     @endforeach
                 </tbody>
+
+                <tfoot>
+                    <tr class="bg-slate-100">
+                        <th class="border whitespace-no-wrap"><input id="checkbox-switch-all1" data-tw-merge type="checkbox" class="checkbox-switch-all transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  value="" />
+                            <label data-tw-merge for="checkbox-switch-all" class="cursor-pointer ml-2">S.N.</label></th>
+                        <th class="border whitespace-no-wrap">Payslip Name</th>
+                        <th class="border whitespace-no-wrap">Employee</th>
+                        <th class="border whitespace-no-wrap">Action</th>
+                    </tr>
+                </tfoot>
             </table>
         </form>
     </div>
@@ -121,8 +134,8 @@
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.attendance') }}" class="btn btn-primary shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mx-2"></i> Back to Attendance</a>
             
-            <button id="hrPaySlipBtn"  class="btn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm All <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
-            <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll" class="hidden transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mb-2 mr-1 inline-block w-48">Delete All</button>
+            <button id="hrPaySlipBtn"  class="btn hidden hrPaySlipBtn btn-outline-success shadow-md mr-2 w-36"><i data-lucide="check-circle" class="w-4 h-4 mx-2"></i> Confirm Selected <i data-loading-icon="oval" class="loading w-4 h-4 ml-2 hidden"></i></a>
+            <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmDeleteModal" id="deleteBtnAll1" class="hidden deleteBtnAll transition duration-200 border shadow-sm items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-danger focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-danger text-danger dark:border-danger [&:hover:not(:disabled)]:bg-danger/10 mr-1 inline-block w-48">Delete Selected</button>
                    
 
         </div>
