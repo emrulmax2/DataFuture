@@ -258,4 +258,56 @@ class AgentManagementController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
+
+    public function payableComissions(Request $request){
+        $rule_id = $request->agentcomissionruleid;
+        $theRule = AgentComissionRule::find($rule_id);
+        $creation_ids = CourseCreation::where('semester_id', $theRule->semester_id)->pluck('id')->unique()->toArray();
+        $comission_mode = (isset($theRule->comission_mode) && $theRule->comission_mode > 0 ? $theRule->comission_mode : 2);
+        $period = (isset($theRule->period) && $theRule->period > 0 ? $theRule->period : 2);
+        $percentage = (isset($theRule->percentage) && $theRule->percentage > 0 ? $theRule->percentage : 0);
+        $fixedAmount = (isset($theRule->amount) && $theRule->amount > 0 ? $theRule->amount : 0);
+        $code = (isset($request->code) && !empty($request->code) ? $request->code : '');
+        $studentids = (isset($request->studentids) && !empty($request->studentids) ? $request->studentids : []);
+
+        $html = '';
+        if(!empty($studentids)):
+            $students = Student::whereIn('id', $studentids)->get();
+            if($students->count() > 0):
+                foreach($students as $std):
+                    $std_course_relation_id = (isset($std->activeCR->id) && $std->activeCR->id > 0 ? $std->activeCR->id : 0);
+                    $moneyReceipts = SlcMoneyReceipt::where('student_id', $std->id)->where('student_course_relation_id', $std_course_relation_id)
+                                    ->whereIn('payment_type', ['Course Fee', 'Refund']);
+                    if($period == 2):
+                        $moneyReceipts->whereHas('agreement', function($q){
+                            $q->where('year', 1);
+                        });
+                    endif;
+                    $moneyReceipts = $moneyReceipts->get();
+                    if($moneyReceipts->count() > 0):
+                        foreach($moneyReceipts as $mr):
+                            $amount = (isset($mr->amount) && $mr->amount > 0 ? $mr->amount : 0);
+                            if($comission_mode == 2):
+                                $comission = $fixedAmount;
+                            else:
+                                $comission = $amount * $percentage / 100;
+                            endif;
+                            $html .= '<tr>';
+                                $html .= '<td>'.$mr->id.'<inp</td>';
+                                $html .= '<td>'.(isset($mr->payment_date) && !empty($mr->payment_date) ? date('jS M, Y', strtotime($mr->payment_date)) : '').'</td>';
+                                $html .= '<td>'.(isset($mr->agreement->year) && $mr->agreement->year > 0 ? $mr->agreement->year : '').'</td>';
+                                $html .= '<td>£'.number_format($amount, 2).'</td>';
+                                $html .= '<td><input type="number" step="any" value="'.number_format($comission, 2).'" name="comission['.$std->id.']['.$mr->id.'][comission]" class="w-full form-control"/></td>';
+                                $html .= '<td><input type="text" value="" name="comission['.$std->id.']['.$mr->id.'][p_date]" class="w-full form-control datepickers"/></td>';
+                                $html .= '<td><input type="number" step="any" value="" name="comission['.$std->id.']['.$mr->id.'][p_amount]" class="w-full form-control"/></td>';
+                                $html .= '<td><input type="text" value="" name="comission['.$std->id.']['.$mr->id.'][remittance_ref]" class="w-full form-control"/></td>';
+                            $html .= '</tr>';
+                        endforeach;
+                    endif;
+                endforeach;
+            endif;
+        endif;
+
+        return response()->json(['html' => $html], 200);
+    }
 }

@@ -1236,6 +1236,7 @@ class PlanController extends Controller
 
         $row = 1;
         $theCollection = [];
+        $theCollection[$row][] = "ID";
         $theCollection[$row][] = "Attendance Term";
         $theCollection[$row][] = "Course";
         $theCollection[$row][] = "Semester";
@@ -1273,6 +1274,7 @@ class PlanController extends Controller
                     $day = 'Fri';
                 }
 
+                $theCollection[$row][] = $list->id;
                 $theCollection[$row][] = (isset($list->attenTerm->name) && !empty($list->attenTerm->name) ? $list->attenTerm->name : '');
                 $theCollection[$row][] = (isset($list->course->name) && !empty($list->course->name) ? $list->course->name : '');
                 $theCollection[$row][] = (isset($list->cCreation->semester->name) && !empty($list->cCreation->semester->name) ? $list->cCreation->semester->name : '');

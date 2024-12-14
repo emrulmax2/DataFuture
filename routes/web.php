@@ -247,6 +247,7 @@ use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
+use App\Http\Controllers\Reports\StudentResultReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
@@ -2931,6 +2932,12 @@ Route::middleware('auth')->group(function() {
         Route::post('student-excel-download', 'excelDownload')->name('report.student.data.excel'); 
     });
 
+    Route::controller(StudentResultReportController::class)->prefix('reports')->group(function(){
+        Route::get('student-result-reports', 'index')->name('report.student.result.view'); 
+        Route::post('student-result-list', 'totalCount')->name('report.student.result.total'); 
+        Route::post('student-result-excel-download', 'excelDownload')->name('report.student.result.excel'); 
+    });
+
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
         Route::get('reports/attendance-reports-list', 'list')->name('report.attendance.reports.list'); 
@@ -3213,6 +3220,8 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-management/store-rule', 'storeRules')->name('agent.management.store.rule'); 
         Route::get('agent-management/comission/{semester}/{agent_user}', 'comission')->name('agent.management.comission'); 
         Route::get('agent-management/comission/list', 'comissionList')->name('agent.management.comission.list'); 
+
+        Route::post('agent-management/payable/comissions', 'payableComissions')->name('agent.management.get.payable.comissions'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {
