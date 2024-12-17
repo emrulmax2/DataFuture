@@ -36,10 +36,12 @@ class StudentResultController extends Controller
         $courseRelationActiveCourseId = $student->crel->creation->id;
         $maxCourseCreationId = max($courseCreationIds);
         $minCourseCreationId = min($courseCreationIds);
-            
+        
+
+        
             $data = [];
             $planList = Result::where('student_id', $student->id)->get()->pluck('plan_id')->unique()->toArray();
-            $QueryPart = Plan::whereIn('id',$planList);
+            $QueryPart = Plan::with('attenTerm')->whereIn('id',$planList);
             
             $QueryPart->where('course_creation_id','>=',$courseRelationActiveCourseId);
 
@@ -72,11 +74,25 @@ class StudentResultController extends Controller
                 if($checkPrimaryResult->isNotEmpty()) {
                     foreach ($checkPrimaryResult as $key => $result) {
                         $data[$moduleCreation->module->name][] = $result;
-                        $termSet[$moduleCreation->module->name][] = isset($result->term_declaration_id) ? TermDeclaration::where('id',$result->term_declaration_id)->first() : $result->plan->attenTerm;
+                        
                     }
                 }
             endforeach;
 
+
+            // Adjusted query and mapping logic
+            $termDeclarationIds = Plan::whereHas('assign', function($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })->with('creations.module')->get()->groupBy(function ($plan) {
+                return $plan->creations->module->name;
+            })->map(function ($group) {
+                return $group->pluck('term_declaration_id')->unique()->map(function ($termDeclarationId) {
+                    return TermDeclaration::find($termDeclarationId);
+                });
+            });
+            $termSet = $termDeclarationIds;
+
+            
         $subQuery = ExamResultPrev::select('id')->where('student_id', $student->id)->groupBy('student_id', 'course_module_id')->havingRaw('MAX(created_at)');
         $prevResultCount = ExamResultPrev::whereIn('id', $subQuery)->where('student_id', $student->id)->get()->count();
         
