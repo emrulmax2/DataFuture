@@ -304,7 +304,7 @@ class StudentResultReportController extends Controller
             $dataCount++;    
         endforeach;
 
-        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'student_data_report.xlsx');
+        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'student_result_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
