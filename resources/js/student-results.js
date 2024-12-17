@@ -736,9 +736,12 @@ var studentNotesListTable = (function () {
         });
         // Reset Tom Select elements
         $newRow.find('select.lccTom').each(function () {
+            // Add "Please select" option as the first element
+            $(this).prepend('<option value=""  selected>Please select</option>');
+
             let NewTom = new TomSelect(this, tomOptions); // Initialize Tom Select for new elements
             NewTom.clear(); // Clear the selected values
-            NewTom.setValue('');
+            NewTom.setValue(''); // Set the value to empty to show "Please select"
         });
 
         $newRow.find('input.datepicker_custom').each(function () {
