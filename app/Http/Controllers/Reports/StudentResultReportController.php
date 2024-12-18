@@ -250,9 +250,12 @@ class StudentResultReportController extends Controller
                 ];
                 //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
                 
+                if(!isset($result->plan->creations)) {
+                    dd($result);
+                }
                 
                 if(isset($result->id)) {
-                    $moduleName = $result->plan->creations->module->name; 
+                        $moduleName = $result->plan->creations->module->name; 
                         $data[$result->student->id][$moduleName] = $result->grade->code;
                         $moduleList[] = $moduleName;
                 }
