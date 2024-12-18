@@ -249,9 +249,10 @@ class StudentResultReportController extends Controller
                     'student_name' => $result->student->full_name,
                 ];
                 //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
-                $moduleName = $result->plan->creations->module->name; 
+                
                 
                 if(isset($result->id)) {
+                    $moduleName = $result->plan->creations->module->name; 
                         $data[$result->student->id][$moduleName] = $result->grade->code;
                         $moduleList[] = $moduleName;
                 }
@@ -304,7 +305,7 @@ class StudentResultReportController extends Controller
             $dataCount++;    
         endforeach;
 
-        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'student_data_report.xlsx');
+        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'student_result_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
