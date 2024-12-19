@@ -36,6 +36,7 @@ class StudentResultReportController extends Controller
 {
     public function index(){
         $semesters = Cache::get('semesters', function () {
+
             $semesters = Semester::all()->sortByDesc("name");
             $semesterData = [];
             foreach ($semesters as $semester):
@@ -239,7 +240,18 @@ class StudentResultReportController extends Controller
         $data = [];
         //$planList = Result::whereIn('student_id', $studentIds)->get()->pluck('plan_id')->unique()->toArray();
         //$QueryInner = Plan::with('creations','creations.module','creations.level')->whereIn('id',$planList)->orderBy('id','DESC')->get();
-        $resultList = Result::with("grade","plan","plan.creations","plan.creations.module",'student')->whereIn('student_id', $studentIds)->orderBy('published_at','ASC')->get();
+        $resultList = Result::with("grade",
+            "plan",
+            "plan.creations",
+            "plan.creations.module",
+            "plan.cCreation",
+            "plan.cCreation.course",
+            'student',
+            'student.award',
+            'student.crel',
+            'student.crel.abody',
+            'student.crel.creation',
+            'student.crel.creation.semester')->whereIn('student_id', $studentIds)->orderBy('published_at','ASC')->get();
             $studentDetails = [];
             $data = [];
             foreach($resultList as $result):
@@ -247,6 +259,10 @@ class StudentResultReportController extends Controller
                 $studentDetails[$result->student->id] = [
                     'registration_no' => $result->student->registration_no,
                     'student_name' => $result->student->full_name,
+                    'status' => $result->student->status->name,
+                    'intake_semester' => isset($result->student->crel) ? $result->student->crel->creation->semester->name : '',
+                    'course' => isset($result->plan->cCreation) ? $result->plan->cCreation->course->name : '',
+                    'award_body_reg_no' => isset($result->student->crel->abody->reference) ? $result->student->crel->abody->reference : '',
                 ];
                 //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
                 
@@ -265,7 +281,11 @@ class StudentResultReportController extends Controller
         $theCollection = [];
         $headers[1][0] = 'Stuent ID';
         $headers[1][1] = 'Student Name';
-        $statusIncrement = 2;
+        $headers[1][2] = 'Status';
+        $headers[1][3] = 'Intake Semester';
+        $headers[1][4] = 'Course';
+        $headers[1][5] = 'Awarding Body Ref';
+        $statusIncrement = 6;
         $printed = false;
         foreach($moduleList as $module) :
             if($printed==false) {
@@ -281,7 +301,11 @@ class StudentResultReportController extends Controller
 
         $headers[2][0] = '';
         $headers[2][1] = '';
-        $statusIncrement = 2;
+        $headers[2][2] = '';
+        $headers[2][3] = '';
+        $headers[2][4] = '';
+        $headers[2][5] = '';
+        $statusIncrement = 6;
 
         foreach($moduleList as $module) :
             $headers[2][$statusIncrement++] = $module;
@@ -295,7 +319,12 @@ class StudentResultReportController extends Controller
         foreach($data as $key => $value):
             $theCollection[$dataCount][0] = $studentDetails[$key]['registration_no'];
             $theCollection[$dataCount][1] = $studentDetails[$key]['student_name'];
-            $statusIncrement = 2;
+            $theCollection[$dataCount][2] = $studentDetails[$key]['status'];
+            $theCollection[$dataCount][3] = $studentDetails[$key]['intake_semester'];
+            $theCollection[$dataCount][4] = $studentDetails[$key]['course'];
+            $theCollection[$dataCount][5] = $studentDetails[$key]['award_body_reg_no'];
+
+            $statusIncrement = 6;
             $unitCount = 0;
             foreach($moduleList as $module) :
                 if(isset($value[$module]) && ($value[$module]=='P' || $value[$module]=='M' || $value[$module]=='D')) {
@@ -308,7 +337,7 @@ class StudentResultReportController extends Controller
             $dataCount++;    
         endforeach;
 
-        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'student_result_report.xlsx');
+        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'board_result_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
