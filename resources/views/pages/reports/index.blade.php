@@ -47,7 +47,7 @@
             
             <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
                 <a href="{{ route('report.student.result.view'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
-                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Result Report" src="{{ asset('build/assets/images/report_icons/student_result_report.png') }}">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Result Report" src="{{ asset('build/assets/images/report_icons/student_result_report_new.png') }}">
                 </a>
             </div>
             
