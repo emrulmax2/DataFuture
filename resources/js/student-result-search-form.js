@@ -1011,7 +1011,7 @@ import TomSelect from 'tom-select';
                     link.href = url;
                     link.setAttribute(
                         'download',
-                        'student_data_report_download.xlsx'
+                        'board_result_report.xlsx'
                     );
                     document.body.appendChild(link);
                     link.click();
