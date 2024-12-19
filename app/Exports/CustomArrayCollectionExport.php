@@ -57,16 +57,18 @@ class CustomArrayCollectionExport implements FromCollection, WithHeadings, WithS
                 }
             }
         }
+
         // Merge cells for the first header row
-        $sheet->mergeCells('C1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->moduleList) + 2) . '1');
+        // first 6 row is reserved for header then merge next
+        $sheet->mergeCells('G1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->moduleList) + 6) . '1');
         
-        // Apply background color based on module values
+        //Apply background color based on module values
         foreach ($this->data as $rowIndex => $row) {
             foreach ($this->moduleList as $colIndex => $module) {
-                $cellValue = $row[$colIndex + 2]; // Adjust index based on your data structure
+                $cellValue = $row[$colIndex + 6]; // Adjust index based on your data structure
                 if (isset($cellValue) && $cellValue!="") {
                     $rgbColor = $cellValue == 'P' ? '60a5fa' : ($cellValue == 'M' ? '4ade80' : ($cellValue == 'D' ? '22d3ee' : 'fed7aa')); // Change color as needed
-                    $cellCoordinate = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 3) . ($rowIndex + 2); // Adjust index based on your data structure
+                    $cellCoordinate = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 7) . ($rowIndex + 2); // Adjust index based on your data structure
                     $styles[$cellCoordinate] = ['fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => $rgbColor]]]; // Change color as needed
                 }
             }
