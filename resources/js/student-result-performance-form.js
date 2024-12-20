@@ -846,8 +846,7 @@ import TomSelect from 'tom-select';
         }
     });
     $('.resetSearch').on('click', function (e) {
-        //resetGroupSearch();
-        location.reload();
+        resetGroupSearch();
     });
 
     function resetGroupSearch() {
@@ -1012,7 +1011,7 @@ import TomSelect from 'tom-select';
                     link.href = url;
                     link.setAttribute(
                         'download',
-                        'board_result_report.xlsx'
+                        'student_performance_report.xlsx'
                     );
                     document.body.appendChild(link);
                     link.click();
