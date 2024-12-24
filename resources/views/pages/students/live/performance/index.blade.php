@@ -18,7 +18,7 @@
         <div class="intro-y box col-span-12 p-5 mt-5  ">
             <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-cyan-600 text-slate-100 rounded-tl rounded-tr">
                 @php
-                        $attendanceCriteriaFound = \App\Models\AttendanceCriteria::where('range_from', '<=', round($termAttendanceCount[$term->id]['avg']))
+                    $attendanceCriteriaFound = \App\Models\AttendanceCriteria::where('range_from', '<=', round($termAttendanceCount[$term->id]['avg']))
                     ->where('range_to', '>=', round($termAttendanceCount[$term->id]['avg']))
                     ->first();
                 

@@ -47,7 +47,7 @@ class StudentPerformanceController extends Controller
         $termList = $planListForModules->unique()->pluck('term_declaration_id');
 
 
-        $results = Result::with('plan','plan.creations.module','grade')->whereIn('plan_id',$planList)->where('student_id',$student->id)->orderBy('published_at','DESC')->get();
+        $results = Result::with('plan','plan.creations.module','grade')->whereIn('plan_id',$planList)->where('student_id',$student->id)->orderBy('published_at','DESC')->where('published_at','<',Carbon::now())->get();
 
         $attendanceList = Attendance::with('plan','feed')->whereHas('planDateList', function ($query) use ($planList) {
             $query->whereIn('plan_id', $planList);
@@ -141,7 +141,7 @@ class StudentPerformanceController extends Controller
         $termList = $planListForModules->unique()->pluck('term_declaration_id');
 
 
-        $results = Result::with('plan','plan.creations.module','grade')->whereIn('plan_id',$planList)->where('student_id',$student->id)->orderBy('published_at','DESC')->get();
+        $results = Result::with('plan','plan.creations.module','grade')->whereIn('plan_id',$planList)->where('student_id',$student->id)->orderBy('published_at','DESC')->where('published_at','<',Carbon::now())->get();
 
         $attendanceList = Attendance::with('plan','feed')->whereHas('planDateList', function ($query) use ($planList) {
             $query->whereIn('plan_id', $planList);
