@@ -55,7 +55,7 @@
                         <div class="col-span-4 font-medium ml-2 py-3">Expected Performance</div>
                         <div class="col-span-7 ml-auto py-3">
                             <div class="w-96 bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-success h-2.5 rounded-full " style="width: 100%"></div> <!-- Adjust width as needed -->
+                                <div class="bg-info h-2.5 rounded-full " style="width: 100%"></div> <!-- Adjust width as needed -->
                             </div>   
                         </div>
                         <div class="col-span-1 ml-auto py-3 font-medium ">{{ $TopAttendanceCriteria +  $perTermTopSet[$term->id] }}</div>
