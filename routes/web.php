@@ -278,6 +278,7 @@ use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\Result\StudentResultController;
 use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
+use App\Http\Controllers\Student\StudentPerformanceController;
 use App\Http\Controllers\Student\WorkPlacementController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
@@ -594,7 +595,10 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('student-results/{student}/frontend', 'frontEndIndex')->name('results.frontend.index'); 
             Route::get('student-results/{student}/print', 'print')->name('results.print');
         }); 
-    
+        Route::controller(StudentPerformanceController::class)->group(function() {
+            Route::get('student-performance/{student}/front', 'frontEndIndex')->name('performance.frontend.index'); 
+            //Route::get('student-performance/{student}/print', 'print')->name('student-performance.print');
+        }); 
 
     });
     
@@ -891,6 +895,12 @@ Route::middleware('auth')->group(function() {
         Route::get('student-results/{student}/print', 'print')->name('student-results.print');
     }); 
 
+    
+
+    Route::controller(StudentPerformanceController::class)->group(function() {
+        Route::get('student-performance/{student}', 'index')->name('student-performance.index'); 
+        //Route::get('student-performance/{student}/print', 'print')->name('student-performance.print');
+    }); 
     
     Route::controller(PersonalDetailController::class)->group(function() {
         Route::post('student/update-personal-details', 'update')->name('student.update.personal.details'); 

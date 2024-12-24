@@ -134,6 +134,14 @@ class Plan extends Model
         return $this->hasMany(Attendance::class, 'plan_id', 'id');
     }
 
+    public function attendances(){
+        return $this->hasMany(Attendance::class, 'plan_id', 'id');
+    }
+
+    public function results(){
+        return $this->hasMany(Result::class, 'plan_id', 'id');
+    }
+
     public function tutorial(){
         return $this->hasOne(Plan::class, 'parent_id', 'id')->where('class_type', 'Tutorial')->latestOfMany();
     }

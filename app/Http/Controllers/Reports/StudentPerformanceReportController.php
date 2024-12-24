@@ -6,10 +6,13 @@ use App\Exports\ArrayCollectionExport;
 use App\Exports\CustomArrayCollectionExport;
 use App\Exports\Reports\StudentDataReportBySelectionExport;
 use App\Http\Controllers\Controller;
+use App\Models\AcademicCriteria;
 use App\Models\AcademicYear;
 use App\Models\Agent;
 use App\Models\AgentReferralCode;
 use App\Models\Assign;
+use App\Models\Attendance;
+use App\Models\AttendanceCriteria;
 use App\Models\Course;
 use App\Models\CourseCreationVenue;
 use App\Models\Employee;
@@ -32,7 +35,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
-
+ini_set('memory_limit', '256M'); // Increase memory limit
+ini_set('max_execution_time', '300'); // Increase execution time limit to 300 seconds
 class StudentPerformanceReportController extends Controller
 {
     public function index(){
@@ -232,48 +236,91 @@ class StudentPerformanceReportController extends Controller
 
 
     public function excelDownload(Request $request)
-    {         
+    {    
+             
         $studentIds = explode(",",$request->studentIds);
         
         $data = [];
-        Plan::with('assign')->whereHas('assign', function($q) use($studentIds){
-            $q->whereIn('student_id', $studentIds);
-        })->get()->each(function($plan) use(&$data,$studentIds) {
-            Result::whereIn('student_id',$studentIds)->wehre('plan_id',$plan->id)->get()->each(function($result) use(&$data) {
-                $data[] = [
-                    'term_name' => $result->term->name,
-                    'term_status' => $result->term->status->name,
-                    'term_student_id' => $result->term->student_id,
-                    'course' => $result->course->name,
-                    'intake_semester' => $result->term->semester->name,
-                    'student_id' => $result->student->student_id,
-                    'expected_performanance' => $result->expected_performanance,
-                    'achive_performanance' => $result->achive_performanance,
-                    'grand_expected' => $result->grand_expected,
-                    'grand_achive' => $result->grand_achive,
-                ];
-            });
-        });
+        $attendances = [];
+        $results = [];
+        $terminfo = [];
 
-        Result::whereIn('student_id',$studentIds)->get()->each(function($result) use(&$data) {
-            $data[] = [
-                'term_name' => $result->term->name,
-                'term_status' => $result->term->status->name,
-                'term_student_id' => $result->term->student_id,
-                'course' => $result->course->name,
-                'intake_semester' => $result->term->semester->name,
-                'student_id' => $result->student->student_id,
-                'expected_performanance' => $result->expected_performanance,
-                'achive_performanance' => $result->achive_performanance,
-                'grand_expected' => $result->grand_expected,
-                'grand_achive' => $result->grand_achive,
+        $assignments = Assign::with([
+            'plan',
+            'plan.attenTerm',
+            'plan.creations',
+            'plan.creations.module',
+            'plan.course',
+            'student',
+            'student.crel',
+            'student.crel.creation',
+            'plan.attendances',
+            'plan.attendances.plan.attenTerm',
+            'plan.attendances.feed',
+            'plan.results',
+            'plan.results.grade',
+            'plan.results.plan.attenTerm',
+            'plan.results.plan.creations',
+            'plan.results.plan.creations.module',
+        ])->whereIn('student_id', $studentIds)->get();
+        
+        
+        foreach ($assignments as $assign) {
+            $terminfo[$assign->student_id][$assign->plan->attenTerm->name] = [
+                'term_name' => $assign->plan->attenTerm->name,
+                'term_status' => $assign->attendance == 1 && $assign->attendance == NULL ? '' : 'No',
+                'term_student_id' => $assign->student->registration_no,
+                'course' => $assign->plan->course->name,
+                'intake_semester' => $assign->student->crel->creation->semester->name,
+                'student_id' => $assign->student->registration_no,
             ];
-        });
+            
+            foreach ($assign->plan->attendances as $attendance) {
+                $termName = $attendance->plan->attenTerm->name;
+                if (!isset($attendances[$attendance->student_id][$termName]["total"])) {
+                    $attendances[$attendance->student_id][$termName]["total"] = 0;
+                }
+        
+                if (!isset($attendances[$attendance->student_id][$termName]["count"])) {
+                    $attendances[$attendance->student_id][$termName]["count"] = 0;
+                }
+        
+                $attendances[$attendance->student_id][$termName]["total"] += 1;
+                $attendances[$attendance->student_id][$termName]["count"] += $attendance->feed->attendance_count == 1 ? 1 : 0;
+        
+                $averageAttendanceWithPercentage = ($attendances[$attendance->student_id][$termName]["count"] / $attendances[$attendance->student_id][$termName]["total"]) * 100;
 
+                $attendanceCriteriaFound = AttendanceCriteria::where('range_from', '<=', round($averageAttendanceWithPercentage))
+                    ->where('range_to', '>=', round($averageAttendanceWithPercentage))
+                    ->first();
+                
+                $attendances[$attendance->student_id][$termName]["attendance_criteria"] = isset($attendanceCriteriaFound->id) ? round($attendanceCriteriaFound->point) : 0;
+            }
+            //dd($attendances);
+            foreach ($assign->plan->results as $result) {
+                
+                $termName = $result->plan->attenTerm->name;
+                $moduleName = $result->plan->creations->module->name;
+                $results[$result->student_id][$termName][$moduleName]['grade'] = $result->grade->code;
+                $academicCriteria = AcademicCriteria::where('code', $result->grade->code)->first();
+                $results[$result->student_id][$termName][$moduleName]['academic_criteria'] = $academicCriteria ? $academicCriteria->point : 0;
+            }
+            //dd($results);
+        }
 
         $moduleList = [];
         $data = [];
-
+        foreach($terminfo as $studentId => $termInfo) {
+            foreach($termInfo as $termName => $term) {
+                $data[] = array_merge($term, [
+                    'expected_performanance' => isset($attendances[$studentId][$termName]["attendance_criteria"]) ? $attendances[$studentId][$termName]["attendance_criteria"] : 0,
+                    'achive_performanance' => isset($attendances[$studentId][$termName]["attendance_criteria"]) ? $attendances[$studentId][$termName]["attendance_criteria"] : 0,
+                    'grand_expected' => isset($results[$studentId][$termName]) ? array_sum(array_column($results[$studentId][$termName], 'academic_criteria')) : 0,
+                    'grand_achive' => isset($results[$studentId][$termName]) ? array_sum(array_column($results[$studentId][$termName], 'academic_criteria')) : 0,
+                ]);
+            }
+        }
+        
         $theCollection = [];
         $headers[1][0] = 'Term Name';
         $headers[1][1] = 'Term Status';

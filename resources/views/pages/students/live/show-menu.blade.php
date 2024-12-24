@@ -1,6 +1,6 @@
 <ul 
     class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu" 
-    style="padding-bottom: {{  Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
+    style="padding-bottom: {{  Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student-performance.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
     >
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.show', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.show' ? 'active' : '' }}">
@@ -8,10 +8,10 @@
         </a>
     </li>
     <li class="nav-item hasChildren" role="presentation">
-        <a href="javascript:void(0);" class="nav-link py-4 {{ Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? 'active' : '' }} {{ (Session::has('student_temp_course_relation_'.$student->id) && Session::get('student_temp_course_relation_'.$student->id) > 0 ? 'temp-course' : '' ) }}">
+        <a href="javascript:void(0);" class="nav-link py-4 {{ Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student-performance.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? 'active' : '' }} {{ (Session::has('student_temp_course_relation_'.$student->id) && Session::get('student_temp_course_relation_'.$student->id) > 0 ? 'temp-course' : '' ) }}">
             Course <i data-lucide="chevron-down" class="inline-flex ml-1 w-4 h-4"></i>
         </a>
-        <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentSubMenu {{ Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? 'show' : '' }}">
+        <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentSubMenu {{ Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student-performance.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? 'show' : '' }}">
             <li class="nav-item" role="presentation">
                 <a href="{{ route('student.course', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.course' ? 'active' : '' }}">
                     Course Details
@@ -55,7 +55,7 @@
             @endif
             @if(isset(auth()->user()->priv()['student_performance_view']) && auth()->user()->priv()['student_performance_view'] == 1)
             <li class="nav-item" role="presentation">
-                <a href="javascript:void(0);" class="nav-link py-4">
+                <a href="{{ route('student-performance.index', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student-performance.index' ? 'active' : '' }}">
                     Student Performance
                 </a>
             </li>

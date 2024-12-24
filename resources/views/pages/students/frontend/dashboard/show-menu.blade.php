@@ -16,4 +16,11 @@
             Result
         </a>
     </li>
+
+    
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('students.performance.frontend.index',$student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'students.performance.frontend.index' ? 'active' : '' }}">
+            Student Performance
+        </a>
+    </li>
 </ul>
