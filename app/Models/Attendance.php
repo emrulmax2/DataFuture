@@ -34,6 +34,10 @@ class Attendance extends Model
         return $this->belongsTo(AttendanceFeedStatus::class, 'attendance_feed_status_id');
     }
 
+    public function plan(){
+        return $this->belongsTo(Plan::class, 'plan_id');
+    }
+
     public function updatedBy(): BelongsTo 
     {
         return $this->belongsTo(User::class,"updated_by");
@@ -44,5 +48,8 @@ class Attendance extends Model
         return $this->belongsTo(User::class,"created_by");
     }
 
+    public function planDateList() {
+        return $this->belongsTo(PlansDateList::class, 'plans_date_list_id');
+    }
     
 }

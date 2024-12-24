@@ -986,7 +986,7 @@ import TomSelect from 'tom-select';
             form_data.append('studentIds', studentIds);
             axios({
                 method: 'post',
-                url: route('report.student.result.excel'),
+                url: route('report.student.performance.excel'),
                 data: form_data,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
