@@ -245,7 +245,7 @@ class StudentDataReportController extends Controller
         
         
 
-        $StudentData = Student::with('other','crel','termStatus','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest')->whereIn('id',$studentIds)->get();
 
         
 
@@ -293,11 +293,12 @@ class StudentDataReportController extends Controller
             }else
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
-
+        
         if(!empty($StudentAttendanceTermStatusData))
         foreach($StudentAttendanceTermStatusData as $key =>$value):
             
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+            
         endforeach; 
 
         if(!empty($StudentAwardingBodyDetailsData))
@@ -482,12 +483,12 @@ class StudentDataReportController extends Controller
                         if(strpos( $key, '_id') !== false) {
                             
                             $rel = key($value);
-                            $theCollection[$row][$j++] = (isset($student->termStatus->$rel)) ?$student->termStatus->$rel->name : "";
+                            $theCollection[$row][$j++] = (isset($student->termStatusLatest->$rel)) ?$student->termStatusLatest->$rel->name : "";
                         }else {
                             // if($student->id == 16968) {
                             //     dd($student->termStatus);
                             // }
-                            $theCollection[$row][$j++] = (isset($student->termStatus)) ? $student->termStatus->$key : "";
+                            $theCollection[$row][$j++] = (isset($student->termStatusLatest)) ? $student->termStatusLatest->$key : "";
                         }
                     endforeach; 
             
