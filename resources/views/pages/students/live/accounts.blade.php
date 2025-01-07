@@ -222,6 +222,8 @@
                                                             <td>{{ isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '' }}</td>
                                                             <td>{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
                                                             <td>
+                                                                <a data-id="{{ $payment->id }}" href="{{ route('student.accounts.print',[$student->id, $payment->id]) }}" class="printBtn btn-rounded btn btn-primary text-white p-0 w-6 h-6"><i data-lucide="printer" class="w-3 h-3"></i></a>
+                                                                
                                                                 <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
                                                                 <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                                                                 @if(!empty($agreements) && $agreements->count() > 0)

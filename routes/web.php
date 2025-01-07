@@ -861,6 +861,7 @@ Route::middleware('auth')->group(function() {
 
         Route::get('student/slc-history/{id}', 'slcHistory')->name('student.slc.history');
         Route::get('student/accounts/{id}', 'accounts')->name('student.accounts');
+        Route::get('student/accounts/{id}/print/{payment_id}', 'accountsInvoicePrint')->name('student.accounts.print');
 
         Route::post('student/send-mobile-verification-code','sendMobileVerificationCode')->name('student.send.mobile.verification.code');
         Route::post('student/send-mobile-verify-code','verifyMobileVerificationCode')->name('student.mobile.verify.code');

@@ -63,6 +63,7 @@ use App\Models\Signatory;
 use App\Models\SlcAgreement;
 use App\Models\SlcAttendance;
 use App\Models\SlcCoc;
+use App\Models\SlcMoneyReceipt;
 use App\Models\SlcPaymentMethod;
 use App\Models\SlcRegistration;
 use App\Models\SlcRegistrationStatus;
@@ -97,8 +98,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
-use Barryvdh\DomPDF\Facade\Pdf;
 
+use PDF;
 
 class StudentController extends Controller
 {
@@ -568,6 +569,67 @@ class StudentController extends Controller
             'registrations' => SlcRegistration::where('student_course_relation_id', $courseRelationId)->where('student_id', $student_id)->get(),
             "slcCode" =>(isset($CourseCreationVenue->slc_code) && !empty($CourseCreationVenue->slc_code) ? $CourseCreationVenue->slc_code : ''),
         ]);
+    }
+    public function accountsInvoicePrint($student_id, $payment_id) {
+        set_time_limit(300);
+		$opt = Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? url('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
+		
+        
+        // $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl'));
+        // return $pdf->download('student_payment.pdf');
+        $student = Student::find($student_id);
+        //Not using currently this part
+        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+        $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
+
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id', $courseCreationID)
+                        ->where('student_course_relation_id', $courseRelationId)
+                        ->get()
+                        ->first();
+        $venue_id = (isset($currentCourse->venue_id) && $currentCourse->venue_id > 0 ? $currentCourse->venue_id : 0);
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id', $courseCreationID)->where('venue_id', $venue_id)->get()->first();
+
+        $agreements = SlcAgreement::with('installments')->where('student_id', $student_id)->where(function($q) use($courseRelationId){
+                                $q->where('student_course_relation_id', $courseRelationId)->orWhere('student_course_relation_id', 0)->orWhereNull('student_course_relation_id');
+                            })->orderBy('id', 'ASC')->get();
+        //End of not using part
+
+        $address = '';
+        if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
+            if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                $address .= $student->contact->termaddress->address_line_1.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                $address .= $student->contact->termaddress->address_line_2.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                $address .= $student->contact->termaddress->city.', ';
+            endif;
+            if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                $address .= $student->contact->termaddress->state.', <br/>';
+            endif;
+            if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                $address .= $student->contact->termaddress->post_code.', ';
+            endif;
+            if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                $address .= '<br/>'.$student->contact->termaddress->country;
+            endif;
+        endif;
+        $payment = SlcMoneyReceipt::find($payment_id);
+        $statuses = Status::where('type', 'Student')->orderBy('id', 'ASC')->get();
+
+        // return view('pages.students.live.payment.pdf.moneyreceipt', [
+        //     'logoUrl' => $logoUrl,
+        //     'student' => $student,
+        //     'address' => $address,
+        //     'payment' => SlcMoneyReceipt::find($payment_id),
+        //     'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+        // ]);
+
+        $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl','student','address','payment','statuses'));
+        return $pdf->download('student_payment.pdf');
     }
 
     public function sendMobileVerificationCode(Request $request){
