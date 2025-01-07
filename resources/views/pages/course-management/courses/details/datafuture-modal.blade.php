@@ -16,14 +16,14 @@
                                 <option value="">Please Select</option>
                                 @if(!empty($df_fields) && $df_fields->count() > 0)
                                     @foreach($df_fields as $fld)
-                                        <option value="{{ $fld->id }}">{{ $fld->name }}</option>
+                                        <option data-type="{{ $fld->type }}" value="{{ $fld->id }}">{{ $fld->name }} ({{ strtoupper($fld->type) }}) {{ (isset($fld->category->name) && !empty($fld->category->name) ? ' - '.$fld->category->name : '') }}</option>
                                     @endforeach
                                 @endif
                             </select>
                             <div class="acc__input-error error-datafuture_field_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="field_value" class="form-label">Field Value <span class="text-danger">*</span></label>
+                            <label for="field_value" class="form-label">Field Value</label>
                             <input id="field_value" type="text" name="field_value" class="form-control w-full">
                             <div class="acc__input-error error-field_value text-danger mt-2"></div>
                         </div>    
@@ -71,14 +71,14 @@
                                 <option value="">Please Select</option>
                                 @if(!empty($df_fields) && $df_fields->count() > 0)
                                     @foreach($df_fields as $fld)
-                                        <option value="{{ $fld->id }}">{{ $fld->name }}</option>
+                                        <option data-type="{{ $fld->type }}" value="{{ $fld->id }}">{{ $fld->name }} ({{ strtoupper($fld->type) }}) {{ (isset($fld->category->name) && !empty($fld->category->name) ? ' - '.$fld->category->name : '') }}</option>
                                     @endforeach
                                 @endif
                             </select>
                             <div class="acc__input-error error-datafuture_field_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="edit_field_value" class="form-label">Field Value <span class="text-danger">*</span></label>
+                            <label for="edit_field_value" class="form-label">Field Value</label>
                             <input id="edit_field_value" type="text" name="field_value" class="form-control w-full">
                             <div class="acc__input-error error-field_value text-danger mt-2"></div>
                         </div>   

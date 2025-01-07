@@ -52,4 +52,25 @@ import Toastify from "toastify-js";
             }).showToast();
         });
     }
+
+    $('.lcc-accordion-button').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theAccordion = $theBtn.closest('.lcc-accordion');
+        var $theHeader = $theBtn.parent('.lcc-accordion-header');
+        var $theBody = $theHeader.siblings('.lcc-accordion-collapse');
+
+        if($theBtn.hasClass('lcc-collapsed')){
+            console.log('show Now')
+            $theAccordion.find('.lcc-accordion-button').addClass('lcc-collapsed');
+            $theAccordion.find('.lcc-accordion-collapse').removeClass('lcc-show').slideUp();
+
+            $theBtn.removeClass('lcc-collapsed');
+            $theBody.addClass('lcc-show').slideDown();
+        }else{
+            console.log('hide Now')
+            $theBtn.addClass('lcc-collapsed');
+            $theBody.removeClass('lcc-show').slideUp();
+        }
+    })
 })();

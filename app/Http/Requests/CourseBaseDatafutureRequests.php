@@ -24,8 +24,7 @@ class CourseBaseDatafutureRequests extends FormRequest
     public function rules()
     {
         return [
-            'datafuture_field_id' => 'required',      
-            'field_value' => 'required'       
+            'datafuture_field_id' => 'required'  
         ];
     }
 }

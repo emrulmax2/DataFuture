@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import Litepicker from "litepicker";
 
 ("use strict");
 var courseDFListTable = (function () {
@@ -157,13 +158,30 @@ var courseDFListTable = (function () {
             filterHTMLForm();
         });
 
+        let dfLitepicker = {
+            autoApply: true,
+            singleMode: true,
+            numberOfColumns: 1,
+            numberOfMonths: 1,
+            showWeekNumbers: false,
+            format: "YYYY-MM-DD",
+            dropdowns: {
+                minYear: 1900,
+                maxYear: 2050,
+                months: true,
+                years: true,
+            },
+        };
+        let addPicker = null;
+        let editPicker = null;
+
         let tomOptionsCBDF = {
             plugins: {
                 dropdown_input: {}
             },
             placeholder: 'Search Here...',
-            persist: false,
-            create: true,
+            //persist: false,
+            create: false,
             allowEmptyOption: true,
             onDelete: function (values) {
                 return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
@@ -188,6 +206,10 @@ var courseDFListTable = (function () {
             $('#courseDataFutureAddModal select').val('');
 
             datafuture_field_id.clear(true);
+
+            if(addPicker != null){
+                editPicker.destroy();
+            }
         });
         
         const courseDataFutureEditModalEl = document.getElementById('courseDataFutureEditModal')
@@ -198,6 +220,10 @@ var courseDFListTable = (function () {
             $('#courseDataFutureEditModal input[name="id"]').val('0');
 
             edit_datafuture_field_id.clear(true);
+
+            if(editPicker != null){
+                editPicker.destroy();
+            }
         });
 
         const confModalDFEL = document.getElementById('confirmModalDF');
@@ -295,10 +321,29 @@ var courseDFListTable = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     let datafuture_field_id = dataset.datafuture_field_id ? dataset.datafuture_field_id : '';
-                    $('#courseDataFutureEditModal input[name="field_value"]').val(dataset.field_value ? dataset.field_value : '');
+                    //$('#courseDataFutureEditModal input[name="field_value"]').val(dataset.field_value ? dataset.field_value : '');
+                    let theType = dataset.field.type ? dataset.field.type : 'text';
 
                     if(datafuture_field_id != ''){
                         edit_datafuture_field_id.setValue(datafuture_field_id);
+                    }else{
+                        edit_datafuture_field_id.clear(true);
+                    }
+
+                    if(theType == 'number'){
+                        $('#edit_field_value').attr('type', 'number').attr('step', 'any').val(dataset.field_value ? dataset.field_value : '');
+                    }else{
+                        $('#edit_field_value').attr('type', 'text').removeAttr('step').val(dataset.field_value ? dataset.field_value : '');
+                        if(theType == 'date'){
+                            editPicker = new Litepicker({
+                                element: document.getElementById('edit_field_value'),
+                                ...dfLitepicker,
+                            });
+                        }else{
+                            if(editPicker != null){
+                                editPicker.destroy();
+                            }
+                        }
                     }
                     
 
@@ -308,6 +353,36 @@ var courseDFListTable = (function () {
                 console.log(error);
             });
         });
+
+        
+        $('#edit_datafuture_field_id').on('change', function(){
+            var $theField = $(this);
+            var theFieldId = $theField.val();
+
+            if(theFieldId > 0){
+                var theType = $('option:selected', $theField).attr('data-type');
+                if(theType == 'number'){
+                    $('#edit_field_value').attr('type', 'number').attr('step', 'any').val('');
+                }else{
+                    $('#edit_field_value').attr('type', 'text').removeAttr('step').val('');
+                    if(theType == 'date'){
+                        editPicker = new Litepicker({
+                            element: document.getElementById('edit_field_value'),
+                            ...dfLitepicker,
+                        });
+                    }else{
+                        if(editPicker != null){
+                            editPicker.destroy();
+                        }
+                    }
+                }
+            }else{
+                $('#edit_field_value').attr('type', 'text').removeAttr('step').val('');
+                if(editPicker != null){
+                    editPicker.destroy();
+                }
+            }
+        })
 
         $('#courseDataFutureEditForm').on('submit', function(e){
             e.preventDefault();
@@ -357,6 +432,38 @@ var courseDFListTable = (function () {
             });
 
         });
+
+        
+        $('#datafuture_field_id').on('change', function(){
+            var $theField = $(this);
+            var theFieldId = $theField.val();
+
+            if(theFieldId > 0){
+                var theType = $('option:selected', $theField).attr('data-type');
+                console.log(theType);
+
+                if(theType == 'number'){
+                    $('#field_value').attr('type', 'number').attr('step', 'any').val('');
+                }else{
+                    $('#field_value').attr('type', 'text').removeAttr('step').val('');
+                    if(theType == 'date'){
+                        addPicker = new Litepicker({
+                            element: document.getElementById('field_value'),
+                            ...dfLitepicker,
+                        });
+                    }else{
+                        if(addPicker != null){
+                            addPicker.destroy();
+                        }
+                    }
+                }
+            }else{
+                $('#field_value').attr('type', 'text').removeAttr('step').val('');
+                if(addPicker != null){
+                    addPicker.destroy();
+                }
+            }
+        })
 
 
         $('#courseDataFutureAddForm').on('submit', function(e){

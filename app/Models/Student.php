@@ -94,9 +94,11 @@ class Student extends Model
     public function quals(){
         return $this->hasMany(StudentQualification::class, 'student_id', 'id');
     }
+
     public function qualHigest(){
         return $this->hasOne(StudentQualification::class, 'student_id', 'id')->latestOfMany();
     }
+    
     public function employment(){
         return $this->hasMany(StudentEmployment::class, 'student_id', 'id');
     }
@@ -206,7 +208,6 @@ class Student extends Model
     }
     
     public function activeCR(){
-
         return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1);
         //return $this->hasOne(StudentCourseRelation::class, 'student_id')->where('active', '=', 1)->latestOfMany();
         
@@ -303,6 +304,21 @@ class Student extends Model
     public function awarded(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
         return $this->hasOne(StudentAward::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+    }
+
+    public function stuload(){
+        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+        return $this->hasMany(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel);
+    }
+
+    public function laststuload(){
+        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+        return $this->hasOne(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+    }
+
+    public function df(){
+        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+        return $this->hasOne(StudentDatafuture::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
     }
     
 }

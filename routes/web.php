@@ -268,12 +268,20 @@ use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\StudentFlagController;
+use App\Http\Controllers\Settings\Studentoptions\EquivalentOrLowerQualificationController;
+use App\Http\Controllers\Settings\Studentoptions\FundingCompletionController;
+use App\Http\Controllers\Settings\Studentoptions\FundingLengthController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
+use App\Http\Controllers\Settings\Studentoptions\ModuleOutcomeController;
+use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
+use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
+use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
 use App\Http\Controllers\Student\AttendanceTermStatusController;
 use App\Http\Controllers\Student\AwardController;
+use App\Http\Controllers\Student\DatafutureController;
 use App\Http\Controllers\Student\Frontend\AttendanceExcuseController;
 use App\Http\Controllers\Student\Result\StudentResultController;
 use App\Http\Controllers\Student\SlcCocController;
@@ -2068,6 +2076,19 @@ Route::middleware('auth')->group(function() {
         Route::post('titles/import', 'import')->name('titles.import');
     });
 
+    Route::controller(EquivalentOrLowerQualificationController::class)->group(function() {
+        Route::get('equivalent-or-lower-qualification/list', 'list')->name('eqvorlwqf.list'); 
+        Route::post('equivalent-or-lower-qualification/store', 'store')->name('eqvorlwqf.store'); 
+        Route::get('equivalent-or-lower-qualification/edit/{id}', 'edit')->name('eqvorlwqf.edit');
+        Route::post('equivalent-or-lower-qualification/update', 'update')->name('eqvorlwqf.update');
+        Route::delete('equivalent-or-lower-qualification/delete/{id}', 'destroy')->name('eqvorlwqf.destory');
+        Route::post('equivalent-or-lower-qualification/restore/{id}', 'restore')->name('eqvorlwqf.restore');
+        Route::post('equivalent-or-lower-qualification/update-status/{id}', 'updateStatus')->name('eqvorlwqf.update.status');
+    
+        Route::get('equivalent-or-lower-qualification/export', 'export')->name('eqvorlwqf.export');
+        Route::post('equivalent-or-lower-qualification/import', 'import')->name('eqvorlwqf.import');
+    });
+
     Route::controller(EthnicityController::class)->group(function() {
         Route::get('ethnic', 'index')->name('ethnic'); 
         Route::get('ethnic/list', 'list')->name('ethnic.list'); 
@@ -2080,6 +2101,71 @@ Route::middleware('auth')->group(function() {
     
         Route::get('ethnic/export', 'export')->name('ethnic.export');
         Route::post('ethnic/import', 'import')->name('ethnic.import');
+    });
+
+    Route::controller(FundingCompletionController::class)->group(function() {
+        Route::get('funding-completion/list', 'list')->name('funding.completion.list'); 
+        Route::post('funding-completion/store', 'store')->name('funding.completion.store'); 
+        Route::get('funding-completion/edit/{id}', 'edit')->name('funding.completion.edit');
+        Route::post('funding-completion/update', 'update')->name('funding.completion.update');
+        Route::delete('funding-completion/delete/{id}', 'destroy')->name('funding.completion.destory');
+        Route::post('funding-completion/restore/{id}', 'restore')->name('funding.completion.restore');
+        Route::post('funding-completion/update-status/{id}', 'updateStatus')->name('funding.completion.update.status');
+    
+        Route::get('funding-completion/export', 'export')->name('funding.completion.export');
+        Route::post('funding-completion/import', 'import')->name('funding.completion.import');
+    });
+
+    Route::controller(FundingLengthController::class)->group(function() {
+        Route::get('funding-length/list', 'list')->name('funding.length.list'); 
+        Route::post('funding-length/store', 'store')->name('funding.length.store'); 
+        Route::get('funding-length/edit/{id}', 'edit')->name('funding.length.edit');
+        Route::post('funding-length/update', 'update')->name('funding.length.update');
+        Route::delete('funding-length/delete/{id}', 'destroy')->name('funding.length.destory');
+        Route::post('funding-length/restore/{id}', 'restore')->name('funding.length.restore');
+        Route::post('funding-length/update-status/{id}', 'updateStatus')->name('funding.length.update.status');
+    
+        Route::get('funding-length/export', 'export')->name('funding.length.export');
+        Route::post('funding-length/import', 'import')->name('funding.length.import');
+    });
+
+    Route::controller(ModuleOutcomeController::class)->group(function() {
+        Route::get('module-outcome/list', 'list')->name('module.outcome.list'); 
+        Route::post('module-outcome/store', 'store')->name('module.outcome.store'); 
+        Route::get('module-outcome/edit/{id}', 'edit')->name('module.outcome.edit');
+        Route::post('module-outcome/update', 'update')->name('module.outcome.update');
+        Route::delete('module-outcome/delete/{id}', 'destroy')->name('module.outcome.destory');
+        Route::post('module-outcome/restore/{id}', 'restore')->name('module.outcome.restore');
+        Route::post('module-outcome/update-status/{id}', 'updateStatus')->name('module.outcome.update.status');
+    
+        Route::get('module-outcome/export', 'export')->name('module.outcome.export');
+        Route::post('module-outcome/import', 'import')->name('module.outcome.import');
+    });
+
+    Route::controller(ModuleResultController::class)->group(function() {
+        Route::get('module-result/list', 'list')->name('module.result.list'); 
+        Route::post('module-result/store', 'store')->name('module.result.store'); 
+        Route::get('module-result/edit/{id}', 'edit')->name('module.result.edit');
+        Route::post('module-result/update', 'update')->name('module.result.update');
+        Route::delete('module-result/delete/{id}', 'destroy')->name('module.result.destory');
+        Route::post('module-result/restore/{id}', 'restore')->name('module.result.restore');
+        Route::post('module-result/update-status/{id}', 'updateStatus')->name('module.result.update.status');
+    
+        Route::get('module-result/export', 'export')->name('module.result.export');
+        Route::post('module-result/import', 'import')->name('module.result.import');
+    });
+
+    Route::controller(NonRegulatedFeeFlagController::class)->group(function() {
+        Route::get('non-regulated-fee-flag/list', 'list')->name('non.regulated.fee.flag.list'); 
+        Route::post('non-regulated-fee-flag/store', 'store')->name('non.regulated.fee.flag.store'); 
+        Route::get('non-regulated-fee-flag/edit/{id}', 'edit')->name('non.regulated.fee.flag.edit');
+        Route::post('non-regulated-fee-flag/update', 'update')->name('non.regulated.fee.flag.update');
+        Route::delete('non-regulated-fee-flag/delete/{id}', 'destroy')->name('non.regulated.fee.flag.destory');
+        Route::post('non-regulated-fee-flag/restore/{id}', 'restore')->name('non.regulated.fee.flag.restore');
+        Route::post('non-regulated-fee-flag/update-status/{id}', 'updateStatus')->name('non.regulated.fee.flag.update.status');
+    
+        Route::get('non-regulated-fee-flag/export', 'export')->name('non.regulated.fee.flag.export');
+        Route::post('non-regulated-fee-flag/import', 'import')->name('non.regulated.fee.flag.import');
     });
 
     Route::controller(KinsRelationController::class)->group(function() {
@@ -2263,6 +2349,18 @@ Route::middleware('auth')->group(function() {
     
         Route::get('qualification-identifier/export', 'export')->name('qaualtypeid.export');
         Route::post('qualification-identifier/import', 'import')->name('qaualtypeid.import');
+    });
+
+    Route::controller(ReasonForEndingCourseSessionController::class)->group(function(){
+        Route::get('reason-end-course/list', 'list')->name('rsendcrss.list');
+        Route::post('reason-end-course/store', 'store')->name('rsendcrss.store'); 
+        Route::get('reason-end-course/edit/{id}', 'edit')->name('rsendcrss.edit');
+        Route::post('reason-end-course/update', 'update')->name('rsendcrss.update');
+        Route::delete('reason-end-course/delete/{id}', 'destroy')->name('rsendcrss.destory');
+        Route::post('reason-end-course/restore/{id}', 'restore')->name('rsendcrss.restore');
+        Route::post('reason-end-course/update-status/{id}', 'updateStatus')->name('rsendcrss.update.status');
+        Route::get('reason-end-course/export', 'export')->name('rsendcrss.export');
+        Route::post('reason-end-course/import', 'import')->name('rsendcrss.import');
     });
 
     Route::controller(ReasonForEngagementEndingController::class)->group(function() {
@@ -3333,6 +3431,15 @@ Route::middleware('auth')->group(function() {
         Route::post('budget-management/reports/generate', 'generate')->name('budget.management.reports.generate'); 
         Route::get('budget-management/reports/details/{year}/{set}/{set_detail}', 'details')->name('budget.management.reports.details'); 
         Route::get('budget-management/reports/details-list', 'detailsList')->name('budget.management.reports.details.list'); 
+    });
+
+    Route::controller(DatafutureController::class)->group(function() {
+        Route::get('student/datafuture/{student}', 'index')->name('student.datafuture');
+
+        Route::post('student/datafuture/{student}/store', 'store')->name('student.datafuture.store');
+        
+        Route::post('student/datafuture/{student}/get-instances', 'getInstances')->name('student.datafuture.get.instances');
+        Route::post('student/datafuture/{student}/store-hesa-instances', 'storeHesaInstance')->name('student.datafuture.store.hesa.instances');
     });
     
 });

@@ -67,17 +67,20 @@ class CourseBaseDatafutureCntroller extends Controller
     }
 
     public function store(CourseBaseDatafutureRequests $request){
-        $request->merge([
+        $data = [
+            'course_id'=> $request->course_id,
+            'datafuture_field_id'=> $request->datafuture_field_id,
+            'field_value'=> (!empty($request->field_value) ? $request->field_value : null),
             'created_by' => auth()->user()->id
-        ]);
+        ];
         
-        $courseDF = CourseBaseDatafutures::create($request->all());
+        $courseDF = CourseBaseDatafutures::create($data);
         
         return response()->json($courseDF);
     }
 
     public function edit($id){
-        $data = CourseBaseDatafutures::find($id);
+        $data = CourseBaseDatafutures::with('field')->find($id);
 
         if($data){
             return response()->json($data);
@@ -91,7 +94,7 @@ class CourseBaseDatafutureCntroller extends Controller
         $course_id = $request->course_id;
         $courseDF = CourseBaseDatafutures::where('id', $dfID)->where('course_id', $course_id)->update([
             'datafuture_field_id'=> $request->datafuture_field_id,
-            'field_value'=> $request->field_value,
+            'field_value'=> (!empty($request->field_value) ? $request->field_value : null),
             'updated_by' => auth()->user()->id
         ]);
 

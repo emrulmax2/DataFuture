@@ -53,4 +53,8 @@ class Course extends Model
     public function team(){
         return $this->hasOne(TutorMonitorTeam::class, 'course_id', 'id')->latestOfMany();
     }
+
+    public function df(){
+        return $this->hasMany(CourseBaseDatafutures::class, 'course_id', 'id');
+    }
 }

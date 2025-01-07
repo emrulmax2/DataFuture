@@ -106,5 +106,10 @@
             Task & Process
         </a>
     </li>
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('student.datafuture', $student->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'student.datafuture' ? 'active' : '' }}">
+            Datafuture
+        </a>
+    </li>
     
 </ul>
