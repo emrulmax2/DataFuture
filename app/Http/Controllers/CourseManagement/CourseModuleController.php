@@ -12,6 +12,7 @@ use App\Models\AssessmentType;
 use App\Models\Grade;
 
 use App\Exports\ArrayCollectionExport;
+use App\Models\DatafutureField;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CourseModuleController extends Controller
@@ -19,28 +20,14 @@ class CourseModuleController extends Controller
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) ? $request->status : 1);
         $course = (isset($request->course) && $request->course > 0 ? $request->course : 0);
-
-        $query = CourseModule::where('course_id', $course);
-        if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('code','LIKE','%'.$queryStr.'%');
-            $query->orWhere('status','LIKE','%'.$queryStr.'%');
-        endif;
-        $total_rows = $query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $query = CourseModule::where('course_id', $course)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
@@ -50,7 +37,18 @@ class CourseModuleController extends Controller
         endif;
         if($status == 2):
             $query->onlyTrashed();
+        else:
+            $query->where('active', $status);
         endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -104,7 +102,8 @@ class CourseModuleController extends Controller
             ],
             'module' => $modules,
             'assementTypes' =>$assementTypes,
-            'gradesList' =>$gradesList
+            'gradesList' =>$gradesList,
+            'df_fields' => DatafutureField::whereIn('datafuture_field_category_id', [4])->orderBy('name', 'ASC')->get(),
         ]);
     }
 

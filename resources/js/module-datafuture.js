@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import TomSelect from "tom-select";
 
 ("use strict");
 var moduleDFListTable = (function () {
@@ -30,13 +31,20 @@ var moduleDFListTable = (function () {
                     width: "180",
                 },
                 {
+                    title: "Category",
+                    field: "category",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Field Name",
-                    field: "field_name",
+                    field: "datafuture_field_id",
                     headerHozAlign: "left",
                 },
                 {
                     title: "Field Type",
                     field: "field_type",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
@@ -47,6 +55,7 @@ var moduleDFListTable = (function () {
                 {
                     title: "Description",
                     field: "field_desc",
+                    headerSort: false,
                     headerHozAlign: "left",
                 },
                 {
@@ -148,6 +157,38 @@ var moduleDFListTable = (function () {
             filterHTMLForm();
         });
 
+        let dfLitepicker = {
+            autoApply: true,
+            singleMode: true,
+            numberOfColumns: 1,
+            numberOfMonths: 1,
+            showWeekNumbers: false,
+            format: "YYYY-MM-DD",
+            dropdowns: {
+                minYear: 1900,
+                maxYear: 2050,
+                months: true,
+                years: true,
+            },
+        };
+        let addPicker = null;
+        let editPicker = null;
+
+        let tomOptionsCBDF = {
+            plugins: {
+                dropdown_input: {}
+            },
+            placeholder: 'Search Here...',
+            //persist: false,
+            create: false,
+            allowEmptyOption: true,
+            onDelete: function (values) {
+                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+            },
+        };
+        var datafuture_field_id = new TomSelect('#datafuture_field_id', tomOptionsCBDF);
+        var edit_datafuture_field_id = new TomSelect('#edit_datafuture_field_id', tomOptionsCBDF);
+
 
         const moduleDataFutureAddModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#moduleDataFutureAddModal"));
         const moduleDataFutureEditModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#moduleDataFutureEditModal"));
@@ -162,8 +203,13 @@ var moduleDFListTable = (function () {
         moduleDataFutureAddModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#moduleDataFutureAddModal .acc__input-error').html('');
             $('#moduleDataFutureAddModal input[type="text"]').val('');
-            $('#moduleDataFutureAddModal textarea').val('');
             $('#moduleDataFutureAddModal select').val('');
+
+            datafuture_field_id.clear(true);
+
+            if(addPicker != null){
+                editPicker.destroy();
+            }
         });
         
         const moduleDataFutureEditModalEl = document.getElementById('moduleDataFutureEditModal')
@@ -171,8 +217,13 @@ var moduleDFListTable = (function () {
             $('#moduleDataFutureEditModal .acc__input-error').html('');
             $('#moduleDataFutureEditModal input[type="text"]').val('');
             $('#moduleDataFutureEditModal select').val('');
-            $('#moduleDataFutureEditModal textarea').val('');
             $('#moduleDataFutureEditModal input[name="id"]').val('0');
+
+            edit_datafuture_field_id.clear(true);
+
+            if(editPicker != null){
+                editPicker.destroy();
+            }
         });
 
         const confirmModalMDFEL = document.getElementById('confirmModalMDF');
@@ -269,18 +320,67 @@ var moduleDFListTable = (function () {
             }).then((response) => {
                 if (response.status == 200) {
                     let dataset = response.data;
-                    $('#moduleDataFutureEditModal input[name="field_name"]').val(dataset.field_name ? dataset.field_name : '');
-                    $('#moduleDataFutureEditModal select[name="field_type"]').val(dataset.field_type ? dataset.field_type : '');
-                    $('#moduleDataFutureEditModal input[name="field_value"]').val(dataset.field_value ? dataset.field_value : '');
-                    $('#moduleDataFutureEditModal textarea[name="field_desc"]').val(dataset.field_desc ? dataset.field_desc : '');
-                    
 
+                    let datafuture_field_id = dataset.datafuture_field_id ? dataset.datafuture_field_id : '';
+                    //$('#courseDataFutureEditModal input[name="field_value"]').val(dataset.field_value ? dataset.field_value : '');
+                    let theType = dataset.field.type ? dataset.field.type : 'text';
+
+                    if(datafuture_field_id != ''){
+                        edit_datafuture_field_id.setValue(datafuture_field_id);
+                    }else{
+                        edit_datafuture_field_id.clear(true);
+                    }
+
+                    if(theType == 'number'){
+                        $('#edit_field_value').attr('type', 'number').attr('step', 'any').val(dataset.field_value ? dataset.field_value : '');
+                    }else{
+                        $('#edit_field_value').attr('type', 'text').removeAttr('step').val(dataset.field_value ? dataset.field_value : '');
+                        if(theType == 'date'){
+                            editPicker = new Litepicker({
+                                element: document.getElementById('edit_field_value'),
+                                ...dfLitepicker,
+                            });
+                        }else{
+                            if(editPicker != null){
+                                editPicker.destroy();
+                            }
+                        }
+                    }
                     $('#moduleDataFutureEditModal input[name="id"]').val(editId);
                 }
             }).catch((error) => {
                 console.log(error);
             });
         });
+
+        $('#edit_datafuture_field_id').on('change', function(){
+            var $theField = $(this);
+            var theFieldId = $theField.val();
+
+            if(theFieldId > 0){
+                var theType = $('option:selected', $theField).attr('data-type');
+                if(theType == 'number'){
+                    $('#edit_field_value').attr('type', 'number').attr('step', 'any').val('');
+                }else{
+                    $('#edit_field_value').attr('type', 'text').removeAttr('step').val('');
+                    if(theType == 'date'){
+                        editPicker = new Litepicker({
+                            element: document.getElementById('edit_field_value'),
+                            ...dfLitepicker,
+                        });
+                    }else{
+                        if(editPicker != null){
+                            editPicker.destroy();
+                        }
+                    }
+                }
+            }else{
+                $('#edit_field_value').attr('type', 'text').removeAttr('step').val('');
+                if(editPicker != null){
+                    editPicker.destroy();
+                }
+            }
+        })
 
         $('#moduleDataFutureEditForm').on('submit', function(e){
             e.preventDefault();
@@ -331,6 +431,36 @@ var moduleDFListTable = (function () {
 
         });
 
+        $('#datafuture_field_id').on('change', function(){
+            var $theField = $(this);
+            var theFieldId = $theField.val();
+
+            if(theFieldId > 0){
+                var theType = $('option:selected', $theField).attr('data-type');
+                console.log(theType);
+                
+                if(theType == 'number'){
+                    $('#field_value').attr('type', 'number').attr('step', 'any').val('');
+                }else{
+                    $('#field_value').attr('type', 'text').removeAttr('step').val('');
+                    if(theType == 'date'){
+                        addPicker = new Litepicker({
+                            element: document.getElementById('field_value'),
+                            ...dfLitepicker,
+                        });
+                    }else{
+                        if(addPicker != null){
+                            addPicker.destroy();
+                        }
+                    }
+                }
+            }else{
+                $('#field_value').attr('type', 'text').removeAttr('step').val('');
+                if(addPicker != null){
+                    addPicker.destroy();
+                }
+            }
+        })
 
         $('#moduleDataFutureAddForm').on('submit', function(e){
             e.preventDefault();

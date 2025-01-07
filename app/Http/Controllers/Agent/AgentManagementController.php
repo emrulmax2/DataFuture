@@ -269,6 +269,7 @@ class AgentManagementController extends Controller
         $fixedAmount = (isset($theRule->amount) && $theRule->amount > 0 ? $theRule->amount : 0);
         $code = (isset($request->code) && !empty($request->code) ? $request->code : '');
         $studentids = (isset($request->studentids) && !empty($request->studentids) ? $request->studentids : []);
+        $remittanceRef = random_int(100000, 999999);
 
         $html = '';
         if(!empty($studentids)):
@@ -293,14 +294,16 @@ class AgentManagementController extends Controller
                                 $comission = $amount * $percentage / 100;
                             endif;
                             $html .= '<tr>';
-                                $html .= '<td>'.$mr->id.'<inp</td>';
+                                $html .= '<td>';
+                                    $html .= $mr->id;
+                                $html .= '</td>';
                                 $html .= '<td>'.(isset($mr->payment_date) && !empty($mr->payment_date) ? date('jS M, Y', strtotime($mr->payment_date)) : '').'</td>';
                                 $html .= '<td>'.(isset($mr->agreement->year) && $mr->agreement->year > 0 ? $mr->agreement->year : '').'</td>';
                                 $html .= '<td>£'.number_format($amount, 2).'</td>';
                                 $html .= '<td><input type="number" step="any" value="'.number_format($comission, 2).'" name="comission['.$std->id.']['.$mr->id.'][comission]" class="w-full form-control"/></td>';
                                 $html .= '<td><input type="text" value="" name="comission['.$std->id.']['.$mr->id.'][p_date]" class="w-full form-control datepickers"/></td>';
                                 $html .= '<td><input type="number" step="any" value="" name="comission['.$std->id.']['.$mr->id.'][p_amount]" class="w-full form-control"/></td>';
-                                $html .= '<td><input type="text" value="" name="comission['.$std->id.']['.$mr->id.'][remittance_ref]" class="w-full form-control"/></td>';
+                                $html .= '<td><input type="text" readonly value="'.$remittanceRef.'" name="comission['.$std->id.']['.$mr->id.'][remittance_ref]" class="w-full form-control"/></td>';
                             $html .= '</tr>';
                         endforeach;
                     endif;

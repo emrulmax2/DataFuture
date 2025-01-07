@@ -12,10 +12,8 @@ class ModuleDatafuture extends Model
 
     protected $fillable = [
         'course_module_id',
-        'field_name',
-        'field_type',
+        'datafuture_field_id',
         'field_value',
-        'field_desc',
         'parent_id',
         'created_by',
         'updated_by',
@@ -30,5 +28,9 @@ class ModuleDatafuture extends Model
 
     public function module(){
         return $this->belongsTo(CourseModule::class);
+    }
+
+    public function field(){
+        return $this->belongsTo(DatafutureField::class, 'datafuture_field_id');
     }
 }

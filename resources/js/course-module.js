@@ -27,12 +27,15 @@ var courseModuleListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "70",
                 },
                 {
                     title: "Module",
                     field: "name",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="whitespace-normal">'+cell.getData().name+'</div>';
+                    }
                 },
                 {
                     title: "Level",

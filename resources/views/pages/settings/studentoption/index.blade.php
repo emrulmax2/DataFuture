@@ -67,6 +67,20 @@
                 <div class="col-span-12">
                     <div class="intro-y box optionBox">
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Equivalent or Lower qualification</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addEqvOrLwQfModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="EqvOrLwQfListTable">
+                            @include('pages.settings.studentoption.eqvorlwqf.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Ethnicities</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                                 <button data-tw-toggle="modal" data-tw-target="#addEthnicityModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New Ethnicity</button>
@@ -89,6 +103,34 @@
                         </div>
                         <div class="optionBoxBody p-5" data-tableid="feeEligibilitiesListTable">
                             @include('pages.settings.studentoption.feeeligibility.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Funding Completion</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addFundingCompletionModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="FundingCompletionListTable">
+                            @include('pages.settings.studentoption.fundingcompletion.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Funding Length</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addFundingLengthModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="FundingLengthListTable">
+                            @include('pages.settings.studentoption.fundinglength.index')
                         </div>
                     </div>
                 </div>
@@ -151,6 +193,48 @@
                 <div class="col-span-12">
                     <div class="intro-y box optionBox">
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Module Outcome</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addModuleOutcomeModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="ModuleOutcomeTable">
+                            @include('pages.settings.studentoption.moduleOutcome.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Module Result</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addModuleResultModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="ModuleResultTable">
+                            @include('pages.settings.studentoption.moduleResult.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Non Regulated Fee Flag</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addNonRegFFlgModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="NonRegFFlgListTable">
+                            @include('pages.settings.studentoption.nonregfflg.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Previous provider</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                                 <button data-tw-toggle="modal" data-tw-target="#addPreviousproviderModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
@@ -173,6 +257,20 @@
                         </div>
                         <div class="optionBoxBody p-5" data-tableid="QaualtypeidListTable">
                             @include('pages.settings.studentoption.qaualtypeid.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Reason for Ending course session</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addRsForEndCrsSModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="RsForEndCrsSListTable">
+                            @include('pages.settings.studentoption.rsfendcrss.index')
                         </div>
                     </div>
                 </div>
@@ -332,12 +430,19 @@
     @vite('resources/js/country.js')
     @vite('resources/js/disabilities.js')
     @vite('resources/js/feeeligibilities.js')
+    @vite('resources/js/funding-completion.js')
+    @vite('resources/js/funding-length.js')
+    @vite('resources/js/module-outcome.js')
+    @vite('resources/js/module-result.js')
     @vite('resources/js/apelcredit.js')
     @vite('resources/js/highest-qualification-on-entry.js')
     @vite('resources/js/hesa-qualification-subject.js')
     @vite('resources/js/country-fo-permanent-address.js')
     @vite('resources/js/previous-provider.js')
     @vite('resources/js/qualification-type-identifier.js')
+    @vite('resources/js/reason-for-ending-course-session.js')
+    @vite('resources/js/equivalent-or-lower-qualification.js')
+    @vite('resources/js/non-regulated-fee-flag.js')
     @vite('resources/js/reason-for-engagement-ending.js')
     @vite('resources/js/termtimeaccommodationtype.js')     
     @vite('resources/js/sexidentifier.js')

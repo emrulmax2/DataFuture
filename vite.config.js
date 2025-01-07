@@ -341,6 +341,16 @@ export default defineConfig({
                 'resources/js/budget-report.js',
                 'resources/js/budget-report-details.js',
                 'resources/js/agent-management-comission.js',
+
+                'resources/js/student-datafuture.js',
+
+                'resources/js/reason-for-ending-course-session.js',
+                'resources/js/equivalent-or-lower-qualification.js',
+                'resources/js/funding-completion.js',
+                'resources/js/funding-length.js',
+                'resources/js/non-regulated-fee-flag.js',
+                'resources/js/module-outcome.js',
+                'resources/js/module-result.js',
             ],
             refresh: true,
         }),

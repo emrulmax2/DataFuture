@@ -10,6 +10,7 @@
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                 <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                     <option value="1">Active</option>
+                    <option value="0">Inactive</option>
                     <option value="2">Archived</option>
                 </select>
             </div>
