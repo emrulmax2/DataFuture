@@ -66,7 +66,7 @@
                 <td colspan="2" style="text-color:gray; font-size:28px; text-align:right; padding-top:40px; text-transform:uppercase;" colspan="2">Money Receipt</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:left;">Date: {{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : date('jS M, Y')) }}</td>
+                <td colspan="4" style="text-align:left; margin-top:10px;">Date: {{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : date('jS M, Y')) }}</td>
             </tr>
             <tr>
                 <td colspan="4" style="text-align:left;">Invoice# {{ $payment->invoice_no }}</td>
