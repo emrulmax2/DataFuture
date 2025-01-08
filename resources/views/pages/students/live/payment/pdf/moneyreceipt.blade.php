@@ -66,22 +66,22 @@
                 <td colspan="2" style="text-color:gray; font-size:28px; text-align:right; padding-top:40px; text-transform:uppercase;" colspan="2">Money Receipt</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:left; margin-top:10px;">Date: {{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : date('jS M, Y')) }}</td>
+                <td colspan="4" style="text-align:right; margin-top:10px;">{{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : date('jS M, Y')) }}</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:left;">Invoice# {{ $payment->invoice_no }}</td>
+                <td colspan="4" style="text-align:right;">Invoice# {{ $payment->invoice_no }}</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:left;">Student Name: {{ $student->full_name }}</td>
+                <td colspan="4" style="text-align:left;">{{ $student->full_name }}</td>
             </tr>
-            <tr>
+            {{-- <tr>
                 <td colspan="4" style="text-align:left;">Student Mobile: {{ $student->contact->mobile }}</td>
-            </tr>
+            </tr> --}}
             <tr>
                 <td colspan="4" style="text-align:left;">{!! $address !!}</td>
             </tr>
             <tr>
-                <td colspan="4" style="text-align:left;">Student ID: {{ $student->registration_no }}</td>
+                <td colspan="4" style="text-align:left;">ID: {{ $student->registration_no }}</td>
             </tr>
         </table>
       </div>
