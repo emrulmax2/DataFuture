@@ -45,14 +45,32 @@ import Litepicker from "litepicker";
         new TomSelect(this, tomOptionsSDF);
     });
 
-    $('#editStudentStuloadModal .df-tom-selects').each(function(){
-        new TomSelect(this, tomOptionsSDF);
-    });
     let semester_id = new TomSelect('#semester_id', tomOptionsSDF);
     let DISABILITY_IDS = new TomSelect('#DISABILITY_IDS', tomOptionsSDFMul);
 
+    let SSI_disall_id = new TomSelect('#SSI_disall_id', tomOptionsSDF);
+    let SSI_exchind_id = new TomSelect('#SSI_exchind_id', tomOptionsSDF);
+    let SSI_locsdy_id = new TomSelect('#SSI_locsdy_id', tomOptionsSDF);
+    let SSI_mode_id = new TomSelect('#SSI_mode_id', tomOptionsSDF);
+    let SSI_mstufee_id = new TomSelect('#SSI_mstufee_id', tomOptionsSDF);
+    let SSI_notact_id = new TomSelect('#SSI_notact_id', tomOptionsSDF);
+    let SSI_priprov_id = new TomSelect('#SSI_priprov_id', tomOptionsSDF);
+    let SSI_sselig_id = new TomSelect('#SSI_sselig_id', tomOptionsSDF);
+    let SSI_qual_id = new TomSelect('#SSI_qual_id', tomOptionsSDF);
+    let SSI_heapespop_id = new TomSelect('#SSI_heapespop_id', tomOptionsSDF);
+
     if($('.dfReportWrap .df-datepicker').length > 0){
         $('.dfReportWrap .df-datepicker').each(function(){
+            new Litepicker({
+                element: this,
+                ...stdDFLitepicker,
+            });
+        })
+    }
+
+    if($('#editStudentStuloadModal .df-datepicker').length > 0){
+        stdDFLitepicker.format = 'DD-MM-YYYY';
+        $('#editStudentStuloadModal .df-datepicker').each(function(){
             new Litepicker({
                 element: this,
                 ...stdDFLitepicker,
@@ -64,6 +82,7 @@ import Litepicker from "litepicker";
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const addHesaInstanceModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHesaInstanceModal"));
+    const editStudentStuloadModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editStudentStuloadModal"));
 
     const addHesaInstanceModalEl = document.getElementById('addHesaInstanceModal')
     addHesaInstanceModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -73,6 +92,24 @@ import Litepicker from "litepicker";
         });
         
         semester_id.clear(true);
+    });
+
+    const editStudentStuloadModalEl = document.getElementById('editStudentStuloadModal')
+    editStudentStuloadModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#editStudentStuloadModal .acc__input-error').html('');
+        $('#editStudentStuloadModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editStudentStuloadModal input[name="id"]').val('0');
+        
+        SSI_disall_id.clear(true);
+        SSI_exchind_id.clear(true);
+        SSI_locsdy_id.clear(true);
+        SSI_mode_id.clear(true);
+        SSI_mstufee_id.clear(true);
+        SSI_notact_id.clear(true);
+        SSI_priprov_id.clear(true);
+        SSI_sselig_id.clear(true);
+        SSI_qual_id.clear(true);
+        SSI_heapespop_id.clear(true);
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -196,7 +233,7 @@ import Litepicker from "litepicker";
         var student_id = $('[name="student_id"]', $form).val();
     
         document.querySelector('#saveDFBTN').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveDFBTN svg").style.cssText ="display: inline-block;";
+        document.querySelector("#saveDFBTN .theLoader").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
         axios({
@@ -206,7 +243,7 @@ import Litepicker from "litepicker";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             document.querySelector('#saveDFBTN').removeAttribute('disabled');
-            document.querySelector("#saveDFBTN svg").style.cssText = "display: none;";
+            document.querySelector("#saveDFBTN .theLoader").style.cssText = "display: none;";
 
             if (response.status == 200) {
 
@@ -224,7 +261,7 @@ import Litepicker from "litepicker";
             }
         }).catch(error => {
             document.querySelector('#saveDFBTN').removeAttribute('disabled');
-            document.querySelector("#saveDFBTN svg").style.cssText = "display: none;";
+            document.querySelector("#saveDFBTN .theLoader").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -238,5 +275,94 @@ import Litepicker from "litepicker";
         });
     });
 
+    $(document).on('click', '.editStudentLoadBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var stuload_id = $theBtn.attr('data-id');
+        var student_id = $theBtn.attr('data-student-id');
+
+        axios({
+            method: "POST",
+            url: route('student.datafuture.get.stuload.information', student_id),
+            data: {stuload_id : stuload_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            let row = response.data.row;
+
+            $('#editStudentStuloadModal [name="gross_fee"]').val(row.gross_fee ? row.gross_fee : '');
+            $('#editStudentStuloadModal [name="netfee"]').val(row.netfee ? row.netfee : '');
+            $('#editStudentStuloadModal [name="periodstart"]').val(row.periodstart ? row.periodstart : '');
+            $('#editStudentStuloadModal [name="periodend"]').val(row.periodend ? row.periodend : '');
+            $('#editStudentStuloadModal [name="yearprg"]').val(row.yearprg ? row.yearprg : '');
+            $('#editStudentStuloadModal [name="yearstu"]').val(row.yearstu ? row.yearstu : '');
+            $('#editStudentStuloadModal [name="comdate"]').val(row.comdate ? row.comdate : '');
+            $('#editStudentStuloadModal [name="comdate"]').val(row.comdate ? row.comdate : '');
+            $('#editStudentStuloadModal [name="enddate"]').val(row.enddate ? row.enddate : '');
+            SSI_disall_id.addItem(row.disall_id);
+            SSI_exchind_id.addItem(row.exchind_id);
+            SSI_locsdy_id.addItem(row.locsdy_id);
+            SSI_mode_id.addItem(row.mode_id);
+            SSI_mstufee_id.addItem(row.mstufee_id);
+            SSI_notact_id.addItem(row.notact_id);
+            SSI_priprov_id.addItem(row.priprov_id);
+            SSI_sselig_id.addItem(row.sselig_id);
+            SSI_qual_id.addItem(row.qual_id);
+            SSI_heapespop_id.addItem(row.heapespop_id);
+
+            $('#editStudentStuloadModal [name="id"]').val(stuload_id);
+        }).catch(error => {
+            console.log('error');
+        });
+    });
+
+    $('#editStudentStuloadForm').on('submit', function(e){
+        e.preventDefault();
+        let $form = $(this);
+        const form = document.getElementById('editStudentStuloadForm');
+        var student_id = $('[name="student_id"]', $form).val();
     
+        document.querySelector('#saveStuloadBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveStuloadBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.datafuture.update.hesa.instances', student_id),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveStuloadBtn').removeAttribute('disabled');
+            document.querySelector("#saveStuloadBtn svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                editStudentStuloadModal.hide();
+                
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student stuload information successfully updated.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveStuloadBtn').removeAttribute('disabled');
+            document.querySelector("#saveStuloadBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#editStudentStuloadForm .${key}`).addClass('border-danger');
+                        $(`#editStudentStuloadForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
 })()
