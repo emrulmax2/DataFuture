@@ -11,91 +11,149 @@
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">DISALL</label>
-                            <select name="DISALL" class="w-full tom-selects df-tom-selects">
-                                <option value="">Please Select</option>
+                            <select id="SSI_disall_id" name="disall_id" class="w-full tom-selects">
+                                <option value="">N/A</option>
+                                @if($disalls->count() > 0)
+                                    @foreach($disalls as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">EXCHIND</label>
-                            <select name="EXCHIND" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_exchind_id" name="exchind_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($exchinds->count() > 0)
+                                    @foreach($exchinds as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">GROSSFEE</label>
-                            <input type="text" name="GROSSFEE" class="form-control w-full" />
+                            <input type="text" name="gross_fee" class="form-control w-full" />
                         </div>
-                        <div class="col-span-12 sm:col-span-3">
+                        {{--<div class="col-span-12 sm:col-span-3">
                             <label class="form-label">LOCATION</label>
                             <input type="text" name="LOCATION" class="form-control w-full" />
-                        </div>
+                        </div>--}}
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">LOCSDY</label>
-                            <select name="EXCHIND" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_locsdy_id" name="locsdy_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($locsdys->count() > 0)
+                                    @foreach($locsdys as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">MODE</label>
-                            <select name="MODE" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_mode_id" name="mode_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($modes->count() > 0)
+                                    @foreach($modes as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">MSTUFEE</label>
-                            <select name="MSTUFEE" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_mstufee_id" name="mstufee_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($mustfees->count() > 0)
+                                    @foreach($mustfees as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">NETFEE</label>
-                            <input type="text" name="NETFEE" class="w-full form-control"/>
+                            <input type="text" name="netfee" class="w-full form-control"/>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">NOTACT</label>
-                            <select name="NOTACT" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_notact_id" name="notact_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($notacts->count() > 0)
+                                    @foreach($notacts as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">PERIODSTART</label>
-                            <input type="text" name="PERIODSTART" class="w-full form-control df-datepicker" />
+                            <input type="text" name="periodstart" class="w-full form-control df-datepicker" />
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">PERIODEND</label>
-                            <input type="text" name="PERIODEND" class="w-full form-control df-datepicker" />
+                            <input type="text" name="periodend" class="w-full form-control df-datepicker" />
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">PRIPROV</label>
-                            <select name="PRIPROV" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_priprov_id" name="priprov_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($prefprovider->count() > 0)
+                                    @foreach($prefprovider as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">SSELIG</label>
-                            <select name="SSELIG" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_sselig_id" name="sselig_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($sseligs->count() > 0)
+                                    @foreach($sseligs as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">YEARPRG</label>
-                            <input type="text" name="YEARPRG" class="w-full form-control" />
+                            <input type="text" name="yearprg" class="w-full form-control" />
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">YEARSTU</label>
-                            <input type="text" name="YEARSTU" class="w-full form-control" />
+                            <input type="text" name="yearstu" class="w-full form-control" />
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">Qualification Achievement After Completion:</label>
-                            <select name="hesa_qual_id" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_qual_id" name="qual_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($quals->count() > 0)
+                                    @foreach($quals as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <label class="form-label">HEAPES population (HEAPESPOP):</label>
-                            <select name="hesa_heapespop_id" class="w-full tom-selects df-tom-selects">
+                            <select id="SSI_heapespop_id" name="heapespop_id" class="w-full tom-selects">
                                 <option value="">Please Select</option>
+                                @if($heapespops->count() > 0)
+                                    @foreach($heapespops as $opt)
+                                        <option value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                    @endforeach
+                                @endif
                             </select>
+                        </div>
+                        <div class="col-span-12 sm:col-span-3">
+                            <label class="form-label">COMDATE</label>
+                            <input type="text" name="comdate" class="w-full form-control df-datepicker" />
+                        </div>
+                        <div class="col-span-12 sm:col-span-3">
+                            <label class="form-label">ENDDATE</label>
+                            <input type="text" name="enddate" class="w-full form-control df-datepicker" />
                         </div>
                     </div>
                 </div>
@@ -117,6 +175,7 @@
                         </svg>
                     </button>
                     <input type="hidden" value="0" name="id"/>
+                    <input type="hidden" value="{{ $student->id }}" name="student_id"/>
                 </div>
             </div>
         </form>

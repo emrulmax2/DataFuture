@@ -268,14 +268,22 @@ use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 use App\Http\Controllers\Settings\StudentFlagController;
+use App\Http\Controllers\Settings\Studentoptions\DisableAllowanceController;
 use App\Http\Controllers\Settings\Studentoptions\EquivalentOrLowerQualificationController;
+use App\Http\Controllers\Settings\Studentoptions\ExchangeProgrammeController;
 use App\Http\Controllers\Settings\Studentoptions\FundingCompletionController;
 use App\Http\Controllers\Settings\Studentoptions\FundingLengthController;
+use App\Http\Controllers\Settings\Studentoptions\HeapesPopulationController;
+use App\Http\Controllers\Settings\Studentoptions\HesaQualificationAwardController;
 use App\Http\Controllers\Settings\Studentoptions\HesaQualificationSubjectController;
+use App\Http\Controllers\Settings\Studentoptions\LocationOfStudyController;
+use App\Http\Controllers\Settings\Studentoptions\MajorSourceOfTuitionFeeController;
 use App\Http\Controllers\Settings\Studentoptions\ModuleOutcomeController;
 use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
 use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
+use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
+use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
@@ -2063,6 +2071,20 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/student-options', 'index')->name('student.options');
     });
 
+
+    Route::controller(DisableAllowanceController::class)->group(function() {
+        Route::get('disable-allowance/list', 'list')->name('disable.allowance.list'); 
+        Route::post('disable-allowance/store', 'store')->name('disable.allowance.store'); 
+        Route::get('disable-allowance/edit/{id}', 'edit')->name('disable.allowance.edit');
+        Route::post('disable-allowance/update', 'update')->name('disable.allowance.update');
+        Route::delete('disable-allowance/delete/{id}', 'destroy')->name('disable.allowance.destory');
+        Route::post('disable-allowance/restore/{id}', 'restore')->name('disable.allowance.restore');
+        Route::post('disable-allowance/update-status/{id}', 'updateStatus')->name('disable.allowance.update.status');
+    
+        Route::get('disable-allowance/export', 'export')->name('disable.allowance.export');
+        Route::post('disable-allowance/import', 'import')->name('disable.allowance.import');
+    });
+
     Route::controller(TitleController::class)->group(function() {
         Route::get('titles', 'index')->name('titles'); 
         Route::get('titles/list', 'list')->name('titles.list'); 
@@ -2104,6 +2126,19 @@ Route::middleware('auth')->group(function() {
         Route::post('ethnic/import', 'import')->name('ethnic.import');
     });
 
+    Route::controller(ExchangeProgrammeController::class)->group(function() {
+        Route::get('exchange-programme/list', 'list')->name('exchange.programme.list'); 
+        Route::post('exchange-programme/store', 'store')->name('exchange.programme.store'); 
+        Route::get('exchange-programme/edit/{id}', 'edit')->name('exchange.programme.edit');
+        Route::post('exchange-programme/update', 'update')->name('exchange.programme.update');
+        Route::delete('exchange-programme/delete/{id}', 'destroy')->name('exchange.programme.destory');
+        Route::post('exchange-programme/restore/{id}', 'restore')->name('exchange.programme.restore');
+        Route::post('exchange-programme/update-status/{id}', 'updateStatus')->name('exchange.programme.update.status');
+    
+        Route::get('exchange-programme/export', 'export')->name('exchange.programme.export');
+        Route::post('exchange-programme/import', 'import')->name('exchange.programme.import');
+    });
+
     Route::controller(FundingCompletionController::class)->group(function() {
         Route::get('funding-completion/list', 'list')->name('funding.completion.list'); 
         Route::post('funding-completion/store', 'store')->name('funding.completion.store'); 
@@ -2128,6 +2163,60 @@ Route::middleware('auth')->group(function() {
     
         Route::get('funding-length/export', 'export')->name('funding.length.export');
         Route::post('funding-length/import', 'import')->name('funding.length.import');
+    });
+
+
+    Route::controller(HeapesPopulationController::class)->group(function() {
+        Route::get('heapes-population/list', 'list')->name('heapes.population.list'); 
+        Route::post('heapes-population/store', 'store')->name('heapes.population.store'); 
+        Route::get('heapes-population/edit/{id}', 'edit')->name('heapes.population.edit');
+        Route::post('heapes-population/update', 'update')->name('heapes.population.update');
+        Route::delete('heapes-population/delete/{id}', 'destroy')->name('heapes.population.destory');
+        Route::post('heapes-population/restore/{id}', 'restore')->name('heapes.population.restore');
+        Route::post('heapes-population/update-status/{id}', 'updateStatus')->name('heapes.population.update.status');
+    
+        Route::get('heapes-population/export', 'export')->name('heapes.population.export');
+        Route::post('heapes-population/import', 'import')->name('heapes.population.import');
+    });
+
+    Route::controller(HesaQualificationAwardController::class)->group(function() {
+        Route::get('hesa-qualification-award/list', 'list')->name('hesa.qualification.award.list'); 
+        Route::post('hesa-qualification-award/store', 'store')->name('hesa.qualification.award.store'); 
+        Route::get('hesa-qualification-award/edit/{id}', 'edit')->name('hesa.qualification.award.edit');
+        Route::post('hesa-qualification-award/update', 'update')->name('hesa.qualification.award.update');
+        Route::delete('hesa-qualification-award/delete/{id}', 'destroy')->name('hesa.qualification.award.destory');
+        Route::post('hesa-qualification-award/restore/{id}', 'restore')->name('hesa.qualification.award.restore');
+        Route::post('hesa-qualification-award/update-status/{id}', 'updateStatus')->name('hesa.qualification.award.update.status');
+    
+        Route::get('hesa-qualification-award/export', 'export')->name('hesa.qualification.award.export');
+        Route::post('hesa-qualification-award/import', 'import')->name('hesa.qualification.award.import');
+    });
+
+    Route::controller(LocationOfStudyController::class)->group(function() {
+        Route::get('location-of-study/list', 'list')->name('location.of.study.list'); 
+        Route::post('location-of-study/store', 'store')->name('location.of.study.store'); 
+        Route::get('location-of-study/edit/{id}', 'edit')->name('location.of.study.edit');
+        Route::post('location-of-study/update', 'update')->name('location.of.study.update');
+        Route::delete('location-of-study/delete/{id}', 'destroy')->name('location.of.study.destory');
+        Route::post('location-of-study/restore/{id}', 'restore')->name('location.of.study.restore');
+        Route::post('location-of-study/update-status/{id}', 'updateStatus')->name('location.of.study.update.status');
+    
+        Route::get('location-of-study/export', 'export')->name('location.of.study.export');
+        Route::post('location-of-study/import', 'import')->name('location.of.study.import');
+    });
+
+
+    Route::controller(MajorSourceOfTuitionFeeController::class)->group(function() {
+        Route::get('major-source-of-tuition-fee/list', 'list')->name('major.source.of.tuition.fee.list'); 
+        Route::post('major-source-of-tuition-fee/store', 'store')->name('major.source.of.tuition.fee.store'); 
+        Route::get('major-source-of-tuition-fee/edit/{id}', 'edit')->name('major.source.of.tuition.fee.edit');
+        Route::post('major-source-of-tuition-fee/update', 'update')->name('major.source.of.tuition.fee.update');
+        Route::delete('major-source-of-tuition-fee/delete/{id}', 'destroy')->name('major.source.of.tuition.fee.destory');
+        Route::post('major-source-of-tuition-fee/restore/{id}', 'restore')->name('major.source.of.tuition.fee.restore');
+        Route::post('major-source-of-tuition-fee/update-status/{id}', 'updateStatus')->name('major.source.of.tuition.fee.update.status');
+    
+        Route::get('major-source-of-tuition-fee/export', 'export')->name('major.source.of.tuition.fee.export');
+        Route::post('major-source-of-tuition-fee/import', 'import')->name('major.source.of.tuition.fee.import');
     });
 
     Route::controller(ModuleOutcomeController::class)->group(function() {
@@ -2196,6 +2285,33 @@ Route::middleware('auth')->group(function() {
         Route::get('sex-orientation/export', 'export')->name('sex-orientation.export');
         Route::post('sex-orientation/import', 'import')->name('sex-orientation.import');
     });
+
+    Route::controller(StudentSupportEligibilityController::class)->group(function() {
+        Route::get('student-support-eligibility/list', 'list')->name('student.support.eligibility.list'); 
+        Route::post('student-support-eligibility/store', 'store')->name('student.support.eligibility.store'); 
+        Route::get('student-support-eligibility/edit/{id}', 'edit')->name('student.support.eligibility.edit');
+        Route::post('student-support-eligibility/update', 'update')->name('student.support.eligibility.update');
+        Route::delete('student-support-eligibility/delete/{id}', 'destroy')->name('student.support.eligibility.destory');
+        Route::post('student-support-eligibility/restore/{id}', 'restore')->name('student.support.eligibility.restore');
+        Route::post('student-support-eligibility/update-status/{id}', 'updateStatus')->name('student.support.eligibility.update.status');
+    
+        Route::get('student-support-eligibility/export', 'export')->name('student.support.eligibility.export');
+        Route::post('student-support-eligibility/import', 'import')->name('student.support.eligibility.import');
+    });
+
+    Route::controller(SuspensionOfActiveStudyController::class)->group(function() {
+        Route::get('suspension-of-active-study/list', 'list')->name('suspension.of.active.study.list'); 
+        Route::post('suspension-of-active-study/store', 'store')->name('suspension.of.active.study.store'); 
+        Route::get('suspension-of-active-study/edit/{id}', 'edit')->name('suspension.of.active.study.edit');
+        Route::post('suspension-of-active-study/update', 'update')->name('suspension.of.active.study.update');
+        Route::delete('suspension-of-active-study/delete/{id}', 'destroy')->name('suspension.of.active.study.destory');
+        Route::post('suspension-of-active-study/restore/{id}', 'restore')->name('suspension.of.active.study.restore');
+        Route::post('suspension-of-active-study/update-status/{id}', 'updateStatus')->name('suspension.of.active.study.update.status');
+    
+        Route::get('suspension-of-active-study/export', 'export')->name('suspension.of.active.study.export');
+        Route::post('suspension-of-active-study/import', 'import')->name('suspension.of.active.study.import');
+    });
+
 
     Route::controller(ReligionController::class)->group(function() {
         Route::get('religion', 'index')->name('religion'); 
@@ -3441,6 +3557,8 @@ Route::middleware('auth')->group(function() {
         
         Route::post('student/datafuture/{student}/get-instances', 'getInstances')->name('student.datafuture.get.instances');
         Route::post('student/datafuture/{student}/store-hesa-instances', 'storeHesaInstance')->name('student.datafuture.store.hesa.instances');
+        Route::post('student/datafuture/{student}/get-stuload-information', 'getStuloadInformation')->name('student.datafuture.get.stuload.information');
+        Route::post('student/datafuture/{student}/update-stuload-information', 'updateStuloadInformation')->name('student.datafuture.update.hesa.instances');
     });
     
 });

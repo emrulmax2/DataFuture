@@ -12,14 +12,20 @@ use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseModule;
 use App\Models\Disability;
+use App\Models\DisableAllowance;
 use App\Models\EquivalentOrLowerQualification;
 use App\Models\Ethnicity;
+use App\Models\ExchangeProgramme;
 use App\Models\FeeEligibility;
 use App\Models\FundingCompletion;
 use App\Models\FundingLength;
+use App\Models\HeapesPopulation;
 use App\Models\HesaGender;
+use App\Models\HesaQualificationAward;
 use App\Models\HesaQualificationSubject;
 use App\Models\HighestQualificationOnEntry;
+use App\Models\LocationOfStudy;
+use App\Models\MajorSourceOfTuitionFee;
 use App\Models\ModuleOutcome;
 use App\Models\ModuleResult;
 use App\Models\NonRegulatedFeeFlag;
@@ -42,8 +48,10 @@ use App\Models\StudentDisability;
 use App\Models\StudentModuleInstanceDatafuture;
 use App\Models\StudentQualification;
 use App\Models\StudentStuloadInformation;
+use App\Models\StudentSupportEligibility;
 use App\Models\StudentTermStuload;
 use App\Models\StudyMode;
+use App\Models\SuspensionOfActiveStudy;
 use App\Models\TermTimeAccommodationType;
 use Google\Service\Datastore\Count;
 use Illuminate\Http\Request;
@@ -99,6 +107,14 @@ class DatafutureController extends Controller
             'moduleInstances' => $this->getStuloadModuleInstance($student->id, $student->crel->id),
             'modoutcom' => ModuleOutcome::where('active', 1)->orderBy('name', 'ASC')->get(),
             'modresult' => ModuleResult::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'disalls' => DisableAllowance::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'exchinds' => ExchangeProgramme::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'locsdys' => LocationOfStudy::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'mustfees' => MajorSourceOfTuitionFee::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'notacts' => SuspensionOfActiveStudy::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'sseligs' => StudentSupportEligibility::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'quals' => HesaQualificationAward::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'heapespops' => HeapesPopulation::where('active', 1)->orderBy('name', 'ASC')->get(),
             
         ]);
     }
@@ -219,6 +235,7 @@ class DatafutureController extends Controller
             foreach($stuloads as $stu):
                 $instance_id = $stu->course_creation_instance_id;
                 $instance = CourseCreationInstance::find($instance_id);
+                $stuLoadTotal = 0;
                 if(isset($instance->terms) && $instance->terms->count() > 0):
                     foreach($instance->terms as $term):
                         $term_declaration_id = $term->term_declaration_id;
@@ -232,6 +249,7 @@ class DatafutureController extends Controller
                         if($autoLoad == 1):
                             $attendanceCodes = SlcAttendance::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('term_declaration_id', $term_declaration_id)->pluck('attendance_code_id')->unique()->toArray();
                             $stuload = (!empty($attendanceCodes) && in_array(1, $attendanceCodes) && !in_array(6, $attendanceCodes) ? 33 : 0);
+                            $stuLoadTotal += $stuload;
 
                             $loadData = [
                                 'student_id' => $student_id,
@@ -281,6 +299,8 @@ class DatafutureController extends Controller
                         endif;
                     endforeach;
                 endif;
+                $stuLoadTotal = ($stuLoadTotal == 99 ? 100 : $stuLoadTotal);
+                StudentStuloadInformation::where('id', $stu->id)->update(['student_load' => $stuLoadTotal]);
             endforeach;
         endif;
 
@@ -456,5 +476,43 @@ class DatafutureController extends Controller
         $theSID = $theNumber.$theCheckDigit;
 
         return $theSID;
+    }
+
+    public function getStuloadInformation(Request $request){
+        $stuload_id = $request->stuload_id;
+        $stuload = StudentStuloadInformation::find($stuload_id);
+        $stuload->periodstart = (isset($stuload->periodstart) && !empty($stuload->periodstart) ? date('d-m-Y', strtotime($stuload->periodstart)) : '');
+        $stuload->periodend = (isset($stuload->periodend) && !empty($stuload->periodend) ? date('d-m-Y', strtotime($stuload->periodend)) : '');
+        $stuload->comdate = (isset($stuload->comdate) && !empty($stuload->comdate) ? date('d-m-Y', strtotime($stuload->comdate)) : '');
+        $stuload->enddate = (isset($stuload->enddate) && !empty($stuload->enddate) ? date('d-m-Y', strtotime($stuload->enddate)) : '');
+
+        return response()->json(['row' => $stuload], 200);
+    }
+
+    public function updateStuloadInformation(Student $student, Request $request){
+        $data = [
+            'disall_id' => (!empty($request->disall_id) ? $request->disall_id : null),
+            'exchind_id' => (!empty($request->exchind_id) ? $request->exchind_id : null),
+            'gross_fee' => (!empty($request->gross_fee) ? $request->gross_fee : null),
+            'locsdy_id' => (!empty($request->locsdy_id) ? $request->locsdy_id : null),
+            'mode_id' => (!empty($request->mode_id) ? $request->mode_id : null),
+            'mstufee_id' => (!empty($request->mstufee_id) ? $request->mstufee_id : null),
+            'netfee' => (!empty($request->netfee) ? $request->netfee : null),
+            'notact_id' => (!empty($request->notact_id) ? $request->notact_id : null),
+            'periodstart' => (!empty($request->periodstart) ? date('Y-m-d', strtotime($request->periodstart)) : null),
+            'periodend' => (!empty($request->periodend) ? date('Y-m-d', strtotime($request->periodend)) : null),
+            'priprov_id' => (!empty($request->priprov_id) ? $request->priprov_id : null),
+            'sselig_id' => (!empty($request->sselig_id) ? $request->sselig_id : null),
+            'yearprg' => (!empty($request->yearprg) ? $request->yearprg : null),
+            'yearstu' => (!empty($request->yearstu) ? $request->yearstu : null),
+            'qual_id' => (!empty($request->qual_id) ? $request->qual_id : null),
+            'heapespop_id' => (!empty($request->heapespop_id) ? $request->heapespop_id : null),
+            'comdate' => (!empty($request->comdate) ? date('Y-m-d', strtotime($request->comdate)) : null),
+            'enddate' => (!empty($request->enddate) ? date('Y-m-d', strtotime($request->enddate)) : null),
+            'updated_by' => auth()->user()->id
+        ];
+        StudentStuloadInformation::where('student_id', $student->id)->where('id', $request->id)->update($data);
+
+        return response()->json(['msg' => 'Student stuload information successfully updated.'], 200);
     }
 }
