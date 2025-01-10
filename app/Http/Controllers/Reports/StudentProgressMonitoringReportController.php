@@ -277,7 +277,8 @@ class StudentProgressMonitoringReportController extends Controller
         
         $theCollection = [];
         $theCollection[1][0] = 'Search Criteria';
-        $theCollection[1][1] = $searchedCriteria;
+        
+        $theCollection[1][1] =  $searchedCriteria;
 
         $theCollection[2][0] = 'Report created date time';
         $theCollection[2][1] = Carbon::now()->format('f j, Y, g:i a');
@@ -314,26 +315,23 @@ class StudentProgressMonitoringReportController extends Controller
             $dataSet[$studentId]['result'] = [];
             $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded')->where('id',$studentId)->get()->first();
             $planList = Assign::where('student_id',$studentId)->get()->unique()->pluck('plan_id')->toArray();
-            $results = Result::with(['plan' => function($query) {
+            $QueryInner = Result::with(['plan' => function($query) {
                 $query->orderBy('term_declaration_id','DESC'); 
-            }],'plan.creations.module','grade','plan.creations.module','plan.tutor.employee','plan.group','plan.attenTerm')->whereIn('plan_id',$planList)->where('student_id',$studentId)->where('published_at','<',Carbon::now())->orderBy('published_at','DESC')->get();
+            }],'plan.creations.module','grade','plan.creations.module','plan.tutor.employee','plan.group','plan.attenTerm')
+            ->whereIn('plan_id',$planList)
+            ->where('student_id',$studentId)
+            ->where('published_at','<',Carbon::now());
+            if(isset($searchedCriteria['attendance_semester']) && !empty($searchedCriteria['attendance_semester'])) {
+                $QueryInner->whereHas('plan', function($q) use($searchedCriteria){
+                    $q->where('term_declaration_id',$searchedCriteria['attendance_semester']);
+                });
+            }
+            
+            $results = $QueryInner->orderBy('published_at','DESC')->get();
             
             $term_declaration_ids = $results->pluck('plan.term_declaration_id')->unique()->toArray();
 
             $resultSets = [];
-            $previousTerm = 0;
-            $icount = 1;
-            $iResultCount = 1;
-            $inCompleteCount = 1;
-            $resultBoxes = [];
-            $collectionset = [];
-
-            $collectionset['lcc_id'] = isset($student) ?$student->registration_no : "";
-            $collectionset['status'] = ($student->status) ? $student->status->name : "";
-            $collectionset['intake_semester'] = isset($student->activeCR->propose->semester) ? $student->activeCR->propose->semester->name : "";
-            $collectionset['course'] = isset($student->activeCR->course) ?  $student->activeCR->course->name : "";
-            $collectionset['certificate_claimed'] = isset($student->awarded) ? $student->awarded->certificate_released : "";
-
 
             if(isset($results))
             foreach ($results as $result) {
@@ -392,10 +390,10 @@ class StudentProgressMonitoringReportController extends Controller
                     $dataCount++;
                 endforeach;
             endforeach;
-                $theCollection[$dataCount][0] = $collectionset[$term]['lcc_id'];
-                $theCollection[$dataCount][1] = $collectionset[$term]['status'];
-                $theCollection[$dataCount][2] = $collectionset[$term]['intake_semester'];
-                $theCollection[$dataCount][3] = $collectionset[$term]['course'];
+                $theCollection[$dataCount][0] = isset($student) ?$student->registration_no : "";
+                $theCollection[$dataCount][1] = isset($student->status) ? $student->status->name : "";
+                $theCollection[$dataCount][2] = isset($student->activeCR->propose->semester) ? $student->activeCR->propose->semester->name : "";
+                $theCollection[$dataCount][3] = isset($student->activeCR->course) ?  $student->activeCR->course->name : "";
                 $theCollection[$dataCount][4] = "";
                 $theCollection[$dataCount][5] = "";
                 $theCollection[$dataCount][6] = "";
@@ -405,7 +403,7 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][10] = "";
                 $theCollection[$dataCount][11] = $CompleteCount;
                 $theCollection[$dataCount][12] = $inCompleteCount;
-                $theCollection[$dataCount][13] = $collectionset[$term]['certificate_claimed'];
+                $theCollection[$dataCount][13] = isset($student->awarded) ? $student->awarded->certificate_requested : "";
                 $dataCount++;		
         endforeach;
 
