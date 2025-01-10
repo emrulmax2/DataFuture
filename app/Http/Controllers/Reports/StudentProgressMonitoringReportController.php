@@ -327,6 +327,14 @@ class StudentProgressMonitoringReportController extends Controller
             $inCompleteCount = 1;
             $resultBoxes = [];
             $collectionset = [];
+
+            $collectionset['lcc_id'] = isset($student) ?$student->registration_no : "";
+            $collectionset['status'] = ($student->status) ? $student->status->name : "";
+            $collectionset['intake_semester'] = isset($student->activeCR->propose->semester) ? $student->activeCR->propose->semester->name : "";
+            $collectionset['course'] = isset($student->activeCR->course) ?  $student->activeCR->course->name : "";
+            $collectionset['certificate_claimed'] = isset($student->awarded) ? $student->awarded->certificate_released : "";
+
+
             if(isset($results))
             foreach ($results as $result) {
 
@@ -337,40 +345,35 @@ class StudentProgressMonitoringReportController extends Controller
                 $groupName = isset($result->plan->group) ? $result->plan->group->name : "";
                 $tutorEmployee = isset($result->plan->tutor->employee) ? $result->plan->tutor->employee->full_name : "";
                 
-                $collectionset[$termId]['lcc_id'] = isset($student) ?$student->registration_no : "";
-                $collectionset[$termId]['status'] = ($student->status) ? $student->status->name : "";
-                $collectionset[$termId]['intake_semester'] = isset($student->activeCR->propose->semester) ? $student->activeCR->propose->semester->name : "";
-                $collectionset[$termId]['course'] = isset($student->activeCR->course) ?  $student->activeCR->course->name : "";
                 
-                $collectionset[$termId]['certificate_claimed'] = isset($student->awarded) ? $student->awarded->certificate_released : "";
+                if(in_array($gradeFound,$GradeListForCount)) {
+                    $resultSets[$termId][$moduleName]['results'] = $gradeFound;
+                    
+                }
+                
 
                 $resultSets[$termId][$moduleName]['attendance_term'] = $termName;
                 $resultSets[$termId][$moduleName]['group'] = $groupName;
                 $resultSets[$termId][$moduleName]['module'] = $moduleName;
                 $resultSets[$termId][$moduleName]['tutor'] = $tutorEmployee;
 
-                if(!isset($collectionset[$termId]['complete'])) {
-                    $collectionset[$termId]['complete'] = 0;
-                }
-                if(in_array($gradeFound,$GradeListForCount)) {
-                    $resultSets[$termId][$moduleName]['results'] = $gradeFound;
-                    $collectionset[$termId]['complete'] += 1;
-                }
-
+                
                 if(!isset($resultSets[$termId][$moduleName]['attempts'])) {
                     $resultSets[$termId][$moduleName]['attempts'] = 1;
                 } else {
                     $resultSets[$termId][$moduleName]['attempts']++;
                 }
             }
-           
+           $inCompleteCount = 0;
+           $CompleteCount = 0;
            foreach($term_declaration_ids as $term):
-                $inCompleteCount = 0;
                 $i =1;
                 foreach($resultSets[$term] as $module => $result):
                     
                     if(!isset($result['results']) || $result['results']=="") {
                         ++$inCompleteCount;
+                    }else{
+                        ++$CompleteCount;
                     }
                     $theCollection[$dataCount][0] = "";
                     $theCollection[$dataCount][1] = "";
@@ -388,6 +391,7 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][13] = "";
                     $dataCount++;
                 endforeach;
+            endforeach;
                 $theCollection[$dataCount][0] = $collectionset[$term]['lcc_id'];
                 $theCollection[$dataCount][1] = $collectionset[$term]['status'];
                 $theCollection[$dataCount][2] = $collectionset[$term]['intake_semester'];
@@ -399,12 +403,10 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][8] = "";
                 $theCollection[$dataCount][9] = "";
                 $theCollection[$dataCount][10] = "";
-                $theCollection[$dataCount][11] = $collectionset[$term]['complete'];
+                $theCollection[$dataCount][11] = $CompleteCount;
                 $theCollection[$dataCount][12] = $inCompleteCount;
                 $theCollection[$dataCount][13] = $collectionset[$term]['certificate_claimed'];
-                $dataCount++;
-            endforeach;
-        			
+                $dataCount++;		
         endforeach;
 
         return Excel::download(new ArrayCollectionExport($theCollection), 'student_progress_monitor_report.xlsx');
