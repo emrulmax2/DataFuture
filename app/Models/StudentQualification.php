@@ -39,6 +39,18 @@ class StudentQualification extends Model
     public function highest_qualification_on_entries(){
         return $this->belongsTo(HighestQualificationOnEntry::class, 'highest_qualification_on_entry_id');
     }
+
+    public function hesa_qualification_subjects(){
+        return $this->belongsTo(HesaQualificationSubject::class, 'hesa_qualification_subject_id');
+    }
+
+    public function qualification_type_identifiers(){
+        return $this->belongsTo(QualificationTypeIdentifier::class, 'qualification_type_identifier_id');
+    }
+
+    public function previous_providers(){
+        return $this->belongsTo(PreviousProvider::class, 'previous_provider_id');
+    }
     
     public function setDegreeAwardDateAttribute($value) {  
         $this->attributes['degree_award_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
