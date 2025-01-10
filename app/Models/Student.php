@@ -251,6 +251,9 @@ class Student extends Model
         return $this->hasOne(StudentAwardingBodyDetails::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
     }
 
+    public function awardReport(){
+        return $this->hasOne(StudentAwardingBodyDetails::class, 'student_id')->latestOfMany();
+    }
     public function getDueAttribute(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
         $agreements = SlcAgreement::where('student_id', $this->id)->where('student_course_relation_id', $activeCRel)->orderBy('id', 'ASC')->get();
