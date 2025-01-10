@@ -248,6 +248,7 @@ use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportContr
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\StudentPerformanceReportController;
+use App\Http\Controllers\Reports\StudentProgressMonitoringReportController;
 use App\Http\Controllers\Reports\StudentResultReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
@@ -3170,7 +3171,13 @@ Route::middleware('auth')->group(function() {
         Route::post('student-performance-list', 'totalCount')->name('report.student.performance.total'); 
         Route::post('student-performance-excel-download', 'excelDownload')->name('report.student.performance.excel'); 
     });
+    
 
+    Route::controller(StudentProgressMonitoringReportController::class)->prefix('reports')->group(function(){
+        Route::get('student-progress-reports', 'index')->name('report.student.progress.view'); 
+        Route::post('student-progress-list', 'totalCount')->name('report.student.progress.total'); 
+        Route::post('student-progress-excel-download', 'excelDownload')->name('report.student.progress.excel'); 
+    });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){
         Route::get('reports/attendance-reports', 'index')->name('report.attendance.reports'); 
