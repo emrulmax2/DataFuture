@@ -245,7 +245,7 @@ class StudentDataReportController extends Controller
         
         
 
-        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers')->whereIn('id',$studentIds)->get();
 
         
 
@@ -353,7 +353,9 @@ class StudentDataReportController extends Controller
                 $theCollection[$i][$j++] = "Highest Qualification on Entry (QUALENT3)";
             } else if($key=="qualification_details") {
                 $theCollection[$i][$j++] = "Prev. Qualification Awarding Body";
+                $theCollection[$i][$j++] = "Prev. Provider Name";
                 $theCollection[$i][$j++] = "Prev. Qualification Higest Academic Degree";
+                $theCollection[$i][$j++] = "Prev. Qualification Type";
                 $theCollection[$i][$j++] = "Prev. Qualification Subjects";
                 $theCollection[$i][$j++] = "Prev. Qualification Result";
                 $theCollection[$i][$j++] = "Prev. Qualification Award Date";
@@ -589,8 +591,11 @@ class StudentDataReportController extends Controller
                                 break;
 
                             case "qualification_details":
+
                                 $theCollection[$row][$j++] = (isset($student->qualHigest->awarding_body)) ? $student->qualHigest->awarding_body : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->previous_providers)) ? $student->qualHigest->previous_providers->name : "";
                                 $theCollection[$row][$j++] = (isset($student->qualHigest->highest_academic)) ? $student->qualHigest->highest_academic : "";
+                                $theCollection[$row][$j++] = (isset($student->qualHigest->qualification_type_identifiers)) ? $student->qualHigest->qualification_type_identifiers->name : "";
                                 $theCollection[$row][$j++] = (isset($student->qualHigest->subjects)) ? $student->qualHigest->subjects : "";
                                 $theCollection[$row][$j++] = (isset($student->qualHigest->result)) ? $student->qualHigest->result : "";
                                 $theCollection[$row][$j++] = (isset($student->qualHigest->degree_award_date)) ? $student->qualHigest->degree_award_date : "";
