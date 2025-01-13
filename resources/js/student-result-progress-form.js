@@ -926,6 +926,12 @@ import TomSelect from 'tom-select';
                         'searchedCriteria25',
                         jsonData
                     );
+                    
+                    const jsonDataTerm = JSON.stringify(response.data.term);
+                    localStorage.setItem(
+                        'term25',
+                        jsonDataTerm
+                    );
                 }
             })
             .catch((error) => {
@@ -936,6 +942,7 @@ import TomSelect from 'tom-select';
                     '#studentGroupSearchSubmitBtn svg.loadingCall'
                 ).style.cssText = 'display: none;';
                 localStorage.setItem('studentIdsList2024', []);
+                localStorage.setItem('term25', []);
                 if (error.response) {
                     if (error.response.status == 422) {
                         let total_student = 'OOPS! something went wrong.';
@@ -981,18 +988,22 @@ import TomSelect from 'tom-select';
             '#studentDataReportExcelBtn svg.loadingCall'
         ).style.cssText = 'display: inline-block;';
         $('#studentExcelForm').submit();
+        
     });
 
     $('#studentExcelForm').on('submit', function (event) {
+        
         event.preventDefault();
         let studentIds = localStorage.getItem('studentIdsList2024');
         let searchedCriteria25 = localStorage.getItem('searchedCriteria25');
+        let termData = localStorage.getItem('term25');
         
         if (studentIds.length > 0) {
             const form = document.getElementById('studentExcelForm');
             let form_data = new FormData(form);
             form_data.append('studentIds', studentIds);
             form_data.append('searchedCriteria', searchedCriteria25);
+            form_data.append('term', termData);
             axios({
                 method: 'post',
                 url: route('report.student.progress.excel'),
