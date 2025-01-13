@@ -414,7 +414,7 @@ class DatafutureController extends Controller
         $studentCrel = StudentCourseRelation::find($student_course_relation_id);
         $course_creation_instance_id = (isset($request->course_creation_instance_id) && $request->course_creation_instance_id > 0 ? $request->course_creation_instance_id : 0);
         
-        $existInstanceStuload = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id')->withTrashed()->get();
+        $existInstanceStuload = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $course_creation_instance_id)->withTrashed()->get();
         if($existInstanceStuload->count() > 0):
             foreach($existInstanceStuload as $theStuload):
                 if(isset($theStuload->deleted_at) && !empty($theStuload->deleted_at)):
