@@ -85,18 +85,21 @@ class StudentProgressMonitoringReportController extends Controller
         
         $Query = Student::orderBy('id','desc');
         $itemSelected = false;
+        $term_declaration_ids = [];
         foreach($groupParams as $field => $value):
             $$field = (isset($value) && !empty($value) ? $value : '');
 
             if($$field!='') {
                 $itemSelected = true;
                 //$seratchCriteria[] = $field;
-
+                
 
                 if(isset($academic_year))
                     $seratchCriteria[$field] = AcademicYear::where('id',$academic_year)->get()->first()->name;
-                if(isset($attendance_semester))
-                    $seratchCriteria[$field] = TermDeclaration::where('id',$attendance_semester)->get()->first()->name;
+                if(isset($attendance_semester)) {
+                    $seratchCriteria[$field] = TermDeclaration::whereIn('id',$attendance_semester)->pluck('name')->toArray();
+                    $term_declaration_ids = $attendance_semester;
+                }
 
                 if(isset($course))
                     $seratchCriteria[$field] = Course::where('id',$course)->get()->first()->name;
@@ -155,7 +158,7 @@ class StudentProgressMonitoringReportController extends Controller
             $Query = $Query->get();
 
     
-            return response()->json(['all_rows' => $total_rows, 'student_ids'=>$studentsIds,'search_criteria'=>$seratchCriteria, "certificate_claimed"=>isset($certificate_claimed)?$certificate_claimed:null],200);
+            return response()->json(['all_rows' => $total_rows, 'student_ids'=>$studentsIds,'search_criteria'=>$seratchCriteria, 'term' =>isset($term_declaration_ids) ? $term_declaration_ids : "",   "certificate_claimed"=>isset($certificate_claimed)?$certificate_claimed:null],200);
 
         } else {
             return response()->json(['all_rows' => 0, 'student_ids'=>[]],302);
@@ -229,11 +232,11 @@ class StudentProgressMonitoringReportController extends Controller
         if(!empty($certificate_claimed) && $certificate_claimed=="Yes") {
             
             $studentIds = Student::whereIn('id',$studentIds)->whereHas('awarded', function($q) use($certificate_claimed){
-                $q->where('certificate_released',$certificate_claimed);
+                $q->where('certificate_requested',$certificate_claimed);
             })->pluck('id')->unique()->toArray();
         } else if(!empty($certificate_claimed) && $certificate_claimed=="No") {
             $studentIds = Student::whereIn('id',$studentIds)->whereHas('awarded', function($q) use($certificate_claimed){
-                $q->where('certificate_released',$certificate_claimed);
+                $q->where('certificate_requested',$certificate_claimed);
             })->pluck('id')->unique()->toArray();
         }
         //this part will use both term and intake and open
@@ -270,8 +273,10 @@ class StudentProgressMonitoringReportController extends Controller
 
 
     public function excelDownload(Request $request)
-    {    
+    {
+       
         $searchedCriteria = json_decode($request->searchedCriteria, true);
+        $selectedTerm = json_decode($request->term, true);
         
         $searchedCriteria = $searchedCriteria;
         
@@ -281,7 +286,7 @@ class StudentProgressMonitoringReportController extends Controller
         $theCollection[1][1] =  $searchedCriteria;
 
         $theCollection[2][0] = 'Report created date time';
-        $theCollection[2][1] = Carbon::now()->format('f j, Y, g:i a');
+        $theCollection[2][1] = Carbon::now()->format('jS M Y h:i a');
         
         $theCollection[3][0] = 'Created by';
         $theCollection[3][1] = Employee::where('user_id',auth()->user()->id)->get()->first()->full_name;
@@ -315,21 +320,23 @@ class StudentProgressMonitoringReportController extends Controller
             $dataSet[$studentId]['result'] = [];
             $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded')->where('id',$studentId)->get()->first();
             $planList = Assign::where('student_id',$studentId)->get()->unique()->pluck('plan_id')->toArray();
-            $QueryInner = Result::with(['plan' => function($query) {
+
+            $results = Result::with(['plan' => function($query) {
                 $query->orderBy('term_declaration_id','DESC'); 
             }],'plan.creations.module','grade','plan.creations.module','plan.tutor.employee','plan.group','plan.attenTerm')
             ->whereIn('plan_id',$planList)
             ->where('student_id',$studentId)
-            ->where('published_at','<',Carbon::now());
-            if(isset($searchedCriteria['attendance_semester']) && !empty($searchedCriteria['attendance_semester'])) {
-                $QueryInner->whereHas('plan', function($q) use($searchedCriteria){
-                    $q->where('term_declaration_id',$searchedCriteria['attendance_semester']);
-                });
+            ->where('published_at','<',Carbon::now())->orderBy('published_at','DESC')->get();
+
+            if(isset($selectedTerm) && !empty($selectedTerm)) {
+                
+                $term_declaration_ids = $selectedTerm;
+
+                //dd($term_declaration_ids);
+            } else {
+                $term_declaration_ids = $results->pluck('plan.term_declaration_id')->unique()->toArray();
             }
             
-            $results = $QueryInner->orderBy('published_at','DESC')->get();
-            
-            $term_declaration_ids = $results->pluck('plan.term_declaration_id')->unique()->toArray();
 
             $resultSets = [];
 
@@ -366,6 +373,7 @@ class StudentProgressMonitoringReportController extends Controller
            $CompleteCount = 0;
            foreach($term_declaration_ids as $term):
                 $i =1;
+                if(isset($resultSets[$term]))
                 foreach($resultSets[$term] as $module => $result):
                     
                     if(!isset($result['results']) || $result['results']=="") {
