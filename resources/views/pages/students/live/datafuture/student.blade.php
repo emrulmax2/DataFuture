@@ -267,11 +267,11 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDID</label>
-                                                        <input type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/>
+                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->qualification_grade_id) && !empty($student->qualHigest->qualification_grade_id) ? $student->qualHigest->qualification_grade_id : '') }}" type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/>
                                                     </div>
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDRESULT</label>
-                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->result) && !empty($student->qualHigest->result) ? $student->qualHigest->result : '') }}" type="text" name="ENTRYQUALAWARDRESULT" class="w-full form-control" placeholder="ENTRYQUALAWARDRESULT"/>
+                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->grade->name) && !empty($student->qualHigest->grade->name) ? $student->qualHigest->grade->name : '') }}" type="text" name="ENTRYQUALAWARDRESULT" class="w-full form-control" placeholder="ENTRYQUALAWARDRESULT"/>
                                                     </div>
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">QUALTYPEID</label>

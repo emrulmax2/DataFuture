@@ -16,6 +16,7 @@ class StudentQualification extends Model
         'highest_academic',
         'subjects',
         'result',
+        'qualification_grade_id',
         'degree_award_date',
         'created_by',
         'updated_by',
@@ -61,5 +62,9 @@ class StudentQualification extends Model
         } else {
             return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
         }
+    }
+
+    public function grade(){
+        return $this->belongsTo(QualificationGrade::class, 'qualification_grade_id');
     }
 }

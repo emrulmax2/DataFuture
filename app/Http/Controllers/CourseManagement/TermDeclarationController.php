@@ -118,6 +118,7 @@ class TermDeclarationController extends Controller
             'exam_publish_time'=> $request->exam_publish_time,
             'exam_resubmission_publish_date'=> $request->exam_resubmission_publish_date,
             'exam_resubmission_publish_time'=> $request->exam_resubmission_publish_time,
+            'stuload'=> (isset($request->stuload) && $request->stuload > 0 ? $request->stuload : null),
             
             'created_by' => auth()->user()->id
         ]);

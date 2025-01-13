@@ -28,6 +28,7 @@ class TermDeclaration extends Model
         'exam_publish_time',
         'exam_resubmission_publish_date',
         'exam_resubmission_publish_time',
+        'stuload',
         'created_by',
         'updated_by',
     ];

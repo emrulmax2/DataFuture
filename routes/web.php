@@ -282,6 +282,7 @@ use App\Http\Controllers\Settings\Studentoptions\MajorSourceOfTuitionFeeControll
 use App\Http\Controllers\Settings\Studentoptions\ModuleOutcomeController;
 use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
 use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
+use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
 use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
@@ -3566,6 +3567,20 @@ Route::middleware('auth')->group(function() {
         Route::post('student/datafuture/{student}/store-hesa-instances', 'storeHesaInstance')->name('student.datafuture.store.hesa.instances');
         Route::post('student/datafuture/{student}/get-stuload-information', 'getStuloadInformation')->name('student.datafuture.get.stuload.information');
         Route::post('student/datafuture/{student}/update-stuload-information', 'updateStuloadInformation')->name('student.datafuture.update.hesa.instances');
+    });
+
+    Route::controller(QualificationGradeController::class)->group(function() {
+        Route::get('qualification-grade', 'index')->name('qualification.grade'); 
+        Route::get('qualification-grade/list', 'list')->name('qualification.grade.list'); 
+        Route::post('qualification-grade/store', 'store')->name('qualification.grade.store'); 
+        Route::get('qualification-grade/edit/{id}', 'edit')->name('qualification.grade.edit');
+        Route::post('qualification-grade/update', 'update')->name('qualification.grade.update');
+        Route::delete('qualification-grade/delete/{id}', 'destroy')->name('qualification.grade.destory');
+        Route::post('qualification-grade/restore/{id}', 'restore')->name('qualification.grade.restore');
+        Route::post('qualification-grade/update-status/{id}', 'updateStatus')->name('qualification.grade.update.status');
+    
+        Route::get('qualification-grade/export', 'export')->name('qualification.grade.export');
+        Route::post('qualification-grade/import', 'import')->name('qualification.grade.import');
     });
     
 });
