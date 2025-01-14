@@ -52,6 +52,7 @@ use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\PreviousProvider;
 use App\Models\ProcessList;
+use App\Models\QualificationGrade;
 use App\Models\QualificationTypeIdentifier;
 use App\Models\ReferralCode;
 use App\Models\Religion;
@@ -312,7 +313,8 @@ class StudentController extends Controller
             'HesaQualificationSubjects' => HesaQualificationSubject::all(),
             'HesaExamSittingVenues' => HesaExamSittingVenue::all(),
             'StudyModes' => StudyMode::where('active', 1)->orderBy('id', 'ASC')->get(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'qualgrades' => QualificationGrade::where('active', 1)->orderBy('id', 'ASC')->get(),
         ]);
     }
 

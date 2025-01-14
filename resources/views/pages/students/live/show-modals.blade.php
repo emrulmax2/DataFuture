@@ -787,10 +787,22 @@
                         <div class="acc__input-error error-subjects text-danger mt-2"></div>
                     </div>
 
-                    <div class="col-span-12 sm:col-span-3">
+                    {{--<div class="col-span-12 sm:col-span-3">
                         <label for="result" class="form-label">Result <span class="text-danger"></span></label>
                         <input type="text" placeholder="Result" id="result" class="form-control" name="result">
                         <div class="acc__input-error error-result text-danger mt-2"></div>
+                    </div>--}}
+                    <div class="col-span-12 sm:col-span-3">
+                        <label for="qualification_grade_id" class="form-label">Result <span class="text-danger"></span></label>
+                        <select id="qualification_grade_id" class="w-full tom-selects" name="qualification_grade_id">
+                            <option value="">Please Select</option>
+                            @if($qualgrades->count() > 0)
+                                @foreach($qualgrades as $qg)
+                                    <option value="{{ $qg->id }}">{{ $qg->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-qualification_grade_id text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-3">
                         <label for="degree_award_date" class="form-label">Date Of Award <span class="text-danger"></span></label>
@@ -911,10 +923,22 @@
                         <input type="text" placeholder="Subjects" id="edit_subjects" class="form-control" name="subjects">
                         <div class="acc__input-error error-subjects text-danger mt-2"></div>
                     </div>
-                    <div  class="col-span-12 sm:col-span-4">
+                    {{--<div  class="col-span-12 sm:col-span-4">
                         <label for="edit_result" class="form-label">Result </label>
                         <input type="text" placeholder="Result" id="edit_result" class="form-control" name="result">
                         <div class="acc__input-error error-result text-danger mt-2"></div>
+                    </div>--}}
+                    <div class="col-span-12 sm:col-span-3">
+                        <label for="edit_qualification_grade_id" class="form-label">Result <span class="text-danger"></span></label>
+                        <select id="edit_qualification_grade_id" class="w-full tom-selects" name="qualification_grade_id">
+                            <option value="">Please Select</option>
+                            @if($qualgrades->count() > 0)
+                                @foreach($qualgrades as $qg)
+                                    <option value="{{ $qg->id }}">{{ $qg->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-qualification_grade_id text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
                         <label for="edit_degree_award_date" class="form-label">Date Of Award </label>

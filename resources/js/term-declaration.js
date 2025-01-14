@@ -300,6 +300,7 @@ var table = (function () {
                         $('#editModal input[name="exam_publish_time"]').val(dataset.exam_publish_time ? dataset.exam_publish_time : '');
                         $('#editModal input[name="exam_resubmission_publish_date"]').val(dataset.exam_resubmission_publish_date ? dataset.exam_resubmission_publish_date : '');
                         $('#editModal input[name="exam_resubmission_publish_time"]').val(dataset.exam_resubmission_publish_time ? dataset.exam_resubmission_publish_time : '');
+                        $('#editModal input[name="stuload"]').val(dataset.stuload && dataset.stuload > 0 ? dataset.stuload : '');
                         
                         $('#editModal input[name="id"]').val(editId);
                     }

@@ -57,6 +57,8 @@ class EmploymentReportController extends Controller
                     $url = route('hr.portal.reports.attendance');
                 elseif(($list->report_description=='Employment Hour Report')):
                     $url = route('hr.portal.reports.holiday.hour');
+                elseif(($list->report_description=='Outstanding Holiday Report')):
+                    $url = route('hr.portal.reports.outstanding.holiday');
                 endif;
                 $data[] = [
                     'sl' => $list->id,

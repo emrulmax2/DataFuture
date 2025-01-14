@@ -45,9 +45,14 @@ var studentEducationQualTable = (function () {
                     field: "subjects",
                     headerHozAlign: "left",
                 },
-                {
+                /*{
                     title: "Result",
                     field: "result",
+                    headerHozAlign: "left",
+                },*/
+                {
+                    title: "Result",
+                    field: "qualification_grade_id",
                     headerHozAlign: "left",
                 },
                 {
@@ -176,6 +181,7 @@ var studentEducationQualTable = (function () {
         hesa_qualification_subject_id1.clear();
         highest_qualification_on_entry_id1.clear();
         hesa_exam_sitting_venue_id1.clear()
+        qualification_grade_id.clear()
     });
 
     const editQualificationModalEl = document.getElementById('editQualificationModal')
@@ -189,6 +195,7 @@ var studentEducationQualTable = (function () {
         hesa_qualification_subject_id.clear(true);
         highest_qualification_on_entry_id.clear(true);
         hesa_exam_sitting_venue_id.clear(true);
+        edit_qualification_grade_id.clear(true);
     });
 
     let tomOptions = {
@@ -215,6 +222,9 @@ var studentEducationQualTable = (function () {
     var hesa_qualification_subject_id1 = new TomSelect('#hesa_qualification_subject_id1', tomOptions);
     var highest_qualification_on_entry_id1 = new TomSelect('#highest_qualification_on_entry_id1', tomOptions);
     var hesa_exam_sitting_venue_id1 = new TomSelect('#hesa_exam_sitting_venue_id1', tomOptions);
+
+    var qualification_grade_id = new TomSelect('#qualification_grade_id', tomOptions);
+    var edit_qualification_grade_id = new TomSelect('#edit_qualification_grade_id', tomOptions);
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -336,18 +346,20 @@ var studentEducationQualTable = (function () {
                     $('#editQualificationModal input[name="highest_academic"]').val(dataset.highest_academic ? dataset.highest_academic : '');
                     $('#editQualificationModal input[name="awarding_body"]').val(dataset.awarding_body ? dataset.awarding_body : '');
                     $('#editQualificationModal input[name="subjects"]').val(dataset.subjects ? dataset.subjects : '');
-                    $('#editQualificationModal input[name="result"]').val(dataset.result ? dataset.result : '');
+                    //$('#editQualificationModal input[name="result"]').val(dataset.result ? dataset.result : '');
                     $('#editQualificationModal input[name="degree_award_date"]').val(dataset.degree_award_date ? dataset.degree_award_date : '');
                     previous_provider_id.clear(true);
                     qualification_type_identifier_id.clear(true);
                     hesa_qualification_subject_id.clear(true);
                     highest_qualification_on_entry_id.clear(true);
+                    edit_qualification_grade_id.clear(true);
 
                     previous_provider_id.addItem(dataset.previous_provider_id);
                     qualification_type_identifier_id.addItem(dataset.qualification_type_identifier_id);
                     hesa_qualification_subject_id.addItem(dataset.hesa_qualification_subject_id);
                     highest_qualification_on_entry_id.addItem(dataset.highest_qualification_on_entry_id);
                     hesa_exam_sitting_venue_id.addItem(dataset.hesa_exam_sitting_venue_id);
+                    edit_qualification_grade_id.addItem(dataset.edit_qualification_grade_id);
                     
 
                     $('#editQualificationModal input[name="id"]').val(editId);

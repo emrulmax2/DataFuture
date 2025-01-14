@@ -24,6 +24,7 @@ use App\Models\HesaGender;
 use App\Models\HesaQualificationAward;
 use App\Models\HesaQualificationSubject;
 use App\Models\HighestQualificationOnEntry;
+use App\Models\InstanceTerm;
 use App\Models\LocationOfStudy;
 use App\Models\MajorSourceOfTuitionFee;
 use App\Models\ModuleOutcome;
@@ -63,6 +64,8 @@ class DatafutureController extends Controller
         $student->load(['other', 'contact', 'qualHigest', 'disability']);
         $course_id = $student->crel->creation->course_id;
         $module_ids = $this->getStudentModules($student->id, $course_id);
+        
+        $autoStuloads = $this->autoLoadStudentStuloads($student->id, $student->crel->id);
         return view('pages.students.live.datafuture', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
@@ -228,6 +231,103 @@ class DatafutureController extends Controller
         return response()->json(['msg' => 'Datafuture missing data successfully updated.'], 200);
     }
 
+    public function autoLoadStudentStuloads($student_id, $student_course_relation_id){
+        $student = Student::find($student_id);
+        $studentCrel = StudentCourseRelation::find($student_course_relation_id);
+        $course_id = (isset($studentCrel->creation->course_id) && $studentCrel->creation->course_id > 0 ? $studentCrel->creation->course_id : null);
+        $course_creation_id = $studentCrel->course_creation_id;
+
+        $counts = 0;
+        $instances = CourseCreationInstance::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get();
+        if($instances->count() > 0):
+            foreach($instances as $instance):
+                $existInstance = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $instance->id)->withTrashed()->get();
+                if($existInstance->count() == 0):
+                    $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
+                    $lastRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
+
+                    $priprov_id = null;
+                    $qual_type = null;
+                    $qual_sub = null;
+                    $qual_sit = null;
+                    $qualent3_id = null;
+                    $sid_number = (isset($lastRow->sid_number) && !empty($lastRow->sid_number) ? $lastRow->sid_number : $this->calculateSidNumber($student->registration_no));
+                    $is_education_qualification = (isset($student->other->is_education_qualification) && $student->other->is_education_qualification > 0 ? $student->other->is_education_qualification : 0);
+                    if($is_education_qualification == 1):
+                        $qualification = StudentQualification::orderBy('id', 'DESC')->get()->first();
+                        $priprov_id = (isset($qualification->previous_provider_id) && $qualification->previous_provider_id > 0 ? $qualification->previous_provider_id : null);
+                        $qual_type = (isset($qualification->qualification_type_identifier_id) && $qualification->qualification_type_identifier_id > 0 ? $qualification->qualification_type_identifier_id : null);
+                        $qual_sub = (isset($qualification->hesa_qualification_subject_id) && $qualification->hesa_qualification_subject_id > 0 ? $qualification->hesa_qualification_subject_id : null);
+                        $qual_sit = (isset($qualification->hesa_exam_sitting_venue_id) && $qualification->hesa_exam_sitting_venue_id > 0 ? $qualification->hesa_exam_sitting_venue_id : null);
+                        $qualent3_id = (isset($qualification->highest_qualification_on_entry_id) && $qualification->highest_qualification_on_entry_id > 0 ? $qualification->highest_qualification_on_entry_id : null);
+                    endif;
+                    $disall_id = null;
+                    if(isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0):
+                        $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->get()->first();
+                        $disall_id = (isset($studentDis->disability_id) && $studentDis->disability_id > 0 ? $studentDis->disability_id : null);
+                    endif;
+                    $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get()->first();
+                    $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
+                    
+
+                    $data = [
+                        'student_id' => $student->id,
+                        'student_course_relation_id' => $student_course_relation_id,
+                        'course_creation_instance_id' => $instance->id,
+                        'year_of_the_course' => ($existingRowCount > 0 ? ($existingRowCount + 1) : 1),
+                        'auto_stuload' => 1,
+                        'student_load' => null,
+                        'disall_id' => $disall_id,
+                        'exchind_id' => null,
+                        'gross_fee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                        'locsdy_id' => null,
+                        'mode_id' => 1,
+                        'mstufee_id' => null,
+                        'netfee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                        'notact_id' => null,
+                        'periodstart' => (isset($instance->start_date) && !empty($instance->start_date) ? date('Y-m-d', strtotime($instance->start_date)) : null),
+                        'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
+                        'priprov_id' => $priprov_id,
+                        'sselig_id' => null,
+                        'yearprg' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                        'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                        'qual_id' => null,
+                        'heapespop_id' => null,
+                        'class_id' => $class_id,
+                        'courseaim_id' => $course_id,
+                        'genderid_id' => (isset($student->other->hesa_gender_id) && $student->other->hesa_gender_id > 0 ? $student->other->hesa_gender_id : null),
+                        'regbody_id' => null,
+                        'relblf_id' => (isset($student->other->religion_id) && $student->other->religion_id > 0 ? $student->other->religion_id : null),
+                        'rsnend_id' => null,
+                        'sexort_id' => (isset($student->other->sexual_orientation_id) && $student->other->sexual_orientation_id > 0 ? $student->other->sexual_orientation_id : null),
+                        'ttcid_id' => (isset($student->contact->term_time_accommodation_type_id) && $student->contact->term_time_accommodation_type_id > 0 ? $student->contact->term_time_accommodation_type_id : null),
+                        'uhn_number' => (isset($student->uhn_no) && !empty($student->uhn_no) ? $student->uhn_no : null),
+                        'sid_number' => $sid_number,
+                        'provider_name' => $priprov_id,
+                        'qual_type' => $qual_type,
+                        'qual_sub' => $qual_sub,
+                        'qual_sit' => $qual_sit,
+                        'domicile_id' => (isset($student->contact->permanent_country_id) && $student->contact->permanent_country_id > 0 ? $student->contact->permanent_country_id : null),
+                        'numhus' => null,
+                        'owninst' => $student->registration_no,
+                        'comdate' => (isset($studentCrel->course_start_date) && !empty($studentCrel->course_start_date) ? date('Y-m-d', strtotime($studentCrel->course_start_date)) : null),
+                        'enddate' => (isset($studentCrel->course_end_date) && !empty($studentCrel->course_end_date) ? date('Y-m-d', strtotime($studentCrel->course_end_date)) : null),
+                        'qualent3_id' => $qualent3_id,
+                        'reporting_period' => 0,
+                        'created_by' => auth()->user()->id,
+                    ];
+
+                    $stuload = StudentStuloadInformation::create($data);
+                    if($stuload->id):
+                        $counts += 1;
+                    endif;
+                endif;
+            endforeach;
+        endif;
+
+        return $counts;
+    }
+
     public function getStuloadModuleInstance($student_id, $student_course_relation_id){
         $res = [];
         $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
@@ -313,87 +413,97 @@ class DatafutureController extends Controller
         $student_course_relation_id = $request->student_course_relation_id;
         $studentCrel = StudentCourseRelation::find($student_course_relation_id);
         $course_creation_instance_id = (isset($request->course_creation_instance_id) && $request->course_creation_instance_id > 0 ? $request->course_creation_instance_id : 0);
-        $instance = CourseCreationInstance::find($course_creation_instance_id);
-
-        $existingRowCount = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
-        $lastRow = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
-
-        $priprov_id = null;
-        $qual_type = null;
-        $qual_sub = null;
-        $qual_sit = null;
-        $qualent3_id = null;
-        $sid_number = (isset($lastRow->sid_number) && !empty($lastRow->sid_number) ? $lastRow->sid_number : $this->calculateSidNumber($student->registration_no));
-        $is_education_qualification = (isset($student->other->is_education_qualification) && $student->other->is_education_qualification > 0 ? $student->other->is_education_qualification : 0);
-        if($is_education_qualification == 1):
-            $qualification = StudentQualification::orderBy('id', 'DESC')->get()->first();
-            $priprov_id = (isset($qualification->previous_provider_id) && $qualification->previous_provider_id > 0 ? $qualification->previous_provider_id : null);
-            $qual_type = (isset($qualification->qualification_type_identifier_id) && $qualification->qualification_type_identifier_id > 0 ? $qualification->qualification_type_identifier_id : null);
-            $qual_sub = (isset($qualification->hesa_qualification_subject_id) && $qualification->hesa_qualification_subject_id > 0 ? $qualification->hesa_qualification_subject_id : null);
-            $qual_sit = (isset($qualification->hesa_exam_sitting_venue_id) && $qualification->hesa_exam_sitting_venue_id > 0 ? $qualification->hesa_exam_sitting_venue_id : null);
-            $qualent3_id = (isset($qualification->highest_qualification_on_entry_id) && $qualification->highest_qualification_on_entry_id > 0 ? $qualification->highest_qualification_on_entry_id : null);
-        endif;
-        $disall_id = null;
-        if(isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0):
-            $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->get()->first();
-            $disall_id = (isset($studentDis->disability_id) && $studentDis->disability_id > 0 ? $studentDis->disability_id : null);
-        endif;
-        $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get()->first();
-        $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
         
-
-        $data = [
-            'student_id' => $student->id,
-            'student_course_relation_id' => $student_course_relation_id,
-            'course_creation_instance_id' => $course_creation_instance_id,
-            'year_of_the_course' => ($existingRowCount > 0 ? ($existingRowCount + 1) : 1),
-            'auto_stuload' => 1,
-            'student_load' => null,
-            'disall_id' => $disall_id,
-            'exchind_id' => null,
-            'gross_fee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
-            'locsdy_id' => null,
-            'mode_id' => 1,
-            'mstufee_id' => null,
-            'netfee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
-            'notact_id' => null,
-            'periodstart' => (isset($instance->start_date) && !empty($instance->start_date) ? date('Y-m-d', strtotime($instance->start_date)) : null),
-            'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
-            'priprov_id' => $priprov_id,
-            'sselig_id' => null,
-            'yearprg' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
-            'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
-            'qual_id' => null,
-            'heapespop_id' => null,
-            'class_id' => $class_id,
-            'courseaim_id' => $course_id,
-            'genderid_id' => (isset($student->other->hesa_gender_id) && $student->other->hesa_gender_id > 0 ? $student->other->hesa_gender_id : null),
-            'regbody_id' => null,
-            'relblf_id' => (isset($student->other->religion_id) && $student->other->religion_id > 0 ? $student->other->religion_id : null),
-            'rsnend_id' => null,
-            'sexort_id' => (isset($student->other->sexual_orientation_id) && $student->other->sexual_orientation_id > 0 ? $student->other->sexual_orientation_id : null),
-            'ttcid_id' => (isset($student->contact->term_time_accommodation_type_id) && $student->contact->term_time_accommodation_type_id > 0 ? $student->contact->term_time_accommodation_type_id : null),
-            'uhn_number' => (isset($student->uhn_no) && !empty($student->uhn_no) ? $student->uhn_no : null),
-            'sid_number' => $sid_number,
-            'provider_name' => $priprov_id,
-            'qual_type' => $qual_type,
-            'qual_sub' => $qual_sub,
-            'qual_sit' => $qual_sit,
-            'domicile_id' => (isset($student->contact->permanent_country_id) && $student->contact->permanent_country_id > 0 ? $student->contact->permanent_country_id : null),
-            'numhus' => null,
-            'owninst' => $student->registration_no,
-            'comdate' => (isset($studentCrel->course_start_date) && !empty($studentCrel->course_start_date) ? date('Y-m-d', strtotime($studentCrel->course_start_date)) : null),
-            'enddate' => (isset($studentCrel->course_end_date) && !empty($studentCrel->course_end_date) ? date('Y-m-d', strtotime($studentCrel->course_end_date)) : null),
-            'qualent3_id' => $qualent3_id,
-            'reporting_period' => 0,
-            'created_by' => auth()->user()->id,
-        ];
-
-        $stuload = StudentStuloadInformation::create($data);
-        if($stuload->id):
+        $existInstanceStuload = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $course_creation_instance_id)->withTrashed()->get();
+        if($existInstanceStuload->count() > 0):
+            foreach($existInstanceStuload as $theStuload):
+                if(isset($theStuload->deleted_at) && !empty($theStuload->deleted_at)):
+                    StudentStuloadInformation::where('id', $theStuload->id)->withTrashed()->restore();
+                endif;
+            endforeach;
             return response()->json(['msg' => 'Student Stuload successfully created.'], 200);
         else:
-            return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 304);
+            $instance = CourseCreationInstance::find($course_creation_instance_id);
+            $existingRowCount = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
+            $lastRow = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
+
+            $priprov_id = null;
+            $qual_type = null;
+            $qual_sub = null;
+            $qual_sit = null;
+            $qualent3_id = null;
+            $sid_number = (isset($lastRow->sid_number) && !empty($lastRow->sid_number) ? $lastRow->sid_number : $this->calculateSidNumber($student->registration_no));
+            $is_education_qualification = (isset($student->other->is_education_qualification) && $student->other->is_education_qualification > 0 ? $student->other->is_education_qualification : 0);
+            if($is_education_qualification == 1):
+                $qualification = StudentQualification::orderBy('id', 'DESC')->get()->first();
+                $priprov_id = (isset($qualification->previous_provider_id) && $qualification->previous_provider_id > 0 ? $qualification->previous_provider_id : null);
+                $qual_type = (isset($qualification->qualification_type_identifier_id) && $qualification->qualification_type_identifier_id > 0 ? $qualification->qualification_type_identifier_id : null);
+                $qual_sub = (isset($qualification->hesa_qualification_subject_id) && $qualification->hesa_qualification_subject_id > 0 ? $qualification->hesa_qualification_subject_id : null);
+                $qual_sit = (isset($qualification->hesa_exam_sitting_venue_id) && $qualification->hesa_exam_sitting_venue_id > 0 ? $qualification->hesa_exam_sitting_venue_id : null);
+                $qualent3_id = (isset($qualification->highest_qualification_on_entry_id) && $qualification->highest_qualification_on_entry_id > 0 ? $qualification->highest_qualification_on_entry_id : null);
+            endif;
+            $disall_id = null;
+            if(isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0):
+                $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->get()->first();
+                $disall_id = (isset($studentDis->disability_id) && $studentDis->disability_id > 0 ? $studentDis->disability_id : null);
+            endif;
+            $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get()->first();
+            $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
+            
+
+            $data = [
+                'student_id' => $student->id,
+                'student_course_relation_id' => $student_course_relation_id,
+                'course_creation_instance_id' => $course_creation_instance_id,
+                'year_of_the_course' => ($existingRowCount > 0 ? ($existingRowCount + 1) : 1),
+                'auto_stuload' => 1,
+                'student_load' => null,
+                'disall_id' => $disall_id,
+                'exchind_id' => null,
+                'gross_fee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                'locsdy_id' => null,
+                'mode_id' => 1,
+                'mstufee_id' => null,
+                'netfee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                'notact_id' => null,
+                'periodstart' => (isset($instance->start_date) && !empty($instance->start_date) ? date('Y-m-d', strtotime($instance->start_date)) : null),
+                'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
+                'priprov_id' => $priprov_id,
+                'sselig_id' => null,
+                'yearprg' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                'qual_id' => null,
+                'heapespop_id' => null,
+                'class_id' => $class_id,
+                'courseaim_id' => $course_id,
+                'genderid_id' => (isset($student->other->hesa_gender_id) && $student->other->hesa_gender_id > 0 ? $student->other->hesa_gender_id : null),
+                'regbody_id' => null,
+                'relblf_id' => (isset($student->other->religion_id) && $student->other->religion_id > 0 ? $student->other->religion_id : null),
+                'rsnend_id' => null,
+                'sexort_id' => (isset($student->other->sexual_orientation_id) && $student->other->sexual_orientation_id > 0 ? $student->other->sexual_orientation_id : null),
+                'ttcid_id' => (isset($student->contact->term_time_accommodation_type_id) && $student->contact->term_time_accommodation_type_id > 0 ? $student->contact->term_time_accommodation_type_id : null),
+                'uhn_number' => (isset($student->uhn_no) && !empty($student->uhn_no) ? $student->uhn_no : null),
+                'sid_number' => $sid_number,
+                'provider_name' => $priprov_id,
+                'qual_type' => $qual_type,
+                'qual_sub' => $qual_sub,
+                'qual_sit' => $qual_sit,
+                'domicile_id' => (isset($student->contact->permanent_country_id) && $student->contact->permanent_country_id > 0 ? $student->contact->permanent_country_id : null),
+                'numhus' => null,
+                'owninst' => $student->registration_no,
+                'comdate' => (isset($studentCrel->course_start_date) && !empty($studentCrel->course_start_date) ? date('Y-m-d', strtotime($studentCrel->course_start_date)) : null),
+                'enddate' => (isset($studentCrel->course_end_date) && !empty($studentCrel->course_end_date) ? date('Y-m-d', strtotime($studentCrel->course_end_date)) : null),
+                'qualent3_id' => $qualent3_id,
+                'reporting_period' => 0,
+                'created_by' => auth()->user()->id,
+            ];
+
+            $stuload = StudentStuloadInformation::create($data);
+            if($stuload->id):
+                return response()->json(['msg' => 'Student Stuload successfully created.'], 200);
+            else:
+                return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 304);
+            endif;
         endif;
     }
 

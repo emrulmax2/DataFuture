@@ -27,7 +27,20 @@ class StudentQualificationRequest extends FormRequest
             'highest_academic' => 'required',
             'awarding_body' => 'required',
             'subjects' => 'required',
-            'result' => 'required',
+            //'result' => 'required',
+            'qualification_grade_id' => 'required',
+            
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'highest_academic.required' => 'This field is required.',
+            'awarding_body.required' => 'This field is required.',
+            'subjects.required' => 'This field is required.',
+            //'result' => 'required',
+            'qualification_grade_id.required' => 'This field is required.',
             
         ];
     }
