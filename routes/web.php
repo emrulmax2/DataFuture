@@ -224,6 +224,7 @@ use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\portal\VacancyController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
+use App\Http\Controllers\HR\Reports\OutstandingHolidayReportController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
@@ -3581,6 +3582,12 @@ Route::middleware('auth')->group(function() {
     
         Route::get('qualification-grade/export', 'export')->name('qualification.grade.export');
         Route::post('qualification-grade/import', 'import')->name('qualification.grade.import');
+    });
+
+    Route::controller(OutstandingHolidayReportController::class)->group(function() {
+        Route::get('hr/portal/reports/outstanding-holiday', 'index')->name('hr.portal.reports.outstanding.holiday'); 
+        Route::get('hr/portal/reports/outstanding-holiday/list', 'list')->name('hr.portal.reports.outstanding.holiday.list'); 
+        Route::post('hr/portal/reports/outstanding-holiday/export', 'export')->name('hr.portal.reports.outstanding.holiday.export'); 
     });
     
 });

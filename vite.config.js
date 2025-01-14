@@ -359,7 +359,9 @@ export default defineConfig({
                 'resources/js/location-of-study.js',
                 'resources/js/major-source-of-tuition-fee.js',
                 'resources/js/student-support-eligibility.js',
-                'resources/js/suspension-of-active-study.js'
+                'resources/js/suspension-of-active-study.js',
+
+                'resources/js/outstanding-holiday-report.js',
             ],
             refresh: true,
         }),
