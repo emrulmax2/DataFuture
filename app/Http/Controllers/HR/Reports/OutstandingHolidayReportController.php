@@ -79,15 +79,18 @@ class OutstandingHolidayReportController extends Controller
                     $endTo = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
                     if($effectiveForm < $to_date && ($endTo == '' || $endTo > $from_date)):
-                        $holidayEntitlement = $this->employeeHolidayEntitlement($list->id, $holiday_year_id, $activePattern, $from_date, $to_date);
+                        $psd = ($from_date < $effectiveForm && ($effectiveForm <= $to_date || $effectiveForm <= date('Y-m-d')) ? $effectiveForm : $from_date);
+                        $ped = (($endTo != '' && $endTo != '0000-00-00') && $endTo < $to_date ? $endTo : $to_date);
+
+                        $holidayEntitlement = $this->employeeHolidayEntitlement($list->id, $holiday_year_id, $activePattern, $psd, $ped);
                         $adjustmentRow = $this->employeeHolidayAdjustment($list->id, $holiday_year_id, $activePattern);
                         $adjustmentHour = (isset($adjustmentRow['hours']) && $adjustmentRow['hours'] > 0 ? $adjustmentRow['hours'] : 0);
                         $adjustmentOpt = (isset($adjustmentRow['opt']) && $adjustmentRow['opt'] > 0 ? $adjustmentRow['opt'] : 1);
                         $totalHolidayEntitlement = ($adjustmentOpt == 2 ? ($holidayEntitlement - $adjustmentHour) : ($holidayEntitlement + $adjustmentHour));
 
-                        $autoBookedBankHoliday = $this->employeeAutoBookedBankHoliday($list->id, $holiday_year_id, $pattern->id, $from_date, $to_date);
+                        $autoBookedBankHoliday = $this->employeeAutoBookedBankHoliday($list->id, $holiday_year_id, $pattern->id, $psd, $ped);
                         $bankHolidayTotal = (isset($autoBookedBankHoliday['bank_holiday_total']) && $autoBookedBankHoliday['bank_holiday_total'] > 0 ? $autoBookedBankHoliday['bank_holiday_total'] : 0);
-                        $leaveHourse = $this->employeeExistingLeaveHours($list->id, $holiday_year_id, $activePattern, $from_date, $to_date);
+                        $leaveHourse = $this->employeeExistingLeaveHours($list->id, $holiday_year_id, $activePattern, $psd, $ped);
                         $takenOnly = (isset($leaveHourse['taken']) && $leaveHourse['taken'] > 0 ? $leaveHourse['taken'] : 0);
                         $bookedOnly = (isset($leaveHourse['booked']) && $leaveHourse['booked'] > 0 ? $leaveHourse['booked'] : 0);
                         $totalTaken = $takenOnly + $bookedOnly + $bankHolidayTotal;
@@ -158,15 +161,18 @@ class OutstandingHolidayReportController extends Controller
                     $endTo = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
 
                     if($effectiveForm < $to_date && ($endTo == '' || $endTo > $from_date)):
-                        $holidayEntitlement = $this->employeeHolidayEntitlement($list->id, $holiday_year_id, $activePattern, $from_date, $to_date);
+                        $psd = ($from_date < $effectiveForm && ($effectiveForm <= $to_date || $effectiveForm <= date('Y-m-d')) ? $effectiveForm : $from_date);
+                        $ped = (($endTo != '' && $endTo != '0000-00-00') && $endTo < $to_date ? $endTo : $to_date);
+
+                        $holidayEntitlement = $this->employeeHolidayEntitlement($list->id, $holiday_year_id, $activePattern, $psd, $ped);
                         $adjustmentRow = $this->employeeHolidayAdjustment($list->id, $holiday_year_id, $activePattern);
                         $adjustmentHour = (isset($adjustmentRow['hours']) && $adjustmentRow['hours'] > 0 ? $adjustmentRow['hours'] : 0);
                         $adjustmentOpt = (isset($adjustmentRow['opt']) && $adjustmentRow['opt'] > 0 ? $adjustmentRow['opt'] : 1);
                         $totalHolidayEntitlement = ($adjustmentOpt == 2 ? ($holidayEntitlement - $adjustmentHour) : ($holidayEntitlement + $adjustmentHour));
 
-                        $autoBookedBankHoliday = $this->employeeAutoBookedBankHoliday($list->id, $holiday_year_id, $pattern->id, $from_date, $to_date);
+                        $autoBookedBankHoliday = $this->employeeAutoBookedBankHoliday($list->id, $holiday_year_id, $pattern->id, $psd, $ped);
                         $bankHolidayTotal = (isset($autoBookedBankHoliday['bank_holiday_total']) && $autoBookedBankHoliday['bank_holiday_total'] > 0 ? $autoBookedBankHoliday['bank_holiday_total'] : 0);
-                        $leaveHourse = $this->employeeExistingLeaveHours($list->id, $holiday_year_id, $activePattern, $from_date, $to_date);
+                        $leaveHourse = $this->employeeExistingLeaveHours($list->id, $holiday_year_id, $activePattern, $psd, $ped);
                         $takenOnly = (isset($leaveHourse['taken']) && $leaveHourse['taken'] > 0 ? $leaveHourse['taken'] : 0);
                         $bookedOnly = (isset($leaveHourse['booked']) && $leaveHourse['booked'] > 0 ? $leaveHourse['booked'] : 0);
                         $totalTaken = $takenOnly + $bookedOnly + $bankHolidayTotal;
@@ -175,7 +181,7 @@ class OutstandingHolidayReportController extends Controller
 
                         $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $activePattern)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
                         $payRate = (isset($activePay->hourly_rate) && $activePay->hourly_rate > 0 ? $activePay->hourly_rate : 0);
-                        $balanceAmount = ($balanceHour > 0 ? number_format(($balanceHour / 60) * $payRate, 2) : ($balanceHour < 1 && $balanceHour != 0 ? '-'.number_format((str_replace('-', '', $balanceHour) / 60) * $payRate, 2) : '0.00'));
+                        $balanceAmount = ($balanceHour > 0 ? '£'.number_format(($balanceHour / 60) * $payRate, 2) : ($balanceHour < 1 && $balanceHour != 0 ? '-£'.number_format((str_replace('-', '', $balanceHour) / 60) * $payRate, 2) : '£0.00'));
                         
                         $theCollection[$row][] = $list->full_name;
                         $theCollection[$row][] = (isset($list->employment->department->name) && !empty($list->employment->department->name) ? $list->employment->department->name : '');
