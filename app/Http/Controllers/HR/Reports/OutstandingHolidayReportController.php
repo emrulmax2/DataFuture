@@ -33,10 +33,10 @@ class OutstandingHolidayReportController extends Controller
     public function list(Request $request){
         $holiday_year_id = (isset($request->holiday_year_id) && $request->holiday_year_id > 0 ? $request->holiday_year_id : 0);
         $holiday_year = HrHolidayYear::find($holiday_year_id);
-        $from_date = (isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime('01-'.$request->from_date)) : '');
+        $from_date = (isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : '');
         $from_date = (empty($from_date) || $from_date < $holiday_year->start_date ? date('Y-m-d', strtotime($holiday_year->start_date)) : $from_date);
-        $to_date = (isset($request->to_date) && !empty($request->to_date) ? date('Y-m-t', strtotime('01-'.$request->to_date)) : '');
-        $to_date = (empty($to_date) || $to_date > $holiday_year->end_date ? date('Y-m-t', strtotime($holiday_year->end_date)) : $to_date);
+        $to_date = (isset($request->to_date) && !empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : '');
+        $to_date = (empty($to_date) || $to_date > $holiday_year->end_date ? date('Y-m-d', strtotime($holiday_year->end_date)) : $to_date);
         $status = (isset($request->status) ? $request->status : 2);
 
         $endMonth = new DateTime($to_date); 
@@ -123,10 +123,10 @@ class OutstandingHolidayReportController extends Controller
     public function export(Request $request){
         $holiday_year_id = (isset($request->holiday_year_id) && $request->holiday_year_id > 0 ? $request->holiday_year_id : 0);
         $holiday_year = HrHolidayYear::find($holiday_year_id);
-        $from_date = (isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime('01-'.$request->from_date)) : '');
+        $from_date = (isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : '');
         $from_date = (empty($from_date) || $from_date < $holiday_year->start_date ? date('Y-m-d', strtotime($holiday_year->start_date)) : $from_date);
-        $to_date = (isset($request->to_date) && !empty($request->to_date) ? date('Y-m-t', strtotime('01-'.$request->to_date)) : '');
-        $to_date = (empty($to_date) || $to_date > $holiday_year->end_date ? date('Y-m-t', strtotime($holiday_year->end_date)) : $to_date);
+        $to_date = (isset($request->to_date) && !empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : '');
+        $to_date = (empty($to_date) || $to_date > $holiday_year->end_date ? date('Y-m-d', strtotime($holiday_year->end_date)) : $to_date);
         $status = (isset($request->status) ? $request->status : 2);
 
         $endMonth = new DateTime($to_date); 
