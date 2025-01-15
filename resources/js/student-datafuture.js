@@ -365,4 +365,58 @@ import Litepicker from "litepicker";
         });
     });
 
+    $(document).on('click', '.deleteStudentLoadBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var stuload_id = $theBtn.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .confModTitle").html("Are you sure?" );
+            $("#confirmModal .confModDesc").html('Want to delete this Session for the student? Please click on agree to continue.');
+            $("#confirmModal .agreeWith").attr('data-recordid', stuload_id);
+            $("#confirmModal .agreeWith").attr('data-status', 'DELETESTL');
+        });
+    });
+
+    $('#confirmModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+        let $agreeBTN = $(this);
+        let recordid = $agreeBTN.attr('data-recordid');
+        let action = $agreeBTN.attr('data-status');
+        let student = $agreeBTN.attr('data-student');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+
+        if(action == 'DELETESTL'){
+            axios({
+                method: 'delete',
+                url: route('student.datafuture.destory.student.stuload', student),
+                data: {student : student, recordid : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student course session successfully deleted.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else{
+            confirmModal.hide();
+        }
+    });
+
 })()

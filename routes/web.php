@@ -3463,6 +3463,7 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-management/store-rule', 'storeRules')->name('agent.management.store.rule'); 
         Route::get('agent-management/comission/{semester}/{agent_user}', 'comission')->name('agent.management.comission'); 
         Route::get('agent-management/comission/list', 'comissionList')->name('agent.management.comission.list'); 
+        Route::get('agent-management/comission/export-list/{semester}/{agent_user}/{code}', 'exportComissionList')->name('agent.management.comission.list.export'); 
 
         Route::post('agent-management/payable/comissions', 'payableComissions')->name('agent.management.get.payable.comissions'); 
     });
@@ -3568,6 +3569,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/datafuture/{student}/store-hesa-instances', 'storeHesaInstance')->name('student.datafuture.store.hesa.instances');
         Route::post('student/datafuture/{student}/get-stuload-information', 'getStuloadInformation')->name('student.datafuture.get.stuload.information');
         Route::post('student/datafuture/{student}/update-stuload-information', 'updateStuloadInformation')->name('student.datafuture.update.hesa.instances');
+
+        Route::delete('student/datafuture/{student}/destroy-stuload-information', 'destroyStuloadInformation')->name('student.datafuture.destory.student.stuload');
     });
 
     Route::controller(QualificationGradeController::class)->group(function() {

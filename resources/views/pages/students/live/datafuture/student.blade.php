@@ -436,13 +436,18 @@
                             @endphp
                             <div class="lcc-accordion-item">
                                 <div id="df-accr-Student-Course-Session-content-{{ $i }}" class="lcc-accordion-header relative">
-                                    <button class="lcc-accordion-button bg-slate-100" type="button" style="padding-left: 60px;">
+                                    <button class="lcc-accordion-button bg-slate-100" type="button" style="padding-left: 95px;">
                                         Student Course Session {{ (isset($stu->periodstart) && !empty($stu->periodstart) ? date('d-m-Y', strtotime($stu->periodstart)) : '')}} - {{ (isset($stu->periodend) && !empty($stu->periodend) ? date('d-m-Y', strtotime($stu->periodend)) : '')}}
                                         <span class="accordionCollaps"></span>
                                     </button>
-                                    <button type="button" data-tw-toggle="modal" data-tw-target="#editStudentStuloadModal" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" class="editStudentLoadBtn absolute btn btn-success w-[30px] h-[30px] p-0 items-center justify-center rounded-full text-white l-0 t-0 b-0 m-auto ml-4">
-                                        <i data-lucide="pencil" class="w-4 h-4"></i>
-                                    </button>
+                                    <div class="absolute l-0 t-0 b-0 m-auto ml-4 inline-flex justify-start items-center">
+                                        <button type="button" data-tw-toggle="modal" data-tw-target="#editStudentStuloadModal" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" class="editStudentLoadBtn btn btn-success w-[30px] h-[30px] p-0 items-center justify-center rounded-full text-white">
+                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                        </button>
+                                        <button type="button" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" class="deleteStudentLoadBtn btn btn-danger w-[30px] h-[30px] p-0 items-center justify-center rounded-full text-white ml-1">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div id="df-accr-Student-Course-Session-collapse-{{ $i }}" class="lcc-accordion-collapse lcc-show" style="display: block;">
                                     <div class="lcc-accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">

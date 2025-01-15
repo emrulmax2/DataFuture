@@ -625,4 +625,11 @@ class DatafutureController extends Controller
 
         return response()->json(['msg' => 'Student stuload information successfully updated.'], 200);
     }
+
+    public function destroyStuloadInformation(Student $student, Request $request){
+        $id = $request->recordid;
+        StudentStuloadInformation::where('student_id', $student->id)->where('id', $id)->delete();
+
+        return response()->json(['message' => 'Student course session successfully deleted.'], 200);
+    }
 }
