@@ -267,6 +267,7 @@ class AgentController extends Controller
                     'referral_code' => $list->referral_code,
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),
                     'is_student' => (!empty($studentFound) ? 1 : 0),
+                    'current_status' => (!empty($studentFound) ? $studentFound->status->name : 0),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
