@@ -126,6 +126,17 @@ var agentComissionListTable = (function () {
                     }
                 },
             ],
+            ajaxResponse: function (url, params, response) {
+                var total_rows = response.all_rows && response.all_rows > 0 ? response.all_rows : 0;
+
+                if (total_rows > 0) {
+                    $('#noOfStdCount').attr('data-total', total_rows).html(total_rows + ' Students');
+                } else {
+                    $('#noOfStdCount').attr('data-total', '0').html('0');
+                }
+
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,

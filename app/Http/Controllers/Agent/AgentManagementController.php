@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AgentComissionRuleStoreRequest;
 use App\Models\AgentComissionRule;
@@ -13,6 +14,7 @@ use App\Models\SlcInstallment;
 use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AgentManagementController extends Controller
 {
@@ -178,6 +180,7 @@ class AgentManagementController extends Controller
         $semester_id = (isset($request->semester_id) && $request->semester_id > 0 ? $request->semester_id : 0);
         $agent_user_id = (isset($request->agent_id) && $request->agent_id > 0 ? $request->agent_id : 0);
         $code = (isset($request->code) && !empty($request->code) ? $request->code : '');
+
         $creation_ids = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
         $theRule = AgentComissionRule::where('agent_user_id', $agent_user_id)->where('semester_id', $semester_id)->get()->first();
         $period = (isset($theRule->period) && $theRule->period > 0 ? $theRule->period : 2);
@@ -256,7 +259,84 @@ class AgentManagementController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
+    }
+
+    public function exportComissionList(Semester $semester, AgentUser $agent_user, $code){
+        $creation_ids = CourseCreation::where('semester_id', $semester->id)->pluck('id')->unique()->toArray();
+        $theRule = AgentComissionRule::where('agent_user_id', $agent_user->id)->where('semester_id', $semester->id)->get()->first();
+        $period = (isset($theRule->period) && $theRule->period > 0 ? $theRule->period : 2);
+
+        $students = Student::whereHas('activeCR', function($q) use($creation_ids){
+                    $q->whereIn('course_creation_id', $creation_ids);
+                })->where('referral_code', $code)->where('is_referral_varified', 1)
+                ->orderBy('id', 'ASC')->get();
+
+        $row = 1;
+        $theCollection = [];
+        $theCollection[$row][] = 'Application No';
+        $theCollection[$row][] = 'Registration No';
+        $theCollection[$row][] = 'Name';
+        $theCollection[$row][] = 'Date of Birth';
+        $theCollection[$row][] = 'SSN';
+        $theCollection[$row][] = 'Course';
+        $theCollection[$row][] = 'Semester';
+        $theCollection[$row][] = 'Status';
+        $theCollection[$row][] = 'Course Fee';
+        $theCollection[$row][] = 'Claimed';
+        $theCollection[$row][] = 'No of Claimed';
+        $theCollection[$row][] = 'Received';
+
+        $row = 2;
+        if($students->count() > 0):
+            foreach($students as $list):
+                $std_course_relation_id = (isset($list->activeCR->id) && $list->activeCR->id > 0 ? $list->activeCR->id : 0);
+                $installments = SlcInstallment::where('student_id', $list->id)->where('student_course_relation_id', $std_course_relation_id);
+                if($period == 2):
+                    $installments->whereHas('agreement', function($q){
+                        $q->where('year', 1);
+                    });
+                endif;
+                $installments = $installments->get();
+
+                $moneyReceipts = SlcMoneyReceipt::where('student_id', $list->id)->where('student_course_relation_id', $std_course_relation_id);
+                if($period == 2):
+                    $moneyReceipts->whereHas('agreement', function($q){
+                        $q->where('year', 1);
+                    });
+                endif;
+                $moneyReceipts = $moneyReceipts->get();
+                $refundReceipts = $moneyReceipts->filter(function ($value, $key) {
+                                    return $value['payment_type'] == 'Refund';
+                                });
+                $courseFeesReceipts = $moneyReceipts->filter(function ($value, $key) {
+                                    return $value['payment_type'] == 'Course Fee';
+                                });
+                $refunds = $refundReceipts->sum('amount');
+                $courseFees = $courseFeesReceipts->sum('amount');
+                $allReceiptsCount = $moneyReceipts->count();
+
+                $receivedAmount = ($refunds > $courseFees ? '-'.number_format(($refunds - $courseFees), 2, '.', '') : number_format(($courseFees - $refunds), 2, '.', ''));
+
+                $theCollection[$row][] = $list->application_no;
+                $theCollection[$row][] = $list->registration_no;
+                $theCollection[$row][] = $list->full_name;
+                $theCollection[$row][] = (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('Y-m-d', strtotime($list->date_of_birth)) : '');
+                $theCollection[$row][] = $list->ssn_no;
+                $theCollection[$row][] = (isset($list->activeCR->creation->course->name) && !empty($list->activeCR->creation->course->name) ? $list->activeCR->creation->course->name : '');
+                $theCollection[$row][] = (isset($list->activeCR->creation->semester->name) && !empty($list->activeCR->creation->semester->name) ? $list->activeCR->creation->semester->name : '');
+                $theCollection[$row][] = (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : '');
+                $theCollection[$row][] = (isset($list->activeCR->creation->fees) && $list->activeCR->creation->fees > 0 ? number_format($list->activeCR->creation->fees, 2, '.', '') : '0.00');
+                $theCollection[$row][] = ($installments->count() > 0 && $installments->sum('amount') > 0 ? number_format($installments->sum('amount'), 2, '.', '') : '0.00');
+                $theCollection[$row][] = ($installments->count() > 0 ? $installments->count() : '0');
+                $theCollection[$row][] = $receivedAmount;
+
+                $row += 1;
+            endforeach;
+        endif;
+
+        $report_title = str_replace(' ', '_', $semester->name).'_'.$code.'.xlsx';
+        return Excel::download(new ArrayCollectionExport($theCollection), $report_title);
     }
 
     public function payableComissions(Request $request){

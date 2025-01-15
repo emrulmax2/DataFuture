@@ -85,6 +85,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-span-12 sm:col-span-3">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">No of Students</div>
+                        <div class="col-span-8 font-medium" id="noOfStdCount">
+                            0
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -118,6 +126,7 @@
                 <button data-comissionruleid="{{ $rule->id }}" data-tw-toggle="modal" style="display: none;" data-tw-target="#comissionGenerateModal" id="generateComissionBtn" class="text-white btn btn-success w-1/2 sm:w-auto">
                     <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Generate Comission
                 </button>
+                <a href="{{ route('agent.management.comission.list.export', [$rule->semester_id, $rule->agent_user_id, $rule->code]) }}" class="btn btn-facebook text-white ml-1"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a>
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
