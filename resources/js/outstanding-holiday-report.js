@@ -148,7 +148,7 @@ var outStandingHolidayReportTable = (function () {
         numberOfColumns: 1,
         numberOfMonths: 1,
         showWeekNumbers: false,
-        format: "MM-YYYY",
+        format: "DD-MM-YYYY",
         dropdowns: {
             minYear: 2015,
             maxYear: 2050,
