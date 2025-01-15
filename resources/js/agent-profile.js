@@ -226,6 +226,12 @@ var applicantApplicantionList = (function () {
                     field: "status",
                     headerHozAlign: "left",
                 },
+                
+                {
+                    title: "Current Status",
+                    field: "current_status",
+                    headerHozAlign: "left",
+                },
                 {
                     title: "Actions",
                     field: "id",
