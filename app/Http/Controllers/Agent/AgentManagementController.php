@@ -20,7 +20,7 @@ class AgentManagementController extends Controller
 {
     public function index(){
         return view('pages.agent.management.index', [
-            'title' => 'Accounts Assets Register - London Churchill College',
+            'title' => 'Agent Management - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);']
@@ -95,9 +95,18 @@ class AgentManagementController extends Controller
                                 $html .= '<tr class="cursor-pointer code_row font-medium" data-code="'.$code.'" data-semester="'.$semester_id.'">';
                                     $html .= '<td>';
                                         if($theCode->type == 'Agent'):
-                                            $html .= (isset($theCode->agent_user->email) && !empty($theCode->agent_user->email) ? $theCode->agent_user->email : '');
+                                            $html .= '<div>';
+                                                $html .= '<div class="font-medium whitespace-nowrap">';
+                                                    $html .= (isset($theCode->agent_user->agent->full_name) && !empty($theCode->agent_user->agent->full_name) ? $theCode->agent_user->agent->full_name : '');
+                                                    $html .= (isset($theCode->agent_user->agent->organization) && !empty($theCode->agent_user->agent->organization) ? ' ('.$theCode->agent_user->agent->organization.')' : '');
+                                                $html .= '</div>';
+                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->agent_user->email) && !empty($theCode->agent_user->email) ? $theCode->agent_user->email : '').'</div>';
+                                            $html .= '</div>';
                                         elseif($theCode->type == 'Student'):
-                                            $html .= (isset($theCode->student->full_name) && !empty($theCode->student->full_name) ? $theCode->student->full_name : '');
+                                            $html .= '<div>';
+                                                $html .= '<div class="font-medium whitespace-nowrap">'.(isset($theCode->student->full_name) && !empty($theCode->student->full_name) ? $theCode->student->full_name : '').'</div>';
+                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->student->contact->institutional_email) && !empty($theCode->student->contact->institutional_email) ? $theCode->student->contact->institutional_email : '').'</div>';
+                                            $html .= '</div>';
                                         endif;
                                     $html .= '</td>';
                                     $html .= '<td>'.$code.'</td>';
@@ -164,7 +173,7 @@ class AgentManagementController extends Controller
         $rule = AgentComissionRule::where('agent_user_id', $agent_user->id)->where('semester_id', $semester->id)->get()->first();
         $theCode = ReferralCode::where('code', $rule->code)->where('agent_user_id', $agent_user->id)->get()->first();
         return view('pages.agent.management.comission', [
-            'title' => 'Accounts Assets Register - London Churchill College',
+            'title' => 'Agent Management - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);']

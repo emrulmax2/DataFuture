@@ -55,5 +55,9 @@ class AgentUser  extends Authenticatable  implements MustVerifyEmail
         $this->notify(new VerifyEmailForAgent($this));
     }
 
+    public function agent() {
+        return $this->hasOne(Agent::class, 'agent_user_id', 'id')->latestOfMany();
+    }
+
     
 }
