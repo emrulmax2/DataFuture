@@ -308,6 +308,14 @@ class StudentProgressMonitoringReportController extends Controller
         $theCollection[5][11] = 'Complete';
         $theCollection[5][12] = 'Incomplete';
         $theCollection[5][13] = 'Certificate Claimed';
+        $theCollection[5][14] = 'Certificate Claimed Date';
+        $theCollection[5][15] = 'Certificate Requested By';
+        $theCollection[5][16] = 'Certificate Received';
+        $theCollection[5][17] = 'Certificate Received Date';
+        $theCollection[5][18] = 'Certificate Released';
+        $theCollection[5][19] = 'Certificate Released Date';
+        $theCollection[5][20] = 'Awarded Date';
+        $theCollection[5][21] = 'Overall Result';
              
         $studentIds = explode(",",$request->studentIds);
         
@@ -318,7 +326,7 @@ class StudentProgressMonitoringReportController extends Controller
         $dataCount = 6;
         foreach($studentIds as $studentId):
             $dataSet[$studentId]['result'] = [];
-            $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded')->where('id',$studentId)->get()->first();
+            $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded','awarded.qual','awarded.requested.user.employee')->where('id',$studentId)->get()->first();
             $planList = Assign::where('student_id',$studentId)->get()->unique()->pluck('plan_id')->toArray();
 
             $results = Result::with(['plan' => function($query) {
@@ -395,6 +403,14 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][11] = "";
                     $theCollection[$dataCount][12] = "";
                     $theCollection[$dataCount][13] = "";
+                    $theCollection[$dataCount][14] = "";
+                    $theCollection[$dataCount][15] = "";
+                    $theCollection[$dataCount][16] = "";
+                    $theCollection[$dataCount][17] = "";
+                    $theCollection[$dataCount][18] = "";
+                    $theCollection[$dataCount][19] = "";
+                    $theCollection[$dataCount][20] = "";
+                    $theCollection[$dataCount][21] = "";
                     $dataCount++;
                 endforeach;
                 if(count($term_declaration_ids)>1) {
@@ -412,6 +428,14 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][11] = $CompleteCount;
                     $theCollection[$dataCount][12] = $inCompleteCount;
                     $theCollection[$dataCount][13] = "";
+                    $theCollection[$dataCount][14] = "";
+                    $theCollection[$dataCount][15] = "";
+                    $theCollection[$dataCount][16] = "";
+                    $theCollection[$dataCount][17] = "";
+                    $theCollection[$dataCount][18] = "";
+                    $theCollection[$dataCount][19] = "";
+                    $theCollection[$dataCount][20] = "";
+                    $theCollection[$dataCount][21] = "";
                     $dataCount++;
                 }
             endforeach;
@@ -429,6 +453,14 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][11] = $CompleteCount;
                 $theCollection[$dataCount][12] = $inCompleteCount;
                 $theCollection[$dataCount][13] = isset($student->awarded) ? $student->awarded->certificate_requested : "";
+                $theCollection[$dataCount][14] = isset($student->awarded->date_of_certificate_requested) ? $student->awarded->date_of_certificate_requested : "";
+                $theCollection[$dataCount][15] = isset($student->awarded->requested->user->employee) ? $student->awarded->requested->user->employee->full_name : "";
+                $theCollection[$dataCount][16] = isset($student->awarded->certificate_received) ? $student->awarded->certificate_received : "";
+                $theCollection[$dataCount][17] = isset($student->awarded->date_of_certificate_received) ? $student->awarded->date_of_certificate_received : "";
+                $theCollection[$dataCount][18] = isset($student->awarded->certificate_released) ? $student->awarded->certificate_released : "";
+                $theCollection[$dataCount][19] = isset($student->awarded->date_of_certificate_released) ? $student->awarded->date_of_certificate_released : "";
+                $theCollection[$dataCount][20] = isset($student->awarded->date_of_award) ? $student->awarded->date_of_award : "";
+                $theCollection[$dataCount][21] = isset($student->awarded->qual_award_result_id) ? $student->awarded->qual->name : "";
                 $dataCount++;		
         endforeach;
 
