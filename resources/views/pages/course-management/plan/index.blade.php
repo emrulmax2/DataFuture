@@ -243,8 +243,8 @@
                                 </select>
                                 <div class="acc__input-error error-tutor_id text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6 sm:col-span-4 PersonalTutorWrap" style="display: none;">
-                                <label for="personal_tutor_id" class="form-label">Personal Tutor <span class="text-danger">*</span></label>
+                            <div class="col-span-6 sm:col-span-4 PersonalTutorWrap">
+                                <label for="personal_tutor_id" class="form-label">Personal Tutor</label>
                                 <select id="personal_tutor_id" name="personal_tutor_id" class="tom-selects w-full">
                                     <option value="">Please Select</option>
                                     @if(!empty($ptutor))
