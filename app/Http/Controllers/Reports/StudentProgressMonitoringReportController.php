@@ -326,7 +326,7 @@ class StudentProgressMonitoringReportController extends Controller
         $dataCount = 6;
         foreach($studentIds as $studentId):
             $dataSet[$studentId]['result'] = [];
-            $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded','awarded.qual','awarded.requested.user.employee')->where('id',$studentId)->get()->first();
+            $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded','awarded.qual','awarded.requested.employee')->where('id',$studentId)->get()->first();
             $planList = Assign::where('student_id',$studentId)->get()->unique()->pluck('plan_id')->toArray();
 
             $results = Result::with(['plan' => function($query) {
@@ -454,7 +454,7 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][12] = $inCompleteCount;
                 $theCollection[$dataCount][13] = isset($student->awarded) ? $student->awarded->certificate_requested : "";
                 $theCollection[$dataCount][14] = isset($student->awarded->date_of_certificate_requested) ? $student->awarded->date_of_certificate_requested : "";
-                $theCollection[$dataCount][15] = isset($student->awarded->requested->user->employee) ? $student->awarded->requested->user->employee->full_name : "";
+                $theCollection[$dataCount][15] = isset($student->awarded->requested->employee) ? $student->awarded->requested->employee->full_name : "";
                 $theCollection[$dataCount][16] = isset($student->awarded->certificate_received) ? $student->awarded->certificate_received : "";
                 $theCollection[$dataCount][17] = isset($student->awarded->date_of_certificate_received) ? $student->awarded->date_of_certificate_received : "";
                 $theCollection[$dataCount][18] = isset($student->awarded->certificate_released) ? $student->awarded->certificate_released : "";
