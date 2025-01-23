@@ -360,6 +360,7 @@ export default defineConfig({
                 'resources/js/major-source-of-tuition-fee.js',
                 'resources/js/student-support-eligibility.js',
                 'resources/js/suspension-of-active-study.js',
+                'resources/js/qualification-grades.js',
 
                 'resources/js/outstanding-holiday-report.js',
                 'resources/js/agent-payment-settings.js',
