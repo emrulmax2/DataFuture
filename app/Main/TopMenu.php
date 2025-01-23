@@ -72,10 +72,10 @@ class TopMenu
                             'params' => [],
                             'title' => 'Live'
                         ],
-                        'agent' => [
-                            'route_name' => 'agent-user.index',
+                        'agent_management' => [
+                            'route_name' => 'agent.management',
                             'params' => [],
-                            'title' => 'Agent'
+                            'title' => 'Agent Management'
                         ]
                     ]
                 ];

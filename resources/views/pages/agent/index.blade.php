@@ -154,6 +154,10 @@
                         </div> 
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="is_default">Is Default</label>
+                            <input id="is_default" class="form-check-input m-0" name="is_default" value="1" type="checkbox">
+                        </div>
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="saveAgent" class="btn btn-primary w-auto">
                             Save
@@ -267,6 +271,10 @@
                         </div> 
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="edit_is_default">Is Default</label>
+                            <input id="edit_is_default" class="form-check-input m-0" name="is_default" value="1" type="checkbox">
+                        </div>
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="updateAgent" class="btn btn-primary w-auto">
                             Update

@@ -11,16 +11,48 @@ class AgentComission extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'student_id',
+        'agent_id',
+        'agent_user_id',
         'agent_comission_rule_id',
-        'slc_money_receipt_id',
-        'receipt_amount',
-        'comission',
-        'paid_date',
-        'paid_amount',
+        'semester_id',
         'remittance_ref',
+        'entry_date',
         'status',
+        'acc_transaction_id',
         'created_by',
         'updated_by',
     ];
+
+    protected $dates = ['deleted_at'];
+
+    public function setEntryDateAttribute($value) {  
+        $this->attributes['entry_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+    public function getEntryDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function agent(){
+        return $this->belongsTo(Agent::class, 'agent_id');
+    }
+
+    public function agentuser(){
+        return $this->belongsTo(AgentUser::class, 'agent_user_id');
+    }
+
+    public function rule(){
+        return $this->belongsTo(AgentComissionRule::class, 'agent_comission_rule_id');
+    }
+
+    public function semester(){
+        return $this->belongsTo(Semester::class, 'semester_id');
+    }
+
+    public function comissions(){
+        return $this->hasMany(AgentComissionDetail::class, 'agent_comission_id', 'id');
+    }
+
+    public function transaction(){
+        return $this->belongsTo(AccTransaction::class, 'acc_transaction_id');
+    }
 }

@@ -44,6 +44,14 @@ var agentTableId = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Default",
+                    field: "is_default",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        return (cell.getData().is_default == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">YES</span>' : '');
+                    }
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
@@ -212,14 +220,14 @@ var agentTableId = (function () {
         const addAgentModalEl = document.getElementById('addAgentModal')
         addAgentModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addAgentModal .acc__input-error').html('');
-            $('#addAgentModal input').val('');
+            $('#addAgentModal input:not([type="checkbox"])').val('');
             $('#addAgentModal select').val('');
         });
         
         const editAgentModalEl = document.getElementById('editAgentModal')
         editAgentModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editAgentModal .acc__input-error').html('');
-            $('#editAgentModal input').val('');
+            $('#editAgentModal input:not([type="checkbox"])').val('');
             $('#editAgentModal select').val('');
             $('#editAgentModal input[name="id"]').val('0');
         });
@@ -319,6 +327,12 @@ var agentTableId = (function () {
                     $('#editAgentModal input[name="code"]').val(dataset.code ? dataset.code : '');
                     $('#editAgentModal input[name="email"]').val(dataset.agent_user.email ? dataset.agent_user.email : '');
                     $('#editAgentModal input[name="id"]').val(editId);
+
+                    if(dataset.is_default == 1){
+                        $('#editAgentModal [name="is_default"]').prop('checked', true);
+                    }else{
+                        $('#editAgentModal [name="is_default"]').prop('checked', false);
+                    }
                     if(dataset.agent_user.email_verified_at==null) {
                         let verificationList = $("#verificationEmail");
                             verificationList.removeClass('text-success');

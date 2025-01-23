@@ -64,7 +64,7 @@
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Amount</div>
                         <div class="col-span-8 font-medium">
-                            {{ (isset($rule->amount) && $rule->amount > 0 ? number_format($rule->amount, 2) : '') }}
+                            {{ (isset($rule->amount) && $rule->amount > 0 ? Number::currency($rule->amount, in: 'GBP') : '') }}
                         </div>
                     </div>
                 </div>
@@ -123,8 +123,20 @@
                 </div>
             </form>
             <div class="flex mt-5 sm:mt-0">
-                <button data-comissionruleid="{{ $rule->id }}" data-tw-toggle="modal" style="display: none;" data-tw-target="#comissionGenerateModal" id="generateComissionBtn" class="text-white btn btn-success w-1/2 sm:w-auto">
-                    <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Generate Comission
+                <button data-comissionruleid="{{ $rule->id }}" style="display: none;" id="generateComissionBtn" class="text-white btn btn-success w-1/2 sm:w-auto">
+                    <i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Generate Comission 
+                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        stroke="white" class="w-4 h-4 ml-2 theLoader">
+                        <g fill="none" fill-rule="evenodd">
+                            <g transform="translate(1 1)" stroke-width="4">
+                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
                 </button>
                 <a href="{{ route('agent.management.comission.list.export', [$rule->semester_id, $rule->agent_user_id, $rule->code]) }}" class="btn btn-facebook text-white ml-1"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a>
             </div>
@@ -206,6 +218,25 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Warning Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-danger w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Warning Modal Content -->
 
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">

@@ -3468,6 +3468,15 @@ Route::middleware('auth')->group(function() {
         Route::get('agent-management/comission/export-list/{semester}/{agent_user}/{code}', 'exportComissionList')->name('agent.management.comission.list.export'); 
 
         Route::post('agent-management/payable/comissions', 'payableComissions')->name('agent.management.get.payable.comissions'); 
+        Route::get('agent-management/comission-details/{comission}', 'comissionDetails')->name('agent.management.comission.details'); 
+        Route::get('agent-management/comission-details-list', 'comissionDetailsList')->name('agent.management.comission.details.list'); 
+
+        Route::get('agent-management/remittance', 'remittance')->name('agent.management.remittance'); 
+        Route::get('agent-management/remittance/list', 'remittanceList')->name('agent.management.remittance.list'); 
+        Route::post('agent-management/remittance/search-transactions', 'searchTransactions')->name('agent.management.remittance.search.transaction'); 
+        Route::post('agent-management/remittance/linked-transaction', 'linkedTransaction')->name('agent.management.remittance.linked.transaction'); 
+        Route::get('agent-management/remittance/export/{comission_id}', 'exportRemittance')->name('agent.management.remittance.export'); 
+        Route::get('agent-management/remittance/print/{comission_id}', 'printRemittance')->name('agent.management.remittance.print'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {

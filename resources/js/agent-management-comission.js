@@ -19,8 +19,8 @@ var agentComissionListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSize: 50,
+            paginationSizeSelector: [true, 50, 100, 150, 200, 300, 400, 500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -179,6 +179,7 @@ var agentComissionListTable = (function () {
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const comissionGenerateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#comissionGenerateModal"));
 
     const comissionGenerateModalEl = document.getElementById('comissionGenerateModal')
@@ -192,6 +193,8 @@ var agentComissionListTable = (function () {
         e.preventDefault();
         var $theBtn = $(this);
         var agentcomissionruleid = $theBtn.attr('data-comissionruleid');
+        $theBtn.find('svg.theLoader').fadeIn();
+        $theBtn.attr('disabled', 'disabled');
 
         var studentids = [];
         $('#agentComissionListTable').find('.tabulator-row.tabulator-selected').each(function(){
@@ -208,15 +211,33 @@ var agentComissionListTable = (function () {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
+                $theBtn.find('svg.theLoader').fadeOut();
+                $theBtn.removeAttr('disabled');
                 if (response.status == 200) {
-                    $('#comissionGenerateModal #comissionsPaymentTable tbody').html(response.data.html);
-                    $('#comissionGenerateModal [name="agent_comission_rule_id"]').val(agentcomissionruleid);
+                    window.location.href = response.data.url;
                 }
             }).catch((error) => {
-                console.log(error);
+                $theBtn.find('svg.theLoader').fadeOut();
+                $theBtn.removeAttr('disabled');
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        warningModal.show();
+                        document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#warningModal .warningModalTitle").html("Error!");
+                            $("#warningModal .warningModalDesc").html(error.response.data.msg);
+                        });
+
+                        setTimeout(() => {
+                            warningModal.hide();
+                        }, 2000);
+                    } else {
+                        console.log('error');
+                    }
+                }
             });
         }else{
-
+            $theBtn.find('svg.theLoader').fadeOut();
+            $theBtn.removeAttr('disabled');
         }
     })
 })()

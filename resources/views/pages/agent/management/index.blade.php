@@ -8,7 +8,9 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Agent Management</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('agent-user.index') }}" class="add_btn btn btn-primary shadow-md">Back to List</a>
+            <a href="{{ route('agent.management.remittance') }}" class="add_btn btn btn-success text-white shadow-md ml-1"><i data-lucide="pound-sterling" class="w-4 h-4 mr-2"></i> Remittance</a>
+            <a href="{{ route('agent-user.index') }}" class="add_btn btn btn-facebook text-white shadow-md ml-1"><i data-lucide="user" class="w-4 h-4 mr-2"></i> Agents</a>
+            <a href="{{ route('agent.management') }}" class="add_btn btn btn-primary text-white shadow-md ml-1"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Back to Management</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
@@ -88,12 +90,26 @@
                             <label for="period" class="form-label">Period <span class="text-danger">*</span></label>
                             <select id="period" name="period" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option value="1">Full Course</option>
+                                <option value="1">Every Year</option>
                                 <option value="2">Year 1</option>
                             </select>
                             <div class="acc__input-error error-period text-danger mt-2"></div>
                         </div>
                         <div>
+                            <label>Payment</label>
+                            <div class="flex flex-col sm:flex-row mt-2">
+                                <div class="form-check mr-2">
+                                    <input id="payment_type_1" class="form-check-input" type="radio" name="payment_type" value="1">
+                                    <label class="form-check-label" for="payment_type_1">Single Payment</label>
+                                </div>
+                                <div class="form-check mr-2 mt-2 sm:mt-0">
+                                    <input id="payment_type_2" class="form-check-input" type="radio" name="payment_type" value="2">
+                                    <label class="form-check-label" for="payment_type_2">On Receipt</label>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-payment_type text-danger mt-2"></div>
+                        </div>          
+                        {{--<div>
                             <label for="payment_type" class="form-label">Payment <span class="text-danger">*</span></label>
                             <select id="payment_type" name="payment_type" class="form-control w-full">
                                 <option value="">Please Select</option>
@@ -101,7 +117,7 @@
                                 <option value="2">On Receipt</option>
                             </select>
                             <div class="acc__input-error error-payment_type text-danger mt-2"></div>
-                        </div>
+                        </div>--}}
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
