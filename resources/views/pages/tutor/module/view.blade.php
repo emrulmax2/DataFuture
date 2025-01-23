@@ -46,13 +46,23 @@
                     </div>
                 </div>
             @endif
-            @if($plan->personal_tutor_id > 0)
+            @if(isset($plan->class_type) && $plan->class_type == 'Tutorial' && $plan->personal_tutor_id > 0)
                 <div class="flex items-center mt-4">
                     <div class="w-10 h-10 intro-x image-fit mr-5 inline-block">
                         <img alt="{{ (isset($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : '') }}" class="rounded-full shadow" src="{{ (isset($plan->personalTutor->employee->photo_url) ? $plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'))}}">
                     </div>
                     <div class="inline-block relative">
                         <div class="font-medium whitespace-nowrap uppercase">{{ (isset($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : '') }}</div>
+                        <div class="text-slate-500 text-xs whitespace-nowrap">Personal Tutor</div>
+                    </div>
+                </div>
+            @elseif(isset($plan->class_type) && $plan->class_type != 'Tutorial' && isset($plan->tutorial->personal_tutor_id) && $plan->tutorial->personal_tutor_id > 0)
+                <div class="flex items-center mt-4">
+                    <div class="w-10 h-10 intro-x image-fit mr-5 inline-block">
+                        <img alt="{{ (isset($plan->personalTutor->employee->full_name) ? $plan->personalTutor->employee->full_name : '') }}" class="rounded-full shadow" src="{{ (isset($plan->personalTutor->employee->photo_url) ? $plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'))}}">
+                    </div>
+                    <div class="inline-block relative">
+                        <div class="font-medium whitespace-nowrap uppercase">{{ (isset($plan->tutorial->personalTutor->employee->full_name) ? $plan->tutorial->personalTutor->employee->full_name : '') }}</div>
                         <div class="text-slate-500 text-xs whitespace-nowrap">Personal Tutor</div>
                     </div>
                 </div>
