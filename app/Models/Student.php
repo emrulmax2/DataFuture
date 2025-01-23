@@ -305,8 +305,10 @@ class Student extends Model
     }
 
     public function awarded(){
-        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
-        return $this->hasOne(StudentAward::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+        //$activeCRel = (isset($this->activeCR->id) && $this->activeCR->id > 0 ? $this->activeCR->id : 0);
+
+        
+        return $this->hasOne(StudentAward::class, 'student_id')->latestOfMany();
     }
 
     public function stuload(){
