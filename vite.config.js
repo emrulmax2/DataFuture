@@ -362,6 +362,9 @@ export default defineConfig({
                 'resources/js/suspension-of-active-study.js',
 
                 'resources/js/outstanding-holiday-report.js',
+                'resources/js/agent-payment-settings.js',
+                'resources/js/agent-management-comission-details.js',
+                'resources/js/agent-management-remittance.js',
             ],
             refresh: true,
         }),

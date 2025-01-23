@@ -391,7 +391,7 @@ class PlanTreeController extends Controller
                     'module_enrollment_key'=> $list->module_enrollment_key,
                     'submission_date'=> $list->submission_date,
                     'tutor'=> (isset($list->tutor->name) ? $list->tutor->name : ''),
-                    'personalTutor'=> (isset($list->personalTutor->name) ? $list->personalTutor->name : ''),
+                    'personalTutor'=> (isset($list->tutorial->personalTutor->name) && !empty($list->tutorial->personalTutor->name) ? $list->tutorial->personalTutor->name : ''),
                     'virtual_room'=> $list->virtual_room,
                     'group'=> (isset($list->group->name) ? $list->group->name : ''),
                     'day'=> $day,

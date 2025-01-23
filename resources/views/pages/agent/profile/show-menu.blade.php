@@ -16,4 +16,10 @@
             Documents
         </a>
     </li>
+    
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('agent-user.payment.settings', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'agent-user.payment.settings' ? 'active' : '' }}">
+            Payment Settings
+        </a>
+    </li>
 </ul>

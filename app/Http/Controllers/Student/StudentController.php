@@ -389,6 +389,7 @@ class StudentController extends Controller
     }
 
     public function notes($studentId){
+        $userData = \Auth::guard('web')->user();
         return view('pages.students.live.notes', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
@@ -400,7 +401,8 @@ class StudentController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'terms' => TermDeclaration::orderBy('id', 'desc')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
-            'flags' => StudentFlag::orderBy('id', 'ASC')->get()
+            'flags' => StudentFlag::orderBy('id', 'ASC')->get(),
+            'cuser' => $userData,
         ]);
     }
 

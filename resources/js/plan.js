@@ -98,9 +98,21 @@ var classPlanListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Tutor",
+                    title: "Class Type",
+                    field: "class_type",
+                    headerHozAlign: "left",
+                },
+                {
+                    title: "Tutor / P. Tutor",
                     field: "tutor",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {
+                        if(cell.getData().class_type == 'Tutorial' || cell.getData().class_type == 'Seminar'){
+                            return cell.getData().personalTutor;
+                        }else{
+                            return cell.getData().tutor;
+                        }
+                    }
                 },
                 {
                     title: "Actions",
@@ -182,6 +194,9 @@ var classPlanListTable = (function () {
             $('#editPlanModal .modal-body input:not([type="radio"])').val('');
             $('#editPlanModal input[name="id"]').val('0');
             $('#editPlanModal input[type="radio"]').prop('checked', false);
+
+            $('#editPlanModal .tutorWrap').fadeOut('fast');
+            $('#editPlanModal .PersonalTutorWrap').fadeOut('fast');
 
             tutorId.clear(true);
             personalTutorId.clear(true);
@@ -460,19 +475,26 @@ var classPlanListTable = (function () {
                             //$('#editPlanModal [name="tutor_id"]').val('');
                             tutorId.clear(true)
                         });
+                        $('#editPlanModal .PersonalTutorWrap').fadeIn('fast', function(){
+                            personalTutorId.addItem(dataset.plan.personal_tutor_id);
+                        });
                     }else{
                         $('#editPlanModal .tutorWrap').fadeIn('fast', function(){
                             //$('#editPlanModal [name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                             tutorId.addItem(dataset.plan.tutor_id);
                         });
+                            
+                        $('#editPlanModal .PersonalTutorWrap').fadeOut('fast', function(){
+                            personalTutorId.clear(true);
+                        });
                     }
                     //$('#editPlanModal select[name="tutor_id"]').val(dataset.plan.tutor_id ? dataset.plan.tutor_id : '');
                     //$('#editPlanModal select[name="personal_tutor_id"]').val(dataset.plan.personal_tutor_id ? dataset.plan.personal_tutor_id : '');
-                    if(dataset.plan.personal_tutor_id > 0){
-                        personalTutorId.addItem(dataset.plan.personal_tutor_id)
-                    }else{
-                        personalTutorId.clear(true);
-                    }
+                    // if(dataset.plan.personal_tutor_id > 0){
+                    //     personalTutorId.addItem(dataset.plan.personal_tutor_id)
+                    // }else{
+                    //     personalTutorId.clear(true);
+                    // }
                     //$('#editPlanModal input[name="module_enrollment_key"]').val(dataset.plan.module_enrollment_key ? dataset.plan.module_enrollment_key : '');
                     $('#editPlanModal input[name="start_time"]').val(dataset.plan.start_time ? dataset.plan.start_time : '');
                     $('#editPlanModal input[name="end_time"]').val(dataset.plan.end_time ? dataset.plan.end_time : '');

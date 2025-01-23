@@ -93,6 +93,7 @@ class AgentController extends Controller
                     'name' => $list->full_name,
                     'organization' => ($agentUserCount) ? $list->organization." [ ".$agentUserCount." ]" : $list->organization,
                     'code' => $list->code,
+                    'is_default' => $list->is_default,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -376,7 +377,7 @@ class AgentController extends Controller
      */
     public function update(UpdateAgentRequest $request, Agent $agent_user)
     {
-        
+        $is_default = (isset($request->is_default) && $request->is_default > 0 ? $request->is_default : 0);
         $request->request->add(['agent_user_id' => $agent_user->AgentUser->id]);
         $agenUser = AgentUser::find($agent_user->AgentUser->id);
         
@@ -393,7 +394,8 @@ class AgentController extends Controller
             $agenUser->fill($request->all());
             $agenUser->save();
         }
-        
+
+        $request->merge(['is_default' => $is_default]);
         $agent_user->fill($request->all());
         $agent_user->save();
 

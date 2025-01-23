@@ -121,6 +121,11 @@ class NoteController extends Controller
                     $raisers = StudentFlagRaiser::where('student_flag_id', $list->student_flag_id)->pluck('user_id')->unique()->toArray();
                     $is_ownere = (!empty($raisers) && in_array(auth()->user()->id, $raisers) ? 1 : $is_ownere);
                 endif;
+                $amIFollowed = 0;
+                if(isset($list->follows) && $list->follows->count() > 0):
+                    $followsBy = $list->follows->pluck('user_id')->unique()->toArray();
+                    $amIFollowed = (!empty($followsBy) && in_array(auth()->user()->id, $followsBy) ? 1 : 0);
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -135,6 +140,8 @@ class NoteController extends Controller
                     'followed' => (isset($list->followed_tag) && !empty($list->followed_tag) ? $list->followed_tag : ''),
                     'completed_by' => (isset($list->completed->employee->full_name) && !empty($list->completed->employee->full_name) ? $list->completed->employee->full_name : ''),
                     'completed_at' => (isset($list->followup_completed_at) && !empty($list->followup_completed_at) ? date('jS F, Y', strtotime($list->followup_completed_at)) : ''),
+                    'am_i_followed' => $amIFollowed,
+                    'unread_comment' => (isset($list->unread_comment_count) ? $list->unread_comment_count : 0),
                     'is_flaged' => (isset($list->is_flaged) && !empty($list->is_flaged) ? $list->is_flaged : 'No'),
                     'flaged_status' => (isset($list->flaged_status) && !empty($list->flaged_status) ? $list->flaged_status : ''),
                     'student_flag_id' => ($list->student_flag_id > 0 ? $list->student_flag_id : '0'),

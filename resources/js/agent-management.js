@@ -28,8 +28,9 @@ import TomSelect from "tom-select";
     const agentRulesModalEl = document.getElementById('agentRulesModal')
     agentRulesModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#agentRulesModal .acc__input-error').html('');
-        $('#agentRulesModal .modal-body input:not([type="checkbox"])').val('');
+        $('#agentRulesModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
         $('#agentRulesModal .modal-body select').val('');
+        $('#agentRulesModal [name="payment_type"]').prop('checked', false);
 
         $('#agentRulesModal .fixedAmountWrap').fadeOut('fast', function(e){
             $('input', this).val('');
@@ -48,6 +49,7 @@ import TomSelect from "tom-select";
         semister_id.clear(true);
         $('.agentRefListWrap').fadeOut().html('')
     })
+
     $('#tabulator-html-filter-go').on('click', function(e){
         e.preventDefault();
         var $theBtn = $(this);
@@ -142,6 +144,9 @@ import TomSelect from "tom-select";
                         $('#agentRulesModal .percentageWrap').fadeIn('fast', function(e){
                             $('input', this).val(row.percentage ? row.percentage : '');
                         })
+
+                        $('#agentRulesModal #payment_type_2').removeAttr('disabled').prop('checked', true);
+                        $('#agentRulesModal #payment_type_1').attr('disabled', 'disabled');
                     }else if(row.comission_mode == 2){
                         $('#agentRulesModal .percentageWrap').fadeOut('fast', function(e){
                             $('input', this).val('');
@@ -149,6 +154,8 @@ import TomSelect from "tom-select";
                         $('#agentRulesModal .fixedAmountWrap').fadeIn('fast', function(e){
                             $('input', this).val(row.amount ? row.amount : '');
                         })
+                        $('#agentRulesModal #payment_type_1').removeAttr('disabled').prop('checked', true);
+                        $('#agentRulesModal #payment_type_2').attr('disabled', 'disabled');
                     }else{
                         $('#agentRulesModal .fixedAmountWrap').fadeOut('fast', function(e){
                             $('input', this).val('');
@@ -156,9 +163,9 @@ import TomSelect from "tom-select";
                         $('#agentRulesModal .percentageWrap').fadeOut('fast', function(e){
                             $('input', this).val('');
                         })
+                        $('#agentRulesModal input[name="payment_type"]').prop('checked', false).attr('disabled', 'disabled');
                     }
                     $('#agentRulesModal [name="period"]').val(row.period ? row.period : '');
-                    $('#agentRulesModal [name="payment_type"]').val(row.payment_type ? row.payment_type : '');
 
                     $('#agentRulesModal input[name="agent_user_id"]').val(agent_user_id);
                     $('#agentRulesModal input[name="code"]').val(code);
@@ -181,20 +188,26 @@ import TomSelect from "tom-select";
             $('#agentRulesModal .percentageWrap').fadeIn('fast', function(e){
                 $('input', this).val('');
             })
+
+            $('#agentRulesModal #payment_type_2').removeAttr('disabled').prop('checked', true);
+            $('#agentRulesModal #payment_type_1').attr('disabled', 'disabled');
         }else if(theMode == 2){
             $('#agentRulesModal .percentageWrap').fadeOut('fast', function(e){
                 $('input', this).val('');
             })
             $('#agentRulesModal .fixedAmountWrap').fadeIn('fast', function(e){
                 $('input', this).val('');
-            })
+            });
+            $('#agentRulesModal #payment_type_1').removeAttr('disabled').prop('checked', true);
+            $('#agentRulesModal #payment_type_2').attr('disabled', 'disabled');
         }else{
             $('#agentRulesModal .fixedAmountWrap').fadeOut('fast', function(e){
                 $('input', this).val('');
             })
             $('#agentRulesModal .percentageWrap').fadeOut('fast', function(e){
                 $('input', this).val('');
-            })
+            });
+            $('#agentRulesModal input[name="payment_type"]').prop('checked', false).attr('disabled', 'disabled');
         }
     });
 

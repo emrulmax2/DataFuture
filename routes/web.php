@@ -19,10 +19,12 @@ use App\Http\Controllers\Settings\SourceTutionFeeController;
 use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\Agent\AgentBankDetailController;
 use App\Http\Controllers\Agent\AgentController;
 use App\Http\Controllers\Agent\AgentDocumentsController;
 use App\Http\Controllers\Agent\AgentManagementController;
 use App\Http\Controllers\Agent\AgentMyAccountController;
+use App\Http\Controllers\Agent\AgentPaymentSettingController;
 use App\Http\Controllers\Applicant\ApplicantEmploymentController;
 use App\Http\Controllers\CourseManagement\GroupController;
 use App\Http\Controllers\Settings\VenueController;
@@ -3466,6 +3468,15 @@ Route::middleware('auth')->group(function() {
         Route::get('agent-management/comission/export-list/{semester}/{agent_user}/{code}', 'exportComissionList')->name('agent.management.comission.list.export'); 
 
         Route::post('agent-management/payable/comissions', 'payableComissions')->name('agent.management.get.payable.comissions'); 
+        Route::get('agent-management/comission-details/{comission}', 'comissionDetails')->name('agent.management.comission.details'); 
+        Route::get('agent-management/comission-details-list', 'comissionDetailsList')->name('agent.management.comission.details.list'); 
+
+        Route::get('agent-management/remittance', 'remittance')->name('agent.management.remittance'); 
+        Route::get('agent-management/remittance/list', 'remittanceList')->name('agent.management.remittance.list'); 
+        Route::post('agent-management/remittance/search-transactions', 'searchTransactions')->name('agent.management.remittance.search.transaction'); 
+        Route::post('agent-management/remittance/linked-transaction', 'linkedTransaction')->name('agent.management.remittance.linked.transaction'); 
+        Route::get('agent-management/remittance/export/{comission_id}', 'exportRemittance')->name('agent.management.remittance.export'); 
+        Route::get('agent-management/remittance/print/{comission_id}', 'printRemittance')->name('agent.management.remittance.print'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {
@@ -3591,6 +3602,22 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/outstanding-holiday', 'index')->name('hr.portal.reports.outstanding.holiday'); 
         Route::get('hr/portal/reports/outstanding-holiday/list', 'list')->name('hr.portal.reports.outstanding.holiday.list'); 
         Route::post('hr/portal/reports/outstanding-holiday/export', 'export')->name('hr.portal.reports.outstanding.holiday.export'); 
+    });
+
+    
+    Route::controller(AgentPaymentSettingController::class)->group(function(){
+        Route::get('agent-profile/payment-settings/{id}', 'index')->name('agent-user.payment.settings'); 
+    });
+    
+    Route::controller(AgentBankDetailController::class)->group(function(){
+        Route::post('agent-profile/bank/store', 'store')->name('agent-user.store.bank'); 
+        Route::get('agent-profile/bank/list', 'list')->name('agent-user.bank.list');
+        Route::post('agent-profile/bank/edit', 'edit')->name('agent-user.edit.bank');
+
+        Route::post('agent-profile/bank/update', 'update')->name('agent-user.update.bank'); 
+        Route::delete('agent-profile/bank/delete/{id}', 'destroy')->name('agent-user.destroy.bank');
+        Route::post('agent-profile/bank/restore/{id}', 'restore')->name('agent-user.restore.bank');
+        Route::post('agent-profile/bank/change-status/{id}', 'changeStatus')->name('agent-user.changestatus.bank');
     });
     
 });
