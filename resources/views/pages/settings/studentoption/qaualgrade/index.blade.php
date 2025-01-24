@@ -42,7 +42,7 @@
                     </ul>
                 </div>
             </div>
-            <button data-tw-toggle="modal" data-tw-target="#qaualtypeidImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
+            <button data-tw-toggle="modal" data-tw-target="#qaualgradeidImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
@@ -195,7 +195,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="font-medium text-base mr-auto">Import Previous Provider</h2>
+                <h2 class="font-medium text-base mr-auto">Import Qualification Grades</h2>
                 <a data-tw-dismiss="modal" href="javascript:;">
                     <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                 </a>

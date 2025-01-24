@@ -522,7 +522,10 @@ var QaualGradeListTable = (function () {
             qaualgradeidImportModal.hide();
 
             succModal.show();   
-            setTimeout(function() { succModal.hide(); }, 2000);        
+            setTimeout(function() { 
+                succModal.hide(); 
+                QaualGradeListTable.init();
+            }, 2000);        
         });
     }
 })();
