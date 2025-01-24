@@ -58,6 +58,16 @@
                         <option value="">Please Select</option>
                     </select>
                 </div>
+                
+                <div class="col-span-12 sm:col-span-3">
+                    <label for="is_self_funded" class="form-label">Self Funding</label>
+                    <select id="is_self_funded" class="w-full tom-selects" name="group[is_self_funded]">
+                        <option value="">Please Select</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+
                 <div class="col-span-12 sm:col-span-3">
                     <label for="evening_weekend" class="form-label">Evening / Weekend</label>
                     <select id="evening_weekend" class="w-full tom-selects" name="group[evening_weekend]">
@@ -86,7 +96,7 @@
                         @endif
                     </select>
                 </div>
-                <div class="col-span-12 sm:col-span-3 ml-auto mt-auto flex">
+                <div class="col-span-12 ml-auto mt-auto flex ">
                     <button type="button" class="btn btn-danger resetSearch text-white ml-auto w-auto inline-flex mr-2"><i class="w-4 h-4 mr-2" data-lucide="refresh-cw"></i> Reset</button>
                     <button id="studentGroupSearchSubmitBtn" type="submit" class="btn btn-success text-white ml-auto  w-36 xl:w-56 2xl:w-80"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search <i data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 hidden loadingCall"></i></button>
                 </div>
@@ -494,10 +504,45 @@
                 </div>
             </div>
         </div>
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 items-center">
+                <div class="col-span-12 sm:col-span-12 items-center accordion accordion-boxed">
+                    <div class="accordion-item bg-white mb-3 border-0 rounded">
+                        <div id="datareportAccordion-1" class="accordion-header">
+                            <button class="accordion-button  relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#datareportAccordion-collapse-1" aria-expanded="true" aria-controls="datareportAccordion-collapse-1">
+                                <span class="font-normal">Accounts
+                                <span class="accordionCollaps"></span>
+                            </button>
+                        </div>
+                        <div id="datareportAccordion-collapse-1" class="accordion-collapse " aria-labelledby="datareportAccordion-1" data-tw-parent="#datareportAccordion">
+                            <div class="accordion-body px-5 border-t pt-5">
+                                <div class="grid grid-cols-12 gap-6">
+                                    <div class="col-span-12 intro-y border-b mb-2">
+                                        <div data-tw-merge class="flex items-center mt-2 "><input id="checkbox-all-acc" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />
+                                            <label data-tw-merge for="checkbox-all-acc" class="cursor-pointer ml-2 ">Select All</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-12 gap-6">
+                                    <div class="col-span-12 sm:col-span-4 intro-y">
+                                        <div data-tw-merge class="flex items-center mt-2 ">
+                                            <input name="slcAccount[is_self_funded]" id="checkbox-switch-60" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />
+                                            <label data-tw-merge for="checkbox-switch-60" class="cursor-pointer ml-2">Self Funding</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-4 intro-y"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
 @endsection
 
 @section('script')
     @vite('resources/js/student-data-search-form.js')
-    @vite('resources/js/student-attendance-reports.js')
+    
 @endsection
