@@ -108,6 +108,8 @@ class StudentDataReportController extends Controller
                     $myRequest->request->add(['student_types' => $student_type]);
                 if(isset($evening_weekend))
                     $myRequest->request->add(['evening_weekends' => $evening_weekend]);
+                if(isset($is_self_funded))
+                    $myRequest->request->add(['is_self_funded' => $is_self_funded]);
 
                 $studentsIds = $this->callTheStudentListForGroup($myRequest);
                 
@@ -141,7 +143,7 @@ class StudentDataReportController extends Controller
         $group_student_statuses = $request->group_student_statuses;
         $student_types = $request->student_types;
         $evening_weekends = $request->evening_weekends;
-        
+        $is_self_funded = $request->is_self_funded;
         $studentIds = [];
 
 
@@ -152,7 +154,6 @@ class StudentDataReportController extends Controller
         if(!empty($academic_years) && count($academic_years)>0)
             $QueryInner->where('academic_year_id',$academic_years);
         
-
             $studentIds =  $QueryInner->whereHas('activeCreation', function($q) use($intake_semesters,$courses){
                     if(!empty($intake_semesters))
                         $q->whereIn('semester_id', $intake_semesters);
@@ -191,6 +192,25 @@ class StudentDataReportController extends Controller
             }
             endforeach;
             
+        }
+        
+        if(!empty($is_self_funded)) {
+            
+            $innerQuery = Student::with('slcAgreement')->whereHas('slcAgreement', function($q) use($is_self_funded){
+                if($is_self_funded=="Yes") {
+                    $fundDigit = 1;
+                } else {
+                    $fundDigit = 0;
+                }
+                $q->where('is_self_funded', $fundDigit);
+            });
+            if(!empty($studentIds)) {
+                $innerQuery->whereIn('id',$studentIds);
+            }
+            
+            $studentsListBySelfFunded = $innerQuery->pluck('id')->unique()->toArray();
+
+            $studentIds = $studentsListBySelfFunded;
         }
 
         //this part will use both term and intake and open
@@ -242,10 +262,11 @@ class StudentDataReportController extends Controller
         $StudentKinData  = $request->StudentKin;
         $StudentQualificationData  = $request->StudentQualification;
         $AgentReferralCodeData  = $request->AgentReferralCode;
+        $slcAccountData  = $request->slcAccount;
         
-        
+       
 
-        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
 
         
 
@@ -269,11 +290,20 @@ class StudentDataReportController extends Controller
             }elseif($key=="uhn_no"){
 
                 $theCollection[$i][$j++] = "UHN No ";
-            }else  
+            }else    
                 $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
             
         endforeach; 
 
+        
+
+        if(!empty($slcAccountData))
+        foreach($slcAccountData as $key =>$value):
+            if($key=="is_self_funded") {
+                $theCollection[$i][$j++] = "Self Funded";
+            }else    
+                $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+        endforeach; 
 
         if(!empty($StudentOtherDetailData))
         foreach($StudentOtherDetailData as $key =>$value):
@@ -487,9 +517,6 @@ class StudentDataReportController extends Controller
                             $rel = key($value);
                             $theCollection[$row][$j++] = (isset($student->termStatusLatest->$rel)) ?$student->termStatusLatest->$rel->name : "";
                         }else {
-                            // if($student->id == 16968) {
-                            //     dd($student->termStatus);
-                            // }
                             $theCollection[$row][$j++] = (isset($student->termStatusLatest)) ? $student->termStatusLatest->$key : "";
                         }
                     endforeach; 
@@ -623,6 +650,29 @@ class StudentDataReportController extends Controller
                         
                     endforeach; 
                         
+                    
+                    if(!empty($slcAccountData))
+                    foreach($slcAccountData as $key =>$value):
+                        
+                        switch ($key) {
+                            case "is_self_funded":
+
+                                $selfFunding = "No";
+                                if(isset($student->slcAgreement)) {
+                                    foreach($student->slcAgreement as $slcAgreement):
+                                     if($slcAgreement->is_self_funded==1) {
+                                        $selfFunding = "Yes";
+                                     } 
+                                    endforeach;
+                                }
+                                $theCollection[$row][$j++] = $selfFunding;
+
+                            default:
+                                $key = strtolower($key);
+                                
+                        }
+                        
+                    endforeach;
                 $row++;
             endforeach;
         endif;

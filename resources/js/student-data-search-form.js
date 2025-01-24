@@ -67,6 +67,8 @@ import TomSelect from 'tom-select';
     );
     var evening_weekend = new TomSelect('#evening_weekend', tomOptions);
 
+    var is_self_funded = new TomSelect('#is_self_funded', tomOptions);
+
     intake_semester.on('change', function () {
         let intakeSemester = intake_semester.getValue();
 
@@ -78,6 +80,7 @@ import TomSelect from 'tom-select';
             let student_types = student_type.getValue();
             let group_student_statuses = group_student_status.getValue();
             let evening_weekends = evening_weekend.getValue();
+            let is_self_funds = is_self_funded.getValue();
 
             axios({
                 method: 'post',
@@ -91,6 +94,7 @@ import TomSelect from 'tom-select';
                     group_student_statuses: group_student_statuses,
                     student_types: student_types,
                     evening_weekends: evening_weekends,
+                    is_self_funded : is_self_funds,
                 },
 
                 headers: {
@@ -1057,6 +1061,12 @@ import TomSelect from 'tom-select';
 
     $('#checkbox-all-ref').on('click', function (e) {
         for (let i = 43; i < 49; i++) {
+            $('#checkbox-switch-' + i).trigger('click');
+        }
+    });
+
+    $('#checkbox-all-acc').on('click', function (e) {
+        for (let i = 60; i < 61; i++) {
             $('#checkbox-switch-' + i).trigger('click');
         }
     });
