@@ -339,6 +339,9 @@ class DatafutureController extends Controller
                 if(isset($instance->terms) && $instance->terms->count() > 0):
                     foreach($instance->terms as $term):
                         $term_declaration_id = $term->term_declaration_id;
+                        $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
+                        $termDecStuload = (isset($termDeclaration->stuload) && !empty($termDeclaration->stuload) ? $termDeclaration->stuload : 0);
+
                         $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
                         $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
 
@@ -348,7 +351,7 @@ class DatafutureController extends Controller
                         $stuload = (isset($existLoad->id) && $existLoad->id > 0 ? $existLoad->student_load : 0);
                         if($autoLoad == 1):
                             $attendanceCodes = SlcAttendance::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('term_declaration_id', $term_declaration_id)->pluck('attendance_code_id')->unique()->toArray();
-                            $stuload = (!empty($attendanceCodes) && in_array(1, $attendanceCodes) && !in_array(6, $attendanceCodes) ? 33 : 0);
+                            $stuload = (!empty($attendanceCodes) && in_array(1, $attendanceCodes) && !in_array(6, $attendanceCodes) ? $termDecStuload : 0);
                             $stuLoadTotal += $stuload;
 
                             $loadData = [

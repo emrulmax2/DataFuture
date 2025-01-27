@@ -45,7 +45,7 @@
             <div id="df-accordion-main" class="accordion accordion-boxed">
                 <div class="accordion-item">
                     <div id="df-accr-main-content-1" class="accordion-header">
-                        <button class="accordion-button bg-slate-100" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-1" aria-expanded="true" aria-controls="df-accr-main-collapse-1">
+                        <button class="accordion-button bg_color_1" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-1" aria-expanded="true" aria-controls="df-accr-main-collapse-1">
                             Course
                             <span class="accordionCollaps"></span>
                         </button>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="accordion-item">
                     <div id="df-accr-main-content-2" class="accordion-header">
-                        <button class="accordion-button bg-slate-100 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-2" aria-expanded="false" aria-controls="df-accr-main-collapse-2">
+                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-2" aria-expanded="false" aria-controls="df-accr-main-collapse-2">
                             Modules
                             <span class="accordionCollaps"></span>
                         </button>
@@ -77,7 +77,7 @@
                 </div>
                 <div class="accordion-item">
                     <div id="df-accr-main-content-3" class="accordion-header">
-                        <button class="accordion-button bg-slate-100 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-3" aria-expanded="false" aria-controls="df-accr-main-collapse-3">
+                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-3" aria-expanded="false" aria-controls="df-accr-main-collapse-3">
                             Qualifications
                             <span class="accordionCollaps"></span>
                         </button>
@@ -90,20 +90,20 @@
                 </div>
                 <div class="accordion-item">
                     <div id="df-accr-main-content-4" class="accordion-header">
-                        <button class="accordion-button bg-slate-100 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-4" aria-expanded="false" aria-controls="df-accr-main-collapse-4">
+                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-4" aria-expanded="false" aria-controls="df-accr-main-collapse-4">
                             Session Years
                             <span class="accordionCollaps"></span>
                         </button>
                     </div>
                     <div id="df-accr-main-collapse-4" class="accordion-collapse collapse" aria-labelledby="df-accr-main-content-4" data-tw-parent="#df-accordion-main">
                         <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                            Comming Soon...
+                            @include('pages.students.live.datafuture.session-years')
                         </div>
                     </div>
                 </div>
                 <div class="accordion-item">
                     <div id="df-accr-main-content-5" class="accordion-header">
-                        <button class="accordion-button bg-slate-100 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-5" aria-expanded="false" aria-controls="df-accr-main-collapse-5">
+                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-5" aria-expanded="false" aria-controls="df-accr-main-collapse-5">
                             Student
                             <span class="accordionCollaps"></span>
                         </button>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="accordion-item">
                     <div id="df-accr-main-content-6" class="accordion-header">
-                        <button class="accordion-button bg-slate-100 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-6" aria-expanded="false" aria-controls="df-accr-main-collapse-6">
+                        <button class="accordion-button bg_color_1 collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#df-accr-main-collapse-6" aria-expanded="false" aria-controls="df-accr-main-collapse-6">
                             Venue
                             <span class="accordionCollaps"></span>
                         </button>

@@ -1238,13 +1238,33 @@
     background-color: rgb(59 89 152 / .1);
 }
 .bg-twitter-soft{
-    background-color: rgb(74 179 244 / .1);
+    background-color: rgb(74 179 244 / .4);
 }
 .bg-instagram-soft{
     background-color: rgb(81 127 164 / .1); 
 }
 .bg-linkedin-soft{
-    background-color: rgb(0 119 181 / .1)
+    background-color: rgb(0 119 181 / .3)
+}
+
+
+.bg_color_1{
+    background: rgba(54, 179, 127, .8);
+}
+.bg_color_2{
+    background: rgba(0, 82, 204, .8);
+}
+.bg_color_3{
+    background: rgba(101, 84, 192, .8);
+}
+.bg_color_4{
+    background: rgba(255, 171, 0, .8);
+}
+.bg_color_5{
+    background: rgba(255, 86, 48, .8);
+}
+.bg_color_6{
+    background: rgba(0, 184, 217, .8);
 }
 
 #leaveCalendar .litepicker{
@@ -2420,10 +2440,11 @@ input[type=number] {
     padding-bottom: 1rem;
     font-weight: 500;
     text-align: left;
+    color: #FFF;
 }
 .lcc-accordion .lcc-accordion-item .lcc-accordion-header .lcc-accordion-button:not(.lcc-collapsed) {
     --tw-text-opacity: 1;
-    color: rgb(var(--color-primary) / var(--tw-text-opacity, 1));
+    color: #FFF;
 }
 .dfReportWrap .lcc-accordion .lcc-accordion-item .lcc-accordion-header .lcc-accordion-button {
     padding-left: 1rem;
@@ -2455,6 +2476,10 @@ input[type=number] {
     right: 1rem;
     top: 16px;
 }
+.dfReportWrap .lcc-accordion-button .accordionCollaps::after, 
+.dfReportWrap .lcc-accordion-button .accordionCollaps::before{
+    background-color: #FFF;
+}
 fieldset.modInstSet{
     border: 1px solid rgb(var(--color-slate-200) / 0.6);
     padding: 1rem;
@@ -2476,4 +2501,12 @@ fieldset.modInstSet legend{
     height: 100%;
     background: transparent;
     z-index: 4;
+}
+.dfReportWrap .accordion .accordion-item .accordion-header .accordion-button,
+.dfReportWrap .accordion .accordion-item .accordion-header .accordion-button:not(.collapsed){
+    color: #FFF;
+}
+.dfReportWrap .accordion-button .accordionCollaps::before, 
+.dfReportWrap .accordion-button .accordionCollaps::after{
+    background-color: #FFF;
 }

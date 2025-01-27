@@ -123,7 +123,7 @@
                 </div>
                 <!-- END: General Report -->
 
-                <!-- BEGIN: Student Attendance Tracking
+                <!-- BEGIN: Student Attendance Tracking -->
                 <div class="col-span-12 mt-6 relative z-10">
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Students Attendance Tracking</h2>
@@ -170,7 +170,7 @@
                         </table>
                     </div>
                 </div>
-                END:  Student Attendance Tracking -->
+                <!-- END:  Student Attendance Tracking -->
             </div>
             <div class="grid grid-cols-12 gap-6 mt-5 relative z-10">
                 <div class="col-span-12 pt-5 relative">
@@ -180,7 +180,7 @@
                             {{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? '['.$theTerm->attenTerm->name.']' : '') }}
                         </h2>
                         <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
-                            <button id="undecidedCount" class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">{{ (isset($undecidedUploads) && !empty($undecidedUploads) ? ''.$undecidedUploads.'' : '') }}</button>
+                            <button id="undecidedCount" class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">{{ (isset($undecidedUploads) && !empty($undecidedUploads) ? ''.$undecidedUploads.'' : '0') }}</button>
                             <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
                                 <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
                                 <select class="form-control w-full border-0" id="planClassStatus" style="max-width: 230px;">
