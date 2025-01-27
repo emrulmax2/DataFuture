@@ -21,6 +21,7 @@ use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
+use App\Models\SmsTemplate;
 use App\Models\Student;
 use App\Models\StudentEmail;
 use App\Models\StudentSms;
@@ -98,7 +99,9 @@ class DashboardController extends Controller
             'attendance_avg' => $this->myModulesAttendanceAverage($id, $latestTermId),
             'bellow_60' => $this->myModulesAttendanceBellow($id, $latestTermId),
             'yesterday' => $yesterday,
-            'no_of_assignment' => $this->getAssignmentCount($id, $latestTermId)
+            'no_of_assignment' => $this->getAssignmentCount($id, $latestTermId),
+            'termdeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
         ]);
 
     }
@@ -450,7 +453,7 @@ class DashboardController extends Controller
             endforeach;
         else:
             $html .= '<tr class="intro-x">';
-                $html .= '<td colspan="6">';
+                $html .= '<td colspan="7">';
                     $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan found for the selected date.</div>';
                 $html .= '</td>';
             $html .= '</tr>';
@@ -646,6 +649,7 @@ class DashboardController extends Controller
                     $res[$student_id] = [
                         'student_id' => $student->id,
                         'registration_no' => $student->registration_no,
+                        'mobile' => (isset($student->contact->mobile) && !empty($student->contact->mobile) ? $student->contact->mobile : ''),
                         'photo_url' => $student->photo_url,
                         'name' => $student->full_name,
                         'course' => (isset($student->activeCR->creation->course->name) && !empty($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''),
@@ -670,8 +674,11 @@ class DashboardController extends Controller
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td>';
-                        $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap">'.$row['name'].' - '.$row['student_id'].'</a>';
+                        $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap">'.$row['name'].'</a>';
                         $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.$row['course'].'</div>';
+                        if(!empty($row['mobile'])):
+                            $html .= '<div class="text-slate-500 text-xs font-medium whitespace-nowrap mt-0.5">'.$row['mobile'].'</div>';
+                        endif;
                     $html .= '</td>';
                     $html .= '<td class="text-center">'.number_format($row['attendance'], 2).'%</td>';
                     $html .= '<td class="text-left">';
@@ -679,7 +686,10 @@ class DashboardController extends Controller
                             $m = 1;
                             foreach($row['modules'] as $mod):
                                 $html .= '<div class="'.($m != count($mod) ? 'mb-1' : '').' flex items-start justify-start text-'.($mod['status'] == 1 ? 'success' : 'danger').'">';
-                                    $html .= '<i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> '.$mod['module'].' - '.$mod['type'].' - '.$mod['start'];
+                                    $html .= '<i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> '.$mod['module'];
+                                    $html .= (isset($mod['type']) && !empty($mod['type']) ? ' ('.$mod['type'].')' : '');
+                                    $html .= (isset($mod['group']) && !empty($mod['group']) ? ' ('.$mod['group'].')' : '');
+                                    $html .= (!empty($mod['start']) ? ' ('.$mod['start'].(!empty($mod['end']) ? ' - '.$mod['end'] : '').')' : '');
                                 $html .= '</div>';
 
                                 $m++;
@@ -688,10 +698,10 @@ class DashboardController extends Controller
                     $html .= '</td>';
                     $html .= '<td class="table-report__action w-56">';
                         $html .= '<div class="flex justify-center items-center">';
-                            $html .= '<a class="flex items-center mr-3" href="">';
+                            $html .= '<a class="addNoteBtn flex items-center mr-3" data-tw-toggle="modal" data-tw-target="#addNoteModal" href="javascript:void(0);" data-student="'.$row['student_id'].'">';
                                 $html .= '<i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note';
                             $html .= '</a>';
-                            $html .= '<a class="flex items-center text-danger" href="">';
+                            $html .= '<a class="addSmsBtn flex items-center text-danger" href="javascript:void(0);" data-student="'.$row['student_id'].'" data-tw-toggle="modal" data-tw-target="#smsSMSModal">';
                                 $html .= '<i data-lucide="tablet-smartphone" class="w-4 h-4 mr-1"></i> Send SMS';
                             $html .= '</a>';
                         $html .= '</div>';
@@ -731,6 +741,7 @@ class DashboardController extends Controller
                     $plan = Plan::find($plan_id);
                     $res[$plan_id] = [
                         'module' => $plan->creations->module_name,
+                        'group' => (isset($plan->group->name) && !empty($plan->group->name) ? $plan->group->name : ''),
                         'type' => $plan->class_type,
                         'start' => (!empty($plan->start_time) ? date('H:i', strtotime($plan->start_time)) : ''),
                         'end' => (!empty($plan->end_time) ? date('H:i', strtotime($plan->end_time)) : ''),

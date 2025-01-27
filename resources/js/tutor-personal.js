@@ -2,9 +2,23 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import moment from 'moment';
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
+import TomSelect from "tom-select";
 
 
 (function(){
+    let tomOptionsNote = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        //persist: true,
+        create: false,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
 
     if($('#personalTutorDashboard').length > 0){
         $("#load-more").on('click',function(e){
@@ -130,6 +144,9 @@ import moment from 'moment';
 
     }); 
 
+    let note_term_declaration_id = new TomSelect('#note_term_declaration_id', tomOptionsNote);
+    let sms_template_id = new TomSelect('#sms_template_id', tomOptionsNote);
+
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editPunchNumberDeteilsModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPunchNumberDeteilsModal"));
@@ -138,6 +155,40 @@ import moment from 'moment';
     const startClassConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#startClassConfirmModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
     const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
+    const addNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addNoteModal"));
+    const smsSMSModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#smsSMSModal"));
+
+    let addEditor;
+    if($("#addEditor").length > 0){
+        const el = document.getElementById('addEditor');
+        ClassicEditor.create(el).then((editor) => {
+            addEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
+
+    const addNoteModalEl = document.getElementById('addNoteModal')
+    addNoteModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addNoteModal .acc__input-error').html('');
+        $('#addNoteModal input[name="document"]').val('');
+        $('#addNoteModal #addNoteDocumentName').html('');
+        $('#addNoteModal input[name="student_id"]').val('0');
+
+        addEditor.setData('');
+        note_term_declaration_id.clear(true);
+    });
+
+
+    const smsSMSModalEl = document.getElementById('smsSMSModal')
+    smsSMSModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#smsSMSModal .acc__input-error').html('');
+        $('#smsSMSModal .modal-body input, #smsSMSModal .modal-body textarea').val('');
+        $('#smsSMSModal input[name="student_id"]').val('0');
+        $('#smsSMSModal .sms_countr').html('160 / 1');
+        sms_template_id.clear(true);
+    });
     
     //const termDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#term-dropdown"));
     $('.save').on('click', function (e) {
@@ -394,6 +445,173 @@ import moment from 'moment';
             }
         });
     }
+
+    $('#addNoteForm').on('change', '#addNoteDocument', function(){
+        showFileName('addNoteDocument', 'addNoteDocumentName');
+    });
+
+    function showFileName(inputId, targetPreviewId) {
+        let fileInput = document.getElementById(inputId);
+        let namePreview = document.getElementById(targetPreviewId);
+        let fileName = fileInput.files[0].name;
+        namePreview.innerText = fileName;
+        return false;
+    };
+
+    $('#studentTrackingListTable').on('click', '.addNoteBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var student_id = $theBtn.attr('data-student');
+
+        $('#addNoteModal input[name="student_id"]').val(student_id);
+    })
+
+    $('#addNoteForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addNoteForm');
+    
+        document.querySelector('#saveNote').setAttribute('disabled', 'disabled');
+        document.querySelector("#saveNote svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#addNoteForm input[name="document"]')[0].files[0]); 
+        form_data.append("content", addEditor.getData());
+        axios({
+            method: "post",
+            url: route('student.store.note'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#saveNote').removeAttribute('disabled');
+            document.querySelector("#saveNote svg").style.cssText = "display: none;";
+            //console.log(response.data.message);
+            //return false;
+
+            if (response.status == 200) {
+                addNoteModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Note successfully stored.');
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#saveNote').removeAttribute('disabled');
+            document.querySelector("#saveNote svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addNoteForm .${key}`).addClass('border-danger');
+                        $(`#addNoteForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
+    $('#studentTrackingListTable').on('click', '.addSmsBtn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var student_id = $theBtn.attr('data-student');
+
+        $('#smsSMSModal input[name="student_id"]').val(student_id);
+    })
+
+    $('#smsTextArea').on('keyup', function(){
+        var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
+        var chars = this.value.length,
+            messages = Math.ceil(chars / 160),
+            remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
+        if(chars > 0){
+            if(chars >= maxlength && maxlength > 0){
+                $('#smsSMSModal .modal-content .smsWarning').remove();
+                $('#smsSMSModal .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
+            }else{
+                $('#smsSMSModal .modal-content .smsWarning').remove();
+            }
+            $('#smsSMSModal .sms_countr').html(remaining +' / '+messages);
+        }else{
+            $('#smsSMSModal .sms_countr').html('160 / 1');
+            $('#smsSMSModal .modal-content .smsWarning').remove();
+        }
+    });
+
+
+    $('#smsSMSForm #sms_template_id').on('change', function(){
+        var smsTemplateId = $(this).val();
+        if(smsTemplateId != ''){
+            axios({
+                method: "post",
+                url: route('student.get.sms.template'),
+                data: {smsTemplateId : smsTemplateId},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#smsSMSForm #smsTextArea').val(response.data.row.description ? response.data.row.description : '').trigger('keyup');
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                }
+            })
+        }else{
+            $('#smsSMSForm #smsTextArea').val('');
+            $('#smsSMSModal .sms_countr').html('160 / 1');
+        }
+    });
+
+    $('#smsSMSForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('smsSMSForm');
+    
+        document.querySelector('#sendSMSBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#sendSMSBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.send.sms'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#sendSMSBtn').removeAttribute('disabled');
+            document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                smsSMSModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html(response.data.message);
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                }, 1000);
+            }
+        }).catch(error => {
+            document.querySelector('#sendSMSBtn').removeAttribute('disabled');
+            document.querySelector("#sendSMSBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#smsSMSForm .${key}`).addClass('border-danger');
+                        $(`#smsSMSForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
     /*Student Attendance Tracking  End*/
     
 })();

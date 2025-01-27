@@ -207,3 +207,137 @@
     </div>
 </div>
 <!-- END: Success Modal Content -->
+
+<!-- BEGIN: Add Modal -->
+<div id="addNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" action="#" id="addNoteForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Add Note</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="note_term_declaration_id" class="form-label">Term <span class="text-danger">*</span></label>
+                        <select id="note_term_declaration_id" class="w-full tom-selects" name="term_declaration_id">
+                            <option value="">Please Select</option>
+                            @if($termdeclarations->count() > 0)
+                                @foreach($termdeclarations as $trm)
+                                    <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="opening_date" class="form-label">Date <span class="text-danger">*</span></label>
+                        <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                        <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="content" class="form-label">Note <span class="text-danger">*</span></label>
+                        <div class="editor document-editor">
+                            <div class="document-editor__toolbar"></div>
+                            <div class="document-editor__editable-container">
+                                <div class="document-editor__editable" id="addEditor"></div>
+                            </div>
+                        </div>
+                        <div class="acc__input-error error-content text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3 flex justify-start items-center relative">
+                        <label for="addNoteDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                            <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Document
+                        </label>
+                        <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addNoteDocument"/>
+                        <span id="addNoteDocumentName" class="documentNoteName ml-5"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="saveNote" class="btn btn-primary w-auto">     
+                        Save                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Add Modal -->
+
+<!-- BEGIN: Add Modal -->
+<div id="smsSMSModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <form method="POST" action="#" id="smsSMSForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Send SMS</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label for="sms_template_id" class="form-label">Template</label>
+                        <select id="sms_template_id" name="sms_template_id" class="w-full tom-selects">
+                            <option value="">Please Select</option>
+                            @if($smsTemplates->count() > 0)
+                                @foreach($smsTemplates as $st)
+                                    <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="mt-3">
+                        <label for="sms_subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                        <input id="sms_subject" type="text" name="subject" class="form-control w-full">
+                        <div class="acc__input-error error-subject text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="flex justify-between items-center">
+                            <label for="smsTextArea" class="form-label">SMS <span class="text-danger">*</span></label>
+                            <span class="sms_countr font-bold">160 / 1</span>
+                        </div>
+                        <textarea maxlength rows="7" id="smsTextArea" name="sms" class="form-control w-full"></textarea>
+                        <div class="acc__input-error error-sms text-danger mt-2"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="sendSMSBtn" class="btn btn-primary w-auto">     
+                        Send SMS                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="student_id" value="0"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Add Modal -->

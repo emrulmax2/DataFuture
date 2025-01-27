@@ -113,7 +113,7 @@
 <div id="df-accordion-EQS" class="lcc-accordion lcc-accordion-boxed mt-5">
     <div class="lcc-accordion-item">
         <div id="df-accr-EQS-content-1" class="lcc-accordion-header">
-            <button class="lcc-accordion-button bg-slate-100" type="button">
+            <button class="lcc-accordion-button bg_color_2" type="button">
                 Entry Qualification Subject
                 <span class="accordionCollaps"></span>
             </button>
@@ -143,7 +143,7 @@
 <div id="df-accordion-Engagement" class="lcc-accordion lcc-accordion-boxed mt-5">
     <div class="lcc-accordion-item">
         <div id="df-accr-Engagement-content-1" class="lcc-accordion-header">
-            <button class="lcc-accordion-button bg-slate-100" type="button">
+            <button class="lcc-accordion-button bg_color_2" type="button">
                 Engagement
                 <span class="accordionCollaps"></span>
             </button>
@@ -191,7 +191,7 @@
                 <div id="df-accordion-EntryProfile" class="lcc-accordion lcc-accordion-boxed mt-5">
                     <div class="lcc-accordion-item">
                         <div id="df-accr-EntryProfile-content-1" class="lcc-accordion-header">
-                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                            <button class="lcc-accordion-button bg_color_3" type="button">
                                 Entry Profile
                                 <span class="accordionCollaps"></span>
                             </button>
@@ -257,7 +257,7 @@
                                 <div id="df-accordion-EntryQualificationAward" class="lcc-accordion lcc-accordion-boxed mt-5">
                                     <div class="lcc-accordion-item">
                                         <div id="df-accr-EntryQualificationAward-content-1" class="lcc-accordion-header">
-                                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                                            <button class="lcc-accordion-button bg_color_6" type="button">
                                                 Entry Qualification Award
                                                 <span class="accordionCollaps"></span>
                                             </button>
@@ -294,7 +294,7 @@
                                                 <div id="df-accordion-EntryQualificationSubject" class="lcc-accordion lcc-accordion-boxed mt-5">
                                                     <div class="lcc-accordion-item">
                                                         <div id="df-accr-EntryQualificationSubject-content-1" class="lcc-accordion-header">
-                                                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                            <button class="lcc-accordion-button bg_color_5" type="button">
                                                                 Entry Qualification Subject
                                                                 <span class="accordionCollaps"></span>
                                                             </button>
@@ -335,7 +335,7 @@
                 <div id="df-accordion-Leaver" class="lcc-accordion lcc-accordion-boxed mt-5">
                     <div class="lcc-accordion-item">
                         <div id="df-accr-Leaver-content-1" class="lcc-accordion-header">
-                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                            <button class="lcc-accordion-button bg_color_3" type="button">
                                 Leaver
                                 <span class="accordionCollaps"></span>
                             </button>
@@ -382,7 +382,7 @@
                 <div id="df-accordion-QualificationAwarded" class="lcc-accordion lcc-accordion-boxed mt-5">
                     <div class="lcc-accordion-item">
                         <div id="df-accr-QualificationAwarded-content-1" class="lcc-accordion-header">
-                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                            <button class="lcc-accordion-button bg_color_3" type="button">
                                 Qualification Awarded
                                 <span class="accordionCollaps"></span>
                             </button>
@@ -412,7 +412,9 @@
                 <!-- BEGIN: Student Course Sessions -->
                 @if($stuloads->count() > 0)
                     <div id="df-accordion-Student-Course-Session" class="lcc-accordion lcc-accordion-boxed mt-5">
-                        @php $i = 1; @endphp
+                        @php 
+                            $i = 1; 
+                        @endphp
                         @foreach($stuloads as $stu)
                             @php 
                                 $instanceStart = (isset($stu->instance->start_date) && !empty($stu->instance->start_date) ? date('Y-m-d', strtotime($stu->instance->start_date)) : '');
@@ -436,7 +438,7 @@
                             @endphp
                             <div class="lcc-accordion-item">
                                 <div id="df-accr-Student-Course-Session-content-{{ $i }}" class="lcc-accordion-header relative">
-                                    <button class="lcc-accordion-button bg-slate-100" type="button" style="padding-left: 95px;">
+                                    <button class="lcc-accordion-button bg_color_3" type="button" style="padding-left: 95px;">
                                         Student Course Session {{ (isset($stu->periodstart) && !empty($stu->periodstart) ? date('d-m-Y', strtotime($stu->periodstart)) : '')}} - {{ (isset($stu->periodend) && !empty($stu->periodend) ? date('d-m-Y', strtotime($stu->periodend)) : '')}}
                                         <span class="accordionCollaps"></span>
                                     </button>
@@ -520,7 +522,7 @@
                                         <div id="df-accordion-FundingAndMonitoring-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-FundingAndMonitoring-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                    <button class="lcc-accordion-button bg_color_6" type="button">
                                                         Funding And Monitoring
                                                         <span class="accordionCollaps"></span>
                                                     </button>
@@ -583,7 +585,7 @@
                                         <div id="df-accordion-ModuleInstance-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-ModuleInstance-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button" type="button">
+                                                    <button class="lcc-accordion-button  bg_color_6" type="button">
                                                         Module Instance
                                                         <span class="accordionCollaps"></span>
                                                     </button>
@@ -595,7 +597,7 @@
                                                                 @foreach($moduleInstances[$stu->id] as $term_id => $termDetails)
                                                                     <div class="lcc-accordion-item">
                                                                         <div id="df-accr-modTerms-content-{{$stu->id}}-{{ $term_id }}" class="lcc-accordion-header">
-                                                                            <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                                            <button class="lcc-accordion-button bg_color_5" type="button">
                                                                                 {{ $termDetails['name'] }}
                                                                                 <span class="accordionCollaps"></span>
                                                                             </button>
@@ -686,7 +688,7 @@
                                         <div id="df-accordion-ReferencePeriodStudentLoad-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-ReferencePeriodStudentLoad-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                    <button class="lcc-accordion-button bg_color_6" type="button">
                                                         Reference Period Student Load
                                                         <span class="accordionCollaps"></span>
                                                     </button>
@@ -709,7 +711,7 @@
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">RPSTULOAD</label>
-                                                                <input type="text" name="SCS[{{ $stu->id }}][RPSTULOAD]" class="w-full form-control" placeholder="RPSTULOAD"/>
+                                                                <input type="text" name="SCS[{{ $stu->id }}][RPSTULOAD]" value="{{ ($stu->student_load && $stu->student_load > 0 ? ($stu->student_load == 99 ? '100' : $stu->student_load) : '') }}" class="w-full form-control" placeholder="RPSTULOAD"/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -722,7 +724,7 @@
                                         <div id="df-accordion-SessionStatus-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-SessionStatus-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                    <button class="lcc-accordion-button bg_color_6" type="button">
                                                         Session Status
                                                         <span class="accordionCollaps"></span>
                                                     </button>
@@ -749,7 +751,7 @@
                                         <div id="df-accordion-StudentFinancialSupport-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-StudentFinancialSupport-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                    <button class="lcc-accordion-button bg_color_6" type="button">
                                                         Student Financial Support
                                                         <span class="accordionCollaps"></span>
                                                     </button>
@@ -772,7 +774,7 @@
                                         <div id="df-accordion-StudyLocation-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
                                                 <div id="df-accr-StudyLocation-content-{{$stu->id}}" class="lcc-accordion-header">
-                                                    <button class="lcc-accordion-button bg-slate-100" type="button">
+                                                    <button class="lcc-accordion-button bg_color_6" type="button">
                                                         Study Location
                                                         <span class="accordionCollaps"></span>
                                                     </button>
