@@ -16,10 +16,10 @@
             
         @php $termstart++; $planId=1; @endphp
         <div class="intro-y box col-span-12 p-5 mt-5  ">
-            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ ($attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
+            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
                 
                 <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} 
-                    @if($attendanceIndicator[$termId]===0)
+                    @if(isset($attendanceIndicator) && $attendanceIndicator[$termId]===0)
                     <div class="font-medium dark:text-slate-500 text-white rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
                     
                     @else

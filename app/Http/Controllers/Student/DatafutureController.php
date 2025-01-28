@@ -392,8 +392,8 @@ class DatafutureController extends Controller
                                               ->where('course_module_id', $pln->creations->course_module_id)->get()->first();
                                     $res[$stu->id][$term->id]['modules'][$mod]['MODINSTID'] = $pln->id;
                                     $res[$stu->id][$term->id]['modules'][$mod]['MODINS_MODID'] = $pln->creations->course_module_id;
-                                    $res[$stu->id][$term->id]['modules'][$mod]['MODINSTENDDATE'] = $pln->attenTerm->end_date;
-                                    $res[$stu->id][$term->id]['modules'][$mod]['MODINSTSTARTDATE'] = $pln->attenTerm->start_date;
+                                    $res[$stu->id][$term->id]['modules'][$mod]['MODINSTENDDATE'] = (!empty($pln->attenTerm->end_date) ? date('Y-m-d', strtotime($pln->attenTerm->end_date)) : '');
+                                    $res[$stu->id][$term->id]['modules'][$mod]['MODINSTSTARTDATE'] = (!empty($pln->attenTerm->start_date) ? date('Y-m-d', strtotime($pln->attenTerm->start_date)) : '');
                                     $res[$stu->id][$term->id]['modules'][$mod]['MODULEOUTCOME'] = (isset($theRow->MODULEOUTCOME) && !empty($theRow->MODULEOUTCOME) ? $theRow->MODULEOUTCOME : '');
                                     $res[$stu->id][$term->id]['modules'][$mod]['MODULERESULT'] = (isset($theRow->MODULERESULT) && !empty($theRow->MODULERESULT) ? $theRow->MODULERESULT : '');
                                     $mod++;
