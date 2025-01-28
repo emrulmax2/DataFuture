@@ -25,6 +25,12 @@ var instancetermListtable = (function () {
             placeholder: 'No matching records found',
             columns: [
                 {
+                    title: 'ID',
+                    field: 'id',
+                    headerHozAlign: 'left',
+                    width: '70',
+                },
+                {
                     title: 'Name',
                     field: 'name',
                     headerHozAlign: 'left',
@@ -171,7 +177,7 @@ var courseCreationINListTable = (function () {
                     formatter: hideCollapsibleIcon,
                     align: 'left',
                     title: '&nbsp;',
-                    width: '90',
+                    width: '80',
                     headerSort: false,
                     download: false,
                     cellClick: function (e, row, formatterParams) {
@@ -205,6 +211,12 @@ var courseCreationINListTable = (function () {
                             }
                         }
                     },
+                },
+                {
+                    title: 'ID',
+                    field: 'id',
+                    width: '70',
+                    headerHozAlign: 'left',
                 },
                 {
                     title: 'Academic Year',

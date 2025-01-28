@@ -55,4 +55,8 @@ class CourseCreationInstance extends Model
         return $this->hasMany(InstanceTerm::class, 'course_creation_instance_id', 'id');
     }
 
+    public function firstTerm(){
+        return $this->hasOne(InstanceTerm::class, 'course_creation_instance_id', 'id')->oldestOfMany();
+    }
+
 }

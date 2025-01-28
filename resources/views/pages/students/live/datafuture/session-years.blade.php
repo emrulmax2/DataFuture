@@ -12,7 +12,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium uppercase">OWNSESSIONID</div>
-                        <div class="col-span-8 font-medium">{{ (isset($stu->instance->creation->semester->name) && !empty($stu->instance->creation->semester->name) ? $stu->instance->creation->semester->name : '---') }}</div>
+                        <div class="col-span-8 font-medium">{{ (isset($stu->instance->firstTerm->termDeclaration->name) && !empty($stu->instance->firstTerm->termDeclaration->name) ? $stu->instance->firstTerm->termDeclaration->name : '---') }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
