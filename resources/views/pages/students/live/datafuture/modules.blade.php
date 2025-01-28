@@ -5,7 +5,7 @@
     @foreach($df_modules_fields as $module)
         <div class="lcc-accordion-item">
             <div id="df-accr-module-content-{{$m}}" class="lcc-accordion-header">
-                <button class="lcc-accordion-button lcc-collapsed" type="button">
+                <button class="lcc-accordion-button lcc-collapsed bg_color_2" type="button">
                     {{ $module->name.' - '.($m < 10 ? '0'.$m : $m)}}
                     <span class="accordionCollaps"></span>
                 </button>
