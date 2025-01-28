@@ -630,8 +630,12 @@ class DashboardController extends Controller
     public function getStudentAttenTrackingHtml(Request $request){
         $user_id = auth()->user()->id;
         $theDate = (isset($request->theDate) && !empty($request->theDate) ? date('Y-m-d', strtotime($request->theDate)) : Carbon::yesterday()->format('Y-m-d'));
+        $res = [];
+        
         $tutor_plans = PlansDateList::where('date', $theDate)->whereHas('plan', function($q) use($user_id){
-            $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id);
+            $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id)->orWhereHas('tutorial', function($sq) use($user_id){
+                $sq->where('personal_tutor_id', $user_id);
+            });
         })->get();
         $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
         $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();
@@ -640,7 +644,6 @@ class DashboardController extends Controller
             $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
         })->pluck('student_id')->unique()->toArray();
 
-        $res = [];
         if(!empty($assigns)):
             foreach($assigns as $student_id):
                 $student = Student::find($student_id);
