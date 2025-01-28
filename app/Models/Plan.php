@@ -143,7 +143,7 @@ class Plan extends Model
     }
 
     public function tutorial(){
-        return $this->hasOne(Plan::class, 'parent_id', 'id')->where('class_type', 'Tutorial')->latestOfMany();
+        return $this->hasOne(Plan::class, 'parent_id', 'id')->where('class_type', 'Tutorial');//->latestOfMany();
     }
     
 }

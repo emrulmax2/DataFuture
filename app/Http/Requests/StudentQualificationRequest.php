@@ -25,10 +25,14 @@ class StudentQualificationRequest extends FormRequest
     {
         return [
             'highest_academic' => 'required',
-            'awarding_body' => 'required',
-            'subjects' => 'required',
-            //'result' => 'required',
+            'result' => 'required',
             'qualification_grade_id' => 'required',
+            //'result' => 'required',
+            'degree_award_date' => 'required',
+            'previous_provider_id' => 'required',
+            'qualification_type_identifier_id' => 'required',
+            'hesa_qualification_subject_id' => 'required',
+            'highest_qualification_on_entry_id' => 'required',
             
         ];
     }
@@ -37,11 +41,15 @@ class StudentQualificationRequest extends FormRequest
     {
         return [
             'highest_academic.required' => 'This field is required.',
-            'awarding_body.required' => 'This field is required.',
+            'result.required' => 'This field is required.',
             'subjects.required' => 'This field is required.',
             //'result' => 'required',
             'qualification_grade_id.required' => 'This field is required.',
-            
+            'degree_award_date.required' => 'This field is required.',
+            'previous_provider_id.required' => 'This field is required.',
+            'qualification_type_identifier_id.required' => 'This field is required.',
+            'hesa_qualification_subject_id.required' => 'This field is required.',
+            'highest_qualification_on_entry_id.required' => 'This field is required.'
         ];
     }
 }
