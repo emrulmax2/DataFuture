@@ -16,10 +16,10 @@
             
         @php $termstart++; $planId=1; @endphp
         <div class="intro-y box col-span-12 p-5 mt-5  ">
-            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
+            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
                 
                 <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} 
-                    @if(isset($attendanceIndicator) && $attendanceIndicator[$termId]===0)
+                    @if(isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0)
                     <div class="font-medium dark:text-slate-500 text-white rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
                     
                     @else
@@ -69,7 +69,7 @@
                     <i data-lucide="info" class="w-5 h-5"></i>
                 </button>
             </div>
-            <div class="w-full py-3  {{ ($attendanceIndicator[$termId]===0 ? "border-red-600" : "border-teal-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
+            <div class="w-full py-3  {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "border-red-600" : "border-teal-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
                 @foreach($dataStartPoint as $planId => $data)
                     @if(isset($planDetails[$termId][$planId]) && !empty($planDetails[$termId][$planId]))
                         
