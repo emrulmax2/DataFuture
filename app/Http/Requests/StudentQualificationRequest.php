@@ -25,9 +25,7 @@ class StudentQualificationRequest extends FormRequest
     {
         return [
             'highest_academic' => 'required',
-            'result' => 'required',
             'qualification_grade_id' => 'required',
-            //'result' => 'required',
             'degree_award_date' => 'required',
             'previous_provider_id' => 'required',
             'qualification_type_identifier_id' => 'required',
@@ -41,9 +39,6 @@ class StudentQualificationRequest extends FormRequest
     {
         return [
             'highest_academic.required' => 'This field is required.',
-            'result.required' => 'This field is required.',
-            'subjects.required' => 'This field is required.',
-            //'result' => 'required',
             'qualification_grade_id.required' => 'This field is required.',
             'degree_award_date.required' => 'This field is required.',
             'previous_provider_id.required' => 'This field is required.',
