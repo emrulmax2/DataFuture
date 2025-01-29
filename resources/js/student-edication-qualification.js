@@ -359,7 +359,7 @@ var studentEducationQualTable = (function () {
                     hesa_qualification_subject_id.addItem(dataset.hesa_qualification_subject_id);
                     highest_qualification_on_entry_id.addItem(dataset.highest_qualification_on_entry_id);
                     hesa_exam_sitting_venue_id.addItem(dataset.hesa_exam_sitting_venue_id);
-                    edit_qualification_grade_id.addItem(dataset.edit_qualification_grade_id);
+                    edit_qualification_grade_id.addItem(dataset.qualification_grade_id);
                     
 
                     $('#editQualificationModal input[name="id"]').val(editId);
