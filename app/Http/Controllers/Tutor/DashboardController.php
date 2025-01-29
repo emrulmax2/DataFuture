@@ -214,7 +214,13 @@ class DashboardController extends Controller
         $employee = Employee::where("user_id",$userData->id)->get()->first();
 
         $Query = DB::table('plans as plan')
-        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->select('plan.*','academic_years.id as academic_year_id',
+            'academic_years.name as academic_year_name',
+            'terms.id as term_id','term_declarations.name as term_name',
+            'term_declarations.id as attendance_term_id',
+            'terms.term as term','course.name as course_name',
+            'module.module_name','venue.name as venue_name','room.name as room_name',
+            'group.name as group_name',"user.name as username")
         ->leftJoin('courses as course', 'plan.course_id', 'course.id')
         ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
         ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
@@ -240,18 +246,18 @@ class DashboardController extends Controller
             $i = 1;
             
             foreach($Query as $list):
-                    
-                    if($currentTerm==0)
-                        $currentTerm = $list->term_id;
 
-                    $termData[$list->term_id] = (object) [ 
-                        'id' =>$list->term_id,
+                    if($currentTerm==0)
+                        $currentTerm = $list->attendance_term_id;
+
+                    $termData[$list->attendance_term_id] = (object) [ 
+                        'id' =>$list->attendance_term_id,
                         'name' => $list->term_name,   
-                        "total_modules" => !isset($termData[$list->term_id]) ? 1 : $termData[$list->term_id]->total_modules,
+                        "total_modules" => !isset($termData[$list->attendance_term_id]) ? 1 : $termData[$list->attendance_term_id]->total_modules,
                         
                     ];
 
-                    $data[$list->term_id][] = (object) [
+                    $data[$list->attendance_term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
                         'course' => $list->course_name,
@@ -259,10 +265,10 @@ class DashboardController extends Controller
                         'group'=> $list->group_name,           
                     ];
 
-                    if(isset($termData[$list->term_id]))  
-                        $termData[$list->term_id]->total_modules = count($data[$list->term_id]);
+                    if(isset($termData[$list->attendance_term_id]))  
+                        $termData[$list->attendance_term_id]->total_modules = count($data[$list->attendance_term_id]);
                     else 
-                        $termData[$list->term_id] = 1;
+                        $termData[$list->attendance_term_id] = 1;
                     $i++;
         
             endforeach;
