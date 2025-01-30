@@ -722,7 +722,7 @@ var employeePatternListTable = (function () {
                 
                 setTimeout(function(){
                     successModal.hide();
-                    window.location.reload();
+                    //window.location.reload();
                 }, 2000)
             }
             employeePatternListTable.init();

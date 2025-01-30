@@ -193,7 +193,7 @@ class EmployeeWorkingPatternController extends Controller
         $data['updated_by'] = auth()->user()->id;
 
         $employeeWorkingPattern = EmployeeWorkingPattern::find($id);
-        $employeeWorkingPattern->fill($request->input());
+        $employeeWorkingPattern->fill($data);//$request->input()
         $changes = $employeeWorkingPattern->getDirty();
         $employeeWorkingPattern->save();
 
