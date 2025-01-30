@@ -266,7 +266,7 @@ class StudentDataReportController extends Controller
         
        
 
-        $StudentData = Student::with('other','crel','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
 
         
 
