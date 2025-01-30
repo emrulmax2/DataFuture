@@ -114,7 +114,7 @@
     <div class="lcc-accordion-item">
         <div id="df-accr-EQS-content-1" class="lcc-accordion-header">
             <button class="lcc-accordion-button bg_color_2" type="button">
-                Entry Qualification Subject
+                Disability
                 <span class="accordionCollaps"></span>
             </button>
         </div>
@@ -267,7 +267,7 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDID</label>
-                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->qualification_grade_id) && !empty($student->qualHigest->qualification_grade_id) ? $student->qualHigest->qualification_grade_id : '') }}" type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/>
+                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->highest_academic) && !empty($student->qualHigest->highest_academic) ? $student->qualHigest->highest_academic : '') }}" type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/>
                                                     </div>
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDRESULT</label>
@@ -400,7 +400,7 @@
                                     </div>
                                     <div class="grid-column">
                                         <label class="form-label uppercase">QUALRESULT</label>
-                                        <input type="text" value="{{ (isset($student->awarded->qual->df_code) && !empty($student->awarded->qual->df_code) ? $student->awarded->qual->df_code : '') }}" name="QUALRESULT" class="w-full form-control" placeholder="QUALRESULT"/>
+                                        <input type="text" value="{{ (isset($student->awarded->qual->name) && !empty($student->awarded->qual->name) ? $student->awarded->qual->name : '') }}" name="QUALRESULT" class="w-full form-control" placeholder="QUALRESULT"/>
                                     </div>
                                 </div>
                             </div>
@@ -431,8 +431,8 @@
                                 else:
                                     $RSNSCSEND = '';
                                 endif;
-                                $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? '01' : '03');
-                                $FUNDLENGTH = 96;
+                                $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
+                                $FUNDLENGTH = 3;
 
                                 $REFPERIOD_INC = ($i < 10 ? '0'.$i : $i);
                             @endphp
@@ -547,7 +547,7 @@
                                                                     <option value="">Please Select</option>
                                                                     @if($fundcomps->count() > 0)
                                                                         @foreach($fundcomps as $opt)
-                                                                            <option {{ (isset($stu->df->FUNDCOMP) && $stu->df->FUNDCOMP == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                                            <option {{ (isset($stu->df->FUNDCOMP) && $stu->df->FUNDCOMP == $opt->id ? 'Selected' : ($FUNDCOMP == $opt->id ? 'Selected' : '')) }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
                                                                         @endforeach
                                                                     @endif
                                                                 </select>
@@ -558,7 +558,7 @@
                                                                     <option value="">Please Select</option>
                                                                     @if($fundLengths->count() > 0)
                                                                         @foreach($fundLengths as $opt)
-                                                                            <option {{ (isset($stu->df->FUNDLENGTH) && $stu->df->FUNDLENGTH == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                                            <option {{ (isset($stu->df->FUNDLENGTH) && $stu->df->FUNDLENGTH == $opt->id ? 'Selected' : ($FUNDLENGTH == $opt->id ? 'Selected' : '')) }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
                                                                         @endforeach
                                                                     @endif
                                                                 </select>
