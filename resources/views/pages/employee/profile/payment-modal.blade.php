@@ -93,7 +93,7 @@
                                     <div class="acc__input-error error-holiday_base text-danger mt-2"></div>
                                 </div>
                                 <div class="col-span-6 sm:col-span-4">
-                                    <label for="bank_holiday_auto_book" class="form-label">Bank Holiday Auto Book <span class="text-danger">*</span></label>
+                                    <label for="bank_holiday_auto_book" class="form-label">Bank Holiday Auto Book</label>
                                     <div class="form-check form-switch">
                                         <input id="bank_holiday_auto_book" name="bank_holiday_auto_book" value="1" class="form-check-input" type="checkbox">
                                     </div>

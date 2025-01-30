@@ -33,7 +33,7 @@ class EmployeePaymentSettingsUpdateRequest extends FormRequest
 
             'holiday_entitled' => 'sometimes',
             'holiday_base' => 'required_if:holiday_entitled,1',
-            'bank_holiday_auto_book' => 'required_if:holiday_entitled,1',
+            //'bank_holiday_auto_book' => 'required_if:holiday_entitled,1',
             'holiday_authorised_by' => 'required_if:holiday_entitled,1',
 
         ];
@@ -49,7 +49,7 @@ class EmployeePaymentSettingsUpdateRequest extends FormRequest
             'hour_authorised_by.required_if' => 'This field is required',
 
             'holiday_base.required_if' => 'This field is required',
-            'bank_holiday_auto_book.required_if' => 'This field is required',
+            //'bank_holiday_auto_book.required_if' => 'This field is required',
             'holiday_authorised_by.required_if' => 'This field is required'
         ];
     }

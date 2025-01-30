@@ -117,8 +117,7 @@ class DatafutureController extends Controller
             'notacts' => SuspensionOfActiveStudy::where('active', 1)->orderBy('name', 'ASC')->get(),
             'sseligs' => StudentSupportEligibility::where('active', 1)->orderBy('name', 'ASC')->get(),
             'quals' => HesaQualificationAward::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'heapespops' => HeapesPopulation::where('active', 1)->orderBy('name', 'ASC')->get(),
-            
+            'heapespops' => HeapesPopulation::where('active', 1)->orderBy('name', 'ASC')->get()
         ]);
     }
 

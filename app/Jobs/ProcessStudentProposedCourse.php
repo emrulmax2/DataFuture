@@ -46,10 +46,13 @@ class ProcessStudentProposedCourse implements ShouldQueue
         $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
         
         $applicantProposedCourse= ApplicantProposedCourse::where('applicant_id',$this->applicant->id)->get()->first();
+        $curse_creation = CourseCreation::find($applicantProposedCourse->course_creation_id);
             
         $studentCourseRelation = StudentCourseRelation::create([
                 "student_id" => $student->id,
                 "course_creation_id" => $applicantProposedCourse->course_creation_id,
+                "course_start_date" => (isset($curse_creation->available->course_start_date) && !empty($curse_creation->available->course_start_date) ? date('Y-m-d', strtotime($curse_creation->available->course_start_date)) : null),
+                "course_end_date" => (isset($curse_creation->available->course_end_date) && !empty($curse_creation->available->course_end_date) ? date('Y-m-d', strtotime($curse_creation->available->course_end_date)) : null),
                 "active"=> 1,
                 "created_by" => 1
         ]);
