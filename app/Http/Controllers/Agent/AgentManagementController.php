@@ -1079,10 +1079,11 @@ class AgentManagementController extends Controller
 
                                 .invInfoTable{margin-top: 30px; margin-bottom: 50px;}
                                 .invToTable{width: 300px;}
-                                .invInfoTableRight{width: 200px}
+                                .invToTable.payInfoTable{margin-top: 30px;}
+                                .invInfoTableRight{width: 200px; vertical-align: top;}
                                 .invInfoTableRight .invToTable{width: 100%;}
                                 .invToLabel{ font-size: 12px; font-weight: bold; text-transform: uppercase; color: #0d9488; line-height: 1; padding-bottom: 10px;}
-                                .invToName{ font-size: 23px; font-weight: bold; text-transform: capitalize; line-height: 1; padding-bottom: 2px;}
+                                .invToName{ font-size: 18px; font-weight: bold; text-transform: capitalize; line-height: 1; padding-bottom: 2px;}
                                 .invToOrg{ font-size: 13px; line-height: 1; padding-bottom: 7px;}
                                 .invInfoRow td{ vertical-align: top; font-size: 13px; line-height: 16px; padding-bottom: 5px;}
                                 .invInfoRow td:first-child{ width: 80px;}
@@ -1096,23 +1097,7 @@ class AgentManagementController extends Controller
                         $PDFHTML .= '<tr>';
                             $PDFHTML .= '<td class="text-left"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
                             $PDFHTML .= '<td class="headerRightCol">';
-                                $PDFHTML .= '<table class="headerInnerTable">';
-                                    $PDFHTML .= '<tbody>';
-                                        $PDFHTML .= '<tr class="headerHeadingRow"><td colspan="2">Invoice</td></tr>';
-                                        $PDFHTML .= '<tr class="headerBodyRow">';
-                                            $PDFHTML .= '<td>Reference</td>';
-                                            $PDFHTML .= '<td class="htd2">'.(!empty($remittanceRef) ? '#'.$remittanceRef : '---').'</td>';
-                                        $PDFHTML .= '</tr>';
-                                        $PDFHTML .= '<tr class="headerBodyRow">';
-                                            $PDFHTML .= '<td>Date</td>';
-                                            $PDFHTML .= '<td class="htd2">'.(isset($comission->entry_date) && !empty($comission->entry_date) ? date('jS M, Y', strtotime($comission->entry_date)) : '').'</td>';
-                                        $PDFHTML .= '</tr>';
-                                        $PDFHTML .= '<tr class="headerBodyRow">';
-                                            $PDFHTML .= '<td>Semester</td>';
-                                            $PDFHTML .= '<td class="htd2">'.(isset($comission->semester->name) && !empty($comission->semester->name) ? $comission->semester->name : '').'</td>';
-                                        $PDFHTML .= '</tr>';
-                                    $PDFHTML .= '</tbody>';
-                                $PDFHTML .= '</table>';
+                                
                             $PDFHTML .= '</td>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</table>';
@@ -1122,12 +1107,11 @@ class AgentManagementController extends Controller
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="invInfoTableLeft">';
                             $PDFHTML .= '<table class="invToTable">';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Invoice To</td></tr>';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToName">'.(isset($comission->agent->full_name) && !empty($comission->agent->full_name) ? $comission->agent->full_name : '').'</td></tr>';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToOrg">'.(isset($comission->agent->organization) && !empty($comission->agent->organization) ? $comission->agent->organization : '').'</td></tr>';
+                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Remit To</td></tr>';
+                                $PDFHTML .= '<tr><td colspan="2" class="invToName">'.(isset($comission->agent->organization) && !empty($comission->agent->organization) ? $comission->agent->organization : '').'</td></tr>';
+                                //$PDFHTML .= '<tr><td colspan="2" class="invToOrg">'.(isset($comission->agent->organization) && !empty($comission->agent->organization) ? $comission->agent->organization : '').'</td></tr>';
                                 $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Email</td>';
-                                    $PDFHTML .= '<td>'.(isset($comission->agent->email) && !empty($comission->agent->email) ? $comission->agent->email : '').'</td>';
+                                    $PDFHTML .= '<td colspan="2">'.(isset($comission->agent->email) && !empty($comission->agent->email) ? $comission->agent->email : '').'</td>';
                                 $PDFHTML .= '</tr>';
                                 if(isset($comission->agent->address->full_address_pdf) && !empty($comission->agent->address->full_address_pdf)):
                                 $PDFHTML .= '<tr class="invInfoRow">';
@@ -1136,19 +1120,46 @@ class AgentManagementController extends Controller
                                 $PDFHTML .= '</tr>';
                                 endif;
                             $PDFHTML .= '</table>';
-                        $PDFHTML .= '</td>';
-                        $PDFHTML .= '<td class="invInfoTableRight text-right">';
-                            $PDFHTML .= '<table class="invToTable">';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Payment Method</td></tr>';
+
+                            $PDFHTML .= '<table class="invToTable payInfoTable">';
+                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Payment Information</td></tr>';
                                 $PDFHTML .= '<tr class="invInfoRow">';
                                     $PDFHTML .= '<td>Sort Code</td>';
-                                    $PDFHTML .= '<td class="text-right">43-56-91</td>';
+                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->sort_code) && !empty($comission->agent->bank->sort_code) ? $comission->agent->bank->sort_code : '').'</td>';
                                 $PDFHTML .= '</tr>';
                                 $PDFHTML .= '<tr class="invInfoRow">';
                                     $PDFHTML .= '<td>Account No</td>';
-                                    $PDFHTML .= '<td class="text-right">12458795</td>';
+                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->ac_no) && !empty($comission->agent->bank->ac_no) ? $comission->agent->bank->ac_no : '').'</td>';
+                                $PDFHTML .= '</tr>';
+                                $PDFHTML .= '<tr class="invInfoRow">';
+                                    $PDFHTML .= '<td>Beneficiary</td>';
+                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->beneficiary) && !empty($comission->agent->bank->beneficiary) ? $comission->agent->bank->beneficiary : '').'</td>';
                                 $PDFHTML .= '</tr>';
                             $PDFHTML .= '</table>';
+
+                        $PDFHTML .= '</td>';
+                        $PDFHTML .= '<td class="invInfoTableRight text-right" style="vertical-align: top;">';
+                            $PDFHTML .= '<table class="invToTable">';
+                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Remit Report</td></tr>';
+                                $PDFHTML .= '<tr class="invInfoRow">';
+                                    $PDFHTML .= '<td>Reference</td>';
+                                    $PDFHTML .= '<td class="text-right">'.(!empty($remittanceRef) ? '#'.$remittanceRef : '---').'</td>';
+                                $PDFHTML .= '</tr>';
+                                $PDFHTML .= '<tr class="invInfoRow">';
+                                    $PDFHTML .= '<td>Date</td>';
+                                    $PDFHTML .= '<td class="text-right">'.(isset($comission->entry_date) && !empty($comission->entry_date) ? date('jS M, Y', strtotime($comission->entry_date)) : '').'</td>';
+                                $PDFHTML .= '</tr>';
+                                $PDFHTML .= '<tr class="invInfoRow">';
+                                    $PDFHTML .= '<td>Semester</td>';
+                                    $PDFHTML .= '<td class="text-right">'.(isset($comission->semester->name) && !empty($comission->semester->name) ? $comission->semester->name : '').'</td>';
+                                $PDFHTML .= '</tr>';
+                                $PDFHTML .= '<tr class="invInfoRow">';
+                                    $PDFHTML .= '<td>No of Student</td>';
+                                    $PDFHTML .= '<td class="text-right">'.(!empty($comission_details) && $comission_details->count() > 0 ? $comission_details->count() : 0).'</td>';
+                                $PDFHTML .= '</tr>';
+                            $PDFHTML .= '</table>';
+
+                            
                         $PDFHTML .= '</td>';
                     $PDFHTML .= '</tr>';
                 $PDFHTML .= '</table>';
