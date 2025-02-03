@@ -31,4 +31,8 @@ class Agent extends Model
     public function address() {
         return $this->belongsTo(Address::class, 'address_id');
     }
+
+    public function bank() {
+        return $this->hasOne(AgentBankDetail::class, 'agent_id', 'id')->where('active', 1)->latestOfMany();
+    }
 }
