@@ -1,13 +1,13 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">SID</label>
         <input type="text" value="{{ (isset($student->laststuload->sid_number) ? $student->laststuload->sid_number : '') }}" name="SID" class="w-full form-control" placeholder="SID"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">BIRTHDTE</label>
         <input type="text" value="{{ (!empty($student->date_of_birth) ? date('Y-m-d', strtotime($student->date_of_birth)) : '') }}" name="BIRTHDTE" class="w-full form-control df-datepicker" placeholder="BIRTHDTE"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">ETHNIC</label>
         <select name="ETHNIC" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -18,11 +18,11 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">FNAMES</label>
         <input value="{{ (!empty($student->first_name) ? $student->first_name : '') }}" type="text" name="FNAMES" class="w-full form-control" placeholder="FNAMES"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">GENDERID</label>
         <select name="GENDERID" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -33,7 +33,7 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">NATION</label>
         <select name="NATION" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -44,11 +44,11 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">OWNSTU</label>
         <input type="text" value="{{ (!empty($student->registration_no) ? $student->registration_no : '') }}" name="OWNSTU" class="w-full form-control" placeholder="OWNSTU"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">RELIGION</label>
         <select name="RELIGION" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -59,7 +59,7 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">SEXID</label>
         <select name="SEXID" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -70,7 +70,7 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">SEXORT</label>
         <select name="SEXORT" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -81,15 +81,15 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">SSN</label>
         <input value="{{ (!empty($student->ssn_no) ? $student->ssn_no : '') }}" type="text" name="SSN" class="w-full form-control" placeholder="SSN"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">SURNAME</label>
         <input value="{{ (!empty($student->last_name) ? $student->last_name : '') }}" type="text" name="SURNAME" class="w-full form-control" placeholder="SURNAME"/>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">TTACCOM</label>
         <select name="TTACCOM" class="w-full tom-selects df-tom-selects">
             <option value="">Please Select</option>
@@ -100,7 +100,7 @@
             @endif
         </select>
     </div>
-    <div class="grid-column">
+    <div class="grid-column readonlyBlock">
         <label class="form-label uppercase">TTPCODE</label>
         <input value="{{ (isset($student->contact->term_time_post_code) ? $student->contact->term_time_post_code : '') }}" type="text" name="TTPCODE" class="w-full form-control" placeholder="TTPCODE"/>
     </div>
@@ -121,7 +121,7 @@
         <div id="df-accr-EQS-collapse-1" class="lcc-accordion-collapse lcc-show" style="display: block;">
             <div class="lcc-accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
-                    <div class="grid-column">
+                    <div class="grid-column readonlyBlock">
                         <label class="form-label uppercase">DISABILITY</label>
                         <select name="DISABILITY[]" multiple class="w-full tom-selects" id="DISABILITY_IDS">
                             <option value="">Please Select</option>

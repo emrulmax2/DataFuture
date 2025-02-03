@@ -23,7 +23,7 @@ class StudentAwardStoreRequest extends FormRequest
     {
         return [
             'date_of_award' => 'required',
-            'qual_award_result_id' => 'required',
+            //'qual_award_result_id' => 'required',
         ];
     }
 
@@ -31,7 +31,7 @@ class StudentAwardStoreRequest extends FormRequest
     {
         return [
             'date_of_award.required' => 'This field is required.',
-            'qual_award_result_id.required' => 'This field is required.',
+            //'qual_award_result_id.required' => 'This field is required.',
         ];
     }
 }
