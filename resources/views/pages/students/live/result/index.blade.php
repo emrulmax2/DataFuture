@@ -202,7 +202,7 @@
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-5 text-slate-500 font-medium">Date of received</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_requested) && !empty($award->date_of_certificate_requested) ? date('jS F, Y', strtotime($award->date_of_certificate_requested)) : '') }}</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_received) && !empty($award->date_of_certificate_received) ? date('jS F, Y', strtotime($award->date_of_certificate_received)) : '') }}</div>
                     </div>
                 </div>
                 @endif
@@ -704,7 +704,7 @@
                         <div class="acc__input-error error-date_of_award text-danger mt-2"></div>
                     </div>
                     <div class="mt-3">
-                        <label for="qual_award_result_id" class="form-label">Overall Result <span class="text-danger">*</span></label>
+                        <label for="qual_award_result_id" class="form-label">Overall Result</label>
                         <select id="qual_award_result_id" class="tom-selects w-full" name="qual_award_result_id">
                             <option value="">Please Select</option>
                             @if($qualAwards->count() > 0)
