@@ -469,6 +469,9 @@ class StudentDataReportController extends Controller
                                 case 'awarding_body':
                                     $theCollection[$row][$j++] = (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown');
                                   break;
+                                case 'semester':
+                                    $theCollection[$row][$j++] = (isset($student->crel->creation->semester->name) ? $student->crel->creation->semester->name : 'Unknown');
+                                break;
                                 default:
                                     $theCollection[$row][$j++] = (isset($student->crel)) ? $student->crel->$key : "";
                             }
