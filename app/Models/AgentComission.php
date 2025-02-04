@@ -18,6 +18,7 @@ class AgentComission extends Model
         'remittance_ref',
         'entry_date',
         'status',
+        'agent_comission_payment_id',
         'acc_transaction_id',
         'created_by',
         'updated_by',
@@ -54,5 +55,9 @@ class AgentComission extends Model
 
     public function transaction(){
         return $this->belongsTo(AccTransaction::class, 'acc_transaction_id');
+    }
+
+    public function payment(){
+        return $this->belongsTo(AgentComissionPayment::class, 'agent_comission_payment_id');
     }
 }

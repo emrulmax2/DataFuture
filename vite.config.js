@@ -366,6 +366,7 @@ export default defineConfig({
                 'resources/js/agent-payment-settings.js',
                 'resources/js/agent-management-comission-details.js',
                 'resources/js/agent-management-remittance.js',
+                'resources/js/agent-management-payments.js',
             ],
             refresh: true,
         }),
