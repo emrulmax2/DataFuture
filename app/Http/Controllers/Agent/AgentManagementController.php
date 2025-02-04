@@ -10,6 +10,7 @@ use App\Models\AccTransaction;
 use App\Models\Agent;
 use App\Models\AgentComission;
 use App\Models\AgentComissionDetail;
+use App\Models\AgentComissionPayment;
 use App\Models\AgentComissionRule;
 use App\Models\AgentUser;
 use App\Models\CourseCreation;
@@ -338,13 +339,13 @@ class AgentManagementController extends Controller
                                                 $q->where('year', $year);
                                             })->orderBy('id', 'ASC')->get();
                             $instCount += ($installments->count() > 0 ? $installments->count() : 0);
-                            $instTotal += ($installment->count() > 0 ? $installment->sum('amount') : 0);
+                            $instTotal += ($installments->count() > 0 ? $installments->sum('amount') : 0);
 
                             $moneyReceipts = SlcMoneyReceipt::where('student_id', $list->id)->where('student_course_relation_id', $std_course_relation_id)
                                             ->where('payment_type', 'Course Fee')->whereHas('agreement', function($q) use($year){
                                                     $q->where('year', $year);
                                             })->orderBy('id', 'ASC')->get();
-                            if($moneyReceipt->count() > 0):
+                            if($moneyReceipts->count() > 0):
                                 $receiptCount += $moneyReceipts->count();
                                 $receiptTotal += $moneyReceipts->sum('amount');
                             endif;
@@ -908,6 +909,8 @@ class AgentManagementController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'agent_id' => (isset($list->agent_id) && $list->agent_id > 0 ? $list->agent_id : 0),
+                    'semester' => (isset($list->rule->semester->name) && !empty($list->rule->semester->name) ? $list->rule->semester->name : ''),
                     'remittance_ref' => $list->remittance_ref,
                     'entry_date' => (!empty($list->entry_date) ? date('jS M, Y', strtotime($list->entry_date)) : ''),
                     'agent_name' => (isset($list->agent->full_name) ? $list->agent->full_name : ''),
@@ -915,6 +918,7 @@ class AgentManagementController extends Controller
                     'amount_html' => (isset($list->comissions) && $list->comissions->count() > 0 ? Number::currency($list->comissions->sum('amount'), in: 'GBP') : '£0.00'),
                     'amount' => (isset($list->comissions) && $list->comissions->count() > 0 ? $list->comissions->sum('amount') : 0),
                     'status' => $list->status,
+                    'payment_status' => (isset($list->payment->status) && $list->payment->status > 0 ? $list->payment->status : 0),
                     'acc_transaction_id' => ($list->acc_transaction_id > 0 ? $list->acc_transaction_id : 0),
                     'transaction_code' => (isset($list->transaction->transaction_code) && !empty($list->transaction->transaction_code) ? $list->transaction->transaction_code : ''),
                     'transaction_date' => (isset($list->transaction->transaction_date_2) && !empty($list->transaction->transaction_date_2) ? date('jS M, Y', strtotime($list->transaction->transaction_date_2)) : ''),
@@ -1208,5 +1212,160 @@ class AgentManagementController extends Controller
             ->setPaper('a4', 'portrait')//landscape portrait
             ->setWarnings(false);
         return $pdf->download($fileName);
+    }
+
+    public function getRemittancesDetail(Request $request){
+        $agent_comission_ids = (isset($request->agent_comission_ids) && !empty($request->agent_comission_ids) ? $request->agent_comission_ids : []);
+        
+        $lastRow = AgentComissionPayment::orderBy('id', 'DESC')->get()->first();
+        $reference = (isset($lastRow->reference)) ? str_replace('P', '', $lastRow->reference) : '00000';
+        $reference_code = 'P'.sprintf('%05d', ($reference + 1));
+
+        if(!empty($agent_comission_ids)):
+            $agentComissions = AgentComission::whereIn('id', $agent_comission_ids)->whereNull('agent_comission_payment_id')->get();
+            $refine_agent_comission_ids = $agentComissions->pluck('id')->unique()->toArray();
+            $remittance_ref = $agentComissions->pluck('remittance_ref')->unique()->toArray();
+            $agent_ids = $agentComissions->pluck('agent_id')->unique()->toArray();
+            $semester_ids = $agentComissions->pluck('semester_id')->unique()->toArray();
+            $semester_names = (!empty($semester_ids) ? Semester::whereIn('id', $semester_ids)->pluck('name')->unique()->toArray() : []);
+            $comissions = AgentComissionDetail::whereIn('agent_comission_id', $refine_agent_comission_ids)->get();
+            if(!empty($agent_ids) && count($agent_ids) == 1):
+                $agent = Agent::whereIn('id', $agent_ids)->orderBy('id', 'DESC')->get()->first();
+                $html = '';
+                $html .= '<table class="table table-bordered table-sm">';
+                    $html .= '<thead>';
+                        $html .= '<tr>';
+                            $html .= '<th>Ref</th>';
+                            $html .= '<th>Date</th>';
+                            $html .= '<th>Agent</th>';
+                            $html .= '<th>Terms</th>';
+                            $html .= '<th>Remittance Ref.</th>';
+                            $html .= '<th>Amount</th>';
+                        $html .= '</tr>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                        $html .= '<tr>';
+                            $html .= '<td>'.$reference_code.'</td>';
+                            $html .= '<td><input type="text" class="form-control datepickers w-full" name="date" placeholder="DD-MM-YYYY"/><div class="acc__input-error text-danger mt-1"></div></td>';
+                            $html .= '<td>'.(isset($agent->full_name) && !empty($agent->full_name) ? $agent->full_name : '').(isset($agent->organization) && !empty($agent->organization) ? ' ('.$agent->organization.')' : '').'</td>';
+                            $html .= '<td>'.(!empty($semester_names) ? implode(', ', $semester_names) : '').'</td>';
+                            $html .= '<td>'.(!empty($remittance_ref) ? implode(', ', $remittance_ref) : '').'</td>';
+                            $html .= '<td>'.($comissions->count() > 0 ? Number::currency($comissions->sum('amount'), in: 'GBP') : '').'</td>';
+                        $html .= '</tr>';
+                    $html .= '</tbody>';
+                $html .= '</table>';
+                $html .= '<input type="hidden" name="reference" value="'.$reference_code.'"/>';
+                $html .= '<input type="hidden" name="agent_id" value="'.(isset($agent->id) && $agent->id > 0 ? $agent->id : 0).'"/>';
+                $html .= '<input type="hidden" name="agent_user_id" value="'.(isset($agent->agent_user_id) && $agent->agent_user_id > 0 ? $agent->agent_user_id : 0).'"/>';
+                $html .= '<input type="hidden" name="agent_comission_ids" value="'.implode(',', $refine_agent_comission_ids).'"/>';
+                $html .= '<input type="hidden" name="amount" value="'.($comissions->count() > 0 ? $comissions->sum('amount') : 0).'"/>';
+
+                return response()->json(['msg' => 'success', 'html' => $html], 200);
+            else:
+                return response()->json(['msg' => 'You can not select multiple agents remittance at a time.'], 422);
+            endif;
+        else:
+            return response()->json(['msg' => 'Please select some remittance to generate the schedule.'], 422);
+        endif;
+    }
+
+    public function storePayment(Request $request){
+        $agent_comission_ids = (isset($request->agent_comission_ids) && !empty($request->agent_comission_ids) ? explode(',', $request->agent_comission_ids) : []);
+        $reference = $request->reference;
+        $date = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : date('Y-m-d'));
+        $agent_id = (isset($request->agent_id) && $request->agent_id > 0 ? $request->agent_id : null);
+        $agent_user_id = (isset($request->agent_user_id) && $request->agent_user_id > 0 ? $request->agent_user_id : null);
+        $amount = (isset($request->amount) && $request->amount > 0 ? $request->amount : 0);
+
+        $data = [];
+        $data['agent_id'] = $agent_id;
+        $data['agent_user_id'] = $agent_user_id;
+        $data['reference'] = $reference;
+        $data['date'] = $date;
+        $data['amount'] = $amount;
+        $data['status'] = 1;
+        $data['created_by'] = auth()->user()->id;
+        $payment = AgentComissionPayment::create($data);
+
+        if($payment->id):
+            if(!empty($agent_comission_ids)):
+                AgentComission::whereIn('id', $agent_comission_ids)->update(['agent_comission_payment_id' => $payment->id]);
+            endif;
+            return response()->json(['msg' => 'Agent comission remittances successfully secheduled for payment.'], 200);
+        else:
+            return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 422);
+        endif;
+    }
+
+    public function payments(){
+        return view('pages.agent.management.payments', [
+            'title' => 'Agent Management - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Agent', 'href' => route('agent-user.index')],
+                ['label' => 'Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Remittance', 'href' => 'javascript:void(0);'],
+                ['label' => 'Payments', 'href' => 'javascript:void(0);'],
+            ]
+        ]);
+    }
+
+    public function paymentList(Request $request){
+        $querystr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
+        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = AgentComissionPayment::with('comissions')->where('status', $status);
+        if(!empty($querystr)):
+            $query->where(function($q) use($querystr){
+                $q->where('remittance_ref','LIKE','%'.$querystr.'%');
+            });
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        /*if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'agent_id' => (isset($list->agent_id) && $list->agent_id > 0 ? $list->agent_id : 0),
+                    'semester' => (isset($list->rule->semester->name) && !empty($list->rule->semester->name) ? $list->rule->semester->name : ''),
+                    'remittance_ref' => $list->remittance_ref,
+                    'entry_date' => (!empty($list->entry_date) ? date('jS M, Y', strtotime($list->entry_date)) : ''),
+                    'agent_name' => (isset($list->agent->full_name) ? $list->agent->full_name : ''),
+                    'organization' => (isset($list->agent->organization) ? $list->agent->organization : ''),
+                    'amount_html' => (isset($list->comissions) && $list->comissions->count() > 0 ? Number::currency($list->comissions->sum('amount'), in: 'GBP') : '£0.00'),
+                    'amount' => (isset($list->comissions) && $list->comissions->count() > 0 ? $list->comissions->sum('amount') : 0),
+                    'status' => $list->status,
+                    'payment_status' => (isset($list->payment->status) && $list->payment->status > 0 ? $list->payment->status : 0),
+                    'acc_transaction_id' => ($list->acc_transaction_id > 0 ? $list->acc_transaction_id : 0),
+                    'transaction_code' => (isset($list->transaction->transaction_code) && !empty($list->transaction->transaction_code) ? $list->transaction->transaction_code : ''),
+                    'transaction_date' => (isset($list->transaction->transaction_date_2) && !empty($list->transaction->transaction_date_2) ? date('jS M, Y', strtotime($list->transaction->transaction_date_2)) : ''),
+                    'url' => route('agent.management.comission.details', $list->id),
+
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;*/
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 }

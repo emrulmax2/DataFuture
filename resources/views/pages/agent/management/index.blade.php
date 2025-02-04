@@ -78,7 +78,7 @@
                         </div>
                         <div class="mt-3 percentageWrap" style="display: none;">
                             <label for="percentage" class="form-label">Percentage <span class="text-danger">*</span></label>
-                            <input id="percentage" step="1" type="number" name="percentage" class="form-control w-full">
+                            <input id="percentage" type="text" name="percentage" class="form-control w-full">
                             <div class="acc__input-error error-percentage text-danger mt-2"></div>
                         </div>
                         <div class="mt-3 fixedAmountWrap" style="display: none;">

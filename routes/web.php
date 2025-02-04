@@ -3477,6 +3477,11 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-management/remittance/linked-transaction', 'linkedTransaction')->name('agent.management.remittance.linked.transaction'); 
         Route::get('agent-management/remittance/export/{comission_id}', 'exportRemittance')->name('agent.management.remittance.export'); 
         Route::get('agent-management/remittance/print/{comission_id}', 'printRemittance')->name('agent.management.remittance.print'); 
+
+        Route::post('agent-management/remittance/get-remittances-detail', 'getRemittancesDetail')->name('agent.management.remittances.details'); 
+        Route::post('agent-management/remittance/store-payment', 'storePayment')->name('agent.management.remittances.store.payment'); 
+        Route::get('agent-management/remittance/payments', 'payments')->name('agent.management.remittances.payment'); 
+        Route::get('agent-management/remittance/payment-list', 'paymentList')->name('agent.management.remittances.payment.list'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {
