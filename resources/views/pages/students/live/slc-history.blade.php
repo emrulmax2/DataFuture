@@ -602,7 +602,7 @@
                     <div class="modal-footer">
                         @php 
                             $disable = '';
-                            if(empty($student->ssn_no) || (!isset($student->crel->creation->slc_code) || empty($student->crel->creation->slc_code)) || (!isset($student->crel->id) || empty($student->crel->id))):
+                            if(empty($student->ssn_no) || (!isset($student->crel->propose->slc_code) || empty($student->crel->propose->slc_code)) || (!isset($student->crel->id) || empty($student->crel->id))):
                                 $disable = ' disabled ';
                             endif;
                         @endphp
