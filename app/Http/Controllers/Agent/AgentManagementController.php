@@ -799,7 +799,7 @@ class AgentManagementController extends Controller
                 endforeach;
             endif;
             if($entryCount > 0):
-                return response()->json(['url' => route('agent.management.comission.details', $agent_comission_id), 'ids' => count($ids), 'in_ids' => count($in_ids) ], 200);
+                return response()->json(['url' => route('agent.management.comission.details', $agent_comission_id) ], 200);
             else:
                 AgentComission::where('id', $agent_comission_id)->forceDelete();
                 return response()->json(['msg' => 'New money receipt not for the selected students. Please generate comission once you have some new Money receipt.'], 422);
