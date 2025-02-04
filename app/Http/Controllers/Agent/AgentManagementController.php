@@ -1087,11 +1087,12 @@ class AgentManagementController extends Controller
                                 .table.attenRateReportTable tr th{ background: #0d9488; color: #FFF; font-size: 12px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 10px;}
                                 .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
                                 .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
-                                .table.attenRateReportTable tr th.amountHeading, .table.attenRateReportTable tr td.amountColumn{width: 100px; text-align: center;}
+                                .table.attenRateReportTable tr th.amountHeading, .table.attenRateReportTable tr td.amountColumn{width: 90px; text-align: center;}
                                 .attenRateReportTable.table {border-collapse: separate;}
                                 .attenRateReportTable.table tr th, .attenRateReportTable.table tr td{border-spacing: 3px;}
                                 .attenRateReportTable.table tr:nth-child(even) td{background: rgba(241, 245, 249, .9);}
                                 .table.attenRateReportTable tfoot tr th.amountHeading{font-size: 14px;}
+                                .table.attenRateReportTable thead tr td.serialHeading, .table.attenRateReportTable tbody tr td.serialColumn{width: 30px;}
 
                                 .invInfoTable{margin-top: 30px; margin-bottom: 50px;}
                                 .invToTable{width: 300px;}
@@ -1185,17 +1186,20 @@ class AgentManagementController extends Controller
                 $PDFHTML .= '<table class="table attenRateReportTable table-sm" id="continuationListTable">';
                     $PDFHTML .= '<thead>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th>Student Ref</th>';
+                            $PDFHTML .= '<th class="serialHeading">SL</th>';
+                            $PDFHTML .= '<th>Reference</th>';
                             $PDFHTML .= '<th>Name</th>';
                             $PDFHTML .= '<th class="amountHeading">Amount</th>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</thead>';
                     $PDFHTML .= '<tbody>';
                     if($comission_details->count() > 0):
+                        $sl = 1;
                         foreach($comission_details as $list):
                             $comissionFor = (isset($list->comission_for) && !empty($list->comission_for) ? $list->comission_for : 'Course Fee');
                             $receiptAmount = (isset($list->receipt->amount) && $list->receipt->amount > 0 ? ($comissionFor == 'Refund' ? abs($list->receipt->amount) * -1 : $list->receipt->amount) : 0);
                             $PDFHTML .= '<tr>';
+                                $PDFHTML .= '<td class="serialColumn">'.$sl.'</td>';
                                 $PDFHTML .= '<td style="font-weight: bold; font-size: 12px;">';
                                     $PDFHTML .= (isset($list->student->application_no) ? $list->student->application_no : '');
                                     $PDFHTML .= (isset($list->student->registration_no) ? '<br/><span style="display: block; padding-top: 3px; font-weight: normal; font-size: 11px; color: #64748b;">'.$list->student->registration_no.'</span>' : '');
@@ -1204,14 +1208,15 @@ class AgentManagementController extends Controller
                                     $PDFHTML .= (isset($list->student->full_name) ? $list->student->full_name : $list->student->full_name);
                                     $PDFHTML .= (isset($list->student->activeCR->creation->course->name) && !empty($list->student->activeCR->creation->course->name) ? '<span style="display: block; padding-top: 3px; font-weight: normal; font-size: 11px; color: #64748b;">'.$list->student->activeCR->creation->course->name.'</span>' : '');
                                 $PDFHTML .= '</td>';
-                                $PDFHTML .= '<td class="amountColumn" style="font-weight: bold; '.($list->amount < 0 ? 'color: red;' : '').'">'.Number::currency($list->amount, in: 'GBP').'</td>';
+                                $PDFHTML .= '<td class="amountColumn" style="'.($list->amount < 0 ? 'color: red;' : '').'">'.Number::currency($list->amount, in: 'GBP').'</td>';
                             $PDFHTML .= '</tr>';
+                            $sl++;
                         endforeach;
                     endif;
                     $PDFHTML .= '</tbody>';
                     $PDFHTML .= '<tfoot>';
                         $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th colspan="2">Total</th>';
+                            $PDFHTML .= '<th colspan="3">Total</th>';
                             $PDFHTML .= '<th class="amountHeading">'.Number::currency($comission->comissions->sum('amount'), in: 'GBP').'</th>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</tfoot>';
