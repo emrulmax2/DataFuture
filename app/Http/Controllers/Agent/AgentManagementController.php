@@ -692,7 +692,10 @@ class AgentManagementController extends Controller
                                 if(isset($moneyReceipts->id) && $moneyReceipts->id > 0):
                                     /* BEGIN: Year's Comission */
                                     $comissionExist = AgentComissionDetail::where('student_id', $std->id)//->where('agent_comission_id', $agent_comission_id)
-                                                      ->where('slc_money_receipt_id', $moneyReceipts->id)->where('comission_for', 'Course Fee')->orderBy('id', 'desc')->get()->first();
+                                                      ->where('slc_money_receipt_id', $moneyReceipts->id)->where('comission_for', 'Course Fee')
+                                                      ->whereHas('comission', function($q) use($rule_id){
+                                                            $q->where('agent_comission_rule_id', $rule_id);
+                                                      })->orderBy('id', 'desc')->get()->first();
                                     if(!isset($comissionExist->id)):
                                         $comission_details = AgentComissionDetail::create([
                                             'student_id' => $std->id,
@@ -713,7 +716,10 @@ class AgentManagementController extends Controller
                                                     })->orderBy('id', 'ASC')->get()->first();
                                 if(isset($moneyRefunds->id) && $moneyRefunds->id > 0):
                                     $comissionExist = AgentComissionDetail::where('student_id', $std->id)//->where('agent_comission_id', $agent_comission_id)
-                                                      ->where('slc_money_receipt_id', $moneyRefunds->id)->where('comission_for', 'Refund')->orderBy('id', 'desc')->get()->first();
+                                                      ->where('slc_money_receipt_id', $moneyRefunds->id)->where('comission_for', 'Refund')
+                                                      ->whereHas('comission', function($q) use($rule_id){
+                                                            $q->where('agent_comission_rule_id', $rule_id);
+                                                      })->orderBy('id', 'desc')->get()->first();
                                     if(!isset($comissionExist->id)):
                                         $comission_details = AgentComissionDetail::create([
                                             'student_id' => $std->id,
@@ -741,7 +747,10 @@ class AgentManagementController extends Controller
                                     /* BEGIN: Year's Comission */
                                     foreach($moneyReceipts as $recipt):
                                         $comissionExist = AgentComissionDetail::where('student_id', $std->id)//->where('agent_comission_id', $agent_comission_id)
-                                                            ->where('slc_money_receipt_id', $recipt->id)->where('comission_for', 'Course Fee')->orderBy('id', 'desc')->get()->first();
+                                                            ->where('slc_money_receipt_id', $recipt->id)->where('comission_for', 'Course Fee')
+                                                            ->whereHas('comission', function($q) use($rule_id){
+                                                                  $q->where('agent_comission_rule_id', $rule_id);
+                                                            })->orderBy('id', 'desc')->get()->first();
                                         if(!isset($comissionExist->id)):
                                             $comissionAmount = (isset($recipt->amount) && $recipt->amount > 0 && $percentage > 0 ? ($recipt->amount * $percentage) / 100 : 0);
                                             $comission_details = AgentComissionDetail::create([
@@ -765,7 +774,10 @@ class AgentManagementController extends Controller
                                     /* BEGIN: Year's Comission */
                                     foreach($moneyRefunds as $recipt):
                                         $comissionExist = AgentComissionDetail::where('student_id', $std->id)//->where('agent_comission_id', $agent_comission_id)
-                                                            ->where('slc_money_receipt_id', $recipt->id)->where('comission_for', 'Refund')->orderBy('id', 'desc')->get()->first();
+                                                            ->where('slc_money_receipt_id', $recipt->id)->where('comission_for', 'Refund')
+                                                            ->whereHas('comission', function($q) use($rule_id){
+                                                                  $q->where('agent_comission_rule_id', $rule_id);
+                                                            })->orderBy('id', 'desc')->get()->first();
                                         if(!isset($comissionExist->id)):
                                             $comissionAmount = (isset($recipt->amount) && $recipt->amount > 0 && $percentage > 0 ? ($recipt->amount * $percentage) / 100 : 0);
                                             $comission_details = AgentComissionDetail::create([
@@ -787,7 +799,7 @@ class AgentManagementController extends Controller
                 endforeach;
             endif;
             if($entryCount > 0):
-                return response()->json(['url' => route('agent.management.comission.details', $agent_comission_id) ], 200);
+                return response()->json(['url' => route('agent.management.comission.details', $agent_comission_id), 'ids' => count($ids), 'in_ids' => count($in_ids) ], 200);
             else:
                 AgentComission::where('id', $agent_comission_id)->forceDelete();
                 return response()->json(['msg' => 'New money receipt not for the selected students. Please generate comission once you have some new Money receipt.'], 422);
@@ -1184,7 +1196,7 @@ class AgentManagementController extends Controller
                             $comissionFor = (isset($list->comission_for) && !empty($list->comission_for) ? $list->comission_for : 'Course Fee');
                             $receiptAmount = (isset($list->receipt->amount) && $list->receipt->amount > 0 ? ($comissionFor == 'Refund' ? abs($list->receipt->amount) * -1 : $list->receipt->amount) : 0);
                             $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td style="font-weight: bold;">';
+                                $PDFHTML .= '<td style="font-weight: bold; font-size: 12px;">';
                                     $PDFHTML .= (isset($list->student->application_no) ? $list->student->application_no : '');
                                     $PDFHTML .= (isset($list->student->registration_no) ? '<br/><span style="display: block; padding-top: 3px; font-weight: normal; font-size: 11px; color: #64748b;">'.$list->student->registration_no.'</span>' : '');
                                 $PDFHTML .= '</td>';
@@ -1322,7 +1334,7 @@ class AgentManagementController extends Controller
         $query = AgentComissionPayment::with('comissions')->where('status', $status);
         if(!empty($querystr)):
             $query->where(function($q) use($querystr){
-                $q->where('remittance_ref','LIKE','%'.$querystr.'%');
+                $q->where('reference','LIKE','%'.$querystr.'%');
             });
         endif;
 
@@ -1340,7 +1352,7 @@ class AgentManagementController extends Controller
 
         $data = array();
 
-        /*if(!empty($Query)):
+        if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
                 $data[] = [
@@ -1365,7 +1377,7 @@ class AgentManagementController extends Controller
                 ];
                 $i++;
             endforeach;
-        endif;*/
+        endif;
         return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 }

@@ -19,7 +19,7 @@ var agentComissionListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 50,
+            paginationSize: true,
             paginationSizeSelector: [true, 50, 100, 150, 200, 300, 400, 500],
             layout: "fitColumns",
             responsiveLayout: "collapse",
@@ -211,6 +211,7 @@ var agentComissionListTable = (function () {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
+                //console.log(response.data);
                 $theBtn.find('svg.theLoader').fadeOut();
                 $theBtn.removeAttr('disabled');
                 if (response.status == 200) {
