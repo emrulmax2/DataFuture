@@ -1,6 +1,10 @@
     <div class="intro-y flex items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
         <div class="ml-auto flex justify-end">
+            
+            @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
+                <a style="float: right;" href="{{ route('applicantprofile.print',$student->applicant->id) }}" data-id="{{ $student->applicant->id }}" class="btn btn-outline-pending w-auto mr-1"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf</a>
+            @endif
             @if(isset(auth()->user()->priv()['login_as_student']) && auth()->user()->priv()['login_as_student'] == 1)
                 <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning w-auto mr-1 mb-0">
                         Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
@@ -15,7 +19,6 @@
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
             </button>
             @endif
-            <!-- <a style="float: right;" href="{{ route('applicantprofile.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-success text-white w-auto">Download Pdf</a> -->
             <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
         </div>
     </div>
