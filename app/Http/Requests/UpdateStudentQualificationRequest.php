@@ -24,26 +24,30 @@ class UpdateStudentQualificationRequest extends FormRequest
     public function rules()
     {
         return [
-            'highest_academic' => 'required',
-            'qualification_grade_id' => 'required',
-            'degree_award_date' => 'required',
             'previous_provider_id' => 'required',
-            'qualification_type_identifier_id' => 'required',
-            'hesa_qualification_subject_id' => 'required',
+
             'highest_qualification_on_entry_id' => 'required',
+            
+            'highest_academic' => 'required_unless:highest_qualification_on_entry_id,58',
+            'qualification_grade_id' => 'required_unless:highest_qualification_on_entry_id,58',
+            'degree_award_date' => 'required_unless:highest_qualification_on_entry_id,58',
+            'qualification_type_identifier_id' => 'required_unless:highest_qualification_on_entry_id,58',
+            'hesa_qualification_subject_id' => 'required_unless:highest_qualification_on_entry_id,58',
         ];
     }
 
     public function messages()
     {
         return [
-            'highest_academic.required' => 'This field is required.',
-            'qualification_grade_id.required' => 'This field is required.',
-            'degree_award_date.required' => 'This field is required.',
             'previous_provider_id.required' => 'This field is required.',
-            'qualification_type_identifier_id.required' => 'This field is required.',
-            'hesa_qualification_subject_id.required' => 'This field is required.',
-            'highest_qualification_on_entry_id.required' => 'This field is required.'
+
+            'highest_qualification_on_entry_id.required' => 'This field is required.',
+
+            'qualification_type_identifier_id.required_unless' => 'This field is required.',
+            'hesa_qualification_subject_id.required_unless' => 'This field is required.',
+            'highest_academic.required_unless' => 'This field is required.',
+            'qualification_grade_id.required_unless' => 'This field is required.',
+            'degree_award_date.required_unless' => 'This field is required.',
         ];
     }
 }

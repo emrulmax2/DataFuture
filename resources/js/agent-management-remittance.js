@@ -142,10 +142,10 @@ var agentRemittanceListTable = (function () {
                                     <div class="dropdown-menu w-40">\
                                         <ul class="dropdown-content">\
                                             <li>\
-                                                <a href="'+route('agent.management.remittance.export', cell.getData().id)+'" class="dropdown-item"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-success"></i> Download Excel</a>\
+                                                <a href="'+route('agent.management.remittance.print', cell.getData().id)+'" class="dropdown-item"><i data-lucide="printer" class="w-4 h-4 mr-2 text-success"></i> Download PDF</a>\
                                             </li>\
                                             <li>\
-                                                <a href="'+route('agent.management.remittance.print', cell.getData().id)+'" class="dropdown-item"><i data-lucide="printer" class="w-4 h-4 mr-2 text-success"></i> Download PDF</a>\
+                                                <a href="'+route('agent.management.remittance.export', cell.getData().id)+'" class="dropdown-item"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-success"></i> Download Excel</a>\
                                             </li>\
                                         </ul>\
                                     </div>\

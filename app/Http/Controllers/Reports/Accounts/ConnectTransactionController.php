@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ArrayCollectionExport;
+use App\Models\AccTransactionTag;
 
 class ConnectTransactionController extends Controller
 {
@@ -59,7 +60,17 @@ class ConnectTransactionController extends Controller
 
             $connect = 0;
             foreach($slc_money_receipt_ids as $receipt):
+                $theMoneyReceipt = SlcMoneyReceipt::with('student')->find($receipt);
+                $registration_no = (isset($theMoneyReceipt->student->registration_no) && !empty($theMoneyReceipt->student->registration_no) ? $theMoneyReceipt->student->registration_no : '');
+                $tagCount = AccTransactionTag::where('acc_transaction_id', $acc_transaction_id)->where('registration_no', $registration_no)->get()->count();
+                if($tagCount == 0):
+                    AccTransactionTag::create([
+                        'acc_transaction_id' => $acc_transaction_id,
+                        'registration_no' => $registration_no
+                    ]);
+                endif;
                 $slcMoneyReceipt = SlcMoneyReceipt::where('id', $receipt)->update(['acc_transaction_id' => $acc_transaction_id]);
+
                 $connect += 1;
             endforeach;
 

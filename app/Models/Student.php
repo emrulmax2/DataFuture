@@ -62,6 +62,9 @@ class Student extends Model
         }
         return NULL;
     }
+    public function applicant(){
+        return $this->belongsTo(Applicant::class, 'applicant_id');
+    }
 
     public function getPhotoAttribute($value){
         return $value;
