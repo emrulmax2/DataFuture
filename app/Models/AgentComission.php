@@ -19,7 +19,6 @@ class AgentComission extends Model
         'entry_date',
         'status',
         'agent_comission_payment_id',
-        'acc_transaction_id',
         'created_by',
         'updated_by',
     ];
@@ -51,10 +50,6 @@ class AgentComission extends Model
 
     public function comissions(){
         return $this->hasMany(AgentComissionDetail::class, 'agent_comission_id', 'id');
-    }
-
-    public function transaction(){
-        return $this->belongsTo(AccTransaction::class, 'acc_transaction_id');
     }
 
     public function payment(){

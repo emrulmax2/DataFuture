@@ -5,13 +5,13 @@ import Litepicker from "litepicker";
 
 
 ("use strict");
-var agentRemittanceListTable = (function () {
+var agentRemittPaymentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "1";
 
-        let tableContent = new Tabulator("#agentRemittanceListTable", {
+        let tableContent = new Tabulator("#agentRemittPaymentsListTable", {
             ajaxURL: route("agent.management.remittances.payment.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
@@ -24,38 +24,20 @@ var agentRemittanceListTable = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
-            selectable:true,
             columns: [
-                {
-                    formatter: "rowSelection", 
-                    titleFormatter: "rowSelection", 
-                    hozAlign: "left", 
-                    headerHozAlign: "left",
-                    width: "60",
-                    headerSort: false, 
-                    download: false,
-                    cellClick:function(e, cell){
-                        cell.getRow().toggleSelect();
-                    }
-                },
                 {
                     title: "#ID",
                     field: "id",
                     width: "80",
                 },
                 {
-                    title: "Remittance Ref.",
-                    field: "remittance_ref",
+                    title: "Reference",
+                    field: "reference",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Created Date",
-                    field: "entry_date",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Intake",
-                    field: "semester",
+                    title: "Date",
+                    field: "date",
                     headerHozAlign: "left",
                 },
                 {
@@ -75,12 +57,18 @@ var agentRemittanceListTable = (function () {
                     }
                 },
                 {
-                    title: "Total Amount",
-                    field: "amount_html",
+                    title: "Terms",
+                    field: "semsters",
                     headerHozAlign: "left",
                     headerSort: false,
                 },
-                /*{
+                {
+                    title: "Remit Ref.",
+                    field: "remittance_refs",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                },
+                {
                     title: "Transaction",
                     field: "transaction_code",
                     headerHozAlign: "left",
@@ -103,27 +91,21 @@ var agentRemittanceListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 1){
-                            return '<button data-id="'+cell.getData().id+'" data-amount="'+cell.getData().amount+'" type="button" data-tw-toggle="modal" data-tw-target="#linkTransactionModal" class="linked_trans_btn btn btn-xs btn-warning text-white px-2 py-0 rounded-sm">Unpaid</button>';
-                        }else{
-                            return '<span class="btn btn-xs btn-success text-white px-2 py-0 rounded-sm">Paid</span>';
-                        }
-                    }
-                },*/
-                {
-                    title: "Status",
-                    field: "payment_status",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        if(cell.getData().payment_status == 1){
                             return '<span class=" btn btn-xs btn-linkedin text-white px-2 py-0 text-xs rounded-sm">Scheduled</span>';
-                        }else if(cell.getData().payment_status == 2){
+                        }else if(cell.getData().status == 2){
                             return '<span class=" btn btn-xs btn-success text-white px-2 py-0 text-xs rounded-sm">Paid</span>';
-                        }else if(cell.getData().payment_status == 3){
+                        }else if(cell.getData().status == 3){
                             return '<span class=" btn btn-xs btn-danger text-white px-2 py-0 text-xs rounded-sm">Canceled</span>';
                         }else{
-                            return '<span class="btn btn-xs btn-facebook text-white px-2 py-0 text-xs rounded-sm">New</span>';
+                            return '';
                         }
                     }
+                },
+                {
+                    title: "Amount",
+                    field: "amount_html",
+                    headerHozAlign: "left",
+                    headerSort: false,
                 },
                 {
                     title: "Actions",
@@ -134,23 +116,9 @@ var agentRemittanceListTable = (function () {
                     width: "180",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        btns +='<a href="'+cell.getData().url+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                        btns += '<div class="dropdown inline-flex ml-1">\
-                                    <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></button>\
-                                    <div class="dropdown-menu w-40">\
-                                        <ul class="dropdown-content">\
-                                            <li>\
-                                                <a href="'+route('agent.management.remittance.export', cell.getData().id)+'" class="dropdown-item"><i data-lucide="file-text" class="w-4 h-4 mr-2 text-success"></i> Download Excel</a>\
-                                            </li>\
-                                            <li>\
-                                                <a href="'+route('agent.management.remittance.print', cell.getData().id)+'" class="dropdown-item"><i data-lucide="printer" class="w-4 h-4 mr-2 text-success"></i> Download PDF</a>\
-                                            </li>\
-                                        </ul>\
-                                    </div>\
-                                </div>';
-                        btns += '<button data-id="' +cell.getData().id +'" class="send_email btn btn-primary text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="mail" class="w-4 h-4"></i></button>';
-                        btns += '<input type="hidden" class="agent_comission_ids" name="agent_comission_ids" value="' +cell.getData().id +'"/>';
-                        btns += '<input type="hidden" class="agent_ids" name="agent_ids" value="' +cell.getData().agent_id +'"/>';
+                        if(cell.getData().acc_transaction_id == 0){
+                            btns +='<button data-id="'+cell.getData().id+'" data-amount="'+cell.getData().amount+'" type="button" data-tw-toggle="modal" data-tw-target="#linkTransactionModal" class="linked_trans_btn btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="link" class="w-4 h-4"></i></button>';
+                        }
                         return btns;
                     },
                 },
@@ -162,17 +130,6 @@ var agentRemittanceListTable = (function () {
                     nameAttr: "data-lucide",
                 });
             },
-            rowSelectionChanged:function(data, rows){
-                var ids = [];
-                if(rows.length > 0){
-                    $('#scheduleRemitPaymentBtn').fadeIn();
-                }else{
-                    $('#scheduleRemitPaymentBtn').fadeOut();
-                }
-            },
-            selectableCheck:function(row){
-                return row.getData().id > 0;
-            }
         });
 
         // Redraw table onresize
@@ -191,3 +148,166 @@ var agentRemittanceListTable = (function () {
         },
     };
 })();
+
+(function(){
+    if ($("#agentRemittPaymentsListTable").length) {
+        agentRemittPaymentsListTable.init();
+
+        // Filter function
+        function filterTitleHTMLForm() {
+            agentRemittPaymentsListTable.init();
+        }
+
+        // On submit filter form
+        $("#tabulatorFilterForm")[0].addEventListener(
+            "keypress",
+            function (event) {
+                let keycode = event.keyCode ? event.keyCode : event.which;
+                if (keycode == "13") {
+                    event.preventDefault();
+                    filterHTMLForm();
+                }
+            }
+        );
+
+        // On click go button
+        $("#tabulator-html-filter-go").on("click", function (event) {
+            filterTitleHTMLForm();
+        });
+
+        // On reset filter form
+        $("#tabulator-html-filter-reset").on("click", function (event) {
+            $("#query").val("");
+            $("#status").val("1");
+            filterTitleHTMLForm();
+        });
+    }
+
+    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const linkTransactionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#linkTransactionModal"));
+
+    const linkTransactionModalEl = document.getElementById('linkTransactionModal')
+    linkTransactionModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#comissionGenerateModal .acc__input-error').html('');
+        $('#comissionGenerateModal #transaction_code').val('');
+        $('#comissionGenerateModal #transaction_id').val('');
+        $('#comissionGenerateModal .autoFillDropdown').html('').fadeOut();
+
+        $('#comissionGenerateModal [name="agent_comission_payment_id"]').val('0');
+        $('#comissionGenerateModal [name="agent_comission_total"]').val('0');
+        $('#linkTransactionModal .modal-body .amountError').remove();
+
+    });
+
+    $('#agentRemittPaymentsListTable').on('click', '.linked_trans_btn', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var agent_comission_payment_id = $theBtn.attr('data-id');
+        var agent_comission_total = $theBtn.attr('data-amount');
+
+        $('#linkTransactionModal [name="agent_comission_payment_id"]').val(agent_comission_payment_id);
+        $('#linkTransactionModal [name="agent_comission_total"]').val(agent_comission_total);
+    })
+
+    $('#linkTransactionModal #transaction_code').on('keyup', function(){
+        var $theInput = $(this);
+        var SearchVal = $theInput.val();
+
+        if(SearchVal.length >= 3){
+            axios({
+                method: "post",
+                url: route('agent.management.remittance.search.transaction'),
+                data: {SearchVal : SearchVal},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $theInput.siblings('.autoFillDropdown').html(response.data.htm).fadeIn();
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                    $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+                }
+            });
+        }else{
+            $theInput.siblings('.autoFillDropdown').html('').fadeOut();
+        }
+    });
+
+    $('#linkTransactionModal .autoFillDropdown').on('click', 'li a:not(".disable")', function(e){
+        e.preventDefault();
+        var comission_total = $('#linkTransactionModal [name="comission_total"]').val();
+        var transaction_code = $(this).attr('href');
+        var transaction_id = $(this).attr('data-id');
+        var transaction_amount = $(this).attr('data-amount');
+        $(this).parent('li').parent('ul.autoFillDropdown').siblings('.transaction_code').val(transaction_code);
+        $(this).parent('li').parent('ul.autoFillDropdown').siblings('.transaction_id').val(transaction_id);
+        $(this).parent('li').parent('.autoFillDropdown').html('').fadeOut();
+
+        if(comission_total != transaction_amount){
+            $('#linkTransactionModal .modal-body .amountError').remove();
+            $('#linkTransactionModal .modal-body').append('<div class="amountError alert alert-pending-soft show flex items-center mt-5" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <span><strong>Oops! </strong> Transaction amount does not match with the remittance total.</span></div>')
+            
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        }else{
+            $('#linkTransactionModal .modal-body .amountError').remove();
+        }
+    });
+
+    $('#linkTransactionForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('linkTransactionForm');
+    
+        document.querySelector('#linkTransBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#linkTransBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('agent.management.remittance.linked.transaction'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#linkTransBtn').removeAttribute('disabled');
+            document.querySelector("#linkTransBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                linkTransactionModal.hide();
+
+                succModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Transaction successfully linked with the payment.');
+                });     
+
+                setTimeout(() => {
+                    succModal.hide();
+                }, 2000);
+            }
+            agentRemittPaymentsListTable.init();
+        }).catch(error => {
+            document.querySelector('#linkTransBtn').removeAttribute('disabled');
+            document.querySelector("#linkTransBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    warningModal.show();
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html( "ERROR!" );
+                        $("#warningModal .warningModalDesc").html(error.response.data.msg);
+                    });     
+
+                    setTimeout(() => {
+                        succModal.hide();
+                    }, 2000);
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+})()

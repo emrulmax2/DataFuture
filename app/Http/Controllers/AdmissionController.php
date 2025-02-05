@@ -1345,7 +1345,7 @@ class AdmissionController extends Controller
         $document_settings_name = (isset($documentSetting->name) && !empty($documentSetting->name) ? $documentSetting->name : '');
         $hard_copy_check = $request->hard_copy_check;
         $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
-        $display_file_name .= ($display_file_name != '' ? ($document_settings_name != '' ? ' - '.$document_settings_name : '') : $document_settings_name);
+        $display_file_name = ($document_settings_name != '' ? $document_settings_name : '') . ($display_file_name != '' ? ($document_settings_name != '' ? ' - ' . $display_file_name : $display_file_name) : '');
         
 
         $document = $request->file('file');

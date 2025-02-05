@@ -30,7 +30,7 @@
                                     <li>
                                         <div class="form-check dropdown-item">
                                             <label class="inline-flex items-center cursor-pointer" for="employee_doc_{{ $ds->id }}"><i data-lucide="activity" class="w-4 h-4 mr-2"></i> {{ $ds->name }}</label>
-                                            <input id="employee_doc_{{ $ds->id }}" name="employee_doc_ids[]" class="form-check-input employee_doc_ids ml-auto" type="radio" value="{{ $ds->id }}">
+                                            <input id="employee_doc_{{ $ds->id }}" name="employee_doc_ids[]" class="form-check-input employee_doc_ids ml-auto" type="radio" value="{{ $ds->id }}" data-label="{{ $ds->name }}">
                                         </div>
                                     </li>
                                 @endforeach
@@ -342,7 +342,8 @@
                     </form>
                     <div class="mt-3">
                         <label class="block mb-1">Document Name</label>
-                        <input type="text" name="doc_name" class="form-control w-full"/>
+                        <span id="documentNameDisplay" class="block mb-1"></span>
+                        <input type="text" name="doc_name" class="displayNameInput form-control w-full"/>
                     </div>
                     <div class="mt-3">
                         <label>Hard Copy Checked?</label>

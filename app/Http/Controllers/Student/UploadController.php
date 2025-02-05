@@ -21,7 +21,7 @@ class UploadController extends Controller
         $hard_copy_check = $request->hard_copy_check;
 
         $display_file_name = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : '');
-        $display_file_name .= ($display_file_name != '' ? ($document_settings_name != '' ? ' - '.$document_settings_name : '') : $document_settings_name);
+        $display_file_name = ($document_settings_name != '' ? $document_settings_name : '') . ($display_file_name != '' ? ($document_settings_name != '' ? ' - ' . $display_file_name : $display_file_name) : '');
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
@@ -79,7 +79,7 @@ class UploadController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $url = '';
-                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('s3')->exists('public/students/'.$list->student_id.'/'.$list->current_file_name)):
+                if(isset($list->current_file_name) && !empty($list->current_file_name) && Storage::disk('public')->exists('public/students/'.$list->student_id.'/'.$list->current_file_name)):
                     $disk = Storage::disk('s3');
                     $url = $disk->url('public/students/'.$list->student_id.'/'.$list->current_file_name);
                 endif;
