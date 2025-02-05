@@ -67,4 +67,8 @@ class AccTransaction extends Model
     public function assets(){
         return $this->hasOne(AccAssetRegister::class, 'acc_transaction_id', 'id');
     }
+
+    public function tags(){
+        return $this->hasMany(AccTransactionTag::class, 'acc_transaction_id', 'id');
+    }
 }

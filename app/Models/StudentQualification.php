@@ -57,11 +57,7 @@ class StudentQualification extends Model
         $this->attributes['degree_award_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
     }
     public function getDegreeAwardDateAttribute($value) {
-        if($value == '0000-00-00'){
-            return '0000-00-00';
-        } else {
-            return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
-        }
+        return (!empty($value) && $value != '0000-00-00' ? date('d-m-Y', strtotime($value)) : '');
     }
 
     public function grade(){

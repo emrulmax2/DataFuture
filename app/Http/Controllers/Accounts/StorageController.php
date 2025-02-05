@@ -163,12 +163,9 @@ class StorageController extends Controller
                 if(!empty($categoryIds)):
                     $q->orWhereIn('acc_category_id', $categoryIds);
                 endif;
+            })->orWhereHas('tags', function($q) use($queryStr){
+                $q->where('registration_no','LIKE', '%'.$queryStr.'%');
             });
-            /*$query->orWhereHas('receipts', function($q) use($queryStr){
-                $q->whereHas('student', function($sq) use($queryStr){
-                    $sq->where('registration_no','LIKE', $queryStr.'%');
-                });
-            });*/
         endif;
         /*if($status == 2):
             $query->onlyTrashed();
