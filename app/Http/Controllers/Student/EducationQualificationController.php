@@ -103,17 +103,17 @@ class EducationQualificationController extends Controller
         
         $data = StudentQualification::create([
             'student_id'=> $request->student_id,
-            'highest_academic'=> $request->highest_academic,
-            'awarding_body'=> $request->awarding_body,
-            'subjects'=> $request->subjects,
+            'highest_academic'=> (!empty($request->highest_academic) ? $request->highest_academic : null),
+            'awarding_body'=> (!empty($request->awarding_body) ? $request->awarding_body : null),
+            'subjects'=> (!empty($request->subjects) ? $request->subjects : null),
             //'result'=> $request->result,
             'qualification_grade_id'=> (isset($request->qualification_grade_id) && $request->qualification_grade_id > 0 ? $request->qualification_grade_id : null),
-            'highest_qualification_on_entry_id'=> $request->highest_qualification_on_entry_id,
-            'hesa_qualification_subject_id'=> $request->hesa_qualification_subject_id,
-            'qualification_type_identifier_id'=> $request->qualification_type_identifier_id,
-            'previous_provider_id'=> $request->previous_provider_id,
+            'highest_qualification_on_entry_id'=> (!empty($request->highest_qualification_on_entry_id) ? $request->highest_qualification_on_entry_id : null),
+            'hesa_qualification_subject_id'=> (!empty($request->hesa_qualification_subject_id) ? $request->hesa_qualification_subject_id : null),
+            'qualification_type_identifier_id'=> (!empty($request->qualification_type_identifier_id) ? $request->qualification_type_identifier_id : null),
+            'previous_provider_id'=> (!empty($request->previous_provider_id) ? $request->previous_provider_id : null),
             'hesa_exam_sitting_venue_id'=> ($request->hesa_exam_sitting_venue_id) ?? null,
-            'degree_award_date'=> date('Y-m-d', strtotime($request->degree_award_date)),
+            'degree_award_date'=> (!empty($request->degree_award_date) ? date('Y-m-d', strtotime($request->degree_award_date)) : null),
             'created_by' => auth()->user()->id
         ]);
 
