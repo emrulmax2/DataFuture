@@ -441,7 +441,7 @@
 
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
-                            <label class="form-check-label ml-4" for="">Print View</label>
+                            <label class="form-check-label ml-4" for="">Print Application Form</label>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
