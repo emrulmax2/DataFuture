@@ -474,6 +474,25 @@ var applicantUploadListTable = (function () {
             $('#uploadDocumentModal input[name="document_setting_id"]').val(
                 documentSettingId
             );
+
+            var selectedDocumentID = $('.applicant_doc_ids:checked');
+            var documentLabelText = selectedDocumentID.attr('data-label').trim();
+
+            $('#documentNameDisplay').text(documentLabelText);
+
+            $('.displayNameInput').on('keyup', function() {
+                var displayName = $(this).val();
+                var seperator = " ";
+                if(displayName.length > 0){
+                    seperator = " - ";
+                }else{
+                    seperator = " ";
+                }
+                $('#documentNameDisplay').text(documentLabelText + seperator + displayName);
+            });
+
+
+
             uploadsDropdown.hide();
             $(".applicant_doc_ids").prop("checked", false);
         } else {

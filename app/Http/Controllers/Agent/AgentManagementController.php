@@ -886,7 +886,7 @@ class AgentManagementController extends Controller
 
     public function remittanceList(Request $request){
         $querystr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) && $request->status > 0 ? $request->status : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -894,10 +894,15 @@ class AgentManagementController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AgentComission::with('comissions')->where('status', $status);
+        $query = AgentComission::with('comissions');
         if(!empty($querystr)):
             $query->where(function($q) use($querystr){
                 $q->where('remittance_ref','LIKE','%'.$querystr.'%');
+            });
+        endif;
+        if($status > 0):
+            $query->whereHas('payment', function($q) use($status){
+                $q->where('status', $status);
             });
         endif;
 
@@ -931,9 +936,7 @@ class AgentManagementController extends Controller
                     'amount' => (isset($list->comissions) && $list->comissions->count() > 0 ? $list->comissions->sum('amount') : 0),
                     'status' => $list->status,
                     'payment_status' => (isset($list->payment->status) && $list->payment->status > 0 ? $list->payment->status : 0),
-                    'acc_transaction_id' => ($list->acc_transaction_id > 0 ? $list->acc_transaction_id : 0),
-                    'transaction_code' => (isset($list->transaction->transaction_code) && !empty($list->transaction->transaction_code) ? $list->transaction->transaction_code : ''),
-                    'transaction_date' => (isset($list->transaction->transaction_date_2) && !empty($list->transaction->transaction_date_2) ? date('jS M, Y', strtotime($list->transaction->transaction_date_2)) : ''),
+                    'payment_date' => (isset($list->payment->date) && !empty($list->payment->date) ? date('jS M, Y', strtotime($list->payment->date)) : ''),
                     'url' => route('agent.management.comission.details', $list->id),
 
                     'deleted_at' => $list->deleted_at
@@ -942,38 +945,6 @@ class AgentManagementController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
-    }
-
-    public function searchTransactions(Request $request){
-        $SearchVal = (isset($request->SearchVal) && !empty($request->SearchVal) ? trim($request->SearchVal) : '');
-        $html = '';
-        $Query = AccTransaction::where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->orderBy('transaction_date_2', 'DESC')->get();
-        
-        if($Query->count() > 0):
-            foreach($Query as $qr):
-                $html .= '<li>';
-                    $html .= '<a href="'.$qr->transaction_code.'" data-id="'.$qr->id.'" data-amount="'.$qr->transaction_amount.'" class="dropdown-item">'.$qr->transaction_code.'</a>';
-                $html .= '</li>';
-            endforeach;
-        else:
-            $html .= '<li>';
-                $html .= '<a href="javascript:void(0);" class="dropdown-item">Nothing found!</a>';
-            $html .= '</li>';
-        endif;
-
-        return response()->json(['htm' => $html], 200);
-    }
-
-    public function linkedTransaction(RemittanceLinkedRequest $request){
-        $transaction_id = $request->transaction_id;
-        $agent_comission_id = $request->agent_comission_id;
-        $comission_total = $request->comission_total;
-
-        if($transaction_id > 0 && $agent_comission_id > 0):
-            AgentComission::where('id', $agent_comission_id)->update(['acc_transaction_id' => $transaction_id, 'status' => 2]);
-        endif;
-
-        return response()->json(['msg' => 'Agent Remittance successfully linked with the transaction.'], 200);
     }
 
     public function exportRemittance($comission_id){
@@ -1360,29 +1331,71 @@ class AgentManagementController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $terms = [];
+                $remit_ref = [];
+                if(isset($list->comissions) && $list->comissions->count() > 0):
+                    foreach($list->comissions as $comission):
+                        $remit_ref[] = $comission->remittance_ref;
+                        if(isset($comission->rule->semester->name) && !empty($comission->rule->semester->name)):
+                            $terms[] = $comission->rule->semester->name;
+                        endif;
+                    endforeach;
+                endif;
+                $terms = array_unique($terms);
+                $remit_ref = array_unique($remit_ref);
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'agent_id' => (isset($list->agent_id) && $list->agent_id > 0 ? $list->agent_id : 0),
-                    'semester' => (isset($list->rule->semester->name) && !empty($list->rule->semester->name) ? $list->rule->semester->name : ''),
-                    'remittance_ref' => $list->remittance_ref,
-                    'entry_date' => (!empty($list->entry_date) ? date('jS M, Y', strtotime($list->entry_date)) : ''),
+                    'reference' => $list->reference,
+                    'date' => (!empty($list->date) ? date('jS M, Y', strtotime($list->date)) : ''),
                     'agent_name' => (isset($list->agent->full_name) ? $list->agent->full_name : ''),
                     'organization' => (isset($list->agent->organization) ? $list->agent->organization : ''),
-                    'amount_html' => (isset($list->comissions) && $list->comissions->count() > 0 ? Number::currency($list->comissions->sum('amount'), in: 'GBP') : '£0.00'),
-                    'amount' => (isset($list->comissions) && $list->comissions->count() > 0 ? $list->comissions->sum('amount') : 0),
+                    'amount_html' => (!empty($list->amount) ? Number::currency($list->amount, in: 'GBP') : '£0.00'),
+                    'amount' => (!empty($list->amount) ? $list->amount : 0),
                     'status' => $list->status,
-                    'payment_status' => (isset($list->payment->status) && $list->payment->status > 0 ? $list->payment->status : 0),
+                    'semsters' => (!empty($terms) ? implode(', ', $terms) : ''),
+                    'remittance_refs' => (!empty($remit_ref) ? implode(', ', $remit_ref) : ''),
                     'acc_transaction_id' => ($list->acc_transaction_id > 0 ? $list->acc_transaction_id : 0),
                     'transaction_code' => (isset($list->transaction->transaction_code) && !empty($list->transaction->transaction_code) ? $list->transaction->transaction_code : ''),
                     'transaction_date' => (isset($list->transaction->transaction_date_2) && !empty($list->transaction->transaction_date_2) ? date('jS M, Y', strtotime($list->transaction->transaction_date_2)) : ''),
-                    'url' => route('agent.management.comission.details', $list->id),
-
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
+    }
+
+    public function searchTransactions(Request $request){
+        $SearchVal = (isset($request->SearchVal) && !empty($request->SearchVal) ? trim($request->SearchVal) : '');
+        $html = '';
+        $Query = AccTransaction::where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->orderBy('transaction_date_2', 'DESC')->get();
+        
+        if($Query->count() > 0):
+            foreach($Query as $qr):
+                $html .= '<li>';
+                    $html .= '<a href="'.$qr->transaction_code.'" data-id="'.$qr->id.'" data-amount="'.$qr->transaction_amount.'" class="dropdown-item">'.$qr->transaction_code.'</a>';
+                $html .= '</li>';
+            endforeach;
+        else:
+            $html .= '<li>';
+                $html .= '<a href="javascript:void(0);" class="dropdown-item">Nothing found!</a>';
+            $html .= '</li>';
+        endif;
+
+        return response()->json(['htm' => $html], 200);
+    }
+
+    public function linkedTransaction(RemittanceLinkedRequest $request){
+        $transaction_id = $request->transaction_id;
+        $agent_comission_payment_id = $request->agent_comission_payment_id;
+        $agent_comission_total = $request->agent_comission_total;
+
+        if($transaction_id > 0 && $agent_comission_payment_id > 0):
+            AgentComissionPayment::where('id', $agent_comission_payment_id)->update(['acc_transaction_id' => $transaction_id, 'status' => 2]);
+            return response()->json(['msg' => 'Remittance Payment successfully linked with the transaction.'], 200);
+        else:
+            return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 422);
+        endif;
     }
 }
