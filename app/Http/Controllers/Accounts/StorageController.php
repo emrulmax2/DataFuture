@@ -160,12 +160,11 @@ class StorageController extends Controller
                     ->orWhere('transaction_date_2','LIKE','%'.$queryStr.'%')
                     ->orWhere('transaction_code','LIKE','%'.$queryStr.'%')
                     ->orWhere('transaction_amount','LIKE','%'.$queryStr.'%')
-                    ->orWhere('invoice_no','LIKE','%'.$queryStr.'%');
+                    ->orWhere('invoice_no','LIKE','%'.$queryStr.'%')
+                    ->orWhere('taged_students','LIKE','%'.$queryStr.'%');
                 if(!empty($categoryIds)):
                     $q->orWhereIn('acc_category_id', $categoryIds);
                 endif;
-            })->orWhereHas('tags', function($q) use($queryStr){
-                $q->where('registration_no','LIKE', '%'.$queryStr.'%');
             });
         endif;
         /*if($status == 2):
@@ -195,13 +194,12 @@ class StorageController extends Controller
                 $transaction_amount = (isset($list->transaction_amount) && $list->transaction_amount > 0 ? $list->transaction_amount : 0);
                 
                 $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id,$audit_status) : 0);
-                $receipts = SlcMoneyReceipt::where('acc_transaction_id', $list->id)->get()->count();
 
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'transaction_code' => $list->transaction_code,
-                    'connected' => ($receipts > 0 ? 1 : 0),
+                    'connected' => ($list->has_receipts > 0 ? $list->has_receipts : (isset($list->receipts) && $list->receipts->count() > 0 ? 1 : 0)),
                     'transaction_date_2' => (!empty($list->transaction_date_2) ? date('jS F, Y', strtotime($list->transaction_date_2)) : ''),
                     'invoice_no' => (!empty($list->invoice_no) ? $list->invoice_no : ''),
                     'detail' => (!empty($list->detail) ? $list->detail : ''),

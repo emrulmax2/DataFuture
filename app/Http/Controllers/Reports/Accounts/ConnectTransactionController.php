@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ArrayCollectionExport;
-use App\Models\AccTransactionTag;
 
 class ConnectTransactionController extends Controller
 {
@@ -57,22 +56,26 @@ class ConnectTransactionController extends Controller
         if($acc_transaction_id > 0 && !empty($slc_money_receipt_ids) && count($slc_money_receipt_ids) > 0):
             $transaction = AccTransaction::find($acc_transaction_id);
             $code = $transaction->transaction_code;
+            $taged_students = (isset($transaction->taged_students) && !empty($transaction->taged_students) ? explode(',', $transaction->taged_students) : []);
+            $has_receipts = 0;
 
             $connect = 0;
+            $reg_nos = [];
             foreach($slc_money_receipt_ids as $receipt):
                 $theMoneyReceipt = SlcMoneyReceipt::with('student')->find($receipt);
-                $registration_no = (isset($theMoneyReceipt->student->registration_no) && !empty($theMoneyReceipt->student->registration_no) ? $theMoneyReceipt->student->registration_no : '');
-                $tagCount = AccTransactionTag::where('acc_transaction_id', $acc_transaction_id)->where('registration_no', $registration_no)->get()->count();
-                if($tagCount == 0):
-                    AccTransactionTag::create([
-                        'acc_transaction_id' => $acc_transaction_id,
-                        'registration_no' => $registration_no
-                    ]);
+                if(isset($theMoneyReceipt->student->registration_no) && !empty($theMoneyReceipt->student->registration_no)):
+                    $reg_nos[] = $theMoneyReceipt->student->registration_no;
                 endif;
+                
                 $slcMoneyReceipt = SlcMoneyReceipt::where('id', $receipt)->update(['acc_transaction_id' => $acc_transaction_id]);
 
                 $connect += 1;
             endforeach;
+            if(!empty($reg_nos)):
+                $taged_students = array_merge($taged_students, $reg_nos);
+                $has_receipts = 1;
+            endif;
+            AccTransaction::where('id', $acc_transaction_id)->update(['taged_students' => implode(',', $taged_students), 'has_receipts' => $has_receipts]);
 
             return response()->json(['msg' => $connect.' Money Receipts successfully connected to '.$code.' transaction.'], 200);
         else:
