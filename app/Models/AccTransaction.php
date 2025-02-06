@@ -37,6 +37,8 @@ class AccTransaction extends Model
         'audit_status',
         'transfer_id',
         'transfer_bank_id',
+        'taged_students',
+        'has_receipts',
         'created_by',
         'updated_by',
     ];
@@ -66,9 +68,5 @@ class AccTransaction extends Model
 
     public function assets(){
         return $this->hasOne(AccAssetRegister::class, 'acc_transaction_id', 'id');
-    }
-
-    public function tags(){
-        return $this->hasMany(AccTransactionTag::class, 'acc_transaction_id', 'id');
     }
 }
