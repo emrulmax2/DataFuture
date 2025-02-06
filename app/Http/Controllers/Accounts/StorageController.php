@@ -11,6 +11,7 @@ use App\Models\AccCategory;
 use App\Models\AccCsvFile;
 use App\Models\AccCsvTransaction;
 use App\Models\AccTransaction;
+use App\Models\SlcMoneyReceipt;
 use Faker\Core\Number;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -147,7 +148,7 @@ class StorageController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AccTransaction::with('receipts', 'category', 'bank', 'assets', 'tbank')->orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
+        $query = AccTransaction::with('category', 'bank', 'assets', 'tbank')->orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
         if(!empty($openingDate)):
             $query->where('transaction_date_2', '>=', $openingDate);
         endif;
@@ -194,12 +195,13 @@ class StorageController extends Controller
                 $transaction_amount = (isset($list->transaction_amount) && $list->transaction_amount > 0 ? $list->transaction_amount : 0);
                 
                 $balance = (empty($queryStr) ? $this->getBalance($storage, $list->id,$audit_status) : 0);
+                $receipts = SlcMoneyReceipt::where('acc_transaction_id', $list->id)->get()->count();
 
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'transaction_code' => $list->transaction_code,
-                    'connected' => (isset($list->receipts) && $list->receipts->count() > 0 ? 1 : 0),
+                    'connected' => ($receipts > 0 ? 1 : 0),
                     'transaction_date_2' => (!empty($list->transaction_date_2) ? date('jS F, Y', strtotime($list->transaction_date_2)) : ''),
                     'invoice_no' => (!empty($list->invoice_no) ? $list->invoice_no : ''),
                     'detail' => (!empty($list->detail) ? $list->detail : ''),
