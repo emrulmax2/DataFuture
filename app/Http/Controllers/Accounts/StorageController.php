@@ -147,7 +147,7 @@ class StorageController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AccTransaction::orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
+        $query = AccTransaction::with('receipts', 'category', 'bank', 'assets', 'tbank')->orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
         if(!empty($openingDate)):
             $query->where('transaction_date_2', '>=', $openingDate);
         endif;
