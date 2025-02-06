@@ -55,7 +55,8 @@ class SummaryController extends Controller
                         ->orWhere('description','LIKE','%'.$theQueryText.'%')
                         ->orWhere('transaction_code','LIKE','%'.$theQueryText.'%')
                         ->orWhere('transaction_amount','LIKE','%'.$theQueryText.'%')
-                        ->orWhere('invoice_no','LIKE','%'.$theQueryText.'%');
+                        ->orWhere('invoice_no','LIKE','%'.$theQueryText.'%')
+                        ->orWhere('taged_students','LIKE','%'.$theQueryText.'%');
                 });
             endif;
             $banksids = $query->pluck('acc_bank_id')->unique()->toArray();
@@ -81,7 +82,8 @@ class SummaryController extends Controller
                                 ->orWhere('description','LIKE','%'.$theQueryText.'%')
                                 ->orWhere('transaction_code','LIKE','%'.$theQueryText.'%')
                                 ->orWhere('transaction_amount','LIKE','%'.$theQueryText.'%')
-                                ->orWhere('invoice_no','LIKE','%'.$theQueryText.'%');
+                                ->orWhere('invoice_no','LIKE','%'.$theQueryText.'%')
+                                ->orWhere('taged_students','LIKE','%'.$theQueryText.'%');
                         });
                     endif;
                     $bankTransactions = $query->where('acc_bank_id', $bank->id)->get();
@@ -89,6 +91,7 @@ class SummaryController extends Controller
                         $HTML .= '<table class="table table-striped table-sm">';
                             $HTML .= '<tr><td colspan="5" class="text-left font-medium text-lg">'.$bank->bank_name.'</td></tr>';
                             foreach($bankTransactions as $bt):
+                                $connected = ($bt->has_receipts > 0 ? $bt->has_receipts : (isset($bt->receipts) && $bt->receipts->count() > 0 ? 1 : 0));
                                 $HTML .= '<tr>';
                                     $HTML .= '<td>';
                                         $HTML .= '<div class="block relative">';
@@ -97,7 +100,13 @@ class SummaryController extends Controller
                                                 if($bt->transaction_doc_name != ''):
                                                     $HTML .= '<a href="javascript:void(0);" data-id="'.$bt->id.'" class="text-success mr-2 downloadDoc" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                                 endif;
+                                                if(isset($bt->assets->id) && $bt->assets->id > 0):
+                                                    $HTML .= '<span class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="package-check" class="w-4 h-4"></i></span>';
+                                                endif;
                                                 $HTML .= $bt->transaction_code;
+                                                if($connected == 1):
+                                                    $HTML .= '<a href="'.route('reports.accounts.transaction.connection', $bt->id).'" class="text-success ml-2" style="position: relative; top: -1px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></a>';
+                                                endif;
                                             $HTML .= '</div>';
                                         $HTML .= '</div>';
                                     $HTML .= '</td>';

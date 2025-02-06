@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Number;
 
 class AssetsRegisterController extends Controller
 {
@@ -361,8 +362,10 @@ class AssetsRegisterController extends Controller
                     $PDFHTML .= '</thead>';
                     $PDFHTML .= '<tbody>';
                         $assets = $query->get();
+                        $total = 0;
                         if($assets->count() > 0):
                             foreach($assets as $list):
+                                $total += (isset($list->trans->transaction_amount) && $list->trans->transaction_amount > 0 ? $list->trans->transaction_amount : 0);
                                 $PDFHTML .= '<tr>';
                                     $PDFHTML .= '<td>';
                                         $PDFHTML .= (isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : '');
@@ -380,6 +383,11 @@ class AssetsRegisterController extends Controller
                             endforeach;
                         endif;
                     $PDFHTML .= '</tbody>';
+                    $PDFHTML .= '<tfoot>';
+                        $PDFHTML .= '<th style="text-align:left;" colspan="2">Total</th>';
+                        $PDFHTML .= '<th>'.Number::currency($total, in: 'GBP').'</th>';
+                        $PDFHTML .= '<th colspan="6">&nbsp;</th>';
+                    $PDFHTML .= '</tfoot>';
                 $PDFHTML .= '</table>';
             $PDFHTML .= '</body>';
         $PDFHTML .= '</html>';
