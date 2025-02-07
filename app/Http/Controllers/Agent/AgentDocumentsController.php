@@ -206,7 +206,7 @@ class AgentDocumentsController extends Controller
         $row_id = $request->row_id;
 
         $empDoc = AgentDocuments::find($row_id);
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/agent/'.$empDoc->agent_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/agents/'.$empDoc->agent_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }
 }
