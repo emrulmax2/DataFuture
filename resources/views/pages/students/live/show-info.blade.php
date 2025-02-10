@@ -6,7 +6,7 @@
 
     <div class="md:ml-auto w-full md:w-auto flex flex-wrap sm:flex-row gap-2 justify-center md:justify-end">
         @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
-            <a href="{{ route('applicantprofile.print',$student->applicant->id) }}" data-id="{{ $student->applicant->id }}" class="btn btn-outline-pending flex-1 sm:flex-none">
+            <a href="{{ route('studentapplication.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-outline-pending flex-1 sm:flex-none">
                 <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf
             </a>
         @endif
