@@ -31,26 +31,31 @@ var studentCommLetterListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "120",
+                    minWidth: 50,
                 },
                 {
                     title: "Type",
                     field: "letter_type",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Subject",
                     field: "letter_title",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Signatory",
                     field: "signatory_name",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Issued By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 120,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -69,6 +74,7 @@ var studentCommLetterListTable = (function () {
                     headerHozAlign: "right",
                     width: "230",
                     download: false,
+                    minWidth: 230,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if(cell.getData().letter_doc_id > 0){

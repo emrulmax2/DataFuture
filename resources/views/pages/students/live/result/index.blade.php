@@ -15,9 +15,9 @@
         <h2 class="text-lg font-medium mr-auto">
             {{ $title }}
         </h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0 items-center">
-            <h4 id="frequency-distribution" class="text-sm font-medium mr-2 py-5">[  ]</h4>
-            <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
+        <div class="flex md:mt-4 sm:mt-0 items-center">
+            <h4 id="frequency-distribution" class="text-sm font-medium mr-2 md:py-5">[  ]</h4>
+            <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2 hidden md:inline-flex">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </a>
             
@@ -41,7 +41,7 @@
                             Id <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                         <th data-sort="attendance_term" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Attendance <br/>Term <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                            Attendance Term <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                         <th data-sort="module" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Module <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
@@ -50,7 +50,7 @@
                             Code <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                         <th data-sort="awarding_body" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Awarding <br/>Body <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
+                            Awarding Body <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
                         </th>
                         <th data-sort="exam_published_date" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
                             Published Date <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
@@ -847,6 +847,7 @@
 
 @section('script')
 
+        @vite('resources/js/student-global.js')
         @vite('resources/js/student-results.js')
         @vite('resources/js/student-award.js')
 @endsection

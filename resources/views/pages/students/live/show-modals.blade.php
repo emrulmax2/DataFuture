@@ -1641,7 +1641,7 @@
                         <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
                         <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
                         
-                        <input id="horizontal-form-1" name="email" type="text" class="form-control w-60 mr-2" placeholder="email@example.com">
+                        <input id="horizontal-form-1" name="email" type="text" class="form-control w-40 md:w-60 mr-2" placeholder="email@example.com">
                         <input name="type" value="email" type="hidden">
 
                         <button id="send-email" type="submit" data-id="0" data-action="none" class="save btn btn-primary w-auto ml-auto">

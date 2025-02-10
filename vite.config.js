@@ -34,6 +34,7 @@ export default defineConfig({
                 'resources/js/application.js',
 
                 'resources/js/applicant-dahsboard.js',
+                'resources/js/agent-global.js',
                 'resources/js/agent-dahsboard.js',
                 'resources/js/agent-crud.js',
                 'resources/js/agent-profile.js',

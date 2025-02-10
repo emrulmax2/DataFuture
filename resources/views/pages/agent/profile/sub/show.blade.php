@@ -346,6 +346,7 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/agent-global.js')
     @vite('resources/js/agent-profile.js')
     @vite('resources/js/sub-agent-crud.js')
 @endsection

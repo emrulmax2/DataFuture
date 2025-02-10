@@ -6,6 +6,8 @@ use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AgentComissionRuleStoreRequest;
 use App\Http\Requests\RemittanceLinkedRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\AccTransaction;
 use App\Models\Agent;
 use App\Models\AgentComission;
@@ -13,6 +15,7 @@ use App\Models\AgentComissionDetail;
 use App\Models\AgentComissionPayment;
 use App\Models\AgentComissionRule;
 use App\Models\AgentUser;
+use App\Models\ComonSmtp;
 use App\Models\CourseCreation;
 use App\Models\Option;
 use App\Models\ReferralCode;
@@ -26,9 +29,12 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Number;
+use App\Traits\GenerateAgentComissionPdfTrait;
 
 class AgentManagementController extends Controller
 {
+    use GenerateAgentComissionPdfTrait;
+
     public function index(){
         return view('pages.agent.management.index', [
             'title' => 'Agent Management - London Churchill College',
@@ -1335,14 +1341,15 @@ class AgentManagementController extends Controller
                 $remit_ref = [];
                 if(isset($list->comissions) && $list->comissions->count() > 0):
                     foreach($list->comissions as $comission):
-                        $remit_ref[] = $comission->remittance_ref;
+                        if(!array_key_exists($comission->id, $remit_ref)):
+                            $remit_ref[$comission->id] = '<a class="text-primary font-medium underline" href="'.route('agent.management.remittance.print', $comission->id).'">'.$comission->remittance_ref.'</a>';
+                        endif;
                         if(isset($comission->rule->semester->name) && !empty($comission->rule->semester->name)):
                             $terms[] = $comission->rule->semester->name;
                         endif;
                     endforeach;
                 endif;
                 $terms = array_unique($terms);
-                $remit_ref = array_unique($remit_ref);
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -1394,6 +1401,63 @@ class AgentManagementController extends Controller
         if($transaction_id > 0 && $agent_comission_payment_id > 0):
             AgentComissionPayment::where('id', $agent_comission_payment_id)->update(['acc_transaction_id' => $transaction_id, 'status' => 2]);
             return response()->json(['msg' => 'Remittance Payment successfully linked with the transaction.'], 200);
+        else:
+            return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 422);
+        endif;
+    }
+
+    public function paymentSendMail(Request $request){
+        $payment_id = $request->payment_id;
+        $payment = AgentComissionPayment::find($payment_id);
+
+        $to = [];
+        if(isset($payment->agent->email) && !empty($payment->agent->email)):
+            $to[] = $payment->agent->email;
+        endif;
+
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+        if(isset($commonSmtp->id) && $commonSmtp->id > 0 && $payment_id > 0 && !empty($to)):
+            $attachmentFiles = [];
+            if(isset($payment->comissions) && $payment->comissions->count() > 0):
+                $i = 0;
+                foreach($payment->comissions as $comission):
+                    $thePDF = $this->generagePdf($payment_id, $comission->id);
+                    $attachmentFiles[$i] = [
+                        "pathinfo" => 'public/agents/payment/'.$payment_id.'/'.$thePDF['filename'],
+                        "nameinfo" => $thePDF['filename'],
+                        "mimeinfo" => 'application/pdf',
+                        "disk" => 's3'
+                    ];
+                    $i++;
+                endforeach;
+            endif;
+            $configuration = [
+                'smtp_host'    => $commonSmtp->smtp_host,
+                'smtp_port'    => $commonSmtp->smtp_port,
+                'smtp_username'  => $commonSmtp->smtp_user,
+                'smtp_password'  => $commonSmtp->smtp_pass,
+                'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                
+                'from_email'    => 'accounts@lcc.ac.uk',
+                'from_name'    =>  'Accounts Department LCC',
+            ];
+
+            $subject = 'Remittance Advice';
+            $message = 'Dear Concern,<br/><br/>';
+            $message .= '<p>Please find attached the remittance advice for your reference. Below are the key details:</p>'; 
+
+            $message .= '<p>Date: '.(isset($payment->date) && !empty($payment->date) ? date('jS F, Y', strtotime($payment->date)) : '').'</p>';  
+            $message .= '<p>Total Amount: '.Number::currency($payment->amount, in: 'GBP').'</p>';   
+
+            $message .= '<p>For any further queries, feel free to reach out.</p><br/>';
+
+            $message .= 'Best regards,<br/>'; 
+            $message .= 'Accounts<br/>';  
+            $message .= 'London Churchill College';
+
+            UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $message, $attachmentFiles));
+
+            return response()->json(['msg' => 'Mail successfully sent to the agent.'], 200);
         else:
             return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 422);
         endif;

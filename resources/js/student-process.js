@@ -26,21 +26,25 @@ var processTaskArchiveListTable = (function () {
                     title: "#ID",
                     field: "id",
                     width: "180",
+                    minWidth: 50,
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Description",
                     field: "desc",
                     headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Deleted At",
                     field: "deleted_at",
                     headerHozAlign: "left",
+                    minWidth: 120,
                 },
                 {
                     title: "Actions",
@@ -50,6 +54,7 @@ var processTaskArchiveListTable = (function () {
                     headerHozAlign: "center",
                     width: "180",
                     download: false,
+                    minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         btns += '<button data-id="' +cell.getData().id +'" style="top: -7px;"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9">\

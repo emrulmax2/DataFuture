@@ -61,7 +61,7 @@ import TomSelect from "tom-select";
         if(semester_id > 0){
             axios({
                 method: "post",
-                url: route('agent.management.list'),
+                url: route('agent.management.list.details'),
                 data: {semester_id : semester_id},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
@@ -69,7 +69,13 @@ import TomSelect from "tom-select";
                 $theBtn.find('svg.theLoader').fadeOut();
                 
                 if (response.status == 200) {
-                    $('.agentRefListWrap').fadeIn().html(response.data.html)
+                    $('.agentRefListWrap').fadeIn().html(response.data.html);
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                 }
             }).catch(error => {
                 $theBtn.removeAttr('disabled');

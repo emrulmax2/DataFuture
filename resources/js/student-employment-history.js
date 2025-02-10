@@ -31,37 +31,44 @@ var studentEmploymentHistoryTable = (function () {
                     title: "#SL",
                     field: "sl",
                     width: "80",
+                    minWidth: 50,
                 },
                 {
                     title: "Company",
                     field: "company_name",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Phone",
                     field: "company_phone",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Position",
                     field: "position",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Start",
                     field: "start_date",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "End",
                     field: "end_date",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Address",
                     field: "address",
                     headerHozAlign: "left",
                     width: "180",
+                    minWidth: 150,
                     formatter(cell, formatterParams) {   
                         return '<div class="whitespace-nowrap">'+cell.getData().address+'</div>';
                     }
@@ -70,16 +77,19 @@ var studentEmploymentHistoryTable = (function () {
                     title: "Contact Person",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Position",
                     field: "contact_position",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Phone",
                     field: "contact_phone",
                     headerHozAlign: "left",
+                    minWidth: 150,
                 },
                 {
                     title: "Actions",
@@ -88,6 +98,7 @@ var studentEmploymentHistoryTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
+                    minWidth: 150,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

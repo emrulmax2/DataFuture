@@ -3482,6 +3482,7 @@ Route::middleware('auth')->group(function() {
         Route::post('agent-management/remittance/store-payment', 'storePayment')->name('agent.management.remittances.store.payment'); 
         Route::get('agent-management/remittance/payments', 'payments')->name('agent.management.remittances.payment'); 
         Route::get('agent-management/remittance/payment-list', 'paymentList')->name('agent.management.remittances.payment.list'); 
+        Route::post('agent-management/remittance/payment-send-mail', 'paymentSendMail')->name('agent.management.remittance.payment.send.mail'); 
     });
 
     Route::controller(BudgetManagementController::class)->group(function() {
