@@ -16,7 +16,7 @@
             
         @php $termstart++; $planId=1; @endphp
         <div class="intro-y box col-span-12 p-5 mt-5  ">
-            <div class="flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
+            <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
                 
                 <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} 
                     @if(isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0)
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="dropdown ml-auto sm:hidden">
+                <div class="dropdown ml-auto hidden md:block">
                     <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
                         <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-100"></i>
                     </a>
@@ -57,7 +57,7 @@
                         </ul>
                     </div>
                 </div>
-                <button class="btn sm:flex transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
+                <button class="btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                 </button>
                 @if($termstart==1 && $termAttendanceFound[$termId]===true)
@@ -65,7 +65,7 @@
                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
                 </a>
                 @endif
-                <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center ml-2">
+                <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center md:ml-2">
                     <i data-lucide="info" class="w-5 h-5"></i>
                 </button>
             </div>
@@ -75,7 +75,7 @@
                         
                     <div class="p-5 ">
 
-                        <div class="relative flex items-center mb-5">
+                        <div class="relative md:flex items-center mb-5">
                             <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
                                 <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
                                     <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
@@ -94,9 +94,9 @@
                             }
                             @endphp
                             <div class="ml-4 mr-auto toggle-heading">
-                                <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
+                                <a href="" class="font-medium flex flex-col md:flex-row gap-2 md:gap-0">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span></a>
                                 
-                                <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1">
+                                <div class="text-slate-500 text-xs md:text-md mr-5 sm:mr-5 inline-flex mt-4 md:mt-1">
                                     <i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
                                     <i data-lucide="user" class="w-4 h-4 mr-1 ml-2"></i> 
                                     @if($ClassType[$planId]!="Tutorial")
@@ -234,6 +234,7 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/student-global.js')
     @vite('resources/js/student-attendance-term-status.js')
     <script type="module">
         (function () {

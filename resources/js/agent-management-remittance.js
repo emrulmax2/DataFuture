@@ -150,7 +150,6 @@ var agentRemittanceListTable = (function () {
                                         </ul>\
                                     </div>\
                                 </div>';
-                        btns += '<button data-id="' +cell.getData().id +'" class="send_email btn btn-primary text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="mail" class="w-4 h-4"></i></button>';
                         btns += '<input type="hidden" class="agent_comission_ids" name="agent_comission_ids" value="' +cell.getData().id +'"/>';
                         btns += '<input type="hidden" class="agent_ids" name="agent_ids" value="' +cell.getData().agent_id +'"/>';
                         return btns;

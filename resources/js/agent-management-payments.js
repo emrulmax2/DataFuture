@@ -67,6 +67,11 @@ var agentRemittPaymentsListTable = (function () {
                     field: "remittance_refs",
                     headerHozAlign: "left",
                     headerSort: false,
+                    formatter(cell, formatterParams){
+                        var html = '<div class="whitespace-normal">'+cell.getData().remittance_refs+'</div>';
+
+                        return html;
+                    }
                 },
                 {
                     title: "Transaction",
@@ -119,6 +124,10 @@ var agentRemittPaymentsListTable = (function () {
                         if(cell.getData().acc_transaction_id == 0){
                             btns +='<button data-id="'+cell.getData().id+'" data-amount="'+cell.getData().amount+'" type="button" data-tw-toggle="modal" data-tw-target="#linkTransactionModal" class="linked_trans_btn btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="link" class="w-4 h-4"></i></button>';
                         }
+                        btns += '<button data-id="' +cell.getData().id +'" class="send_email btn btn-primary text-white btn-rounded ml-1 p-0 w-9 h-9 relative">';
+                            btns += '<i data-lucide="mail" class="w-4 h-4 theIcon"></i>';
+                            btns += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 theLoader absolute l-0 r-0 t-0 b-0 m-auto"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>'
+                        btns += '</button>';
                         return btns;
                     },
                 },
@@ -310,4 +319,43 @@ var agentRemittPaymentsListTable = (function () {
             }
         });
     });
+
+    $('#agentRemittPaymentsListTable').on('click', '.send_email', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var the_id = $theBtn.attr('data-id');
+
+        $theBtn.attr('disabled', 'disabled');
+        $theBtn.find('svg.theIcon').css({'opacity' : '0'});
+        $theBtn.find('svg.theLoader').fadeIn();
+
+        axios({
+            method: "post",
+            url: route('agent.management.remittance.payment.send.mail'),
+            data: {payment_id : the_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $theBtn.removeAttr('disabled');
+            $theBtn.find('svg.theLoader').fadeOut();
+            $theBtn.find('svg.theIcon').css({'opacity' : '1'});
+            if (response.status == 200) {
+                succModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Mail successfully sent to the agent.');
+                });     
+
+                setTimeout(() => {
+                    succModal.hide();
+                }, 2000);
+            }
+        }).catch(error => {
+            $theBtn.removeAttr('disabled');
+            $theBtn.find('svg.theLoader').fadeOut();
+            $theBtn.find('svg.theIcon').css({'opacity' : '1'});
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    })
 })()

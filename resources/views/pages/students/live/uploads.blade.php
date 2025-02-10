@@ -12,10 +12,10 @@
 
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+            <div class="col-span-5 md:col-span-6">
                 <div class="font-medium text-base">Documents</div>
             </div>
-            <div class="col-span-6 text-right relative">
+            <div class="col-span-7 md:col-span-6 text-right relative">
                 <div class="dropdown" id="uploadsDropdown">
                     <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
@@ -71,7 +71,7 @@
                         <button id="tabulator-html-filter-reset-UP" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
+                <div class="mt-5 sm:mt-0 hidden md:flex">
                     <button id="tabulator-print-UP" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                         <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                     </button>

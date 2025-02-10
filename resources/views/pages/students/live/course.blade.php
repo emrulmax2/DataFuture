@@ -15,7 +15,7 @@
             <div class="col-span-6">
                 <div class="font-medium text-base">Course Details</div>
             </div>
-            <div class="col-span-6 text-right">
+            <div class="col-span-12 md:col-span-6 text-right">
 
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="btn btn-outline-secondary mr-2 w-auto"><i data-lucide="book-copy" class="stroke-1.5 h-4 w-4"></i></button>
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
@@ -110,10 +110,10 @@
    
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+            <div class="col-span-5 md:col-md-6">
                 <div class="font-medium text-base">Awarding Body</div>
             </div>
-            <div class="col-span-6 text-right">
+            <div class="col-span-7 md:col-span-6 text-right">
                 <button data-tw-toggle="modal" data-tw-target="#editStudentAWBModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                     <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Awarding Body
                 </button>

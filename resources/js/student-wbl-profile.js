@@ -25,12 +25,14 @@ var studentWBLProfileTable = (function () {
                 {
                     title: "Company",
                     field: "company",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 80,
                 },
                 {
                     title: "WEIF form provided",
                     field: "weif_form_provided_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -45,6 +47,7 @@ var studentWBLProfileTable = (function () {
                     title: "Received completed WEIF form",
                     field: "received_completed_weif_form_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -59,6 +62,7 @@ var studentWBLProfileTable = (function () {
                     title: "Work hours update by terms",
                     field: "work_hour_update_term_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -73,6 +77,7 @@ var studentWBLProfileTable = (function () {
                     title: "Work experience handbook completed",
                     field: "work_exp_handbook_complete_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -87,6 +92,7 @@ var studentWBLProfileTable = (function () {
                     title: "Work experience handbook checked",
                     field: "work_exp_handbook_checked_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -101,6 +107,7 @@ var studentWBLProfileTable = (function () {
                     title: "Employer handbook sent",
                     field: "emp_handbook_sent_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -115,6 +122,7 @@ var studentWBLProfileTable = (function () {
                     title: "Employers letter sent",
                     field: "emp_letter_sent_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -129,6 +137,7 @@ var studentWBLProfileTable = (function () {
                     title: "Employers confirmation received",
                     field: "emp_confirm_rec_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -143,6 +152,7 @@ var studentWBLProfileTable = (function () {
                     title: "Company visit",
                     field: "company_visit_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -157,6 +167,7 @@ var studentWBLProfileTable = (function () {
                     title: "Record of student meetings",
                     field: "record_std_meeting_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -171,6 +182,7 @@ var studentWBLProfileTable = (function () {
                     title: "Record of all contacts to student",
                     field: "record_all_contact_student_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -185,6 +197,7 @@ var studentWBLProfileTable = (function () {
                     title: "Email sent to employer",
                     field: "email_sent_emp_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -202,6 +215,7 @@ var studentWBLProfileTable = (function () {
                     title: "Created",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -220,6 +234,7 @@ var studentWBLProfileTable = (function () {
                     headerHozAlign: "center",
                     width: "120",
                     download: false,
+                    minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

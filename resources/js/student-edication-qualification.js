@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import { min } from "lodash";
 
 ("use strict");
 var studentEducationQualTable = (function () {
@@ -29,21 +30,25 @@ var studentEducationQualTable = (function () {
                     title: "#SL",
                     field: "sl",
                     width: "110",
+                    minWidth: 50,
                 },
                 {
                     title: "Awarding Body",
                     field: "awarding_body",
                     headerHozAlign: "left",
+                    minWidth: 200,
                 },
                 {
                     title: "Highest Academic Qualification",
                     field: "highest_academic",
                     headerHozAlign: "left",
+                    minWidth: 200,
                 },
                 {
                     title: "Subjects",
                     field: "subjects",
                     headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 /*{
                     title: "Result",
@@ -54,16 +59,19 @@ var studentEducationQualTable = (function () {
                     title: "Result",
                     field: "qualification_grade_id",
                     headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 {
                     title: "Award Date",
                     field: "degree_award_date",
                     headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 {
                     title: "HIghest Qualification Entry",
                     field: "highest_qualification_on_entry_id",
                     headerHozAlign: "left",
+                    minWidth: 200,
                 },
                 {
                     title: "Actions",
@@ -72,6 +80,7 @@ var studentEducationQualTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
+                    minWidth: 100,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

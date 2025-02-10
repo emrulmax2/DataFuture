@@ -27,9 +27,9 @@
     <div class="tab-content workplacementtabcontent">
         <div id="std_work_placement" class="tab-pane active" role="tabpanel" aria-labelledby="example-3-tab">
             <div class="intro-y box p-5">
-                <div class="absolute thebtnarea">
+                <div class="absolute top-3 md:-top-10 right-0 thebtnarea">
                     <button data-tw-toggle="modal" data-tw-target="#addHourModal" type="button" class="btn btn-success rounded-0 text-white"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Hours</button>
-                    <button type="button" class="btn btn-primary rounded-0"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print PDF</button>
+                    <button type="button" class="btn btn-primary rounded-0 hidden md:inline-flex"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print PDF</button>
                 </div>
                 <div class="intro-y">
                     <div class="grid grid-cols-12 gap-4">
@@ -70,7 +70,7 @@
                                 <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                             </div>
                         </form>
-                        <div class="flex mt-5 sm:mt-0">
+                        <div class="mt-5 sm:mt-0 hidden md:inline-flex">
                             <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
@@ -135,7 +135,7 @@
                                     <button id="tabulator-html-filter-reset-WBL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                                 </div>
                             </form>
-                            <div class="flex mt-5 sm:mt-0">
+                            <div class="mt-5 sm:mt-0 hidden md:inline-flex">
                                 <button id="tabulator-print-WBL" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                                 </button>

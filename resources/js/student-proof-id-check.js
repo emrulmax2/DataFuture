@@ -2,6 +2,7 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
+import { min } from "lodash";
 
 ("use strict");
 var studentProofOfIdCheckTable = (function () {
@@ -29,21 +30,25 @@ var studentProofOfIdCheckTable = (function () {
                     title: "#ID",
                     field: "id",
                     width: "180",
+                    minWidth: 60,
                 },
                 {
                     title: "Proof Type",
                     field: "proof_type",
                     headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 {
                     title: "Proof ID",
                     field: "proof_id",
                     headerHozAlign: "left",
+                    minWidth: 200,
                 },
                 {
                     title: "Proof Expire Date",
                     field: "proof_expiredate",
                     headerHozAlign: "left",
+                    minWidth: 200,
                 },
                 {
                     title: "Actions",
@@ -53,6 +58,7 @@ var studentProofOfIdCheckTable = (function () {
                     headerHozAlign: "center",
                     width: "180",
                     download: false,
+                    minWidth: 100,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

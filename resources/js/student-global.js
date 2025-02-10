@@ -112,26 +112,50 @@ import Dropzone from "dropzone";
     /* End Dropzone */
 
     /* Profile Menu Start */
-    if($('.liveStudentMainMenu').length > 0){
-        $('.liveStudentMainMenu li.hasChildren > a').on('click', function(e){
-            e.preventDefault();
-            var $this = $(this);
-
-            if($this.hasClass('active')){
-                $this.removeClass('active');
-                $this.siblings('.liveStudentSubMenu').removeClass('show');
-                $('.liveStudentMainMenu').animate({'padding-bottom' : '0'}, 'fast');
-            }else{
-                $this.parent('li').siblings('li').children('a').removeClass('active');
-                $this.parent('li').siblings('li').children('.liveStudentSubMenu').removeClass('show');
-
-                $this.addClass('active');
-                $('.liveStudentMainMenu').animate({'padding-bottom' : '55px'}, 350, function(){
-                    $this.siblings('.liveStudentSubMenu').addClass('show');
-                });
+    document.getElementById('menu-toggle').addEventListener('click', function () {
+        var menu = document.querySelector('.liveStudentMainMenu');
+        menu.classList.toggle('hidden');
+        menu.classList.toggle('flex');
+    });
+    
+    // Handle submenu toggle
+    if (document.querySelector('.liveStudentMainMenu')) {
+        document.querySelectorAll('.liveStudentMainMenu li.hasChildren > a').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                var $this = this;
+                var menu = document.querySelector('.liveStudentMainMenu');
+                var paddingValue = window.innerWidth <= 768 ? '38px' : '55px'; // Adjust for screen size
+    
+                if ($this.classList.contains('active')) {
+                    $this.classList.remove('active');
+                    $this.nextElementSibling.classList.remove('show');
+                    menu.style.paddingBottom = '0';
+                } else {
+                    $this.parentElement.parentElement.querySelectorAll('li.hasChildren > a').forEach(function (el) {
+                        el.classList.remove('active');
+                    });
+                    $this.parentElement.parentElement.querySelectorAll('.liveStudentSubMenu').forEach(function (el) {
+                        el.classList.remove('show');
+                    });
+    
+                    $this.classList.add('active');
+                    menu.style.paddingBottom = paddingValue;
+                    $this.nextElementSibling.classList.add('show');
+                }
+            });
+        });
+    
+        // Listen for window resize to adjust padding dynamically
+        window.addEventListener('resize', function () {
+            var activeLink = document.querySelector('.liveStudentMainMenu li.hasChildren > a.active');
+            if (activeLink) {
+                var menu = document.querySelector('.liveStudentMainMenu');
+                menu.style.paddingBottom = window.innerWidth <= 768 ? '38px' : '55px';
             }
-        })
+        });
     }
+    
     /* Profile Menu End */
 
     /* Student Status Update */

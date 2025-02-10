@@ -30,11 +30,13 @@ var studentCommSMSListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "120",
+                    minWidth: 50,
                 },
                 {
                     title: "Mobile Number",
                     field: "phone",
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -49,6 +51,7 @@ var studentCommSMSListTable = (function () {
                     field: "subject",
                     headerSort: false,
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -63,6 +66,7 @@ var studentCommSMSListTable = (function () {
                     field: "template",
                     headerHozAlign: "left",
                     headerSort: false,
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -77,6 +81,7 @@ var studentCommSMSListTable = (function () {
                     field: "created_by",
                     headerHozAlign: "left",
                     width: "180",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -95,6 +100,7 @@ var studentCommSMSListTable = (function () {
                     headerHozAlign: "right",
                     width: "120",
                     download: false,
+                    minWidth: 100,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
