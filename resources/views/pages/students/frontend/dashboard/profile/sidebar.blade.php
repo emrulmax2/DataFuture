@@ -76,11 +76,20 @@
                             <img class="block w-full h-auto shadow-md zoom-in rounded" alt="J Stor Library" src="{{ asset('build/assets/images/jstor_vertical.png') }}">
                         </a>
                     </div>
+                    
+                    <div class="col-span-12">
+                        <a href="https://research.ebsco.com/c/c4wm42" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/ebsco.png') }}">
+                        </a>
+                    </div>
+
                     <div class="col-span-12">
                         <a href="https://sites.google.com/lcc.ac.uk/training-guidance/home" class="box introy-y zoom-in bg-primary flex justify-center items-center">
                             <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Term Performance Report" src="{{ asset('build/assets/images/training_and_guidance_vertical.png') }}">
                         </a>
                     </div>
+
+                    
                 </div>
             </div>
 
