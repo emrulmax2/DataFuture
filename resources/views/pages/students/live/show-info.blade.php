@@ -3,7 +3,7 @@
         <div class="ml-auto flex justify-end">
             
             @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
-                <a style="float: right;" href="{{ route('applicantprofile.print',$student->applicant->id) }}" data-id="{{ $student->applicant->id }}" class="btn btn-outline-pending w-auto mr-1"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf</a>
+                <a style="float: right;" href="{{ route('studentapplication.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-outline-pending w-auto mr-1"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf</a>
             @endif
             @if(isset(auth()->user()->priv()['login_as_student']) && auth()->user()->priv()['login_as_student'] == 1)
                 <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning w-auto mr-1 mb-0">

@@ -301,6 +301,7 @@ use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\Student\StudentPerformanceController;
 use App\Http\Controllers\Student\WorkPlacementController;
+use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -1825,6 +1826,11 @@ Route::middleware('auth')->group(function() {
     
     Route::controller(ApplicantProfilePrintController::class)->group(function() {
         Route::get('applicantprofilepdf/{applicantId}', 'generatePDF')->name('applicantprofile.print');
+    });
+    // a pdf will be saved
+
+    Route::controller(StudentApplicationPrintController::class)->group(function() {
+        Route::get('student-profilepdf/{student_id}', 'generatePDF')->name('studentapplication.print');
     });
     // a pdf will be saved
 
