@@ -445,8 +445,6 @@ class StudentApplicationPrintController extends Controller
             $PDFHTML .= '</body>';
         $PDFHTML .= '</html>';
 
-        echo $PDFHTML;
-        die();
         $fileName = 'Application_of_'.$student->first_name.'_'.$student->last_name.'.pdf';
         $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
             ->setPaper('a4', 'portrait')
