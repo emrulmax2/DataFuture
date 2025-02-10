@@ -231,6 +231,7 @@ class DashboardController extends Controller
         ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
         ->leftJoin('assigns', 'assigns.plan_id', 'plan.id')
         ->where('assigns.student_id', $studentData->id);
+        //->where('plan.parent_id', 0);
 
         
 
@@ -264,6 +265,9 @@ class DashboardController extends Controller
                     
                     $end_time = date("Y-m-d ".$list->end_time);
                     $end_time = date('h:i A', strtotime($end_time));
+
+                    $tutorial = Plan::where('parent_id', $list->id)->where('class_type', 'Tutorial')->get()->first();
+                    $has_tutorial = (isset($tutorial->id) && $tutorial->id > 0 ? true : false); 
                     $data[$list->term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
@@ -279,7 +283,9 @@ class DashboardController extends Controller
                         'virtual_room' =>$list->virtual_room,   
                         'plan_dates' => $getClassDatesForStudent,
                         'start_time' =>$start_time,           
-                        'end_time' =>$end_time,                    
+                        'end_time' =>$end_time, 
+                        'has_tutorial' => $has_tutorial,
+                        'p_tutor_photo' => isset($tutorial->personalTutor->employee->photo_url) ? $tutorial->personalTutor->employee->photo_url : ""              
                     ];
                     
                     if(isset($termData[$list->term_id]))  

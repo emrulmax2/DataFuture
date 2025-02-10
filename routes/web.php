@@ -2730,6 +2730,8 @@ Route::middleware('auth')->group(function() {
         Route::get('personal-tutor-dashboard/outstanding-upload-count', 'totalUndecidedCount')->name('pt.dashboard.class.outstanding.count');
 
         Route::post('personal-tutor-dashboard/student-attendance-tracking', 'getStudentAttenTrackingHtml')->name('pt.dashboard.get.student.attn.tracking'); 
+
+        Route::post('personal-tutor-dashboard/get-term-statistics', 'getTermStatistics')->name('pt.dashboard.get.term.statistics'); 
         
     });
 

@@ -48,8 +48,9 @@ class DashboardController extends Controller
         $userData = User::find($id);
         $employee = Employee::where("user_id", $userData->id)->get()->first();
 
-        $latestTerm = Plan::where('personal_tutor_id', $id)->orderBy('term_declaration_id', 'DESC')->get()->first();
-        $latestTermId = (isset($latestTerm->term_declaration_id) && $latestTerm->term_declaration_id > 0 ? $latestTerm->term_declaration_id : 0);
+        $ptTerms = Plan::where('personal_tutor_id', $id)->orderBy('term_declaration_id', 'DESC')->get();
+        $ptTermIds = $ptTerms->pluck('term_declaration_id')->unique()->toArray();
+        $latestTermId = (isset($ptTerms[0]->term_declaration_id) && $ptTerms[0]->term_declaration_id > 0 ? $ptTerms[0]->term_declaration_id : 0);
         $theTermDeclaration = TermDeclaration::find($latestTermId);
         $modules = Plan::with('activeAssign', 'tutor', 'personalTutor')->where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)->orderBy('id', 'ASC')->get();
         $plan_ids = $modules->pluck('id')->unique()->toArray();
@@ -102,6 +103,7 @@ class DashboardController extends Controller
             'no_of_assignment' => $this->getAssignmentCount($id, $latestTermId),
             'termdeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'otherTerms' => (!empty($ptTermIds) ? TermDeclaration::whereIn('id', $ptTermIds)->orderBy('id', 'DESC')->get() : [])
         ]);
 
     }
@@ -755,6 +757,78 @@ class DashboardController extends Controller
             endforeach;
         endif;
         return (!empty($res) && $absentCount > 0 ? $res : false);
+    }
+
+    public function getTermStatistics(Request $request){
+        $id = auth()->user()->id;
+        $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
+        
+        $html = '';
+        if($term_id > 0):
+            $plans = Plan::where('personal_tutor_id', $id)->where('term_declaration_id', $term_id)->orderBy('term_declaration_id', 'DESC')->get();
+            $plan_ids = $plans->pluck('id')->unique()->toArray();
+            $myModules = DB::table('plans')->select('class_type', DB::raw('COUNT(DISTINCT id) as TOTAL_MODULE'))
+                        ->where('term_declaration_id', $term_id)->where('personal_tutor_id', $id)
+                        ->groupBy('class_type')->orderBy('class_type', 'ASC')->get();
+            $no_of_assigned = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
+                                $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+                            })->distinct()->count('student_id');
+            $no_of_assignment = $this->getAssignmentCount($id, $term_id);
+            $attendance_avg = $this->myModulesAttendanceAverage($id, $term_id);
+            $bellow_60 = $this->myModulesAttendanceBellow($id, $term_id);
+
+            $html .= '<div class="grid grid-cols-12 gap-y-8 gap-x-10">';
+                $html .= '<div class="col-span-6 sm:col-span-6">';
+                    $html .= '<div class="text-slate-500">No of Module</div>';
+                    $html .= '<div class="mt-1.5 flex items-center">';
+                        $html .= '<div id="totalModule" class="text-base">';
+                            if($myModules->count() > 0):
+                                foreach($myModules as $mm):
+                                    if($mm->TOTAL_MODULE > 0):
+                                        $html .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">'.$mm->class_type.': '.$mm->TOTAL_MODULE.'</span>';
+                                    endif;
+                                endforeach;
+                            else:
+                                $html .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>';
+                            endif;
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+                $html .= '<div class="col-span-12 sm:col-span-6">';
+                    $html .= '<div class="text-slate-500">No of Student</div>';
+                    $html .= '<div class="mt-1.5 flex items-center">';
+                        $html .= '<div class="text-base">'.$no_of_assigned.'</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+                $html .= '<div class="col-span-12 sm:col-span-6">';
+                    $html .= '<div class="text-slate-500">Expected Assignments</div>';
+                    $html .= '<div class="mt-1.5 flex items-center">';
+                        $html .= '<div class="text-base">'.($no_of_assignment).'</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+                $html .= '<div class="col-span-12 sm:col-span-6">';
+                    $html .= '<div class="text-slate-500">Average Attendance</div>';
+                    $html .= '<div class="mt-1.5 flex items-center">';
+                        $html .= '<div class="text-base">'.$attendance_avg.'</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
+
+                $html .= '<div class="col-span-12 sm:col-span-6"></div>';
+
+                $html .= '<div class="col-span-12 sm:col-span-6">';
+                    $html .= '<div class="text-slate-500">Attendance Bellow 60%</div>';
+                    $html .= '<div class="mt-1.5 flex items-center">';
+                        $html .= '<a target="_blank" href="'.route('attendance.percentage', [auth()->user()->id, $term_id]).'" class="text-base font-medium underline">'.$bellow_60.'</a>';
+                    $html .= '</div>';
+                $html .= '</div>';
+            $html .= '</div>';
+        else:
+            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">';
+                $html .= '<i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No data found for the selected term.';
+            $html .= '</div>';
+        endif;
+
+        return response()->json(['html' => $html], 200);
     }
 
 }

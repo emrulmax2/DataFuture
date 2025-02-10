@@ -158,6 +158,8 @@ import TomSelect from "tom-select";
     const addNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addNoteModal"));
     const smsSMSModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#smsSMSModal"));
 
+    const ptTermDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#ptTermDropdown"));
+
     let addEditor;
     if($("#addEditor").length > 0){
         const el = document.getElementById('addEditor');
@@ -613,5 +615,49 @@ import TomSelect from "tom-select";
         });
     });
     /*Student Attendance Tracking  End*/
+
+    /* Term Data Reload Start*/
+    $(document).on('click', '.pt_term_item', function(e){
+        e.preventDefault();
+        ptTermDropdown.hide();
+        var $theBtn = $(this);
+        var $theList = $theBtn.closest('.dropdown-content');
+        var term_id = $theBtn.attr('data-id');
+        var term_name = $theBtn.attr('data-term');
+
+        var $contentWrap = $('.pt_term_content_wrap');
+        var $contentArea = $contentWrap.find('.pt_term_content');
+        $contentWrap.find('.leaveTableLoader').addClass('active');
+
+        $('.ptTermDropdwnWrap').find('#ptTermDropdown span').html(term_name);
+        $theList.find('li .pt_term_item').removeClass('text-primary font-medium');
+        $theBtn.addClass('text-primary font-medium');
+
+        axios({
+            method: "post",
+            url: route('pt.dashboard.get.term.statistics'),
+            data: {term_id : term_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            $contentWrap.find('.leaveTableLoader').removeClass('active');
+
+            if (response.status == 200) {
+                $contentArea.html(response.data.html);
+            }
+        }).catch(error => {
+            $contentWrap.find('.leaveTableLoader').removeClass('active');
+            if (error.response) {
+                $contentArea.html('<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Something went wrong. Please try again later or contact with the administrator.</div>');
+                console.log('error');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        });
+    })
+    /* Term Data Reload End*/
     
 })();
