@@ -1,34 +1,42 @@
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile Review of <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u></h2>
-        <div class="ml-auto flex justify-end">
-            
-            @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
-                <a style="float: right;" href="{{ route('studentapplication.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-outline-pending w-auto mr-1"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf</a>
-            @endif
-            @if(isset(auth()->user()->priv()['login_as_student']) && auth()->user()->priv()['login_as_student'] == 1)
-                <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning w-auto mr-1 mb-0">
-                        Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
-                </a>
-            @endif
-                <button type="button" class="btn btn-success text-white w-auto mr-1 mb-0">
-                    {{ $student->status->name }}
-                </button>
-            
-            @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
-            <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary w-auto text-white tooltip" title="Change Status">
+<div class="intro-y flex flex-col md:flex-row items-center mt-1 md:mt-8">
+    <div class="flex flex-col md:flex-row items-center gap-2 mb-4 md:mb-0">
+        <h2 class="text-lg font-medium text-center md:text-left">Profile Review of</h2>
+        <u><strong class="text-lg">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u>
+    </div>
+
+    <div class="md:ml-auto w-full md:w-auto flex flex-wrap sm:flex-row gap-2 justify-center md:justify-end">
+        @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
+            <a href="{{ route('applicantprofile.print',$student->applicant->id) }}" data-id="{{ $student->applicant->id }}" class="btn btn-outline-pending flex-1 sm:flex-none">
+                <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf
+            </a>
+        @endif
+
+        @if(isset(auth()->user()->priv()['login_as_student']) && auth()->user()->priv()['login_as_student'] == 1)
+            <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning">
+                Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
+            </a>
+        @endif
+
+        <button type="button" class="btn btn-success text-white flex-1 sm:flex-none max-w-24 md:w-auto">
+            {{ $student->status->name }}
+        </button>
+
+        @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
+            <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary text-white tooltip" title="Change Status">
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
             </button>
-            @endif
-            <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
-        </div>
+        @endif
+        <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
     </div>
+</div>
+
     
     <div class="intro-y box px-5 pt-5 mt-5">
         <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
             <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
                 <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
                     <img alt="{{ $student->full_name.' '.$student->last_name }}" class="rounded-full" src="{{ (isset($student->photo_url) && !empty($student->photo_url) ? $student->photo_url : asset('build/assets/images/avater.png')) }}">
-                    <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" type="button" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
+                    <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" type="button" class="absolute md:mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-1 md:p-2">
                         <i class="w-4 h-4 text-white" data-lucide="camera"></i>
                     </button>
                 </div>
@@ -72,8 +80,8 @@
             </div>
             
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
-                <div class="font-medium text-center lg:text-left lg:mt-3">Contact Details</div>
-                <div class="flex flex-col justify-center items-center lg:items-start mt-4">
+                <div class="font-medium text-left lg:mt-3">Contact Details</div>
+                <div class="flex flex-col justify-center items-start md:items-center lg:items-start mt-4">
                     <div class="truncate sm:whitespace-normal flex items-center">
                         <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $student->users->email }}
                     </div>
@@ -87,17 +95,17 @@
             </div>
             
             <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0">
-                <div class="font-medium text-center lg:text-left lg:mt-5">Address</div>
-                <div class="flex flex-col justify-center items-center lg:items-start mt-4">
+                <div class="font-medium text-left lg:mt-5">Address</div>
+                <div class="flex flex-col justify-center items-start md:items-center lg:items-start mt-4">
                     <div class="truncate sm:whitespace-normal flex items-start">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
                         <span>
                             @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
                                 @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
-                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span><br/>
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span>
                                 @endif
                                 @if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2))
-                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_2 }}</span><br/>
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_2 }}</span>
                                 @endif
                                 @if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city))
                                     <span class="font-medium">{{ $student->contact->termaddress->city }}</span>,

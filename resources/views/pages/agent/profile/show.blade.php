@@ -148,5 +148,6 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/agent-global.js')
     @vite('resources/js/agent-profile.js')
 @endsection

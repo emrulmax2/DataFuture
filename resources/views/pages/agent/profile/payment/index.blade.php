@@ -224,7 +224,9 @@
             </div>
         </div>
     </div>
+    @include('pages.agent.profile.show-modals')
 @endsection
 @section('script')
+    @vite('resources/js/agent-global.js')
     @vite('resources/js/agent-payment-settings.js')
 @endsection

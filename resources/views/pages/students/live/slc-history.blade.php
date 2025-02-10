@@ -244,7 +244,7 @@
                 <button data-reg-id="0" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
+        <div class="intro-y mt-5 overflow-x-scroll">
             <table class="table table-bordered table-sm mt-3" id="undefinedAttendanceTable">
                 <thead>
                     <tr>
@@ -304,7 +304,7 @@
                 <button  data-regid="0" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
+        <div class="intro-y mt-5 overflow-x-scroll">
             <table class="table table-bordered table-sm mt-3">
                 <thead>
                     <tr>

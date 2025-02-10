@@ -26,43 +26,54 @@ var studentWorkPlacementTable = (function () {
                     title: "#ID",
                     field: "id",
                     width: "70",
+                    minWidth: 30,
                 },
                 {
                     title: "Company",
                     field: "company",
                     headerSort: false,
                     headerHozAlign: "left",
+                    width: "180",
+                    minWidth: 180,
                 },
                 {
                     title: "Supervisor",
                     field: "supervisor",
                     headerSort: false,
                     headerHozAlign: "left",
+                    width: "180",
+                    minWidth: 180,
                 },
                 {
                     title: "Start",
                     field: "start_date",
                     headerHozAlign: "left",
+                    minWidth: 180,
                 },
                 {
                     title: "End",
                     field: "end_date",
                     headerHozAlign: "left",
+                    minWidth: 180,
                 },
                 {
                     title: "Hours",
                     field: "hours",
                     headerHozAlign: "left",
+                    minWidth: 180,
                 },
                 {
                     title: "Contract Type",
                     field: "contract_type",
                     headerHozAlign: "left",
+                    minWidth: 180,
                 },
                 {
                     title: "Created",
                     field: "created_by",
                     headerHozAlign: "left",
+                    width: "180",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -81,6 +92,7 @@ var studentWorkPlacementTable = (function () {
                     headerHozAlign: "center",
                     width: "180",
                     download: false,
+                    minWidth: 180,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {

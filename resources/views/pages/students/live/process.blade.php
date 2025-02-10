@@ -109,28 +109,28 @@
                         <div id="studentProcessAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse" aria-labelledby="studentProcessAccordion-{{ $loop->index }}" data-tw-parent="#studentProcessAccordion">
                             <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                 <ul class="nav nav-link-tabs border-b border-slate-200/60" role="tablist">
-                                    <li id="process-{{ $loop->index }}-1-tab" class="nav-item mr-10 flex" role="presentation">
+                                    <li id="process-{{ $loop->index }}-1-tab" class="nav-item mr-4 md:mr-10 flex" role="presentation">
                                         <button class="nav-link font-medium text-slate-500 py-2 px-0 active" data-tw-toggle="pill" 
                                             data-tw-target="#process-tab-{{ $loop->index }}-1" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-1" 
                                             aria-selected="true">
                                             Pending
                                         </button>
                                     </li>
-                                    <li id="process-{{ $loop->index }}-4-tab" class="nav-item  mr-10 flex" role="presentation">
+                                    <li id="process-{{ $loop->index }}-4-tab" class="nav-item  mr-4 md:mr-10 flex" role="presentation">
                                         <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
                                             data-tw-target="#process-tab-{{ $loop->index }}-4" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-4" 
                                             aria-selected="false">
                                             In Progress
                                         </button>
                                     </li>
-                                    <li id="process-{{ $loop->index }}-2-tab" class="nav-item flex" role="presentation">
+                                    <li id="process-{{ $loop->index }}-2-tab" class="nav-item mr-4 md:mr-10 flex" role="presentation">
                                         <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
                                             data-tw-target="#process-tab-{{ $loop->index }}-2" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-2" 
                                             aria-selected="false">
                                             Completed
                                         </button>
                                     </li>
-                                    <li id="process-{{ $loop->index }}-3-tab" class="nav-item ml-10 flex" role="presentation">
+                                    <li id="process-{{ $loop->index }}-3-tab" class="nav-item ml-4 md:ml-10 flex" role="presentation">
                                         <button class="nav-link font-medium text-slate-500 py-2  px-0" data-tw-toggle="pill" 
                                             data-tw-target="#process-tab-{{ $loop->index }}-3" type="button" role="tab" aria-controls="process-tab-{{ $loop->index }}-3" 
                                             aria-selected="false">
@@ -142,8 +142,8 @@
                                     <div id="process-tab-{{ $loop->index }}-1" class="tab-pane leading-relaxed active" role="tabpanel" aria-labelledby="process-{{ $loop->index }}-1-tab">
                                         @if($proGroup['pendingTask']->count() > 0)
                                             @foreach($proGroup['pendingTask'] as $task)
-                                                <div class="grid grid-cols-12 gap-4">
-                                                    <div class="col-span-6 sm:col-span-4">
+                                                <div class="grid grid-cols-12 items-center gap-4">
+                                                    <div class="col-span-9 md:col-span-6">
                                                         <div class="relative ">
                                                             <div class="intro-x relative flex items-center mb-3">
                                                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
@@ -284,7 +284,7 @@
                                         @if($proGroup['inProgressTask']->count() > 0)
                                             @foreach($proGroup['inProgressTask'] as $task)
                                                 <div class="grid grid-cols-12 gap-4">
-                                                    <div class="col-span-6 sm:col-span-4">
+                                                    <div class="col-span-12 md:col-span-6">
                                                         <div class="relative ">
                                                             <div class="intro-x relative flex items-center mb-3">
                                                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
@@ -418,7 +418,7 @@
                                                 $uploadedBy = [];
                                             @endphp
                                             <div class="grid grid-cols-12 gap-4">
-                                                    <div class="col-span-6 sm:col-span-4">
+                                                    <div class="col-span-12 md:col-span-6">
                                                         <div class="relative ">
                                                             <div class="intro-x relative flex items-center mb-3">
                                                                 <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
@@ -474,9 +474,9 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-span-3 sm:col-span-4">
-                                                        <div class="flex items-start justify-end assignedUserWrap completedUserWrap" id="assignedUserWrap_{{ $task->id }}">
-                                                            <div class="font-medium text-base mr-5 ml-auto">Completed By:</div>
+                                                    <div class="col-span-12 md:col-span-3">
+                                                        <div class="flex items-start justify-start assignedUserWrap completedUserWrap" id="assignedUserWrap_{{ $task->id }}">
+                                                            <div class="font-medium text-base md:mr-5 w-24 md:w-auto">Completed By:</div>
                                                             @if(isset($task->updatedBy->employee) && !empty($task->updatedBy->employee))
                                                                 <div class="flex items-center justify-start">
                                                                     <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden">

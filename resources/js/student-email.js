@@ -32,21 +32,25 @@ var studentCommEmailListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "120",
+                    minWidth: 50,
                 },
                 {
                     title: "Subject",
                     field: "subject",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 {
                     title: "From",
                     field: "smtp",
-                    headerHozAlign: "left"
+                    headerHozAlign: "left",
+                    minWidth: 100,
                 },
                 {
                     title: "Issued By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 100,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -65,6 +69,7 @@ var studentCommEmailListTable = (function () {
                     headerHozAlign: "right",
                     width: "230",
                     download: false,
+                    minWidth: 100,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         var document_list = cell.getData().document_list;

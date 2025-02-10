@@ -30,16 +30,19 @@ var studentUploadListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "120",
+                    minWidth: 50,
                 },
                 {
                     title: "Name",
                     field: "display_file_name",
                     headerHozAlign: "left",
+                    minWidth: 180,
                 },
                 {
                     title: "Checked",
                     field: "hard_copy_check",
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams) { 
                         if(cell.getData().hard_copy_check == 1){
                             return '<span class="btn btn-success-soft px-1 py-0 rounded-0">Yes</span>';
@@ -52,6 +55,7 @@ var studentUploadListTable = (function () {
                     title: "Uploaded By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -70,6 +74,7 @@ var studentUploadListTable = (function () {
                     headerHozAlign: "center",
                     width: "180",
                     download: false,
+                    minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         btns +='<a data-id="'+cell.getData().id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';

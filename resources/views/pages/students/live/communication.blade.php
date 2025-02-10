@@ -17,11 +17,11 @@
                 <div class="font-medium text-base">Letters</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2">
+                <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2 hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print All
                 </a>
-                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
-                <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary w-auto">
+                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Letters
                 </a>
             </div>
@@ -60,8 +60,8 @@
                 <div class="font-medium text-base">Email</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
-                <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto">
+                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Emails
                 </a>
             </div>
@@ -100,8 +100,8 @@
                 <div class="font-medium text-base">SMS</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
-                <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto">
+                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
+                <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print SMS
                 </a>
             </div>

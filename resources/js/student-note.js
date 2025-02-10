@@ -33,6 +33,7 @@ var studentNotesListTable = (function () {
                     field: "id",
                     headerHozAlign: "left",
                     width: "90",
+                    minWidth: 50,
                 },
                 {
                     title: "Term",
@@ -40,11 +41,13 @@ var studentNotesListTable = (function () {
                     headerHozAlign: "left",
                     headerSort: false,
                     width: "150",
+                    minWidth: 120,
                 },
                 {
                     title: "Note",
                     field: "note",
                     headerHozAlign: "left",
+                    minWidth: 120,
                     formatter(cell, formatterParams){
                         var note = cell.getData().note;
                         var html = '<div class="whitespace-normal break-words">';
@@ -79,6 +82,7 @@ var studentNotesListTable = (function () {
                     title: "Flag & Followed Up",
                     field: "followed_up",
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         if(cell.getData().is_flaged == 'Yes' && cell.getData().flaged_status == 'Active'){
@@ -113,6 +117,7 @@ var studentNotesListTable = (function () {
                     field: "created_by",
                     headerHozAlign: "left",
                     width: "250",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -131,6 +136,7 @@ var studentNotesListTable = (function () {
                     headerHozAlign: "right",
                     width: "220",
                     download: false,
+                    minWidth: 180,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         //if(cell.getData().note_document_id > 0){

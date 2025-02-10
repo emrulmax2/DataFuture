@@ -16,7 +16,7 @@
                 <div class="font-medium text-base">Notes</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Notes</button>
+                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Notes</button>
             </div>
         </div>
         <div class="intro-y mt-5">
@@ -49,7 +49,7 @@
                         <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
+                <div class="hidden md:flex mt-5 sm:mt-0">
                     <button id="tabulator-print-AN" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                         <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                     </button>

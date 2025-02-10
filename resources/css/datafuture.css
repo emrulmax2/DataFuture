@@ -516,12 +516,10 @@
 .liveStudentMainMenu{
     position: relative;
 }
-.liveStudentSubMenu{
+ .liveStudentSubMenu{
     position: absolute;
-    left: 0;
-    top: calc(100% - 55px);
     display: none;
-}
+} 
 .liveStudentSubMenu.show{
     display: flex;
 }
@@ -1702,10 +1700,10 @@ input[type=number] {
 .workplacementtab .btn:focus{
     box-shadow: none !important;
 }
-.workplacementtabcontent .thebtnarea{
+/* .workplacementtabcontent .thebtnarea{
     right: 0;
     top: -40px;
-}
+} */
 .workplacementtabcontent .thebtnarea .btn{
     margin-left: -3px;
 }
@@ -2448,7 +2446,7 @@ input[type=number] {
 }
 .dfReportWrap .lcc-accordion .lcc-accordion-item .lcc-accordion-header .lcc-accordion-button {
     padding-left: 1rem;
-    padding-right: 1rem;
+    padding-right: 1.8rem;
     border-bottom: 1px solid transparent;
     position: relative;
 }

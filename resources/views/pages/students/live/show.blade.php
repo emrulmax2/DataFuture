@@ -13,11 +13,11 @@
     <div class="intro-y mt-5">
         <div class="intro-y box p-5">
             <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
+                <div class="col-span-5 md:col-span-6">
                     <div class="font-medium text-base">Personal Details</div>
                 </div>
 
-                <div class="col-span-6 text-right">
+                <div class="col-span-7 md:col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionPersonalDetailsModal" type="button" class="editPersonalDetails btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Personal Details
                     </button>
@@ -202,12 +202,12 @@
                                 <button id="tabulator-html-filter-reset-PIC" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                             </div>
                         </div>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-PIC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                        <div class="flex justify-end mt-5 sm:mt-0">
+                            <button id="tabulator-print-PIC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden md:inline-flex">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
                             <div class="dropdown w-1/2 sm:w-auto mr-2">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto hidden md:inline-flex" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
@@ -248,15 +248,15 @@
         </div>
         
         <div class="intro-y box p-5 mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
+            <div class="flex flex-col sm:flex-row sm:items-end xl:items-center">
                 <div class="xl:flex sm:mr-auto">
                     <div class="font-medium text-base">Contact Details</div>
                 </div>
-                <div class="flex mt-5 sm:mt-0">
-                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary w-1/2 sm:w-auto mr-2">
+                <div class="flex justify-between mt-5 sm:mt-0">
+                    <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editAdmissionContactDetailsModal" type="button" class="btn btn-primary mr-2">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Contact Details
                     </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
+                    <div class="dropdown w-10">
                         <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                             <i data-lucide="grip" class="w-4 h-4"></i>
                         </button>
@@ -318,8 +318,8 @@
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0 mb-3">
-                        <div class="col-span-12 text-slate-500 font-medium mb-2">Permanent Address</div>
-                        <div class="col-span-12 font-medium">
+                        <div class="col-span-4 md:col-span-12 text-slate-500 font-medium mb-2">Permanent Address</div>
+                        <div class="col-span-8 md:col-span-12 font-medium">
                             @if(isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0)
                                 @if(isset($student->contact->permaddress->address_line_1) && !empty($student->contact->permaddress->address_line_1))
                                     <span class="font-medium">{{ $student->contact->permaddress->address_line_1 }}</span><br/>
@@ -370,9 +370,9 @@
                         <div class="col-span-8 font-medium">
                             {{ $student->contact->personal_email }}
                             @if ($student->contact->personal_email_verification == 0)
-                                <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
+                                <span class="btn inline-flex btn-danger px-2 py-0 md:ml-2 text-white rounded-0">Unverified</span>
                             @else
-                                <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                                <span class="btn inline-flex btn-success px-2 md:ml-2 py-0 text-white rounded-0">Verified</span>
                             @endif
                         </div>
                     </div>
@@ -436,8 +436,8 @@
                 </div>
                 <div class="col-span-12 sm:col-span-6">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-12 text-slate-500 font-medium mb-2">Address</div>
-                        <div class="col-span-12 font-medium">
+                        <div class="col-span-4 md:col-span-12 text-slate-500 font-medium mb-2">Address</div>
+                        <div class="col-span-8 md:col-span-12 font-medium">
                             @if(isset($student->kin->address_id) && $student->kin->address_id > 0)
                                 @if(isset($student->kin->address->address_line_1) && !empty($student->kin->address->address_line_1))
                                     <span class="font-medium">{{ $student->kin->address->address_line_1 }}</span><br/>
@@ -468,10 +468,10 @@
 
         <div class="intro-y box p-5 mt-5" id="applicantQualification">
             <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
+                <div class="col-span-7 md:col-span-6">
                     <div class="font-medium text-base">Educational Qualification</div>
                 </div>
-                <div class="col-span-6 text-right">
+                <div class="col-span-5 md:col-span-6 text-right">
                     <button data-tw-toggle="modal" data-tw-target="#editStudentQualStatusModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Status
                     </button>
@@ -480,9 +480,9 @@
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-12 mb-2">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-3 text-slate-500 font-medium">Student have any formal academic qualification?</div>
-                        <div class="col-span-8 font-medium">{!! (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
+                    <div class="flex md:grid grid-cols-12 gap-0">
+                        <div class="col-span-9 md:col-span-3 text-slate-500 font-medium">Student have any formal academic qualification?</div>
+                        <div class="col-span-3 md:col-span-8 font-medium">{!! (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
                     </div>
                 </div>
                 <div class="col-span-12 educationQualificationTableWrap" style="display: {{ isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 ? 'block' : 'none' }};">
@@ -505,11 +505,11 @@
                             </div>
                         </div>
                         <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-SEQ" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                            <button id="tabulator-print-SEQ" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden md:inline-flex">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
                             <div class="dropdown w-1/2 sm:w-auto mr-2">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto hidden md:inline-flex" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
@@ -570,9 +570,9 @@
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 sm:col-span-12 mb-2">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-3 text-slate-500 font-medium">Student current employment status</div>
-                        <div class="col-span-8 font-medium">{{ (isset($student->other->employment_status) && $student->other->employment_status != '' ? $student->other->employment_status : $student->other->employment_status ) }}</div>
+                    <div class="flex md:grid justify-between grid-cols-12 gap-0">
+                        <div class="col-span-9 md:col-span-3 text-slate-500 font-medium">Student current employment status</div>
+                        <div class="col-span-3 md:col-span-8 font-medium">{{ (isset($student->other->employment_status) && $student->other->employment_status != '' ? $student->other->employment_status : $student->other->employment_status ) }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 educationEmploymentTableWrap" style="display: {{ $emptStatus ? 'block' : 'none' }};">
@@ -594,12 +594,12 @@
                                 <button id="tabulator-html-filter-reset-SEH" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                             </div>
                         </div>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-SEH" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                        <div class="flex justify-end mt-5 sm:mt-0">
+                            <button id="tabulator-print-SEH" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden md:inline-flex">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                            <div class="dropdown w-1/2 sm:w-auto hidden md:block">
+                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto hidden md:inline-flex" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
@@ -654,8 +654,8 @@
             <div class="grid grid-cols-12 gap-4"> 
                 <div class="col-span-12 sm:col-span-12">
                     <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Communication Consent</div>
-                        <div class="col-span-8"> 
+                        <div class="col-span-12 md:col-span-4 text-slate-500 font-medium">Communication Consent</div>
+                        <div class="col-span-12 md:col-span-8"> 
                             @if(!empty($stdConsentIds) && $consent->count() > 0)
                                 <ul class="m-0 p-0 mb-2">
                                     @foreach($consent as $con)
@@ -678,9 +678,9 @@
                 </div>
                 @if(isset($student->referral_code) && !empty($student->referral_code) && isset($student->is_referral_varified) && $student->is_referral_varified == 1)
                 <div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Referred By</div>
-                        <div class="col-span-8 font-medium">
+                    <div class="grid grid-cols-12 gap-4 md:gap-0">
+                        <div class="col-span-12 md:col-span-4 text-slate-500 font-medium">Referred By</div>
+                        <div class="col-span-12 md:col-span-8 font-medium">
                             <div class="flex justify-start items-start mb-2">
                                 <div class="text-slate-500 font-medium mr-3 mw-120">Code</div>
                                 <div class="font-medium">{{ $referral->code }}</div>
