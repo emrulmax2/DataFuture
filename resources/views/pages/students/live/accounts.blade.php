@@ -136,7 +136,7 @@
                                             <div class="font-medium text-base">Installments</div>
                                         </div>
                                         <div class="col-span-6 text-right">
-                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Installment</button>
+                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Instalment</button>
                                         </div>
                                     </div>
                                     <div class="intro-y mt-5 bg-white">
@@ -433,7 +433,7 @@
             <form method="POST" action="#" id="addInstallmentForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Installment</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Instalment</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
@@ -530,7 +530,7 @@
             <form method="POST" action="#" id="editInstallmentForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Installment</h2>
+                        <h2 class="font-medium text-base mr-auto">Edit Instalment</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
