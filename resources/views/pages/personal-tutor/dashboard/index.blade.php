@@ -56,65 +56,97 @@
                                 </div>-->
                             </div>
                             <div class="col-span-12 lg:col-span-8 p-8 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-darkmode-300 border-dashed">
-                                @if(isset($current_term->id) && $current_term->id > 0)
-                                <ul class="nav nav-pills w-60 border border-slate-300 dark:border-darkmode-300 border-dashed rounded-md mx-auto p-1 mb-8" role="tablist">
-                                    <li id="selectedTermButton" class="nav-item flex-1" role="presentation">
-                                        <button class="nav-link w-full py-1.5 px-2 active" data-tw-toggle="pill" data-tw-target="#weekly-report" type="button" role="tab" aria-controls="weekly-report" aria-selected="true" >
-                                            {{ $current_term->name }}
-                                        </button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content px-5 pb-5">
-                                    <div class="tab-pane active grid grid-cols-12 gap-y-8 gap-x-10" id="weekly-report" role="tabpanel" aria-labelledby="weekly-report-tab">
-                                        <div class="col-span-6 sm:col-span-6">
-                                            <div class="text-slate-500">No of Module</div>
-                                            <div class="mt-1.5 flex items-center">
-                                                <div id="totalModule" class="text-base">
-                                                    @if($myModules->count() > 0)
-                                                        @foreach($myModules as $mm)
-                                                            @if($mm->TOTAL_MODULE > 0)
-                                                                <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">{{$mm->class_type}}: {{ $mm->TOTAL_MODULE}}</span>
-                                                            @endif
-                                                        @endforeach
-                                                    @else 
-                                                        <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>
-                                                    @endif
-                                                </div>
+                                @if($otherTerms->count() > 0)
+                                    <div class="ptTermDropdwnWrap w-60 border border-slate-300 dark:border-darkmode-300 border-dashed rounded-md mx-auto p-1 mb-8">
+                                        <div class="dropdown">
+                                            <button id="ptTermDropdown" class="dropdown-toggle btn btn-primary py-1.5 px-3 w-full term-dropdown-btn" aria-expanded="false" data-tw-toggle="dropdown">
+                                                <span>{{ (isset($current_term->id) && $current_term->id > 0 ? $current_term->name : 'Select Term')}}</span> 
+                                                <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
+                                            </button>
+                                            <div class="dropdown-menu w-full">
+                                                <ul class="dropdown-content overflow-y-auto h-[190px]">
+                                                    @foreach($otherTerms as $term)
+                                                    <li>
+                                                        <a data-term="{{ $term->name }}" data-id="{{ $term->id }}" href="javascript:void(0);" class="dropdown-item pt_term_item {{ (isset($current_term->id) && $current_term->id == $term->id ? 'text-primary font-medium' : '') }}">
+                                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> 
+                                                            {{ $term->name }}
+                                                        </a>
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
                                             </div>
                                         </div>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <div class="text-slate-500">No of Student</div>
-                                            <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">{{ $no_of_assigned }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <div class="text-slate-500">Expected Assignments</div>
-                                            <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">{{ ($no_of_assignment) }}</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <div class="text-slate-500">Average Attendance</div>
-                                            <div class="mt-1.5 flex items-center">
-                                                <div class="text-base">{{ $attendance_avg }}</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-span-12 sm:col-span-6"></div>
-
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <div class="text-slate-500">Attendance Bellow 60%</div>
-                                            <div class="mt-1.5 flex items-center">
-                                                <a target="_blank" href="{{ route('attendance.percentage', [auth()->user()->id, ($current_term->id > 0 ? $current_term->id : 0)]) }}" class="text-base font-medium underline">{{ $bellow_60 }}</a>
-                                            </div>
-                                        </div>
-                                        
                                     </div>
-                                </div>
+                                    <div class="pt_term_content_wrap relative">
+                                        <div class="leaveTableLoader">
+                                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
+                                                <g fill="none" fill-rule="evenodd">
+                                                    <g transform="translate(1 1)" stroke-width="4">
+                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        </path>
+                                                    </g>
+                                                </g>
+                                            </svg>
+                                        </div>
+                                        <div class="pt_term_content px-5 pb-5">
+                                            @if(isset($current_term->id) && $current_term->id > 0)
+                                                <div class="grid grid-cols-12 gap-y-8 gap-x-10">
+                                                    <div class="col-span-6 sm:col-span-6">
+                                                        <div class="text-slate-500">No of Module</div>
+                                                        <div class="mt-1.5 flex items-center">
+                                                            <div id="totalModule" class="text-base">
+                                                                @if($myModules->count() > 0)
+                                                                    @foreach($myModules as $mm)
+                                                                        @if($mm->TOTAL_MODULE > 0)
+                                                                            <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">{{$mm->class_type}}: {{ $mm->TOTAL_MODULE}}</span>
+                                                                        @endif
+                                                                    @endforeach
+                                                                @else 
+                                                                    <span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-span-12 sm:col-span-6">
+                                                        <div class="text-slate-500">No of Student</div>
+                                                        <div class="mt-1.5 flex items-center">
+                                                            <div class="text-base">{{ $no_of_assigned }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-span-12 sm:col-span-6">
+                                                        <div class="text-slate-500">Expected Assignments</div>
+                                                        <div class="mt-1.5 flex items-center">
+                                                            <div class="text-base">{{ ($no_of_assignment) }}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-span-12 sm:col-span-6">
+                                                        <div class="text-slate-500">Average Attendance</div>
+                                                        <div class="mt-1.5 flex items-center">
+                                                            <div class="text-base">{{ $attendance_avg }}</div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-span-12 sm:col-span-6"></div>
+
+                                                    <div class="col-span-12 sm:col-span-6">
+                                                        <div class="text-slate-500">Attendance Bellow 60%</div>
+                                                        <div class="mt-1.5 flex items-center">
+                                                            <a target="_blank" href="{{ route('attendance.percentage', [auth()->user()->id, ($current_term->id > 0 ? $current_term->id : 0)]) }}" class="text-base font-medium underline">{{ $bellow_60 }}</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @else:
+                                                <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Current term data not found. Please select a term from the dropdown.
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 @else 
                                     <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
-                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Assigned terms not found.
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Assigned term not found.
                                     </div>
                                 @endif
                             </div>

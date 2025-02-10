@@ -42,6 +42,7 @@
                             @foreach($data as $termId => $termModuleList)
                                 @if($termList[$currenTerm]->id == $termId)
                                     @foreach($termModuleList as $termData)
+                                        @if($termData->parent_id == 0)
                                         @php 
                                             $module_id = (isset($termData->parent_id) && $termData->parent_id > 0 ? $termData->parent_id : $termData->id);
                                         @endphp
@@ -50,12 +51,19 @@
                                                 <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $termData->module }}</div>
-                                                        <div class="text-slate-500 text-xs mt-0.5">{{ isset($termData->classType) ? $termData->classType : "No class type found" }}</div>
+                                                        <div class="text-slate-500 text-xs mt-0.5">
+                                                            {{ isset($termData->classType) ? $termData->classType : "Unknown" }}{{ isset($termData->has_tutorial) && $termData->has_tutorial ? ', Tutorial' : "" }}
+                                                        </div>
                                                     </div>
                                                     @if($termData->tutor_photo != "")
                                                         <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
                                                             
                                                             <img alt="#" src="{{ $termData->tutor_photo }}">
+                                                        </div>
+                                                    @endif
+                                                    @if($termData->has_tutorial && $termData->p_tutor_photo != '')
+                                                        <div class="w-10 h-10 flex-none image-fit rounded-md overflow-hidden mr-2">
+                                                            <img alt="#" src="{{ $termData->p_tutor_photo }}">
                                                         </div>
                                                     @endif
                                                     @if($termData->personal_tutor_photo!="")
@@ -74,6 +82,7 @@
                                                 </div>
                                             </div>
                                         </a>
+                                        @endif
                                     @endforeach
                                 @endif
                             @endforeach
