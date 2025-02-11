@@ -21,7 +21,7 @@ import TomSelect from "tom-select";
     };
 
     if($('#personalTutorDashboard').length > 0){
-        $("#load-more").on('click',function(e){
+        $("#personalTutorDashboard").on('click', '#load-more', function(e){
             e.preventDefault()
             $('.more').removeClass('hidden');
             $("#load-more").hide()
@@ -627,7 +627,11 @@ import TomSelect from "tom-select";
 
         var $contentWrap = $('.pt_term_content_wrap');
         var $contentArea = $contentWrap.find('.pt_term_content');
+        var $myModuleWrap = $('#personalTutormoduleListWrap');
+        var $myModuleArea = $myModuleWrap.find('#personalTutormoduleList');
         $contentWrap.find('.leaveTableLoader').addClass('active');
+        $myModuleWrap.find('.leaveTableLoader').addClass('active');
+
 
         $('.ptTermDropdwnWrap').find('#ptTermDropdown span').html(term_name);
         $theList.find('li .pt_term_item').removeClass('text-primary font-medium');
@@ -640,14 +644,24 @@ import TomSelect from "tom-select";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             $contentWrap.find('.leaveTableLoader').removeClass('active');
+            $myModuleWrap.find('.leaveTableLoader').removeClass('active');
 
             if (response.status == 200) {
-                $contentArea.html(response.data.html);
+                $contentArea.html(response.data.statshtml);
+                $myModuleArea.html(response.data.modulhtml);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
             }
         }).catch(error => {
             $contentWrap.find('.leaveTableLoader').removeClass('active');
+            $myModuleWrap.find('.leaveTableLoader').removeClass('active');
             if (error.response) {
                 $contentArea.html('<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Something went wrong. Please try again later or contact with the administrator.</div>');
+                $myModuleArea.html('<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Something went wrong. Please try again later or contact with the administrator.</div>');
                 console.log('error');
 
                 createIcons({

@@ -762,8 +762,10 @@ class DashboardController extends Controller
     public function getTermStatistics(Request $request){
         $id = auth()->user()->id;
         $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
+        $modules = Plan::with('activeAssign', 'tutor', 'personalTutor')->where('term_declaration_id', $term_id)->where('personal_tutor_id', $id)->orderBy('id', 'ASC')->get();
         
-        $html = '';
+        $statsHtml = '';
+        $modulHtml = '';
         if($term_id > 0):
             $plans = Plan::where('personal_tutor_id', $id)->where('term_declaration_id', $term_id)->orderBy('term_declaration_id', 'DESC')->get();
             $plan_ids = $plans->pluck('id')->unique()->toArray();
@@ -777,58 +779,98 @@ class DashboardController extends Controller
             $attendance_avg = $this->myModulesAttendanceAverage($id, $term_id);
             $bellow_60 = $this->myModulesAttendanceBellow($id, $term_id);
 
-            $html .= '<div class="grid grid-cols-12 gap-y-8 gap-x-10">';
-                $html .= '<div class="col-span-6 sm:col-span-6">';
-                    $html .= '<div class="text-slate-500">No of Module</div>';
-                    $html .= '<div class="mt-1.5 flex items-center">';
-                        $html .= '<div id="totalModule" class="text-base">';
+            $statsHtml .= '<div class="grid grid-cols-12 gap-y-8 gap-x-10">';
+                $statsHtml .= '<div class="col-span-6 sm:col-span-6">';
+                    $statsHtml .= '<div class="text-slate-500">No of Module</div>';
+                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
+                        $statsHtml .= '<div id="totalModule" class="text-base">';
                             if($myModules->count() > 0):
                                 foreach($myModules as $mm):
                                     if($mm->TOTAL_MODULE > 0):
-                                        $html .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">'.$mm->class_type.': '.$mm->TOTAL_MODULE.'</span>';
+                                        $statsHtml .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">'.$mm->class_type.': '.$mm->TOTAL_MODULE.'</span>';
                                     endif;
                                 endforeach;
                             else:
-                                $html .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>';
+                                $statsHtml .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>';
                             endif;
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="col-span-12 sm:col-span-6">';
-                    $html .= '<div class="text-slate-500">No of Student</div>';
-                    $html .= '<div class="mt-1.5 flex items-center">';
-                        $html .= '<div class="text-base">'.$no_of_assigned.'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="col-span-12 sm:col-span-6">';
-                    $html .= '<div class="text-slate-500">Expected Assignments</div>';
-                    $html .= '<div class="mt-1.5 flex items-center">';
-                        $html .= '<div class="text-base">'.($no_of_assignment).'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="col-span-12 sm:col-span-6">';
-                    $html .= '<div class="text-slate-500">Average Attendance</div>';
-                    $html .= '<div class="mt-1.5 flex items-center">';
-                        $html .= '<div class="text-base">'.$attendance_avg.'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
+                        $statsHtml .= '</div>';
+                    $statsHtml .= '</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
+                    $statsHtml .= '<div class="text-slate-500">No of Student</div>';
+                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
+                        $statsHtml .= '<div class="text-base">'.$no_of_assigned.'</div>';
+                    $statsHtml .= '</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
+                    $statsHtml .= '<div class="text-slate-500">Expected Assignments</div>';
+                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
+                        $statsHtml .= '<div class="text-base">'.($no_of_assignment).'</div>';
+                    $statsHtml .= '</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
+                    $statsHtml .= '<div class="text-slate-500">Average Attendance</div>';
+                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
+                        $statsHtml .= '<div class="text-base">'.$attendance_avg.'</div>';
+                    $statsHtml .= '</div>';
+                $statsHtml .= '</div>';
 
-                $html .= '<div class="col-span-12 sm:col-span-6"></div>';
+                $statsHtml .= '<div class="col-span-12 sm:col-span-6"></div>';
 
-                $html .= '<div class="col-span-12 sm:col-span-6">';
-                    $html .= '<div class="text-slate-500">Attendance Bellow 60%</div>';
-                    $html .= '<div class="mt-1.5 flex items-center">';
-                        $html .= '<a target="_blank" href="'.route('attendance.percentage', [auth()->user()->id, $term_id]).'" class="text-base font-medium underline">'.$bellow_60.'</a>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
+                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
+                    $statsHtml .= '<div class="text-slate-500">Attendance Bellow 60%</div>';
+                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
+                        $statsHtml .= '<a target="_blank" href="'.route('attendance.percentage', [auth()->user()->id, $term_id]).'" class="text-base font-medium underline">'.$bellow_60.'</a>';
+                    $statsHtml .= '</div>';
+                $statsHtml .= '</div>';
+            $statsHtml .= '</div>';
         else:
-            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">';
-                $html .= '<i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No data found for the selected term.';
-            $html .= '</div>';
+            $statsHtml .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">';
+                $statsHtml .= '<i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> No data found for the selected term.';
+            $statsHtml .= '</div>';
         endif;
 
-        return response()->json(['html' => $html], 200);
+        if($modules->count() > 0 && $term_id > 0):
+            $i = 1;
+            foreach($modules as $mod):
+                $module_id = (isset($mod->parent_id) && $mod->parent_id > 0 ? $mod->parent_id : $mod->id);
+                $modClass = ($i > 4 ? 'more hidden' : 'block');
+                $modulHtml .= '<a class="'.$modClass.'" href="'.route('tutor-dashboard.plan.module.show', $module_id).'" target="_blank">';
+                    $modulHtml .= '<div id="moduleset-'.$mod->id.'" class="intro-y module-details_'.$mod->id.'">';
+                        $modulHtml .= '<div class="box px-4 py-4 mb-3 zoom-in '.(isset($mod->tutor_id) && $mod->tutor_id > 0 ? 'pl-5' : '').'">';
+                            if(isset($mod->tutor_id) && $mod->tutor_id > 0):
+                                $modulHtml .= '<div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">';
+                                    $modulHtml .= '<img src="'.(isset($mod->tutor->employee->photo_url) && !empty($mod->tutor->employee->photo_url) ? $mod->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" title="'.(isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '').'" class="tooltip rounded-full" alt="'.(isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '').'"/>';
+                                $modulHtml .= '</div>';
+                            endif;
+                            $modulHtml .= '<div class="flex justify-start items-center mb-2 pl-4">';
+                                $modulHtml .= '<div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">'.$mod->group->name.'</div>';
+                                $modulHtml .= '<button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">';
+                                    $modulHtml .= (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown'));
+                                $modulHtml .= '</button>';
+                                $modulHtml .= '<button class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">';
+                                    $modulHtml .= $mod->activeAssign->count();
+                                $modulHtml .= '</button>';
+                            $modulHtml .= '</div>';
+                            $modulHtml .= '<div class="ml-4 mr-auto">';
+                                $modulHtml .= '<div class="font-medium">'.$mod->creations->module_name.'</div>';
+                                $modulHtml .= '<div class="text-slate-500 text-xs mt-0.5">'.$mod->course->name.'</div>';
+                            $modulHtml .= '</div>';
+                        $modulHtml .= '</div>';
+                    $modulHtml .= '</div>';
+                $modulHtml .= '</a>';
+                $i += 1;
+            endforeach;
+            if($modules->count() > 4):
+                $modulHtml .= '<a href="javascript:void(0);" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>';
+            endif;
+        else: 
+            $modulHtml .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">';
+                $modulHtml .= '<i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Modules not found!';
+            $modulHtml .= '</div>';
+        endif;
+
+        return response()->json(['statshtml' => $statsHtml, 'modulhtml' => $modulHtml], 200);
     }
 
 }

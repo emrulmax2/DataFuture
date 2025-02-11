@@ -247,17 +247,18 @@ var agentRemittPaymentsListTable = (function () {
 
     $('#linkTransactionModal .autoFillDropdown').on('click', 'li a:not(".disable")', function(e){
         e.preventDefault();
-        var comission_total = $('#linkTransactionModal [name="comission_total"]').val();
+        var comission_total = $('#linkTransactionModal [name="agent_comission_total"]').val() * 1;
         var transaction_code = $(this).attr('href');
         var transaction_id = $(this).attr('data-id');
-        var transaction_amount = $(this).attr('data-amount');
+        var transaction_amount = $(this).attr('data-amount') * 1;
         $(this).parent('li').parent('ul.autoFillDropdown').siblings('.transaction_code').val(transaction_code);
         $(this).parent('li').parent('ul.autoFillDropdown').siblings('.transaction_id').val(transaction_id);
         $(this).parent('li').parent('.autoFillDropdown').html('').fadeOut();
 
-        if(comission_total != transaction_amount){
+        //console.log(comission_total.toFixed(2)+' - '+transaction_amount.toFixed(2));
+        if(comission_total.toFixed(2) != transaction_amount.toFixed(2)){
             $('#linkTransactionModal .modal-body .amountError').remove();
-            $('#linkTransactionModal .modal-body').append('<div class="amountError alert alert-pending-soft show flex items-center mt-5" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <span><strong>Oops! </strong> Transaction amount does not match with the remittance total.</span></div>')
+            $('#linkTransactionModal .modal-body').append('<div class="amountError alert alert-pending-soft show flex items-center mt-5" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <span><strong>Oops! </strong> The transaction amount does not match the remittance total.</span></div>')
             
             createIcons({
                 icons,
@@ -266,6 +267,13 @@ var agentRemittPaymentsListTable = (function () {
             });
         }else{
             $('#linkTransactionModal .modal-body .amountError').remove();
+            $('#linkTransactionModal .modal-body').append('<div class="amountError alert alert-success-soft show flex items-center mt-5" role="alert"><i data-lucide="check-circle" class="w-6 h-6 mr-2"></i> <span><strong>WOW! </strong> The transaction amount matches the remittance total.</span></div>')
+            
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
         }
     });
 
