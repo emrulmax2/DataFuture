@@ -36,6 +36,7 @@
                         </svg>
                     </button>
                     <input type="hidden" name="acc_transaction_id" value="{{ $transaction->id }}"/>
+                    <a href="{{ route('reports.accounts.transaction.connection.print', $transaction->id) }}" class="btn btn-linkedin text-white w-auto ml-1"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
                     <a href="{{ route('reports.accounts.transaction.connection.export', $transaction->id) }}" class="btn btn-facebook text-white w-auto ml-1"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel</a>
                 </div>
             </div>

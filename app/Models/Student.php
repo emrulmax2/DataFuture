@@ -257,6 +257,7 @@ class Student extends Model
     public function awardReport(){
         return $this->hasOne(StudentAwardingBodyDetails::class, 'student_id')->latestOfMany();
     }
+
     public function getDueAttribute(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
         $agreements = SlcAgreement::where('student_id', $this->id)->where('student_course_relation_id', $activeCRel)->orderBy('id', 'ASC')->get();
@@ -329,6 +330,23 @@ class Student extends Model
     public function df(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
         return $this->hasOne(StudentDatafuture::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+    }
+
+    public function getMultiAgreementStatusAttribute(){
+        $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+        $query = DB::table('slc_agreements')
+                 ->select(DB::raw('COUNT(DISTINCT id) as no_of_agreement'))
+                 ->where('student_id', $this->id)
+                 ->where('student_course_relation_id', $activeCRel)
+                 ->groupBy('year')
+                 ->get();
+        $count = 0;
+        if($query->count() > 0):
+            foreach($query as $q):
+                $count += (isset($q->no_of_agreement) && $q->no_of_agreement > 1 ? 1 : 0);
+            endforeach;
+        endif;
+        return $count > 0 ? 2 : 0;
     }
     
 }

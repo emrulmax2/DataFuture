@@ -75,6 +75,9 @@ var liveStudentsListTable = (function () {
                         if (cell.getData().flag_html != '') {
                             html += cell.getData().flag_html;
                         }
+                        if (cell.getData().multi_agreement_status > 1) {
+                            html += '<div class="mr-2 inline-flex  intro-x  ml-auto" style="color:#f59e0b"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-octagon" class="lucide lucide-alert-octagon w-6 h-6"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></div>';
+                        }
                         if (cell.getData().due > 1) {
                             html +=
                                 '<div class="mr-2 ' +
