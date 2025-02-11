@@ -3234,6 +3234,7 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/accounts/connections/{transaction_id}', 'transactionConnection')->name('reports.accounts.transaction.connection'); 
         Route::post('reports/accounts/connections/store', 'store')->name('reports.accounts.transaction.connection.store'); 
         Route::get('reports/accounts/connections/export/{transaction_id}', 'exportList')->name('reports.accounts.transaction.connection.export'); 
+        Route::get('reports/accounts/connections/print/{transaction_id}', 'printList')->name('reports.accounts.transaction.connection.print'); 
     });
 
     Route::controller(AttendanceRateReportController::class)->group(function(){

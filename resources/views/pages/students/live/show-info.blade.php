@@ -47,6 +47,9 @@
                         $day = 'text-amber-600';
                     endif;
                     $html = '<div class="inline-flex ml-auto">';
+                        if(isset($student->multi_agreement_status) && $student->multi_agreement_status > 1):
+                            $html .= '<div class="mr-2 inline-flex  intro-x  ml-auto" style="color:#f59e0b"><i data-lucide="alert-octagon" class="w-6 h-6"></i></div>';
+                        endif;
                         $html .= (isset($student->flag_html) && !empty($student->flag_html) ? $student->flag_html : '');
                         if($student->due > 1):
                             $html .= '<div class="mr-2 '.($student->due == 2 ? 'text-success' : ($student->due == 3 ? 'text-warning' : 'text-danger')).'"><i data-lucide="badge-pound-sterling" class="w-6 h-6"></i></div>';

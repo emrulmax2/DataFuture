@@ -64,13 +64,14 @@
         $('#totalRefunds').html('£'+refund.toFixed(2));
 
         let totalReceived = received - refund;
-        if(transAmount == totalReceived){
+        if(transAmount == totalReceived.toFixed(2)){
             $('#transactionAmount').addClass('text-success');
             $('#saveConnectionBtn').fadeIn('fast');
         }else{
             $('#transactionAmount').removeClass('text-success');
             $('#saveConnectionBtn').fadeOut('fast');
         }
+        //console.log(transAmount+' - '+received+' - '+refund+' - '+totalReceived);
     }
 
     $('#transConnectionForm').on('submit', function(e){

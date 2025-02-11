@@ -266,7 +266,8 @@ class StudentController extends Controller
                     'url' => route('student.show', $list->id),
                     'photo_url' => $list->photo_url,
                     'flag_html' => (isset($list->flag_html) && !empty($list->flag_html) ? $list->flag_html : ''),
-                    'due' => $list->due
+                    'due' => $list->due,
+                    'multi_agreement_status' => $list->multi_agreement_status
                 ];
                 $i++;
             endforeach;
