@@ -133,6 +133,12 @@ class ConnectTransactionController extends Controller
         $moneyReceipts = SlcMoneyReceipt::where('payment_date', $transDate)->where(function($q) use($transaction_id){
                             $q->where('acc_transaction_id', $transaction_id)->orWhereNull('acc_transaction_id');
                         })->orderBy('id', 'ASC')->get();
+        $courseFees = $moneyReceipts->filter(function($moneyReceipts) {
+            return $moneyReceipts->payment_type == 'Course Fee';
+        });
+        $refunds = $moneyReceipts->filter(function($moneyReceipts) {
+            return $moneyReceipts->payment_type == 'Refund';
+        });
 
         $user = User::find(auth()->user()->id);
 
@@ -167,6 +173,7 @@ class ConnectTransactionController extends Controller
                                 .pageBreak{page-break-after: always;}
                                 
                                 .mb-15{margin-bottom: 15px;}
+                                .mb-20{margin-bottom: 20px;}
                                 .mb-10{margin-bottom: 10px;}
                                 .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
                                 .table-sm th, .table-sm td{padding: 5px 10px;}
@@ -174,6 +181,7 @@ class ConnectTransactionController extends Controller
                                 .w-2/6{width: 33.333333%;}
                                 .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
                                 .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
+                                .table.summaryTable tr:first-child th{padding-bottom: 7px}
                             </style>';
             $PDFHTML .= '</head>';
 
@@ -198,6 +206,22 @@ class ConnectTransactionController extends Controller
                     $PDFHTML .= '</table>';
                 $PDFHTML .= '</header>';
 
+                $PDFHTML .= '<table class="table table-bordered table-sm summaryTable mb-20">';
+                    $PDFHTML .= '<tbody>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th class="text-left">Transaction of '.(!empty($transaction->transaction_date_2) ? '('.date('d-m-Y', strtotime($transaction->transaction_date_2)).')' : '').'</th>';
+                            $PDFHTML .= '<th class="text-left">Amount</th>';
+                            $PDFHTML .= '<th class="text-left">Course Fees Received</th>';
+                            $PDFHTML .= '<th class="text-left">Refund</th>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th class="text-left">'.$transaction->transaction_code.'</th>';
+                            $PDFHTML .= '<th class="text-left">'.Number::currency($transaction->transaction_amount, in: 'GBP').'</th>';
+                            $PDFHTML .= '<th class="text-left">'.Number::currency($courseFees->sum('amount'), in: 'GBP').'</th>';
+                            $PDFHTML .= '<th class="text-left">'.Number::currency($refunds->sum('amount'), in: 'GBP').'</th>';
+                        $PDFHTML .= '</tr>';
+                    $PDFHTML .= '</tbody>';
+                $PDFHTML .= '</table>';
                 $PDFHTML .= '<table class="table table-bordered table-sm attenRateReportTable">';
                     $PDFHTML .= '<thead>';
                         $PDFHTML .= '<tr>';

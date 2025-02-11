@@ -14,8 +14,13 @@ use Illuminate\Support\Facades\DB;
 class AttendancePercentageController extends Controller
 {
     public function index($tutor_id, $term_id){
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
-                    ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+        // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
+        // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+                        $q->where('tutor_id', $tutor_id)->orWhere('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
+                            $sq->where('personal_tutor_id', $tutor_id);
+                        });
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
         $students = [];
 
         if(!empty($plan_ids)):
@@ -56,9 +61,16 @@ class AttendancePercentageController extends Controller
         $tutor_id = (isset($request->tutor_id) && $request->tutor_id > 0 ? $request->tutor_id : 0);
         $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
 
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
-                    ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-        $assign_student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
+        // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
+        // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+
+        $term_plan_ids = Plan::where('term_declaration_id', $term_id)->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+                        $q->where('tutor_id', $tutor_id)->orWhere('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
+                            $sq->where('personal_tutor_id', $tutor_id);
+                        });
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+        $assign_student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : [0]);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
         $sorts = [];
@@ -69,10 +81,11 @@ class AttendancePercentageController extends Controller
         $Query = DB::table('attendances as atn')
                     ->select(
                         'std.id',
+                        DB::raw('GROUP_CONCAT(DISTINCT atn.plan_id) as plan_ids'),
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
-                    ->whereIn('atn.plan_id', $plan_ids)
+                    ->whereIn('atn.plan_id', $term_plan_ids)
                     ->groupBy('atn.student_id');
         if($student_ids > 0):
             $Query->where('atn.student_id', $student_ids);
@@ -101,6 +114,7 @@ class AttendancePercentageController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'plan_ids' => $list->plan_ids,
                     'disability' =>  (isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0),
                     'full_time' => (isset($student->activeCR->propose->full_time) && $student->activeCR->propose->full_time > 0) ? $student->activeCR->propose->full_time : 0, 
                     'registration_no' => (!empty($student->registration_no) ? $student->registration_no : $student->application_no),

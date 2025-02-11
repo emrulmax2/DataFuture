@@ -64,7 +64,7 @@
                                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
                                             </button>
                                             <div class="dropdown-menu w-full">
-                                                <ul class="dropdown-content overflow-y-auto h-[190px]">
+                                                <ul class="dropdown-content overflow-y-auto max-h-[190px]">
                                                     @foreach($otherTerms as $term)
                                                     <li>
                                                         <a data-term="{{ $term->name }}" data-id="{{ $term->id }}" href="javascript:void(0);" class="dropdown-item pt_term_item {{ (isset($current_term->id) && $current_term->id == $term->id ? 'text-primary font-medium' : '') }}">
@@ -268,47 +268,61 @@
                             <h2 class="text-lg font-medium truncate mr-5">My Modules</h2>
                         </div>
                         
-                        <div id="personalTutormoduleList" class="mt-5">
-                            @if($modules->count() > 0)
-                                @php $i = 1; @endphp
-                                @foreach($modules as $mod)
-                                    @php 
-                                        $module_id = (isset($mod->parent_id) && $mod->parent_id > 0 ? $mod->parent_id : $mod->id)
-                                    @endphp
-                                    <a class="{{ $i > 4 ? 'more hidden' : 'block' }}" href="{{ route('tutor-dashboard.plan.module.show', $module_id) }}" target="_blank">
-                                        <div id="moduleset-{{ $mod->id }}" class="intro-y module-details_{{ $mod->id }}">
-                                            <div class="box px-4 py-4 mb-3 zoom-in {{ (isset($mod->tutor_id) && $mod->tutor_id > 0 ? 'pl-5' : '') }}">
-                                                @if(isset($mod->tutor_id) && $mod->tutor_id > 0)
-                                                <div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">
-                                                    <img src="{{ (isset($mod->tutor->employee->photo_url) && !empty($mod->tutor->employee->photo_url) ? $mod->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}" title="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}" class="tooltip rounded-full" alt="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}"/>
-                                                </div>
-                                                @endif
-                                                <div class="flex justify-start items-center mb-2 pl-4">
-                                                    <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">{{ $mod->group->name }}</div>
-                                                    <button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
-                                                        {{ (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown')) }}
-                                                    </button>
-                                                    <button class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
-                                                        {{ $mod->activeAssign->count() }}
-                                                    </button>
-                                                </div>
-                                                <div class="ml-4 mr-auto">
-                                                    <div class="font-medium">{{ $mod->creations->module_name }}</div>
-                                                    <div class="text-slate-500 text-xs mt-0.5">{{ $mod->course->name }}</div>
+                        <div id="personalTutormoduleListWrap" class="mt-5 relative">
+                            <div class="leaveTableLoader">
+                                <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div id="personalTutormoduleList">
+                                @if($modules->count() > 0)
+                                    @php $i = 1; @endphp
+                                    @foreach($modules as $mod)
+                                        @php 
+                                            $module_id = (isset($mod->parent_id) && $mod->parent_id > 0 ? $mod->parent_id : $mod->id)
+                                        @endphp
+                                        <a class="{{ $i > 4 ? 'more hidden' : 'block' }}" href="{{ route('tutor-dashboard.plan.module.show', $module_id) }}" target="_blank">
+                                            <div id="moduleset-{{ $mod->id }}" class="intro-y module-details_{{ $mod->id }}">
+                                                <div class="box px-4 py-4 mb-3 zoom-in {{ (isset($mod->tutor_id) && $mod->tutor_id > 0 ? 'pl-5' : '') }}">
+                                                    @if(isset($mod->tutor_id) && $mod->tutor_id > 0)
+                                                    <div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">
+                                                        <img src="{{ (isset($mod->tutor->employee->photo_url) && !empty($mod->tutor->employee->photo_url) ? $mod->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}" title="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}" class="tooltip rounded-full" alt="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}"/>
+                                                    </div>
+                                                    @endif
+                                                    <div class="flex justify-start items-center mb-2 pl-4">
+                                                        <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">{{ $mod->group->name }}</div>
+                                                        <button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
+                                                            {{ (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown')) }}
+                                                        </button>
+                                                        <button class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">
+                                                            {{ $mod->activeAssign->count() }}
+                                                        </button>
+                                                    </div>
+                                                    <div class="ml-4 mr-auto">
+                                                        <div class="font-medium">{{ $mod->creations->module_name }}</div>
+                                                        <div class="text-slate-500 text-xs mt-0.5">{{ $mod->course->name }}</div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                    @php $i += 1; @endphp
-                                @endforeach
-                                @if($modules->count() > 4)
-                                    <a href="javascript:void(0);" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                                        </a>
+                                        @php $i += 1; @endphp
+                                    @endforeach
+                                    @if($modules->count() > 4)
+                                        <a href="javascript:void(0);" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                                    @endif
+                                @else 
+                                    <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Modules not found!
+                                    </div>
                                 @endif
-                            @else 
-                                <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
-                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Modules not found!
-                                </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
                     <!-- END: Important Notes -->
