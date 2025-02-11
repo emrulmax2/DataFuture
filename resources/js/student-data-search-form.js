@@ -1066,7 +1066,7 @@ import TomSelect from 'tom-select';
     });
 
     $('#checkbox-all-acc').on('click', function (e) {
-        for (let i = 60; i < 61; i++) {
+        for (let i = 60; i < 66; i++) {
             $('#checkbox-switch-' + i).trigger('click');
         }
     });
