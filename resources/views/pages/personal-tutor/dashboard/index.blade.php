@@ -64,7 +64,7 @@
                                                 <i data-lucide="chevron-down" class="w-4 h-4 ml-auto"></i>
                                             </button>
                                             <div class="dropdown-menu w-full">
-                                                <ul class="dropdown-content overflow-y-auto h-[190px]">
+                                                <ul class="dropdown-content overflow-y-auto max-h-[190px]">
                                                     @foreach($otherTerms as $term)
                                                     <li>
                                                         <a data-term="{{ $term->name }}" data-id="{{ $term->id }}" href="javascript:void(0);" class="dropdown-item pt_term_item {{ (isset($current_term->id) && $current_term->id == $term->id ? 'text-primary font-medium' : '') }}">
