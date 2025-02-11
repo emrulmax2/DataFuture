@@ -525,13 +525,19 @@
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-6">
-                                    <div class="col-span-12 sm:col-span-4 intro-y">
+                                    <div class="col-span-3 sm:col-span-4 intro-y">
                                         <div data-tw-merge class="flex items-center mt-2 ">
                                             <input name="slcAccount[is_self_funded]" id="checkbox-switch-60" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />
                                             <label data-tw-merge for="checkbox-switch-60" class="cursor-pointer ml-2">Self Funding</label>
                                         </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-4 intro-y"></div>
+                                    <div class="col-span-3 sm:col-span-4 intro-y">
+                                        <div data-tw-merge class="flex items-center mt-2 ">
+                                            <input name="Student[multi_agreement_status]" id="checkbox-switch-61" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />
+                                            <label data-tw-merge for="checkbox-switch-61" class="cursor-pointer ml-2">Multi Agreement</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-4 intro-y"></div>
                                 </div>
                             </div>
                         </div>
