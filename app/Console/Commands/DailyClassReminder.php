@@ -53,6 +53,7 @@ class DailyClassReminder extends Command
         if(!empty($plan_ids) && count($plan_ids) > 0):
             foreach($plan_ids as $plan_id):
                 $plan = Plan::with('activeAssign')->find($plan_id);
+                $plan_cc_id = (isset($plan->course_creation_id) && $plan->course_creation_id > 0 ? $plan->course_creation_id : 0);
 
                 $module = (isset($plan->creations->module_name) ? $plan->creations->module_name : '');
                 $classDate = date('d-m-Y', strtotime($today));
@@ -79,7 +80,8 @@ class DailyClassReminder extends Command
                     $mobileNumbers = [];
                     $i = 1;
                     foreach($assigns as $asign):
-                        if(isset($asign->student->contact->mobile) && !empty($asign->student->contact->mobile) && isset($asign->student->status->active) && $asign->student->status->active == 1):
+                        $std_cc_id = (isset($asign->student->activeCR->course_creation_id) && $asign->student->activeCR->course_creation_id > 0 ? $asign->student->activeCR->course_creation_id : 0);
+                        if(isset($asign->student->contact->mobile) && !empty($asign->student->contact->mobile) && isset($asign->student->status->active) && $asign->student->status->active == 1 && ($std_cc_id > 0 && $plan_cc_id >= $std_cc_id)):
                             $mobileNumbers[$i] = $asign->student->contact->mobile;
 
                             $studentSms = StudentSms::create([
