@@ -338,6 +338,7 @@ class Student extends Model
                  ->select(DB::raw('COUNT(DISTINCT id) as no_of_agreement'))
                  ->where('student_id', $this->id)
                  ->where('student_course_relation_id', $activeCRel)
+                 ->whereNull('deleted_at')
                  ->groupBy('year')
                  ->get();
         $count = 0;

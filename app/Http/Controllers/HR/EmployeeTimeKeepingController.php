@@ -103,7 +103,7 @@ class EmployeeTimeKeepingController extends Controller
         $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                          ->orderBy('id', 'DESC')->get()->first();
         $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
-        $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
+        //$payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
 
         $html = '';
         $workingHoursTotal = $holidayHoursTotal = $monthTotalPay = 0;
@@ -111,6 +111,8 @@ class EmployeeTimeKeepingController extends Controller
             $today = date('Y-m', strtotime($date)).($i < 10 ? '-0'.$i : '-'.$i);
             $D = date('D', strtotime($today));
             $N = date('N', strtotime($today));
+            $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $today);
+            
             $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
             $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
             $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
@@ -293,8 +295,26 @@ class EmployeeTimeKeepingController extends Controller
         return $res;
     }
 
-    public function getEmployeeActivePatternsActivePayRate($employee_id){
-        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+    public function getEmployeeActivePatternsActivePayRate($employee_id, $pattern_id, $the_date){
+        $the_date = date('Y-m-d', strtotime($the_date));
+        $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $pattern_id)
+                    ->where(function($q) use($the_date){
+                        $q->where('effective_from', '<=', $the_date)->where(function($sq) use($the_date){
+                            $sq->whereNull('end_to')->orWhere('end_to', '>=', $the_date);
+                        });
+                    })->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+        if(isset($activePay->id) && $activePay->id > 0):
+            return (isset($activePay->hourly_rate) && $activePay->hourly_rate > 0 ? $activePay->hourly_rate : 0);
+        else:
+            $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $pattern_id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+            if(isset($activePay->id) && $activePay->id > 0):
+                return (isset($activePay->hourly_rate) && $activePay->hourly_rate > 0 ? $activePay->hourly_rate : 0);
+            else:
+                return 0;
+            endif;
+        endif;
+
+        /*$activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                                 ->orderBy('id', 'DESC')->get()->first();
         if(isset($activePattern->id) && $activePattern->id > 0):
             $activePay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $activePattern->id)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
@@ -305,7 +325,7 @@ class EmployeeTimeKeepingController extends Controller
             endif;
         else:
             return 0;
-        endif;
+        endif;*/
     }
 
     public function convertStringToMinute($string){
