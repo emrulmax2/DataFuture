@@ -13,10 +13,10 @@
     <!-- BEGIN: Letters -->
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+            <div class="col-span-5 md:col-span-6">
                 <div class="font-medium text-base">Letters</div>
             </div>
-            <div class="col-span-6 text-right relative">
+            <div class="col-span-7 md:col-span-6 text-right relative">
                 <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2 hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print All
                 </a>

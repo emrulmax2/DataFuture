@@ -12,7 +12,7 @@
 
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+            <div class="col-span-5 md:col-span-6">
                 <div class="font-medium text-base">SLC History</div>
                 <div class="col-span-12">
                     <div class="grid grid-cols-12 gap-0">
@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-span-6 text-right relative">
+            <div class="col-span-7 md:col-span-6 text-right relative">
                 <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button>
             </div>
         </div>
@@ -85,15 +85,16 @@
                         @endif
                     </div>
                     @if(!empty($regs->attendances) && $regs->attendances->count() > 0)
-                        <div class="attendanceWrap mt-7  bg-success-soft-1 p-3 rounded">
+                        <div class="attendanceWrap mt-7  md:bg-success-soft-1 md:p-3 rounded">
                             <div class="grid grid-cols-12 gap-0 items-center">
-                                <div class="col-span-6">
+                                <div class="col-span-5 md:col-span-6">
                                     <h3 class="font-medium text-base">Attendances</h3>
                                 </div>
-                                <div class="col-span-6 text-right">
+                                <div class="col-span-7 md:col-span-6 text-right">
                                     <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
                                 </div>
                             </div>
+                            <div class="overflow-x-auto">
                             <table class="table table-bordered table-sm mt-3 bg-white">
                                 <thead>
                                     <tr>
@@ -146,6 +147,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
                         </div>
                     @else 
                         <div class="alert alert-pending-soft show flex items-center mt-7" role="alert">
@@ -244,7 +246,7 @@
                 <button data-reg-id="0" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
             </div>
         </div>
-        <div class="intro-y mt-5 overflow-x-scroll">
+        <div class="intro-y mt-5 overflow-x-auto">
             <table class="table table-bordered table-sm mt-3" id="undefinedAttendanceTable">
                 <thead>
                     <tr>
@@ -304,7 +306,7 @@
                 <button  data-regid="0" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
             </div>
         </div>
-        <div class="intro-y mt-5 overflow-x-scroll">
+        <div class="intro-y mt-5 overflow-x-auto">
             <table class="table table-bordered table-sm mt-3">
                 <thead>
                     <tr>

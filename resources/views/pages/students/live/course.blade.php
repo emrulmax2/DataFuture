@@ -110,7 +110,7 @@
    
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-5 md:col-md-6">
+            <div class="col-span-5 md:col-span-6">
                 <div class="font-medium text-base">Awarding Body</div>
             </div>
             <div class="col-span-7 md:col-span-6 text-right">

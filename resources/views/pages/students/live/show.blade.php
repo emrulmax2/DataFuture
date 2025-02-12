@@ -11,7 +11,7 @@
     <!-- END: Profile Info -->
 
     <div class="intro-y mt-5">
-        <div class="intro-y box p-5">
+        <div class="intro-y box p-4 sm:p-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-5 md:col-span-6">
                     <div class="font-medium text-base">Personal Details</div>
@@ -136,11 +136,11 @@
 
         <div class="intro-y box p-5  mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
+                <div class="col-span-5 sm:col-span-6">
                     <div class="font-medium text-base">Student Other Identifications</div>
                 </div>
 
-                <div class="col-span-6 text-right">
+                <div class="col-span-7 sm:col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherItentificationModal" type="button" class="editOtherIdentification btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Identification
                     </button>
@@ -206,7 +206,7 @@
                             <button id="tabulator-print-PIC" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden md:inline-flex">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto mr-2">
+                            <div class="dropdown w-1/2 sm:w-auto hidden md:inline-flex mr-2">
                                 <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto hidden md:inline-flex" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
@@ -508,7 +508,7 @@
                             <button id="tabulator-print-SEQ" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden md:inline-flex">
                                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto mr-2">
+                            <div class="dropdown w-1/2 sm:w-auto hidden md:inline-flex mr-2">
                                 <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto hidden md:inline-flex" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                                 </button>
@@ -537,7 +537,7 @@
                                     </ul>
                                 </div>
                             </div>
-                            <button data-tw-toggle="modal" data-tw-target="#addQualificationModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
+                            <button data-tw-toggle="modal" data-tw-target="#addQualificationModal" type="button" class="btn btn-primary w-auto mr-0 mb-0 ml-auto">
                                 <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Qualification
                             </button>
                         </div>

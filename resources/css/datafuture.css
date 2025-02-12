@@ -520,7 +520,11 @@
     position: absolute;
     display: none;
 } 
+
 .liveStudentSubMenu.show{
+    display: flex;
+} 
+.liveStudentProfileSubMenu.show{
     display: flex;
 }
 

@@ -63,7 +63,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Agent</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('agent.dashboard') }}">Dashboard</a></li>
                 @else
-                    <li class="breadcrumb-item"><a href="javascript:void(0);">User</a></li>
+                    <li class="breadcrumb-item hidden md:block"><a href="javascript:void(0);">User</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('staff.dashboard') }}">Dashboard</a></li>
                 @endif
                 

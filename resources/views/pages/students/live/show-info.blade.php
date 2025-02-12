@@ -1,10 +1,10 @@
 <div class="intro-y flex flex-col md:flex-row items-center mt-1 md:mt-8">
-    <div class="flex flex-col md:flex-row items-center gap-2 mb-4 md:mb-0">
+    <div class="flex flex-row justify-center md:justify-normal items-center gap-2 flex-wrap mb-4 md:mb-0 w-full">
         <h2 class="text-lg font-medium text-center md:text-left">Profile Review of</h2>
         <u><strong class="text-lg">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u>
     </div>
 
-    <div class="md:ml-auto w-full md:w-auto flex flex-wrap sm:flex-row gap-2 justify-center md:justify-end">
+    <div class="md:ml-auto md:w-full flex flex-wrap sm:flex-row gap-2 justify-end">
         @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
             <a href="{{ route('studentapplication.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-outline-pending flex-1 sm:flex-none">
                 <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf
@@ -12,12 +12,12 @@
         @endif
 
         @if(isset(auth()->user()->priv()['login_as_student']) && auth()->user()->priv()['login_as_student'] == 1)
-            <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning">
+            <a target="__blank" href="{{ route('impersonate', ['id' =>$student->student_user_id,'guardName' =>'student']) }}" class="btn btn-warning min-w-max">
                 Login As Student <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
             </a>
         @endif
 
-        <button type="button" class="btn btn-success text-white flex-1 sm:flex-none max-w-24 md:w-auto">
+        <button type="button" class="btn btn-success text-white flex-1 sm:flex-none md:w-auto min-w-max">
             {{ $student->status->name }}
         </button>
 
@@ -46,9 +46,9 @@
                     else:
                         $day = 'text-amber-600';
                     endif;
-                    $html = '<div class="inline-flex ml-auto">';
+                    $html = '<div class="inline-flex sm:ml-auto">';
                         if(isset($student->multi_agreement_status) && $student->multi_agreement_status > 1):
-                            $html .= '<div class="mr-2 inline-flex  intro-x  ml-auto" style="color:#f59e0b"><i data-lucide="alert-octagon" class="w-6 h-6"></i></div>';
+                            $html .= '<div class="mr-2 inline-flex  intro-x  sm:ml-auto" style="color:#f59e0b"><i data-lucide="alert-octagon" class="w-6 h-6"></i></div>';
                         endif;
                         $html .= (isset($student->flag_html) && !empty($student->flag_html) ? $student->flag_html : '');
                         if($student->due > 1):
@@ -67,7 +67,7 @@
                     $html .= '</div>';
                 @endphp
                 <div class="ml-5">
-                    <div class="w-full flex truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }} {!! $html !!} </div>
+                    <div class="w-full flex flex-col sm:flex-row truncate sm:whitespace-normal font-medium text-lg">{{ !empty($student->registration_no) ? $student->registration_no : '' }} {!! $html !!} </div>
                     <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $student->title->name.' '.$student->first_name }} <span class="font-black">{{ $student->last_name }}</span></div>
                     <div class="text-slate-500">
                         @if(Session::has('student_temp_course_relation_'.$student->id) && Session::get('student_temp_course_relation_'.$student->id) > 0) <span class="bg-danger text-white inline pl-1 pr-1"> @endif
@@ -101,7 +101,7 @@
                 <div class="flex flex-col justify-center items-start md:items-center lg:items-start mt-4">
                     <div class="truncate sm:whitespace-normal flex items-start">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                        <span>
+                        <span class="flex flex-wrap">
                             @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
                                 @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
                                     <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span>
