@@ -50,6 +50,9 @@ var storageTransList = (function () {
                                     if(cell.getData().connected == 1){
                                         html += '<a href="'+route('reports.accounts.transaction.connection', cell.getData().id)+'" class="text-success ml-2" style="position: relative; top: -1px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></a>';
                                     }
+                                    if(cell.getData().has_payments == 1){
+                                        html += '<a href="'+route('agent.management.remittances.payment.details', cell.getData().id)+'" class="text-text-danger ml-2" style="position: relative; top: -1px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg></a>';
+                                    }
                                 html += '</div>';
                             html += '</div>';
                         return html;

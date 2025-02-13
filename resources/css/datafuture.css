@@ -520,7 +520,11 @@
     position: absolute;
     display: none;
 } 
+
 .liveStudentSubMenu.show{
+    display: flex;
+} 
+.liveStudentProfileSubMenu.show{
     display: flex;
 }
 
@@ -2507,4 +2511,12 @@ fieldset.modInstSet legend{
 .dfReportWrap .accordion-button .accordionCollaps::before, 
 .dfReportWrap .accordion-button .accordionCollaps::after{
     background-color: #FFF;
+}
+
+.tabulator .tabulator-row .tabulator-responsive-collapse td{
+    padding-left: 0 !important;
+}
+
+.tabulator .tabulator-tableHolder .tabulator-table{
+    white-space: normal !important;
 }

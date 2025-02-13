@@ -44,6 +44,9 @@ var studentCommLetterListTable = (function () {
                     field: "letter_title",
                     headerHozAlign: "left",
                     minWidth: 120,
+                    formatter(cell, formatterParams){
+                        return `<span class="whitespace-normal">${cell.getData().letter_title}</span>`
+                    }
                 },
                 {
                     title: "Signatory",

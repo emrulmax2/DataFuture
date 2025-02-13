@@ -1587,30 +1587,40 @@
                     <div class="text-slate-500 mt-2 mb-2 confModDesc">To update the student's mobile number, please enter the new number below. An OTP will be sent to the new number. Once the OTP is entered, the student's mobile number will be successfully updated.</div>
                    
                     <div  id="modal-mobileverified" class="mt-5">
-                            <form method="POST" action="#" id="confirmModalForm2" class="flex-none" enctype="multipart/form-data">
+                            <form method="POST" action="#" id="confirmModalForm2" class="flex-none sm:w-full" enctype="multipart/form-data">
                                 <input class="id" type="hidden" name="id" value="">
                                 <input type="hidden" name="url" value="{{ route('student.verify.mobile') }}" />
                                 <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                                <div class="flex py-2 items-center">
-                                    <label for="horizontal-form-2" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
-                                    <input id="horizontal-form-2" name="mobile" type="text" class=" form-control w-60 mr-1 flex-auto" placeholder="079XXXXXXXX">
-                                    <button id="resend-mobile" type="submit" data-id="0" data-action="none" class="save btn btn-primary  w-auto ml-auto flex-auto">
-                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND OTP
-                                        <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                                    </button>
+                                <div class="sm:flex sm:justify-center">
+                                    <div class="flex justify-start items-center">
+                                        <label for="horizontal-form-2" class="w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Mobile</label>
+                                    </div>
+                                    <div class="flex justify-start">
+                                        <input id="horizontal-form-2" name="mobile" type="text" class="form-control md:w-60 mr-2" placeholder="079XXXXXXXX">
+                                        <button id="resend-mobile" type="submit" data-id="0" data-action="none" class="save btn btn-primary flex-auto min-w-max">
+                                            <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND OTP
+                                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </form>
                             <form method="POST" action="#" id="confirmModalForm3" enctype="multipart/form-data" class="hidden">
                                 <div class="flex py-2 items-center">
-                                    <label for="horizontal-form-3" class="form-label w-20 text-left flex-none"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning inline-flex"></i> OTP </label>
-                                    <input type="hidden" name="url" value="{{ route('student.update.mobile') }}" />
+                                    <div>
+                                        <div class="flex justify-start items-center">
+                                            <label for="horizontal-form-3" class="form-label w-20 text-left flex-none"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning inline-flex"></i> OTP </label>
+                                        </div>
+                                        <input type="hidden" name="url" value="{{ route('student.update.mobile') }}" />
                                     <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                                    <input id="horizontal-form-3" name="code" type="text" class="form-control w-60 mr-1 flex-auto" placeholder="XXXX">
-                                    
-                                    <button type="button" data-id="0" data-action="none" class="save btn btn-danger w-auto flex-auto">
-                                        <i data-lucide="send" class="w-4 h-4 mr-2 "></i> VERIFY
-                                        <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                                    </button>
+                                    <div>
+                                        <input id="horizontal-form-3" name="code" type="text" class="form-control w-60 mr-1 flex-auto" placeholder="XXXX">
+                                        <button type="button" data-id="0" data-action="none" class="save btn btn-danger w-auto flex-auto">
+                                            <i data-lucide="send" class="w-4 h-4 mr-2 "></i> VERIFY
+                                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
                                     <div class="acc__input-error error-verify_code text-danger mt-2 w-full text-right"></div>
                                 </div>
                             </form>
@@ -1634,20 +1644,26 @@
                     <i data-lucide="message-square" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Update Email</div>
                     <div class="text-slate-500 mt-2 mb-2 confModDesc">To update the student's personal email, please enter the new email address below. A verification link will be sent to the new email, which the student must click to verify and complete the update.</div>
-                    <div id="modal-emailverified" class="form-inline">
-                        <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data">
+                    <div id="modal-emailverified" class="form-inline ">
+                        <form method="POST" action="#" id="confirmModalForm1" enctype="multipart/form-data" class="sm:w-full">
                         <input class="id" type="hidden" name="id" value="">
                         <input type="hidden" name="url" value="{{ route('student.verify.email') }}" />
                         <input type="hidden" name="student_user_id" value="{{ $student->users->id }}" />
-                        <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
-                        
-                        <input id="horizontal-form-1" name="email" type="text" class="form-control w-40 md:w-60 mr-2" placeholder="email@example.com">
-                        <input name="type" value="email" type="hidden">
-
-                        <button id="send-email" type="submit" data-id="0" data-action="none" class="save btn btn-primary w-auto ml-auto">
-                            <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND
-                            <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
-                        </button>
+                        <div class="sm:flex sm:justify-center">
+                            <div class="flex justify-start items-center">
+                                <label for="horizontal-form-1" class="form-label w-20 text-left inline-flex"><i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-warning"></i> Email </label>
+                            </div>
+                            
+                            <input name="type" value="email" type="hidden">
+                            <div class="flex justify-start">
+                                <input id="horizontal-form-1" name="email" type="text" class="form-control w-40 md:w-60 mr-2" placeholder="email@example.com">
+                            
+                                <button id="send-email" type="submit" data-id="0" data-action="none" class="save btn btn-primary w-auto ml-auto">
+                                    <i data-lucide="send" class="w-4 h-4 mr-2 "></i> SEND
+                                    <i data-loading-icon="oval" data-color="white" class="loadingClass w-4 h-4 ml-2 hidden"></i>
+                                </button>
+                            </div>
+                        </div>
                         <div class="acc__input-success success-email text-success mt-2 w-full text-right"></div>
                         <div class="acc__input-error error-email text-danger mt-2 w-full text-right"></div>
                         </form>

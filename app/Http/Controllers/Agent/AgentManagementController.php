@@ -1395,10 +1395,26 @@ class AgentManagementController extends Controller
 
     public function linkedTransaction(RemittanceLinkedRequest $request){
         $transaction_id = $request->transaction_id;
+        $transaction = AccTransaction::find($transaction_id);
+        $taged_students = (isset($transaction->taged_students) && !empty($transaction->taged_students) ? explode(',', $transaction->taged_students) : []);
+
         $agent_comission_payment_id = $request->agent_comission_payment_id;
+        $agentComission = AgentComissionPayment::find($agent_comission_payment_id);
+        $comission_ids = (isset($agentComission->comissions) && $agentComission->comissions->count() > 0 ? $agentComission->comissions->pluck('id')->unique()->toArray() : []);
         $agent_comission_total = $request->agent_comission_total;
 
         if($transaction_id > 0 && $agent_comission_payment_id > 0):
+            if(!empty($comission_ids)):
+                $reg_nos = [];
+                $student_ids = AgentComissionDetail::whereIn('agent_comission_id', $comission_ids)->pluck('student_id')->unique()->toArray();
+                if(!empty($student_ids)):
+                    $reg_nos = Student::whereIn('id', $student_ids)->pluck('registration_no')->unique()->toArray();
+                    if(!empty($reg_nos)):
+                        $taged_students = array_merge($taged_students, $reg_nos);
+                        AccTransaction::where('id', $transaction_id)->update(['taged_students' => implode(',', $taged_students), 'has_payments' => 1]);
+                    endif;
+                endif;
+            endif;
             AgentComissionPayment::where('id', $agent_comission_payment_id)->update(['acc_transaction_id' => $transaction_id, 'status' => 2]);
             return response()->json(['msg' => 'Remittance Payment successfully linked with the transaction.'], 200);
         else:
@@ -1461,5 +1477,67 @@ class AgentManagementController extends Controller
         else:
             return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 422);
         endif;
+    }
+
+    public function paymentsDetails($transaction_id){
+        return view('pages.agent.management.payments-details', [
+            'title' => 'Agent Management - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Agent', 'href' => route('agent-user.index')],
+                ['label' => 'Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Remittance', 'href' => 'javascript:void(0);'],
+                ['label' => 'Payment Details', 'href' => 'javascript:void(0);'],
+            ],
+            'transaction_id' => $transaction_id
+        ]);
+    }
+
+    public function paymentsDetailsList(Request $request){
+        $transactionid = (isset($request->transactionid) && $request->transactionid > 0 ? $request->transactionid : 0);
+        $Payment = AgentComissionPayment::where('acc_transaction_id', $transactionid)->get()->first();
+        $comission_ids = (isset($Payment->comissions) && $Payment->comissions->count() > 0 ? $Payment->comissions->pluck('id')->unique()->toArray() : [0]);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = AgentComissionDetail::with('student', 'receipt')->whereIn('agent_comission_id', $comission_ids);
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'student_id' => $list->student_id,
+                    'application_no' => (isset($list->student->application_no) ? $list->student->application_no : ''),
+                    'registration_no' => (isset($list->student->registration_no) ? $list->student->registration_no : ''),
+                    'full_name' => (isset($list->student->full_name) ? $list->student->full_name : $list->student->full_name),
+                    'course' => (isset($list->student->activeCR->creation->course->name) && !empty($list->student->activeCR->creation->course->name) ? $list->student->activeCR->creation->course->name : ''),
+                    'amount' => Number::currency($list->amount, in: 'GBP'),
+                    'comission_for' => (isset($list->comission_for) && !empty($list->comission_for) ? $list->comission_for : 'Course Fee'),
+                    'remittance_ref' => (isset($list->comission->remittance_ref) && !empty($list->comission->remittance_ref) ? $list->comission->remittance_ref : ''),
+                    'deleted_at' => $list->deleted_at
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 }

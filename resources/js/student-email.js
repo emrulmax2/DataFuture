@@ -39,6 +39,9 @@ var studentCommEmailListTable = (function () {
                     field: "subject",
                     headerHozAlign: "left",
                     minWidth: 100,
+                    formatter(cell, formatterParams){
+                        return `<span class="whitespace-normal">${cell.getData().subject}</span>`
+                    }
                 },
                 {
                     title: "From",

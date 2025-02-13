@@ -130,7 +130,7 @@
                     <div class="installmentAndPaymentWrap mt-7">
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12 sm:col-span-5">
-                                <div class="intro-y box p-5 bg-success-soft-2">
+                                <div class="intro-y md:box md:p-5 md:bg-success-soft-2">
                                     <div class="grid grid-cols-12 gap-0 items-center">
                                         <div class="col-span-6">
                                             <div class="font-medium text-base">Installments</div>
@@ -139,7 +139,7 @@
                                             <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Instalment</button>
                                         </div>
                                     </div>
-                                    <div class="intro-y mt-5 bg-white">
+                                    <div class="intro-y mt-5 bg-white overflow-x-auto">
                                         <table class="table table-bordered table-sm padding-less">
                                             <thead>
                                                 <tr>
@@ -182,7 +182,7 @@
                                 </div>
                             </div>
                             <div class="col-span-12 sm:col-span-7">
-                                <div class="intro-y box p-5 bg-danger-soft-2">
+                                <div class="intro-y md:box md:p-5 md:bg-danger-soft-2">
                                     <div class="grid grid-cols-12 gap-0 items-center">
                                         <div class="col-span-6">
                                             <div class="font-medium text-base">Invoices</div>
@@ -191,7 +191,7 @@
                                             <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn btn btn-sm btn-twitter shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Payment</button>
                                         </div>
                                     </div>
-                                    <div class="intro-y mt-5 bg-white">
+                                    <div class="intro-y mt-5 bg-white overflow-x-auto">
                                         <table class="table table-bordered table-sm padding-less">
                                             <thead>
                                                 <tr>

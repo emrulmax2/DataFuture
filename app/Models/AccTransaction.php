@@ -39,6 +39,7 @@ class AccTransaction extends Model
         'transfer_bank_id',
         'taged_students',
         'has_receipts',
+        'has_payments',
         'created_by',
         'updated_by',
     ];

@@ -112,21 +112,23 @@ import Dropzone from "dropzone";
     /* End Dropzone */
 
     /* Profile Menu Start */
-    document.getElementById('menu-toggle').addEventListener('click', function () {
-        var menu = document.querySelector('.liveStudentMainMenu');
-        menu.classList.toggle('hidden');
-        menu.classList.toggle('flex');
-    });
+    const menuToggle = document.getElementById('menu-toggle');
+    if(menuToggle){
+        menuToggle.addEventListener('click', function () {
+            var menu = document.querySelector('.liveStudentProfileMainMenu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        });
+    }
     
     // Handle submenu toggle
-    if (document.querySelector('.liveStudentMainMenu')) {
-        document.querySelectorAll('.liveStudentMainMenu li.hasChildren > a').forEach(function (link) {
+    if (document.querySelector('.liveStudentProfileMainMenu')) {
+        document.querySelectorAll('.liveStudentProfileMainMenu li.hasChildren > a').forEach(function (link) {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
                 var $this = this;
-                var menu = document.querySelector('.liveStudentMainMenu');
-                var paddingValue = window.innerWidth <= 768 ? '38px' : '55px'; // Adjust for screen size
-    
+                var menu = document.querySelector('.liveStudentProfileMainMenu');
+                var paddingValue = window.innerWidth <= 768 ? '0px' : '55px';
                 if ($this.classList.contains('active')) {
                     $this.classList.remove('active');
                     $this.nextElementSibling.classList.remove('show');
@@ -135,7 +137,7 @@ import Dropzone from "dropzone";
                     $this.parentElement.parentElement.querySelectorAll('li.hasChildren > a').forEach(function (el) {
                         el.classList.remove('active');
                     });
-                    $this.parentElement.parentElement.querySelectorAll('.liveStudentSubMenu').forEach(function (el) {
+                    $this.parentElement.parentElement.querySelectorAll('.liveStudentProfileSubMenu').forEach(function (el) {
                         el.classList.remove('show');
                     });
     
@@ -144,15 +146,6 @@ import Dropzone from "dropzone";
                     $this.nextElementSibling.classList.add('show');
                 }
             });
-        });
-    
-        // Listen for window resize to adjust padding dynamically
-        window.addEventListener('resize', function () {
-            var activeLink = document.querySelector('.liveStudentMainMenu li.hasChildren > a.active');
-            if (activeLink) {
-                var menu = document.querySelector('.liveStudentMainMenu');
-                menu.style.paddingBottom = window.innerWidth <= 768 ? '38px' : '55px';
-            }
         });
     }
     

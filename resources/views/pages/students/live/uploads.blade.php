@@ -12,10 +12,10 @@
 
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-5 md:col-span-6">
+            <div class="col-span-4 md:col-span-6">
                 <div class="font-medium text-base">Documents</div>
             </div>
-            <div class="col-span-7 md:col-span-6 text-right relative">
+            <div class="col-span-8 md:col-span-6 text-right relative">
                 <div class="dropdown" id="uploadsDropdown">
                     <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">

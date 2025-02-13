@@ -27,16 +27,16 @@
         <div class="grid grid-cols-12 gap-4"> 
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>
-                    <div class="col-span-8 font-medium">
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Course & Semester</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">
                             <span>{{ $student->crel->creation->course->name.' - '.$student->crel->propose->semester->name }}</span>
                     </div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Venue</div>
-                    <div class="col-span-8 font-medium">
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Venue</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">
                             <span>{{ $venue }}</span>
                     </div>
                 </div>
@@ -45,21 +45,21 @@
                 @foreach ($studentCourseAvailability as $availability)
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Course Start</div>
-                            <div class="col-span-8 font-medium">{{ ($CourseRelation->course_start_date!=null) ?  $CourseRelation->course_start_date : $availability->course_start_date }}</div>
+                            <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Course Start</div>
+                            <div class="col-span-6 md:col-span-8 font-medium">{{ ($CourseRelation->course_start_date!=null) ?  $CourseRelation->course_start_date : $availability->course_start_date }}</div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Course End</div>
-                            <div class="col-span-8 font-medium">{{ ($CourseRelation->course_end_date!=null) ?  $CourseRelation->course_end_date : $availability->course_end_date }}</div>
+                            <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Course End</div>
+                            <div class="col-span-6 md:col-span-8 font-medium">{{ ($CourseRelation->course_end_date!=null) ?  $CourseRelation->course_end_date : $availability->course_end_date }}</div>
                         </div>
                     </div>
                     
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-4 text-slate-500 font-medium">Student Type</div>
-                            <div class="col-span-8 font-medium">{{ $availability->type }}</div>
+                            <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Student Type</div>
+                            <div class="col-span-6 md:col-span-8 font-medium">{{ $availability->type }}</div>
                         </div>
                     </div>
                     
@@ -67,21 +67,21 @@
             @endif
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Qualification Achivement after completion</div>
-                    <div class="col-span-8 font-medium">{{ isset($courseQualification->name) ? $courseQualification->name : '' }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Qualification Achivement after completion</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ isset($courseQualification->name) ? $courseQualification->name : '' }}</div>
                 </div>
             </div>
 
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Awarding Body</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown')}}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Awarding Body</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown')}}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Duration</div>
-                    <div class="col-span-8 font-medium">
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Duration</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">
                         {{ (isset($student->crel->creation->duration) ? $student->crel->creation->duration : '0')}} 
                         {{ (isset($student->crel->creation->unit_length) ? $student->crel->creation->unit_length : '')}} 
                     </div>
@@ -89,20 +89,20 @@
             </div>
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">SLC Course Code</div>
-                    <div class="col-span-8 font-medium">{{ $slcCode }} </div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">SLC Course Code</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ $slcCode }} </div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Evening & Weekend Indicator</div>
-                    <div class="col-span-8 font-medium">{!! (isset($student->crel->propose->full_time) && $student->crel->propose->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Evening & Weekend Indicator</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{!! (isset($student->crel->propose->full_time) && $student->crel->propose->full_time == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Fee Eligibility</div>
-                    <div class="col-span-8 font-medium">{!! (isset($student->crel->feeeligibility->elegibility->name) && isset($student->crel->feeeligibility->fee_eligibility_id) && $student->crel->feeeligibility->fee_eligibility_id > 0 ? $student->crel->feeeligibility->elegibility->name : '---') !!}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Fee Eligibility</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{!! (isset($student->crel->feeeligibility->elegibility->name) && isset($student->crel->feeeligibility->fee_eligibility_id) && $student->crel->feeeligibility->fee_eligibility_id > 0 ? $student->crel->feeeligibility->elegibility->name : '---') !!}</div>
                 </div>
             </div>
         </div>
@@ -110,7 +110,7 @@
    
     <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-5 md:col-md-6">
+            <div class="col-span-5 md:col-span-6">
                 <div class="font-medium text-base">Awarding Body</div>
             </div>
             <div class="col-span-7 md:col-span-6 text-right">
@@ -123,9 +123,9 @@
         <div class="grid grid-cols-12 gap-4"> 
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Registration Document Verified</div>
-                    <div class="col-span-8 font-medium">
-                        <div class="flex flex-col sm:flex-row mt-0">
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Registration Document Verified</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">
+                        <div class="flex flex-col sm:flex-row gap-2 mt-0">
                             <div class="form-check mr-5">
                                 <input id="registration_document_verified_yes" class="form-check-input registration_document_verified" type="radio" name="registration_document_verified" {{ (isset($student->crel->abody->registration_document_verified) && $student->crel->abody->registration_document_verified == 'Yes' ? 'Checked' : '' ) }} value="Yes">
                                 <label class="form-check-label" for="registration_document_verified_yes">Yes</label>
@@ -135,7 +135,7 @@
                                 <label class="form-check-label" for="registration_document_verified_no">No</label>
                             </div>
                             @if(isset($student->crel->abody->registration_document_verified) && !empty($student->crel->abody->registration_document_verified))
-                            <button type="button" id="reset_regDocVerify" class="btn btn-success ml-3 rounded-0 px-3 py-1 text-white w-auto">     
+                            <button type="button" id="reset_regDocVerify" class="btn btn-success md:ml-3 rounded-0 px-3 py-1 text-white w-auto">     
                                 Reset                      
                                 <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                     stroke="white" class="w-4 h-4 ml-2">
@@ -157,38 +157,38 @@
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Awarding Body Ref</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Awarding Body Ref</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Awarding body course code</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->course_code) ? $student->crel->abody->course_code : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Awarding body course code</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->course_code) ? $student->crel->abody->course_code : '') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Awarding Body Reg. Date</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->registration_date) ? $student->crel->abody->registration_date : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Awarding Body Reg. Date</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->registration_date) ? $student->crel->abody->registration_date : '') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Awarding Body Reg. Expire Date</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->registration_expire_date) ? $student->crel->abody->registration_expire_date : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Awarding Body Reg. Expire Date</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->registration_expire_date) ? $student->crel->abody->registration_expire_date : '') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Registered By</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->user->name) && !empty($student->crel->abody->user->name) ? $student->crel->abody->user->name : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Registered By</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->user->name) && !empty($student->crel->abody->user->name) ? $student->crel->abody->user->name : '') }}</div>
                 </div>
             </div>
             <div class="col-span-12 sm:col-span-4">
                 <div class="grid grid-cols-12 gap-0">
-                    <div class="col-span-4 text-slate-500 font-medium">Registered At</div>
-                    <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->created_at) && !empty($student->crel->abody->created_at) ? date('jS F, Y', strtotime($student->crel->abody->created_at)) : '') }}</div>
+                    <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Registered At</div>
+                    <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->crel->abody->created_at) && !empty($student->crel->abody->created_at) ? date('jS F, Y', strtotime($student->crel->abody->created_at)) : '') }}</div>
                 </div>
             </div>
         </div>

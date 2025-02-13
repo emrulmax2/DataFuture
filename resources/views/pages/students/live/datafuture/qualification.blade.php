@@ -8,7 +8,7 @@
             <div class="col-span-12 sm:col-span-3">
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-4 text-slate-500 font-medium uppercase">{{ (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : 'ID: '.$dfld->datafuture_field_id) }}</div>
-                    <div class="col-span-8 font-medium">{{ (!empty($value) ? $value : '---') }}</div>
+                    <div class="col-span-8 font-medium text-right md:text-left">{{ (!empty($value) ? $value : '---') }}</div>
                 </div>
             </div>
         @endforeach

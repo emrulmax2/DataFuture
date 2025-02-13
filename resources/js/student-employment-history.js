@@ -70,7 +70,7 @@ var studentEmploymentHistoryTable = (function () {
                     width: "180",
                     minWidth: 150,
                     formatter(cell, formatterParams) {   
-                        return '<div class="whitespace-nowrap">'+cell.getData().address+'</div>';
+                        return '<div class="whitespace-pre">'+cell.getData().address+'</div>';
                     }
                 },
                 {

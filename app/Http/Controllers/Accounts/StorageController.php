@@ -218,6 +218,7 @@ class StorageController extends Controller
                     'deleted_at' => $list->deleted_at,
                     'doc_url' => (isset($list->transaction_doc_name) && !empty($list->transaction_doc_name) ? $list->transaction_doc_name : ''),
                     'has_assets' => (isset($list->assets->id) && $list->assets->id > 0 ? 1 : 0),
+                    'has_payments' => (isset($list->has_payments) && $list->has_payments > 0 ? 1 : 0),
                     'can_eidt' => $canEdit,
                 ];
                 $i++;
