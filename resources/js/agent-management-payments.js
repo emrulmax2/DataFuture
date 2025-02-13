@@ -75,9 +75,10 @@ var agentRemittPaymentsListTable = (function () {
                 },
                 {
                     title: "Transaction",
-                    field: "transaction_code",
+                    field: "acc_transaction_id",
                     headerHozAlign: "left",
                     headerSort: false,
+                    visible: (status == 2 ? true : false),
                     formatter(cell, formatterParams){
                         var html = '';
                         if(cell.getData().acc_transaction_id > 0 && cell.getData().transaction_code != '' && cell.getData().transaction_date != ''){

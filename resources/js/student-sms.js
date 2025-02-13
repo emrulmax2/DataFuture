@@ -54,7 +54,7 @@ var studentCommSMSListTable = (function () {
                     minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
-                        html += '<div>';
+                        html += '<div class="whitespace-normal">';
                             html += cell.getData().subject;
                         html += '</div>';
 

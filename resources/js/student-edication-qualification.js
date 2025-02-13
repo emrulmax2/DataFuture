@@ -71,7 +71,10 @@ var studentEducationQualTable = (function () {
                     title: "HIghest Qualification Entry",
                     field: "highest_qualification_on_entry_id",
                     headerHozAlign: "left",
-                    minWidth: 200,
+                    minWidth: 100,
+                    formatter(cell, formatterParams) {
+                        return `<div class="whitespace-normal">${cell.getData().highest_qualification_on_entry_id}</div>`;
+                    },
                 },
                 {
                     title: "Actions",

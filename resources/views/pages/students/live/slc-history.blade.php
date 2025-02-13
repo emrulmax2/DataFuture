@@ -59,8 +59,8 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-6 text-slate-500 font-medium">Registration Confirmation</div>
-                                <div class="col-span-6 font-medium">
+                                <div class="col-span-4 md:col-span-6 text-slate-500 font-medium">Registration Confirmation</div>
+                                <div class="col-span-8 md:col-span-6 font-medium">
                                     {{ (!empty($regs->regStatus->name) ? $regs->regStatus->name : '---') }}
                                 </div>
                             </div>

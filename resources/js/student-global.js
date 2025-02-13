@@ -128,8 +128,7 @@ import Dropzone from "dropzone";
                 e.preventDefault();
                 var $this = this;
                 var menu = document.querySelector('.liveStudentProfileMainMenu');
-                var paddingValue = window.innerWidth <= 768 ? '38px' : '55px';
-    
+                var paddingValue = window.innerWidth <= 768 ? '0px' : '55px';
                 if ($this.classList.contains('active')) {
                     $this.classList.remove('active');
                     $this.nextElementSibling.classList.remove('show');
@@ -147,15 +146,6 @@ import Dropzone from "dropzone";
                     $this.nextElementSibling.classList.add('show');
                 }
             });
-        });
-    
-        // Listen for window resize to adjust padding dynamically
-        window.addEventListener('resize', function () {
-            var activeLink = document.querySelector('.liveStudentProfileMainMenu li.hasChildren > a.active');
-            if (activeLink) {
-                var menu = document.querySelector('.liveStudentProfileMainMenu');
-                menu.style.paddingBottom = window.innerWidth <= 768 ? '38px' : '55px';
-            }
         });
     }
     
