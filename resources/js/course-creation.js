@@ -402,14 +402,18 @@ var courseCreationListTable = (function () {
 
                     $('#editCourseCreationModal input[name="id"]').val(editId);
                     let venues = response.data.venues;
+                    let venuesList = response.data.venueList;
                     $('table#edit-newvenue tbody').html('');
                     venues.forEach((e, i) => {
                     if(e.pivot.deleted_at==null) {
                             let html='<tr id="'+e.pivot.id+'">\
                                         <td class="w-2/6">\
-                                            <select id="venue_id'+e.pivot.id+'" name="venue_id[]" class="form-control w-full">\
-                                                <option selected value="'+e.id+'">'+e.name+'</option>\
-                                            </select>\
+                                            <select id="venue_id'+e.pivot.id+'" name="venue_id[]" class="form-control w-full">';
+                                                venuesList.forEach((v, n) => {
+                                                    let selected = e.id == v.id ? 'selected' : '';
+                                                html+='<option '+selected+' value="'+v.id+'">'+v.name+'</option>';
+                                            });
+                                            html+='</select>\
                                         </td>\
                                         <td class="w-1/6">\
                                             <input id="slc_code'+e.pivot.id+'" type="text" name="slc_code[]" value="'+e.pivot.slc_code+'" class="form-control w-full">\

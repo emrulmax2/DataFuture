@@ -166,7 +166,9 @@ class CoursCreationController extends Controller
         $data = CourseCreation::with('venues')->where('id',$id)->get()->first();
         
         if($data){
-            return response()->json($data);
+            $venuList = Venue::all();
+            $data->venueList = $venuList;
+            return response()->json($data, 200);
         }else{
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         }
