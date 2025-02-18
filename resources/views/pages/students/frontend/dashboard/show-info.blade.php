@@ -3,7 +3,7 @@
 <div class="col-span-12 flex flex-col sm:flex-row mt-2 sm:mt-6 py-3">
     <div class="flex justify-center items-center flex-wrap gap-2">
         <h2 class="text-lg font-medium sm:mr-auto text-center sm:text-left">
-            Profile Review of 
+            Profile of 
         </h2>
         <h2 class="text-lg font-medium sm:mr-auto text-center sm:text-left">
             <u><strong>{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u>
