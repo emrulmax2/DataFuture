@@ -106,6 +106,71 @@ import Dropzone from "dropzone";
     /* End Dropzone */
 
     /* Update Status */
+    if($('.rejectApplicationBtn').length > 0){
+        const rejectedConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#rejectedConfirmModal"));
+
+        const rejectedConfirmModalEl = document.getElementById('rejectedConfirmModal')
+        rejectedConfirmModalEl.addEventListener('hide.tw.modal', function(event) {
+            $("#rejectedConfirmModal .rejectedConfModTitle").html("Are you sure?");
+            $("#rejectedConfirmModal .rejectedConfModDesc").html('');
+            $("#rejectedConfirmModal .agreeWith").attr('data-statusid', '0');
+        });
+
+        $(document).on('click', '.rejectApplicationBtn', function(e){
+            let statusID = $(this).attr('data-statusid');
+            let applicantID = $(this).attr('data-applicantid');
+
+            rejectedConfirmModal.show();
+            document.getElementById("rejectedConfirmModal").addEventListener("shown.tw.modal", function (event) {
+                $("#rejectedConfirmModal .rejectedConfModTitle").html("Are you sure?" );
+                $("#rejectedConfirmModal .rejectedConfModDesc").html('Do you want to reject the applicantion? Please click on agree to continue.');
+                $("#rejectedConfirmModal .agreeWith").attr('data-statusid', statusID);
+            }); 
+        });
+
+        $('#rejectedConfirmModal .agreeWith').on('click', function(e){
+            e.preventDefault();
+            var applicantID = $(this).attr('data-applicant');
+            var statusidID = $(this).attr('data-statusid');
+            var $theBtn = $(this);
+
+            $('#rejectedConfirmModal button').attr('disabled', 'disabled');
+            axios({
+                method: "post",
+                url: route('admission.student.reject'),
+                data: {applicantID : applicantID, statusidID : statusidID},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#rejectedConfirmModal button').removeAttr('disabled');
+
+                    rejectedConfirmModal.hide();
+                    window.location.reload();
+                }
+            }).catch(error => {
+                $('#rejectedConfirmModal button').removeAttr('disabled');
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        $('#rejectedConfirmModal .modal-content .validationErrors').remove();
+                        $('#rejectedConfirmModal .modal-content').prepend('<div class="alert validationErrors alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Something went wrong. Please try again later or contact with the administrator.</div>');
+                        
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+
+                        setTimeout(function(){
+                            $('#rejectedConfirmModal .modal-content .validationErrors').remove();
+                        }, 2000);
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        })
+    }
+    
     if($('.changeApplicantStatus').length > 0){
         const statusConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#statusConfirmModal"));
         const statusStudentProgressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#progressBarModal"));
@@ -127,6 +192,7 @@ import Dropzone from "dropzone";
             $('#statusConfirmModal .modal-content .validationErrors').remove();
             $('#statusConfirmModal button').removeAttr('disabled');
         });
+
 
         $('.changeApplicantStatus').on('click', function(e){
             e.preventDefault();
