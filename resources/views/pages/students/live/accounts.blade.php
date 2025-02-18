@@ -15,7 +15,7 @@
                 <div class="font-medium text-base">Student Accounts</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addAgreementModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Agreement</button>
+                @if($can_add) <button data-tw-toggle="modal" data-tw-target="#addAgreementModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Agreement</button> @endif
             </div>
         </div>
     </div>
@@ -37,9 +37,9 @@
                         </div>
                     </div>
                     <div class="col-span-6 text-right relative">
-                        <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                        <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        @if(!empty($registrations) && $registrations->count() > 0 && (empty($agr->slc_registration_id) || $agr->slc_registration_id == 0))
+                        @if($can_edit) <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
+                        @if($can_delete) <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
+                        @if(!empty($registrations) && $registrations->count() > 0 && (empty($agr->slc_registration_id) || $agr->slc_registration_id == 0) && $can_add)
                             <div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">
                                 <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
                                 <div class="dropdown-menu w-64">
@@ -136,7 +136,7 @@
                                             <div class="font-medium text-base">Installments</div>
                                         </div>
                                         <div class="col-span-6 text-right">
-                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Instalment</button>
+                                            @if($can_add) <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Instalment</button> @endif
                                         </div>
                                     </div>
                                     <div class="intro-y mt-5 bg-white overflow-x-auto">
@@ -166,8 +166,8 @@
                                                             <td class="font-medium">{{ ($inst->amount > 0 ? '£'.number_format($inst->amount, 2) : '£0.00') }}</td>
                                                             <td>{{ (isset($inst->agreement->slc_coursecode) && !empty($inst->agreement->slc_coursecode) ? $inst->agreement->slc_coursecode : '') }}</td>
                                                             <td>
-                                                                <button data-id="{{ $inst->id }}" data-tw-toggle="modal" data-tw-target="#editInstallmentModal" type="button" class="editInstallmentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
-                                                                <button data-id="{{ $inst->id }}" type="button" class="deleteInstallmentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                                @if($can_edit) <button data-id="{{ $inst->id }}" data-tw-toggle="modal" data-tw-target="#editInstallmentModal" type="button" class="editInstallmentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button> @endif
+                                                                @if($can_delete) <button data-id="{{ $inst->id }}" type="button" class="deleteInstallmentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button> @endif
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -188,7 +188,7 @@
                                             <div class="font-medium text-base">Invoices</div>
                                         </div>
                                         <div class="col-span-6 text-right">
-                                            <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn btn btn-sm btn-twitter shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Payment</button>
+                                            @if($can_add) <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn btn btn-sm btn-twitter shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Payment</button> @endif
                                         </div>
                                     </div>
                                     <div class="intro-y mt-5 bg-white overflow-x-auto">
@@ -224,9 +224,9 @@
                                                             <td>
                                                                 <a data-id="{{ $payment->id }}" href="{{ route('student.accounts.print',[$student->id, $payment->id]) }}" class="printBtn btn-rounded btn btn-primary text-white p-0 w-6 h-6"><i data-lucide="printer" class="w-3 h-3"></i></a>
                                                                 
-                                                                <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
-                                                                <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                                                                @if(!empty($agreements) && $agreements->count() > 0)
+                                                                @if($can_edit) <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button> @endif
+                                                                @if($can_delete) <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button> @endif
+                                                                @if(!empty($agreements) && $agreements->count() > 0 && $can_add)
                                                                     <div class="dropdown inline-flex" data-tw-placement="bottom-end">
                                                                         <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-6 h-6" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-3 h-3"></i></button>
                                                                         <div class="dropdown-menu w-64">

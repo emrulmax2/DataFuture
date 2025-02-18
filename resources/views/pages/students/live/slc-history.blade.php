@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="col-span-7 md:col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button>
+                @if($can_add) <button data-tw-toggle="modal" data-tw-target="#addRegistrationModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Registration</button> @endif
             </div>
         </div>
     </div>
@@ -34,8 +34,8 @@
                         <div class="font-medium text-base">Registration Information for <u class="text-success">Year {{ $regs->registration_year }}</u></div>
                     </div>
                     <div class="col-span-6 text-right relative">
-                        <button data-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#editRegistrationModal" type="button" class="edit_registration_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                        <button data-id="{{ $regs->id }}" type="button" class="delete_reg_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        @if($can_edit) <button data-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#editRegistrationModal" type="button" class="edit_registration_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
+                        @if($can_delete) <button data-id="{{ $regs->id }}" type="button" class="delete_reg_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
                     </div>
                 </div>
                 <div class="intro-y mt-5">
@@ -91,7 +91,7 @@
                                     <h3 class="font-medium text-base">Attendances</h3>
                                 </div>
                                 <div class="col-span-7 md:col-span-6 text-right">
-                                    <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                                    @if($can_add) <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button> @endif
                                 </div>
                             </div>
                             <div class="overflow-x-auto">
@@ -140,8 +140,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <button data-id="{{ $atn->id }}" data-tw-toggle="modal" data-tw-target="#editAttendanceModal" type="button" class="edit_attendance_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                                                <button data-id="{{ $atn->id }}" type="button" class="delete_attendance_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                                @if($can_edit) <button data-id="{{ $atn->id }}" data-tw-toggle="modal" data-tw-target="#editAttendanceModal" type="button" class="edit_attendance_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
+                                                @if($can_delete) <button data-id="{{ $atn->id }}" type="button" class="delete_attendance_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -154,7 +154,7 @@
                             <span class="inline-flex items-center">
                                 <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Attendance record not found!
                             </span>
-                            <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                            @if($can_add) <button data-reg-id="{{ $regs->id }}" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md ml-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button> @endif
                         </div>
                     @endif
 
@@ -165,7 +165,7 @@
                                 <h3 class="font-medium text-base">Coc Histories</h3>
                             </div>
                             <div class="col-span-6 text-right">
-                                <button  data-regid="{{ $regs->id }}" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
+                                @if($can_add) <button  data-regid="{{ $regs->id }}" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button> @endif
                             </div>
                         </div>
                         <table class="table table-bordered table-sm mt-3 bg-white">
@@ -212,7 +212,7 @@
                                                                         @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
                                                                             <a href="{{ Storage::disk('s3')->temporaryUrl('public/students/'.$doc->student_id.'/'.$doc->current_file_name, now()->addMinutes(60)) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
                                                                         @endif
-                                                                        <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                                                                        @if($can_delete) <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a> @endif
                                                                     </span>
                                                                 </span>
                                                             </li>
@@ -223,8 +223,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                                            <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                            @if($can_edit) <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
+                                            @if($can_delete) <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -243,7 +243,7 @@
                 <div class="font-medium text-base">Attendance at SLC is unspecified</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button data-reg-id="0" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button>
+                @if($can_add) <button data-reg-id="0" data-tw-toggle="modal" data-tw-target="#addAttendanceModal" type="button" class="add_attendance_btn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Attendance</button> @endif
             </div>
         </div>
         <div class="intro-y mt-5 overflow-x-auto">
@@ -277,7 +277,7 @@
                             <td><span class="font-medium">{{ isset($atn->code->code) && !empty($atn->code->code) ? $atn->code->code : '' }}</span></td>
                             <td>{{ !empty($atn->note) ? $atn->note : '' }}</td>
                             <td class="text-right">
-                                @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0)
+                                @if(!empty($slcRegistrations) && $slcRegistrations->count() > 0 && $can_add)
                                     <div class="dropdown inline-block" data-tw-placement="bottom-end">
                                         <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
                                         <div class="dropdown-menu w-64">
@@ -303,7 +303,7 @@
                 <div class="font-medium text-base">COC at SLC is unspecified</div>
             </div>
             <div class="col-span-6 text-right relative">
-                <button  data-regid="0" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button>
+                @if($can_add) <button  data-regid="0" data-atnid="0" data-tw-toggle="modal" data-tw-target="#addCOCModal" type="button" class="addCOCBtn btn btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add COC</button> @endif
             </div>
         </div>
         <div class="intro-y mt-5 overflow-x-auto">
@@ -352,7 +352,7 @@
                                                                 @if(isset($doc->current_file_name) && !empty($doc->current_file_name) && Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
                                                                     <a href="{{ Storage::disk('s3')->temporaryUrl('public/students/'.$doc->student_id.'/'.$doc->current_file_name, now()->addMinutes(60)) }}" target="_blank" class="text-success mr-2"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
                                                                 @endif
-                                                                <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a>
+                                                                @if($can_delete) <a data-cocid="{{ $coc->id }}" data-docid="{{ $doc->id }}" href="javascript:void(0);" target="_blank" class="deleteCOCDoc text-danger"><i data-lucide="trash-2" class="w-4 h-4"></i></a> @endif
                                                             </span>
                                                         </span>
                                                     </li>
@@ -363,9 +363,9 @@
                                     @endif
                                 </td>
                                 <td class="text-right">
-                                    <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>
-                                    <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                                    @if(!empty($studentAttendanceIds) && !empty($studentAttendanceIds))
+                                    @if($can_edit) <button data-id="{{ $coc->id }}" data-tw-toggle="modal" data-tw-target="#editCOCModal" type="button" class="edit_coc_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
+                                    @if($can_delete) <button data-id="{{ $coc->id }}" type="button" class="delete_coc_btn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
+                                    @if(!empty($studentAttendanceIds) && !empty($studentAttendanceIds) && $can_add)
                                         <div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">
                                             <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
                                             <div class="dropdown-menu w-64">

@@ -23,38 +23,38 @@
                     <div class="grid grid-cols-12 gap-4"> 
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                                <div class="col-span-8 font-medium">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Name</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Date of Birth</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('jS M, Y', strtotime($student->date_of_birth)) : '') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Date of Birth</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->date_of_birth) && !empty($student->date_of_birth) ? date('jS M, Y', strtotime($student->date_of_birth)) : '') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Sex Identifier/Gender</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->sexid->name) ? $student->sexid->name : '') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Sex Identifier/Gender</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->sexid->name) ? $student->sexid->name : '') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Nationality</div>
-                                <div class="col-span-8 font-medium">{{ $student->nation->name }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Nationality</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ $student->nation->name }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Country of Birth</div>
-                                <div class="col-span-8 font-medium">{{ $student->country->name }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Country of Birth</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ $student->country->name }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Ethnicity</div>
-                                <div class="col-span-8 font-medium">{{ isset($student->other->ethnicity->name) ? $student->other->ethnicity->name : '' }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Ethnicity</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ isset($student->other->ethnicity->name) ? $student->other->ethnicity->name : '' }}</div>
                             </div>
                         </div>
                     </div>
@@ -62,7 +62,7 @@
 
                 <div class="intro-y box p-5  mt-5">
                     <div class="grid grid-cols-12 gap-0 items-center">
-                        <div class="col-span-6">
+                        <div class="col-span-12 sm:col-span-6">
                             <div class="font-medium text-base">Student Other Personal Information</div>
                         </div>
                         
@@ -72,27 +72,27 @@
                     <div class="grid grid-cols-12 gap-4">
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Sexual Orientation</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->other->sexori->name) && !empty($student->other->sexori->name) ? $student->other->sexori->name : '---') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Sexual Orientation</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->other->sexori->name) && !empty($student->other->sexori->name) ? $student->other->sexori->name : '---') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Gender Identity</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->other->gender->name) && !empty($student->other->gender->name) ? $student->other->gender->name : '---') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Gender Identity</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->other->gender->name) && !empty($student->other->gender->name) ? $student->other->gender->name : '---') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Religion or Belief</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->other->religion->name) && !empty($student->other->religion->name) ? $student->other->religion->name : '---') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Religion or Belief</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->other->religion->name) && !empty($student->other->religion->name) ? $student->other->religion->name : '---') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-3"></div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Disability Status</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Disability Status</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">
                                     {!! (isset($student->other->disability_status) && $student->other->disability_status == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
                                 </div>
                             </div>
@@ -162,8 +162,8 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->contact->ttacom->name) && !empty($student->contact->ttacom->name) ? $student->contact->ttacom->name : '---') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->contact->ttacom->name) && !empty($student->contact->ttacom->name) ? $student->contact->ttacom->name : '---') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
@@ -172,10 +172,10 @@
                                 <div class="col-span-12 font-medium">
                                     @if(isset($student->contact->permanent_address_id) && $student->contact->permanent_address_id > 0)
                                         @if(isset($student->contact->permaddress->address_line_1) && !empty($student->contact->permaddress->address_line_1))
-                                            <span class="font-medium">{{ $student->contact->permaddress->address_line_1 }}</span><br/>
+                                            <span class="font-medium">{{ $student->contact->permaddress->address_line_1 }}</span><br class="hidden sm:block"/>
                                         @endif
                                         @if(isset($student->contact->permaddress->address_line_2) && !empty($student->contact->permaddress->address_line_2))
-                                            <span class="font-medium">{{ $student->contact->permaddress->address_line_2 }}</span><br/>
+                                            <span class="font-medium">{{ $student->contact->permaddress->address_line_2 }}</span><br class="hidden sm:block"/>
                                         @endif
                                         @if(isset($student->contact->permaddress->city) && !empty($student->contact->permaddress->city))
                                             <span class="font-medium">{{ $student->contact->permaddress->city }}</span>,
@@ -197,14 +197,14 @@
                         </div>
                         <div class="col-span-12 sm:col-span-4">
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Personal Email</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Personal Email</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium break-words">
                                     {{ $student->contact->personal_email }} <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
                                 </div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Institutional/Login Email</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Institutional/Login Email</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium break-words">
                                     {{ $student->users->email }}
                                     @if ($student->users->email_verified_at == NULL)
                                         <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
@@ -219,12 +219,12 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Home Phone</div>
-                                <div class="col-span-8 font-medium">{{ $student->contact->home }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Home Phone</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ $student->contact->home }}</div>
                             </div>
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Mobile</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">
                                     {{ $student->contact->mobile }}
                                     @if($student->contact->mobile_verification == 1)
                                         <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
@@ -238,24 +238,24 @@
                     </div>
                 </div>
                 <div class="intro-y box p-5 mt-5">
-                    <div class="grid grid-cols-12 gap-0 items-center">
-                            <div class="font-medium text-base">Course Details</div>
+                    <div class="grid sm:grid-cols-12 gap-0 items-center">
+                        <div class="font-medium text-base">Course Details</div>
                         
                     </div>
                     <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
                     <div class="grid grid-cols-12 gap-4"> 
                         <div class="col-span-12 sm:col-span-12">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Course & Semester</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Course & Semester</div>
+                                <div class="col-span-12 sm:col-span-8 font-medium">
                                         <span>{{ $student->crel->creation->course->name.' - '.$student->crel->propose->semester->name }}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Venue</div>
-                                <div class="col-span-8 font-medium">
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Venue</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">
                                         <span>{{ $venue }}</span>
                                 </div>
                             </div>
@@ -264,14 +264,14 @@
                             @foreach ($studentCourseAvailability as $availability)
                                 <div class="col-span-12 sm:col-span-12">
                                     <div class="grid grid-cols-12 gap-0">
-                                        <div class="col-span-4 text-slate-500 font-medium">Course Start</div>
-                                        <div class="col-span-8 font-medium">{{ $availability->course_start_date }}</div>
+                                        <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Course Start</div>
+                                        <div class="col-span-6 sm:col-span-8 font-medium">{{ $availability->course_start_date }}</div>
                                     </div>
                                 </div>
                                 <div class="col-span-12 sm:col-span-12">
                                     <div class="grid grid-cols-12 gap-0">
-                                        <div class="col-span-4 text-slate-500 font-medium">Course End</div>
-                                        <div class="col-span-8 font-medium">{{ $availability->course_end_date }}</div>
+                                        <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Course End</div>
+                                        <div class="col-span-6 sm:col-span-8 font-medium">{{ $availability->course_end_date }}</div>
                                     </div>
                                 </div>
                                 
@@ -280,14 +280,14 @@
             
                         <div class="col-span-12 sm:col-span-12">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Awarding Body</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown')}}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Awarding Body</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown')}}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-12">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Awarding Body Ref</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Awarding Body Ref</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}</div>
                             </div>
                         </div>
                     </div>
@@ -303,20 +303,20 @@
                     <div class="grid grid-cols-12 gap-4"> 
                         <div class="col-span-12 sm:col-span-6">
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                                <div class="col-span-8 font-medium">{{ isset($student->kin->name) ? $student->kin->name : '' }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Name</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ isset($student->kin->name) ? $student->kin->name : '' }}</div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Relation</div>
-                                <div class="col-span-8 font-medium">{{ isset($student->kin->relation->name) ? $student->kin->relation->name : '' }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Relation</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ isset($student->kin->relation->name) ? $student->kin->relation->name : '' }}</div>
                             </div>
                             <div class="grid grid-cols-12 gap-0 mb-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Mobile</div>
-                                <div class="col-span-8 font-medium">{{ isset($student->kin->mobile) ? $student->kin->mobile : '' }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Mobile</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ isset($student->kin->mobile) ? $student->kin->mobile : '' }}</div>
                             </div>
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Email</div>
-                                <div class="col-span-8 font-medium">{{ (isset($student->kin->email) && !empty($student->kin->email) ? $student->kin->email : '---') }}</div>
+                                <div class="col-span-6 sm:col-span-4 text-slate-500 font-medium">Email</div>
+                                <div class="col-span-6 sm:col-span-8 font-medium">{{ (isset($student->kin->email) && !empty($student->kin->email) ? $student->kin->email : '---') }}</div>
                             </div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -362,8 +362,8 @@
                     <div class="grid grid-cols-12 gap-4"> 
                         <div class="col-span-12 sm:col-span-12">
                             <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-4 text-slate-500 font-medium">Communication Consent</div>
-                                <div class="col-span-8"> 
+                                <div class="col-span-12 sm:col-span-4 text-slate-500 font-medium">Communication Consent</div>
+                                <div class="col-span-12 sm:col-span-8"> 
                                     @if(!empty($stdConsentIds) && $consent->count() > 0)
                                         <ul class="m-0 p-0 mb-2">
                                             @foreach($consent as $con)

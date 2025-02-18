@@ -17,10 +17,10 @@
         </div>
     </form>
     <div class="flex mt-5 sm:mt-0">
-        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+        <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2 hidden sm:inline-flex">
             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
         </button>
-        <div class="dropdown w-1/2 sm:w-auto">
+        <div class="dropdown w-1/2 sm:w-auto hidden sm:inline-flex">
             <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
             </button>
