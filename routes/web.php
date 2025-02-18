@@ -1211,6 +1211,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/download-document', 'admissionDocumentDownload')->name('admission.document.download');
 
         Route::post('admission/get-evening-weekend-status', 'getEveningWeekendStatus')->name('admission.get.evening.weekend.status');
+        Route::post('admission/reject-student', 'rejectStudent')->name('admission.student.reject');
         
     });
 

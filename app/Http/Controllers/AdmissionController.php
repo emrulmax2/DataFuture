@@ -2841,4 +2841,28 @@ class AdmissionController extends Controller
         endif;
     }
 
+    public function rejectStudent(Request $request){
+        $applicant_id = $request->applicantID;
+        $status_id = $request->statusidID;
+        $applicant =  $applicantOldRow = Applicant::find($applicant_id);
+       
+        $applicant->status_id = $status_id;
+        $changes = $applicant->getDirty();
+        $applicant->save();
+
+        if($applicant->wasChanged() && !empty($changes)):
+            $data = [];
+            $data['applicant_id'] = $applicant_id;
+            $data['table'] = 'applicants';
+            $data['field_name'] = 'status_id';
+            $data['field_value'] = $applicantOldRow->status_id;
+            $data['field_new_value'] = $status_id;
+            $data['created_by'] = auth()->user()->id;
+
+            ApplicantArchive::create($data);
+        endif;
+
+        return response()->json(['msg' => 'Student status successfully updated!'], 200);
+    }
+
 }

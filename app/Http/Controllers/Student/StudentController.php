@@ -93,6 +93,7 @@ use App\Models\StudyMode;
 use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
+use App\Models\StudentStuloadInformation;
 use Barryvdh\Debugbar\Facades\Debugbar;
 use DebugBar\DebugBar as DebugBarDebugBar;
 use Illuminate\Support\Facades\DB;
@@ -517,6 +518,10 @@ class StudentController extends Controller
         $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
         $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
         $firstCreationInstance = CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('id', 'ASC')->get()->first();
+        $instances = CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get();
+        $default_inst_ids = ($instances->count() > 0 ? $instances->pluck('id')->unique()->toArray() : [0]);
+        $stuload_instance_ids = StudentStuloadInformation::where('student_id', $studentId)->whereNotIn('course_creation_instance_id', $default_inst_ids)->where('student_course_relation_id', $courseRelationId)->pluck('course_creation_instance_id')->unique()->toArray();
+        $availableInstanc_ids = array_merge($default_inst_ids, $stuload_instance_ids);
 
         return view('pages.students.live.slc-history', [
             'title' => 'Live Students - London Churchill College',
@@ -528,7 +533,7 @@ class StudentController extends Controller
             'ac_years' => AcademicYear::orderBy('from_date', 'DESC')->get(),
             'active_ac_year' => (isset($firstCreationInstance->academic_year_id) && $firstCreationInstance->academic_year_id > 0 ? $firstCreationInstance->academic_year_id : 0),
             'reg_status' => SlcRegistrationStatus::where('active', 1)->get(),
-            'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
+            'instances' => CourseCreationInstance::whereIn('id', $availableInstanc_ids)->orderBy('academic_year_id', 'ASC')->get(),
             'attendanceCodes' => AttendanceCode::where('active', 1)->orderBy('code', 'ASC')->get(),
             'slcRegistrations' => SlcRegistration::where('student_id', $studentId)->where('student_course_relation_id', $courseRelationId)->orderBy('registration_year', 'ASC')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'desc')->get(),

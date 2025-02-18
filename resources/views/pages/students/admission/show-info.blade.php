@@ -79,6 +79,30 @@
                                     </ul>
                                 </div>
                             </div>
+                        @elseif($applicant->status_id == 3 && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
+                            <div class="dropdown inline-block" data-tw-placement="bottom-start">
+                                <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
+                                    {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
+                                </button>
+                                <div class="dropdown-menu w-72">
+                                    <ul class="dropdown-content">
+                                        <li><h6 class="dropdown-header">Status List</h6></li>
+                                        <li><hr class="dropdown-divider mt-0"></li>
+
+                                        @if(!empty($allStatuses))
+                                            @foreach($allStatuses as $sts)
+                                                @if(($applicant->status_id == 3 && in_array($sts->id, [8])))
+                                                <li>
+                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item rejectApplicationBtn">
+                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
+                                                    </a>
+                                                </li>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                    </ul>
+                                </div>
+                            </div>
                         @else
                             <button type="button" class="btn btn-{{ $applicant->status_id == 8 ? 'danger' : 'primary' }} text-white w-auto mr-1 mb-0">
                                 {{ $applicant->status->name }}
@@ -236,6 +260,26 @@
         </div>
     </div>
     <!-- END: Status Confirm Modal -->
+
+    <!-- BEGIN: Rejected Confirm Modal Content -->
+    <div id="rejectedConfirmModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 rejectedConfModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 rejectedConfModDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-statusid="0" data-applicant="{{ $applicant->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Rejected Confirm Modal Content -->
 
 
     <!-- BEGIN: Progress bar Modal -->
