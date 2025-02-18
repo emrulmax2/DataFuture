@@ -5,9 +5,9 @@
 @endsection
 
 @section('subcontent')
-<div class="intro-y flex items-center mt-8">
-    <h2 class="text-lg font-medium mr-auto">Module Details</h2>
-    <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+<div class="intro-y flex justify-between items-center mt-8">
+    <h2 class="text-lg font-medium mr-auto min-w-max">Module Details</h2>
+    <div class="w-auto flex mt-0 sm:mt-4">
         <a href="{{ route('students.dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
         
     </div>
@@ -17,13 +17,13 @@
     <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
         <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
             <div class="ml-auto mr-auto">
-                <div class="w-auto sm:w-full truncate text-primary sm:whitespace-normal font-bold text-3xl">{{ $data->module }}</div>
+                <div class="w-auto sm:w-full truncate text-primary sm:whitespace-normal font-bold sm:text-3xl">{{ $data->module }}</div>
                 <div class="text-slate-500 font-medium">{{ $data->course }} - {{ $data->term_name }}</div>
             </div>
         </div>
         <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
-            <div class="font-medium text-center lg:text-left lg:mt-3">Module Details</div>
-            <div class="flex flex-col justify-center items-center lg:items-start mt-4">
+            <div class="font-medium text-left lg:mt-3">Module Details</div>
+            <div class="flex flex-col justify-center items-start mt-4">
                 <div class="truncate sm:whitespace-normal flex items-center">
                     <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">Group:</span> <span class="font-medium ml-2">{{ $data->group }}</span>
                 </div>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="flex flex-1 px-5 items-center justify-center lg:justify-start border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0">
-            <div class="grid grid-cols-12 gap-6 mt-0">
+            <div class="w-full sm:w-auto grid grid-cols-12 gap-6 mt-2 sm:mt-0">
                 @if(isset($data->tutor) && $data->tutor!=null)
                 <div class="relative flex items-center w-full col-span-12">
                     <div class="w-12 h-12 flex-none image-fit">
@@ -62,7 +62,7 @@
             </div>
         </div>
     </div>
-    <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
+    <ul class="nav nav-link-tabs flex-col sm:flex-row justify-start sm:text-center" role="tablist">
         <li id="availabilty-tab" class="nav-item mr-5" role="presentation">
             <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#availabilty" aria-controls="availabilty" aria-selected="true" role="tab" >
                 <i data-lucide="layers" class="w-4 h-4 mr-2"></i> Course Content
@@ -106,7 +106,7 @@
 </div>
 <div class="intro-y tab-content mt-5">
     <div id="availabilty" class="tab-pane active" role="tabpanel" aria-labelledby="availabilty-tab">
-        <div class="intro-y box p-5 mt-5">
+        <div class="intro-y box sm:p-5 mt-5">
             @include('pages.students.frontend.dashboard.module.includes.activity')
         </div>
     </div>

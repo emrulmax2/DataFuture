@@ -33,12 +33,14 @@ var classPlanDateListsTutorTable = (function () {
                     
                     headerSort: false,
                     width: "180",
+                    minWidth: 30,
                 },
                 {
                     title: "DATE",
                     field: "date",
                     headerHozAlign: "left",
-                    headerSortTristate:true
+                    headerSortTristate:true,
+                    minWidth: 180,
                 },
                 {
                     title: "ROOM",
@@ -47,6 +49,7 @@ var classPlanDateListsTutorTable = (function () {
                     headerHozAlign: "center",
                     hozAlign:  "center",
                     width:200,
+                    minWidth: 200,
                     formatter(cell, formatterParams) {
                         return `<div>
                             <div class="font-medium whitespace-nowrap">${
@@ -65,6 +68,7 @@ var classPlanDateListsTutorTable = (function () {
                     headerHozAlign: "center",
                     hozAlign:"center",
                     width:150,
+                    minWidth: 150,
                     formatter(cell, formatterParams) {
                         return `<div>
                             <div class="font-medium whitespace-nowrap">${
@@ -84,6 +88,7 @@ var classPlanDateListsTutorTable = (function () {
                     hozAlign:  "center",
                     headerSort: false,
                     headerHozAlign: "center",
+                    minWidth: 150,
                     formatter(cell, formatterParams) {
                         let dropdown = [];
                         let attendanceInformation = cell.getData().attendance_information
@@ -115,6 +120,7 @@ var classPlanDateListsTutorTable = (function () {
                     headerSort: false,
                     print: false,
                     download: false,
+                    minWidth: 200,
                     formatter(cell, formatterParams) {
                         let dropdown = [];
                         

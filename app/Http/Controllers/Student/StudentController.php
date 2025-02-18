@@ -539,7 +539,10 @@ class StudentController extends Controller
             'undefinedSlcCocs' => SlcCoc::where('student_id', $student->id)->where(function($q){
                                     $q->where('slc_registration_id', 0)->orWhereNull('slc_registration_id');
                                 })->orderBy('id', 'DESC')->get(),
-            'studentAttendanceIds' => SlcAttendance::where('student_id', $studentId)->pluck('id')->unique()->toArray()
+            'studentAttendanceIds' => SlcAttendance::where('student_id', $studentId)->pluck('id')->unique()->toArray(),
+            'can_add' => (isset(auth()->user()->priv()['slc_history_add']) && auth()->user()->priv()['slc_history_add'] == 1 ? true : false),
+            'can_edit' => (isset(auth()->user()->priv()['slc_history_edit']) && auth()->user()->priv()['slc_history_edit'] == 1 ? true : false),
+            'can_delete' => (isset(auth()->user()->priv()['slc_history_delete']) && auth()->user()->priv()['slc_history_delete'] == 1 ? true : false)
         ]);
     }
 
@@ -573,6 +576,10 @@ class StudentController extends Controller
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'registrations' => SlcRegistration::where('student_course_relation_id', $courseRelationId)->where('student_id', $student_id)->get(),
             "slcCode" =>(isset($CourseCreationVenue->slc_code) && !empty($CourseCreationVenue->slc_code) ? $CourseCreationVenue->slc_code : ''),
+            
+            'can_add' => (isset(auth()->user()->priv()['student_account_add']) && auth()->user()->priv()['student_account_add'] == 1 ? true : false),
+            'can_edit' => (isset(auth()->user()->priv()['student_account_edit']) && auth()->user()->priv()['student_account_edit'] == 1 ? true : false),
+            'can_delete' => (isset(auth()->user()->priv()['student_account_delete']) && auth()->user()->priv()['student_account_delete'] == 1 ? true : false)
         ]);
     }
     public function accountsInvoicePrint($student_id, $payment_id) {

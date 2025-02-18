@@ -1,5 +1,5 @@
-<div data-tw-merge class="accordion p-5 mt-5">
-    <div data-tw-merge class="bg-slate-200 accordion-item py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
+<div data-tw-merge class="accordion sm:p-5 mt-5">
+    <div data-tw-merge class="sm:bg-slate-200 accordion-item py-4 first:-mt-4 last:-mb-4 [&amp;:not(:last-child)]:border-b [&amp;:not(:last-child)]:border-slate-200/60 [&amp;:not(:last-child)]:dark:border-darkmode-400 p-4 first:mt-0 last:mb-0 border border-slate-200/60 mt-3 dark:border-darkmode-400">
         <div class="accordion-header" id="faq-accordion-5">
             <button data-tw-merge data-tw-toggle="collapse" data-tw-target="#faq-accordion-5-collapse" type="button" aria-expanded="true" aria-controls="faq-accordion-5-collapse" class="accordion-button outline-none inline-flex justify-between py-4 -my-4 font-medium w-full text-left dark:text-slate-400 [&amp;:not(.collapsed)]:text-primary [&amp;:not(.collapsed)]:dark:text-slate-300"><div class="flex-none">Assignment Breief and Important Documents</div> <div class="accordian-lucide flex-none"><i data-lucide="minus" class="w-4 h-4"></i></div></button>
         </div>
@@ -54,7 +54,7 @@
                     </div>
                 </div> --}}
                 <!-- END: Module Documents  -->
-                <div class="p-5 pt-0">
+                <div class="p-0 sm:p-5 sm:pt-0">
                     <div class="grid grid-cols-12 gap-4">
                         @foreach ($planTasks as $task) 
                             @php

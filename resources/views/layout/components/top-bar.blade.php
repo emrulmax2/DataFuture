@@ -57,7 +57,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Applicant</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('applicant.dashboard')  }}">Dashboard</a></li>
                 @elseif(Auth::guard('student')->check())
-                    <li class="breadcrumb-item"><a href="javascript:void(0);">Student</a></li>
+                    <li class="breadcrumb-item hidden sm:block"><a href="javascript:void(0);">Student</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('students.dashboard') }}">Dashboard</a></li>
                 @elseif(Auth::guard('agent')->check())
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Agent</a></li>
@@ -183,7 +183,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
             @endImpersonating
         @elseif(Auth::guard('student')->check())
             @impersonating($guard='student')
-                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6">
+                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6 min-w-max">
                     Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
                 </a>
             @endImpersonating
