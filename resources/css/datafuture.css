@@ -2520,3 +2520,8 @@ fieldset.modInstSet legend{
 .tabulator .tabulator-tableHolder .tabulator-table{
     white-space: normal !important;
 }
+@media screen and (max-width: 767px) {
+    .tabulator .tabulator-tableHolder .tabulator-table{
+        display: block !important;
+    }
+}

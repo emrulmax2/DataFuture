@@ -58,7 +58,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                     <li class="breadcrumb-item"><a href="{{ route('applicant.dashboard')  }}">Dashboard</a></li>
                 @elseif(Auth::guard('student')->check())
                     <li class="breadcrumb-item hidden sm:block"><a href="javascript:void(0);">Student</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('students.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item hidden sm:block"><a href="{{ route('students.dashboard') }}">Dashboard</a></li>
                 @elseif(Auth::guard('agent')->check())
                     <li class="breadcrumb-item"><a href="javascript:void(0);">Agent</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('agent.dashboard') }}">Dashboard</a></li>
@@ -70,7 +70,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                 @if(isset($breadcrumbs) && !empty($breadcrumbs))
                     @php $i = 1; @endphp
                     @foreach($breadcrumbs as $crumbs)
-                        <li class="breadcrumb-item {{ $i == count($breadcrumbs) ? 'active' : '' }}" aria-current="{{ $i == count($breadcrumbs) ? 'page' : '' }}">
+                        <li class="breadcrumb-item hidden sm:block {{ $i == count($breadcrumbs) ? 'active' : '' }}" aria-current="{{ $i == count($breadcrumbs) ? 'page' : '' }}">
                             @if($i != count($breadcrumbs)) <a href="{{ $crumbs['href'] }}"> @endif
                                 {{ $crumbs['label'] }}
                             @if($i != count($breadcrumbs)) </a> @endif

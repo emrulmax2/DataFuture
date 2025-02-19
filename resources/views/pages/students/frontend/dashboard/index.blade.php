@@ -48,7 +48,7 @@
                                         @endphp
                                         <a href="{{ route('students.dashboard.plan.module.show', $module_id) }}" target="_blank" style="inline-block">
                                             <div id="moduleset-{{ $termData->id }}" class="intro-y module-details_{{ $termId }}  @php if($termList[$currenTerm]->id != $termId) echo "hidden " @endphp ">
-                                                <div class="box px-4 py-4 mb-3 flex items-center zoom-in">
+                                                <div class="box pr-4 py-4 mb-3 flex items-center zoom-in">
                                                     <div class="ml-4 mr-auto">
                                                         <div class="font-medium">{{ $termData->module }}</div>
                                                         <div class="text-slate-500 text-xs mt-0.5">
