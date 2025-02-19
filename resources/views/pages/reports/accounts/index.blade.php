@@ -9,7 +9,7 @@
         <h2 class="text-lg font-medium mr-auto">Accounts Reports</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <button type="button" data-tw-target="#transConnectionModal" data-tw-toggle="modal" class="add_btn btn btn-success text-white shadow-md mr-2"><i data-lucide="arrow-right-left" class="w-4 h-4 mr-2"></i> Connect TC</button>
-            <a href="{{ route('reports') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Reports</a>
+            <a href="{{ route('accounts') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Accounts</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->

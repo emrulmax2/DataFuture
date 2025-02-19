@@ -113,9 +113,9 @@
                                 @if($icountData<7)
                                 <div id="dates-{{ $icountData++ }}" class="intro-x">
                                     <div class="box px-5 py-3 mb-3 flex items-center zoom-in">
-                                        <div class="ml-4 mr-auto">
+                                        <div class="sm:ml-4 mr-auto">
                                             <div class="font-medium">{{ $data->module }}  </div>
-                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $data->classType }}</div>
+                                            <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center sm:ml-4 min-w-10 px-3 py-0.5 mb-2">{{ $data->classType }}</div>
                                             <div class="font-medium">{{ $data->hr_date }}, {{ $data->hr_time }} </div>
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $data->venue_room }} </div>
                                         </div>
