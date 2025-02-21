@@ -175,8 +175,9 @@
                             @php 
 								$existAttendance = (isset($data['existAttendances'][$list->student->id]) && $data['existAttendances'][$list->student->id] > 0 ? $data['existAttendances'][$list->student->id] : 0);
                                 $statusActive = (isset($list->student->status->active) && $list->student->status->active == 1 ? 1 : 0);
+
                             @endphp    
-                            @if($existAttendance > 0 || $statusActive == 1)  
+                            @if($existAttendance > 0 || $statusActive == 1 || $list->student->status->id == 43)  
                                 <tr class="theAttendanceRow">
                                     <td width="100px">{{ $serial }}</td>
                                     <td width="w-2/6">
@@ -185,8 +186,11 @@
                                                 <img alt="{{ $list->student->full_name }}" class="rounded-full shadow" src="{{ $list->student->photo_url }}">
                                             </div>
                                             <div class="inline-block relative" style="top: -5px;" >
-                                                <div class="font-medium whitespace-nowrap">{{ $list->student->registration_no }}</div>
+                                                <div class="font-medium whitespace-nowrap {{ $list->student->status->id==43 ? 'text-danger': ''; }}">{{ $list->student->registration_no }}</div>
                                                 <div class="text-slate-500 text-xs whitespace-nowrap">{{ $list->student->full_name }}</div>
+                                                @if($list->student->status->id==43)
+                                                    <div class="text-danger text-xs whitespace-nowrap">{{ $list->student->status->name }}</div>
+                                                @endif
                                             </div>
                                         </div>   
                                         <input type="hidden" name="attendances[{{$data['id']}}][{{$serial}}][student_id]" value="{{ $list->student->id }}">
