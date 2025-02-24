@@ -152,7 +152,7 @@ class SlcRegistrationController extends Controller
 
         $regData = [];
         $regData['course_creation_instance_id'] = $request->course_creation_instance_id;
-        $regData['ssn'] = $request->studen_ssn;
+        $regData['ssn'] = $request->ssn;
         $regData['confirmation_date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
         $regData['academic_year_id'] = $request->academic_year_id;
         $regData['registration_year'] = $request->registration_year;

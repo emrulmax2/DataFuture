@@ -16,7 +16,9 @@
             {{ $title }}
         </h2>
         <div class="flex md:mt-4 sm:mt-0 items-center">
-            <h4 id="frequency-distribution" class="text-sm font-medium mr-2 md:py-5">[  ]</h4>
+            <h4 id="frequency-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">Completed: []</h4>
+            <h4 id="outstanding-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">Outstanding: []</h4>
+            <h4 id="total-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">total: []</h4>
             <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2 hidden md:inline-flex">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </a>
