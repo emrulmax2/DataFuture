@@ -6,6 +6,7 @@ import TomSelect from 'tom-select';
 
 import { Litepicker } from 'litepicker';
 import { param } from 'jquery';
+import tippy, { roundArrow } from "tippy.js";
 
 ('use strict');
 var studentNotesListTable = (function () {
@@ -730,15 +731,47 @@ var studentNotesListTable = (function () {
         console.log(gradeFrequency);
 
         // Optionally, you can display the frequency distribution in the HTML
+        //completed grabing
+
         var frequencyHtml = '[ ';
+        var completedTotal = 0;
+        var outstandingHtml = '[ ';
+        var outstandingTotal = 0;
+        var totalHtml = '';
         $.each(gradeFrequency, function (grade, count) {
-            if (count != 0) frequencyHtml += grade + ': ' + count + ', ';
+            if(grade=='P' || grade=='M' || grade=='D') {
+                if (count != 0) frequencyHtml += grade + ': ' + count + ' ';
+                completedTotal += count;
+            }
+            else {
+                if (count != 0) outstandingHtml += grade + ': ' + count + ' ';
+                outstandingTotal += count;
+            }
+
         });
-        frequencyHtml +=
-            'Total: ' + $('#sortable-table tbody tr').length + ' ]';
+        frequencyHtml += ' ]';
+        outstandingHtml += ' ]';
+        totalHtml +=
+            '[ ' + $('#sortable-table tbody tr').length + ' ]';
 
         // Append the frequency distribution to a specific element
-        $('#frequency-distribution').html(frequencyHtml);
+        $('#frequency-distribution').data('content', frequencyHtml);
+        $('#frequency-distribution').html("Completed: "+completedTotal);
+        $('#outstanding-distribution').data('content', outstandingHtml);
+        $('#outstanding-distribution').html('Outstanding: '+outstandingTotal);
+        $('#total-distribution').data('content', totalHtml);
+        $('#total-distribution').html('Total: '+$('#sortable-table tbody tr').length);
+        $(".tabltooltip").each(function () {
+            let tipyyoptions = {
+                content: $(this).data('content'),
+            };
+            tippy(this, {
+                arrow: roundArrow,
+                animation: "shift-away",
+                ...tipyyoptions,
+            });
+        })
+
     }
 
     function comparer(index) {
