@@ -292,6 +292,7 @@ use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyControll
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\Student\ArchiveController;
 use App\Http\Controllers\Student\AttendanceTermStatusController;
 use App\Http\Controllers\Student\AwardController;
 use App\Http\Controllers\Student\DatafutureController;
@@ -868,6 +869,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/notes/{id}', 'notes')->name('student.notes');
         Route::get('student/process/{id}', 'process')->name('student.process');
         Route::get('student/workplacement/{id}', 'workplacement')->name('student.workplacement');
+        Route::get('student/archives/{id}', 'archives')->name('student.archives');
 
         Route::post('student/upload-student-photo', 'UploadStudentPhoto')->name('student.upload.photo');
 
@@ -1045,6 +1047,10 @@ Route::middleware('auth')->group(function() {
         
         Route::post('student/process-task-view-excuse', 'processTaskViewExcuse')->name('student.process.task.view.excuse');
         Route::post('student/update-process-task-and-excuse', 'updateProcessTaskAndExcuse')->name('student.process.update.task.and.excuse');
+    });
+
+    Route::controller(ArchiveController::class)->group(function() {
+        Route::get('student/archives-list', 'list')->name('student.archives.list');
     });
 
     Route::controller(CourseDetailController::class)->group(function() {

@@ -2520,4 +2520,15 @@ class StudentController extends Controller
         
         return response()->json(['res' => $res], 200);
     }
+
+    public function archives($studentId){
+        return view('pages.students.live.archives', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Archives', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => Student::find($studentId),
+        ]);
+    }
 }

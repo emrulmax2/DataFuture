@@ -14,6 +14,7 @@ use App\Models\SlcCocDocument;
 use App\Models\SlcInstallment;
 use App\Models\SlcRegistration;
 use App\Models\Student;
+use App\Models\StudentArchive;
 use App\Models\StudentDocument;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
@@ -116,6 +117,8 @@ class SlcAttendanceController extends Controller
     public function update(SlcAttendanceUpdateRequest $request){
         $slc_attendance_id = $request->slc_attendance_id;
         
+        $attendanceOldRow = SlcAttendance::find($slc_attendance_id);
+        
         $attendance_code_id = $request->attendance_code_id;
         $attendanceCode = AttendanceCode::find($attendance_code_id);
         $cocRequired = (isset($attendanceCode->coc_required) && $attendanceCode->coc_required == 1 ? true : false);
@@ -128,7 +131,24 @@ class SlcAttendanceController extends Controller
         $attenData['note'] = $request->attendance_note;
         $attenData['updated_by'] = auth()->user()->id;
 
-        $slcAttendance = SlcAttendance::where('id', $slc_attendance_id)->update($attenData);
+        $attendance = SlcAttendance::find($slc_attendance_id);
+        $attendance->fill($attenData);
+        $changes = $attendance->getDirty();
+        $attendance->save();
+
+        if($attendance->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                StudentArchive::create([
+                    'student_id' => $attendanceOldRow->student_id,
+                    'table' => 'slc_attendances',
+                    'field_name' => $field,
+                    'field_value' => $attendanceOldRow->$field,
+                    'field_new_value' => $value,
+                    'created_by' => auth()->user()->id
+                ]);
+            endforeach;
+        endif;
+
         if($cocRequired):
             $existingCoc = SlcCoc::where('slc_attendance_id', $slc_attendance_id)->get()->first();
             $attendanceRow = SlcAttendance::find($slc_attendance_id);
