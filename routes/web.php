@@ -2751,6 +2751,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('programme-dashboard/reassign-class', 'reAssignClass')->name('programme.dashboard.reassign.class'); 
         Route::post('programme-dashboard/get-undecided-class', 'getUndecidedClass')->name('programme.dashboard.get.undecided.class'); 
+
+        Route::get('programme-dashboard/tutors/export/{id}/{course?}', 'tutorsExport')->name('programme.dashboard.tutors.export');
     });
 
     Route::controller(DatafutureFieldCategoryController::class)->group(function() {

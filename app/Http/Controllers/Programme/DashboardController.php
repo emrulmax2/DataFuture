@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Programme;
 
+use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CancelClassRequest;
 use App\Http\Requests\ReAssignClassRequest;
@@ -31,6 +32,7 @@ use App\Traits\SendSmsTrait;
 use DateTime;
 use App\Traits\GenerateEmailPdfTrait;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -477,11 +479,12 @@ class DashboardController extends Controller
 
                 $activePlans = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
-                $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
+                $assigned = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->toArray();
                 $moduleCreations = $activePlans->pluck('module_creation_id')->toArray();
                 $groups = $activePlans->pluck('group_id')->unique()->toArray();
 
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
+                $tut['expected_submission'] = (!empty($assigned) ? count($assigned) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1);
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
@@ -1031,5 +1034,76 @@ class DashboardController extends Controller
         endif;
 
         return response()->json(['htm' => $html], 200);
+    }
+
+    public function tutorsExport($term_declaration_id, $course_id = 0){
+        $theTerm = TermDeclaration::find($term_declaration_id);
+        $usedCourses = Plan::where('term_declaration_id', $term_declaration_id)->pluck('course_id')->unique()->toArray();
+        //$tutorIds = Plan::where('term_declaration_id', $term_declaration_id)->pluck('tutor_id')->unique()->toArray();
+        $query = Plan::where('term_declaration_id', $term_declaration_id);
+        if($course_id > 0):
+            $query->where('course_id', $course_id);
+        endif;
+        $tutorIds = $query->pluck('tutor_id')->unique()->toArray();
+
+        $tutors = User::with('employee')->whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
+
+        $theCollection = [];
+        $theCollection[1][] = 'Name';
+        $theCollection[1][] = 'Work Type';
+        $theCollection[1][] = 'Contracted Hour';
+        $theCollection[1][] = 'Class Hour';
+        $theCollection[1][] = 'Load';
+        $theCollection[1][] = 'No of Module';
+        $theCollection[1][] = 'Attendance Rate';
+        $theCollection[1][] = 'Expected Submission';
+        $theCollection[1][] = 'Submission Rage';
+
+        $row = 2;
+        if(!empty($tutors)):
+            foreach($tutors as $tut):
+                $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
+                $classMinutes = $this->calculateTutorHours($tut->id, $term_declaration_id);
+                $contracted_hour = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
+
+                $activePlans = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+                $plan_ids = $activePlans->pluck('id')->unique()->toArray();
+                $assigned = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->toArray();
+                $moduleCreations = $activePlans->pluck('module_creation_id')->toArray();
+                $groups = $activePlans->pluck('group_id')->unique()->toArray();
+
+                $cHour = $this->convertStringToMinute($contracted_hour);
+                $load = ($cHour > 0 && $classMinutes > 0 ? $classMinutes / $cHour : 0);
+
+                $attendances = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 1);
+                $attendance = 0;
+                $attendance += (isset($attendances->P) && $attendances->P > 0 ? $attendances->P : 0);
+                $attendance += (isset($attendances->O) && $attendances->O > 0 ? $attendances->O : 0);
+                $attendance += (isset($attendances->L) && $attendances->L > 0 ? $attendances->L : 0);
+                $attendance += (isset($attendances->E) && $attendances->E > 0 ? $attendances->L : 0);
+                $attendance += (isset($attendances->M) && $attendances->M > 0 ? $attendances->M : 0);
+                $attendance += (isset($attendances->H) && $attendances->H > 0 ? $attendances->H : 0);
+
+                $attendanceTotal = (isset($attendances->TOTAL) && $attendances->TOTAL > 0) ? $attendances->TOTAL : 0;
+                if($attendance > 0 && $attendanceTotal > 0):
+                    $attendance_rate = number_format($attendance / $attendanceTotal * 100, 2);
+                else:
+                    $attendance_rate = '0';
+                endif;
+
+                $theCollection[$row][] = (isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee');
+                $theCollection[$row][] = (isset($tut->employee->employment->employeeWorkType->name) && !empty($tut->employee->employment->employeeWorkType->name) ? $tut->employee->employment->employeeWorkType->name : '');
+                $theCollection[$row][] = $contracted_hour;
+                $theCollection[$row][] = $this->calculateHourMinute($classMinutes);
+                $theCollection[$row][] = number_format($load, 2);
+                $theCollection[$row][] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
+                $theCollection[$row][] = $attendance_rate;
+                $theCollection[$row][] = (!empty($assigned) ? count($assigned) : 0);
+                $theCollection[$row][] = '0.0';
+                $row++;
+            endforeach;
+        endif;
+
+        return Excel::download(new ArrayCollectionExport($theCollection), str_replace(' ', '_', $theTerm->name).'_tutors_report.xlsx');
     }
 }

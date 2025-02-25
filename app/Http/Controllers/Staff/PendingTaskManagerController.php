@@ -109,6 +109,7 @@ class PendingTaskManagerController extends Controller
     }
 
     public function list(Request $request){
+        $reg_or_ref = isset($request->reg_or_ref) && !empty($request->reg_or_ref) ? $request->reg_or_ref : '';
         $status = isset($request->status) && !empty($request->status) ? $request->status : 'Pending';
         $task_id = isset($request->task_id) && $request->task_id > 0 ? $request->task_id : 0;
         $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : 'Live');
@@ -126,6 +127,9 @@ class PendingTaskManagerController extends Controller
                         $q->whereIn('course_creation_id', $courseCreations);
                     });
                 endif;
+            endif;
+            if(!empty($reg_or_ref)):
+                $Query->where('application_no', 'LIKE', '%'.$reg_or_ref.'%');
             endif;
 
             $total_rows = $Query->count();
@@ -236,6 +240,11 @@ class PendingTaskManagerController extends Controller
                         $q->whereIn('course_creation_id', $courseCreations)->where('active', 1);
                     });
                 endif;
+            endif;
+            if(!empty($reg_or_ref)):
+                $Query->where(function($q) use($reg_or_ref){
+                    $q->where('application_no', 'LIKE', '%'.$reg_or_ref.'%')->orWhere('registration_no', 'LIKE', '%'.$reg_or_ref.'%');
+                });
             endif;
 
             $total_rows = $Query->count();
