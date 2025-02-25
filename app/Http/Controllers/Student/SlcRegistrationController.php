@@ -15,6 +15,7 @@ use App\Models\SlcInstallment;
 use App\Models\SlcRegistration;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
+use App\Models\StudentArchive;
 
 class SlcRegistrationController extends Controller
 {
@@ -144,6 +145,7 @@ class SlcRegistrationController extends Controller
     public function update(SlcRegistrationUpdateRequest $request){
         $slc_registration_id = $request->slc_registration_id;
         $theRegistration = SlcRegistration::find($slc_registration_id);
+        $oldData = $theRegistration->toArray();
         /*$existRegistration = SlcRegistration::where('student_id', $theRegistration->student_id)->where('student_course_relation_id', $theRegistration->student_course_relation_id)
                             ->where('registration_year', $request->registration_year)->where('id', '!=', $slc_registration_id)->get()->first();
         if(isset($existRegistration->id) && $existRegistration->id > 0):
@@ -160,7 +162,22 @@ class SlcRegistrationController extends Controller
         $regData['note'] = $request->note;
         $regData['updated_by'] = auth()->user()->id;
 
-        $slcRegistration = SlcRegistration::where('id', $slc_registration_id)->update($regData);
+        $theRegistration->fill($regData);
+        $changes = $theRegistration->getDirty();
+        $theRegistration->save();
+
+        if($theRegistration->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                StudentArchive::create([
+                    'student_id' => $theRegistration->student_id,
+                    'table' => 'slc_registrations',
+                    'field_name' => $field,
+                    'field_value' => $oldData[$field],
+                    'field_new_value' => $value,
+                    'created_by' => auth()->user()->id
+                ]);
+            endforeach;
+        endif;
 
         return response()->json(['res' => 'Registration data successfully updated.'], 200);
     }

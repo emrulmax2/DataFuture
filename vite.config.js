@@ -76,6 +76,7 @@ export default defineConfig({
                 'resources/js/student-process.js',
                 'resources/js/student-course.js',
                 'resources/js/student-results.js',
+                'resources/js/student-archives.js',
 
                 'resources/js/settings.js',
                 'resources/js/awardingbody.js',

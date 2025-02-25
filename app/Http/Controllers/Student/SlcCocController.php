@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\StudentDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\StudentArchive;
 
 class SlcCocController extends Controller
 {
@@ -73,6 +74,8 @@ class SlcCocController extends Controller
 
         $slc_coc_id = $request->slc_coc_id;
 
+        $cocOldRow = SlcCoc::find($slc_coc_id);
+        
         $slcCoc = SlcCoc::find($slc_coc_id);
         $cocData = [
             'confirmation_date' => (isset($request->confirmation_date) && !empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null),
@@ -82,7 +85,21 @@ class SlcCocController extends Controller
             'updated_by' => auth()->user()->id,
         ];
         $slcCoc->fill($cocData);
+        $changes = $slcCoc->getDirty();
         $slcCoc->save();
+
+        if($slcCoc->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                StudentArchive::create([
+                    'student_id' => $studen_id,
+                    'table' => 'slc_cocs',
+                    'field_name' => $field,
+                    'field_value' => $cocOldRow->$field,
+                    'field_new_value' => $value,
+                    'created_by' => auth()->user()->id
+                ]);
+            endforeach;
+        endif;
 
         if($request->hasFile('document')):
             foreach($request->file('document') as $file):
