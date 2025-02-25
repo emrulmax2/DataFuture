@@ -169,7 +169,7 @@ class DashboardController extends Controller
 
     public function myModulesAttendanceBellow($id = 0, $term_declaration_id, $percentage = 60){
         $id = ($id > 0 ? $id : auth()->user()->id);
-        $exculdeStatus = [22, 27, 31, 33, 14, 17];
+        $exculdeStatus = [22, 27, 31, 33, 14, 17, 30, 36];
 
         $term_plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
