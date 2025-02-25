@@ -59,7 +59,7 @@
                     </select>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
-                    <label for="group_student_status" class="form-label">Student Status</label>
+                    <label for="student_status" class="form-label">Student Status</label>
                     <select id="group_student_status" class="w-full tom-selects" name="params[group_student_status][]" multiple>
                         <option value="">Please Select</option>
                         @if(!empty($allStatuses))
@@ -424,6 +424,5 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/student-group-search-form.js')
     @vite('resources/js/student-attendance-reports.js')
 @endsection
