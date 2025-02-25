@@ -12,6 +12,7 @@ use App\Models\SlcMoneyReceipt;
 use App\Models\SlcRegistration;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Models\StudentArchive;
 
 class SlcAgreementController extends Controller
 {
@@ -58,19 +59,40 @@ class SlcAgreementController extends Controller
         $studen_id = $request->studen_id;
         $slc_agreement_id = $request->slc_agreement_id;
 
+        $agreementOldRow = SlcAgreement::find($slc_agreement_id);
+
         $discount = (isset($request->discount) && $request->discount > 0 ? $request->discount : 0);
         $fees = (isset($request->fees) && $request->fees > 0 ? $request->fees : 0);
-        $agreementData = [];
-        $agreementData['slc_coursecode'] = $request->slc_coursecode;
-        $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
-        $agreementData['date'] = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null);
-        $agreementData['year'] = $request->year;
-        $agreementData['fees'] = $fees;
-        $agreementData['discount'] = $discount;
-        $agreementData['total'] = ($fees - $discount);
-        $agreementData['updated_by'] = auth()->user()->id;
+        
+        $agreement = SlcAgreement::find($slc_agreement_id);
+        $agreementData = [
+            'slc_coursecode' => $request->slc_coursecode,
+            'is_self_funded' => (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0),
+            'date' => (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null),
+            'year' => $request->year,
+            'fees' => $fees,
+            'discount' => $discount,
+            'total' => ($fees - $discount),
+            'note' => (isset($request->note) && !empty($request->note) ? $request->note : ''),
+            'updated_by' => auth()->user()->id
+        ];
+        
+        $agreement->fill($agreementData);
+        $changes = $agreement->getDirty();
+        $agreement->save();
 
-        $slcAgreement = SlcAgreement::where('id', $slc_agreement_id)->update($agreementData);
+        if($agreement->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                StudentArchive::create([
+                    'student_id' => $studen_id,
+                    'table' => 'slc_agreements',
+                    'field_name' => $field,
+                    'field_value' => $agreementOldRow->$field,
+                    'field_new_value' => $value,
+                    'created_by' => auth()->user()->id
+                ]);
+            endforeach;
+        endif;
 
         return response()->json(['res' => 'Student Slc Agreement successfully updated.'], 200);
     }

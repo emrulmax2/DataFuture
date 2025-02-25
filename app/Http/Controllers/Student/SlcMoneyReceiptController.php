@@ -9,6 +9,7 @@ use App\Models\SlcInstallment;
 use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use App\Models\StudentArchive;
 
 class SlcMoneyReceiptController extends Controller
 {
@@ -66,10 +67,13 @@ class SlcMoneyReceiptController extends Controller
         $student_id = $request->student_id;
         $id = $request->id;
 
+        $moneyReceiptOldRow = SlcMoneyReceipt::find($id);
+
         $payment_type = $request->payment_type;
         $invoice_no = $request->invoice_no;
         $invoice_no = ($payment_type == 'Refund' ? 'R-'.str_replace('R-', '', $invoice_no) : $invoice_no);
 
+        $moneyReceiptModel = SlcMoneyReceipt::find($id);
         $mrData = [
             'term_declaration_id' => $request->term_declaration_id,
             'session_term' => $request->session_term,
@@ -82,18 +86,37 @@ class SlcMoneyReceiptController extends Controller
             'updated_by' => auth()->user()->id,
         ];
         
-        $moneyReceipt = SlcMoneyReceipt::where('id', $id)->update($mrData);
-        if($moneyReceipt):
-            $moneyReciptRow = SlcMoneyReceipt::find($id);
+        $moneyReceiptModel->fill($mrData);
+        $changes = $moneyReceiptModel->getDirty();
+        $moneyReceiptModel->save();
+
+        if($moneyReceiptModel->wasChanged() && !empty($changes)):
+            foreach($changes as $field => $value):
+                StudentArchive::create([
+                    'student_id' => $student_id,
+                    'table' => 'slc_money_receipts',
+                    'field_name' => $field,
+                    'field_value' => $moneyReceiptOldRow->$field,
+                    'field_new_value' => $value,
+                    'created_by' => auth()->user()->id
+                ]);
+            endforeach;
+        endif;
+
+        if($moneyReceiptModel->wasChanged()):
             $updateOldInstallments = SlcInstallment::where('slc_money_receipt_id', $id)->update(['slc_money_receipt_id' => null]);
-            $slcInstallment = SlcInstallment::where('student_id', $student_id)->where('student_course_relation_id', $moneyReciptRow->student_course_relation_id)
-                              ->where('slc_agreement_id', $moneyReciptRow->slc_agreement_id)->where('term_declaration_id', $request->term_declaration_id)
-                              ->where('session_term', $request->session_term)->where('amount', $request->amount)
+            $slcInstallment = SlcInstallment::where('student_id', $student_id)
+                              ->where('student_course_relation_id', $moneyReceiptModel->student_course_relation_id)
+                              ->where('slc_agreement_id', $moneyReceiptModel->slc_agreement_id)
+                              ->where('term_declaration_id', $request->term_declaration_id)
+                              ->where('session_term', $request->session_term)
+                              ->where('amount', $request->amount)
                               ->get()->first();
             if(isset($slcInstallment->id) && $slcInstallment->id > 0):
                 SlcInstallment::where('id', $slcInstallment->id)->update(['slc_money_receipt_id' => $id]);
             endif;
         endif;
+
         return response()->json(['res' => 'Success'], 200);
     }
 

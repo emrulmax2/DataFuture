@@ -454,6 +454,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Student Archives</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['view_student_archives']) && $priv['student_live_portal']['view_student_archives'] == 1 ? 'checked' : '') }} id="student_portal_archives" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][view_student_archives]">
+                                <label class="form-check-label ml-4" for="student_portal_archives">View</label>
+                            </div>  
+                        </div>
+                    </div>
                     
                 </div>
             </div>
