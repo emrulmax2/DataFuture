@@ -24,6 +24,7 @@
                             @endif
                         </select>
                     </div>
+                    <a href="{{ route('programme.dashboard.tutors.export', [$termDeclaration->id, $selected_course]) }}" class="btn btn-success text-white ml-1 py-0 h-[36px]"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i>Export XL</a>
                 </div>
             </div>
 
@@ -37,6 +38,7 @@
                             <th class="text-center whitespace-nowrap uppercase">Load</th>
                             <th class="text-center whitespace-nowrap uppercase">No of Module</th>
                             <th class="text-left whitespace-nowrap uppercase">Attendance Rate</th>
+                            <th class="text-left whitespace-nowrap uppercase">Exp. Submission</th>
                             <th class="text-left whitespace-nowrap uppercase">Submission Rate</th>
                         </tr>
                     </thead>
@@ -104,6 +106,7 @@
                                             endif;
                                         @endphp
                                     </td>
+                                    <td>{{ (isset($tut->expected_submission) && $tut->expected_submission > 0 ? $tut->expected_submission : '0') }}</td>
                                     <td class="text-left">
                                         0.0%
                                     </td>

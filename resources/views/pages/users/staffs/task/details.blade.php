@@ -16,6 +16,10 @@
         <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
             <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
                 <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">REG/REF</label>
+                    <input id="reg_or_ref" name="reg_or_ref" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Reg No or Ref No">
+                </div>
+                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                     <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                     <select name="status" id="status" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0">
                         <option value="Pending">Pending</option>

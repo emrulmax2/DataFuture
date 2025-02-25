@@ -10,6 +10,7 @@ import TomSelect from "tom-select";
 var taskAssignedStudentTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
+        let reg_or_ref = $("#reg_or_ref").val() != "" ? $("#reg_or_ref").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let courses = $("#courses").val() != "" ? $("#courses").val() : "";
         let task_id = $("#taskAssignedStudentTable").attr('data-taskid');
@@ -24,7 +25,7 @@ var taskAssignedStudentTable = (function () {
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
             ajaxURL: route("task.manager.list"),
-            ajaxParams: { status : status, task_id : task_id, phase : phase, courses : courses},
+            ajaxParams: { status : status, task_id : task_id, phase : phase, courses : courses, reg_or_ref : reg_or_ref},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -365,6 +366,7 @@ var taskAssignedStudentTable = (function () {
         $("#tabulator-html-filter-reset").on("click", function (event) {
             $("#status").val('Pending');
             $("#courses").val('');
+            $("#reg_or_ref").val('');
 
             filterHTMLFormADM();
         });
