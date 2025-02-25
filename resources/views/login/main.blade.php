@@ -144,7 +144,7 @@
                 <div class="my-auto mx-auto xl:ml-20 bg-white dark:bg-darkmode-600 xl:bg-transparent px-5 sm:px-8 py-8 xl:p-0 rounded-md shadow-md xl:shadow-none w-full sm:w-3/4 lg:w-2/4 xl:w-auto">
                     <h2 class="intro-x font-bold text-2xl xl:text-3xl text-center ">Login</h2>
                     <div class="intro-x mt-2 text-slate-400 xl:hidden text-center">A few more clicks to sign in to your account. Manage all your accounts in one place</div>
-                    
+                    @if($env != "production") 
                         <div class="intro-x mt-8">
                             <form id="login-form">
                                 <input id="email" type="text" class="intro-x login__input form-control py-3 px-4 block" placeholder="Email" value="midone@left4code.com">
@@ -168,6 +168,7 @@
                         <div class="intro-x mt-4 text-center font-bold text-1xl">
                             OR
                         </div>
+                    @endif
                     <div class="flex items-center justify-center mt-5 intro-x  xl:mt-8 ">
                         <a href="{{ route('redirect.google') }}">
                             <button class="gsi-material-button" style="width:400px">
