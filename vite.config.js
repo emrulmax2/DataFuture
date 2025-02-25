@@ -370,6 +370,8 @@ export default defineConfig({
                 'resources/js/agent-management-remittance.js',
                 'resources/js/agent-management-payments.js',
                 'resources/js/agent-management-payment-details.js',
+                'resources/js/student-archives.js',
+
             ],
             refresh: true,
         }),
