@@ -16,6 +16,7 @@ class AttendancePercentageController extends Controller
     public function index($tutor_id, $term_id){
         // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
         // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+        $exculdeStatus = [22, 27, 31, 33, 14, 17];
         $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
                         $q->where('tutor_id', $tutor_id)->orWhere('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
                             $sq->where('personal_tutor_id', $tutor_id);
@@ -34,6 +35,7 @@ class AttendancePercentageController extends Controller
                         ->leftJoin('students as std', 'atn.student_id', 'std.id')
                         ->whereIn('atn.plan_id', $plan_ids)
                         ->whereIn('atn.student_id', $student_ids)
+                        ->whereNotIn('std.status_id', $exculdeStatus)
                         ->groupBy('atn.student_id')
                         ->havingRaw('percentage_withexcuse < 60 OR round(percentage_withexcuse) = 0')->pluck('student_id')->unique()->toArray();
                 if(!empty($attn_student_ids)):
@@ -60,6 +62,7 @@ class AttendancePercentageController extends Controller
         $student_ids = (isset($request->student_ids) && $request->student_ids > 0 ? $request->student_ids : 0);
         $tutor_id = (isset($request->tutor_id) && $request->tutor_id > 0 ? $request->tutor_id : 0);
         $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
+        $exculdeStatus = [22, 27, 31, 33, 14, 17];
 
         // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
         // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
@@ -86,6 +89,7 @@ class AttendancePercentageController extends Controller
                     )
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
                     ->whereIn('atn.plan_id', $term_plan_ids)
+                    ->whereNotIn('std.status_id', $exculdeStatus)
                     ->groupBy('atn.student_id');
         if($student_ids > 0):
             $Query->where('atn.student_id', $student_ids);
