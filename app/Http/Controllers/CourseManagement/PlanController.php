@@ -474,9 +474,43 @@ class PlanController extends Controller
         return response()->json(['plan' => $data], 200);
     }
 
-    public function destroy($id){
-        $plan = Plan::find($id)->delete();
-        return response()->json($plan);
+    public function destroy($id)
+    {
+        // Find the plan by ID
+        $plan = Plan::with(['attendances', 'plansDateList','plansDateList.attendanceInformation'])->find($id);
+    
+        if ($plan) {
+
+
+            // Delete related attendance information
+            if (isset($plan->plansDateList->attendanceInformation)) {
+
+                foreach ($plan->plansDateList->attendanceInformation as $atnInf) {
+                    $atnInf->delete();
+                }
+            }
+    
+            // Delete related attendances
+            if (isset($plan->attendances)) {
+                foreach ($plan->attendances as $attendance) {
+                    $attendance->delete();
+                }
+            }
+    
+            // Delete related plans date lists
+            if (isset($plan->plansDateList)) {
+                foreach ($plan->plansDateList as $plansDateList) {
+                    $plansDateList->delete();
+                }
+            }
+    
+            // Delete the plan itself
+            $plan->delete();
+    
+            return response()->json($plan, 200);
+        } else {
+            return response()->json(['message' => 'Plan not found.'], 404);
+        }
     }
 
     public function restore($id) {

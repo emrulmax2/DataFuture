@@ -84,6 +84,11 @@ class Plan extends Model
     public function dates(){
         return $this->hasMany(PlansDateList::class, 'plan_id', 'id');
     }
+
+    public function plansDateList(){
+        return $this->hasMany(PlansDateList::class, 'plan_id', 'id');
+    }
+    
     public function getPlanDayAttribute($value) {
         $day = '';
         if($this->sat == 1){

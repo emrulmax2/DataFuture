@@ -381,38 +381,43 @@ class StudentProgressMonitoringReportController extends Controller
            $CompleteCount = 0;
            foreach($term_declaration_ids as $term):
                 $i =1;
-                if(isset($resultSets[$term]))
-                foreach($resultSets[$term] as $module => $result):
-                    
-                    if(!isset($result['results']) || $result['results']=="") {
-                        ++$inCompleteCount;
-                    }else{
-                        ++$CompleteCount;
-                    }
-                    $theCollection[$dataCount][0] = "";
-                    $theCollection[$dataCount][1] = "";
-                    $theCollection[$dataCount][2] = "";
-                    $theCollection[$dataCount][3] = "";
-                    $theCollection[$dataCount][4] = ($i>1) ? "":$result['attendance_term'];
-                    $theCollection[$dataCount][5] = $result['group'];
-                    $theCollection[$dataCount][6] = $i++;
-                    $theCollection[$dataCount][7] = $result['module'];
-                    $theCollection[$dataCount][8] = $result['tutor'];
-                    $theCollection[$dataCount][9] = isset($result['results']) ? $result['results'] : "";
-                    $theCollection[$dataCount][10] = $result['attempts'];
-                    $theCollection[$dataCount][11] = "";
-                    $theCollection[$dataCount][12] = "";
-                    $theCollection[$dataCount][13] = "";
-                    $theCollection[$dataCount][14] = "";
-                    $theCollection[$dataCount][15] = "";
-                    $theCollection[$dataCount][16] = "";
-                    $theCollection[$dataCount][17] = "";
-                    $theCollection[$dataCount][18] = "";
-                    $theCollection[$dataCount][19] = "";
-                    $theCollection[$dataCount][20] = "";
-                    $theCollection[$dataCount][21] = "";
-                    $dataCount++;
-                endforeach;
+                if(isset($resultSets[$term])):
+                    $termBaseSingleInCompleteCount[$term] = 0;
+                    $termBaseSingleCompleteCount[$term] = 0;
+                    foreach($resultSets[$term] as $module => $result):
+                        
+                        if(!isset($result['results']) || $result['results']=="") {
+                            ++$inCompleteCount;
+                            ++$termBaseSingleCompleteCount[$term];
+                        }else{
+                            ++$CompleteCount;
+                            ++$termBaseSingleInCompleteCount[$term];
+                        }
+                        $theCollection[$dataCount][0] = "";
+                        $theCollection[$dataCount][1] = "";
+                        $theCollection[$dataCount][2] = "";
+                        $theCollection[$dataCount][3] = "";
+                        $theCollection[$dataCount][4] = ($i>1) ? "":$result['attendance_term'];
+                        $theCollection[$dataCount][5] = $result['group'];
+                        $theCollection[$dataCount][6] = $i++;
+                        $theCollection[$dataCount][7] = $result['module'];
+                        $theCollection[$dataCount][8] = $result['tutor'];
+                        $theCollection[$dataCount][9] = isset($result['results']) ? $result['results'] : "";
+                        $theCollection[$dataCount][10] = $result['attempts'];
+                        $theCollection[$dataCount][11] = "";
+                        $theCollection[$dataCount][12] = "";
+                        $theCollection[$dataCount][13] = "";
+                        $theCollection[$dataCount][14] = "";
+                        $theCollection[$dataCount][15] = "";
+                        $theCollection[$dataCount][16] = "";
+                        $theCollection[$dataCount][17] = "";
+                        $theCollection[$dataCount][18] = "";
+                        $theCollection[$dataCount][19] = "";
+                        $theCollection[$dataCount][20] = "";
+                        $theCollection[$dataCount][21] = "";
+                        $dataCount++;
+                    endforeach;
+                endif;
                 if(count($term_declaration_ids)>1) {
                     $theCollection[$dataCount][0] = "";
                     $theCollection[$dataCount][1] = "";
@@ -425,8 +430,8 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][8] = "";
                     $theCollection[$dataCount][9] = "";
                     $theCollection[$dataCount][10] = "";
-                    $theCollection[$dataCount][11] = $CompleteCount;
-                    $theCollection[$dataCount][12] = $inCompleteCount;
+                    $theCollection[$dataCount][11] = $termBaseSingleCompleteCount[$term];
+                    $theCollection[$dataCount][12] = $termBaseSingleInCompleteCount[$term];
                     $theCollection[$dataCount][13] = "";
                     $theCollection[$dataCount][14] = "";
                     $theCollection[$dataCount][15] = "";
