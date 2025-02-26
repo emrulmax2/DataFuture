@@ -104,10 +104,10 @@
                         <span class="">
                             @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
                                 @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
-                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span>
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span> <br/>
                                 @endif
                                 @if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2))
-                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_2 }}</span>
+                                    <span class="font-medium">{{ $student->contact->termaddress->address_line_2 }}</span> <br/>
                                 @endif
                                 @if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city))
                                     <span class="font-medium">{{ $student->contact->termaddress->city }}</span>,
@@ -119,7 +119,7 @@
                                     <span class="font-medium">{{ $student->contact->termaddress->post_code }}</span>,
                                 @endif
                                 @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
-                                    <br/><span class="font-medium">{{ $student->contact->termaddress->country }}</span>
+                                    <span class="font-medium">{{ $student->contact->termaddress->country }}</span>
                                 @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
