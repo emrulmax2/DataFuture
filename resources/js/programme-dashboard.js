@@ -47,8 +47,9 @@ import tippy, { roundArrow } from "tippy.js";
 
     const proxyClassModalEl = document.getElementById('proxyClassModal')
     proxyClassModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#proxyClassModal .plan_id').val('0');
-        $('#proxyClassModal .plans_date_list_id').val('0');
+        $('#proxyClassModal [name="plan_id"]').val('0');
+        $('#proxyClassModal [name="plans_date_list_id"]').val('0');
+        $('#proxyClassModal [name="org_tutor_id"]').val('0');
         proxyTutorId.clear(true);
     });
 
@@ -350,56 +351,76 @@ import tippy, { roundArrow } from "tippy.js";
         let $theLink = $(this);
         let plan_id = $theLink.attr('data-planid');
         let plan_date_id = $theLink.attr('data-plandateid');
+        let org_tutor_id = $theLink.attr('data-tutorid');
         
         $('#proxyClassModal input[name="plan_id"]').val(plan_id);
         $('#proxyClassModal input[name="plans_date_list_id"]').val(plan_date_id);
+        $('#proxyClassModal input[name="org_tutor_id"]').val(org_tutor_id);
+
     });
 
     $('#proxyClassForm').on('submit', function(e){
         e.preventDefault();
+        let $form = $(this);
         const form = document.getElementById('proxyClassForm');
+
+        let org_tutor_id = $form.find('[name="org_tutor_id"]').val();
+        let proxy_tutor_id = proxyTutorId.getValue();
         
         document.querySelector('#saveReAsignBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#saveReAsignBtn svg").style.cssText ="display: inline-block;";
-
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('programme.dashboard.reassign.class'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
+        if(org_tutor_id == proxy_tutor_id){
             document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
             document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
-            
-            if (response.status == 200){
-                proxyClassModal.hide();
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "WOW!" );
-                    $("#successModal .successModalDesc").html('Class successfully re-assigned to the new tutor.');
-                });     
+            $('#proxyClassModal .modal-content .proxyWarning').remove();
+            $('#proxyClassModal .modal-content').prepend('<div class="alert proxyWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! You cant not assign same tutor as a proxy.</div>').fadeIn();
 
-                setTimeout(function(){
-                    successModal.hide();
-                    window.location.reload();
-                }, 1000);
-            }
-        }).catch(error => {
-            document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
-            document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
-            if (error.response) {
-                if(error.response.status == 422){
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#proxyClassForm .${key}`).addClass('border-danger')
-                        $(`#proxyClassForm  .error-${key}`).html(val)
-                    }
-                }else{
-                    console.log('error');
+            createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
+
+            setTimeout(function(){
+                $('#proxyClassModal .modal-content .proxyWarning').remove();
+            }, 5000)
+        }else{
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('programme.dashboard.reassign.class'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
+                document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
+                
+                if (response.status == 200){
+                    proxyClassModal.hide();
+
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html( "WOW!" );
+                        $("#successModal .successModalDesc").html('Class successfully re-assigned to the new tutor.');
+                    });     
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 1000);
                 }
-            }
-        });
+            }).catch(error => {
+                document.querySelector('#saveReAsignBtn').removeAttribute('disabled');
+                document.querySelector("#saveReAsignBtn svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if(error.response.status == 422){
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#proxyClassForm .${key}`).addClass('border-danger')
+                            $(`#proxyClassForm  .error-${key}`).html(val)
+                        }
+                    }else{
+                        console.log('error');
+                    }
+                }
+            });
+        }
     });
     /* Proxy Class End */
 })();

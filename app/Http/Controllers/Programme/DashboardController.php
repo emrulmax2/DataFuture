@@ -147,7 +147,7 @@ class DashboardController extends Controller
                             $html .= '<div>';
                                 $html .= '<a href="'.route('tutor-dashboard.plan.module.show', $parent_id).'" class="font-medium whitespace-nowrap">'.(isset($pln->plan->creations->module->name) && !empty($pln->plan->creations->module->name) ? $pln->plan->creations->module->name : 'Unknown').(isset($pln->plan->class_type) && !empty($pln->plan->class_type) ? ' - '.$pln->plan->class_type : '').'</a>';
                                 $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.(isset($pln->plan->course->name) && !empty($pln->plan->course->name) ? $pln->plan->course->name : 'Unknown').'</div>';
-                                if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0):
+                                if(isset($pln->plan->tasks) && $pln->plan->tasks->count() > 0 && $pln->plan->class_type == 'Theory'):
                                     $html .= '<div class="flex flex-start pt-1">';
                                     foreach($pln->plan->tasks as $tsk):
                                         $sc_class = 'btn-success';
@@ -177,7 +177,7 @@ class DashboardController extends Controller
                             $html .= '<div class="flex justify-start items-center '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? 'tooltip' : '').'" '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? ' title="'.$pln->proxy_reason.'" ' : '').'>';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
                                     if($pln->proxy_tutor_id > 0):
-                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                        $html .= '<img src="'.(isset($pln->proxy->employee->photo_url) ? $pln->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'LCC').'">';
                                     else:
                                         $html .= '<img src="'.(isset($pln->plan->tutor->employee->photo_url) ? $pln->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->tutor->employee->full_name) ? $pln->plan->tutor->employee->full_name : 'LCC').'">';
                                     endif;
@@ -196,7 +196,7 @@ class DashboardController extends Controller
                             $html .= '<div class="flex justify-start items-center '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? 'tooltip' : '').'" '.(!empty($pln->proxy_reason) && $pln->proxy_tutor_id > 0 ? ' title="'.$pln->proxy_reason.'" ' : '').'>';
                                 $html .= '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block" style="0 0 2.5rem">';
                                     if($pln->proxy_tutor_id > 0):
-                                        $html .= '<img src="'.(isset($pln->plan->proxy->employee->photo_url) ? $pln->plan->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->proxy->employee->full_name) ? $pln->plan->proxy->employee->full_name : 'LCC').'">';
+                                        $html .= '<img src="'.(isset($pln->proxy->employee->photo_url) ? $pln->proxy->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->proxy->employee->full_name) ? $pln->proxy->employee->full_name : 'LCC').'">';
                                     else:
                                         $html .= '<img src="'.(isset($pln->plan->personalTutor->employee->photo_url) ? $pln->plan->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" class="rounded-full shadow" alt="'.(isset($pln->plan->personalTutor->employee->full_name) ? $pln->plan->personalTutor->employee->full_name : 'LCC').'">';
                                     endif;
@@ -237,7 +237,7 @@ class DashboardController extends Controller
                         endif;
                         if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime)) && ($pln->proxy_tutor_id == null || $pln->proxy_tutor_id == 0)):
                             $btnHtml .= '<li>';
-                                $btnHtml .= '<a data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
+                                $btnHtml .= '<a data-tutorid="'.($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : ($pln->plan->personal_tutor_id > 0 ? $pln->plan->personal_tutor_id : 0)).'" data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
                             $btnHtml .= '</li>';
                         endif;
                         if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
@@ -511,6 +511,9 @@ class DashboardController extends Controller
             foreach($tutorPlans as $tp):
                 $plans[$tp->id] = $tp;
                 $plans[$tp->id]['attendances'] = $this->getPlanAttendanceRate($tp->id);
+
+                $assigned = Assign::where('plan_id', $tp->id)->pluck('student_id')->toArray();
+                $plans[$tp->id]['expected_submission'] = (!empty($assigned) ? count($assigned) : 0);
             endforeach;
         endif;
         

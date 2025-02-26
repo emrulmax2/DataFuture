@@ -33,9 +33,10 @@
                         <table class="table table-report sm:mt-2">
                             <thead>
                                 <tr>
-                                    <th class="whitespace-nowrap">PT - Moudel Name</th>
+                                    <th class="whitespace-nowrap">Tutors <span class="pl-[35px]">Moudel Name</span></th>
                                     <th class="whitespace-nowrap">Group</th>
                                     <th class="whitespace-nowrap">Attendance Rate</th>
+                                    <th class="whitespace-nowrap">Exp. Submission</th>
                                     <th class="whitespace-nowrap">Submission Rate</th>
                                     <th class="whitespace-nowrap">Achivement Rate</th>
                                     <th class="whitespace-nowrap">&nbsp;</th>
@@ -49,6 +50,7 @@
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
                                     <td class="font-medium"></td>
+                                    <td class="font-medium"></td>
                                 </tr>
                                 @php 
                                     $P = $O = $L = $E = $M = $H = $OVERALLTOTAL = 0;
@@ -58,9 +60,19 @@
                                         <tr class="intro-x">
                                             <td class="font-medium">
                                                 <div class="block">
-                                                    <div class="w-10 h-10 intro-x image-fit mr-4 inline-block">
-                                                        <img alt="{{ (isset($pln->personalTutor->employee->full_name) ? ' - '.$pln->personalTutor->employee->full_name : '') }}" title="{{ (isset($pln->personalTutor->employee->full_name) ? $pln->personalTutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->personalTutor->employee->photo_url) && !empty($pln->personalTutor->employee->photo_url) ? $pln->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    <div class="mr-4 inline-flex intro-x w-[60px]">
+                                                        <div class="w-10 h-10 image-fit zoom-in z-10 hover:z-30">
+                                                            <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                        </div>
+                                                        @if(isset($pln->tutorial->personal_tutor_id) && $pln->tutorial->personal_tutor_id > 0)
+                                                        <div class="w-10 h-10 image-fit zoom-in -ml-5 z-20 hover:z-30">
+                                                            <img alt="{{ (isset($pln->tutorial->personalTutor->employee->full_name) ? ' - '.$pln->tutorial->personalTutor->employee->full_name : '') }}" title="{{ (isset($pln->tutorial->personalTutor->employee->full_name) ? $pln->tutorial->personalTutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutorial->personalTutor->employee->photo_url) && !empty($pln->tutorial->personalTutor->employee->photo_url) ? $pln->tutorial->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                        </div>
+                                                        @endif
                                                     </div>
+                                                    {{--<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">
+                                                        <img alt="{{ (isset($pln->tutor->employee->full_name) ? ' - '.$pln->tutor->employee->full_name : '') }}" title="{{ (isset($pln->tutor->employee->full_name) ? $pln->tutor->employee->full_name : 'Unknown') }}" class="rounded-full shadow tooltip" src="{{ (isset($pln->tutor->employee->photo_url) && !empty($pln->tutor->employee->photo_url) ? $pln->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                                    </div>--}}
                                                     <div class="inline-block relative" style="top: -5px;">
                                                         <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->creations->module->name) ? $pln->creations->module->name : '') }}</div>
                                                         <div class="font-medium whitespace-nowrap uppercase">{{ (isset($pln->class_type) ? $pln->class_type : '') }}</div>
@@ -105,7 +117,8 @@
                                                     endif;
                                                 @endphp
                                             </td>
-                                            <td></td>
+                                            <td>{{ (isset($pln->expected_submission) && $pln->expected_submission > 0 ? $pln->expected_submission : 0) }}</td>
+                                            <td>0%</td>
                                             <td></td>
                                             <td>
                                                 <a href="{{ route('tutor-dashboard.plan.module.show', $pln->id) }}" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></a>

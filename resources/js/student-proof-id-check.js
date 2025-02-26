@@ -29,8 +29,7 @@ var studentProofOfIdCheckTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
-                    minWidth: 60,
+                    minWidth: 80,
                 },
                 {
                     title: "Proof Type",
@@ -42,13 +41,13 @@ var studentProofOfIdCheckTable = (function () {
                     title: "Proof ID",
                     field: "proof_id",
                     headerHozAlign: "left",
-                    minWidth: 250,
+                    minWidth: 120,
                 },
                 {
                     title: "Proof Expire Date",
                     field: "proof_expiredate",
                     headerHozAlign: "left",
-                    minWidth: 350,
+                    minWidth: 180,
                     formatter(cell, formatterParams) {
                         return `<span class="whitespace-nowrap">${cell.getData().proof_expiredate}</span>`
                     }
@@ -59,9 +58,8 @@ var studentProofOfIdCheckTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
                     download: false,
-                    minWidth: 100,
+                    minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
