@@ -282,7 +282,7 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="proxy_tutor_id" class="form-label">Title <span class="text-danger">*</span></label>
+                            <label for="proxy_tutor_id" class="form-label">Tutor <span class="text-danger">*</span></label>
                             <select id="proxy_tutor_id" name="proxy_tutor_id" class="tom-selects w-full">
                                 <option value="">Please Select</option>
                                 @if($tutors->count() > 0)
@@ -318,6 +318,7 @@
                         </button>
                         <input type="hidden" name="plan_id" value="0" />
                         <input type="hidden" name="plans_date_list_id" value="0" />
+                        <input type="hidden" name="org_tutor_id" value="0" />
                     </div>
                 </div>
             </form>

@@ -1,6 +1,6 @@
 <div class="intro-y flex flex-col md:flex-row items-center mt-1 md:mt-8">
     <div class="flex flex-row justify-center md:justify-normal items-center gap-2 flex-wrap mb-4 md:mb-0 w-full">
-        <h2 class="text-lg font-medium text-center md:text-left">Profile Review of</h2>
+        <h2 class="text-lg font-medium text-center md:text-left">Profile of</h2>
         <u><strong class="text-lg">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u>
     </div>
 
@@ -101,7 +101,7 @@
                 <div class="flex flex-col justify-center items-start md:items-center lg:items-start mt-4">
                     <div class="truncate sm:whitespace-normal flex items-start">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                        <span class="flex flex-wrap">
+                        <span class="">
                             @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
                                 @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
                                     <span class="font-medium">{{ $student->contact->termaddress->address_line_1 }}</span>

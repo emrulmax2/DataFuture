@@ -29,20 +29,25 @@ var studentEducationQualTable = (function () {
                 {
                     title: "#SL",
                     field: "sl",
-                    width: "110",
-                    minWidth: 50,
+                    minWidth: 80,
                 },
                 {
                     title: "Awarding Body",
                     field: "awarding_body",
                     headerHozAlign: "left",
-                    minWidth: 200,
+                    minWidth: 150,
+                    formatter(cell, formatterParams) {
+                        return `<div class="whitespace-normal">${cell.getData().awarding_body}</div>`;
+                    }
                 },
                 {
                     title: "Highest Academic Qualification",
                     field: "highest_academic",
                     headerHozAlign: "left",
                     minWidth: 200,
+                    formatter(cell, formatterParams) {
+                        return `<div class="whitespace-normal">${cell.getData().highest_academic}</div>`;
+                    }
                 },
                 {
                     title: "Subjects",
@@ -71,7 +76,7 @@ var studentEducationQualTable = (function () {
                     title: "HIghest Qualification Entry",
                     field: "highest_qualification_on_entry_id",
                     headerHozAlign: "left",
-                    minWidth: 100,
+                    minWidth: 200,
                     formatter(cell, formatterParams) {
                         return `<div class="whitespace-normal">${cell.getData().highest_qualification_on_entry_id}</div>`;
                     },
@@ -83,7 +88,7 @@ var studentEducationQualTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    minWidth: 100,
+                    minWidth: 120,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
