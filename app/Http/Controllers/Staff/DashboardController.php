@@ -581,8 +581,9 @@ class DashboardController extends Controller
 
         return PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)
                 ->where('proxy_tutor_id', $proxyTutorId)->orderBy('id', 'ASC')->get()->sortBy(function($classes, $key) {
-                    return $classes->plan->start_time;
-                });
+                    return isset($classes->plan->start_time) ? $classes->plan->start_time : '00:00:00';
+        });
+                
     }
 
     public function startProxyClass(Request $request){
