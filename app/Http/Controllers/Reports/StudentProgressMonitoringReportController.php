@@ -388,10 +388,10 @@ class StudentProgressMonitoringReportController extends Controller
                         
                         if(!isset($result['results']) || $result['results']=="") {
                             ++$inCompleteCount;
-                            ++$termBaseSingleCompleteCount[$term];
+                            ++$termBaseSingleInCompleteCount[$term];
                         }else{
                             ++$CompleteCount;
-                            ++$termBaseSingleInCompleteCount[$term];
+                            ++$termBaseSingleCompleteCount[$term];
                         }
                         $theCollection[$dataCount][0] = "";
                         $theCollection[$dataCount][1] = "";
