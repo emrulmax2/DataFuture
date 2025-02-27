@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
+use App\Models\Country;
+use App\Models\Employee;
 use App\Models\Status;
 use App\Models\StudentArchive;
 use App\Models\StudentEmail;
+use App\Models\TermTimeAccommodationType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -44,15 +48,38 @@ class ArchiveController extends Controller
             $i = 1;
             foreach($Query as $list):
                 
-                if($list->field_name=="status_id") {
+                switch($list->field_name) {
+                        case 'status_id':
+                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Status::where('id', $list->field_value)->first()->name : '');
+                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Status::where('id', $list->field_new_value)->first()->name : '');
+                        break;
+                        case 'updated_by':
+                            isset(Employee::where('user_id', $list->field_value)->first()->full_name) ? $old_value = Employee::where('user_id', $list->field_value)->first()->full_name : '';
+                            isset(Employee::where('user_id', $list->field_new_value)->first()->full_name) ? $new_value = Employee::where('user_id', $list->field_new_value)->first()->full_name : '';
+                           
+                        break;
+                        case 'created_by':
+                            isset(Employee::where('user_id', $list->field_value)->first()->full_name) ? $old_value = Employee::where('user_id', $list->field_value)->first()->full_name : '';
+                            isset(Employee::where('user_id', $list->field_new_value)->first()->full_name) ? $new_value = Employee::where('user_id', $list->field_new_value)->first()->full_name : '';
+                        break;
+                        case 'term_time_accommodation_type_id':
+                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? TermTimeAccommodationType::where('id', $list->field_value)->first()->name : '');
+                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? TermTimeAccommodationType::where('id', $list->field_new_value)->first()->name : '');
+                        break;
 
-                    $old_value = (isset($list->field_value) && !empty($list->field_value) ? Status::where('id', $list->field_value)->first()->name : '');
-                    $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Status::where('id', $list->field_new_value)->first()->name : '');
-                } else {
-                    $old_value = $list->field_value;
-                    $new_value = $list->field_new_value;
-                }
-
+                        case 'permanent_address_id':
+                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Address::where('id', $list->field_value)->first()->full_address : '');
+                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Address::where('id', $list->field_new_value)->first()->full_address : '');
+                        break;
+                        case 'permanent_country_id':
+                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Country::where('id', $list->field_value)->first()->name : '');
+                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Country::where('id', $list->field_new_value)->first()->name : '');
+                        break;
+                    default:
+                            $old_value = $list->field_value;
+                            $new_value = $list->field_new_value;
+                        break;                    
+                        }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
