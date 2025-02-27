@@ -47,45 +47,13 @@ class ArchiveController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                
-                switch($list->field_name) {
-                        case 'status_id':
-                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Status::where('id', $list->field_value)->first()->name : '');
-                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Status::where('id', $list->field_new_value)->first()->name : '');
-                        break;
-                        case 'updated_by':
-                            isset(Employee::where('user_id', $list->field_value)->first()->full_name) ? $old_value = Employee::where('user_id', $list->field_value)->first()->full_name : '';
-                            isset(Employee::where('user_id', $list->field_new_value)->first()->full_name) ? $new_value = Employee::where('user_id', $list->field_new_value)->first()->full_name : '';
-                           
-                        break;
-                        case 'created_by':
-                            isset(Employee::where('user_id', $list->field_value)->first()->full_name) ? $old_value = Employee::where('user_id', $list->field_value)->first()->full_name : '';
-                            isset(Employee::where('user_id', $list->field_new_value)->first()->full_name) ? $new_value = Employee::where('user_id', $list->field_new_value)->first()->full_name : '';
-                        break;
-                        case 'term_time_accommodation_type_id':
-                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? TermTimeAccommodationType::where('id', $list->field_value)->first()->name : '');
-                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? TermTimeAccommodationType::where('id', $list->field_new_value)->first()->name : '');
-                        break;
-
-                        case 'permanent_address_id':
-                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Address::where('id', $list->field_value)->first()->full_address : '');
-                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Address::where('id', $list->field_new_value)->first()->full_address : '');
-                        break;
-                        case 'permanent_country_id':
-                            $old_value = (isset($list->field_value) && !empty($list->field_value) ? Country::where('id', $list->field_value)->first()->name : '');
-                            $new_value = (isset($list->field_new_value) && !empty($list->field_new_value) ? Country::where('id', $list->field_new_value)->first()->name : '');
-                        break;
-                    default:
-                            $old_value = $list->field_value;
-                            $new_value = $list->field_new_value;
-                        break;                    
-                        }
+                $values = $this->getArchiveFieldValues($list->field_name, $list->field_value, $list->field_new_value);
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'field_name' => $list->table . ' : ' . $list->field_name,
-                    'old_value' => $old_value,
-                    'new_value' => $new_value,
+                    'old_value' => (isset($values['field_value']) ? $values['field_value'] : ''),
+                    'new_value' => (isset($values['field_new_value']) ? $values['field_new_value'] : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
@@ -97,5 +65,39 @@ class ArchiveController extends Controller
     }
 
 
+    public function getArchiveFieldValues($fieldName, $fieldValue = null, $fieldNewValue = null){
+        switch($fieldName):
+            case 'status_id':
+                $old_value = (!empty($fieldValue) ? Status::where('id', $fieldValue)->first()->name : '');
+                $new_value = (!empty($fieldNewValue) ? Status::where('id', $fieldNewValue)->first()->name : '');
+                break;
+            case 'updated_by':
+                $old_value = isset(Employee::where('user_id', $fieldValue)->first()->full_name) ? Employee::where('user_id', $fieldValue)->first()->full_name : '';
+                $new_value = isset(Employee::where('user_id', $fieldNewValue)->first()->full_name) ? Employee::where('user_id', $fieldNewValue)->first()->full_name : '';
+                break;
+            case 'created_by':
+                $old_value = isset(Employee::where('user_id', $fieldValue)->first()->full_name) ? Employee::where('user_id', $fieldValue)->first()->full_name : '';
+                $new_value = isset(Employee::where('user_id', $fieldNewValue)->first()->full_name) ? Employee::where('user_id', $fieldNewValue)->first()->full_name : '';
+                break;
+            case 'term_time_accommodation_type_id':
+                $old_value = (isset($fieldValue) && !empty($fieldValue) ? TermTimeAccommodationType::where('id', $fieldValue)->first()->name : '');
+                $new_value = (!empty($fieldNewValue) ? TermTimeAccommodationType::where('id', $fieldNewValue)->first()->name : '');
+                break;
 
+            case 'permanent_address_id':
+                $old_value = (isset($fieldValue) && !empty($fieldValue) ? Address::where('id', $fieldValue)->first()->full_address : '');
+                $new_value = (!empty($fieldNewValue) ? Address::where('id', $fieldNewValue)->first()->full_address : '');
+                break;
+            case 'permanent_country_id':
+                $old_value = (isset($fieldValue) && !empty($fieldValue) ? Country::where('id', $fieldValue)->first()->name : '');
+                $new_value = (!empty($fieldNewValue) ? Country::where('id', $fieldNewValue)->first()->name : '');
+                break;
+            default:
+                $old_value = $fieldValue;
+                $new_value = $fieldNewValue;
+                break; 
+        endswitch;
+
+        return ['field_value' => $old_value, 'field_new_value' => $new_value];
+    }
 }
