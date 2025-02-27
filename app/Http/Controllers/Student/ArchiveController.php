@@ -92,6 +92,11 @@ class ArchiveController extends Controller
                 $old_value = (isset($fieldValue) && !empty($fieldValue) ? Country::where('id', $fieldValue)->first()->name : '');
                 $new_value = (!empty($fieldNewValue) ? Country::where('id', $fieldNewValue)->first()->name : '');
                 break;
+
+            case 'password':
+                $old_value = '********';
+                $new_value = '********';
+                break;
             default:
                 $old_value = $fieldValue;
                 $new_value = $fieldNewValue;
