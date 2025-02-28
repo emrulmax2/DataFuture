@@ -249,27 +249,27 @@ class StudentApplicationPrintController extends Controller
                 endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $applicant->course->student_loan.'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $student->crel->propose->student_loan.'</td>';
                 $PDFHTML .= '</tr>';
-                if( $applicant->course->student_loan == 'Student Loan'):
+                if( $student->crel->propose->student_loan == 'Student Loan'):
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->student_finance_england) &&  $applicant->coursee->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($student->crel->propose->student_finance_england) &&  $student->crel->propose->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                     $PDFHTML .= '</tr>';
-                    if(isset( $applicant->course->student_finance_england) &&  $applicant->course->student_finance_england == 1):
+                    if(isset( $student->crel->propose->student_finance_england) &&  $student->crel->propose->student_finance_england == 1):
                         $PDFHTML .= '<tr>';
                             $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you already in receipt of funds?</td>';
-                            $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->fund_receipt) &&  $applicant->course->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                            $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->propose->fund_receipt) &&  $student->crel->propose->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                         $PDFHTML .= '</tr>';
                     endif;
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->applied_received_fund) &&  $applicant->course->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->propose->applied_received_fund) &&  $student->crel->propose->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                     $PDFHTML .= '</tr>';
-                elseif( $applicant->course->student_loan == 'Others'):
+                elseif( $student->crel->propose->student_loan == 'Others'):
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Other Funding</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->other_funding) &&  $applicant->course->other_funding != '' ?  $applicant->course->other_funding : '').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->propose->other_funding) &&  $student->crel->propose->other_funding != '' ?  $student->crel->propose->other_funding : '').'</td>';
                     $PDFHTML .= '</tr>';
                 endif;
                 if(isset( $student->crel->propose->has_evening_and_weekend) &&  $student->crel->propose->has_evening_and_weekend == 1):
