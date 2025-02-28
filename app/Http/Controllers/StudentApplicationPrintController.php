@@ -86,8 +86,8 @@ class StudentApplicationPrintController extends Controller
                             $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
                         $PDFHTML .= '</td>';
                         $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
-                            $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$student->title->name.' '.$student->first_name.' '.$student->last_name.'" src="'.(isset($student->photo_url) && !empty($student->photo_url) ? $student->photo_url : asset('build/assets/images/avater.png')).'">';
-                            $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($student->application_no) ? $student->application_no : '').'</span>';
+                            $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name.'" src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/'.$applicant->id.'/'.$applicant->photo) ? url('storage/applicants/'.$applicant->id.'/'.$applicant->photo) : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                            $PDFHTML .= '<span style="font-size: 10px; padding: 3px 0 0; font-weight: 700; display: block;">'.(!empty($applicant->application_no) ? $applicant->application_no : '').'</span>';
                         $PDFHTML .= '</td>';
                     $PDFHTML .= '</tr>';
                 $PDFHTML .= '</table>';
