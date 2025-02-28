@@ -83,7 +83,7 @@ class StudentApplicationPrintController extends Controller
                 $PDFHTML .= '<table>';
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td>';
-                            $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://sms.lcc.ac.uk/storage/company_logo.png"/>';
+                            $PDFHTML .= '<img style="height: 60px; width: atuo;" src="https://datafuture2.lcc.ac.uk/limon/LCC-Logo-01-croped.png"/>';
                         $PDFHTML .= '</td>';
                         $PDFHTML .= '<td class="text-right">';//'https://datafuture2.lcc.ac.uk/limon/avatar.png'
                             $PDFHTML .= '<img style="height: 60px; width: auto;" alt="'.$student->title->name.' '.$student->first_name.' '.$student->last_name.'" src="'.(isset($student->photo_url) && !empty($student->photo_url) ? $student->photo_url : asset('build/assets/images/avater.png')).'">';
@@ -154,7 +154,7 @@ class StudentApplicationPrintController extends Controller
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel">Email</td>';
-                    $PDFHTML .= '<td class="theValue">'.$student->users->email.'</td>';
+                    $PDFHTML .= '<td class="theValue">'.$applicant->email.'</td>';
                     $PDFHTML .= '<td class="theLabel">Home Phone</td>';
                     $PDFHTML .= '<td class="theValue">'.$student->contact->home.'</td>';
                 $PDFHTML .= '</tr>';
@@ -163,23 +163,24 @@ class StudentApplicationPrintController extends Controller
                     $PDFHTML .= '<td class="theValue">'.$student->contact->mobile.'</td>';
                     $PDFHTML .= '<td class="theLabel">Address</td>';
                     $PDFHTML .= '<td class="theValue">';
-                        if(isset($student->contact->address_line_1) && !empty($student->contact->address_line_1)):
-                            $PDFHTML .= $student->contact->address_line_1.'<br/>';
+
+                        if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                            $PDFHTML .= $student->contact->termaddress->address_line_1.'<br/>';
                         endif;
-                        if(isset($student->contact->address_line_2) && !empty($student->contact->address_line_2)):
-                            $PDFHTML .= $student->contact->address_line_2.'<br/>';
+                        if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                            $PDFHTML .= $student->contact->termaddress->address_line_2.'<br/>';
                         endif;
-                        if(isset($student->contact->city) && !empty($student->contact->city)):
-                            $PDFHTML .= $student->contact->city.', ';
+                        if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                            $PDFHTML .= $student->contact->termaddress->city.', ';
                         endif;
-                        if(isset($student->contact->state) && !empty($student->contact->state)):
-                            $PDFHTML .= $student->contact->state.', <br/>';
+                        if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                            $PDFHTML .= $student->contact->termaddress->state.', <br/>';
                         endif;
-                        if(isset($student->contact->post_code) && !empty($student->contact->post_code)):
-                            $PDFHTML .= $student->contact->post_code.',';
+                        if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                            $PDFHTML .= $student->contact->termaddress->post_code.',';
                         endif;
-                        if(isset($student->contact->country) && !empty($student->contact->country)):
-                            $PDFHTML .= $student->contact->country;
+                        if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                            $PDFHTML .= $student->contact->termaddress->country;
                         endif;
                     $PDFHTML .= '</td>';
                 $PDFHTML .= '</tr>';
@@ -204,23 +205,23 @@ class StudentApplicationPrintController extends Controller
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel">Address</td>';
                     $PDFHTML .= '<td class="theValue">';
-                        if(isset($student->kin->address_line_1) && !empty($student->kin->address_line_1)):
-                            $PDFHTML .= $student->kin->address_line_1.'<br/>';
+                        if(isset($student->kin->address->address_line_1) && !empty($student->kin->address->address_line_1)):
+                            $PDFHTML .= $student->kin->address->address_line_1.'<br/>';
                         endif;
-                        if(isset($student->kin->address_line_2) && !empty($student->kin->address_line_2)):
-                            $PDFHTML .= $student->kin->address_line_2.'<br/>';
+                        if(isset($student->kin->address->address_line_2) && !empty($student->kin->address->address_line_2)):
+                            $PDFHTML .= $student->kin->address->address_line_2.'<br/>';
                         endif;
-                        if(isset($student->kin->city) && !empty($student->kin->city)):
-                            $PDFHTML .= $student->kin->city.', ';
+                        if(isset($student->kin->address->city) && !empty($student->kin->address->city)):
+                            $PDFHTML .= $student->kin->address->city.', ';
                         endif;
-                        if(isset($student->kin->state) && !empty($student->kin->state)):
-                            $PDFHTML .= $student->kin->state.', <br/>';
+                        if(isset($student->kin->address->state) && !empty($student->kin->address->state)):
+                            $PDFHTML .= $student->kin->address->state.', <br/>';
                         endif;
-                        if(isset($student->kin->post_code) && !empty($student->kin->post_code)):
-                            $PDFHTML .= $student->kin->post_code.',';
+                        if(isset($student->kin->address->post_code) && !empty($student->kin->address->post_code)):
+                            $PDFHTML .= $student->kin->address->post_code.',';
                         endif;
-                        if(isset($student->kin->country) && !empty($student->kin->country)):
-                            $PDFHTML .= $student->kin->country;
+                        if(isset($student->kin->address->country) && !empty($student->kin->address->country)):
+                            $PDFHTML .= $student->kin->address->country;
                         endif;
                     $PDFHTML .= '</td>';
                     $PDFHTML .= '<td class="theLabel"></td>';
@@ -240,46 +241,46 @@ class StudentApplicationPrintController extends Controller
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which course do you propose to take?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $student->crel->creation->course->name.'</td>';
                 $PDFHTML .= '</tr>';
-                if(isset( $student->crel->creation->course->venue) && !empty( $student->crel->creation->course->venue)):
+                if(isset( $student->crel->creation->venue) && !empty( $student->crel->creation->venue)):
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.  $student->crel->creation->course->venue->name.'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.  $student->crel->creation->venue->name.'</td>';
                 $PDFHTML .= '</tr>';
                 endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $student->crel->creation->course->student_loan.'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $applicant->course->student_loan.'</td>';
                 $PDFHTML .= '</tr>';
-                if( $student->crel->creation->course->student_loan == 'Student Loan'):
+                if( $applicant->course->student_loan == 'Student Loan'):
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">If your funding is through Student Finance England, please choose from the following. Have you applied for the proposed course?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($student->crel->creation->course->student_finance_england) &&  $student->crel->creation->coursee->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($applicant->course->student_finance_england) &&  $applicant->coursee->student_finance_england == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                     $PDFHTML .= '</tr>';
-                    if(isset( $student->crel->creation->course->student_finance_england) &&  $student->crel->creation->course->student_finance_england == 1):
+                    if(isset( $applicant->course->student_finance_england) &&  $applicant->course->student_finance_england == 1):
                         $PDFHTML .= '<tr>';
                             $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you already in receipt of funds?</td>';
-                            $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->creation->course->fund_receipt) &&  $student->crel->creation->course->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                            $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->fund_receipt) &&  $applicant->course->fund_receipt == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                         $PDFHTML .= '</tr>';
                     endif;
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Have you ever apply/Received any fund/Loan from SLC/government Loan for any other programme/institution?</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->creation->course->applied_received_fund) &&  $student->crel->creation->course->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->applied_received_fund) &&  $applicant->course->applied_received_fund == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                     $PDFHTML .= '</tr>';
-                elseif( $student->crel->creation->course->student_loan == 'Others'):
+                elseif( $applicant->course->student_loan == 'Others'):
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Other Funding</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->creation->course->other_funding) &&  $student->crel->creation->course->other_funding != '' ?  $student->crel->creation->course->other_funding : '').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $applicant->course->other_funding) &&  $applicant->course->other_funding != '' ?  $applicant->course->other_funding : '').'</td>';
                     $PDFHTML .= '</tr>';
                 endif;
-                if(isset( $student->crel->creation->course->creation->has_evening_and_weekend) &&  $student->crel->creation->course->creation->has_evening_and_weekend == 1):
+                if(isset( $student->crel->propose->has_evening_and_weekend) &&  $student->crel->propose->has_evening_and_weekend == 1):
                     $PDFHTML .= '<tr>';
                         $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Are you applying for evening and weekend classes (Full Time)</td>';
-                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->creation->course->full_time) &&  $student->crel->creation->course->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset( $student->crel->propose->full_time) &&  $student->crel->propose->full_time == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
                     $PDFHTML .= '</tr>';
                 endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Fee Eligibility</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($student->feeeligibility->elegibility->name) && isset($student->feeeligibility->fee_eligibility_id) && $student->feeeligibility->fee_eligibility_id > 0 ? $student->feeeligibility->elegibility->name : '---').'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.(isset($student->crel->feeeligibility->elegibility->name) && isset($student->crel->feeeligibility->fee_eligibility_id) && $student->crel->feeeligibility->fee_eligibility_id > 0 ? $student->crel->feeeligibility->elegibility->name : '---').'</td>';
                 $PDFHTML .= '</tr>';
 
                 /* Educational Qualification */
@@ -344,12 +345,12 @@ class StudentApplicationPrintController extends Controller
                             if(isset($student->employment) && $student->employment->count() > 0):
                                 foreach($student->employment as $empt):
                                     $address = '';
-                                    $address .= $empt->address_line_1.'<br/>';
-                                    $address .= ($empt->address_line_2 != '' ? $empt->address_line_2.'<br/>' : '');
-                                    $address .= ($empt->city != '' ? $empt->city.', ' : '');
-                                    $address .= ($empt->state != '' ? $empt->state.', ' : '');
-                                    $address .= ($empt->post_code != '' ? $empt->post_code.', ' : '');
-                                    $address .= ($empt->country != '' ? '<br/>'.$empt->country : '');
+                                    $address .= $empt->address->address_line_1.'<br/>';
+                                    $address .= ($empt->address->address_line_2 != '' ? $empt->address->address_line_2.'<br/>' : '');
+                                    $address .= ($empt->address->city != '' ? $empt->address->city.', ' : '');
+                                    $address .= ($empt->address->state != '' ? $empt->address->state.', ' : '');
+                                    $address .= ($empt->address->post_code != '' ? $empt->address->post_code.', ' : '');
+                                    $address .= ($empt->address->country != '' ? '<br/>'.$empt->address->country : '');
 
                                     $PDFHTML .= '<div style="border: 1px solid rgb(226, 232, 240); padding: 15px 0 0; display: block;" class="mb-10">';
                                         $PDFHTML .= '<table>';
