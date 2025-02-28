@@ -154,7 +154,7 @@ class StudentApplicationPrintController extends Controller
                 $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel">Email</td>';
-                    $PDFHTML .= '<td class="theValue">'.$applicant->email.'</td>';
+                    $PDFHTML .= '<td class="theValue">'.$student->contact->personal_email.'</td>';
                     $PDFHTML .= '<td class="theLabel">Home Phone</td>';
                     $PDFHTML .= '<td class="theValue">'.$student->contact->home.'</td>';
                 $PDFHTML .= '</tr>';
