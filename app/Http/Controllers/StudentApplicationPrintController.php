@@ -255,12 +255,12 @@ class StudentApplicationPrintController extends Controller
                 $PDFHTML .= '</tr>';
 
 
-                if(isset( $venue) && !empty( $venue)):
+                //if(isset( $venue) && !empty( $venue)):
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.  $venue.'</td>';
                 $PDFHTML .= '</tr>';
-                endif;
+                //endif;
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">How are you funding your education at London Churchill College?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $student->crel->propose->student_loan.'</td>';
