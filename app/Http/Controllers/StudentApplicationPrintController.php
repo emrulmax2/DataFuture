@@ -14,7 +14,9 @@ use App\Models\ApplicantTask;
 use App\Models\ApplicantEmail;
 use App\Models\ComonSmtp;
 use App\Models\ApplicantSms;
+use App\Models\CourseCreationVenue;
 use App\Models\Student;
+use App\Models\StudentProposedCourse;
 use PDF;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,6 +30,16 @@ class StudentApplicationPrintController extends Controller
         $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
         $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
         $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms']);
+
+        $courseRelationCreation = $student->crel->creation;
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id',$courseRelationCreation->id)
+                        ->where('student_course_relation_id',$student->crel->id)
+                        ->get()
+                        ->first();
+
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
+        $venue = isset($CourseCreationVenue->venue)? $CourseCreationVenue->venue->name : '';
 
         $PDFHTML = '';
         $PDFHTML .= '<html>';
@@ -241,10 +253,12 @@ class StudentApplicationPrintController extends Controller
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which course do you propose to take?</td>';
                     $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'. $student->crel->creation->course->name.'</td>';
                 $PDFHTML .= '</tr>';
-                if(isset( $student->crel->creation->venue) && !empty( $student->crel->creation->venue)):
+
+
+                if(isset( $venue) && !empty( $venue)):
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td class="theLabel" style="width: 50%;" colspan="2">Which venue do you want to study?</td>';
-                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.  $student->crel->creation->venue->name.'</td>';
+                    $PDFHTML .= '<td class="theValue" style="width: 50%;" colspan="2">'.  $venue.'</td>';
                 $PDFHTML .= '</tr>';
                 endif;
                 $PDFHTML .= '<tr>';
