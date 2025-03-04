@@ -97,6 +97,7 @@ class ArchiveController extends Controller
                 $old_value = '********';
                 $new_value = '********';
                 break;
+                
             default:
                 $old_value = $fieldValue;
                 $new_value = $fieldNewValue;
