@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Storage;
 use App\Traits\GenerateStudentLetterTrait;
 
 use App\Exports\ArrayCollectionExport;
+use App\Models\Grade;
+use App\Models\ModuleCreation;
+use App\Models\Plan;
+use App\Models\Result;
 use Maatwebsite\Excel\Facades\Excel;
 
 class LetterController extends Controller
@@ -292,5 +296,97 @@ class LetterController extends Controller
         endforeach;
 
         return (!empty($lists) && count($lists) ? $lists : false);
+    }
+
+    public function letterTest(){
+        $student_id = 16978;
+        $grades = 'W,P,M,D,R,C,U,A';
+        $student = Student::find($student_id);
+        $grades = (!empty($grades) ? explode(',', str_replace(' ', '', $grades)) : []);
+
+        $html = '';
+        $aloverCount = [];
+        if(!empty($grades)):
+            foreach($grades as $grade):
+                $aloverCount[$grade] = 0;
+            endforeach;
+            $grade_ids = Grade::whereIn('code', $grades)->pluck('id')->unique()->toArray();
+            $studentCourseCreationId = $student->activeCR->course_creation_id;
+            $plan_ids = Result::where('student_id', $student->id)->whereIn('grade_id', $grade_ids)->whereHas('plan', function($q) use($studentCourseCreationId){
+                            $q->where('course_creation_id', '>=', $studentCourseCreationId);
+                        })->pluck('plan_id')->unique()->toArray();
+
+            if(!empty($plan_ids)):
+                $plans = Plan::with('attenTerm')->whereIn('id', $plan_ids)->where('course_creation_id', '>=', $studentCourseCreationId)
+                        ->orderBy('id','DESC')->get();
+
+                if(!empty($plans) && $plans->count() > 0):
+                    $s = 1;
+                    $html .= '<table border="1" class="table table-bordered submissionPerformanceReportTable table-sm mb-5" id="submissionPerformanceReportTable">';
+                    $html .= '<thead>';
+                        $html .= '<tr>';
+                            $html .= '<th>S/N</th>';
+                            $html .= '<th>Module Name</th>';
+                            $html .= '<th>Awarding body</th>';
+                            $html .= '<th>Module No.</th>';
+                            $html .= '<th>No of Attempt</th>';
+                            $html .= '<th>Exam Date</th>';
+                            $html .= '<th>Percentage</th>';
+                            $html .= '<th>Grade</th>';
+                            $html .= '<th>Semester</th>';
+                            $html .= '<th>Status</th>';
+                        $html .= '</tr>';
+                    $html .= '</thead>';
+                    $html .= '<tbody>';
+                        foreach($plans as $list):
+                            $moduleCreation = ModuleCreation::with('module', 'level')->where('id', $list->module_creation_id)->get()->first();
+                            $results = Result::with(["grade", "createdBy", "updatedBy", "plan", "plan.creations", "plan.course.body", "plan.creations.module"])
+                                                ->where("student_id", $student->id)->whereHas('plan', function($query) use ($list) {
+                                                    $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
+                                                })->orderBy('id','DESC')->get();
+                            if($results->isNotEmpty()):
+                                $result = $results[0];
+                                if(isset($aloverCount[$result->grade->code])):
+                                    $aloverCount[$result->grade->code] += 1;
+                                endif;
+                                $html .= '<tr>';
+                                    $html .= '<td>'.$s.'</td>';
+                                    $html .= '<td>'.(isset($result->plan->creations->module_name) ? $result->plan->creations->module_name : '').' ('.(isset($result->plan->creations->course_module_id) ? $result->plan->creations->course_module_id : '').')</td>';
+                                    $html .= '<td>'.(isset($result->plan->course->body->name) ? $result->plan->course->body->name : '').'</td>';
+                                    $html .= '<td>'.(isset($result->plan->creations->code) ? $result->plan->creations->code : '').'</td>';
+                                    $html .= '<td>'.$results->count().'</td>';
+                                    $html .= '<td>'.(isset($result->published_at) && !empty($result->published_at) ? date('d-m-Y', strtotime($result->published_at)) : '').'</td>';
+                                    $html .= '<td>&nbsp;</td>';
+                                    $html .= '<td>'.(isset($result->grade->code) ? $result->grade->code : '').'</td>';
+                                    $html .= '<td>'.(isset($list->cCreation->semester->name) && !empty($list->cCreation->semester->name) ? $list->cCreation->semester->name : (isset($result->plan->attenTerm->name) && !empty($result->plan->attenTerm->name) ? $result->plan->attenTerm->name : '')).'</td>';
+                                    $html .= '<td>'.(isset($result->grade->name) ? $result->grade->name : '').'</td>';
+                                $html .= '</tr>';
+                            else:
+                                return '';
+                            endif;
+                            $s++;
+                        endforeach;
+                        $html .= '</tbody>';
+                    $html .= '</table>';
+                endif;
+            endif;
+        endif;
+
+        $theHTML = '';
+        if(!empty($aloverCount)):
+            $theHTML .= '<div style="font-weight: bold; margin-bottom: 10px;">';
+                $totalCount = 0;
+                $theHTML .= 'RQF (';
+                foreach($aloverCount as $grade => $count):
+                    $theHTML .= $grade.' = '.$count.' | ';
+                    $totalCount += $count;
+                endforeach;
+                $theHTML .= ' Total = '.$totalCount.')';
+            $theHTML .= '</div>';
+        endif;
+        $theHTML .= $html;
+
+        print_r($theHTML);
+
     }
 }

@@ -150,5 +150,9 @@ class Plan extends Model
     public function tutorial(){
         return $this->hasOne(Plan::class, 'parent_id', 'id')->where('class_type', 'Tutorial');//->latestOfMany();
     }
+
+    public function theory(){
+        return $this->belongsTo(Plan::class, 'parent_id');
+    }
     
 }
