@@ -14,11 +14,14 @@ use Illuminate\Support\Facades\DB;
 class AttendancePercentageController extends Controller
 {
     public function index($tutor_id, $term_id){
-        // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
-        // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
         $exculdeStatus = [22, 27, 31, 33, 14, 17, 30, 36];
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+        /*$plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
                         $q->where('tutor_id', $tutor_id)->orWhere('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
+                            $sq->where('personal_tutor_id', $tutor_id);
+                        });
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();*/
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+                        $q->where('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
                             $sq->where('personal_tutor_id', $tutor_id);
                         });
                     })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
@@ -64,15 +67,18 @@ class AttendancePercentageController extends Controller
         $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
         $exculdeStatus = [22, 27, 31, 33, 14, 17, 30, 36];
 
-        // $plan_ids = Plan::where('term_declaration_id', $term_id)->where('personal_tutor_id', $tutor_id)
-        // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-
         $term_plan_ids = Plan::where('term_declaration_id', $term_id)->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+        /*$plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
                         $q->where('tutor_id', $tutor_id)->orWhere('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
                             $sq->where('personal_tutor_id', $tutor_id);
                         });
-                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();*/
+        
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->where(function($q) use($tutor_id){
+                $q->where('personal_tutor_id', $tutor_id)->orWhereHas('tutorial', function($sq) use($tutor_id){
+                    $sq->where('personal_tutor_id', $tutor_id);
+                });
+            })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
         $assign_student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : [0]);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'registration_no', 'dir' => 'DESC']));
@@ -88,7 +94,7 @@ class AttendancePercentageController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
-                    ->whereIn('atn.plan_id', $term_plan_ids)
+                    ->whereIn('atn.plan_id', $plan_ids)
                     ->whereNotIn('std.status_id', $exculdeStatus)
                     ->groupBy('atn.student_id');
         if($student_ids > 0):

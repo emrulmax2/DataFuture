@@ -96,6 +96,7 @@ class DashboardController extends Controller
                                 }),
             'myModules' => DB::table('plans')->select('class_type', DB::raw('COUNT(DISTINCT id) as TOTAL_MODULE'))
                             ->where('term_declaration_id', $latestTermId)->where('personal_tutor_id', $id)
+                            ->whereNull('deleted_at')
                             ->groupBy('class_type')->orderBy('class_type', 'ASC')->get(),
             'attendance_avg' => $this->myModulesAttendanceAverage($id, $latestTermId),
             'bellow_60' => $this->myModulesAttendanceBellow($id, $latestTermId),
@@ -109,11 +110,14 @@ class DashboardController extends Controller
     }
 
     public function getAssignmentCount($id, $term_declaration_id){
-        //$plan_ids = Plan::where('personal_tutor_id', $id)->where('term_declaration_id', $term_declaration_id)
-        //->where('class_type', 'Theory')->pluck('id')->unique()->toArray();
 
-        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
+        /*$plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
                         $q->where('tutor_id', $id)->orWhere('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
+                            $sq->where('personal_tutor_id', $id);
+                        });
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();*/
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
+                        $q->where('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
                             $sq->where('personal_tutor_id', $id);
                         });
                     })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
@@ -131,12 +135,16 @@ class DashboardController extends Controller
 
     public function myModulesAttendanceAverage($id = 0, $term_declaration_id){
         $id = ($id > 0 ? $id : auth()->user()->id);
-        // $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $id)
-        // ->whereIn('class_type', ['Tutorial', 'Seminar'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
 
         $term_plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
+        /*$plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
                         $q->where('tutor_id', $id)->orWhere('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
+                            $sq->where('personal_tutor_id', $id);
+                        });
+                    })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();*/
+
+        $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
+                        $q->where('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
                             $sq->where('personal_tutor_id', $id);
                         });
                     })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
@@ -155,7 +163,7 @@ class DashboardController extends Controller
                             DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
                             DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                         )
-                        ->whereIn('atn.plan_id', $term_plan_ids);
+                        ->whereIn('atn.plan_id', $plan_ids);
             if(!empty($student_ids)):
                 $query->whereIn('atn.student_id', $student_ids);
             endif;
@@ -173,14 +181,11 @@ class DashboardController extends Controller
 
         $term_plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where(function($q) use($id){
-                    $q->where('tutor_id', $id)->orWhere('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
+                    $q->where('personal_tutor_id', $id)->orWhereHas('tutorial', function($sq) use($id){
                         $sq->where('personal_tutor_id', $id);
                     });
                 })->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-
-        // $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->where('personal_tutor_id', $id)
-        //             ->whereIn('class_type', ['Tutorial'])->orderBy('id', 'ASC')->pluck('id')->unique()->toArray();
-
+        
         if(!empty($plan_ids)):
             $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
             $query = DB::table('attendances as atn')
@@ -196,7 +201,7 @@ class DashboardController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
                     ->leftJoin('students as std', 'atn.student_id', '=', 'std.id')
-                    ->whereIn('atn.plan_id', $term_plan_ids)
+                    ->whereIn('atn.plan_id', $plan_ids)
                     ->whereIn('atn.student_id', $student_ids)
                     ->whereNotIn('std.status_id', $exculdeStatus);
             
