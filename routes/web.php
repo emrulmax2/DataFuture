@@ -990,6 +990,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/download-letter', 'studentLetterDownload')->name('student.letter.download');
 
         //Route::get('student/export-letter-tags', 'studentExportLetterTags')->name('student.export.letter.tags');
+        //Route::get('student/letter-test', 'letterTest')->name('student.letter.test');
     });
 
     Route::controller(EmailController::class)->group(function() {

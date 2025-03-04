@@ -34,6 +34,7 @@
             <li class="dropdown-item">[DATA=student_proposed_courses]class_enddate[/DATA]</li>
             <li class="dropdown-item">[DATA=student_proposed_courses]fees[/DATA]</li>
             <li class="dropdown-item">[DATA=other_details]mode[/DATA]</li>
+            <li class="dropdown-item">[DATA=result]W,P,M,D,R,C,U,A[/DATA]</li>
 
             <li class="dropdown-header">Applicant Tags</li>
             <li class="dropdown-item">[DATA=titles]name[/DATA]</li>
