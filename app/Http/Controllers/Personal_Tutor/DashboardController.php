@@ -201,7 +201,7 @@ class DashboardController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
                     ->leftJoin('students as std', 'atn.student_id', '=', 'std.id')
-                    ->whereIn('atn.plan_id', $plan_ids)
+                    ->whereIn('atn.plan_id', $term_plan_ids)
                     ->whereIn('atn.student_id', $student_ids)
                     ->whereNotIn('std.status_id', $exculdeStatus);
             
