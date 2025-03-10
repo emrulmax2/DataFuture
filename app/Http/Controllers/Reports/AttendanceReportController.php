@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Exports\ArrayCollectionExport;
 use App\Models\ComonSmtp;
+use App\Models\CourseCreation;
 use App\Models\EmailTemplate;
 use App\Models\LetterSet;
 use App\Models\Signatory;
@@ -51,8 +52,8 @@ class AttendanceReportController extends Controller
     public function list(Request $request){
         parse_str($request->form_data, $form);
         $params = isset($form['params']) && !empty($form['params']) ? $form['params'] : [];
-        //$academic_year = (isset($params['academic_year']) && !empty($params['academic_year']) ? $params['academic_year'] : []);
         $intake_semester = (isset($params['intake_semester']) && !empty($params['intake_semester']) ? $params['intake_semester'] : []);
+        $courseCreations = (!empty($intake_semester) ? CourseCreation::whereIn('semester_id', $intake_semester)->pluck('id')->unique()->toArray() : []);
         $attendance_semester = (isset($params['attendance_semester']) && !empty($params['attendance_semester']) ? $params['attendance_semester'] : []);
         $course = (isset($params['course']) && !empty($params['course']) ? $params['course'] : []);
         $group = (isset($params['group']) && !empty($params['group']) ? $params['group'] : []);
@@ -62,26 +63,28 @@ class AttendanceReportController extends Controller
         $groupsIDList = $groupsIDList->groupBy('id')->get()->pluck('id')->unique()->toArray();
         
         $evening_weekend = (isset($params['evening_weekend']) && !empty($params['evening_weekend']) ? [$params['evening_weekend']] : [0, 1]);
-        //$student_type = (isset($params['student_type']) && !empty($params['student_type']) ? $params['student_type'] : []);
-        //$term_status = (isset($params['term_status']) && !empty($params['term_status']) ? $params['term_status'] : []);
         $group_student_status = (isset($params['group_student_status']) && !empty($params['group_student_status']) ? $params['group_student_status'] : []);
         $attendance_percentage = (isset($params['attendance_percentage']) && $params['attendance_percentage'] != '' ? $params['attendance_percentage'] * 1 : 101);
 
         $plans = Plan::orderBy('id', 'asc');
-        //if(!empty($academic_year)): $plans->whereIn('academic_year_id', $academic_year); endif;
-        if(!empty($intake_semester)):
+        /*if(!empty($intake_semester)):
             $plans->whereHas('cCreation', function($q) use($intake_semester){
                 $q->whereIn('semester_id', $intake_semester);
             });
-        endif;
+        endif;*/
         if(!empty($attendance_semester)): $plans->whereIn('term_declaration_id', $attendance_semester); endif;
         if(!empty($course)): $plans->whereIn('course_id', $course); endif;
         if(!empty($groupsIDList)): $plans->whereIn('group_id', $groupsIDList); endif;
         $plan_ids = $plans->pluck('id')->unique()->toArray();
 
-        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status){
+        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status, $courseCreations){
             if(!empty($group_student_status)):
                 $q->whereIn('status_id', $group_student_status);
+            endif;
+            if(!empty($courseCreations)):
+                $q->whereHas('activeCR', function($sq) use($courseCreations){
+                    $sq->whereIn('course_creation_id', $courseCreations);
+                });
             endif;
         })->pluck('student_id')->unique()->toArray();
 
@@ -200,6 +203,7 @@ class AttendanceReportController extends Controller
         $params = isset($form['params']) && !empty($form['params']) ? $form['params'] : [];
         //$academic_year = (isset($params['academic_year']) && !empty($params['academic_year']) ? $params['academic_year'] : []);
         $intake_semester = (isset($params['intake_semester']) && !empty($params['intake_semester']) ? $params['intake_semester'] : []);
+        $courseCreations = (!empty($intake_semester) ? CourseCreation::whereIn('semester_id', $intake_semester)->pluck('id')->unique()->toArray() : []);
         $attendance_semester = (isset($params['attendance_semester']) && !empty($params['attendance_semester']) ? $params['attendance_semester'] : []);
         $course = (isset($params['course']) && !empty($params['course']) ? $params['course'] : []);
         $group = (isset($params['group']) && !empty($params['group']) ? $params['group'] : []);
@@ -209,26 +213,33 @@ class AttendanceReportController extends Controller
         $groupsIDList = $groupsIDList->groupBy('id')->get()->pluck('id')->unique()->toArray();
         
         $evening_weekend = (isset($params['evening_weekend']) && !empty($params['evening_weekend']) ? [$params['evening_weekend']] : [0, 1]);
-        //$student_type = (isset($params['student_type']) && !empty($params['student_type']) ? $params['student_type'] : []);
-        //$term_status = (isset($params['term_status']) && !empty($params['term_status']) ? $params['term_status'] : []);
         $group_student_status = (isset($params['group_student_status']) && !empty($params['group_student_status']) ? $params['group_student_status'] : []);
         $attendance_percentage = (isset($params['attendance_percentage']) && $params['attendance_percentage'] != '' ? $params['attendance_percentage'] * 1 : 101);
 
         $plans = Plan::orderBy('id', 'asc');
-        //if(!empty($academic_year)): $plans->whereIn('academic_year_id', $academic_year); endif;
-        if(!empty($intake_semester)):
+        /*if(!empty($intake_semester)):
             $plans->whereHas('cCreation', function($q) use($intake_semester){
                 $q->whereIn('semester_id', $intake_semester);
             });
-        endif;
+        endif;*/
         if(!empty($attendance_semester)): $plans->whereIn('term_declaration_id', $attendance_semester); endif;
         if(!empty($course)): $plans->whereIn('course_id', $course); endif;
         if(!empty($groupsIDList)): $plans->whereIn('group_id', $groupsIDList); endif;
         $plan_ids = $plans->pluck('id')->unique()->toArray();
 
-        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status){
+        /*$assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status){
             if(!empty($group_student_status)):
                 $q->whereIn('status_id', $group_student_status);
+            endif;
+        })->pluck('student_id')->unique()->toArray();*/
+        $assign_student_ids = Assign::whereIn('plan_id', $plan_ids)->whereHas('student', function($q) use($group_student_status, $courseCreations){
+            if(!empty($group_student_status)):
+                $q->whereIn('status_id', $group_student_status);
+            endif;
+            if(!empty($courseCreations)):
+                $q->whereHas('activeCR', function($sq) use($courseCreations){
+                    $sq->whereIn('course_creation_id', $courseCreations);
+                });
             endif;
         })->pluck('student_id')->unique()->toArray();
 
