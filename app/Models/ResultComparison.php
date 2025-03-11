@@ -14,4 +14,9 @@ class ResultComparison extends Model
         
         return $this->belongsTo(AssessmentPlan::class);
     }
+
+    public function result(){
+        
+        return $this->belongsTo(Result::class);
+    }
 }

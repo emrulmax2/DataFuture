@@ -21,6 +21,7 @@ use App\Models\PlanContentUpload;
 use App\Models\PlansDateList;
 use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
+use App\Models\Result;
 use App\Models\ResultSubmission;
 use App\Models\SmsTemplate;
 use App\Models\Student;
@@ -98,11 +99,13 @@ class ResultSubmissionController extends Controller
         // read the uploaded file and store it in the database
         $import = new ResultSubmissionValidationImport($courseMoudleBaseAssessment, $plan);
         Excel::import($import, $document);
-        $unmatchedStudents = $import->getStudentErrorFound();
+        //error for unmatched students
+        $errorStudents = $import->getStudentErrorFound();
+
         $errorMessage = $import->getErrorMessage();
         
-        if (count($unmatchedStudents) > 0) {
-            return response()->json(['message' => $errorMessage, 'errors' => $unmatchedStudents], 400);
+        if (count($errorStudents) > 0) {
+            return response()->json(['message' => $errorMessage, 'errors' => $errorStudents], 400);
         } else {
 
             Excel::import(new ResultSubmissionImport($courseMoudleBaseAssessment, $plan), $document);
@@ -127,20 +130,42 @@ class ResultSubmissionController extends Controller
             if(count($missingStudents) > 0){
                 // add those missing student to the result submission table
                 foreach($missingStudents as $studentId){
-                    $student = Student::find($studentId);
-                    $resultSubmission = new ResultSubmission();
-                    $resultSubmission->assessment_plan_id = $assessmentPlan->id;
-                    $resultSubmission->plan_id = $plan->id;
-                    $resultSubmission->student_id = $studentId;
-                    $resultSubmission->student_course_relation_id = $student->crel->id;
-                    $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
-                    $resultSubmission->is_student_matched = 1;
-                    $resultSubmission->is_it_final = 1;
-                    $resultSubmission->module_creation_id = $plan->module_creation_id;
-                    $resultSubmission->module_code = $plan->creations->code;
-                    $resultSubmission->upload_user_type = 'personal_tutor';
-                    $resultSubmission->created_by = Auth::id();
-                    $resultSubmission->save();
+
+                    $assessmentPlanStaff = AssessmentPlan::where('course_module_base_assesment_id', $courseMoudleBaseAssessment)
+                    ->where('plan_id', $plan->id)
+                    ->where('upload_user_type','staff')
+                    ->orderBy('id', 'desc')
+                    ->get()->first();
+                    $foundResult = null;
+                    
+                    if(isset($assessmentPlanStaff->id)):
+                        $foundResult = Result::where('student_id', $studentId)
+                            ->where('plan_id', $plan->id)
+                            ->where('assessment_plan_id', $assessmentPlanStaff->id)
+                            ->where(function ($query) {
+                                $query->whereBetween('grade_id', [4, 6]);
+                                
+                            })->get()->first();
+                    else:
+                        $foundResult = null;
+                    endif;
+                    if($foundResult === null){
+                        
+                        $student = Student::find($studentId);
+                        $resultSubmission = new ResultSubmission();
+                        $resultSubmission->assessment_plan_id = $assessmentPlan->id;
+                        $resultSubmission->plan_id = $plan->id;
+                        $resultSubmission->student_id = $studentId;
+                        $resultSubmission->student_course_relation_id = $student->crel->id;
+                        $resultSubmission->grade_id = Grade::where('code', 'A')->first()->id;
+                        $resultSubmission->is_student_matched = 1;
+                        $resultSubmission->is_it_final = 1;
+                        $resultSubmission->module_creation_id = $plan->module_creation_id;
+                        $resultSubmission->module_code = $plan->creations->code;
+                        $resultSubmission->upload_user_type = 'personal_tutor';
+                        $resultSubmission->created_by = Auth::id();
+                        $resultSubmission->save();
+                    }
                 }
             }
             return response()->json(['message' => 'Document successfully uploaded.'], 200);
@@ -175,14 +200,36 @@ class ResultSubmissionController extends Controller
             
             // compare and get the missing stuedents
             $missingStudents = array_diff($studentIds, $submittedStudents);
-            //Debugbar::info($missingStudents);
+            
             sort($missingStudents);
             if(count($missingStudents) > 0){
                 // add those missing student to the result submission table
+
+
                 foreach($missingStudents as $studentId){
 
                     $assigns = Assign::where('student_id', $studentId)->where('plan_id', $plan->id)->get()->first();
-                    if($assigns->attendance ===1 || $assigns->attendance === null) {
+                    
+                    $assessmentPlanStaff = AssessmentPlan::where('course_module_base_assesment_id', $courseMoudleBaseAssessment)
+                    ->where('plan_id', $plan->id)
+                    ->where('upload_user_type','staff')
+                    ->orderBy('id', 'desc')
+                    ->get()->first();
+
+                    
+                    if(isset($assessmentPlan->id)):
+                        $foundResult = Result::where('student_id', $studentId)
+                            ->where('plan_id', $plan->id)
+                            ->where('assessment_plan_id', $assessmentPlanStaff->id)
+                            ->where(function ($query) {
+                                $query->whereBetween('grade_id', [4, 6]);
+                                
+                            })->get()->first();
+                    else:
+                        $foundResult = null;
+                    endif;
+                    
+                    if(($assigns->attendance ===1 || $assigns->attendance === null) && $foundResult === null){
                         
                         $student = Student::find($studentId);
                         $resultSubmission = new ResultSubmission();

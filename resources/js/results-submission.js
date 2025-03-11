@@ -225,6 +225,7 @@ var submissionTable = (function () {
 
         drzn1.on('success', function (file, response) {
             //console.log(response);
+            dzError = false;
             return file.previewElement.classList.add('dz-success');
         });
 
@@ -271,7 +272,7 @@ var submissionTable = (function () {
                 html += '</ul>';
                 $('#displayError').removeClass('hidden');
 
-                $('#displayError .errorList').html('Students Data Not Found!');
+                $('#displayError .errorList').html('Students Data Error Found!');
                 $('#displayError .errorMessage').html(errorData.message);
 
                 $('#displayError .error-students').html(html);
