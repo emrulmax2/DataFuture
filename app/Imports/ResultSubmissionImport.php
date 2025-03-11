@@ -55,8 +55,10 @@ class ResultSubmissionImport implements ToModel, WithHeadingRow
                 $student = Student::where('student_user_id',$studentUserId->id)->get()->first();
                 if($row['grade'] == '' && $row['paper_id'] == ""){
                     $row['grade'] = 'A';
-                } else if($row['grade'] == '' && $row['paper_id'] != "" && $row['grade'] == 0){
+                } else if($row['paper_id'] != "" && $row['grade'] == 8){
                     $row['grade'] = 'S';
+                }else if($row['paper_id'] != "" && $row['grade'] === 0){
+                    $row['grade'] = 'R';
                 }
                 $grade = Grade::where('code',$row['grade'])->orWhere('turnitin_grade',$row['grade'])->orWhere('name',$row['grade'])->get()->first();
                 

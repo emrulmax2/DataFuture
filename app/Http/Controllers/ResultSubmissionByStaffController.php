@@ -234,9 +234,12 @@ class ResultSubmissionByStaffController extends Controller
             ->orderBy('created_at', 'DESC')
             ->pluck('id')->toArray();
 
-            $resultComparison = ResultComparison::whereIn('assessment_plan_id', $allAssessmentPlan)->pluck('student_id')->unique()->toArray();
+            $resultComparison = ResultComparison::whereIn('assessment_plan_id', $allAssessmentPlan)->pluck('assessment_plan_id')->unique()->toArray();
+
+            
 
             $submittedStudents = ResultSubmissionByStaff::where('assessment_plan_id', $assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
+            
             $studentIds = Assign::where('plan_id', $plan->id)->where(function($q){
                 $q->where('attendance', 1)->orWhereNull('attendance');
             })->pluck('student_id')->toArray();
@@ -244,11 +247,16 @@ class ResultSubmissionByStaffController extends Controller
             // compare and get the missing stuedents
             $missingStudents = array_diff($studentIds, $submittedStudents);
 
-            if(isset( $resultComparison) && count($resultComparison) > 0){
-                $missingStudents = array_diff($missingStudents, $resultComparison);
-            } else {
-                $resultStudents = Result::whereIn('student_id', $missingStudents)->where('assessment_plan_id',$assessmentPlan->id)->where('plan_id', $plan->id)->pluck('student_id')->toArray();
-                $missingStudents = array_diff($missingStudents, $resultStudents);
+            
+            //already a result is submitted for this assessment plan
+            if(isset($resultComparison) && count($resultComparison) > 0){
+
+                $numberOfFailedStudents = Result::whereIn('assessment_plan_id', $resultComparison)->whereNotIn('grade_id', [4,5,6])
+                ->pluck('student_id')->unique()->toArray();
+
+                $missingStudents = array_diff($numberOfFailedStudents ,$submittedStudents );
+
+                //dd($studentIds, $submittedStudents, $missingStudents, $numberOfFailedStudents);
             }
             
             sort($missingStudents);

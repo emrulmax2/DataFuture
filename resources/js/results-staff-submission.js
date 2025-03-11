@@ -352,6 +352,7 @@ var submissionTableTutor = (function () {
         });
 
         drzn1.on('success', function (file, response) {
+            dzError = false;
             //console.log(response);
             return file.previewElement.classList.add('dz-success');
         });
@@ -400,7 +401,7 @@ var submissionTableTutor = (function () {
                 html += '</ul>';
                 $('#displayError').removeClass('hidden');
 
-                $('#displayError .errorList').html('Students Data Not Found!');
+                $('#displayError .errorList').html('Students Data Error Found!');
                 $('#displayError .errorMessage').html(errorData.message);
 
                 $('#displayError .error-students').html(html);
