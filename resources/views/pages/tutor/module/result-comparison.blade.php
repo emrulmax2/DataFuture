@@ -148,8 +148,8 @@
                                             <th class="whitespace-nowrap border">Name</th>
                                             <th class="whitespace-nowrap border">Status</th>
                                             <th class="whitespace-nowrap border">Assessment</th>
-                                            <th class="whitespace-nowrap border">Grade By Staff</th>
                                             <th class="whitespace-nowrap border">Grade By P.T</th>
+                                            <th class="whitespace-nowrap border">Grade By Staff</th>
                                             <th class="whitespace-nowrap border">Final Grade</th>
                                             <th class="whitespace-nowrap border">Publish At</th>
                                         </tr>
@@ -190,8 +190,8 @@
                                                         <td class="">{{ $data['full_name']}}</td>
                                                         <td class="">{{ $data['status'] }}</td>
                                                         <td class="">{{ $data['assement'] }}</td>
-                                                        <td class="">{{ $data['staff_given_grade'] }}</td>
                                                         <td class="">{{ $data['tutor_given_grade'] }}</td>
+                                                        <td class="">{{ $data['staff_given_grade'] }}</td>
                                                         <td class="">
                                                             @if($data['attendance'] !==0)
                                                             <select id="grade_id" class="lccTom lcc-tom-select w-full" name="grade_id[{{ $serial }}]">
@@ -229,8 +229,8 @@
                                             <th class="whitespace-nowrap border ">Name</th>
                                             <th class="whitespace-nowrap border ">Status</th>
                                             <th class="whitespace-nowrap border ">Assessment</th>
-                                            <th class="whitespace-nowrap border ">Grade By Staff</th>
                                             <th class="whitespace-nowrap border ">Grade By P.T</th>
+                                            <th class="whitespace-nowrap border ">Grade By Staff</th>
                                             <th class="whitespace-nowrap border ">Final Grade</th>
                                             <th class="whitespace-nowrap border ">Publish At</th>
                                         </tr>
