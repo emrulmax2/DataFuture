@@ -295,16 +295,6 @@ class StudentDataReportController extends Controller
             
         endforeach; 
 
-        
-
-        if(!empty($slcAccountData))
-        foreach($slcAccountData as $key =>$value):
-            if($key=="is_self_funded") {
-                $theCollection[$i][$j++] = "Self Funded";
-            }else    
-                $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
-        endforeach; 
-
         if(!empty($StudentOtherDetailData))
         foreach($StudentOtherDetailData as $key =>$value):
            
@@ -399,6 +389,16 @@ class StudentDataReportController extends Controller
             $theCollection[$i][$j++] = ucwords(str_replace('_',' ', $key));
         endforeach; 
 
+        
+
+        if(!empty($slcAccountData))
+        foreach($slcAccountData as $key =>$value):
+            if($key=="is_self_funded") {
+                $theCollection[$i][$j++] = "Self Funded";
+            }else    
+                $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+        endforeach; 
+        
         $returnData = [];
 
         $row = 2;
