@@ -263,53 +263,68 @@ trait GenerateStudentLetterTrait{
                         ->orderBy('id','DESC')->get();
 
                 if(!empty($plans) && $plans->count() > 0):
-                    $s = 1;
-                    $html .= '<table border="1" class="table table-bordered studentLetterResultTable table-sm mb-5" id="studentLetterResultTable">';
-                    $html .= '<thead>';
-                        $html .= '<tr>';
-                            $html .= '<th>S/N</th>';
-                            $html .= '<th>Module Name</th>';
-                            $html .= '<th>Awarding body</th>';
-                            $html .= '<th>Module No.</th>';
-                            $html .= '<th>No of Attempt</th>';
-                            $html .= '<th>Exam Date</th>';
-                            $html .= '<th>Percentage</th>';
-                            $html .= '<th>Grade</th>';
-                            $html .= '<th>Semester</th>';
-                            $html .= '<th>Status</th>';
-                        $html .= '</tr>';
-                    $html .= '</thead>';
-                    $html .= '<tbody>';
-                        foreach($plans as $list):
-                            $moduleCreation = ModuleCreation::with('module', 'level')->where('id', $list->module_creation_id)->get()->first();
-                            $results = Result::with(["grade", "createdBy", "updatedBy", "plan", "plan.creations", "plan.course.body", "plan.creations.module"])
-                                                ->where("student_id", $student->id)->whereHas('plan', function($query) use ($list) {
-                                                    $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
-                                                })->orderBy('id','DESC')->get();
-                            if($results->isNotEmpty()):
-                                $result = $results[0];
-                                if(isset($aloverCount[$result->grade->code])):
-                                    $aloverCount[$result->grade->code] += 1;
-                                endif;
+                    $studentResult = [];
+                    foreach($plans as $list):
+                        $moduleCreation = ModuleCreation::with('module', 'level')->where('id', $list->module_creation_id)->get()->first();
+                        $results = Result::with(["grade", "createdBy", "updatedBy", "plan", "plan.creations", "plan.course.body", "plan.creations.module"])
+                                            ->where("student_id", $student->id)->whereHas('plan', function($query) use ($list) {
+                                                $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
+                                            })->orderBy('id','DESC')->get();
+                        if($results->isNotEmpty()):
+                            foreach ($results as $key => $result):
+                                $studentResult[$moduleCreation->course_module_id][] = $result;
+                            endforeach;
+                        endif;
+                    endforeach;
+                    if(!empty($studentResult)):
+                        $html .= '<table border="1" class="table table-bordered studentLetterResultTable table-sm mb-5" id="studentLetterResultTable">';
+                            $html .= '<thead>';
                                 $html .= '<tr>';
-                                    $html .= '<td>'.$s.'</td>';
-                                    $html .= '<td>'.(isset($result->plan->creations->module_name) ? $result->plan->creations->module_name : '').' ('.(isset($result->plan->creations->course_module_id) ? $result->plan->creations->course_module_id : '').')</td>';
-                                    $html .= '<td>'.(isset($result->plan->course->body->name) ? $result->plan->course->body->name : '').'</td>';
-                                    $html .= '<td>'.(isset($result->plan->creations->code) ? $result->plan->creations->code : '').'</td>';
-                                    $html .= '<td>'.$results->count().'</td>';
-                                    $html .= '<td>'.(isset($result->published_at) && !empty($result->published_at) ? date('d-m-Y', strtotime($result->published_at)) : '').'</td>';
-                                    $html .= '<td>&nbsp;</td>';
-                                    $html .= '<td>'.(isset($result->grade->code) ? $result->grade->code : '').'</td>';
-                                    $html .= '<td>'.(isset($list->cCreation->semester->name) && !empty($list->cCreation->semester->name) ? $list->cCreation->semester->name : (isset($result->plan->attenTerm->name) && !empty($result->plan->attenTerm->name) ? $result->plan->attenTerm->name : '')).'</td>';
-                                    $html .= '<td>'.(isset($result->grade->name) ? $result->grade->name : '').'</td>';
+                                    $html .= '<th>S/N</th>';
+                                    $html .= '<th>Module Name</th>';
+                                    $html .= '<th>Awarding body</th>';
+                                    $html .= '<th>Module No.</th>';
+                                    $html .= '<th>No of Attempt</th>';
+                                    $html .= '<th>Exam Date</th>';
+                                    $html .= '<th>Percentage</th>';
+                                    $html .= '<th>Grade</th>';
+                                    $html .= '<th>Semester</th>';
+                                    $html .= '<th>Status</th>';
                                 $html .= '</tr>';
-                            else:
-                                return '';
-                            endif;
-                            $s++;
-                        endforeach;
-                        $html .= '</tbody>';
-                    $html .= '</table>';
+                            $html .= '</thead>';
+                            $html .= '<tbody>';
+                                $serial = 1;
+                                foreach($studentResult as $module_id => $results):
+                                    $result = $results[0];
+                                    if(isset($aloverCount[$result->grade->code])):
+                                        $aloverCount[$result->grade->code] += 1;
+                                    endif;
+                                    $html .= '<tr>';
+                                        $html .= '<td>'.$serial.'</td>';
+                                        $html .= '<td>'.(isset($result->plan->creations->module_name) ? $result->plan->creations->module_name : '').' ('.(isset($result->plan->creations->course_module_id) ? $result->plan->creations->course_module_id : '').')</td>';
+                                        $html .= '<td>'.(isset($result->plan->course->body->name) ? $result->plan->course->body->name : '').'</td>';
+                                        $html .= '<td>'.(isset($result->plan->creations->code) ? $result->plan->creations->code : '').'</td>';
+                                        $html .= '<td>'.(!empty($results) ? count($results) : 0).'</td>';
+                                        $html .= '<td>'.(isset($result->published_at) && !empty($result->published_at) ? date('d-m-Y', strtotime($result->published_at)) : '').'</td>';
+                                        $html .= '<td>&nbsp;</td>';
+                                        $html .= '<td>'.(isset($result->grade->code) ? $result->grade->code : '').'</td>';
+                                        $html .= '<td>';
+                                            if($result->term_declaration_id == Null):
+                                                $html .= $result->plan->attenTerm->name;
+                                            else:
+                                                $html .= $result->term->name;
+                                            endif;
+                                        $html .= '</td>';
+                                        $html .= '<td>'.(isset($result->grade->name) ? $result->grade->name : '').'</td>';
+                                    $html .= '</tr>';
+
+                                    $serial++;
+                                endforeach;
+                            $html .= '</tbody>';
+                        $html .= '</table>';
+                    else:
+                        return '';
+                    endif;
                 endif;
             endif;
         endif;
