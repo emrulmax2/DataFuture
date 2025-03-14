@@ -142,7 +142,8 @@ class SlcRecordReportController extends Controller
                         $selfFunedTotal += $row['slc_self_funded'];
                         $html .= '<tr>';
                             $html .= '<td class="w-1/6">'.$row['name'].'</td>';
-                            $html .= '<td>'.$row['slc_sms_registered'].'</td>';
+                            //$html .= '<td>'.$row['slc_sms_registered'].'</td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_sms_registered_std'].'">'.$row['slc_sms_registered'].$theLoader.'</a></td>';
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_awb_registered_std'].'">'.$row['slc_awb_registered'].$theLoader.'</a></td>';
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_registered_std'].'">'.$row['year_1_registered'].$theLoader.'</a></td>';
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_attendance_std'].'">'.$row['year_1_attendance'].$theLoader.'</a></td>';
@@ -239,8 +240,10 @@ class SlcRecordReportController extends Controller
             foreach($semester_ids as $semester_id):
                 $semester = Semester::find($semester_id);
                 $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
-                $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->pluck('student_id')->unique()->toArray();//->where('active', 1)
+                $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();//->where('active', 1)
 
+                $slc_sms_registered = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)
+                                      ->pluck('id')->unique()->toArray();
                 $slc_awb_registered = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->where(function($q){
                                         $q->whereNotNull('reference')->where('reference', '!=', '');
                                     })->whereHas('studentcrel', function($q) use($creations){
@@ -259,7 +262,9 @@ class SlcRecordReportController extends Controller
                 $slc_self_funded = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_self_funded_satuses)->pluck('id')->unique()->toArray();
 
                 $res[$semester_id]['name'] = $semester->name;
-                $res[$semester_id]['slc_sms_registered'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)->get()->count();
+                //$res[$semester_id]['slc_sms_registered'] = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)->get()->count();
+                $res[$semester_id]['slc_sms_registered'] = (!empty($slc_sms_registered) ? count($slc_sms_registered) : 0);
+                $res[$semester_id]['slc_sms_registered_std'] = (!empty($slc_sms_registered) ? implode(',', $slc_sms_registered) : 0);
                 $res[$semester_id]['slc_awb_registered'] = (!empty($slc_awb_registered) ? count($slc_awb_registered) : 0);
                 $res[$semester_id]['slc_awb_registered_std'] = (!empty($slc_awb_registered) ? implode(',', $slc_awb_registered) : '');
                 $res[$semester_id]['year_1_registered'] = (!empty($year_1_registered) ? count($year_1_registered) : 0);
