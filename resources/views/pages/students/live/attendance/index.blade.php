@@ -9,7 +9,16 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
+    {{-- <div class="intro-y box col-span-12 p-5 mt-5  ">
 
+        <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-slate-200 text-slate-100 rounded-tl rounded-tr">
+                
+            <h2 class="font-medium text-base mr-auto ">
+            </h2>
+            <a href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 "><i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i> Print All
+            </a>
+        </div>
+    </div> --}}
     <!-- BEGIN: Daily Sales -->
         @php $termstart=0 @endphp
         @foreach($dataSet as $termId =>$dataStartPoint)
@@ -94,7 +103,13 @@
                             }
                             @endphp
                             <div class="ml-4 mr-auto toggle-heading">
-                                <a href="" class="font-medium flex flex-col md:flex-row gap-2 md:gap-0">{{ $moduleNameList[$planId] }} <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span> <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->room->name }}</span> </a>
+                                <a href="" class="font-medium flex flex-col md:flex-row gap-2 md:gap-0">
+                                    {{ $moduleNameList[$planId] }} 
+                                    <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> 
+                                    <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> 
+                                    <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span>
+                                    <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->room->name }}</span>
+                                </a>
                                 
                                 <div class="text-slate-500 text-xs md:text-md mr-5 sm:mr-5 inline-flex mt-4 md:mt-1">
                                     <i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
