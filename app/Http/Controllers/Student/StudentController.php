@@ -913,7 +913,7 @@ class StudentController extends Controller
                             }
 
                         }
-                        $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
+                        $planSet = Plan::with(["tutor","personalTutor",'creations','room'])->where('id',$list->plan_id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
                         $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
@@ -992,7 +992,7 @@ class StudentController extends Controller
                             "start_date" => $list->start_date,
                             "end_date" => $list->end_date,
                         ];
-                        $planSet = Plan::with(["tutor","personalTutor",'creations'])->where('id',$list->plan_id)->get()->first();
+                        $planSet = Plan::with(["tutor","personalTutor",'creations','room'])->where('id',$list->plan_id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
                         $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
@@ -1114,7 +1114,7 @@ class StudentController extends Controller
 
                         }
                         
-                        $planSet = Plan::with(["tutor","personalTutor",'creations','group'])->where('id',$plan->id)->get()->first();
+                        $planSet = Plan::with(["tutor","personalTutor",'creations','group','room'])->where('id',$plan->id)->get()->first();
                         $planDetails[$list->term_id][$list->plan_id] = $planSet;
                         $ClassType[$list->plan_id] = (isset($planSet->class_type)) ? $planSet->class_type : "N/A";
                         
