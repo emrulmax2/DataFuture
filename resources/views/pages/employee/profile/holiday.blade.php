@@ -278,7 +278,12 @@
                                                                                         @endif
                                                                                         <tr class="newRequestRow  {{ (!$can_auth ? 'disabledRow' : '') }}" data-id="{{ $leave->id }}">
                                                                                             <td class="w-1/5">
-                                                                                                Request for approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})
+                                                                                                <div class="flex justify-start items-start relative">
+                                                                                                    @if(isset($leave->supervisedDays) && $leave->supervisedDays->count() > 0)
+                                                                                                        <span class="w-auto text-success py-0 mr-2 relative" style="top: 2px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-check" class="lucide lucide-shield-check w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path><path d="m9 12 2 2 4-4"></path></svg></span>
+                                                                                                    @endif
+                                                                                                    <span>Request for approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})</span>
+                                                                                                </div>
                                                                                             </td>
                                                                                             <td class="w-1/5">
                                                                                                 {{ date('D jS F, Y', strtotime($leave->from_date))}}

@@ -129,7 +129,8 @@ class Employee extends Model
 
     public function activePatterns(){
         $patterns = $this->hasMany(EmployeeWorkingPattern::class, 'employee_id', 'id');
-        $patterns->getQuery()->where('end_to', '=', '')->orWhereNull('end_to');
+        $patterns->getQuery()->orWhereNull('end_to');
+        //$patterns->getQuery()->where('end_to', '=', '')->orWhereNull('end_to');
         return $patterns;
     }
 

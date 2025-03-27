@@ -200,7 +200,9 @@ class EmployeePortalController extends Controller
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => (isset($list->leave->approved->employee->full_name) && !empty($list->leave->approved->employee->full_name) ? $list->leave->approved->employee->full_name : ''),
                     'approved_at' => (isset($list->leave->approved_at) && !empty($list->leave->approved_at) ? date('jS M, Y', strtotime($list->leave->approved_at)) : ''),
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'leave_status' => 'Approved',
+                    'supervised' => 0
                 ];
                 $i++;
             endforeach;
@@ -246,12 +248,15 @@ class EmployeePortalController extends Controller
                     'approved_by' => (isset($list->uuser->employee->full_name) && !empty($list->uuser->employee->full_name) ? $list->uuser->employee->full_name : ''),
                     'approved_at' => (isset($list->updated_at) && !empty($list->updated_at) ? date('jS M, Y', strtotime($list->updated_at)) : ''),
                     'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'leave_status' => 'Canceled',
+                    'supervised' => 0
                 ];
                 $i++;
             endforeach;
         elseif(!empty($Query) && $type == 'pending'):
             $i = 1;
             foreach($Query as $list):
+                $leave_status = (isset($list->status) && !empty($list->status) ? $list->status : 'Pending');
                 $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->employee_id)->pluck('user_id')->unique()->toArray();
                 $leaveHours = 0;
                 $leaveDays = 0;
@@ -278,7 +283,9 @@ class EmployeePortalController extends Controller
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => '',
                     'approved_at' => '',
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : '')
+                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'leave_status' => $leave_status,
+                    'supervised' => (isset($list->supervisedDays) && $list->supervisedDays->count() > 0 ? 1 : 0)
                 ];
                 $i++;
             endforeach;
