@@ -536,7 +536,7 @@ class DashboardController extends Controller
         $crntUser = Employee::where('user_id', auth()->user()->id)->get()->first();
         $fromEmail = (isset($crntUser->employment->email) && !empty($crntUser->employment->email) ? $crntUser->employment->email : $crntUser->email);
         $commonSmtp = ComonSmtp::where('smtp_user', 'internal@lcc.ac.uk')->get()->first();
-
+        
         if(!empty($mailTos) && (isset($commonSmtp->id) && $commonSmtp->id > 0)):
             $mailTos[] = $fromEmail;
             $configuration = [
@@ -567,7 +567,7 @@ class DashboardController extends Controller
                     $docCounter++;
                 endforeach;
             endif;
-
+            
             UserMailerJob::dispatch($configuration, $mailTos, new CommunicationSendMail($subject, $mail_body, $attachmentInfo));
             return response()->json(['suc' => 1, 'res' => 'Mail successfully sent.'], 200);
         else:
