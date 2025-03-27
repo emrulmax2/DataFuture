@@ -1349,6 +1349,84 @@ class StudentController extends Controller
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
+
+    public function printAllAttendanceDetails(Student $student) {
+        $termData = [];
+        $data = [];
+        $planDetails = [];
+        $avarageDetails = [];
+        $totalFeedListSet = [];
+        $totalFullSetFeedList = [];
+        $avarageTermDetails = [];
+        $totalClassFullSet = [];
+        $returnSet = [];
+        $attendanceIndicator = [];
+            $attendanceFeedStatus = AttendanceFeedStatus::all();
+            $returnSet = $this->PlanWithAttendanceSet($student);
+            
+           
+            $returnSet = array_merge($returnSet);
+            
+        // endforeach;
+        $termData = $returnSet["termData"];
+        $moduleNameList = $returnSet["moduleNameList"];
+        $ClassType   = $returnSet["ClassType"];
+        $data = $returnSet["data"];
+        $planDetails = $returnSet["planDetails"];
+        $avarageDetails = $returnSet["avarageDetails"];
+        $totalFeedListSet = $returnSet["totalFeedListSet"];
+        $totalFullSetFeedList = $returnSet["totalFullSetFeedList"];
+        $avarageTermDetails = $returnSet["avarageTermDetails"];
+        $totalClassFullSet = $returnSet["totalClassFullSet"];
+        $termAttendanceFound = $returnSet["termAttendanceFound"];
+        $lastAttendanceDate = $returnSet["lastAttendanceDate"];
+        $attendanceIndicator = $returnSet["attendanceIndicator"];
+        
+        
+        $fileName = 'attendance_of_'.$student->registration_no.'_'.$student->first_name.'_'.$student->last_name.'.pdf';
+        // $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+        //     ->setPaper('a4', 'portrait')
+        //     ->setWarnings(false);
+        // return $pdf->download($fileName);
+
+        $dataSet = $data;
+        $term = $termData;
+        $planDetails = $planDetails;
+        $avarageDetails = $avarageDetails;
+        $totalFeedList = $totalFeedListSet;
+        $totalFullSetFeedList = $totalFullSetFeedList;
+        $avarageTotalPercentage = $avarageTermDetails;
+        $totalClassFullSet  = $totalClassFullSet;
+        $attendanceFeedStatus  = $attendanceFeedStatus;
+        $moduleNameList = $moduleNameList;
+        $ClassType = $ClassType;
+        $termAttendanceFound = $termAttendanceFound;
+        $lastAttendanceDate =  $lastAttendanceDate;
+        $attendanceIndicator = $attendanceIndicator;
+
+        $statuses = Status::where('type', 'Student')->orderBy('id', 'ASC')->get();
+        $pdf = PDF::loadView('pages.students.live.attendance.print',compact('student','dataSet','term','planDetails','avarageDetails','totalFeedList','totalFullSetFeedList','avarageTotalPercentage','totalClassFullSet','attendanceIndicator','moduleNameList','ClassType','termAttendanceFound','lastAttendanceDate','attendanceIndicator','statuses'));
+        return $pdf->download($fileName);
+
+        // return view('pages.students.live.attendance.print', [
+        //     'student' => $student,
+        //     'dataSet' => $data,
+        //     "term" =>$termData,
+        //     "planDetails" => $planDetails,
+        //     'avarageDetails' => $avarageDetails,
+        //     "totalFeedList" => $totalFeedListSet,
+        //     "totalFullSetFeedList"=>$totalFullSetFeedList,
+        //     "avarageTotalPercentage"=>$avarageTermDetails,
+        //     "totalClassFullSet" =>$totalClassFullSet,
+        //     "attendanceFeedStatus" =>$attendanceFeedStatus,
+        //     "moduleNameList" =>$moduleNameList,
+        //     "ClassType" => $ClassType,
+        //     "termAttendanceFound" =>$termAttendanceFound,
+        //     "lastAttendanceDate"=>$lastAttendanceDate,
+        //     "attendanceIndicator" => $attendanceIndicator,
+        //     'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+        // ]);
+    }
     public function getAllTerms(Request $request) {
         $academicYearList = $request->academic_years;
         $course = $request->course;
