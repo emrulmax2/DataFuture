@@ -237,7 +237,9 @@ use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
 use App\Http\Controllers\Reports\Accounts\DueReportController;
+use App\Http\Controllers\Reports\Accounts\MarketingReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
+use App\Http\Controllers\Reports\Accounts\SemesterComissionRateController;
 use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
@@ -3646,6 +3648,21 @@ Route::middleware('auth')->group(function() {
         Route::delete('agent-profile/bank/delete/{id}', 'destroy')->name('agent-user.destroy.bank');
         Route::post('agent-profile/bank/restore/{id}', 'restore')->name('agent-user.restore.bank');
         Route::post('agent-profile/bank/change-status/{id}', 'changeStatus')->name('agent-user.changestatus.bank');
+    });
+    
+    Route::controller(SemesterComissionRateController::class)->group(function(){
+        Route::post('semester-comission-rate/store', 'store')->name('semester.comission.rate.store'); 
+        Route::get('semester-comission-rate/list', 'list')->name('semester.comission.rate.list');
+        Route::post('semester-comission-rate/edit', 'edit')->name('semester.comission.rate.edit');
+        Route::delete('semester-comission-rate/delete/{id}', 'destroy')->name('semester.comission.rate.destory');
+        Route::post('semester-comission-rate/restore/{id}', 'restore')->name('semester.comission.rate.restore');
+    });
+
+    Route::controller(MarketingReportController::class)->group(function(){
+        Route::post('reports/accounts/marketing/generate', 'generateReport')->name('reports.account.marketing.generate'); 
+        // Route::post('reports/accounts/due/export', 'exportExcel')->name('reports.account.due.export'); 
+        // Route::post('reports/accounts/due/get-course-status-by-semester', 'getCourseStatusBySemester')->name('reports.account.due.get.course.status'); 
+        // Route::post('reports/accounts/due/get-status-by-semester-course', 'getStatusBySemesterCourse')->name('reports.account.due.get.statuses'); 
     });
     
 });
