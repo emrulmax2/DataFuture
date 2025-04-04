@@ -2231,8 +2231,11 @@ input[type=number] {
     .modal#reportsSTDListModal .modal-dialog.modal-xl,
     .modal#stdAtnTermStatusHistoryModal .modal-dialog.modal-xl ,
     .modal#comissionGenerateModal .modal-dialog.modal-xl ,
-    .modal#editStudentStuloadModal .modal-dialog.modal-xl {
+    .modal#editStudentStuloadModal .modal-dialog.modal-xl{
         width: 80%;
+    }
+    .modal#semesterComissionRatModal .modal-dialog.modal-xl {
+        width: 70%;
     }
 }
 
