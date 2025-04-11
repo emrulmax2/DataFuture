@@ -317,12 +317,15 @@ class DashboardController extends Controller
                     $html .= '</div>';
                 $html .= '</div>';
             endforeach;
+            
+            if(isset($termDecId) && $termDecId > 0):
+                $html .= '<a href="'.route('programme.dashboard.tutors', $termDecId).'" class="ml-auto text-primary truncate">Show More</a>';
+            endif;
         else:
             $html .= '<div class="intro-x">';
                 $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
             $html .= '</div>';
         endif;
-
         return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
     }
 
@@ -359,6 +362,10 @@ class DashboardController extends Controller
                     $html .= '</div>';
                 $html .= '</div>';
             endforeach;
+            
+            if(isset($termDecId) && $termDecId > 0):
+                $html .= '<a href="'.route('programme.dashboard.personal.tutors', $termDecId).'" class="ml-auto text-primary truncate">Show More</a>';
+            endif;
         else:
             $html .= '<div class="intro-x">';
                 $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
