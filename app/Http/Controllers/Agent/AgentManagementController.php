@@ -111,7 +111,10 @@ class AgentManagementController extends Controller
                                                 $q->whereIn('course_creation_id', $creation_ids);
                                             })->where('referral_code', $code)->where('is_referral_varified', 1)->pluck('id')->unique()->toArray();
                                 $all_student_ids = array_merge($all_student_ids, $student_ids);
+                                
+                                if(isset($theCode->agent_user_id)) {
                                 $rules = AgentComissionRule::where('agent_user_id', $theCode->agent_user_id)->where('semester_id', $semester_id)->get()->first();
+                                
                                 $html .= '<tr class="cursor-pointer code_row font-medium" data-code="'.$code.'" data-semester="'.$semester_id.'">';
                                     $html .= '<td>';
                                         if($theCode->type == 'Agent'):
@@ -137,11 +140,17 @@ class AgentManagementController extends Controller
                                         $html .= '<button data-isdefault="0" data-code="'.$code.'" data-agent="'.$theCode->agent_user_id.'" data-semester="'.$semester_id.'" type="button" class="theRuleBtn btn btn-success text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="settings" class="w-4 h-4"></i></button>';
                                     $html .= '</td>';
                                 $html .= '</tr>';
+                                } else {
+                                    $html .= '<tr class="cursor-pointer code_row font-medium">';
+                                                '<td colspan="6">'".$code."' - This code does not match the referral code. </td>';
+                                    $html .= '</tr>';
+                                }
                             endforeach;
                         endif;
                         if(!empty($defaultAgentsCodes)):
                             foreach($defaultAgentsCodes as $code):
                                 $theCode = ReferralCode::where('code', $code)->get()->first();
+                            if(isset($theCode->agent_user_id)) {    
                                 $rules = AgentComissionRule::where('agent_user_id', $theCode->agent_user_id)->where('semester_id', $semester_id)->get()->first();
                                 $html .= '<tr class="cursor-pointer code_row font-medium" data-code="'.$code.'" data-semester="'.$semester_id.'">';
                                     $html .= '<td>';
@@ -168,6 +177,11 @@ class AgentManagementController extends Controller
                                         $html .= '<button data-isdefault="1" data-code="'.$code.'" data-agent="'.$theCode->agent_user_id.'" data-semester="'.$semester_id.'" type="button" class="theRuleBtn btn btn-success text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="settings" class="w-4 h-4"></i></button>';
                                     $html .= '</td>';
                                 $html .= '</tr>';
+                            } else {
+                                $html .= '<tr class="cursor-pointer code_row font-medium">';
+                                            '<td colspan="6">'".$code."' - This code does not match the referral code. </td>';
+                                $html .= '</tr>';
+                            }
                             endforeach;
                         endif;
                     $html .= '</tbody>';
