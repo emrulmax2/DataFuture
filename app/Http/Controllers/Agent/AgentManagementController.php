@@ -142,7 +142,7 @@ class AgentManagementController extends Controller
                                 $html .= '</tr>';
                                 } else {
                                     $html .= '<tr class="cursor-pointer code_row font-medium">';
-                                                '<td colspan="6">'".$code."' - This code does not match the referral code. </td>';
+                                                $html .= '<td colspan="6">'.$code.' - This code does not match the referral code. </td>';
                                     $html .= '</tr>';
                                 }
                             endforeach;
@@ -179,7 +179,7 @@ class AgentManagementController extends Controller
                                 $html .= '</tr>';
                             } else {
                                 $html .= '<tr class="cursor-pointer code_row font-medium">';
-                                            '<td colspan="6">'".$code."' - This code does not match the referral code. </td>';
+                                            $html .= '<td colspan="6">'.$code.' - This code does not match the referral code. </td>';
                                 $html .= '</tr>';
                             }
                             endforeach;
