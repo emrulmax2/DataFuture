@@ -41,6 +41,7 @@
                                     <option value="admission">Admission</option>
                                     <option value="live">Live Student</option>
                                     <option value="hr">Human Resource</option>
+                                    <option value="document_request">Document Request / ID replacement</option>
                                 </select>
                             </div>
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
@@ -117,6 +118,11 @@
                                 <div class="form-check mr-4 mt-2 sm:mt-0">
                                     <input id="edit_phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
                                     <label class="form-check-label" for="edit_phase_hr">Human Resource</label>
+                                </div>
+                                
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="edit_phase_document_request" class="form-check-input phaseCheckboxs" name="phase[document_request]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="edit_phase_document_request">Document Request/ID Replacement</label>
                                 </div>
                             </div>
                             <div class="acc__input-error error-phase text-danger mt-2"></div>
@@ -200,6 +206,10 @@
                                 <div class="form-check mr-4 mt-2 sm:mt-0">
                                     <input id="phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
                                     <label class="form-check-label" for="phase_hr">Human Resource</label>
+                                </div>
+                                <div class="form-check mr-4 mt-2 sm:mt-0">
+                                    <input id="phase_document_request" class="form-check-input phaseCheckboxs" name="phase[document_request]" type="checkbox" value="1">
+                                    <label class="form-check-label" for="phase_document_request">Document Request/ID Replacement From Student</label>
                                 </div>
                             </div>
                             <div class="acc__input-error error-phase text-danger mt-2"></div>

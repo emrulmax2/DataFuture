@@ -74,7 +74,6 @@
                 </table>
             </div>
 
-
             <div class="grid grid-cols-12 gap-0 gap-x-6 pt-5 mt-5">
                 <div class="col-span-12 sm:col-span-6">
                     <div class="intro-x flex items-center h-10">

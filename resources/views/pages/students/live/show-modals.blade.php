@@ -649,43 +649,47 @@
         <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Add Address</h2>
+                    <h2 class="font-medium text-base mr-auto">Add Address 255</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
                 </div>
                 <div class="modal-body">
-                    <div class="grid grid-cols-12 gap-4">
+                    <div id="addressStart" class="grid grid-cols-12 gap-4 theAddressWrap" >
                         <div class="col-span-12">
-                            <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="student_address_address_line_1">
-                            <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
+                            <label for="google_address_address_line" class="form-label">Address Lookup <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Address Line 1" id="google_address_address_line" class="theAddressLookup form-control w-full" name="student_address_address_line_1">
+                            <div class="acc__input-error error-google_address_address_line text-danger mt-2"></div>
                         </div>
+                        
                         <div class="col-span-12">
-                            <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full" name="student_address_address_line_2">
+                            <label for="google_address_address_line_1" class="form-label">Address Line 1</label>
+                            <input type="text" placeholder="Address Line 2 (Optional)" id="google_address_address_line_1" class="form-control w-full address_line_1" name="student_address_address_line_2">
+                        </div>
+                        
+                        <div class="col-span-12">
+                            <label for="google_address_address_line_2" class="form-label">Address Line 2</label>
+                            <input type="text" placeholder="Address Line 2 (Optional)" id="google_address_address_line_2" class="form-control w-full address_line_2" name="student_address_address_line_2">
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full" name="student_address_city">
-                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
+                            <label for="google_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="City / Town" id="google_address_city" class="form-control w-full city" name="student_address_city">
+                            <div class="acc__input-error error-google_address_city text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_state_province_region" class="form-label">State</label>
-                            <input type="text" placeholder="State" id="student_address_state_province_region" class="form-control w-full" name="student_address_state_province_region">
+                            <label for="google_address_state_province_region" class="form-label">State</label>
+                            <input type="text" placeholder="State" id="google_address_state_province_region" class="form-control w-full state" name="student_address_state_province_region">
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full" name="student_address_postal_zip_code">
-                            <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
+                            <label for="google_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="City / Town" id="google_address_postal_zip_code" class="form-control w-full postal_code" name="student_address_postal_zip_code">
+                            <div class="acc__input-error error-google_address_postal_zip_code text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="student_address_country">
-                            <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
+                            <label for="google_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                            <input type="text" placeholder="Country" id="google_address_country" class="form-control w-full country" name="student_address_country">
+                            <div class="acc__input-error error-google_address_country text-danger mt-2"></div>
                         </div>
-                        <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-                        <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
                     </div>
                 </div>
                 <div class="modal-footer">

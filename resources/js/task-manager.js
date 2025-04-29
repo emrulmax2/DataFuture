@@ -5,6 +5,7 @@ import html2canvas from "html2canvas";
 import { saveAs } from 'file-saver';
 import Dropzone from "dropzone";
 import TomSelect from "tom-select";
+import { data } from "jquery";
 
 ("use strict");
 var taskAssignedStudentTable = (function () {
@@ -179,6 +180,14 @@ var taskAssignedStudentTable = (function () {
                                     html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
+                            if(cell.getData().student_document_request_form_id != null ){
+                                //insert data into local storage
+                                let student_documentRequest = cell.getData().student_document_request_form_id
+                                
+                                html += '<div>';
+                                        html += '<span class="font-medium">'+student_documentRequest.name+'</span>';
+                                html += '</div>';
+                            }
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
                             html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
                         return html;
@@ -218,6 +227,17 @@ var taskAssignedStudentTable = (function () {
                                                             html += '</a>';
                                                         html += '</li>';
                                                     }
+                                                    console.log(cell.getData().student_document_request_form_id);
+                                                    if(cell.getData().student_document_request_form_id != null ){
+                                                        //insert data into local storage
+                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, cell.getData().student_document_request_form_id);
+                                                        
+                                                        html += '<li>';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
+                                                                html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
                                                     if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No'){
                                                         html += '<li>';
                                                             html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
@@ -250,7 +270,7 @@ var taskAssignedStudentTable = (function () {
                                     html += '</div>';
                                 }
                             html += '</div>';
-                        }
+                        } 
 
                         return html;
                     }
@@ -398,6 +418,7 @@ var taskAssignedStudentTable = (function () {
 
     const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
     const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
+    const updateTaskDocumentRequestOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskDocumentRequestOutcomeModal"));
 
     const uploadPearsonRegConfModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadPearsonRegConfModal"));
 
@@ -889,6 +910,92 @@ var taskAssignedStudentTable = (function () {
         });
     });
 
+    $('#updateTaskDocumentRequestOutcomeForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('updateTaskDocumentRequestOutcomeForm');
+    
+        document.querySelector('#updateRequestBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateRequestBtn .loading").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('task.manager.document_request.update'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateRequestBtn').removeAttribute('disabled');
+            document.querySelector("#updateRequestBtn .loading").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                //second axios post here
+                let formDataJson = response.data.data;
+                // Create a new FormData object
+                let formData = new FormData();
+                // Ensure letter_body is a string
+                // if (formDataJson.hasOwnProperty('letter_body')) {
+                //     formDataJson.letter_body = String(formDataJson.letter_body);
+                // }
+                // Loop through the JSON object and append each key-value pair to the FormData object
+                for (var key in formDataJson) {
+                    if (formDataJson.hasOwnProperty(key)) {
+                        formData.append(key, formDataJson[key]);
+                    }
+                }
+                axios({
+                    method: "post",
+                    url: route('student.send.letter'),
+                    data: formData,
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    document.querySelector('#updateRequestBtn').removeAttribute('disabled');
+                    document.querySelector("#updateRequestBtn .loading").style.cssText = "display: none;";
+                    
+                    if (response.status == 200) {
+                        
+                        updateTaskDocumentRequestOutcomeModal.hide();
+
+                        successModal.show();
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html( "Congratulations!" );
+                            $("#successModal .successModalDesc").html('Selected student task successfully completed.');
+                        });     
+                        
+                        setTimeout(function(){
+                            successModal.hide();
+                        }, 2000);
+                    }
+                }).catch(error => {
+                    if (error.response) {
+                        if (error.response.status == 422) {
+                            for (const [key, val] of Object.entries(error.response.data.errors)) {
+                                $(`#addLetterForm .${key}`).addClass('border-danger');
+                                $(`#addLetterForm  .error-${key}`).html(val);
+                            }
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+
+            }
+            taskAssignedStudentTable.init();
+        }).catch(error => {
+            document.querySelector('#updateRequestBtn').removeAttribute('disabled');
+            document.querySelector("#updateRequestBtn .loading").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#updateTaskDocumentRequestOutcomeForm .${key}`).addClass('border-danger');
+                        $(`#updateTaskDocumentRequestOutcomeForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+
     $('#taskAssignedStudentTable').on('click', '.unlockApplicantInterview', function(e){
         e.preventDefault();
         var $btn = $(this);
@@ -1140,6 +1247,40 @@ var taskAssignedStudentTable = (function () {
         $('#uploadTaskDocumentModal [name="student_id"]').val(studentid);
         $('#uploadTaskDocumentModal [name="task_id"]').val(taskid);
         $('#uploadTaskDocumentModal [name="phase"]').val(phase);
+    });
+
+    $('#uploadTaskDocumentModal #process_doc_name').on('keyup', function(){
+        $('#uploadTaskDocumentModal input[name="display_file_name"]').val($('#uploadTaskDocumentModal #process_doc_name').val());
+    });
+
+    $('#uploadTaskDocumentModal [name="hard_copy_check_status"]').on('change', function(){
+        $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val());
+    });
+
+
+    $(document).on('click', '.updateTaskDocRequestForm', function(e){
+        var $btn = $(this); 
+        var studentTaskId = $btn.attr('data-studenttaskid');
+        //get data from local storage
+        var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
+        console.log(dataset);                                         
+        let dataSetRequest = dataset;
+        
+        // insert data into modal body
+        //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
+        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('');
+        $('#updateTaskDocumentRequestOutcomeModal #description').html('');
+
+        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
+        $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
+        $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(studentTaskId);
+        //this should be checked data
+        if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
+            $('#updateTaskDocumentRequestOutcomeModal #service_type1').prop('checked',true);
+        else
+            $('#updateTaskDocumentRequestOutcomeModal #service_type2').prop('checked',true);
+            
+
     });
 
     $('#uploadTaskDocumentModal #process_doc_name').on('keyup', function(){

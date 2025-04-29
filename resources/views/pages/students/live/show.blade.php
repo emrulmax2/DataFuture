@@ -683,24 +683,24 @@
                         <div class="col-span-12 md:col-span-8 font-medium">
                             <div class="flex justify-start items-start mb-2">
                                 <div class="text-slate-500 font-medium mr-3 mw-120">Code</div>
-                                <div class="font-medium">{{ $referral->code }}</div>
+                                <div class="font-medium">{{ (isset($referral->code) && !empty($referral->code) ? $referral->code : '') }}</div>
                             </div>
                             <div class="flex justify-start items-start mb-2">
                                 <div class="text-slate-500 font-medium mr-3 mw-120">Type</div>
-                                <div class="font-medium">{{ $referral->type }}</div>
+                                <div class="font-medium">{{ (isset($referral->type) ? $referral->type : '') }}</div>
                             </div>
                             <div class="flex justify-start items-start mb-2">
                                 <div class="text-slate-500 font-medium mr-3 mw-120">Referrer</div>
                                 <div class="font-medium">
-                                    @if($referral->type == 'Student')
+                                    @if(isset($referral->type) && $referral->type == 'Student')
                                         <span>{{ $referral->student->first_name }} {{ $referral->student->last_name }}</span><br/>
                                         <span>{{ $referral->student->users->email }}</span><br/>
                                         <span>{{ $referral->student->contact->mobile }}</span>
-                                    @elseif($referral->type == 'Agent')
+                                    @elseif(isset($referral->type) && $referral->type == 'Agent')
                                         <span>N/A</span>
                                     @else 
-                                        <span>{{ $referral->user->name }}</span><br/>
-                                        <span>{{ $referral->user->email }}</span>
+                                        <span>{{ (isset($referral->user->name) ? $referral->user->name : '') }}</span><br/>
+                                        <span>{{ (isset($referral->user->email) ? $referral->user->email : '') }}</span>
                                     @endif
                                 </div>
                             </div>
@@ -723,4 +723,5 @@
     @vite('resources/js/student-edication-qualification.js')
     @vite('resources/js/student-employment-history.js')
     @vite('resources/js/student-consent.js')
+    @vite('resources/js/address.js')
 @endsection

@@ -22,6 +22,7 @@ class StudentTask extends Model
         'task_status_id',
         'created_by',
         'updated_by',
+        'student_document_request_form_id',
     ];
 
     /**
@@ -61,5 +62,9 @@ class StudentTask extends Model
 
     public function excuse(){
         return $this->hasOne(AttendanceExcuse::class, 'student_task_id', 'id')->latestOfMany();
+    }
+
+    public function studentDocumentRequestForm(){
+        return $this->belongsTo(StudentDocumentRequestForm::class, 'student_document_request_form_id', 'id');
     }
 }

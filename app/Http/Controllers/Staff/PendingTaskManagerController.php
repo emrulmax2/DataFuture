@@ -35,6 +35,7 @@ use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
+use App\Models\StudentDocumentRequestForm;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentTask;
@@ -57,8 +58,12 @@ use Illuminate\Support\Str;
 
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
+use App\Traits\GenerateStudentLetterTrait;
+
 class PendingTaskManagerController extends Controller
 {
+    
+
     public function index()
     {
         $userData = \Auth::guard('web')->user();
@@ -271,9 +276,14 @@ class PendingTaskManagerController extends Controller
                 $i = 1;
                 foreach($Query as $list):
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
+                    
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
+                    
+                    $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? 1 : 0);
+                    
+
                     if($status != 'Pending'):
                         $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
@@ -301,6 +311,46 @@ class PendingTaskManagerController extends Controller
                             endforeach;
                         $taskDownloads .= '</div>';
                     endif;
+                    if($sudentTaskDocumentRequest) {
+                        $StudentWiseDoucmentRequestList = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get();
+                        
+                        foreach($StudentWiseDoucmentRequestList as $key => $value) {
+                            $documentRequest = $value->studentDocumentRequestForm;
+                            $documentRequest->letterSet;
+                            $data[] = [
+                                'id' => $list->id,
+                                'sl' => $i,
+                                'registration_no' => (empty($list->registration_no) ? $list->id : $list->registration_no),
+                                'first_name' => $list->first_name,
+                                'last_name' => $list->last_name,
+                                'date_of_birth'=> (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : ''),
+                                'course'=> (isset($list->course->creation->course->name) && !empty($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                                'semester'=> (isset($list->course->creation->semester->name) && !empty($list->course->creation->semester->name) ? $list->course->creation->semester->name : ''),
+                                'sex_identifier_id'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                                'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
+                                'url' => route('student.show', $list->id),
+                                'task_id' => $task_id,
+                                'task_created_by' => $createOrUpdateBy,
+                                'task_created' => $createOrUpdate,
+                                'task_status' => $status,
+                                'ids' => $list->id,
+                                'phase' => $phase,
+                                'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
+                                'interview' => [],
+                                'has_task_status' => ($task->interview != 'Yes' && isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
+                                'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
+                                'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
+                                'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
+                                'downloads' => $taskDownloads,
+                                'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
+                                'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
+                                'student_document_request_form_id' => $documentRequest,
+                            ];
+                            
+                        $i++;
+                        }
+                    }
+                    else
                     $data[] = [
                         'id' => $list->id,
                         'sl' => $i,
@@ -327,7 +377,8 @@ class PendingTaskManagerController extends Controller
                         'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                         'downloads' => $taskDownloads,
                         'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
-                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0)
+                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
+                        'student_document_request_form_id' => null,
                     ];
                     $i++;
                 endforeach;
@@ -1047,6 +1098,40 @@ class PendingTaskManagerController extends Controller
         else:
             return response()->json(['msg' => 'Form validation error found!'], 405);
         endif;
+    }
+    public function updateStudentDocumentRequst(Request $request){
+
+
+        $id = $request->student_task_id;
+
+        $email_sent = (isset($request->email_sent) && $request->email_sent > 0 ? 'Sent' : 'N/A');
+
+        $studentTask = StudentTask::find($id);
+        $studentTask->status = 'Completed';
+        $studentTask->updated_by = auth()->user()->id;     
+
+        //$studentTask->save();
+
+        $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
+
+        $studentTaskDoucmentRequest->status = 'Approved';
+        $studentTaskDoucmentRequest->email_sent = $email_sent;
+        $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
+        
+        //if($studentTaskDoucmentRequest->save()) {
+            $data = [
+                'letter_set_id' => $studentTaskDoucmentRequest->letter_set_id,
+                'send_in_email' =>  ($email_sent == 'Sent') ? 1 : 0,
+                'issued_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'student_id' => $studentTaskDoucmentRequest->student_id,
+                'letter_body' => LetterSet::find($studentTaskDoucmentRequest->letter_set_id)->description,
+                'comon_smtp_id' => 4,
+                'created_by' => auth()->user()->id,
+                //'signatory_id'
+            ];
+
+            return response()->json(['msg' => 'Document request successfully approved.','data'=>$data], 200);
+        //}
     }
 
     public function updateBulkStatus(BulkStatusUpdateReqest $request){

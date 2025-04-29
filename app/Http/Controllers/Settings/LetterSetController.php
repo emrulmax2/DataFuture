@@ -77,6 +77,7 @@ class LetterSetController extends Controller
                     'admission' => (isset($list->admission) && $list->admission > 0 ? $list->admission : 0),
                     'live' => (isset($list->live) && $list->live > 0 ? $list->live : 0),
                     'hr' => (isset($list->hr) && $list->hr > 0 ? $list->hr : 0),
+                    'document_request' => (isset($list->document_request) && $list->document_request > 0 ? $list->document_request : 0),
                     'status' => (isset($list->status) && $list->status > 0 ? $list->status : 0),
                     'deleted_at' => $list->deleted_at
                 ];
@@ -102,6 +103,7 @@ class LetterSetController extends Controller
             'admission' => (isset($phase['admission']) && $phase['admission'] > 0 ? $phase['admission'] : 0),
             'live' => (isset($phase['live']) && $phase['live'] > 0 ? $phase['live'] : 0),
             'hr' => (isset($phase['hr']) && $phase['hr'] > 0 ? $phase['hr'] : 0),
+            'document_request' => (isset($phase['document_request']) && $phase['document_request'] > 0 ? $phase['document_request'] : 0),
             'status' => (isset($request->status) && $request->status > 0 ? $request->status : 0),
             'created_by' => auth()->user()->id
         ]);
@@ -158,6 +160,7 @@ class LetterSetController extends Controller
             'admission' => (isset($phase['admission']) && $phase['admission'] > 0 ? $phase['admission'] : 0),
             'live' => (isset($phase['live']) && $phase['live'] > 0 ? $phase['live'] : 0),
             'hr' => (isset($phase['hr']) && $phase['hr'] > 0 ? $phase['hr'] : 0),
+            'document_request' => (isset($phase['document_request']) && $phase['document_request'] > 0 ? $phase['document_request'] : 0),
             'status' => (isset($request->status) && $request->status > 0 ? $request->status : 0),
             'updated_by' => $letterSetId,
         ]);

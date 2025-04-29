@@ -223,7 +223,7 @@ class TermAttendancePerformanceReportController extends Controller
     }
 
     public function getTermCourseAttendance($term_id, $course_id){
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where('course_id', $course_id)->pluck('id')->unique()->toArray();
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->pluck('id')->unique()->toArray();
         $student_ids = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
 
         $query = DB::table('attendances as atn')
@@ -246,6 +246,7 @@ class TermAttendancePerformanceReportController extends Controller
                 ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                 ->leftJoin('groups as gr', 'pln.group_id', 'gr.id')
                 ->leftJoin('students as std', 'atn.student_id', 'std.id')
+                ->where('pln.course_id', $course_id)
                 ->whereIn('atn.plan_id', $plan_ids)
                 ->whereIn('atn.student_id', $student_ids)
                 ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
@@ -362,7 +363,7 @@ class TermAttendancePerformanceReportController extends Controller
         $group = Group::find($group_id);
         $group_ids = Group::where('name', $group->name)->where('course_id', $course_id)->where('term_declaration_id', $term_id)->pluck('id')->unique()->toArray();
 
-        $plan_ids = Plan::where('term_declaration_id', $term_id)->where('course_id', $course_id)->whereIn('group_id', $group_ids)->pluck('id')->unique()->toArray();
+        $plan_ids = Plan::where('term_declaration_id', $term_id)->pluck('id')->unique()->toArray();
         $student_ids = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
 
         $query = DB::table('attendances as atn')
@@ -387,6 +388,8 @@ class TermAttendancePerformanceReportController extends Controller
                 ->leftJoin('students as std', 'atn.student_id', 'std.id')
                 ->whereIn('atn.plan_id', $plan_ids)
                 ->whereIn('atn.student_id', $student_ids)
+                ->where('pln.course_id', $course_id)
+                ->whereIn('pln.group_id', $group_ids)
                 ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                 ->groupBy('pln.module_creation_id')->orderBy('mc.module_name', 'ASC')->get();
         return $query;

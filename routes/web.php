@@ -305,6 +305,7 @@ use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\Student\StudentPerformanceController;
 use App\Http\Controllers\Student\WorkPlacementController;
 use App\Http\Controllers\StudentApplicationPrintController;
+use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -347,6 +348,8 @@ Route::controller(StudentController::class)->group(function() {
 // Route::controller(CoursCreationController::class)->group(function() {
 //     Route::get('global/course-creation/edit/{id}', 'edit')->name('global.course.creation.edit');
 // });
+
+
 
 Route::controller(EmployeeAttendancePunchController::class)->group(function(){
     Route::get('punch', 'index')->name('attendance.punch');
@@ -560,6 +563,8 @@ Route::prefix('/students')->name('students.')->group(function() {
         
     });
 
+
+
     Route::middleware('auth.students')->group(function() {
 
         Route::get('logout', [StudentLoginController::class, 'logout'])->name('logout');
@@ -574,6 +579,16 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
             Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 
+        });
+
+        Route::controller(StudentDocumentRequestFormController::class)->group(function() {
+
+            Route::get('document-request-form', 'index')->name('document-request-form.index'); 
+            Route::get('document-request-form/list', 'list')->name('document-request-form.list'); 
+            Route::post('document-request-form/store', 'store')->name('document-request-form.store');
+            Route::get('document-request-form/edit/{id}', 'edit')->name('document-request-form.edit');
+            Route::post('document-request-form/update', 'update')->name('document-request-form.update');
+            Route::delete('document-request-form/delete/{id}', 'destroy')->name('document-request-form.destory');
         });
         Route::controller(StudentController::class)->group(function() {
 
@@ -2858,6 +2873,10 @@ Route::middleware('auth')->group(function() {
         
         Route::post('task-manager/upload-pearson-registration-confirmation', 'uploadPearsonRegistrationConfirmation')->name('student.process.upload.registration.confirmations');
         Route::post('task-manager/update-bulk-status', 'updateBulkStatus')->name('task.manager.update.bulk.status');
+
+        
+
+        Route::post('task-manager/student-document-request-status', 'updateStudentDocumentRequst')->name('task.manager.document_request.update');
     });
 
     Route::controller(AssignController::class)->group(function() {

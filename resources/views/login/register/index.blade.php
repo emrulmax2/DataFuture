@@ -266,6 +266,6 @@
             } else {
                 return strength;
             }
-            }
+        }
     </script>
 @endsection

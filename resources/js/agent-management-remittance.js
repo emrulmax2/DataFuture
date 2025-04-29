@@ -136,9 +136,9 @@ var agentRemittanceListTable = (function () {
                     width: "180",
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        btns +='<a href="'+cell.getData().url+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                        btns +='<a href="'+cell.getData().url+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye-off" class="lucide lucide-eye-off w-4 h-4"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line></svg></a>';
                         btns += '<div class="dropdown inline-flex ml-1">\
-                                    <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></button>\
+                                    <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="cloud-lightning" class="lucide lucide-cloud-lightning w-4 h-4"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973"></path><path d="m13 12-3 5h4l-3 5"></path></svg></button>\
                                     <div class="dropdown-menu w-40">\
                                         <ul class="dropdown-content">\
                                             <li>\

@@ -43,6 +43,8 @@ class LetterController extends Controller
     }
 
     public function store(SendLetterRequest $request){
+
+        
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
@@ -76,7 +78,7 @@ class LetterController extends Controller
         $attachmentFiles = [];
         if($letter):
             $generatedLetter = $this->generateLetter($student_id, $letter_title, $letter_body, $issued_date, $pin, $signatory_id);
-
+            
             $data = [];
             $data['student_id'] = $student_id;
             $data['student_letter_id'] = $letter->id;
@@ -88,7 +90,7 @@ class LetterController extends Controller
             $data['created_by'] = auth()->user()->id;
             $letterDocument = StudentLettersDocument::create($data);
             /* Generate PDF End */
-
+            
             if($send_in_email == 1):
                 $signatoryHTML = '';
                 if($signatory_id > 0):
@@ -141,8 +143,19 @@ class LetterController extends Controller
                     $sendTo[] = $student->contact->personal_email;
                 endif;
                 $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
-
+                
+                // $configuration = [
+                //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                //     'smtp_port' => '25',
+                //     'smtp_username' => 'e8ae09cfefd325',
+                //     'smtp_password' => 'ce7fa44b28281d',
+                //     'smtp_encryption' => 'tls',
+                    
+                //     'from_email'    => 'no-reply@lcc.ac.uk',
+                //     'from_name'    =>  'London Churchill College',
+                // ];
                 UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
+                
             endif;
 
             return response()->json(['message' => 'Letter successfully generated and distributed.'], 200);

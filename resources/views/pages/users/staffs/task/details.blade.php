@@ -300,6 +300,70 @@
     </div>
     <!-- END: Update Outcome Modal -->
 
+    
+
+    <!-- BEGIN: Update Outcome Modal -->
+    <div id="updateTaskDocumentRequestOutcomeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="updateTaskDocumentRequestOutcomeForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Update Document Request</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label for="letter_set_id" class="form-label">Requested Document <span class="text-danger">*</span></label>
+                            <select id="letter_set_id" name="letter_set_id" class="form-control w-full"></select>
+                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 description">
+                            <label for="description" class="form-label">Other request or comments <span class="text-danger">*</span></label>
+                            <div id="description" class="w-full h-24 border border-slate-200 px-3 py-3 rounded-md"></div>
+                            
+                            <div class="acc__input-error error-description text-danger mt-2"></div>
+                        </div>
+                        <div>
+                            <div class="font-medium text-base">Service requested <span class="text-danger">*</span></div>
+                            
+                                <div class="form-check mr-2  my-3">
+                                    <input id="service_type1" class="form-check-input" type="radio" name="service_type" value="Same Day (cost £10.00)">
+                                    <label class="form-check-label" for="service_type1">Same Day (cost £10.00)</label>
+                                </div>
+                                <div class="form-check mr-2 my-3 sm:mt-0">
+                                    <input id="service_type2" class="form-check-input" type="radio" name="service_type" value="3 Working Days (Free)">
+                                    <label class="form-check-label" for="service_type2">3 Working Days (Free)</label>
+                                </div>
+                            <div class="acc__input-error error-service_type text-danger mt-2"></div>
+                        </div>   
+                    </div>
+                    <div class="modal-footer">
+                        <!--implement a email sending checkbox here-->
+                        <div class="flex justify-between">
+                            <div class="form-check mr-2 my-3 sm:mt-0 flex justify-start items-center">
+                                <input id="email_sent" class="form-check-input" type="checkbox" name="email_sent" value="1">
+                                <label class="form-check-label" for="email_sent">Send Email</label>
+                            </div>
+                            <div class="form-check mr-2 my-3 sm:mt-0 flex justify-end items-center">
+                                <button type="submit" id="updateRequestBtn" data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&:hover:not(:disabled)]:bg-success/10 mb-2 mr-1 w-52">
+                                    <i data-lucide="check-circle"   class="w-4 h-4 mr-2 text-success "></i> Mark As Completed
+                                    <i data-loading-icon="oval" class="w-4 h-4 loading ml-1 hidden"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="student_id" value="0"/>
+                        <input type="hidden" name="task_id" value="0"/>
+                        <input type="hidden" name="phase" value=""/>
+                        <input id="#request_id" type="hidden" name="student_task_id" value="" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Update Outcome Modal -->
+    
     <!-- BEGIN: Import Modal -->
     <div id="uploadTaskDocumentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
