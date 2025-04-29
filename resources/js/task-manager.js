@@ -180,6 +180,14 @@ var taskAssignedStudentTable = (function () {
                                     html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
+                            if(cell.getData().student_document_request_form_id != null ){
+                                //insert data into local storage
+                                let student_documentRequest = cell.getData().student_document_request_form_id
+                                
+                                html += '<div>';
+                                        html += '<span class="font-medium"> <i data-lucide="award" class="w-4 h-4 mr-2"></i>'+student_documentRequest.name+'</span>';
+                                html += '</div>';
+                            }
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
                             html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
                         return html;
@@ -224,22 +232,8 @@ var taskAssignedStudentTable = (function () {
                                                         //insert data into local storage
                                                         localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, cell.getData().student_document_request_form_id);
                                                         
-                                                        let dataSetRequest = cell.getData().student_document_request_form_id;
-                                                        
-                                                        // insert data into modal body
-                                                        //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
-                                                        
-                                                        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
-                                                        $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
-                                                        $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(cell.getData().student_task_id);
-                                                        //this should be checked data
-                                                        if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
-                                                            $('#updateTaskDocumentRequestOutcomeModal #service_type1').prop('checked',true);
-                                                        else
-                                                            $('#updateTaskDocumentRequestOutcomeModal #service_type2').prop('checked',true);
-                                                            
                                                         html += '<li>';
-                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class=" dropdown-item">';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                 html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
                                                             html += '</a>';
                                                         html += '</li>';
@@ -1253,6 +1247,40 @@ var taskAssignedStudentTable = (function () {
         $('#uploadTaskDocumentModal [name="student_id"]').val(studentid);
         $('#uploadTaskDocumentModal [name="task_id"]').val(taskid);
         $('#uploadTaskDocumentModal [name="phase"]').val(phase);
+    });
+
+    $('#uploadTaskDocumentModal #process_doc_name').on('keyup', function(){
+        $('#uploadTaskDocumentModal input[name="display_file_name"]').val($('#uploadTaskDocumentModal #process_doc_name').val());
+    });
+
+    $('#uploadTaskDocumentModal [name="hard_copy_check_status"]').on('change', function(){
+        $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val());
+    });
+
+
+    $(document).on('click', '.updateTaskDocRequestForm', function(e){
+        var $btn = $(this); 
+        var studentTaskId = $btn.attr('data-studenttaskid');
+        //get data from local storage
+        var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
+        console.log(dataset);
+        var cell = JSON.parse(dataset);
+        console.log(cell);                                             
+        let dataSetRequest = cell;
+        
+        // insert data into modal body
+        //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
+        
+        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
+        $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
+        $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(cell.getData().student_task_id);
+        //this should be checked data
+        if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
+            $('#updateTaskDocumentRequestOutcomeModal #service_type1').prop('checked',true);
+        else
+            $('#updateTaskDocumentRequestOutcomeModal #service_type2').prop('checked',true);
+            
+
     });
 
     $('#uploadTaskDocumentModal #process_doc_name').on('keyup', function(){
