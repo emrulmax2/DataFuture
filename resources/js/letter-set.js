@@ -47,6 +47,15 @@ var letterSettingsListTable = (function () {
                     }
                 },
                 {
+                    title: "Document Requests",
+                    field: "document_request",
+                    headerHozAlign: "left",
+                    width: "100",
+                    formatter(cell, formatterParams) {
+                        return '<div class="form-check form-switch"><input data-phase="document_request" data-id="'+cell.getData().id+'" '+(cell.getData().document_request == 1 ? 'Checked' : '')+' value="'+cell.getData().document_request+'" type="checkbox" class="updatePhase form-check-input"> </div>';
+                    }
+                },
+                {
                     title: "Admission",
                     field: "admission",
                     headerHozAlign: "left",

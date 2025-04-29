@@ -35,6 +35,7 @@ use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
+use App\Models\StudentDocumentRequestForm;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentTask;
@@ -57,8 +58,12 @@ use Illuminate\Support\Str;
 
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
+use App\Traits\GenerateStudentLetterTrait;
+
 class PendingTaskManagerController extends Controller
 {
+    
+
     public function index()
     {
         $userData = \Auth::guard('web')->user();
@@ -274,6 +279,10 @@ class PendingTaskManagerController extends Controller
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
+                    $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? $theStudentTask->studentDocumentRequestForm : 0);
+                    if($sudentTaskDocumentRequest) {
+                        $sudentTaskDocumentRequest->letterSet;
+                    }
                     if($status != 'Pending'):
                         $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
@@ -327,7 +336,8 @@ class PendingTaskManagerController extends Controller
                         'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                         'downloads' => $taskDownloads,
                         'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
-                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0)
+                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
+                        'student_document_request_form_id' => $sudentTaskDocumentRequest,
                     ];
                     $i++;
                 endforeach;
@@ -1047,6 +1057,40 @@ class PendingTaskManagerController extends Controller
         else:
             return response()->json(['msg' => 'Form validation error found!'], 405);
         endif;
+    }
+    public function updateStudentDocumentRequst(Request $request){
+
+
+        $id = $request->student_task_id;
+
+        $email_sent = (isset($request->email_sent) && $request->email_sent > 0 ? 'Sent' : 'N/A');
+
+        $studentTask = StudentTask::find($id);
+        $studentTask->status = 'Completed';
+        $studentTask->updated_by = auth()->user()->id;     
+
+        //$studentTask->save();
+
+        $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
+
+        $studentTaskDoucmentRequest->status = 'Approved';
+        $studentTaskDoucmentRequest->email_sent = $email_sent;
+        $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
+        
+        //if($studentTaskDoucmentRequest->save()) {
+            $data = [
+                'letter_set_id' => $studentTaskDoucmentRequest->letter_set_id,
+                'send_in_email' =>  ($email_sent == 'Sent') ? 1 : 0,
+                'issued_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                'student_id' => $studentTaskDoucmentRequest->student_id,
+                'letter_body' => LetterSet::find($studentTaskDoucmentRequest->letter_set_id)->description,
+                'comon_smtp_id' => 4,
+                'created_by' => auth()->user()->id,
+                //'signatory_id'
+            ];
+
+            return response()->json(['msg' => 'Document request successfully approved.','data'=>$data], 200);
+        //}
     }
 
     public function updateBulkStatus(BulkStatusUpdateReqest $request){

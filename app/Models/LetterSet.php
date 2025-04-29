@@ -15,6 +15,7 @@ class LetterSet extends Model
         'letter_title',
         'description',
         'admission',
+        'document_request',
         'live',
         'hr',
         'status',

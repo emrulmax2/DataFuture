@@ -371,8 +371,10 @@ export default defineConfig({
                 'resources/js/agent-management-payments.js',
                 'resources/js/agent-management-payment-details.js',
                 'resources/js/student-archives.js',
+                'resources/js/address_lookup.js',
 
                 'resources/js/marketing-reports.js',
+                'resources/js/document-requests.js'
 
             ],
             refresh: true,

@@ -448,7 +448,8 @@
     </div>
     <!-- END: Warning Modal Content -->
 
-    <!-- BEGIN: Address Modal -->
+
+
     <div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
@@ -463,8 +464,8 @@
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12">
                                 <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="address_line_1">
-                                <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
+                                <input type="text" placeholder="Address Line 1" id="address_address_line_1" class="form-control w-full" name="address_line_1">
+                                <div class="acc__input-error error-address_address_line_1 text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12">
                                 <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
@@ -513,9 +514,77 @@
             </form>
         </div>
     </div>
-    <!-- END: Address Modal -->
+    <style>
+        
+
+        #address-place   .sb-title {
+  position: relative;
+  top: -12px;
+  font-family: Roboto, sans-serif;
+  font-weight: 500;
+}
+
+#address-place .sb-title-icon {
+  position: relative;
+  top: -5px;
+}
+
+gmpx-split-layout {
+  height: 500px;
+  width: 600px;
+}
+
+gmpx-split-layout:not(:defined) {
+  visibility: hidden;
+}
+
+#address-place .panel {
+  background: white;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+#address-place .half-input-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+#address-place .half-input {
+  max-width: 120px;
+}
+
+#address-place h2 {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+}
+
+#address-place input {
+  height: 30px;
+}
+
+#address-place input {
+  border: 0;
+  border-bottom: 1px solid black;
+  font-size: 14px;
+  font-family: Roboto, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+}
+
+#address-place input:focus::placeholder {
+  color: white;
+}
+    </style>
 @endsection
 
 @section('script')
     @vite('resources/js/employee-data-collection-form.js')
+    <script type="module">
+
+    </script>
 @endsection

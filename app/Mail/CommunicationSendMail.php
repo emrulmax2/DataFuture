@@ -45,6 +45,7 @@ class CommunicationSendMail extends Mailable
      */
     public function content()
     {
+         
         return new Content(
             view: 'emails.communication-email',
             with: [

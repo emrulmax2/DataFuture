@@ -723,4 +723,5 @@
     @vite('resources/js/student-edication-qualification.js')
     @vite('resources/js/student-employment-history.js')
     @vite('resources/js/student-consent.js')
+    @vite('resources/js/address.js')
 @endsection
