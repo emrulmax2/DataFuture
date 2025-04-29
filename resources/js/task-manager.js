@@ -180,6 +180,18 @@ var taskAssignedStudentTable = (function () {
                                     html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
+                            html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
+                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
+                        return html;
+                    }
+                },
+                {
+                    title: "Task Type",
+                    field: "student_document_request_form_id",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        let html = '';
                             if(cell.getData().student_document_request_form_id != null ){
                                 //insert data into local storage
                                 let student_documentRequest = cell.getData().student_document_request_form_id
@@ -188,8 +200,6 @@ var taskAssignedStudentTable = (function () {
                                         html += '<span class="font-medium">'+student_documentRequest.name+'</span>';
                                 html += '</div>';
                             }
-                            html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
-                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
                         return html;
                     }
                 },
@@ -230,8 +240,14 @@ var taskAssignedStudentTable = (function () {
                                                     console.log(cell.getData().student_document_request_form_id);
                                                     if(cell.getData().student_document_request_form_id != null ){
                                                         //insert data into local storage
-                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, cell.getData().student_document_request_form_id);
+                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
                                                         
+                                                        
+                                                        html += '<li>';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
+                                                                html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
+                                                            html += '</a>';
+                                                        html += '</li>';
                                                         html += '<li>';
                                                             html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                 html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
@@ -1263,9 +1279,10 @@ var taskAssignedStudentTable = (function () {
         var studentTaskId = $btn.attr('data-studenttaskid');
         //get data from local storage
         var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
-        console.log(dataset);                                         
-        let dataSetRequest = dataset;
+                          
+        const dataSetRequest = JSON.parse(dataset);                      
         
+        console.log(dataSetRequest);  
         // insert data into modal body
         //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
         $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('');

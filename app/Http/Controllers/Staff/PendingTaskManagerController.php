@@ -28,6 +28,7 @@ use App\Models\CourseCreation;
 use App\Models\LetterSet;
 use App\Models\Plan;
 use App\Models\ProcessList;
+use App\Models\Signatory;
 use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
@@ -59,6 +60,7 @@ use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 use App\Traits\GenerateStudentLetterTrait;
+use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Sign;
 
 class PendingTaskManagerController extends Controller
 {
@@ -74,7 +76,7 @@ class PendingTaskManagerController extends Controller
                 ['label' => 'Task Manager', 'href' => 'javascript:void(0);'],
             ],
             'user' => $userData,
-            'mytasks' => $this->getUserPendingTask()
+            'mytasks' => $this->getUserPendingTask(),
         ]);
     }
 
@@ -109,7 +111,10 @@ class PendingTaskManagerController extends Controller
             'task' => TaskList::find($id),
             'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
-            'terms' => TermDeclaration::orderBy('id', 'DESC')->get()
+            'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            
+            'signatory' => Signatory::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'letterSet' => LetterSet::where('active', 1)->where('document_request',1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 
