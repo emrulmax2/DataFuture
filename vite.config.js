@@ -374,7 +374,8 @@ export default defineConfig({
                 'resources/js/address_lookup.js',
 
                 'resources/js/marketing-reports.js',
-                'resources/js/document-requests.js'
+                'resources/js/document-requests.js',
+                'resources/js/address.js',
 
             ],
             refresh: true,
