@@ -144,16 +144,16 @@ class LetterController extends Controller
                 endif;
                 $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
                 
-                $configuration = [
-                    'smtp_host' => 'sandbox.smtp.mailtrap.io',
-                    'smtp_port' => '25',
-                    'smtp_username' => 'e8ae09cfefd325',
-                    'smtp_password' => 'ce7fa44b28281d',
-                    'smtp_encryption' => 'tls',
+                // $configuration = [
+                //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                //     'smtp_port' => '25',
+                //     'smtp_username' => 'e8ae09cfefd325',
+                //     'smtp_password' => 'ce7fa44b28281d',
+                //     'smtp_encryption' => 'tls',
                     
-                    'from_email'    => 'no-reply@lcc.ac.uk',
-                    'from_name'    =>  'London Churchill College',
-                ];
+                //     'from_email'    => 'no-reply@lcc.ac.uk',
+                //     'from_name'    =>  'London Churchill College',
+                // ];
                 UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($letter_title, $emailHTML, $attachmentFiles));
                 
             endif;
