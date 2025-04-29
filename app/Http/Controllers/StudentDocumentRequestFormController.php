@@ -190,7 +190,7 @@ class StudentDocumentRequestFormController extends Controller
             ->where('letter_set_id', $request->letter_set_id)
             ->where('status', 'Pending')
             ->get()->first();
-        if(!isset($studentDocumentRequestForm->id)){
+        if(isset($studentDocumentRequestForm->id)){
             return response()->json([
                 'status' => 'error',
                 'message' => 'Document request form already submitted for this term. Please check your request history.',
