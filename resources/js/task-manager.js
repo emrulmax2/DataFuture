@@ -222,15 +222,15 @@ var taskAssignedStudentTable = (function () {
                                                     console.log(cell.getData().student_document_request_form_id);
                                                     if(cell.getData().student_document_request_form_id != null ){
                                                         //insert data into local storage
-                                                        localStorage.setItem('student_document_request_form', cell.getData().student_document_request_form_id);
+                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, cell.getData().student_document_request_form_id);
                                                         
                                                         let dataSetRequest = cell.getData().student_document_request_form_id;
-                                                        console.log(dataSetRequest);
+                                                        
                                                         // insert data into modal body
                                                         //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
                                                         
                                                         $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
-                                                        $('#updateTaskDocumentRequestOutcomeModal #description').html(''+dataSetRequest.letter_set.description+'');
+                                                        $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
                                                         $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(cell.getData().student_task_id);
                                                         //this should be checked data
                                                         if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
