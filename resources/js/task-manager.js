@@ -185,7 +185,7 @@ var taskAssignedStudentTable = (function () {
                                 let student_documentRequest = cell.getData().student_document_request_form_id
                                 
                                 html += '<div>';
-                                        html += '<span class="font-medium"> <i data-lucide="award" class="w-4 h-4 mr-2"></i>'+student_documentRequest.name+'</span>';
+                                        html += '<span class="font-medium">'+student_documentRequest.name+'</span>';
                                 html += '</div>';
                             }
                             html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
@@ -1263,17 +1263,17 @@ var taskAssignedStudentTable = (function () {
         var studentTaskId = $btn.attr('data-studenttaskid');
         //get data from local storage
         var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
-        console.log(dataset);
-        var cell = JSON.parse(dataset);
-        console.log(cell);                                             
-        let dataSetRequest = cell;
+        console.log(dataset);                                         
+        let dataSetRequest = dataset;
         
         // insert data into modal body
         //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
-        
+        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('');
+        $('#updateTaskDocumentRequestOutcomeModal #description').html('');
+
         $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
         $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
-        $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(cell.getData().student_task_id);
+        $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(studentTaskId);
         //this should be checked data
         if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
             $('#updateTaskDocumentRequestOutcomeModal #service_type1').prop('checked',true);
