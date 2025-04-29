@@ -914,7 +914,7 @@ class AgentManagementController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AgentComission::with('comissions');
+        $query = AgentComission::with('comissions')->orderByRaw(implode(',', $sorts));
         if(!empty($querystr)):
             $query->where(function($q) use($querystr){
                 $q->where('remittance_ref','LIKE','%'.$querystr.'%');
