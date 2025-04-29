@@ -276,13 +276,23 @@ class PendingTaskManagerController extends Controller
                 $i = 1;
                 foreach($Query as $list):
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
+                    
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
-                    $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? $theStudentTask->studentDocumentRequestForm : 0);
+                    
+                    $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? 1 : 0);
                     if($sudentTaskDocumentRequest) {
-                        $sudentTaskDocumentRequest->letterSet;
+
+                        $StudentWiseDoucmentRequestList = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get();
+                        $documentRequestSet = [];
+                        foreach($StudentWiseDoucmentRequestList as $key => $value) {
+                            $dataRequest = $value->studentDocumentRequestForm;
+                            $dataRequest->letterSet;
+                            $documentRequestSet[] = $dataRequest;
+                        }
                     }
+
                     if($status != 'Pending'):
                         $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
@@ -337,7 +347,7 @@ class PendingTaskManagerController extends Controller
                         'downloads' => $taskDownloads,
                         'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
                         'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
-                        'student_document_request_form_id' => $sudentTaskDocumentRequest,
+                        'student_document_request_form_id' => $documentRequestSet,
                     ];
                     $i++;
                 endforeach;
