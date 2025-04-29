@@ -378,7 +378,7 @@ class PendingTaskManagerController extends Controller
                         'downloads' => $taskDownloads,
                         'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
                         'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
-                        'student_document_request_form_id' => $documentRequestSet,
+                        'student_document_request_form_id' => null,
                     ];
                     $i++;
                 endforeach;
