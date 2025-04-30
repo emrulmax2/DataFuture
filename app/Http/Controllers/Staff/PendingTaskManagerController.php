@@ -113,8 +113,9 @@ class PendingTaskManagerController extends Controller
             'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get(),
             'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
             
-            'signatory' => Signatory::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'letterSet' => LetterSet::where('active', 1)->where('document_request',1)->orderBy('name', 'ASC')->get(),
+            'signatory' => Signatory::orderBy('signatory_name', 'ASC')->get(),
+            'letterSet' => LetterSet::where('status', 1)->where('document_request',1)->orderBy('letter_title', 'ASC')->get(),
+            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
         ]);
     }
 
@@ -242,7 +243,7 @@ class PendingTaskManagerController extends Controller
         else:
             $student_ids = StudentTask::where('task_list_id', $task_id)->where('status', $status)->pluck('student_id')->unique()->toArray();
 
-            $Query = Student::whereIn('id', $student_ids);
+            $Query = Student::with('title')->whereIn('id', $student_ids);
             if($courses > 0):
                 $courseCreations = CourseCreation::where('course_id', $courses)->pluck('id')->unique()->toArray();
                 if(!empty($courseCreations)):
@@ -322,12 +323,14 @@ class PendingTaskManagerController extends Controller
                         foreach($StudentWiseDoucmentRequestList as $key => $value) {
                             $documentRequest = $value->studentDocumentRequestForm;
                             $documentRequest->letterSet;
+                            
                             $data[] = [
                                 'id' => $list->id,
                                 'sl' => $i,
                                 'registration_no' => (empty($list->registration_no) ? $list->id : $list->registration_no),
                                 'first_name' => $list->first_name,
                                 'last_name' => $list->last_name,
+                                'full_name' => $list->title->name.' '.$list->first_name.' '.$list->last_name,
                                 'date_of_birth'=> (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : ''),
                                 'course'=> (isset($list->course->creation->course->name) && !empty($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                                 'semester'=> (isset($list->course->creation->semester->name) && !empty($list->course->creation->semester->name) ? $list->course->creation->semester->name : ''),
@@ -350,6 +353,7 @@ class PendingTaskManagerController extends Controller
                                 'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
                                 'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
                                 'student_document_request_form_id' => $documentRequest,
+                                
                             ];
                             
                         $i++;
@@ -1105,38 +1109,88 @@ class PendingTaskManagerController extends Controller
         endif;
     }
     public function updateStudentDocumentRequst(Request $request){
-
+        //enum('Pending', 'In Progress', 'Approved', 'Rejected')
+        $this->validate($request, [
+            'status' => 'required|string',
+            'description'   => 'required|string',
+        ]);
 
         $id = $request->student_task_id;
 
         $email_sent = (isset($request->email_sent) && $request->email_sent > 0 ? 'Sent' : 'N/A');
-
+        //enum('Pending', 'In Progress', 'Completed', 'Canceled')
         $studentTask = StudentTask::find($id);
-        $studentTask->status = 'Completed';
+        $student = Student::find($studentTask->student_id);
+        if($request->status != 'Approved' && $request->status != 'Rejected'):
+
+            $studentTask->status = $request->status;
+
+        elseif($request->status == 'Approved'):
+
+            $studentTask->status = 'In Progress';
+        else:
+            $studentTask->status = 'Canceled';
+        endif;
         $studentTask->updated_by = auth()->user()->id;     
 
-        //$studentTask->save();
+        $studentTask->save();
 
         $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
-
-        $studentTaskDoucmentRequest->status = 'Approved';
+        $studentTaskDoucmentRequest->status = $request->status;
         $studentTaskDoucmentRequest->email_sent = $email_sent;
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
         
-        //if($studentTaskDoucmentRequest->save()) {
-            $data = [
-                'letter_set_id' => $studentTaskDoucmentRequest->letter_set_id,
-                'send_in_email' =>  ($email_sent == 'Sent') ? 1 : 0,
-                'issued_date' => Carbon::now()->format('Y-m-d H:i:s'),
-                'student_id' => $studentTaskDoucmentRequest->student_id,
-                'letter_body' => LetterSet::find($studentTaskDoucmentRequest->letter_set_id)->description,
-                'comon_smtp_id' => 4,
-                'created_by' => auth()->user()->id,
-                //'signatory_id'
-            ];
+        if($studentTaskDoucmentRequest->save()) {
+            // $data = [
+            //     'letter_set_id' => $studentTaskDoucmentRequest->letter_set_id,
+            //     'send_in_email' =>  ($email_sent == 'Sent') ? 1 : 0,
+            //     'issued_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            //     'student_id' => $studentTaskDoucmentRequest->student_id,
+            //     'letter_body' => LetterSet::find($studentTaskDoucmentRequest->letter_set_id)->description,
+            //     'comon_smtp_id' => 4,
+            //     'created_by' => auth()->user()->id,
+            //     //'signatory_id'
+            // ];
+            if($email_sent=='Sent') {
+                $commonSmtp = ComonSmtp::find(4);
+                $configuration = [
+                    'smtp_host'    => $commonSmtp->smtp_host,
+                    'smtp_port'    => $commonSmtp->smtp_port,
+                    'smtp_username'  => $commonSmtp->smtp_user,
+                    'smtp_password'  => $commonSmtp->smtp_pass,
+                    'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                    
+                    'from_email'    => $commonSmtp->smtp_user,
+                    'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
+                ];
 
-            return response()->json(['msg' => 'Document request successfully approved.','data'=>$data], 200);
-        //}
+                $configuration = [
+                    'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                    'smtp_port' => '25',
+                    'smtp_username' => 'e8ae09cfefd325',
+                    'smtp_password' => 'ce7fa44b28281d',
+                    'smtp_encryption' => 'tls',
+                    
+                    'from_email'    => 'no-reply@lcc.ac.uk',
+                    'from_name'    =>  'London Churchill College',
+                ];
+                $MAILHTML = str_replace('[status]', $request->status, $request->description);
+                $attachmentInfo = [];
+                $sendTo = [];
+                if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email)):
+                    $sendTo[] = $student->contact->institutional_email;
+                endif;
+                if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
+                    $sendTo[] = $student->contact->personal_email;
+                endif;
+                $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
+
+                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail("Regarding Your Recent Document Request", $MAILHTML,$attachmentInfo));
+            }
+            return response()->json(['msg' => 'Document request status successfully updated.'], 200);
+        } else {
+            return response()->json(['msg' => 'Document request status can not be updated'], 405);
+        }
     }
 
     public function updateBulkStatus(BulkStatusUpdateReqest $request){
