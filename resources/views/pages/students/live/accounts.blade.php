@@ -23,6 +23,7 @@
     @if(!empty($agreements) && $agreements->count() > 0)
         @foreach($agreements as $agr)
             @php 
+                $discount = (isset($agr->discount) && $agr->discount > 0 ? $agr->discount : 0);
                 $claimAmount = (isset($agr->claim_amount) && $agr->claim_amount > 0 ? $agr->claim_amount : 0);
                 $onlyReceivedAmount = (isset($agr->only_received_amount) && $agr->only_received_amount > 0 ? $agr->only_received_amount : 0);
                 $refundAmount = (isset($agr->refund_amount) && $agr->refund_amount > 0 ? $agr->refund_amount : 0);
@@ -80,12 +81,28 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-3"></div>
+                        @if($discount > 0)
+                            <div class="col-span-12 sm:col-span-3">
+                                <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                    <div class="col-span-4 text-slate-500 font-medium">Discount</div>
+                                    <div class="col-span-8 font-medium text-pending">
+                                        {{ (!empty($agr->discount) ? '£'.number_format($agr->discount, 2) : '£0.00') }}
+                                    </div>
+                                </div>
+                            </div>
+                        @else 
+                            <div class="col-span-12 sm:col-span-3"></div>
+                        @endif
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
                                 <div class="col-span-4 text-slate-500 font-medium">Fees</div>
                                 <div class="col-span-8 font-medium">
-                                    {{ (!empty($agr->fees) ? '£'.number_format($agr->fees, 2) : '£0.00') }}
+                                    @if($discount > 0)
+                                        <del class="text-slate-400 mr-2">{{ (!empty($agr->fees) ? '£'.number_format($agr->fees, 2) : '£0.00') }}</del>
+                                        {{ (!empty($agr->fees) ? '£'.number_format(($agr->fees - $discount), 2) : '£0.00') }}
+                                    @else
+                                        {{ (!empty($agr->fees) ? '£'.number_format($agr->fees, 2) : '£0.00') }}
+                                    @endif
                                 </div>
                             </div>
                         </div>
