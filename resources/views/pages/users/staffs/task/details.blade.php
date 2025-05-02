@@ -314,41 +314,75 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="letter_set_id" class="form-label">Requested Document <span class="text-danger">*</span></label>
-                            <select id="letter_set_id" name="letter_set_id" class="form-control w-full"></select>
-                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 description">
-                            <label for="description" class="form-label">Other request or comments <span class="text-danger">*</span></label>
-                            <div id="description" class="w-full h-24 border border-slate-200 px-3 py-3 rounded-md"></div>
+                        
+                        <div id="informative-divmark" role="alert" class="alert relative border rounded-md px-5 py-4 bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 mb-2">
+                            <div class="flex items-center">
+                                <div  class="text-lg font-medium letter-title justify-start">
+                                    Awesome alert with additional info
+                                </div>
+                                
+                                <div class="justify-between  ml-auto rounded-md bg-orange-500 px-1 text-xs text-white letter-status">
+                                    Pending
+                                </div>
+                            </div>
+                            <div class="mt-3 letter-description">
+                                Lorem Ipsum is simply dummy text of the printing and
+                                typesetting industry. Lorem Ipsum has been the
+                                industry's standard dummy text ever since the 1500s.
+                            </div>
                             
-                            <div class="acc__input-error error-description text-danger mt-2"></div>
+                            <div class="mt-3 flex items-center">
+                                <div class="flex font-medium text-sm justify-start">Service requested : <span class="letter-service-type"></span></div>
+                                
+                                <div class="flex justify-between ml-auto rounded-md bg-slate-500 px-1 text-xs text-white letter-request-time">
+                                    New
+                                </div>
+                                
+                            </div>
                         </div>
                         <div>
-                            <div class="font-medium text-base">Service requested <span class="text-danger">*</span></div>
+                            <div class="font-medium text-base">Status <span class="text-danger">*</span></div>
                             
                                 <div class="form-check mr-2  my-3">
-                                    <input id="service_type1" class="form-check-input" type="radio" name="service_type" value="Same Day (cost £10.00)">
-                                    <label class="form-check-label" for="service_type1">Same Day (cost £10.00)</label>
+                                    <input id="status1" class="form-check-input" type="radio" name="status" value="In Progress">
+                                    <label class="form-check-label" for="status1">In Progress</label>
                                 </div>
+                                
+                                <div class="form-check mr-2  my-3">
+                                    <input id="status1" class="form-check-input" type="radio" name="status" value="Approved">
+                                    <label class="form-check-label" for="status1">Approved</label>
+                                </div>
+                                
                                 <div class="form-check mr-2 my-3 sm:mt-0">
-                                    <input id="service_type2" class="form-check-input" type="radio" name="service_type" value="3 Working Days (Free)">
-                                    <label class="form-check-label" for="service_type2">3 Working Days (Free)</label>
+                                    <input id="status3" class="form-check-input" type="radio" name="status" value="Rejected">
+                                    <label class="form-check-label" for="status3">Rejected</label>
                                 </div>
-                            <div class="acc__input-error error-service_type text-danger mt-2"></div>
-                        </div>   
+                            <div class="acc__input-error error-status text-danger mt-2"></div>
+                        </div>  
+                        <div class="mt-3 description">
+                            <label for="description" class="form-label">Remarks/ Comments <span class="text-danger">*</span></label>
+                            {{-- <textarea id="description" name="description" class="form-control w-full h-52 border border-slate-200 px-3 py-3 rounded-md" rows="20" style="white-space: pre-wrap;">
+                            </textarea> --}}
+                            
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="emailEditor"></div>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-description text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <!--implement a email sending checkbox here-->
                         <div class="flex justify-between">
                             <div class="form-check mr-2 my-3 sm:mt-0 flex justify-start items-center">
                                 <input id="email_sent" class="form-check-input" type="checkbox" name="email_sent" value="1">
-                                <label class="form-check-label" for="email_sent">Send Email</label>
+                                <label class="form-check-label" for="email_sent">Send Confirmation Email</label>
                             </div>
                             <div class="form-check mr-2 my-3 sm:mt-0 flex justify-end items-center">
                                 <button type="submit" id="updateRequestBtn" data-tw-merge class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed border-success text-success dark:border-success [&:hover:not(:disabled)]:bg-success/10 mb-2 mr-1 w-52">
-                                    <i data-lucide="check-circle"   class="w-4 h-4 mr-2 text-success "></i> Mark As Completed
+                                    <i data-lucide="check-circle"   class="w-4 h-4 mr-2 text-success "></i> Update Status
                                     <i data-loading-icon="oval" class="w-4 h-4 loading ml-1 hidden"></i>
                                 </button>
                             </div>
@@ -564,8 +598,193 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Send Letter Modal -->
+    <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="addLetterForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Send Letter</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div id="informative-div" role="alert" class="alert relative border rounded-md px-5 py-4 bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 mb-2">
+                            <div class="flex items-center">
+                                <div  class="text-lg font-medium letter-title justify-start">
+                                    Awesome alert with additional info
+                                </div>
+                                
+                                <div class="justify-between  ml-auto rounded-md bg-orange-500 px-1 text-xs text-white letter-status">
+                                    Pending
+                                </div>
+                            </div>
+                            <div class="mt-3 letter-description">
+                                Lorem Ipsum is simply dummy text of the printing and
+                                typesetting industry. Lorem Ipsum has been the
+                                industry's standard dummy text ever since the 1500s.
+                            </div>
+                            
+                            <div class="mt-3 flex items-center">
+                                <div class="flex font-medium text-sm justify-start">Service requested : <span class="letter-service-type"></span></div>
+                                
+                                <div class="flex justify-between ml-auto rounded-md bg-slate-500 px-1 text-xs text-white letter-request-time">
+                                    New
+                                </div>
+                                
+                            </div>
+                        </div>
+                        <div>
+                            <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
+                            <input id="issued_date" type="text" value="{{ date('Y-m-d') }}" name="issued_date" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
+                            <div class="acc__input-error error-issued_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
+                            <select id="letter_set_id" name="letter_set_id" class="w-full tom-selects">
+                                <option value="">Please Select</option>
+                                @if(!empty($letterSet))
+                                    @foreach($letterSet as $ls)
+                                        <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-5 letterEditorArea" style="display: none;">
+                            <div class="flex justify-between mb-2">
+                                <div class="ml-auto">@include('pages.settings.letter.letter-tags')</div>
+                            </div>
+                            <div class="editor document-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="letterEditor"></div>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-letter_body text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="signatory_id" class="form-label">Signatory</label>
+                            <select id="signatory_id" name="signatory_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($signatory))
+                                    @foreach($signatory as $sg)
+                                        <option value="{{ $sg->id }}">{{ $sg->signatory_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-signatory_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch items-center">
+                                <label class="form-check-label ml-0 mr-5" for="checkbox-switch-7">Send Email</label>
+                                <input id="send_in_email" class="form-check-input" name="send_in_email" value="1" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="mt-3 commonSmtpWrap" style="display: none;">
+                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
+                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($smtps))
+                                    @foreach($smtps as $sm)
+                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
+                            Send Letter                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value=""/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Send Letter Modal -->
+    
+    <!-- BEGIN: Delete Confirm Modal Content -->
+    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 confModDesc">Do you want to delete the uploaded file.</div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                        <button type="button" data-id="" data-action="DELETE" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Delete Confirm Modal Content -->
+
+    <!-- BEGIN: Warning Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle"></div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Warning Modal Content -->
+
+    <!-- BEGIN: View Modal -->
+    <div id="viewCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Vew Communication</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    
+                </div>
+                <div class="modal-footer">
+                    <div class="footerBtns" style="float: left"></div>
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: View Modal -->
 @endsection
 
 @section('script')
+    
+    @vite('resources/js/student-letter.js')
     @vite('resources/js/task-manager.js')
 @endsection

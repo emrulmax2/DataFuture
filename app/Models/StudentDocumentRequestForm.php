@@ -48,11 +48,31 @@ class StudentDocumentRequestForm extends Model
      * @var array
      */
     protected $appends = [
+        'created_at_formatted',
+        'updated_at_formatted',
         'created_at_human',
         'updated_at_human',
         'deleted_at_human',
     ];
 
+    /**
+     * Get the formatted created_at attribute.
+     *
+     * @return string
+     */
+    public function getCreatedAtFormattedAttribute()
+    {
+        return $this->created_at ? $this->created_at->toFormattedDateString() : null;
+    }
+    /**
+     * Get the formatted updated_at attribute.
+     *
+     * @return string
+     */
+    public function getUpdatedAtFormattedAttribute()
+    {
+        return $this->updated_at ? $this->updated_at->toFormattedDateString(): null;
+    }
 
     /**
      * Get the human readable created_at attribute.
@@ -63,6 +83,8 @@ class StudentDocumentRequestForm extends Model
     {
         return $this->created_at->diffForHumans();
     }
+
+    
     /**
      * Get the human readable updated_at attribute.
      *

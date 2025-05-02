@@ -2376,13 +2376,23 @@ class StudentController extends Controller
             StudentAttendanceTermStatus::create($data);
 
             if(!empty($plan_ids)):
-                //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
             endif;
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
         else:
-            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+            $lastRecord = StudentAttendanceTermStatus::where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+            if((isset($lastRecord->id) && $lastRecord->id > 0 && isset($lastRecord->status_id) && $lastRecord->status_id == $status_id) && ($lastRecord->term_declaration_id != $term_declaration_id || date('Y-m-d', strtotime($lastRecord->status_change_date)) != date('Y-m-d', strtotime($status_change_date)))):
+                $data = [];
+                $data['term_declaration_id'] = $term_declaration_id;
+                $data['status_change_reason'] = $status_change_reason;
+                $data['status_change_date'] = $status_change_date;
+                StudentAttendanceTermStatus::where('id', $lastRecord->id)->where('student_id', $student_id)->update($data);
+
+                return response()->json(['message' => 'Student status related data successfully changed.'], 200);
+            else:
+                return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+            endif;
         endif;
     }
     public function verifyEmail(Request $request){

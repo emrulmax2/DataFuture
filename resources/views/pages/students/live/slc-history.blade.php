@@ -135,7 +135,7 @@
                                                                 @endforeach )
                                                             </a>
                                                         @endif
-                                                        <a href="javascript:void(0);" data-regid="{{ $regs->id }}" data-atnid="{{ $atn->id }}" data-tw-toggle="modal" data-tw-target="#addCOCModal" class="addCOCBtn inline-flex items-center font-medium text-success"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add COC</a>
+                                                        <!--<a href="javascript:void(0);" data-regid="{{ $regs->id }}" data-atnid="{{ $atn->id }}" data-tw-toggle="modal" data-tw-target="#addCOCModal" class="addCOCBtn inline-flex items-center font-medium text-success"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add COC</a>-->
                                                     </div>
                                                 @endif
                                             </td>

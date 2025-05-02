@@ -202,7 +202,7 @@ var studentCommLetterListTable = (function () {
         },
     };
 
-    let letter_set_id = new TomSelect('#letter_set_id', tomOptions);
+    const letter_set_id = new TomSelect('#letter_set_id', tomOptions);
 
     
 

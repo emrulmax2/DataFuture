@@ -1,3 +1,4 @@
+import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
@@ -162,6 +163,7 @@ var taskAssignedStudentTable = (function () {
                     field: "task_status",
                     headerSort: false,
                     headerHozAlign: "left",
+                    width: 120,
                     formatter(cell, formatterParams) {  
                         var html = '<div class="flex justify-start items-center">';
                                 html += '<div>';
@@ -180,6 +182,19 @@ var taskAssignedStudentTable = (function () {
                                     html += '<button data-task="'+cell.getData().task_id+'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#callLockModal" type="button" class="unlockApplicantInterview btn-rounded btn btn-warning text-white p-0 w-9 h-9 ml-4"><i data-lucide="lock" class="w-4 h-4"></i></button>';
                                 }
                             html += '</div>';
+                            html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
+                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
+                        return html;
+                    }
+                },
+                {
+                    title: "Task Type",
+                    field: "student_document_request_form_id",
+                    headerSort: false,
+                    headerHozAlign: "left",
+                    width: 120,
+                    formatter(cell, formatterParams) {  
+                        let html = '';
                             if(cell.getData().student_document_request_form_id != null ){
                                 //insert data into local storage
                                 let student_documentRequest = cell.getData().student_document_request_form_id
@@ -188,8 +203,6 @@ var taskAssignedStudentTable = (function () {
                                         html += '<span class="font-medium">'+student_documentRequest.name+'</span>';
                                 html += '</div>';
                             }
-                            html += '<input type="hidden" name="phase" class="phase" value="'+cell.getData().phase+'"/>';
-                            html += '<input type="hidden" name="ids" class="ids" value="'+cell.getData().ids+'"/>';
                         return html;
                     }
                 },
@@ -230,10 +243,16 @@ var taskAssignedStudentTable = (function () {
                                                     console.log(cell.getData().student_document_request_form_id);
                                                     if(cell.getData().student_document_request_form_id != null ){
                                                         //insert data into local storage
-                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, cell.getData().student_document_request_form_id);
+                                                        localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
+                                                        
                                                         
                                                         html += '<li>';
-                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
+                                                                html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                        html += '<li>';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'"  data-student_name="'+cell.getData().full_name +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                 html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
                                                             html += '</a>';
                                                         html += '</li>';
@@ -918,6 +937,8 @@ var taskAssignedStudentTable = (function () {
         document.querySelector("#updateRequestBtn .loading").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
+        
+        form_data.append("description", emailEditor.getData());
         axios({
             method: "post",
             url: route('task.manager.document_request.update'),
@@ -929,55 +950,31 @@ var taskAssignedStudentTable = (function () {
             
             if (response.status == 200) {
                 //second axios post here
-                let formDataJson = response.data.data;
+                //let formDataJson = response.data.data;
                 // Create a new FormData object
-                let formData = new FormData();
+                //let formData = new FormData();
                 // Ensure letter_body is a string
                 // if (formDataJson.hasOwnProperty('letter_body')) {
                 //     formDataJson.letter_body = String(formDataJson.letter_body);
                 // }
                 // Loop through the JSON object and append each key-value pair to the FormData object
-                for (var key in formDataJson) {
-                    if (formDataJson.hasOwnProperty(key)) {
-                        formData.append(key, formDataJson[key]);
-                    }
-                }
-                axios({
-                    method: "post",
-                    url: route('student.send.letter'),
-                    data: formData,
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    document.querySelector('#updateRequestBtn').removeAttribute('disabled');
-                    document.querySelector("#updateRequestBtn .loading").style.cssText = "display: none;";
-                    
-                    if (response.status == 200) {
-                        
-                        updateTaskDocumentRequestOutcomeModal.hide();
+                // for (var key in formDataJson) {
+                //     if (formDataJson.hasOwnProperty(key)) {
+                //         formData.append(key, formDataJson[key]);
+                //     }
+                // }
 
-                        successModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html( "Congratulations!" );
-                            $("#successModal .successModalDesc").html('Selected student task successfully completed.');
-                        });     
-                        
-                        setTimeout(function(){
-                            successModal.hide();
-                        }, 2000);
-                    }
-                }).catch(error => {
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#addLetterForm .${key}`).addClass('border-danger');
-                                $(`#addLetterForm  .error-${key}`).html(val);
-                            }
-                        } else {
-                            console.log('error');
-                        }
-                    }
-                });
+                updateTaskDocumentRequestOutcomeModal.hide();
 
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('Selected Task status updated successfully.');
+                });     
+                
+                setTimeout(function(){
+                    successModal.hide();
+                }, 2000);
             }
             taskAssignedStudentTable.init();
         }).catch(error => {
@@ -1257,28 +1254,82 @@ var taskAssignedStudentTable = (function () {
         $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val());
     });
 
+    let emailEditor;
+    if($("#emailEditor").length > 0){
+        const el = document.getElementById('emailEditor');
+        ClassicEditor.create(el).then((editor) => {
+            emailEditor = editor;
+            $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
+        }).catch((error) => {
+            console.error(error);
+        });
+    }
 
     $(document).on('click', '.updateTaskDocRequestForm', function(e){
         var $btn = $(this); 
         var studentTaskId = $btn.attr('data-studenttaskid');
+        var studentName = $btn.attr('data-student_name');
         //get data from local storage
         var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
-        console.log(dataset);                                         
-        let dataSetRequest = dataset;
+                          
+        const dataSetRequest = JSON.parse(dataset);                      
         
-        // insert data into modal body
-        //$('#updateTaskDocumentRequestOutcomeModal .modal-body').html(cell.getData().student_document_request_form_id);
-        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('');
-        $('#updateTaskDocumentRequestOutcomeModal #description').html('');
+        
+        $('#updateTaskDocumentRequestOutcomeModal #informative-divmark .letter-title').html(dataSetRequest.name);
+        $('#updateTaskDocumentRequestOutcomeModal #informative-divmark .letter-description').html(dataSetRequest.description);
+        $('#updateTaskDocumentRequestOutcomeModal #informative-divmark .letter-service-type').html(dataSetRequest.service_type);
+        $('#updateTaskDocumentRequestOutcomeModal #informative-divmark .letter-request-time').html(dataSetRequest.created_at_human);
 
-        $('#updateTaskDocumentRequestOutcomeModal #letter_set_id').html('<option value="'+dataSetRequest.letter_set.id+'">'+dataSetRequest.letter_set.letter_title+'</option>');
-        $('#updateTaskDocumentRequestOutcomeModal #description').html(dataSetRequest.description);
+
+const template = `Dear <b>${studentName}</b>,<br/>
+<br/>
+We hope this message finds you well.<br/>
+<br/>
+This is to inform you that the status of your recent document request has been <b>[status]</b>.<br/>
+<br/>
+Request Details:<br/>
+<br/>
+Request Type: <b>${dataSetRequest.name}</b><br/>
+Status: <b>[status]</b><br/>
+Date of Request: <b>${dataSetRequest.created_at_formatted}</b><br/>
+<br/>
+If your request has been approved, you will receive further instructions shortly regarding collection or delivery.<br/>
+<br/>
+If it has been rejected, please contact the administration office or reply to this email for more information regarding the reason and possible next steps.<br/>
+<br/>
+If it is still in progress, we appreciate your patience and will notify you as soon as there is an update.<br/>
+<br/>
+Thank you for your cooperation.<br/>
+<br/>
+Best regards,<br/>
+The Academic Admin Dept.<br/>
+London Churchill College`;
+        // insert data into modal body
+
         $('#updateTaskDocumentRequestOutcomeModal input[name=student_task_id]').val(studentTaskId);
-        //this should be checked data
-        if(dataSetRequest.service_type == 'Same Day (cost £10.00)')
-            $('#updateTaskDocumentRequestOutcomeModal #service_type1').prop('checked',true);
-        else
-            $('#updateTaskDocumentRequestOutcomeModal #service_type2').prop('checked',true);
+        //$('#updateTaskDocumentRequestOutcomeModal textarea[name=description]').val(template);
+        emailEditor.setData(template);
+
+
+    });
+
+
+    $(document).on('click', '.sendLetterToStudent', function(e){
+        var $btn = $(this); 
+        var studentTaskId = $btn.attr('data-studenttaskid');
+        //get data from local storage
+        var dataset = localStorage.getItem('student_document_request_form'+studentTaskId);
+                          
+        const dataSetRequest = JSON.parse(dataset);                      
+        
+        //console.log(dataSetRequest);  
+        $('#addLetterForm #informative-div .letter-title').html(dataSetRequest.name);
+        $('#addLetterForm #informative-div .letter-description').html(dataSetRequest.description);
+        $('#addLetterForm #informative-div .letter-service-type').html(dataSetRequest.service_type);
+        $('#addLetterForm #informative-div .letter-request-time').html(dataSetRequest.created_at_human);
+
+        $('#addLetterForm input[name=student_id]').val(dataSetRequest.student_id);
+
             
 
     });

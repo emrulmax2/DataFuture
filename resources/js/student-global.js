@@ -228,7 +228,7 @@ import Dropzone from "dropzone";
                     successModalInfo.show(); 
                     document.getElementById("successModalInfo").addEventListener("shown.tw.modal", function (event) {
                         $("#successModalInfo .successModalInfoTitle").html("Congratulation!" );
-                        $("#successModalInfo .successModalInfoDesc").html('Student status successfully updated.');
+                        $("#successModalInfo .successModalInfoDesc").html(response.data.message);
                     });  
                     
                     setTimeout(function(){

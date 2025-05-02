@@ -63,6 +63,18 @@ class CommunicationSendMail extends Mailable
     {
         $attachmentArray = [];
         $i =0 ;
+        if(empty($this->attachmentList)) {
+            return $attachmentArray;
+        }
+        if(!is_array($this->attachmentList)) {
+            return $attachmentArray;
+        }
+        if(count($this->attachmentList) == 0) {
+            return $attachmentArray;
+        }
+        if(!isset($this->attachmentList[0])) {
+            return $attachmentArray;
+        }
         
         foreach ($this->attachmentList as $attachment) {     
             $disk = (isset($attachment['disk']) && !empty($attachment['disk']) ? $attachment['disk'] : 'local');      
