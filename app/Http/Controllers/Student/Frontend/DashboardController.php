@@ -66,7 +66,6 @@ class DashboardController extends Controller
         $permanentAddress = Address::find($studentContact->permanent_address_id);
         $terTimeAccomadtionType = TermTimeAccommodationType::all();
         $consentList = ConsentPolicy::all();
-
         $data = [
             "student_id" => $studentData->id,
             "nationality" => $studentData->nationality_id,
