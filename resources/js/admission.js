@@ -125,7 +125,11 @@ var admissionListTable = (function () {
             //     sheetName: "Admission Details",
             // });
             event.preventDefault();
-            $('#tabulator-export-xlsx-ADM #excel-loading').show();
+
+            document.querySelector('#tabulator-export-xlsx-ADM').setAttribute('disabled', 'disabled');
+            document.querySelector("#excelExportBtn").style.cssText ="display: inline-block;";
+
+
             let semesters = $("#semesters-ADM").val() != "" ? $("#semesters-ADM").val() : "";
             let courses = $("#courses-ADM").val() != "" ? $("#courses-ADM").val() : "";
             let statuses = $("#statuses-ADM").val() != "" ? $("#statuses-ADM").val() : "";
@@ -153,10 +157,13 @@ var admissionListTable = (function () {
                     link.setAttribute('download', 'admission_download.xlsx'); 
                     document.body.appendChild(link);
                     link.click();
-                    $('#tabulator-export-xlsx-ADM #excel-loading').hide();
+                    document.querySelector('#tabulator-export-xlsx-ADM').removeAttribute('disabled', 'disabled');
+                    document.querySelector("#excelExportBtn").style.cssText ="display: none;";
             })
             .catch((error) => {
                     console.log(error);
+                    document.querySelector('#tabulator-export-xlsx-ADM').removeAttribute('disabled', 'disabled');
+                    document.querySelector("#excelExportBtn").style.cssText ="display: none;";
             });
         });
 
@@ -614,6 +621,7 @@ var employmentHistoryTable = (function () {
         });
 
         const addQualificationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addQualificationModal"));
+        const exportAdmissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#exportAdmissionModal"));
         const editQualificationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editQualificationModal"));
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
@@ -1982,7 +1990,6 @@ var employmentHistoryTable = (function () {
             });
         });
     }
-    /* Edit Education Qualification Details*/
 
     
 })();

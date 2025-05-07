@@ -111,8 +111,22 @@
                             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                         </button>
                         <button id="tabulator-export-xlsx-ADM" class="btn btn-outline-secondary w-1/2 sm:w-auto">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel <i id="excel-loading" data-loading-icon="oval"  class="w-4 h-4 ml-2 mx-auto hidden"></i>
+                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export Excel 
+                            <svg id="excelExportBtn" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="gray" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
                         </button>
+
+
                         @if(isset(auth()->user()->priv()['applicant_analysis']) && auth()->user()->priv()['applicant_analysis'] == 1)
                         <a href="{{ route('reports.applicant.analysis') }}" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2">
                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Application Analysis
