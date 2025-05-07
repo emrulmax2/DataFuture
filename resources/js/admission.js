@@ -177,6 +177,7 @@ var admissionListTable = (function () {
         $("#tabulator-print-ADM").on("click", function (event) {
             tableContent.print();
         });
+        //comment for uploader
     };
     return {
         init: function () {
