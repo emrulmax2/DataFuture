@@ -621,7 +621,6 @@ var employmentHistoryTable = (function () {
         });
 
         const addQualificationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addQualificationModal"));
-        const exportAdmissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#exportAdmissionModal"));
         const editQualificationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editQualificationModal"));
         const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
