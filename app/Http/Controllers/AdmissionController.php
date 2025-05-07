@@ -262,6 +262,7 @@ class AdmissionController extends Controller
         
         $email = (isset($request->email) && !empty($request->email) ? $request->email : '');
         $phone = (isset($request->phone) && !empty($request->phone) ? $request->phone : '');
+        $semister_id = (isset($request->semister_id) && !empty($request->semister_id) ? $request->semister_id : '');
 
         $dob = (isset($request->dob) && !empty($request->dob) ? date('Y-m-d', strtotime($request->dob)) : '');
 
@@ -304,6 +305,9 @@ class AdmissionController extends Controller
             });
         endif;
         if(!empty($agents)): $query->whereIn('agent_user_id', $agents); endif;
+        
+
+       
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -332,6 +336,7 @@ class AdmissionController extends Controller
                     'date_of_birth'=> $list->date_of_birth,
                     'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
                     'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                    'venue' => (isset($list->course->venue->name) ? $list->course->venue->name : ''),
                     'full_time'=> (isset($list->course->full_time) && $list->course->full_time == 1) ? "Yes": "No",
                     'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
@@ -362,9 +367,10 @@ class AdmissionController extends Controller
         $theCollection[1][4] = 'Course name';
         $theCollection[1][5] = 'Weekday/Weekend';
         $theCollection[1][6] = 'Semester';
-        $theCollection[1][7] = 'Status';
-        $theCollection[1][8] = 'Referral Code';
-        $statusIncrement = 9;
+        $theCollection[1][7] = 'Campus';
+        $theCollection[1][8] = 'Status';
+        $theCollection[1][9] = 'Referral Code';
+        $statusIncrement = 10;
         foreach($statusList as $status) :
             $theCollection[1][$statusIncrement++] = $status->name;
         endforeach;
@@ -382,9 +388,10 @@ class AdmissionController extends Controller
                 $theCollection[$row][4] = $data->course;
                 $theCollection[$row][5] = $data->full_time;
                 $theCollection[$row][6] = $data->semester;
-                $theCollection[$row][7] = $data->status_id;
-                $theCollection[$row][8] = $data->referral_code;
-                $statusIncrement = 9;
+                $theCollection[$row][7] = $data->venue;
+                $theCollection[$row][8] = $data->status_id;
+                $theCollection[$row][9] = $data->referral_code;
+                $statusIncrement = 10;
                 foreach($statusList as $status) :
                     $dataFound =0;
                     foreach($applicantTaskDataSet as $applicantTask)
