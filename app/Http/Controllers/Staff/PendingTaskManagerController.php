@@ -323,6 +323,7 @@ class PendingTaskManagerController extends Controller
                         foreach($StudentWiseDoucmentRequestList as $key => $value) {
                             $documentRequest = $value->studentDocumentRequestForm;
                             $documentRequest->letterSet;
+                            $documentRequest->studentOrder;
                             
                             $data[] = [
                                 'id' => $list->id,

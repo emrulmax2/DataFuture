@@ -14,6 +14,7 @@ class StudentDocumentRequestForm extends Model
         'student_id',
         'term_declaration_id',
         'letter_set_id',
+        'student_order_id',
         'name',
         'description',
         'service_type',
@@ -125,5 +126,13 @@ class StudentDocumentRequestForm extends Model
     public function letterSet()
     {
         return $this->belongsTo(LetterSet::class);
+    }
+
+    /**
+     * Get the student order that owns the document request form.
+     */
+    public function studentOrder()
+    {
+        return $this->belongsTo(StudentOrder::class);
     }
 }

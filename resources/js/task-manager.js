@@ -201,6 +201,12 @@ var taskAssignedStudentTable = (function () {
                                 
                                 html += '<div>';
                                         html += '<span class="font-medium">'+student_documentRequest.name+'</span>';
+                                        if(student_documentRequest.student_order != null) {
+                                            html += '<br /><span class=" font-normal text-xs text-slate-500 ">'+student_documentRequest.student_order.invoice_number+'</span>';
+                                            if(student_documentRequest.student_order.payment_status == "Completed"){
+                                                html += '<br /><span class=" font-normal text-xs text-slate-500 ">Paid By : '+student_documentRequest.student_order.payment_method+'</span>';
+                                            }
+                                        }
                                 html += '</div>';
                             }
                         return html;
