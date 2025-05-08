@@ -18,6 +18,7 @@ class StudentDocumentRequestForm extends Model
         'description',
         'service_type',
         'status',
+        'email_status',
         'student_consent',
         'created_by',
         'updated_by',

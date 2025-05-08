@@ -291,9 +291,11 @@ use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
 use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
+use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
+use App\Http\Controllers\StripeCheckoutController;
 use App\Http\Controllers\Student\ArchiveController;
 use App\Http\Controllers\Student\AttendanceTermStatusController;
 use App\Http\Controllers\Student\AwardController;
@@ -306,6 +308,7 @@ use App\Http\Controllers\Student\StudentPerformanceController;
 use App\Http\Controllers\Student\WorkPlacementController;
 use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
+use App\Http\Controllers\StudentOrderController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -565,7 +568,7 @@ Route::prefix('/students')->name('students.')->group(function() {
 
 
 
-    Route::middleware('auth.students')->group(function() {
+    Route::middleware(['auth.students','saved.shopping_cart'])->group(function() {
 
         Route::get('logout', [StudentLoginController::class, 'logout'])->name('logout');
 
@@ -589,6 +592,37 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('document-request-form/edit/{id}', 'edit')->name('document-request-form.edit');
             Route::post('document-request-form/update', 'update')->name('document-request-form.update');
             Route::delete('document-request-form/delete/{id}', 'destroy')->name('document-request-form.destory');
+
+            
+            Route::get('document-request-form/products', 'products')->name('document-request-form.products'); 
+        });
+
+        Route::controller(ShoppingCartController::class)->group(function() {
+            Route::get('shopping-cart', 'index')->name('shopping.cart'); 
+            Route::post('shopping-cart/store', 'store')->name('shopping.cart.store'); 
+            Route::post('shopping-cart/update', 'update')->name('shopping.cart.update'); 
+            Route::delete('shopping-cart/delete/{id}', 'delete')->name('shopping.cart.destory'); 
+            Route::get('shopping-cart/checkout', 'checkout')->name('shopping.cart.checkout'); 
+            //Route::post('shopping-cart/checkout/paymenthandler', 'paymenthandler')->name('shopping.cart.checkout.post');
+            
+            Route::post('shopping-cart/checkout/stripe', 'processStripe')->name('shopping.cart.checkout.stripe');
+            Route::post('shopping-cart/checkout/paypal/capture', 'capturePaypal')->name('shopping.cart.checkout.paypal.capture'); 
+        });
+
+        Route::controller(StripeCheckoutController::class)->group(function() {
+            Route::post('card-checkout-session', 'createCheckoutSession')->name('checkout.stripe.session'); 
+            Route::any('card-checkout-session/success', 'success')->name('checkout.stripe.success'); 
+            Route::any('card-checkout-session/cancel', 'cancel')->name('checkout.stripe.cancel'); 
+        });
+        
+
+
+        Route::controller(StudentOrderController::class)->group(function() {
+            Route::get('order', 'index')->name('order'); 
+            Route::get('order/list', 'list')->name('order.list'); 
+            Route::get('order/show/{id}', 'show')->name('order.show'); 
+            Route::post('order/confirm-payment', 'confirmPayment')->name('order.confirm.payment'); 
+            Route::post('order/store', 'store')->name('order.store'); 
         });
         Route::controller(StudentController::class)->group(function() {
 

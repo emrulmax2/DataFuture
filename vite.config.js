@@ -376,6 +376,9 @@ export default defineConfig({
                 'resources/js/marketing-reports.js',
                 'resources/js/document-requests.js',
                 'resources/js/address.js',
+                'resources/js/add-to-cart.js',
+                'resources/js/checkout.js',
+                'resources/js/stripe-checkout.js',
 
             ],
             refresh: true,

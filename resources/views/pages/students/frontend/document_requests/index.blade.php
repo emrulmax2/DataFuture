@@ -1,154 +1,221 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Document / ID Card Replacement request</title>
+    <title>My Orders List</title>
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Document / ID Card Replacement request</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#agentRulesModal"  class="add_btn btn btn-facebook text-white shadow-md ml-1"><i data-lucide="plus" class="w-4 h-4 mr-2"></i> Create new request</button>
-            <a href="{{ route('students.dashboard') }}" class=" btn btn-primary text-white shadow-md ml-1"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Dashboard</a>
+    <h2 class="intro-y text-lg font-medium mt-10">Order List</h2>
+    @if (session('paymentSuccessMessage'))
+        <!-- BEGIN: Notification Content -->
+        <div id="success-notification-content" class="toastify-content hidden flex">
+            <i class="text-success" data-lucide="check-circle"></i>
+            <div class="ml-4 mr-4">
+                <div class="font-medium">Success !</div>
+                <div class="text-slate-500 mt-1">{{ session('paymentSuccessMessage') }}</div>
+            </div>
         </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Attendance Semester</label>
-                    <select id="term_declaration_id" name="term_declaration_id" class="tom-selects w-full mt-2 sm:mt-0 sm:w-56" >
-                        <option value="">Please Select</option>
-                        @foreach($term_declarations as $term_declaration)
-                            <option value="{{ $term_declaration->id }}">{{ $term_declaration->name }}</option>
-                        @endforeach
-                    </select>
+        <!-- END: Notification Content -->
+        <!-- BEGIN: Notification Toggle -->
+        <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+        <!-- END: Notification Toggle -->
+    @endif
+    @if (session('paymentErrorMessage'))
+        <!-- BEGIN: Notification Content -->
+        <div id="error-notification-content" class="toastify-content hidden flex">
+            <i class="text-danger" data-lucide="check-circle"></i>
+            <div class="ml-4 mr-4">
+                <div class="font-medium">Payment Failed</div>
+                <div class="text-slate-500 mt-1">{{ session('paymentErrorMessage') }}</div>
+            </div>
+        </div>
+        <!-- END: Notification Content -->
+        <!-- BEGIN: Notification Toggle -->
+        <button id="error-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+        <!-- END: Notification Toggle -->
+    @endif
+    <div class="grid grid-cols-12 gap-6 mt-5">
+        <div class="intro-y col-span-12 flex flex-wrap xl:flex-nowrap items-center mt-2">
+            <div class="flex w-full sm:w-auto">
+                <div class="w-48 relative text-slate-500">
+                    <input type="text" class="form-control w-48 box pr-10" placeholder="Search by invoice...">
+                    <i class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0" data-lucide="search"></i>
                 </div>
-                <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-auto" >
-                        Go 
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 theLoader">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-            </form>
+                <select class="form-select box ml-2">
+                    <option>Status</option>
+                    <option>Waiting Payment</option>
+                    <option>Confirmed</option>
+                    <option>Packing</option>
+                    <option>Delivered</option>
+                    <option>Completed</option>
+                </select>
+            </div>
+            <div class="hidden xl:block mx-auto text-slate-500">Showing {{ ($studentOrderList->count()>0) ? 1 : 0 }} to {{$studentOrderList->count() }} of {{ $studentOrderList->count() }} entries</div>
+            <div class="w-full xl:w-auto flex items-center mt-3 xl:mt-0">
+                {{-- <button class="btn btn-primary shadow-md mr-2">
+                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export to Excel
+                </button> --}}
+                <a href="{{ route('students.document-request-form.products') }}" class=" btn btn-primary text-white shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Products</a>
+                
+            </div>
         </div>
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="requestListTable" class="mt-5 table-report table-report--tabulator"></div>
-        </div>
-    </div>
-    <!-- END: HTML Table Data -->
-
-    <!-- BEGIN: Agent Rule Modal -->
-    <div id="agentRulesModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="agentRulesForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Document Requsts</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="letter_set_id" class="form-label">Select the document you would like to request <span class="text-danger">*</span></label>
-                            <select id="letter_set_id" name="letter_set_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @foreach($letter_sets as $letter_set)
-                                    <option value="{{ $letter_set->id }}">{{ $letter_set->letter_title }}</option>
+        <!-- BEGIN: Data List -->
+        <div class="intro-y col-span-12 overflow-auto 2xl:overflow-visible">
+            <table class="table table-report -mt-2">
+                <thead>
+                    <tr>
+                        <th class="whitespace-nowrap">
+                            S/N
+                        </th>
+                        <th class="whitespace-nowrap">INVOICE</th>
+                        <th class="whitespace-nowrap">PRODUCT</th>
+                        <th class="text-center whitespace-nowrap">STATUS</th>
+                        <th class="whitespace-nowrap">PAYMENT</th>
+                        <th class="text-right whitespace-nowrap">
+                            <div class="pr-16">TOTAL TRANSACTION</div>
+                        </th>
+                        <th class="text-center whitespace-nowrap">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php
+                        $serial = 0;
+                    @endphp
+                    @foreach ($studentOrderList as $order)
+                        @php
+                            $serial++;
+                        @endphp
+                        <tr class="intro-x">
+                            <td class="w-10">
+                                <span class="font-medium whitespace-nowrap">{{ $serial }}</span>
+                            </td>
+                            <td class="w-40 !py-4">
+                                <a href="" class="underline decoration-dotted whitespace-nowrap">{{ '#'.$order->invoice_number }}</a>
+                            </td>
+                            <td class="w-40">
+                               
+                                @foreach ($order->studentOrderItems as $item)
+                                <a href="" class="font-medium whitespace-nowrap">{{ $item->letterSet->letter_title}} [ Qty: {{ $item->quantity }}]</a>
+                                @if ($item->product_type == 'Paid')   
+                                    <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">Same Day (£10.00) [{{ $item->quantity - $item->number_of_free }}]</div>
+                                @else
+                                    <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">3 Working Days (Free)</div>
+                                @endif
                                 @endforeach
-                            </select>
-                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 description">
-                            <label for="description" class="form-label">Any Other request or comments <span class="text-danger">*</span></label>
-                            <textarea id="description" name="description" class="form-control w-full" rows="3"></textarea>
-                            
-                            <div class="acc__input-error error-description text-danger mt-2"></div>
-                        </div>
-                        <!--Implement a disclaimer-->
-                        <!--Implement the disclaimer-->
-                        <div>
-                            <div class="font-medium text-base">Service requested <span class="text-danger">*</span></div>
-                            
-                                <div class="form-check mr-2  my-3">
-                                    <input id="service_type1" class="form-check-input" type="radio" name="service_type" value="Same Day (cost £10.00)">
-                                    <label class="form-check-label" for="service_type1">Same Day (cost £10.00)</label>
+                            </td>
+                            <td class="text-center">
+                                <div class="flex items-center justify-center whitespace-nowrap {{ $order->status == 'Completed' ? 'text-success' : '' }}{{ $order->status == 'In Progress' ? 'text-info' : 'text-pending' }}">
+                                    <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> {{ $order->status == 'Completed' ? 'Completed' : $order->status }} {{ $order->payment_status == 'Completed' ? 'on '.$order->formatted_transaction_date : 'Payment' }}
                                 </div>
-                                <div class="form-check mr-2 my-3 sm:mt-0">
-                                    <input id="service_type2" class="form-check-input" type="radio" name="service_type" value="3 Working Days (Free)">
-                                    <label class="form-check-label" for="service_type2">3 Working Days (Free)</label>
+                            </td>
+                            <td>
+                                @if ($order->payment_method == 'Card' && $order->payment_status=="Completed")
+                                    <div class="whitespace-nowrap">Debit or Credit Card</div>
+                                    <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $order->formatted_transaction_date }}</div>
+                                @elseif ($order->payment_method == 'PayPal' && $order->payment_status=="Completed")
+                                <div class="whitespace-nowrap">PayPal</div>
+                                <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $order->formatted_transaction_date }}</div>
+                                @else
+                                    <div class="whitespace-nowrap">N/A</div>
+                                    <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">{{ $order->formatted_created_at }}</div>
+                                @endif
+                            </td>
+                            <td class="w-40 text-right">
+                                <div class="pr-16">£{{ number_format($order->total_amount, 2) }}</div>
+                            </td>
+                            <td class="table-report__action">
+                                <div class="flex justify-center items-center">
+                                    <a class="flex items-center text-primary whitespace-nowrap mr-5" href="javascript:;">
+                                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i> View Details
+                                    </a>
+                                    @if($order->payment_status!="Completed")
+                                        {{-- <a class="flex items-center text-primary whitespace-nowrap" href="javascript:;" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal">
+                                            <i data-lucide="arrow-left-right" class="w-4 h-4 mr-1"></i> Change Status
+                                        </a> --}}
+                                        <div class="dropdown">
+                                            <button class="dropdown-toggle btn px-2 border-0" aria-expanded="false" data-tw-toggle="dropdown">
+                                                <span class="w-5 h-5 flex items-center justify-center">
+                                                    <i class="w-4 h-4" data-lucide="grip"></i>
+                                                </span>
+                                            </button>
+                                            <div class="dropdown-menu w-40">
+                                                <ul class="dropdown-content">
+                                                    @if($order->status!="Rejected")
+                                                    <li>
+                                                        <a href="" class="dropdown-item payByCard" data-quantity_wihout_free="{{ $order->quantity - $order->number_of_free }}" data-currency="GBP" data-invoice_number="{{ $order->invoice_number }}" data-action="confirm" >
+                                                            <i data-lucide="credit-card" class="w-4 h-4 mr-2"></i> Pay By Card
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="" class="dropdown-item payByPayPal" data-quantity_wihout_free="{{ $order->quantity - $order->number_of_free }}" data-currency="GBP" data-invoice_number="{{ $order->invoice_number }}">
+                                                            <i data-lucide="arrow-left-right" class="w-4 h-4 mr-2"></i> Pay By PayPal
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a href="" class="dropdown-item text-danger cancelOrder" data-id="{{ $order->id }}" >
+                                                            <i data-lucide="square-x" class="w-4 h-4 mr-2"></i> Cancel Order
+                                                        </a>
+                                                    </li>
+                                                    @endif
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
-                            <div class="acc__input-error error-service_type text-danger mt-2"></div>
-                        </div>   
-                        
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-12 text-left">
-                                <div class="font-medium text-base">Disclaimer</div>
-                                <div class="pt-1">Please note that 3 working days’ notice are required to obtain any type of college document. In case of emergency documents (except certificate, ID) may be obtained on the same day provided a fee of £10.oo in paid in advance and request is made before 12pm. Awarding body certificate takes 4 weeks from request date. Also all requests are subject to Accounts / Tuition fees, Class attendance clearance.
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-12 sm:col-span-12">
-                            <div class="form-check form-switch my-3 justify-start">
-                                <input id="student_consent" name="student_consent" value="1" class="form-check-input " type="checkbox">
-                                <label class="form-check-label" for="student_consent">Yes I understand <span class="text-danger">*</span></label>
-                                
-                                <div class="acc__input-error error-student_consent text-danger mt-2"></div>
-                            </div>
-                            
-                        </div>
-                        </div>
-                        {{--<div>
-                            <label for="payment_type" class="form-label">Payment <span class="text-danger">*</span></label>
-                            <select id="payment_type" name="payment_type" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                <option value="1">Single Payment</option>
-                                <option value="2">On Receipt</option>
-                            </select>
-                            <div class="acc__input-error error-payment_type text-danger mt-2"></div>
-                        </div>--}}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveRuleBtn" class="btn btn-primary w-auto">     
-                            Save                    
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
-                        <input type="hidden" name="term_declaration_id" value="{{ $latestTermInfo->id }}"/>
-                        <input type="hidden" name="status" value="Pending"/>
-                    </div>
-                </div>
-            </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
+        <!-- END: Data List -->
+        <!-- BEGIN: Pagination -->
+        <div class="intro-y col-span-12 flex flex-wrap sm:flex-row sm:flex-nowrap items-center">
+            <nav class="w-full sm:w-auto sm:mr-auto">
+                <ul class="pagination">
+                    {{-- <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="w-4 h-4" data-lucide="chevrons-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="w-4 h-4" data-lucide="chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">...</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">...</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="w-4 h-4" data-lucide="chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="w-4 h-4" data-lucide="chevrons-right"></i>
+                        </a>
+                    </li> --}}
+                </ul>
+            </nav>
+            <select class="w-20 form-select box mt-3 sm:mt-0">
+                <option>All</option>
+            </select>
+        </div>
+        <!-- END: Pagination -->
     </div>
-    <!-- END: Agent Rule Modal -->
-
     
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -169,6 +236,22 @@
     </div>
     <!-- END: Success Modal Content -->
 
+    
+    <!-- BEGIN: Success Modal Content -->
+    <div id="errorModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="circle-x" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 text-danger errorModalTitle"></div>
+                        <div class="text-slate-500 mt-2 errorModalDesc"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Success Modal Content -->
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

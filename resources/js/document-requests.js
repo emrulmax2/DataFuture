@@ -3,7 +3,7 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import {createApp} from 'vue'
-
+import Toastify from "toastify-js";
 import IMask from 'imask';
 
 ("use strict");
@@ -223,7 +223,6 @@ var admissionListTable = (function () {
 (function(){
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.getElementById("successModal"));
-    const agentRulesModal = tailwind.Modal.getOrCreateInstance(document.getElementById("agentRulesModal"));
     
     let admissionDatepickerOpt = {
         autoApply: true,
@@ -348,54 +347,90 @@ var admissionListTable = (function () {
         // })
     }
 
-    $('#agentRulesForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('agentRulesForm');
+    // $('#agentRulesForm').on('submit', function(e){
+    //     e.preventDefault();
+    //     const form = document.getElementById('agentRulesForm');
 
  
     
-        document.querySelector('#saveRuleBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveRuleBtn svg").style.cssText ="display: inline-block;";
+    //     document.querySelector('#saveRuleBtn').setAttribute('disabled', 'disabled');
+    //     document.querySelector("#saveRuleBtn svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('students.document-request-form.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveRuleBtn').removeAttribute('disabled');
-            document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
+    //     let form_data = new FormData(form);
+    //     axios({
+    //         method: "post",
+    //         url: route('students.document-request-form.store'),
+    //         data: form_data,
+    //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    //     }).then(response => {
+    //         document.querySelector('#saveRuleBtn').removeAttribute('disabled');
+    //         document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
             
-            if (response.status == 200) {
-                console.log(response);
-                agentRulesModal.hide();
+    //         if (response.status == 200) {
+    //             console.log(response);
+    //             agentRulesModal.hide();
                 
-                succModal.show();
-                admissionListTable.init();
-                //$viewBtn.removeClass('hidden');
+    //             succModal.show();
+    //             admissionListTable.init();
+    //             //$viewBtn.removeClass('hidden');
 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!");
-                    $("#successModal .successModalDesc").html(response.data.message);
-                });                
+    //             document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+    //                 $("#successModal .successModalTitle").html("Congratulation!");
+    //                 $("#successModal .successModalDesc").html(response.data.message);
+    //             });                
                     
-            }
-        }).catch(error => {
-            document.querySelector('#saveRuleBtn').removeAttribute('disabled');
-            document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#agentRulesForm .${key}`).addClass('border-danger')
-                        $(`#agentRulesForm  .error-${key}`).html(val)
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
+    //         }
+    //     }).catch(error => {
+    //         document.querySelector('#saveRuleBtn').removeAttribute('disabled');
+    //         document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
+    //         if (error.response) {
+    //             if (error.response.status == 422) {
+    //                 for (const [key, val] of Object.entries(error.response.data.errors)) {
+    //                     $(`#agentRulesForm .${key}`).addClass('border-danger')
+    //                     $(`#agentRulesForm  .error-${key}`).html(val)
+    //                 }
+    //             } else {
+    //                 console.log('error');
+    //             }
+    //         }
+    //     });
+    // });
     
+    
+
+        if($('#success-notification-toggle').length>0) {
+            $("#success-notification-toggle").on("click", function () {
+                Toastify({
+                    node: $("#success-notification-content")
+                        .clone()
+                        .removeClass("hidden")[0],
+                    duration: -1,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                }).showToast();
+            });
+            $("#success-notification-toggle").trigger('click');
+        }
+        if($('#error-notification-toggle').length>0) {
+
+            $("#error-notification-toggle").on("click", function () {
+                Toastify({
+                    node: $("#error-notification-content")
+                        .clone()
+                        .removeClass("hidden")[0],
+                    duration: -1,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                }).showToast();
+            });
+            $("#error-notification-toggle").trigger('click')
+        }
+
 })();
 

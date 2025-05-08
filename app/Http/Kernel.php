@@ -57,7 +57,7 @@ class Kernel extends HttpKernel
         
         'auth.agent' => \App\Http\Middleware\AuthAgent::class,
         'agent.loggedin' => \App\Http\Middleware\AgentLoggedIn::class,
-
+        'saved.shopping_cart' => \App\Http\Middleware\SaveShoppingCartSession::class,
         'auth.applicant' => \App\Http\Middleware\AuthApplicant::class,
         'applicant.loggedin' => \App\Http\Middleware\ApplicantLoggedIn::class,
         'auth.students' => \App\Http\Middleware\AuthStudent::class,

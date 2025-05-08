@@ -342,15 +342,15 @@
                         </div>
                         <div>
                             <div class="font-medium text-base">Status <span class="text-danger">*</span></div>
-                            
+{{--                             
                                 <div class="form-check mr-2  my-3">
                                     <input id="status1" class="form-check-input" type="radio" name="status" value="In Progress">
                                     <label class="form-check-label" for="status1">In Progress</label>
-                                </div>
+                                </div> --}}
                                 
                                 <div class="form-check mr-2  my-3">
-                                    <input id="status1" class="form-check-input" type="radio" name="status" value="Approved">
-                                    <label class="form-check-label" for="status1">Approved</label>
+                                    <input id="status2" class="form-check-input" type="radio" name="status" value="Approved">
+                                    <label class="form-check-label" for="status2">Approved</label>
                                 </div>
                                 
                                 <div class="form-check mr-2 my-3 sm:mt-0">

@@ -1137,7 +1137,7 @@ class PendingTaskManagerController extends Controller
 
         $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
         $studentTaskDoucmentRequest->status = $request->status;
-        $studentTaskDoucmentRequest->email_sent = $email_sent;
+        $studentTaskDoucmentRequest->email_status = $email_sent;
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
         
         if($studentTaskDoucmentRequest->save()) {
