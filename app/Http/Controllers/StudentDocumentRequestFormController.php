@@ -322,35 +322,5 @@ class StudentDocumentRequestFormController extends Controller
                 'countPendingOrders' => $countPendingOrders,
         ]);
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateStudentDocumentRequestFormRequest $request, StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
 }

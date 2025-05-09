@@ -241,6 +241,21 @@ class Student extends Model
         endif;
     }
 
+    public function getCurrentTermAttribute(){
+        $cp_ids = Assign::where('student_id', $this->id)->pluck('plan_id')->unique()->toArray();
+        if(!empty($cp_ids)):
+            $term_decs = Plan::whereIn('id', $cp_ids)->pluck('term_declaration_id')->unique()->toArray();
+            if(!empty($term_decs)):
+                return TermDeclaration::whereIn('id', $term_decs)->orderBy('id', 'DESC')->get()->first();
+            else:
+                return false;
+            endif;
+        else:
+            return false;
+        endif;
+    }
+
+
     public function termStatus(){
         return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->orderBy('term_declaration_id', 'DESC');
         //return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->latestOfMany();

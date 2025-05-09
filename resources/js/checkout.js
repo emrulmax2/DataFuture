@@ -95,7 +95,15 @@ import { createIcons, icons } from "lucide";
 
                 if(response.data.order) {
                   document.getElementById('invoice_number').value = response.data.order.invoice_number;
-                  $("#payButton").trigger("click");
+                    
+                    
+                    
+
+                    const selected = document.querySelector('input[name="payment_method"]:checked');
+
+                    if (selected.value == 'Card') $("#payButton").trigger("click");
+                    else $("#paypalButton").trigger("click");
+
                 }
                 
                 // setTimeout(() => {

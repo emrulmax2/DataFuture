@@ -2,14 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CourseCreationVenue;
 use App\Models\LetterSet;
+use App\Models\Option;
+use App\Models\SlcAgreement;
+use App\Models\SlcMoneyReceipt;
+use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentDocumentRequestForm;
 use App\Models\StudentOrder;
 use App\Models\StudentOrderItem;
+use App\Models\StudentProposedCourse;
 use App\Models\StudentShoppingCart;
 use App\Models\StudentTask;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+
+use PDF;
 
 class StudentOrderController extends Controller
 {
@@ -174,10 +183,71 @@ class StudentOrderController extends Controller
      */
     public function destroy(StudentOrder $studentOrder)
     {
+        
         // Logic to delete the order
         $studentOrder->delete();
 
         return response()->json(['message' => 'Order deleted successfully']);
+    }
+
+    public function printPdf(StudentOrder $studentOrder) {
+        $student_id = $studentOrder->student_id;
+       
+        $studentOrder = StudentOrder::with('studentOrderItems','letterSet')->where('id',$studentOrder->id)->first();
+        set_time_limit(300);
+		$opt = Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? public_path('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
+
+        $student = Student::find($student_id);
+        //Not using currently this part
+        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+        $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
+
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id', $courseCreationID)
+                        ->where('student_course_relation_id', $courseRelationId)
+                        ->get()
+                        ->first();
+        $venue_id = (isset($currentCourse->venue_id) && $currentCourse->venue_id > 0 ? $currentCourse->venue_id : 0);
+
+        
+        //End of not using part
+
+        $address = '';
+        if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
+            if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                $address .= $student->contact->termaddress->address_line_1.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                $address .= $student->contact->termaddress->address_line_2.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                $address .= $student->contact->termaddress->city.', ';
+            endif;
+            if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                $address .= $student->contact->termaddress->state.', <br/>';
+            endif;
+            if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                $address .= $student->contact->termaddress->post_code.', ';
+            endif;
+            if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                $address .= '<br/>'.$student->contact->termaddress->country;
+            endif;
+        endif;
+
+        // return view('pages.students.frontend.document_requests.pdf.moneyreceipt', [
+        //     'logoUrl' => $logoUrl,
+        //     'student' => $student,
+        //     'address' => $address,
+        //     'studentOrders' => $studentOrder::with('studentOrderItems','letterSet'),
+        //     'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+        // ]);
+
+        
+        $studentOrders = $studentOrder;
+        //dd($studentOrders);
+         $pdf = PDF::loadView('pages.students.frontend.document_requests.pdf.moneyreceipt',compact('logoUrl','student','address','studentOrders'));
+         return $pdf->download('student_document_request_payment.pdf');
     }
 
 }

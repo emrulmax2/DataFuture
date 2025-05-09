@@ -55,7 +55,7 @@ class StripeCheckoutController extends Controller
             $invoiceNumber = $item->description;  // this holds the product name if using price_data->product_data
             
             $studentOrder = StudentOrder::with('studentOrderItems')->where('invoice_number', $invoiceNumber)->first();
-
+            $student = Student::where('id', $studentOrder->student_id)->first();
             $studentOrder->payment_status = 'Completed';
             $studentOrder->payment_method = 'Card';
             $studentOrder->status = 'In Progress';
@@ -72,7 +72,7 @@ class StripeCheckoutController extends Controller
 
                         $studentDocumentRequestForm = new StudentDocumentRequestForm();
                         $studentDocumentRequestForm->student_id = $cartItem->student_id;
-                        $studentDocumentRequestForm->term_declaration_id = $cartItem->term_declaration_id;
+                        $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
                         $studentDocumentRequestForm->letter_set_id = $cartItem->letter_set_id;
                         $studentDocumentRequestForm->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
                         $studentDocumentRequestForm->description = $cartItem->description;
@@ -97,7 +97,7 @@ class StripeCheckoutController extends Controller
                 for($iCount=0; $iCount <= $quantity; $iCount++) {
                     $studentDocumentRequestForm = new StudentDocumentRequestForm();
                     $studentDocumentRequestForm->student_id = $cartItem->student_id;
-                    $studentDocumentRequestForm->term_declaration_id = $cartItem->term_declaration_id;
+                    $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
                     $studentDocumentRequestForm->letter_set_id = $cartItem->letter_set_id;
                     $studentDocumentRequestForm->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
                     $studentDocumentRequestForm->description = $cartItem->description;

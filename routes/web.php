@@ -232,6 +232,7 @@ use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
 use App\Http\Controllers\LibraryManagement\LibraryBookController;
 use App\Http\Controllers\LibraryManagementController;
+use App\Http\Controllers\PayPalCheckOutController;
 use App\Http\Controllers\PaySlipUploadSyncController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
@@ -602,11 +603,11 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::post('shopping-cart/store', 'store')->name('shopping.cart.store'); 
             Route::post('shopping-cart/update', 'update')->name('shopping.cart.update'); 
             Route::delete('shopping-cart/delete/{id}', 'delete')->name('shopping.cart.destory'); 
-            Route::get('shopping-cart/checkout', 'checkout')->name('shopping.cart.checkout'); 
-            //Route::post('shopping-cart/checkout/paymenthandler', 'paymenthandler')->name('shopping.cart.checkout.post');
             
-            Route::post('shopping-cart/checkout/stripe', 'processStripe')->name('shopping.cart.checkout.stripe');
+            Route::get('shopping-cart/checkout', 'checkout')->name('shopping.cart.checkout'); 
+            
             Route::post('shopping-cart/checkout/paypal/capture', 'capturePaypal')->name('shopping.cart.checkout.paypal.capture'); 
+            
         });
 
         Route::controller(StripeCheckoutController::class)->group(function() {
@@ -614,8 +615,13 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::any('card-checkout-session/success', 'success')->name('checkout.stripe.success'); 
             Route::any('card-checkout-session/cancel', 'cancel')->name('checkout.stripe.cancel'); 
         });
-        
 
+         Route::controller(PayPalCheckOutController::class)->group(function() {
+            Route::post('/paypal/create-order', 'createOrder')->name('checkout.paypal.session'); 
+            Route::any('/paypal/success', 'success')->name('checkout.paypal.success'); 
+            Route::any('/paypal/cancell', 'cancel')->name('checkout.paypal.cancel'); 
+        });
+        
 
         Route::controller(StudentOrderController::class)->group(function() {
             Route::get('order', 'index')->name('order'); 
@@ -623,6 +629,9 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('order/show/{id}', 'show')->name('order.show'); 
             Route::post('order/confirm-payment', 'confirmPayment')->name('order.confirm.payment'); 
             Route::post('order/store', 'store')->name('order.store'); 
+            Route::get('order/print/pdf/{student_order}', 'printPdf')->name('order.print.pdf'); 
+            Route::delete('order/delete/{student_order}', 'destroy')->name('order.destory');
+            Route::post('order/restore/{student_order}', 'restore')->name('order.restore');
         });
         Route::controller(StudentController::class)->group(function() {
 
@@ -3723,4 +3732,11 @@ Route::middleware('auth')->group(function() {
 Route::controller(EmployeeFormController::class)->group(function(){
     Route::get('forms/employee/{employee_id?}', 'index')->name('forms.employee'); 
     Route::post('forms/employee/store', 'store')->name('forms.employee.store'); 
+});
+
+
+Route::controller(StudentOrderController::class)->group(function() {
+
+    Route::get('order/print/pdf/{student_order}', 'printPdf')->name('order.print.pdf'); 
+
 });

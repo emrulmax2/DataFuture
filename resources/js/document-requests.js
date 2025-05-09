@@ -223,7 +223,15 @@ var admissionListTable = (function () {
 (function(){
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.getElementById("successModal"));
+    const errorModal = tailwind.Modal.getOrCreateInstance(document.getElementById("errorModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.getElementById("confirmModal"));
+
     
+        document.getElementById("confirmModal").addEventListener('hidden.tw.modal', function(event){
+            $('#confirmModal .agreeWith').attr('data-id', '0');
+            $('#confirmModal .agreeWith').attr('data-action', 'none');
+        });
+
     let admissionDatepickerOpt = {
         autoApply: true,
         singleMode: true,
@@ -396,7 +404,72 @@ var admissionListTable = (function () {
     //     });
     // });
     
-    
+    $(".cancelOrder").on("click", function (event) {
+        event.preventDefault();
+        const $this = $(this);
+        const orderId = $this.attr("data-order_id");
+        const action = "DELETE";
+        const title = "Are you sure?";
+        const desc = "Are you sure you want to delete this order ? This action cannot be undone.";
+      
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .modal-title").html(title);
+            $("#confirmModal .modal-desc").html(desc);
+            $('#confirmModal .agreeWith').attr('data-id', orderId);
+            $('#confirmModal .agreeWith').attr('data-action', action);
+        });
+        confirmModal.show();
+    });
+// Confirm Modal Action
+        $('#confirmModal .agreeWith').on('click', function(){
+            let $agreeBTN = $(this);
+            let recordID = $agreeBTN.attr('data-id');
+            let action = $agreeBTN.attr('data-action');
+
+            $('#confirmModal button').attr('disabled', 'disabled');
+            if(action == 'DELETE'){
+                axios({
+                    method: 'delete',
+                    url: route('students.order.destory', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Done!');
+                            $('#successModal .successModalDesc').html('Order cancelled!');
+                        });
+                    }
+                    window.location.reload();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            } else if(action == 'RESTORE'){
+                axios({
+                    method: 'post',
+                    url: route('academicyears.restore', recordID),
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        $('#confirmModal button').removeAttr('disabled');
+                        confirmModal.hide();
+
+                        succModal.show();
+                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                            $('#successModal .successModalTitle').html('Success!');
+                            $('#successModal .successModalDesc').html('Academic Year Data Successfully Restored!');
+                        });
+                    }
+                    location.reload();
+                }).catch(error =>{
+                    console.log(error)
+                });
+            }
+        })
+
 
         if($('#success-notification-toggle').length>0) {
             $("#success-notification-toggle").on("click", function () {

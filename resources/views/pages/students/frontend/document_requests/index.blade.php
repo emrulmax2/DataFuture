@@ -125,8 +125,14 @@
                             </td>
                             <td class="table-report__action">
                                 <div class="flex justify-center items-center">
-                                    <a class="flex items-center text-primary whitespace-nowrap mr-5" href="javascript:;">
-                                        <i data-lucide="check-square" class="w-4 h-4 mr-1"></i> View Details
+                                    {{--  href="javascript:;" data-tw-toggle="modal" data-order_id="{{ $order->id }}" data-tw-target="#viewInvoiceModal" --}}
+                                    <a href="{{ route("students.order.print.pdf", $order->id) }}"  class="viewInvoiceForStudent flex items-center text-primary whitespace-nowrap mr-5" >
+                                        <i data-lucide="cloud-download" class="w-4 h-4 mr-1"></i> 
+                                            @if($order->payment_status!="Completed")
+                                                Download Invoice
+                                            @else
+                                                Download Receipt
+                                            @endif
                                     </a>
                                     @if($order->payment_status!="Completed")
                                         {{-- <a class="flex items-center text-primary whitespace-nowrap" href="javascript:;" data-tw-toggle="modal" data-tw-target="#delete-confirmation-modal">
@@ -142,18 +148,29 @@
                                                 <ul class="dropdown-content">
                                                     @if($order->status!="Rejected")
                                                     <li>
-                                                        <a href="" class="dropdown-item payByCard" data-quantity_wihout_free="{{ $order->quantity - $order->number_of_free }}" data-currency="GBP" data-invoice_number="{{ $order->invoice_number }}" data-action="confirm" >
+                                                        <a id="payButton_{{ $order->id }}" href="" class="dropdown-item payByCard" 
+                                                        data-quantity-wihout-free="{{ $order->total_paid_quantity }}" 
+                                                        data-currency="GBP" 
+                                                        data-invoice-number="{{ $order->invoice_number }}" 
+                                                        data-amount="{{ $order->total_amount * 100 }}"  
+                                                        data-action="confirm" >
                                                             <i data-lucide="credit-card" class="w-4 h-4 mr-2"></i> Pay By Card
+                                                            <i data-loading-icon="oval" class="w-4 h-4 ml-1 loadingIcon hidden"></i>
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="" class="dropdown-item payByPayPal" data-quantity_wihout_free="{{ $order->quantity - $order->number_of_free }}" data-currency="GBP" data-invoice_number="{{ $order->invoice_number }}">
+                                                        <a href="" id="payPaypalButton_{{ $order->id }}" class="dropdown-item payByPayPal" 
+                                                        data-quantity-wihout-free="{{ $order->total_paid_quantity }}" 
+                                                        data-currency="GBP" 
+                                                        data-invoice-number="{{ $order->invoice_number }}" 
+                                                        data-amount="{{ $order->total_amount * 100 }}"  
+                                                        data-action="confirm">
                                                             <i data-lucide="arrow-left-right" class="w-4 h-4 mr-2"></i> Pay By PayPal
                                                         </a>
                                                     </li>
                                                     <li>
-                                                        <a href="" class="dropdown-item text-danger cancelOrder" data-id="{{ $order->id }}" >
-                                                            <i data-lucide="square-x" class="w-4 h-4 mr-2"></i> Cancel Order
+                                                        <a href="" data-tw-toggle="modal" data-order_id="{{ $order->id }}" data-tw-target="#confirmModal" class="dropdown-item text-danger cancelOrder" data-id="{{ $order->id }}" >
+                                                            <i data-lucide="ban" class="w-4 h-4 mr-2"></i> Cancel Order
                                                         </a>
                                                     </li>
                                                     @endif
@@ -259,8 +276,8 @@
                 <div class="modal-body p-0">
                     <div class="p-5 text-center">
                         <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
+                        <div class="text-3xl mt-5 modal-title">Are you sure?</div>
+                        <div class="text-slate-500 mt-2 modal-desc"></div>
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
@@ -272,9 +289,21 @@
     </div>
     <!-- END: Delete Confirm Modal Content -->
 
+    <!-- BEGIN: Super Large Modal Content -->
+    <div id="viewInvoiceModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-body p-10 text-center">
+                    This is totally awesome superlarge modal!
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Super Large Modal Content -->
 @endsection
 
 
 @section('script')
  @vite(['resources/js/document-requests.js'])
+ @vite(['resources/js/stripe-class-checkout.js'])
 @endsection

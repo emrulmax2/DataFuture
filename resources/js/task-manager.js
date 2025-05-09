@@ -246,7 +246,7 @@ var taskAssignedStudentTable = (function () {
                                                             html += '</a>';
                                                         html += '</li>';
                                                     }
-                                                    console.log(cell.getData().student_document_request_form_id);
+                                                    //console.log(cell.getData().student_document_request_form_id);
                                                     if(cell.getData().student_document_request_form_id != null ){
                                                         //insert data into local storage
                                                         localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
@@ -257,6 +257,15 @@ var taskAssignedStudentTable = (function () {
                                                                 html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
                                                             html += '</a>';
                                                         html += '</li>';
+                                                        let student_order = cell.getData().student_document_request_form_id.student_order_id;
+
+                                                        if(student_order != null){
+                                                            html += '<li>';
+                                                                html += '<a  href="'+route('order.print.pdf',student_order)+'"  class="viewInvoiceForStudent dropdown-item">';
+                                                                    html += '<i data-lucide="file-check-2" class="w-4 h-4 mr-2"></i> View Receipt';
+                                                                html += '</a>';
+                                                            html += '</li>';
+                                                        }
                                                         html += '<li>';
                                                             html += '<a data-studenttaskid="'+cell.getData().student_task_id+'"  data-student_name="'+cell.getData().full_name +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                 html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
@@ -309,6 +318,14 @@ var taskAssignedStudentTable = (function () {
                                                                     html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
                                                                 html += '</a>';
                                                             html += '</li>';
+                                                            let student_order = cell.getData().student_document_request_form_id.student_order_id;
+                                                            if(student_order != null){
+                                                                html += '<li>';
+                                                                    html += '<a  href="'+route('order.print.pdf',student_order)+'"  class="viewInvoiceForStudent dropdown-item">';
+                                                                        html += '<i data-lucide="file-check-2" class="w-4 h-4 mr-2"></i> View Receipt';
+                                                                    html += '</a>';
+                                                                html += '</li>';
+                                                            }
                                                             html += '<li>';
                                                                 html += '<a data-studenttaskid="'+cell.getData().student_task_id+'"  data-student_name="'+cell.getData().full_name +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                     html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
