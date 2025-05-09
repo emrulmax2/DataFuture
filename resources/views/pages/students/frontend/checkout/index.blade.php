@@ -5,11 +5,13 @@
 @endsection
 
 @section('subcontent')
-
+<div class="max-w-5xl mx-auto text-right px-8 mt-10">
+   <a href="{{ route('students.document-request-form.products') }}" class=" btn btn-primary text-white shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Products</a>
+</div>
     <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mt-10">
         
       <h2 class="text-3xl font-bold mb-6 ">Checkout</h2>
-      <form id="checkoutForm" method="POST" action="#" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <form id="checkoutForm" method="POST" action="#" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-8">
         @csrf
         <!-- Customer Info -->
         <div class="md:col-span-2 space-y-6">
