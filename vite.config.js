@@ -379,6 +379,9 @@ export default defineConfig({
                 'resources/js/add-to-cart.js',
                 'resources/js/checkout.js',
                 'resources/js/stripe-checkout.js',
+                'resources/js/stripe-class-checkout.js',
+                'resources/js/paypal-checkout.js',
+                'resources/js/paypal-class-checkout.js',
 
             ],
             refresh: true,
