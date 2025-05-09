@@ -12,6 +12,7 @@ use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Room;
 use App\Models\Student;
+use App\Models\StudentOrder;
 use App\Models\StudentTask;
 use App\Models\StudentUser;
 use App\Models\TermDeclaration;
@@ -27,11 +28,12 @@ class StudentDocumentRequestFormController extends Controller
      */
     public function index()
     {
+       
         // Fetch all student document request forms
         $studentDocumentRequestForms = StudentDocumentRequestForm::all();
 
         $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
-
+        $studentOrderList = StudentOrder::with('studentOrderItems','studentOrderItems.student','studentOrderItems.letterSet')->where('student_id',  $student->id)->get();
         $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
         $DoItOnline = FormsTable::all();
         if($studentAssigned)
@@ -84,6 +86,7 @@ class StudentDocumentRequestFormController extends Controller
                 "letter_sets" => $letter_sets,
                 "term_declarations" => TermDeclaration::orderBy('id','DESC')->get(), 
                 'latestTermInfo' => TermDeclaration::orderBy('id','DESC')->get()->first(),
+                'studentOrderList' => $studentOrderList,
             ]);
     }
 
@@ -185,18 +188,8 @@ class StudentDocumentRequestFormController extends Controller
      */
     public function store(StoreStudentDocumentRequestFormRequest $request)
     {
-        $studentDocumentRequestForm = StudentDocumentRequestForm::where('student_id', $request->student_id)
-            ->where('term_declaration_id', $request->term_declaration_id)
-            ->where('letter_set_id', $request->letter_set_id)
-            ->where('status', 'Pending')
-            ->get()->first();
-        if(isset($studentDocumentRequestForm->id)){
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Document request form already submitted for this term. Please check your request history.',
-            ], 400);
-        }
-        
+
+
         $studentDocumentRequestForm = new StudentDocumentRequestForm();
         $studentDocumentRequestForm->student_id = $request->student_id;
         $studentDocumentRequestForm->term_declaration_id = $request->term_declaration_id;
@@ -220,7 +213,7 @@ class StudentDocumentRequestFormController extends Controller
             StudentTask::create($data);
             return response()->json([
                 'status' => 'success',
-                'message' => 'Document request form submitted successfully.',
+                'message' => 'Your Order has been submitted successfully. Please check order history.',
                 'data' => $studentDocumentRequestForm,
             ]);
 
@@ -233,6 +226,7 @@ class StudentDocumentRequestFormController extends Controller
 
         }
     }
+
 
     public function list(Request $request){
         
@@ -301,35 +295,32 @@ class StudentDocumentRequestFormController extends Controller
         
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
-    /**
-     * Display the specified resource.
-     */
-    public function show(StudentDocumentRequestForm $studentDocumentRequestForm)
+
+
+    public function products(Request $request)
     {
-        //
+        $letter_sets = LetterSet::where('status',1)->where('document_request',1)->get();
+        $student = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
+        $studentOrderList = StudentOrder::where('student_id',  $student->id)->where('status','Pending')->get();
+        
+        // $studentDocumentRequestForm = StudentDocumentRequestForm::where('student_id', $student->id)
+        //     ->where('status', 'Pending')
+        //     ->get();
+
+        $countPendingOrders = $studentOrderList->count(); 
+        return view('pages.students.frontend.document_requests.products',[
+                'title' => 'Live Students - London Churchill College',
+                'breadcrumbs' => [
+                    ['label' => 'Profile View', 'href' => route('students.dashboard')],
+                    ['label' => 'Document / ID Card Replacement request', 'href' => 'javascript:void(0);'],
+                ],
+                'student' => $student,
+                "letter_sets" => $letter_sets,
+                "term_declarations" => TermDeclaration::orderBy('id','DESC')->get(), 
+                'latestTermInfo' => TermDeclaration::orderBy('id','DESC')->get()->first(),
+                'current_term_id' => $student->assigned_terms->first(),
+                'countPendingOrders' => $countPendingOrders,
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateStudentDocumentRequestFormRequest $request, StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(StudentDocumentRequestForm $studentDocumentRequestForm)
-    {
-        //
-    }
 }

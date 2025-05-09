@@ -323,6 +323,7 @@ class PendingTaskManagerController extends Controller
                         foreach($StudentWiseDoucmentRequestList as $key => $value) {
                             $documentRequest = $value->studentDocumentRequestForm;
                             $documentRequest->letterSet;
+                            $documentRequest->studentOrder;
                             
                             $data[] = [
                                 'id' => $list->id,
@@ -1137,7 +1138,7 @@ class PendingTaskManagerController extends Controller
 
         $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
         $studentTaskDoucmentRequest->status = $request->status;
-        $studentTaskDoucmentRequest->email_sent = $email_sent;
+        $studentTaskDoucmentRequest->email_status = $email_sent;
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
         
         if($studentTaskDoucmentRequest->save()) {

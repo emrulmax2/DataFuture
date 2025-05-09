@@ -43,4 +43,17 @@ return [
         'api_key' => env('GOOGLE_BOOKS_API_KEY'),
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+    ],
+
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+        'sandbox' => env('PAYPAL_SANDBOX', true),
+    ],
+
+
+
 ];
