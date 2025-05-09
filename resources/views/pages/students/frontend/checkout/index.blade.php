@@ -14,7 +14,7 @@
      <form id="checkoutForm" method="POST" action="#" enctype="multipart/form-data" class="grid grid-cols-12 gap-4">
         @csrf
         <!-- Customer Info -->
-        <div class="col-span-7 md:col-span-12 space-y-6">
+        <div class="col-span-12 sm:col-span-7 space-y-6">
           <!-- Personal Details -->
           <div>
             <h3 class="text-xl font-semibold mb-4">Student Info</h3>
@@ -90,7 +90,7 @@
         </div>
   
         <!-- Order Summary -->
-        <div class="col-span-5 bg-gray-50 p-6 rounded-lg shadow-sm md:col-span-12 ">
+        <div class="col-span-12 bg-gray-50 p-6 rounded-lg shadow-sm sm:col-span-5 ">
           <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
           <ul class="space-y-2 mb-4">
             @php
