@@ -94,30 +94,31 @@ class StripeCheckoutController extends Controller
                     }
         
                 }
-                for($iCount=0; $iCount <= $quantity; $iCount++) {
-                    $studentDocumentRequestForm = new StudentDocumentRequestForm();
-                    $studentDocumentRequestForm->student_id = $cartItem->student_id;
-                    $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
-                    $studentDocumentRequestForm->letter_set_id = $cartItem->letter_set_id;
-                    $studentDocumentRequestForm->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
-                    $studentDocumentRequestForm->description = $cartItem->description;
-                    $studentDocumentRequestForm->service_type = 'Same Day (cost £10.00)';
-                    $studentDocumentRequestForm->status = 'Pending';
-                    $studentDocumentRequestForm->email_status = 'Pending';
-                    $studentDocumentRequestForm->student_consent = 1;
-                    $studentDocumentRequestForm->created_by = auth('student')->user()->id;
-                    
-                    $studentDocumentRequestForm->student_order_id = $studentOrder->id;
-                    $studentDocumentRequestForm->save();
+                    for($iCount=0; $iCount < $quantity; $iCount++) {
+                        $studentDocumentRequestForm = new StudentDocumentRequestForm();
+                        $studentDocumentRequestForm->student_id = $cartItem->student_id;
+                        $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
+                        $studentDocumentRequestForm->letter_set_id = $cartItem->letter_set_id;
+                        $studentDocumentRequestForm->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
+                        $studentDocumentRequestForm->description = $cartItem->description;
+                        $studentDocumentRequestForm->service_type = 'Same Day (cost £10.00)';
+                        $studentDocumentRequestForm->status = 'Pending';
+                        $studentDocumentRequestForm->email_status = 'Pending';
+                        $studentDocumentRequestForm->student_consent = 1;
+                        $studentDocumentRequestForm->created_by = auth('student')->user()->id;
+                        
+                        $studentDocumentRequestForm->student_order_id = $studentOrder->id;
+                        $studentDocumentRequestForm->save();
 
-                    $data['student_id'] = $studentOrder->student_id;
-                    $data['task_list_id'] = 20; // Document Request Task
-                    $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
-                    $data['status'] = "Pending";
-                    $data['created_by'] = 1;
+                        $data['student_id'] = $studentOrder->student_id;
+                        $data['task_list_id'] = 20; // Document Request Task
+                        $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
+                        $data['status'] = "Pending";
+                        $data['created_by'] = 1;
 
-                    StudentTask::create($data);
-                }
+                        StudentTask::create($data);
+                    }
+                
             }
             
             
@@ -133,4 +134,6 @@ class StripeCheckoutController extends Controller
     {
         return redirect()->route('students.document-request-form.index')->with('paymentErrorMessage', 'Payment canceled. Please try again.');
     }
+
+
 }
