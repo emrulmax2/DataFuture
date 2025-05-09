@@ -197,17 +197,6 @@ class ShoppingCartController extends Controller
     }
 
 
-    public function capturePaypal(Request $request)
-    {
-        $env = new SandboxEnvironment(env('PAYPAL_CLIENT_ID'), env('PAYPAL_SECRET'));
-        $client = new PayPalHttpClient($env);
-
-        $captureRequest = new OrdersCaptureRequest($request->orderID);
-        $captureRequest->prefer('return=representation');
-        $response = $client->execute($captureRequest);
-
-        return response()->json(['message' => 'Payment captured successfully', 'details' => $response->result]);
-    }
 
 }
 
