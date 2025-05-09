@@ -5,8 +5,8 @@
 @endsection
 
 @section('subcontent')
-<div class="max-w-5xl mx-auto text-right px-8 mt-10">
-   <a href="{{ route('students.document-request-form.products') }}" class=" btn btn-primary text-white shadow-md mr-2"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Products</a>
+<div class="max-w-5xl mx-auto text-right mt-10">
+   <a href="{{ route('students.document-request-form.products') }}" class=" btn btn-primary text-white shadow-md "><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Products</a>
 </div>
     <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mt-10">
         
@@ -73,7 +73,7 @@
   
           <!-- Payment Method -->
           <div>
-            <h3 class="text-xl font-semibold mb-4 payment_method">Payment Method</h3>
+            <h3 class="text-xl font-semibold mb-4 payment_method">Payment Method <span class="text-red">*</span></h3>
             <div class="space-y-3">
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio"  name="payment_method" value="Card" class="form-check-input" />
