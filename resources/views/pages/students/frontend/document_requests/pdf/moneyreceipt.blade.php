@@ -62,7 +62,7 @@
       <div class="header">
         <table class="print_table">
             <tr>
-                <td colspan="2"> <img style="max-width: 150px; height: auto;" src="{{ $logoUrl }}" /></td>
+                <td colspan="2"> <img style="max-width: 150px; height: auto;" src="{{ asset("build/assets/images/L1_logo.svg") }}" /></td>
                 @if($studentOrders->transaction_date != null)
                     
                 <td colspan="2" style="text-color:gray; font-size:28px; text-align:right; padding-top:40px; text-transform:uppercase;" colspan="2">MONEYRECEIPT</td>
