@@ -11,10 +11,10 @@
     <div class="max-w-5xl mx-auto bg-white rounded-lg shadow-md p-8 mt-10">
         
       <h2 class="text-3xl font-bold mb-6 ">Checkout</h2>
-     <form id="checkoutForm" method="POST" action="#" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+     <form id="checkoutForm" method="POST" action="#" enctype="multipart/form-data" class="grid grid-cols-12 gap-4">
         @csrf
         <!-- Customer Info -->
-        <div class="md:col-span-2 space-y-6">
+        <div class="col-span-7 space-y-6">
           <!-- Personal Details -->
           <div>
             <h3 class="text-xl font-semibold mb-4">Student Info</h3>
@@ -73,7 +73,7 @@
   
           <!-- Payment Method -->
           <div>
-            <h3 class="text-xl font-semibold mb-4 payment_method">Payment Method <span class="text-red">*</span></h3>
+            <h3 class="text-xl font-semibold mb-4 payment_method">Payment Method <span class="text-danger">*</span></h3>
             <div class="space-y-3">
               <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio"  name="payment_method" value="Card" class="form-check-input" />
@@ -90,7 +90,7 @@
         </div>
   
         <!-- Order Summary -->
-        <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+        <div class="bg-gray-50 p-6 rounded-lg shadow-sm col-span-5">
           <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
           <ul class="space-y-2 mb-4">
             @php
