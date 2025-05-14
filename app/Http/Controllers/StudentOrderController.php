@@ -62,7 +62,7 @@ class StudentOrderController extends Controller
             'tax_amount.*' => 'required|numeric',
             'total_amount.*' => 'required|numeric',
             'product_type.*' => 'nullable|in:Free,Paid',
-            'payment_method' => 'required|in:Card,PayPal',
+            'payment_method' => 'required|in:Card,PayPal,N/A',
         ]);
         $sub_amount =0;
         $tax_amount =0;
