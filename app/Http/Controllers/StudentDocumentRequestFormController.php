@@ -318,7 +318,7 @@ class StudentDocumentRequestFormController extends Controller
                 "letter_sets" => $letter_sets,
                 "term_declarations" => TermDeclaration::orderBy('id','DESC')->get(), 
                 'latestTermInfo' => TermDeclaration::orderBy('id','DESC')->get()->first(),
-                'current_term_id' => $student->assigned_terms->first(),
+                'current_term_id' => isset($student->assigned_terms) ? $student->assigned_terms->first() : TermDeclaration::orderBy('id','DESC')->get()->first(),
                 'countPendingOrders' => $countPendingOrders,
         ]);
     }
