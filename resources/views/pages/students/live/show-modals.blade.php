@@ -666,6 +666,7 @@
                             <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
                             <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full address_line_2" name="student_address_address_line_2">
                         </div>
+                        
                         <div class="col-span-12 sm:col-span-6">
                             <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
                             <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full city" name="student_address_city">
