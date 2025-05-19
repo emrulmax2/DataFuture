@@ -69,7 +69,7 @@ class StripeCheckoutController extends Controller
                     $quantity = $studentOrder->quantity - $studentOrder->number_of_free;
 
                     for($iJount=0; $iJount < $studentOrder->number_of_free; $iJount++) {
-
+                        
                         $studentDocumentRequestForm = new StudentDocumentRequestForm();
                         $studentDocumentRequestForm->student_id = $cartItem->student_id;
                         $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
@@ -83,7 +83,7 @@ class StripeCheckoutController extends Controller
                         $studentDocumentRequestForm->created_by = auth('student')->user()->id;
                         $studentDocumentRequestForm->student_order_id = $studentOrder->id;
                         $studentDocumentRequestForm->save();
-
+                        $data = [];
                         $data['student_id'] = $studentOrder->student_id;
                         $data['task_list_id'] = 20; // Document Request Task
                         $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
@@ -94,30 +94,32 @@ class StripeCheckoutController extends Controller
                     }
         
                 }
+                if($quantity > 0) {
                     for($iCount=0; $iCount < $quantity; $iCount++) {
-                        $studentDocumentRequestForm = new StudentDocumentRequestForm();
-                        $studentDocumentRequestForm->student_id = $cartItem->student_id;
-                        $studentDocumentRequestForm->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
-                        $studentDocumentRequestForm->letter_set_id = $cartItem->letter_set_id;
-                        $studentDocumentRequestForm->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
-                        $studentDocumentRequestForm->description = $cartItem->description;
-                        $studentDocumentRequestForm->service_type = 'Same Day (cost £10.00)';
-                        $studentDocumentRequestForm->status = 'Pending';
-                        $studentDocumentRequestForm->email_status = 'Pending';
-                        $studentDocumentRequestForm->student_consent = 1;
-                        $studentDocumentRequestForm->created_by = auth('student')->user()->id;
+                        $studentDocumentRequestFormPaid = new StudentDocumentRequestForm();
+                        $studentDocumentRequestFormPaid->student_id = $cartItem->student_id;
+                        $studentDocumentRequestFormPaid->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
+                        $studentDocumentRequestFormPaid->letter_set_id = $cartItem->letter_set_id;
+                        $studentDocumentRequestFormPaid->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
+                        $studentDocumentRequestFormPaid->description = $cartItem->description;
+                        $studentDocumentRequestFormPaid->service_type = 'Same Day (cost £10.00)';
+                        $studentDocumentRequestFormPaid->status = 'Pending';
+                        $studentDocumentRequestFormPaid->email_status = 'Pending';
+                        $studentDocumentRequestFormPaid->student_consent = 1;
+                        $studentDocumentRequestFormPaid->created_by = auth('student')->user()->id;
                         
-                        $studentDocumentRequestForm->student_order_id = $studentOrder->id;
-                        $studentDocumentRequestForm->save();
-
+                        $studentDocumentRequestFormPaid->student_order_id = $studentOrder->id;
+                        $studentDocumentRequestFormPaid->save();
+                        $data = [];
                         $data['student_id'] = $studentOrder->student_id;
                         $data['task_list_id'] = 20; // Document Request Task
-                        $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
+                        $data['student_document_request_form_id'] = $studentDocumentRequestFormPaid->id;
                         $data['status'] = "Pending";
                         $data['created_by'] = 1;
 
                         StudentTask::create($data);
                     }
+                }
                 
             }
             
