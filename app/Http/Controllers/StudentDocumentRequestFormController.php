@@ -308,6 +308,7 @@ class StudentDocumentRequestFormController extends Controller
         //     ->get();
 
         $countPendingOrders = $studentOrderList->count(); 
+        dd($student->assigned_terms);
         return view('pages.students.frontend.document_requests.products',[
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
