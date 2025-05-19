@@ -62,14 +62,15 @@ class StripeCheckoutController extends Controller
             $studentOrder->transaction_date = now();
             $studentOrder->transaction_id = $transactionId;
             $studentOrder->save();
-            dd($studentOrder->studentOrderItems);
+            
             foreach ($studentOrder->studentOrderItems as $cartItem) {
                 $quantity = $cartItem->quantity;
                 $free = $cartItem->number_of_free;
+                
                 if($free > 0) {
-                    $quantity = $studentOrder->quantity - $studentOrder->number_of_free;
+                    $quantity = $cartItem->quantity - $cartItem->number_of_free;
 
-                    for($iJount=0; $iJount < $studentOrder->number_of_free; $iJount++) {
+                    for($iJount=0; $iJount < $cartItem->number_of_free; $iJount++) {
                         
                         $studentDocumentRequestForm = new StudentDocumentRequestForm();
                         $studentDocumentRequestForm->student_id = $cartItem->student_id;
