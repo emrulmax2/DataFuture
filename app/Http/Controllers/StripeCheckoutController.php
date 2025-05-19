@@ -62,6 +62,7 @@ class StripeCheckoutController extends Controller
             $studentOrder->transaction_date = now();
             $studentOrder->transaction_id = $transactionId;
             $studentOrder->save();
+            dd($studentOrder->studentOrderItems);
             foreach ($studentOrder->studentOrderItems as $cartItem) {
                 $quantity = $cartItem->quantity;
                 $free = $cartItem->number_of_free;
