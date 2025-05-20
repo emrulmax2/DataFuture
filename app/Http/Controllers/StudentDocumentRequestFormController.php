@@ -308,6 +308,7 @@ class StudentDocumentRequestFormController extends Controller
         //     ->get();
 
         $countPendingOrders = $studentOrderList->count(); 
+        
         return view('pages.students.frontend.document_requests.products',[
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
@@ -318,7 +319,7 @@ class StudentDocumentRequestFormController extends Controller
                 "letter_sets" => $letter_sets,
                 "term_declarations" => TermDeclaration::orderBy('id','DESC')->get(), 
                 'latestTermInfo' => TermDeclaration::orderBy('id','DESC')->get()->first(),
-                'current_term_id' => $student->assigned_terms->first(),
+                'current_term_id' => $student->assigned_terms!=false ? $student->assigned_terms->first() : TermDeclaration::orderBy('id','DESC')->get()->first(),
                 'countPendingOrders' => $countPendingOrders,
         ]);
     }

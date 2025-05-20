@@ -80,10 +80,10 @@
                 <span>Credit/Debit Card</span>
               </label>
               <div id="card-element" class="mb-4"></div>
-              <label class="flex items-center gap-2 cursor-pointer">
+              {{-- <label class="flex items-center gap-2 cursor-pointer">
                 <input type="radio" name="payment_method" value="PayPal" class="form-check-input " />
                 <span>PayPal</span>
-              </label>
+              </label> --}}
               <div class="acc__input-error error-payment_method text-danger mt-2"></div>
             </div>
           </div>
