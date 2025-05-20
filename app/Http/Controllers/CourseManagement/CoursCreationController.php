@@ -32,7 +32,6 @@ class CoursCreationController extends Controller
     }
 
     public function list(Request $request) {
-        
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $course = (isset($request->course) && $request->course > 0 ? $request->course : '');

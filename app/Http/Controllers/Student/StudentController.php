@@ -8,12 +8,7 @@ use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Cache;
-
-use App\Models\Applicant;
-use App\Models\ApplicantTemporaryEmail;
-use App\Models\AssessmentPlan;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\AttendanceCode;
@@ -26,10 +21,8 @@ use App\Models\ConsentPolicy;
 use App\Models\Country;
 use App\Models\Course;
 use App\Models\CourseCreation;
-use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseCreationVenue;
-use App\Models\CourseModule;
 use App\Models\Disability;
 use App\Models\DocumentSettings;
 use App\Models\EmailTemplate;
@@ -45,8 +38,8 @@ use App\Models\HighestQualificationOnEntry;
 use App\Models\InstanceTerm;
 use App\Models\KinsRelation;
 use App\Models\LetterSet;
+use App\Models\LevelHours;
 use App\Models\MobileVerificationCode;
-use App\Models\ModuleCreation;
 use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
@@ -78,8 +71,6 @@ use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentDocument;
 use App\Models\StudentEmail;
-use App\Models\StudentEmailsAttachment;
-use App\Models\StudentEmailsDocument;
 use App\Models\StudentFlag;
 use App\Models\StudentLetter;
 use App\Models\StudentProposedCourse;
@@ -94,8 +85,10 @@ use App\Models\TaskList;
 use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use App\Models\StudentStuloadInformation;
-use Barryvdh\Debugbar\Facades\Debugbar;
-use DebugBar\DebugBar as DebugBarDebugBar;
+use App\Models\StudentWorkplacementDocument;
+use App\Models\WorkplacementDetails;
+use App\Models\WorkplacementSetting;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
@@ -1955,8 +1948,45 @@ class StudentController extends Controller
     }
     
     public function workplacement($student_id) {
-
         $student = Student::find($student_id);
+
+        $courseStartDate = (isset($student->crel->course_start_date) && !empty($student->crel->course_start_date) ? date('Y-m-d', strtotime($student->crel->course_start_date)) : date('Y-m-d', strtotime($student->crel->creation->available->course_start_date)) );
+        $courseId = $student->crel->creation->course_id;
+
+        $workPlacementDetails = WorkplacementDetails::with('level_hours')->where('course_id', $courseId)
+                                ->where(function($q) use($courseStartDate){
+                                    $q->whereNull('end_date')->where('start_date', '<=', $courseStartDate);
+                                })->orWhere(function($q) use($courseStartDate){
+                                    $q->whereNotNull('end_date')->where('start_date', '<=', $courseStartDate)->where('end_date', '>=', $courseStartDate);
+                                })->orderBy('id', 'DESC')->get()->first();
+
+        $assign_modules = Assign::where('student_id', $student_id)
+                                ->with(['plan.creations' => function($query) {
+                                    $query->select('id', 'module_name');
+                                }])
+                                ->get()
+                                ->pluck('plan.creations')
+                                ->unique('id')
+                                ->values();
+
+        if($workPlacementDetails && $workPlacementDetails->id):
+            $total_hours_calculations = LevelHours::with('learning_hours')->where('workplacement_details_id', $workPlacementDetails->id)->get();
+            $confirmed_hours = [];
+            if($total_hours_calculations->count() > 0):
+                foreach($total_hours_calculations as $lavelHour):
+                    if(isset($lavelHour->learning_hours) && $lavelHour->learning_hours->count() > 0):
+                        foreach($lavelHour->learning_hours as $learningHour):
+                            $confirmedHours = StudentWorkPlacement::where('workplacement_details_id', $workPlacementDetails->id)->where('level_hours_id', $lavelHour->id)
+                                                        ->where('learning_hours_id', $learningHour->id)->where('status', 'Confirmed')->sum('hours');
+                            $confirmed_hours[$learningHour->id]['lavel_hours'] = $lavelHour->name;
+                            $confirmed_hours[$learningHour->id]['learning_hours'] = $learningHour->name;
+                            $confirmed_hours[$learningHour->id]['confirmed_hours'] = ($confirmedHours > 0 ? $confirmedHours.' Hours' : '');
+
+                        endforeach;
+                    endif;
+                endforeach;
+            endif;
+        endif;
 
         return view('pages.students.live.workplacement', [
             'title' => 'Live Students - London Churchill College',
@@ -1965,10 +1995,15 @@ class StudentController extends Controller
                 ['label' => 'Work Placement', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
-            'company' => Company::orderBy('name', 'ASC')->get(),
-            'work_hours' => StudentWorkPlacement::where('student_id', $student_id)->sum('hours'),
+            'company' => Company::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'work_hours' => StudentWorkPlacement::where('student_id', $student_id)->where('status', 'Confirmed')->sum('hours'),
             'placement' => StudentWorkPlacement::all(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'workplacement_details' => $workPlacementDetails,
+            'workplacement_settings' => WorkplacementSetting::all(),
+            'assign_modules' => $assign_modules,
+            'total_hours_calculations' => $total_hours_calculations ?? [],
+            'confirmed_hours' => $confirmed_hours
         ]);
     }
 
@@ -2376,23 +2411,13 @@ class StudentController extends Controller
             StudentAttendanceTermStatus::create($data);
 
             if(!empty($plan_ids)):
+                //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
             endif;
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
         else:
-            $lastRecord = StudentAttendanceTermStatus::where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
-            if((isset($lastRecord->id) && $lastRecord->id > 0 && isset($lastRecord->status_id) && $lastRecord->status_id == $status_id) && ($lastRecord->term_declaration_id != $term_declaration_id || date('Y-m-d', strtotime($lastRecord->status_change_date)) != date('Y-m-d', strtotime($status_change_date)))):
-                $data = [];
-                $data['term_declaration_id'] = $term_declaration_id;
-                $data['status_change_reason'] = $status_change_reason;
-                $data['status_change_date'] = $status_change_date;
-                StudentAttendanceTermStatus::where('id', $lastRecord->id)->where('student_id', $student_id)->update($data);
-
-                return response()->json(['message' => 'Student status related data successfully changed.'], 200);
-            else:
-                return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
-            endif;
+            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
         endif;
     }
     public function verifyEmail(Request $request){
