@@ -27,7 +27,3 @@ pnpm-lock.yaml
 
 pnpm-lock.yaml
 composer.lock
-.github/workflows/deploy.yml
-*.sh
-*.yml
-.github/workflows/deploy.sh

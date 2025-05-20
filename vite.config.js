@@ -383,11 +383,6 @@ export default defineConfig({
                 'resources/js/paypal-checkout.js',
                 'resources/js/paypal-class-checkout.js',
 
-                'resources/js/wp-company-supervisor.js',
-                'resources/js/workplacement-details.js',
-                'resources/js/wp-settings.js',
-                'resources/js/student-workplacement-documents.js'
-
             ],
             refresh: true,
         }),
@@ -414,10 +409,5 @@ export default defineConfig({
         alias: {
             vue: 'vue/dist/vue.esm-bundler.js',
         },
-    },
-    build: {
-        rollupOptions: {
-            external: ['@stripe/stripe-js']
-        }
     },
 });

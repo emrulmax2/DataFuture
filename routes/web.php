@@ -293,9 +293,6 @@ use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionCon
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
 use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
 use App\Http\Controllers\ShoppingCartController;
-use App\Http\Controllers\Settings\WorkplacementCompanyController;
-use App\Http\Controllers\Settings\WorkplacementDetailsController;
-use App\Http\Controllers\Settings\WorkplacementSettingController;
 use App\Http\Controllers\Staff\FlagManagementController;
 use App\Http\Controllers\Staff\FollowupController;
 use App\Http\Controllers\Staff\PendingTaskManagerController;
@@ -310,7 +307,6 @@ use App\Http\Controllers\Student\SlcCocController;
 use App\Http\Controllers\Student\SlcMoneyReceiptController;
 use App\Http\Controllers\Student\StudentPerformanceController;
 use App\Http\Controllers\Student\WorkPlacementController;
-use App\Http\Controllers\Student\WorkplacementDocumentController;
 use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\StudentOrderController;
@@ -978,14 +974,6 @@ Route::middleware('auth')->group(function() {
         Route::post('student/mobile/verifed','verifiedMobile')->name('student.update.mobile');
         
 
-    });
-
-    Route::controller(WorkplacementDocumentController::class)->group(function() {
-        Route::post('student/workplacement-documents-store', 'store')->name('student.workplacement.documents.store');
-        Route::get('student/workplacement-documents-list', 'list')->name('student.workplacement.documents.list');
-        Route::post('student/download-workplacement-documents', 'documentDownload')->name('student.workplacement.documents.download');
-        Route::delete('student/workplacement-documents-destroy', 'destroy')->name('student.workplacement.documents.destory');
-        Route::post('student/workplacement-documents-restore', 'restore')->name('student.workplacement.documents.restore');
     });
 
     Route::controller(StudentResultController::class)->group(function() {
@@ -1955,44 +1943,6 @@ Route::middleware('auth')->group(function() {
             Route::post('internal-link/{id}/restore', 'restore')->name('internal-link.restore');
             Route::get('internal-link/{id}/parent', 'parentLinkBox')->name('internal-link.parent');
             Route::post('internal-link-update', 'update')->name('internal-link.update');
-        });
-
-
-        Route::controller(WorkplacementDetailsController::class)->group(function() {
-            Route::get('workplacement-details', 'wp_details')->name('workplacement.details');
-            Route::post('workplacement-details/store', 'wp_store')->name('workplacement.store');
-            Route::get('workplacement-details/edit/{id}', 'wp_edit')->name('workplacement.edit');
-            Route::post('workplacement-details/update/{id}', 'wp_update')->name('workplacement.update');
-            Route::delete('workplacement-details/delete/{id}', 'wp_delete')->name('workplacement.delete');
-            Route::post('level-hours/store', 'level_hours_store')->name('level.hours.store');
-            Route::get('level-hours/edit/{id}', 'level_hours_edit')->name('level.hours.edit');
-            Route::post('level-hours/update/{id}', 'level_hours_update')->name('level.hours.update');
-            Route::delete('level-hours/delete/{id}', 'level_hours_delete')->name('level.hours.delete');
-            Route::post('learning-hours/store', 'learning_hours_store')->name('learning.hours.store');
-            Route::get('learning-hours/edit/{id}', 'learning_hours_edit')->name('learning.hours.edit');
-            Route::post('learning-hours/update/{id}', 'learning_hours_update')->name('learning.hours.update');
-            Route::delete('learning-hours/delete/{id}', 'learning_hours_delete')->name('learning.hours.delete');
-        });
-
-        Route::controller(WorkplacementCompanyController::class)->group(function() {
-            Route::get('workplacement-companies', 'wp_companies')->name('workplacement.companies');
-            Route::get('/workplacement-companies/search', 'search')->name('workplacement.companies.search');
-        });
-
-        Route::controller(WorkplacementSettingController::class)->group(function() {
-            Route::get('site-settings/workplacement-settings', 'index')->name('workplacement-settings'); 
-            Route::get('site-settings/workplacement-settings/list', 'list')->name('workplacement-settings.list');        
-            Route::post('site-settings/workplacement-settings/store', 'store')->name('workplacement-settings.store');
-            Route::get('site-settings/workplacement-settings/edit/{id}', 'edit')->name('workplacement-settings.edit');
-            Route::post('site-settings/workplacement-settings/update/{id}', 'update')->name('workplacement-settings.update');
-            Route::delete('site-settings/workplacement-settings/delete/{id}', 'destroy')->name('workplacement-settings.destory');
-            Route::post('site-settings/workplacement-settings/restore/{id}', 'restore')->name('workplacement-settings.restore');
-
-            Route::post('site-settings/workplacement-setting-types/store', 'type_store')->name('workplacement-setting.types.store');
-            Route::get('site-settings/workplacement-setting-types/edit/{id}', 'type_edit')->name('workplacement-setting.types.edit');
-            Route::post('site-settings/workplacement-setting-types/update/{id}', 'type_update')->name('workplacement-setting.types.update');
-            Route::delete('site-settings/workplacement-setting-types/delete/{id}', 'type_destroy')->name('workplacement-setting.types.destory');
-
         });
 
     });
@@ -3096,18 +3046,10 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(WorkPlacementController::class)->group(function() {
         Route::post('student/get-company-supervisor', 'getSupervisorByCompany')->name('student.get.company.supervisor'); 
-        Route::post('student/get-companysupervisor', 'getCompanySupervisor')->name('student.get.companysupervisor'); 
-        Route::post('student/get-wp-level-hours', 'getWpLevelHours')->name('student.get.wp.level.hours'); 
-        Route::post('student/get-wp-learning-hours', 'getWpLearningHours')->name('student.get.wp.learning.hours'); 
-        Route::post('student/get-wp-setting-type', 'getWpSettingType')->name('student.get.wp.setting.type'); 
-        Route::post('student/store-work-placement-hour', 'storeHour')->name('student.store.work.placement.hour');
-        Route::post('student/store-workplacement-hour', 'wpStoreHour')->name('student.store.workplacement.hour');
+        Route::post('student/store-work-placement-hour', 'storeHour')->name('student.store.work.placement.hour'); 
         Route::get('student/store-work-placement-hour-list', 'hourList')->name('student.work.placement.hour.list'); 
-        Route::get('student/store-workplacement-hour-list', 'wpHourList')->name('student.workplacement.hour.list'); 
         Route::get('student/edit-work-placement-hour/{id}', 'editHour')->name('student.edit.work.placement.hour'); 
-        Route::get('student/edit-workplacement-hour/{id}', 'editWpHour')->name('student.edit.workplacement.hour'); 
         Route::post('student/update-work-placement-hour', 'updateHour')->name('student.update.work.placement.hour'); 
-        Route::post('student/update-workplacement-hour', 'updateWpHour')->name('student.update.workplacement.hour'); 
 
         Route::delete('student/destroy-work-placement-hour/{id}', 'destroyHour')->name('student.destroy.work.placement.hour'); 
         Route::post('student/restore-work-placement-hour', 'restoreHour')->name('student.restore.work.placement.hour'); 

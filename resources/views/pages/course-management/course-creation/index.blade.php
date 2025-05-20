@@ -191,7 +191,7 @@
                                 </div>
                             </div> 
                             <div class="col-span-12 sm:col-span-6 requiredHoursWrap" style="display: none;">
-                                <label for="required_hours" class="form-label">Required Hours</label>
+                                <label for="required_hours" class="form-label">Required Hours <span class="text-danger">*</span></label>
                                 <input id="required_hours" type="number" step="any" name="required_hours" class="form-control w-full">
                                 <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 
@@ -378,7 +378,7 @@
                                 </div>
                             </div> 
                             <div class="col-span-12 sm:col-span-6 requiredHoursWrap" style="display: none;">
-                                <label for="edit_required_hours" class="form-label">Required Hours</label>
+                                <label for="edit_required_hours" class="form-label">Required Hours <span class="text-danger">*</span></label>
                                 <input id="edit_required_hours" type="number" step="any" name="required_hours" class="form-control w-full">
                                 <div class="acc__input-error error-required_hours text-danger mt-2"></div>
                             </div> 

@@ -30,8 +30,8 @@ class CourseCreationsRequest extends FormRequest
             'duration' => 'required',
             'unit_length' => 'required',
 
-            //'is_workplacement' => 'sometimes',
-            //'required_hours' => 'required_if:is_workplacement,1'
+            'is_workplacement' => 'sometimes',
+            'required_hours' => 'required_if:is_workplacement,1'
         ];
     }
 }

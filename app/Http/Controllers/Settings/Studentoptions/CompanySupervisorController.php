@@ -87,7 +87,7 @@ class CompanySupervisorController extends Controller
 
 
         if($data){
-            return response()->json(['message' => 'Data updated', 'data' => $data], 200);
+            return response()->json(['message' => 'Data updated'], 200);
         }else{
             return response()->json(['message' => 'No data Modified'], 422);
         }

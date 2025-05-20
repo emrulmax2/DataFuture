@@ -2528,8 +2528,3 @@ fieldset.modInstSet legend{
         display: block !important;
     }
 }
-
-
-#workplacementDocumentsModal.modal .modal-dialog {
-    width: 90% !important;
-}

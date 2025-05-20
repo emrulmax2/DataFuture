@@ -31,7 +31,7 @@ class Company extends Model
      */
     protected $dates = ['deleted_at'];
 
-    public function supervisors(){
+    public function supervisor(){
         return $this->hasMany(CompanySupervisor::class, 'company_id', 'id');
     }
 }
