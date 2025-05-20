@@ -4,22 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Company extends Model
+class LearningHours extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'name',
-        'phone',
-        'fax',
-        'email',
-        'website',
-        'address',
-        'other_info',
+        'hours',
         'active',
-
+        'level_hours_id',
         'created_by',
         'updated_by',
     ];
@@ -30,8 +24,4 @@ class Company extends Model
      * @var array
      */
     protected $dates = ['deleted_at'];
-
-    public function supervisors(){
-        return $this->hasMany(CompanySupervisor::class, 'company_id', 'id');
-    }
 }

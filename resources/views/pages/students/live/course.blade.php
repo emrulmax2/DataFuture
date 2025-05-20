@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            @if($studentCourseAvailability->count()>0)
+            @if($studentCourseAvailability->count() > 0)
                 @foreach ($studentCourseAvailability as $availability)
                     <div class="col-span-12 sm:col-span-12">
                         <div class="grid grid-cols-12 gap-0">

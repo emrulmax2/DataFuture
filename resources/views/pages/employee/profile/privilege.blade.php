@@ -105,10 +105,119 @@
                             <label class="form-check-label ml-4" for="permission_menue_2">Student Management</label>
                         </div>
                     </div>
-                    <div class="col-span-12 sm:col-span-3">
+                    <div class="col-span-12 sm:col-span-6">
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['top_menue']['settings']) && $priv['top_menue']['settings'] == 1 ? 'checked' : '') }} id="permission_menue_3" class="form-check-input" type="checkbox" value="1" name="permission[top_menue][settings]">
+                            <input {{ (isset($priv['top_menue']['settings']) && $priv['top_menue']['settings'] == 1 ? 'checked' : '') }} id="permission_menue_3" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[top_menue][settings]">
                             <label class="form-check-label ml-4" for="permission_menue_3">Settings</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 grid grid-cols-12">
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['site_settings']) && $priv['settings']['site_settings'] == 1 ? 'checked' : '') }} id="permission_settings_1" class="form-check-input" type="checkbox" value="1" name="permission[settings][site_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_1">Site Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['course_parameters']) && $priv['settings']['course_parameters'] == 1 ? 'checked' : '') }} id="permission_settings_2" class="form-check-input" type="checkbox" value="1" name="permission[settings][course_parameters]">
+                                    <label class="form-check-label ml-4" for="permission_settings_2">Course Parameters</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['campus_settings']) && $priv['settings']['campus_settings'] == 1 ? 'checked' : '') }} id="permission_settings_3" class="form-check-input" type="checkbox" value="1" name="permission[settings][campus_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_3">Campus Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['applicant_settings']) && $priv['settings']['applicant_settings'] == 1 ? 'checked' : '') }} id="permission_settings_4" class="form-check-input" type="checkbox" value="1" name="permission[settings][applicant_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_4">Applicant Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['student_option_values']) && $priv['settings']['student_option_values'] == 1 ? 'checked' : '') }} id="permission_settings_5" class="form-check-input" type="checkbox" value="1" name="permission[settings][student_option_values]">
+                                    <label class="form-check-label ml-4" for="permission_settings_5">Student Option Values</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['student_flags']) && $priv['settings']['student_flags'] == 1 ? 'checked' : '') }} id="permission_settings_6" class="form-check-input" type="checkbox" value="1" name="permission[settings][student_flags]">
+                                    <label class="form-check-label ml-4" for="permission_settings_6">Student Flags</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['communication_settings']) && $priv['settings']['communication_settings'] == 1 ? 'checked' : '') }} id="permission_settings_7" class="form-check-input" type="checkbox" value="1" name="permission[settings][communication_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_7">Communication Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['e_learning_activity_setting']) && $priv['settings']['e_learning_activity_setting'] == 1 ? 'checked' : '') }} id="permission_settings_9" class="form-check-input" type="checkbox" value="1" name="permission[settings][e_learning_activity_setting]">
+                                    <label class="form-check-label ml-4" for="permission_settings_9">E-Learning Activity Setting</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['user_privilege']) && $priv['settings']['user_privilege'] == 1 ? 'checked' : '') }} id="permission_settings_10" class="form-check-input" type="checkbox" value="1" name="permission[settings][user_privilege]">
+                                    <label class="form-check-label ml-4" for="permission_settings_10">User Privilege</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['hr_settings']) && $priv['settings']['hr_settings'] == 1 ? 'checked' : '') }} id="permission_settings_11" class="form-check-input" type="checkbox" value="1" name="permission[settings][hr_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_11">HR Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['datafuture_settings']) && $priv['settings']['datafuture_settings'] == 1 ? 'checked' : '') }} id="permission_settings_12" class="form-check-input" type="checkbox" value="1" name="permission[settings][datafuture_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_12">Datafuture Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['internal_site_link']) && $priv['settings']['internal_site_link'] == 1 ? 'checked' : '') }} id="permission_settings_13" class="form-check-input" type="checkbox" value="1" name="permission[settings][internal_site_link]">
+                                    <label class="form-check-label ml-4" for="permission_settings_13">Internal Site Link</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['accounts_settings']) && $priv['settings']['accounts_settings'] == 1 ? 'checked' : '') }} id="permission_settings_14" class="form-check-input" type="checkbox" value="1" name="permission[settings][accounts_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_14">Accounts Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                <div class="form-check form-switch mb-4 mr-4">
+                                    <input {{ (isset($priv['settings']['file_manager_settings']) && $priv['settings']['file_manager_settings'] == 1 ? 'checked' : '') }} id="permission_settings_15" class="form-check-input" type="checkbox" value="1" name="permission[settings][file_manager_settings]">
+                                    <label class="form-check-label ml-4" for="permission_settings_15">File Manager Settings</label>
+                                </div>
+                            </div>
+                            <div class="col-span-4">
+                                
+                            </div>
+                            <div class="col-span-6">
+                                <div class="form-check form-switch">
+                                      <input {{ (isset($priv['settings']['workplacement']) && $priv['settings']['workplacement'] == 1 ? 'checked' : '') }} id="permission_settings_8" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[settings][workplacement]">
+                                <label class="form-check-label ml-4" for="permission_settings_8">Workplacement</label>
+                                </div>
+                                <div class="childrenPermissionWrap pt-4 pl-12">
+                                    <div class="form-check form-switch mb-4">
+                                        <input {{ (isset($priv['settings_workplacement']['workplacement_details']) && $priv['settings_workplacement']['workplacement_details'] == 1 ? 'checked' : '') }} id="permission_settings_16" class="form-check-input" type="checkbox" value="1" name="permission[settings_workplacement][workplacement_details]">
+                                        <label class="form-check-label ml-4" for="permission_settings_16">Workplacement Details</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-4">
+                                        <input {{ (isset($priv['settings_workplacement']['workplacement_companies']) && $priv['settings_workplacement']['workplacement_companies'] == 1 ? 'checked' : '') }} id="permission_settings_17" class="form-check-input" type="checkbox" value="1" name="permission[settings_workplacement][workplacement_companies]">
+                                        <label class="form-check-label ml-4" for="permission_settings_17">Workplacement Companies / Supervisor</label>
+                                    </div>
+                                    <div class="form-check form-switch mb-4">
+                                        <input {{ (isset($priv['settings_workplacement']['workplacement_settings']) && $priv['settings_workplacement']['workplacement_settings'] == 1 ? 'checked' : '') }} id="permission_settings_18" class="form-check-input" type="checkbox" value="1" name="permission[settings_workplacement][workplacement_settings]">
+                                        <label class="form-check-label ml-4" for="permission_settings_18">Workplacement Settings</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -463,6 +572,30 @@
                                 <input {{ (isset($priv['student_live_portal']['view_student_archives']) && $priv['student_live_portal']['view_student_archives'] == 1 ? 'checked' : '') }} id="student_portal_archives" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][view_student_archives]">
                                 <label class="form-check-label ml-4" for="student_portal_archives">View</label>
                             </div>  
+                        </div>
+                    </div>
+
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Workplacement</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_placement']['placement_add']) && $priv['student_live_placement']['placement_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_placement_1" class="form-check-input" type="checkbox" value="1" name="permission[student_live_placement][placement_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_placement_1">Add</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_placement']['placement_edit']) && $priv['student_live_placement']['placement_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_placement_2" class="form-check-input" type="checkbox" value="1" name="permission[student_live_placement][placement_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_placement_2">Edit</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_placement']['placement_delete']) && $priv['student_live_placement']['placement_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_placement_3" class="form-check-input" type="checkbox" value="1" name="permission[student_live_placement][placement_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_placement_3">Delete</label>
+                            </div>
                         </div>
                     </div>
                     

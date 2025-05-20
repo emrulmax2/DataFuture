@@ -4,22 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Company extends Model
+class LevelHours extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'name',
-        'phone',
-        'fax',
-        'email',
-        'website',
-        'address',
-        'other_info',
+        'hours',
+        'workplacement_details_id',
         'active',
-
         'created_by',
         'updated_by',
     ];
@@ -31,7 +25,13 @@ class Company extends Model
      */
     protected $dates = ['deleted_at'];
 
-    public function supervisors(){
-        return $this->hasMany(CompanySupervisor::class, 'company_id', 'id');
+    public function learning_hours()
+    {
+        return $this->hasMany(LearningHours::class, 'level_hours_id');
+    }
+
+    public function studentWorkPlacements()
+    {
+        return $this->hasMany(StudentWorkPlacement::class, 'level_hours_id');
     }
 }
