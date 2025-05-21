@@ -1,4 +1,4 @@
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe } from "https://js.stripe.com/v3/";
 import { createIcons, icons } from "lucide";
 
 // ("use strict");
