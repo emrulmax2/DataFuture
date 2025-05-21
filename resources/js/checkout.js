@@ -85,7 +85,7 @@
                 //console.log(response);
                 //agentRulesModal.hide();
                 
-                //succModal.show();
+                
                 //$viewBtn.removeClass('hidden');
 
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -102,14 +102,20 @@
                     const selected = document.querySelector('input[name="payment_method"]:checked');
 
                     if (selected.value == 'Card') $("#payButton").trigger("click");
-                    else $("#paypalButton").trigger("click");
+                    else if(selected.value == 'PayPal') $("#paypalButton").trigger("click");
+                    else {
+                    succModal.show();
+                    setTimeout(() => {
+                        succModal.hide();
+                        location.href = route('students.document-request-form.index');
+                    }, 2000);
+                    }
+
+                    
 
                 }
                 
-                // setTimeout(() => {
-                //     succModal.hide();
-                //     location.href = route('students.document-request-form.index');
-                // }, 2000);
+                
                     
             }
         }).catch(error => {
