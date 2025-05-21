@@ -1080,20 +1080,6 @@ var taskAssignedStudentTable = (function () {
             document.querySelector("#updateRequestBtn .loading").style.cssText = "display: none;";
             
             if (response.status == 200) {
-                //second axios post here
-                //let formDataJson = response.data.data;
-                // Create a new FormData object
-                //let formData = new FormData();
-                // Ensure letter_body is a string
-                // if (formDataJson.hasOwnProperty('letter_body')) {
-                //     formDataJson.letter_body = String(formDataJson.letter_body);
-                // }
-                // Loop through the JSON object and append each key-value pair to the FormData object
-                // for (var key in formDataJson) {
-                //     if (formDataJson.hasOwnProperty(key)) {
-                //         formData.append(key, formDataJson[key]);
-                //     }
-                // }
 
                 updateTaskDocumentRequestOutcomeModal.hide();
 

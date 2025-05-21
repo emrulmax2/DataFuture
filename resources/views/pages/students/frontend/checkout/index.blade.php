@@ -70,8 +70,15 @@
                 @endif
             </div>
           </div>
-  
+          @php
+                $total = 0;
+       
+                foreach($shoppingCart as $item):
+                  $total += ($item->total_amount + $item->tax_amount);
+                endforeach;
+            @endphp
           <!-- Payment Method -->
+          @if($total > 0)
           <div>
             <h3 class="text-xl font-semibold mb-4 payment_method">Payment Method <span class="text-danger">*</span></h3>
             <div class="space-y-3">
@@ -87,6 +94,8 @@
               <div class="acc__input-error error-payment_method text-danger mt-2"></div>
             </div>
           </div>
+          @endif
+
         </div>
   
         <!-- Order Summary -->

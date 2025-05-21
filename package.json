@@ -34,14 +34,14 @@
         "moment": "^2.30.1",
         "pristinejs": "^0.1.9",
         "simplebar": "^5.3.9",
-        "stripe": "^18.1.0",
+        "stripe": "^18.1.1",
         "tabulator-tables": "^4.9.3",
         "tiny-slider": "^2.9.4",
         "tippy.js": "^6.3.7",
         "toastify-js": "^1.12.0",
         "tom-select": "^1.7.8",
         "tw-elements": "^1.1.0",
-        "vue": "^3.5.13",
+        "vue": "^3.5.14",
         "vue-loader": "^17.4.2",
         "xlsx": "^0.16.9",
         "zoom-vanilla.js": "^2.0.6"
@@ -59,6 +59,5 @@
         "tailwindcss": "^3.4.17",
         "vite": "^4.5.14",
         "vite-plugin-static-copy": "^0.17.1"
-        
     }
 }
