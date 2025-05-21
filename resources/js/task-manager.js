@@ -419,9 +419,12 @@ var taskAssignedStudentTable = (function () {
                 });
 
                 $(".sendLetterToStudent").on('click', function(e){
+                    
+                    
                     let dataSetId = $(this).attr('data-lettersetid');
-                    const letterSetTomSelect = TomSelect.getInstance('#letter_set_id');
-                    letterSetTomSelect.setValue(dataSetId);
+
+                    let letterSetTomSelect = document.getElementById('letter_set_id');
+                    letterSetTomSelect.tomselect.setValue(dataSetId);
 
                     $('#addLetterModal #letter_set_id').trigger('change');
 
