@@ -50,20 +50,7 @@ class StudentOrderController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        //check shopping_cart_ids array
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'status' => 'nullable|in:Pending,Completed,In Progress,Approved,Rejected',
-            'shopping_cart_ids.*' => 'exists:student_shopping_carts,id',
-            'letter_set_id.*' => 'exists:letter_sets,id',
-            'quantity.*' => 'required|integer|min:1',
-            'sub_amount.*' => 'required|numeric',
-            'tax_amount.*' => 'required|numeric',
-            'total_amount.*' => 'required|numeric',
-            'product_type.*' => 'nullable|in:Free,Paid',
-            'payment_method' => 'required|in:Card,PayPal,N/A',
-        ]);
+    {   
         $sub_amount =0;
         $tax_amount =0;
         $total_amount =0;
@@ -76,13 +63,33 @@ class StudentOrderController extends Controller
                 $total_amount += $cartItem->total_amount;
             }
         }
+        //check shopping_cart_ids array
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'status' => 'nullable|in:Pending,Completed,In Progress,Approved,Rejected',
+            'shopping_cart_ids.*' => 'exists:student_shopping_carts,id',
+            'letter_set_id.*' => 'exists:letter_sets,id',
+            'quantity.*' => 'required|integer|min:1',
+            'sub_amount.*' => 'required|numeric',
+            'tax_amount.*' => 'required|numeric',
+            'total_amount.*' => 'required|numeric',
+            'product_type.*' => 'nullable|in:Free,Paid',
+            'payment_method' => [
+                function ($attribute, $value, $fail) use ($total_amount) {
+                    if ($total_amount > 0 && empty($value)) {
+                        $fail('The payment method field is required if there is a payment involved.');
+                    }
+                },'in:Card,PayPal,N/A',
+            ],
+        ]);
+        
 
         // Logic to create a new order
         $student_order = StudentOrder::create([
 
             'student_id' => $request->student_id,
             'status' => $request->status,
-            'payment_method' => $request->payment_method,
+            'payment_method' => isset($request->payment_method) ? $request->payment_method : 'N/A',
             'total_amount' => $total_amount,
             'sub_amount' => $sub_amount,
             'tax_amount' => $tax_amount,
