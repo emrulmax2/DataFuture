@@ -382,6 +382,7 @@ export default defineConfig({
                 'resources/js/stripe-class-checkout.js',
                 'resources/js/paypal-checkout.js',
                 'resources/js/paypal-class-checkout.js',
+                'resources/js/student-task-letter-manager.js',
 
                 'resources/js/wp-company-supervisor.js',
                 'resources/js/workplacement-details.js',

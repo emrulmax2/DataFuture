@@ -15,7 +15,7 @@
     <!-- BEGIN: CSS Assets-->
     @vite('resources/css/app.css')
     <!-- END: CSS Assets-->
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API', 'YOUR_API_KEY') }}&libraries=places"></script>
+    {{-- <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_API') }}&libraries=places"></script> --}}
     @routes
 </head>
 <!-- END: Head -->

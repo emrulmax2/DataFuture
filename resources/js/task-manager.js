@@ -248,15 +248,18 @@ var taskAssignedStudentTable = (function () {
                                                     }
                                                     //console.log(cell.getData().student_document_request_form_id);
                                                     if(cell.getData().student_document_request_form_id != null ){
+                                                        let studentDocumentRequest = cell.getData().student_document_request_form_id
+                                                        console.log(studentDocumentRequest);
                                                         //insert data into local storage
                                                         localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
                                                         
-                                                        
-                                                        html += '<li>';
-                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
-                                                                html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
-                                                            html += '</a>';
-                                                        html += '</li>';
+                                                        if(studentDocumentRequest.status == 'Approved'){
+                                                            html += '<li>';
+                                                                html += '<a data-letterSetId="'+studentDocumentRequest.letter_set.id+'" data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
+                                                                    html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
+                                                                html += '</a>';
+                                                            html += '</li>';
+                                                        }
                                                         let student_order = cell.getData().student_document_request_form_id.student_order_id;
 
                                                         if(student_order != null){
@@ -266,13 +269,35 @@ var taskAssignedStudentTable = (function () {
                                                                 html += '</a>';
                                                             html += '</li>';
                                                         }
+                                                        if(studentDocumentRequest.status != 'Approved'){
                                                         html += '<li>';
                                                             html += '<a data-studenttaskid="'+cell.getData().student_task_id+'"  data-student_name="'+cell.getData().full_name +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
                                                                 html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
                                                             html += '</a>';
                                                         html += '</li>';
+                                                        }
+                                                        if(studentDocumentRequest.status == 'Approved'){
+                                                        html += '<li>';
+                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
+                                                                html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
+                                                                html += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
+                                                                    stroke="rgb(100, 116, 139)" class="w-4 h-4 ml-2 theLoaderSvg">\
+                                                                    <g fill="none" fill-rule="evenodd">\
+                                                                        <g transform="translate(1 1)" stroke-width="4">\
+                                                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
+                                                                            <path d="M36 18c0-9.94-8.06-18-18-18">\
+                                                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18"\
+                                                                                    to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
+                                                                            </path>\
+                                                                        </g>\
+                                                                    </g>\
+                                                                </svg>';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                        }
                                                     }
-                                                    if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No'){
+                                                    if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
+
                                                         html += '<li>';
                                                             html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                                 html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
@@ -310,11 +335,13 @@ var taskAssignedStudentTable = (function () {
                                                 html += '<ul class="dropdown-content">';
                                                 if(cell.getData().student_document_request_form_id != null ){
                                                             //insert data into local storage
+                                                            let studentDocumentRequest = cell.getData().student_document_request_form_id
+                                                            console.log(studentDocumentRequest.status);
                                                             localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
                                                                     
                                                                     
                                                             html += '<li>';
-                                                                html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
+                                                                html += '<a data-letterSetId="'+studentDocumentRequest.letterSet.id+'" data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
                                                                     html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
                                                                 html += '</a>';
                                                             html += '</li>';
@@ -326,13 +353,27 @@ var taskAssignedStudentTable = (function () {
                                                                     html += '</a>';
                                                                 html += '</li>';
                                                             }
+                                                            if(studentDocumentRequest.status == 'Approved'){
                                                             html += '<li>';
-                                                                html += '<a data-studenttaskid="'+cell.getData().student_task_id+'"  data-student_name="'+cell.getData().full_name +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#updateTaskDocumentRequestOutcomeModal" class="updateTaskDocRequestForm dropdown-item">';
-                                                                    html += '<i data-lucide="award" class="w-4 h-4 mr-2"></i> Update task outcome';
+                                                                html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
+                                                                    html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
+                                                                    html += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
+                                                                        stroke="rgb(100, 116, 139)" class="w-4 h-4 ml-2 theLoaderSvg">\
+                                                                        <g fill="none" fill-rule="evenodd">\
+                                                                            <g transform="translate(1 1)" stroke-width="4">\
+                                                                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
+                                                                                <path d="M36 18c0-9.94-8.06-18-18-18">\
+                                                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"\
+                                                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
+                                                                                </path>\
+                                                                            </g>\
+                                                                        </g>\
+                                                                    </svg>';
                                                                 html += '</a>';
                                                             html += '</li>';
+                                                        }
                                                 }
-                                                if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No'){
+                                                if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
                                                     html += '<li>';
                                                         html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                             html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
@@ -375,6 +416,15 @@ var taskAssignedStudentTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
+                });
+
+                $(".sendLetterToStudent").on('click', function(e){
+                    let dataSetId = $(this).attr('data-lettersetid');
+                    const letterSetTomSelect = TomSelect.getInstance('#letter_set_id');
+                    letterSetTomSelect.setValue(dataSetId);
+
+                    $('#addLetterModal #letter_set_id').trigger('change');
+
                 });
             },
             rowSelectionChanged:function(data, rows){

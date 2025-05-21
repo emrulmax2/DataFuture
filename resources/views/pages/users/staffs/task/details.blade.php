@@ -377,7 +377,7 @@
                         <!--implement a email sending checkbox here-->
                         <div class="flex justify-between">
                             <div class="form-check mr-2 my-3 sm:mt-0 flex justify-start items-center">
-                                <input id="email_sent" class="form-check-input" type="checkbox" name="email_sent" value="1">
+                                <input id="email_sent" class="form-check-input" type="checkbox" checked name="email_sent" value="1">
                                 <label class="form-check-label" for="email_sent">Send Confirmation Email</label>
                             </div>
                             <div class="form-check mr-2 my-3 sm:mt-0 flex justify-end items-center">
@@ -785,6 +785,6 @@
 
 @section('script')
     
-    @vite('resources/js/student-letter.js')
+    @vite('resources/js/student-task-letter-manager.js')
     @vite('resources/js/task-manager.js')
 @endsection
