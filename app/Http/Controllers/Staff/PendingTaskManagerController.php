@@ -1142,16 +1142,7 @@ class PendingTaskManagerController extends Controller
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
         
         if($studentTaskDoucmentRequest->save()) {
-            // $data = [
-            //     'letter_set_id' => $studentTaskDoucmentRequest->letter_set_id,
-            //     'send_in_email' =>  ($email_sent == 'Sent') ? 1 : 0,
-            //     'issued_date' => Carbon::now()->format('Y-m-d H:i:s'),
-            //     'student_id' => $studentTaskDoucmentRequest->student_id,
-            //     'letter_body' => LetterSet::find($studentTaskDoucmentRequest->letter_set_id)->description,
-            //     'comon_smtp_id' => 4,
-            //     'created_by' => auth()->user()->id,
-            //     //'signatory_id'
-            // ];
+
             if($email_sent=='Sent') {
                 $commonSmtp = ComonSmtp::find(4);
                 $configuration = [
@@ -1194,6 +1185,28 @@ class PendingTaskManagerController extends Controller
         }
     }
 
+
+    public function updateStudentDocumentRequstLetterStatus(Request $request){
+        //enum('Pending', 'In Progress', 'Approved', 'Rejected')
+
+        $id = $request->student_task_id;
+
+       
+        $studentTask = StudentTask::find($id);
+        $student = Student::find($studentTask->student_id);
+
+
+        $studentTaskDoucmentRequest = StudentDocumentRequestForm::where('id', $studentTask->student_document_request_form_id)->get()->first();
+        $studentTaskDoucmentRequest->letter_generated_count += 1;
+        $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
+        
+        if($studentTaskDoucmentRequest->save()) {
+
+            return response()->json(['msg' => 'Letter Sent to Student.'], 200);
+        } else {
+            return response()->json(['msg' => 'Letter can not be sent to student'], 405);
+        }
+    }
     public function updateBulkStatus(BulkStatusUpdateReqest $request){
         $registration_nos = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', str_replace(' ', '', $request->student_ids)): []);
         $status_id = $request->status_id;

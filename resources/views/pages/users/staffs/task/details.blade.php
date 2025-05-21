@@ -714,6 +714,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="student_id" value=""/>
+                        <input type="hidden" name="student_task_id" value=""/>
                     </div>
                 </div>
             </form>

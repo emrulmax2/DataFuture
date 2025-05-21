@@ -21,6 +21,7 @@ class StudentDocumentRequestForm extends Model
         'status',
         'email_status',
         'student_consent',
+        'letter_generated_count',
         'created_by',
         'updated_by',
     ];

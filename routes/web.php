@@ -2970,6 +2970,8 @@ Route::middleware('auth')->group(function() {
         
 
         Route::post('task-manager/student-document-request-status', 'updateStudentDocumentRequst')->name('task.manager.document_request.update');
+        Route::post('task-manager/student-document-request-letter-status', 'updateStudentDocumentRequstLetterStatus')->name('task.manager.document_request.letter.update');
+    
     });
 
     Route::controller(AssignController::class)->group(function() {

@@ -163,24 +163,38 @@ import TomSelect from "tom-select";
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#sendLetterBtn').removeAttribute('disabled');
-            document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
             
             if (response.status == 200) {
-                addLetterModal.hide();
-
-                successModal.show(); 
+                
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulation!" );
                     $("#successModal .successModalDesc").html('Letter successfully generated and send.');
                     $("#successModal .successCloser").attr('data-action', 'DISMISS');
                 });  
                 
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+                //I need another axios call where I set the letter status to StudentDocumentRequstForms
+                axios({
+                    method: 'post',
+                    url: route('task.manager.document_request.letter.update'),
+                    data: {student_task_id : form_data.get('student_task_id')},
+                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    if (response.status == 200) {
+                        
+                        document.querySelector('#sendLetterBtn').removeAttribute('disabled');
+                        document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
+                        addLetterModal.hide();
+                        successModal.show(); 
+                        setTimeout(function(){
+                            successModal.hide();
+                        }, 2000);
+                        taskAssignedStudentTable.init();
+                    }
+                }).catch(error =>{
+                    console.log(error)
+                });
+
             }
-            studentCommLetterListTable.init();
         }).catch(error => {
             document.querySelector('#sendLetterBtn').removeAttribute('disabled');
             document.querySelector("#sendLetterBtn svg").style.cssText = "display: none;";
