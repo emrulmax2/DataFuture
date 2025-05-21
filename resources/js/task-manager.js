@@ -336,12 +336,12 @@ var taskAssignedStudentTable = (function () {
                                                 if(cell.getData().student_document_request_form_id != null ){
                                                             //insert data into local storage
                                                             let studentDocumentRequest = cell.getData().student_document_request_form_id
-                                                            console.log(studentDocumentRequest.status);
+                                                            //console.log(studentDocumentRequest.status);
                                                             localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
                                                                     
                                                                     
                                                             html += '<li>';
-                                                                html += '<a data-letterSetId="'+studentDocumentRequest.letterSet.id+'" data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
+                                                                html += '<a data-letterSetId="'+studentDocumentRequest.letter_set.id+'" data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
                                                                     html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
                                                                 html += '</a>';
                                                             html += '</li>';
