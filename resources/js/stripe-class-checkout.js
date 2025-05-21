@@ -54,6 +54,7 @@ import { createIcons, icons } from "lucide";
 ("use strict");
 
 (async function() {
+    console.log(import.meta.env.VITE_STRIPE_KEY);
     const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
     // Attach click event to all buttons with class "payByCard"
