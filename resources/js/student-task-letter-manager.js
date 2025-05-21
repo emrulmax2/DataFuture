@@ -55,6 +55,7 @@ import TomSelect from "tom-select";
         $('#addLetterModal .modal-body select').val('');
         $('#addLetterModal .letterEditorArea').fadeOut();
         letterEditor.setData('');
+        letter_set_id.setData('');
         letter_set_id.clear(true);
 
         $('#addLetterModal .modal-body input[name="send_in_email"]').prop('checked', false);
