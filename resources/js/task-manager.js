@@ -253,7 +253,7 @@ var taskAssignedStudentTable = (function () {
                                                         //insert data into local storage
                                                         localStorage.setItem('student_document_request_form'+cell.getData().student_task_id, JSON.stringify(cell.getData().student_document_request_form_id));
                                                         
-                                                        if(studentDocumentRequest.status == 'Approved'){
+                                                        if(studentDocumentRequest.status == 'Approved' && studentDocumentRequest.letter_generated_count == 0){
                                                             html += '<li>';
                                                                 html += '<a data-letterSetId="'+studentDocumentRequest.letter_set.id+'" data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#addLetterModal" class="sendLetterToStudent dropdown-item">';
                                                                     html += '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Generate Requested Document';
@@ -417,18 +417,21 @@ var taskAssignedStudentTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                if($(".sendLetterToStudent").length > 0){
+                    $(".sendLetterToStudent").on('click', function(e){
+                        
+                        let studentTaskId = $(this).attr('data-studenttaskid');
+                        let dataSetId = $(this).attr('data-lettersetid');
 
-                $(".sendLetterToStudent").on('click', function(e){
-                    
-                    
-                    let dataSetId = $(this).attr('data-lettersetid');
+                        let letterSetTomSelect = document.getElementById('letter_set_id');
+                        letterSetTomSelect.tomselect.setValue(dataSetId);
 
-                    let letterSetTomSelect = document.getElementById('letter_set_id');
-                    letterSetTomSelect.tomselect.setValue(dataSetId);
+                        $('#addLetterModal #letter_set_id').trigger('change');
 
-                    $('#addLetterModal #letter_set_id').trigger('change');
+                        $('#addLetterModal input[name="student_task_id"]').val(studentTaskId);
 
-                });
+                    });
+                }
             },
             rowSelectionChanged:function(data, rows){
                 var ids = [];
