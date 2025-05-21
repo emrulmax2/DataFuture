@@ -54,41 +54,44 @@ import { createIcons, icons } from "lucide";
 ("use strict");
 
 (async function() {
-    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
-    // Attach click event to all buttons with class "payByCard"
-    document.querySelectorAll(".payByCard").forEach((payButton) => {
-        payButton.addEventListener("click", async (event) => {
-            event.preventDefault();
+    if($(".payByCard").length >0){
+        const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
-            // Optional: show loading icon
-            const loadingIcon = payButton.querySelector(".loadingIcon");
-            if (loadingIcon) loadingIcon.classList.remove("hidden");
+        // Attach click event to all buttons with class "payByCard"
+        document.querySelectorAll(".payByCard").forEach((payButton) => {
+            payButton.addEventListener("click", async (event) => {
+                event.preventDefault();
 
-            try {
-                const res = await fetch(route('students.checkout.stripe.session'), {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    },
-                    body: JSON.stringify({
-                        amount: payButton.dataset.amount,
-                        currency: payButton.dataset.currency,
-                        quantity: payButton.dataset.quantityWihoutFree,  // note: typo? see below
-                        invoice_number: payButton.dataset.invoiceNumber,
-                    })
-                });
+                // Optional: show loading icon
+                const loadingIcon = payButton.querySelector(".loadingIcon");
+                if (loadingIcon) loadingIcon.classList.remove("hidden");
 
-                const data = await res.json();
-                if (data.id) {
-                    await stripe.redirectToCheckout({ sessionId: data.id });
-                } else {
-                    console.error("Stripe session ID not found.");
+                try {
+                    const res = await fetch(route('students.checkout.stripe.session'), {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: JSON.stringify({
+                            amount: payButton.dataset.amount,
+                            currency: payButton.dataset.currency,
+                            quantity: payButton.dataset.quantityWihoutFree,  // note: typo? see below
+                            invoice_number: payButton.dataset.invoiceNumber,
+                        })
+                    });
+
+                    const data = await res.json();
+                    if (data.id) {
+                        await stripe.redirectToCheckout({ sessionId: data.id });
+                    } else {
+                        console.error("Stripe session ID not found.");
+                    }
+                } catch (err) {
+                    console.error("Stripe Checkout Error:", err);
                 }
-            } catch (err) {
-                console.error("Stripe Checkout Error:", err);
-            }
+            });
         });
-    });
+    }
 })();

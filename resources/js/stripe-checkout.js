@@ -43,8 +43,10 @@ export async function initStripeCheckout(buttonId) {
     const errorModal = tailwind.Modal.getOrCreateInstance(document.getElementById("errorModal"));
     //const agentRulesModal = tailwind.Modal.getOrCreateInstance(document.getElementById("agentRulesModal"));
      
-    
-    initStripeCheckout("payButton");
+    if($("#payButton").length >0){
+        
+        initStripeCheckout("payButton");
+    }
     
 
     
