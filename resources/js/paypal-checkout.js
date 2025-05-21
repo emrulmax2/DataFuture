@@ -1,4 +1,3 @@
-import { loadStripe } from "@stripe/stripe-js";
 import { createIcons, icons } from "lucide";
 
 ("use strict");
