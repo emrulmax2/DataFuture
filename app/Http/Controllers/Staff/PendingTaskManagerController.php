@@ -1128,7 +1128,7 @@ class PendingTaskManagerController extends Controller
 
         elseif($request->status == 'Approved'):
 
-            $studentTask->status = 'In Progress';
+            $studentTask->status = 'Pending';
         else:
             $studentTask->status = 'Canceled';
         endif;
