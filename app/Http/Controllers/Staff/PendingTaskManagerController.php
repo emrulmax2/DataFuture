@@ -39,6 +39,7 @@ use App\Models\StudentDocument;
 use App\Models\StudentDocumentRequestForm;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
+use App\Models\StudentOrder;
 use App\Models\StudentTask;
 use App\Models\StudentTaskDocument;
 use App\Models\StudentTaskLog;
@@ -669,10 +670,20 @@ class PendingTaskManagerController extends Controller
                 else:
                     $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
                 endif;
-                // if($task_id==20 && $taskOldRow->student_document_request_form_id!=null) {
+                if($task_id==20 && $taskOldRow->student_document_request_form_id!=null) {
                     
-                //     StudentDocumentRequestForm::where('id', $taskOldRow->student_document_request_form_id)->update(['status' => 'Approved']);
-                // }
+                    $studentDoucmentRequestForm = StudentDocumentRequestForm::find($taskOldRow->student_document_request_form_id);
+
+                    $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentDoucmentRequestForm->student_order_id )->get();
+                    $totalLetterGeneratedCount = 0;
+                    foreach($AllDocumentRequestForm as $key => $value) {
+                        $totalLetterGeneratedCount += $value->letter_generated_count;
+                    }
+                    $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - $totalLetterGeneratedCount;
+                    if($totalLetterGeneratedDiffFound <=0) {
+                        StudentOrder::where('id', $studentDoucmentRequestForm->student_order_id )->update(['status' => 'Completed']);
+                    }
+                }
 
                 if($taskOldRow->status != $status):
 

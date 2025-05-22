@@ -41,6 +41,11 @@ class StudentOrder extends Model
         return Carbon::parse($this->transaction_date)->format('d F, H:i');
     }
 
+    public function getFormattedUpdatedAtAttribute()
+    {
+        return Carbon::parse($this->updated_at)->format('d F, H:i');
+    }
+
     public function getTotalPaidQuantityAttribute()
     {
         return $this->studentOrderItems->sum(function ($item) {

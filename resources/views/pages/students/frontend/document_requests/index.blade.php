@@ -105,7 +105,7 @@
                             </td>
                             <td class="text-center">
                                 <div class="flex items-center justify-center whitespace-nowrap {{ $order->status == 'Completed' ? 'text-success' : '' }}{{ $order->status == 'In Progress' ? 'text-info' : 'text-pending' }}">
-                                    <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> {{ $order->status == 'Completed' ? 'Completed' : $order->status }} {{ $order->payment_status == 'Completed' ? 'on '.$order->formatted_transaction_date : 'Payment' }}
+                                    <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> {{ $order->status == 'Completed' ? 'Completed' : $order->status }} {{ $order->payment_status == 'Completed' ? 'on '.$order->formatted_updated_at : 'Payment' }}
                                 </div>
                             </td>
                             <td>
@@ -158,7 +158,7 @@
                                                             <i data-loading-icon="oval" class="w-4 h-4 ml-1 loadingIcon hidden"></i>
                                                         </a>
                                                     </li>
-                                                    <li>
+                                                    {{-- <li>
                                                         <a href="" id="payPaypalButton_{{ $order->id }}" class="dropdown-item payByPayPal" 
                                                         data-quantity-wihout-free="{{ $order->total_paid_quantity }}" 
                                                         data-currency="GBP" 
@@ -167,7 +167,7 @@
                                                         data-action="confirm">
                                                             <i data-lucide="arrow-left-right" class="w-4 h-4 mr-2"></i> Pay By PayPal
                                                         </a>
-                                                    </li>
+                                                    </li> --}}
                                                     <li>
                                                         <a href="" data-tw-toggle="modal" data-order_id="{{ $order->id }}" data-tw-target="#confirmModal" class="dropdown-item text-danger cancelOrder" data-id="{{ $order->id }}" >
                                                             <i data-lucide="ban" class="w-4 h-4 mr-2"></i> Cancel Order
