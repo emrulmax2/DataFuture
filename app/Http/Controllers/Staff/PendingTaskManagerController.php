@@ -622,6 +622,7 @@ class PendingTaskManagerController extends Controller
         $task_id = $request->task_id;
         $status = $request->status;
         $phase = $request->phase;
+        $student_task_id = isset($request->student_task_id) && !empty($request->student_task_id) ? $request->student_task_id : 0;
 
         foreach($student_ids as $student_id):
             if($phase == 'Applicant'):
@@ -662,10 +663,25 @@ class PendingTaskManagerController extends Controller
                     endif;
                 endif;
             else:
-                $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
+
+                if($student_task_id > 0):
+                    $taskOldRow = StudentTask::where('id', $student_task_id)->get()->first();
+                else:
+                    $taskOldRow = StudentTask::where('student_id', $student_id)->where('task_list_id', $task_id)->get()->first();
+                endif;
+                // if($task_id==20 && $taskOldRow->student_document_request_form_id!=null) {
+                    
+                //     StudentDocumentRequestForm::where('id', $taskOldRow->student_document_request_form_id)->update(['status' => 'Approved']);
+                // }
 
                 if($taskOldRow->status != $status):
-                    $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
+
+                    if($student_task_id > 0):
+                        $studentTask = StudentTask::where('id', $student_task_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
+                    else:    
+                        $studentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $student_id)->update(['status' => $status, 'canceled_reason' => null, 'updated_by' => auth()->user()->id]);
+                    endif;
+                    
                     $studentTaskLog = StudentTaskLog::create([
                         'student_tasks_id' => $taskOldRow->id,
                         'actions' => 'Status Changed',
