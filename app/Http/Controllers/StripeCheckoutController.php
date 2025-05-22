@@ -35,7 +35,9 @@ class StripeCheckoutController extends Controller
             'cancel_url' => route('students.checkout.stripe.cancel'),
         ]);
 
-        return response()->json(['id' => $session->id]);
+        return response()->json(['id' => $session->id ,'url' => $session->url]);
+        //instead of returning a JSON response, you can redirect to the Stripe checkout page
+        // return redirect($session->url);
     }
 
     public function success(Request $request)

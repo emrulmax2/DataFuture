@@ -63,6 +63,7 @@ class StudentOrderController extends Controller
                 $total_amount += $cartItem->total_amount;
             }
         }
+        
         //check shopping_cart_ids array
         $request->validate([
             'student_id' => 'required|exists:students,id',
@@ -74,16 +75,10 @@ class StudentOrderController extends Controller
             'tax_amount.*' => 'required|numeric',
             'total_amount.*' => 'required|numeric',
             'product_type.*' => 'nullable|in:Free,Paid',
-            'payment_method' => [
-                function ($attribute, $value, $fail) use ($total_amount) {
-                    if ($total_amount > 0 && empty($value)) {
-                        $fail('The payment method field is required if there is a payment involved.');
-                    }
-                },'in:Card,PayPal,N/A',
-            ],
+            'payment_method' => 'required|in:PayPal,Card,N/A',
         ]);
         
-
+        //dd($total_amount);
         // Logic to create a new order
         $student_order = StudentOrder::create([
 
@@ -141,7 +136,11 @@ class StudentOrderController extends Controller
             // For example, you can redirect to a payment gateway or perform a payment transaction
             return response()->json(['message' => 'Order Created, Please wait for the payment', 'order' => $student_order]);
         }
-        return $this->freeOrderComplete($invoice_number);
+        if($this->freeOrderComplete($invoice_number)) {
+            return response()->json(['message' => 'Order Created Successfully', 'order' => $student_order]);
+        } else {
+            return response()->json(['message' => 'Order creation failed'], 400);
+        }
     }
 
 
@@ -227,7 +226,7 @@ class StudentOrderController extends Controller
         // For example, you can update your order status in the database
 
         // Redirect to a success page or return a response
-        return redirect()->route('students.document-request-form.index')->with('paymentSuccessMessage', 'Order successful! Your order is being processed.');
+        return true;
     }
     /**
      * Display the specified resource.

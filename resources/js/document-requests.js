@@ -224,13 +224,8 @@ var admissionListTable = (function () {
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.getElementById("successModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.getElementById("errorModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.getElementById("confirmModal"));
 
-    
-        document.getElementById("confirmModal").addEventListener('hidden.tw.modal', function(event){
-            $('#confirmModal .agreeWith').attr('data-id', '0');
-            $('#confirmModal .agreeWith').attr('data-action', 'none');
-        });
+
 
     let admissionDatepickerOpt = {
         autoApply: true,
