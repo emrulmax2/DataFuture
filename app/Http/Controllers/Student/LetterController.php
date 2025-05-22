@@ -235,7 +235,6 @@ class LetterController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
-
     
     public function destroy(Request $request){
         $applicant = $request->applicant;
