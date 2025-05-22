@@ -508,7 +508,7 @@ var taskAssignedStudentTable = (function () {
     if($('#taskAssignedStudentTable').length > 0){
         // Init Table
         taskAssignedStudentTable.init();
-
+        window.taskAssignedStudentTable = taskAssignedStudentTable;
         // Filter function
         function filterHTMLFormADM() {
             taskAssignedStudentTable.init();
