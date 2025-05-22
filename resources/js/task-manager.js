@@ -277,7 +277,7 @@ var taskAssignedStudentTable = (function () {
                                                         }
                                                         if(studentDocumentRequest.status == 'Approved'){
                                                         html += '<li>';
-                                                            html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
+                                                            html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                                 html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
                                                                 html += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
                                                                     stroke="rgb(100, 116, 139)" class="w-4 h-4 ml-2 theLoaderSvg">\
@@ -354,7 +354,7 @@ var taskAssignedStudentTable = (function () {
                                                             }
                                                             if(studentDocumentRequest.status == 'Approved'){
                                                             html += '<li>';
-                                                                html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
+                                                                html += '<a data-studenttaskid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                                     html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
                                                                     html += '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"\
                                                                         stroke="rgb(100, 116, 139)" class="w-4 h-4 ml-2 theLoaderSvg">\
@@ -898,12 +898,13 @@ var taskAssignedStudentTable = (function () {
             var phase = $btn.attr('data-phase');
             var studentid = $btn.attr('data-studentid');
             var student_ids = [studentid];
+            var student_task_id = $btn.attr('data-studenttaskid') !== undefined ? $btn.attr('data-studenttaskid') : 0;
 
             if(student_ids.length > 0){
                 axios({
                     method: "post",
                     url: route('task.manager.update.task.status'),
-                    data: {student_ids : student_ids, task_id : task_id, status : status, phase : phase},
+                    data: {student_ids : student_ids, task_id : task_id, status : status, phase : phase, student_task_id : student_task_id},
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
