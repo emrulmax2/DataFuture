@@ -324,7 +324,7 @@ class PendingTaskManagerController extends Controller
                             $documentRequest = $value->studentDocumentRequestForm;
                             $documentRequest->letterSet;
                             $documentRequest->studentOrder;
-                            
+                            $theStudentTaskId = $value->id;
                             $data[] = [
                                 'id' => $list->id,
                                 'sl' => $i,
@@ -352,7 +352,7 @@ class PendingTaskManagerController extends Controller
                                 'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                                 'downloads' => $taskDownloads,
                                 'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
-                                'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
+                                'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
                                 
                             ];
@@ -1117,10 +1117,11 @@ class PendingTaskManagerController extends Controller
         ]);
 
         $id = $request->student_task_id;
-
         $email_sent = (isset($request->email_sent) && $request->email_sent > 0 ? 'Sent' : 'N/A');
         //enum('Pending', 'In Progress', 'Completed', 'Canceled')
         $studentTask = StudentTask::find($id);
+        
+        
         $student = Student::find($studentTask->student_id);
         if($request->status != 'Approved' && $request->status != 'Rejected'):
 
@@ -1142,7 +1143,7 @@ class PendingTaskManagerController extends Controller
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
         
         if($studentTaskDoucmentRequest->save()) {
-
+            
             if($email_sent=='Sent') {
                 $commonSmtp = ComonSmtp::find(4);
                 $configuration = [
