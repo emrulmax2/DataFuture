@@ -27,4 +27,8 @@ class StudentOrderItem extends Model
     {
         return $this->belongsTo(TermDeclaration::class);
     }
+    public function studentDocumentRequestForm()
+    {
+        return $this->belongsTo(StudentDocumentRequestForm::class);
+    }
 }
