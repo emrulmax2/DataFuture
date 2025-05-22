@@ -786,6 +786,6 @@
 
 @section('script')
     
-    @vite('resources/js/student-task-letter-manager.js')
     @vite('resources/js/task-manager.js')
+    @vite('resources/js/student-task-letter-manager.js')
 @endsection
