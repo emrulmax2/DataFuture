@@ -261,7 +261,6 @@ var taskAssignedStudentTable = (function () {
                                                             html += '</li>';
                                                         }
                                                         let student_order = cell.getData().student_document_request_form_id.student_order_id;
-
                                                         if(student_order != null){
                                                             html += '<li>';
                                                                 html += '<a  href="'+route('order.print.pdf',student_order)+'"  class="viewInvoiceForStudent dropdown-item">';
