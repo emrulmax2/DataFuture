@@ -236,6 +236,7 @@ class LetterController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    
     public function destroy(Request $request){
         $applicant = $request->applicant;
         $recordid = $request->recordid;
