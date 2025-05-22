@@ -4,7 +4,7 @@ import { createIcons, icons } from "lucide";
 ("use strict");
 
 export async function initStripeCheckout(buttonId) {
-    const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
+    
 
     const payButton = document.getElementById(buttonId);
     if (!payButton) return console.error(`No button found with ID: ${buttonId}`);
@@ -26,8 +26,12 @@ export async function initStripeCheckout(buttonId) {
             });
 
             const data = await res.json();
+            const url = data.url;
             if (data.id) {
-                await stripe.redirectToCheckout({ sessionId: data.id });
+                
+                window.location.href = url;
+                //const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
+                //await stripe.redirectToCheckout({ sessionId: data.id });
             } else {
                 console.error("Stripe session ID not found.");
             }
@@ -42,10 +46,12 @@ export async function initStripeCheckout(buttonId) {
     const succModal = tailwind.Modal.getOrCreateInstance(document.getElementById("successModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.getElementById("errorModal"));
     //const agentRulesModal = tailwind.Modal.getOrCreateInstance(document.getElementById("agentRulesModal"));
-     
-    if($("#payButton").length >0){
+    let payButton = document.getElementById('payButton')
+    
+    if(payButton != null || payButton != undefined){
         
         initStripeCheckout("payButton");
+        console.log("initStripeCheckout");
     }
     
 

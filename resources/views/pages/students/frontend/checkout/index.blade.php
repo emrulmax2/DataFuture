@@ -94,6 +94,11 @@
               <div class="acc__input-error error-payment_method text-danger mt-2"></div>
             </div>
           </div>
+          @else
+            <label class="flex items-center gap-2 cursor-pointer hidden">
+                <input type="radio"   name="payment_method" value="N/A" checked class="form-check-input" />
+                <span>Free</span>
+              </label>
           @endif
 
         </div>
@@ -151,7 +156,7 @@
             <input type="hidden" id="quantity_without_free" name="quantity_without_free" value="{{ $totalPaidItemQty }}">
             <input type="hidden" id="invoice_number" name="invoice_number" value="INV-250508000001">
 
-            <button id="payButton" type="button" class="hidden payCard w-48 h-10 text-lg transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-1 ">
+            <button id="payButton" type="button" class="hidden payCard w-48 h-10 text-lg transition duration-200 border shadow-sm  items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2 mr-1 ">
               Pay with Card
               <i data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 hidden"></i>
             </button>  
@@ -211,7 +216,8 @@
 @endsection
 
 @section('script')
-@vite('resources/js/checkout.js')
-@vite('resources/js/stripe-checkout.js')
+ @vite('resources/js/checkout.js')
+ @vite('resources/js/stripe-checkout.js')
+
 
 @endsection

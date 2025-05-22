@@ -88,27 +88,31 @@
                 
                 //$viewBtn.removeClass('hidden');
 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!");
-                    $("#successModal .successModalDesc").html(response.data.message);
-                });    
+                
 
-                if(response.data.order) {
+                if(response.data.order != null || response.data.order != undefined){ 
                   document.getElementById('invoice_number').value = response.data.order.invoice_number;
                     
                     
                     
 
                     const selected = document.querySelector('input[name="payment_method"]:checked');
-
-                    if (selected.value == 'Card') $("#payButton").trigger("click");
-                    else if(selected.value == 'PayPal') $("#paypalButton").trigger("click");
+                    console.log(selected);
+                    if (selected!=null && selected.value == 'Card') 
+                        $("#payButton").trigger("click");
+                    else if(selected!=null && selected.value == 'PayPal') 
+                        $("#paypalButton").trigger("click");
                     else {
-                    succModal.show();
-                    setTimeout(() => {
-                        succModal.hide();
-                        location.href = route('students.document-request-form.index');
-                    }, 2000);
+                        succModal.show();
+
+                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                            $("#successModal .successModalTitle").html("Congratulation!");
+                            $("#successModal .successModalDesc").html(response.data.message);
+                        });  
+                        setTimeout(() => {
+                            succModal.hide();
+                            location.href = route('students.document-request-form.index');
+                        }, 2000);
                     }
 
                     

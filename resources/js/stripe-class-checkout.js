@@ -56,7 +56,6 @@ import { createIcons, icons } from "lucide";
 (async function() {
 
     if($(".payByCard").length >0){
-        const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
 
         // Attach click event to all buttons with class "payByCard"
         document.querySelectorAll(".payByCard").forEach((payButton) => {
@@ -83,8 +82,11 @@ import { createIcons, icons } from "lucide";
                     });
 
                     const data = await res.json();
+                    const url = data.url;
                     if (data.id) {
-                        await stripe.redirectToCheckout({ sessionId: data.id });
+                        window.location.href = url;
+                        //const stripe = await loadStripe(import.meta.env.VITE_STRIPE_KEY);
+                        //await stripe.redirectToCheckout({ sessionId: data.id });
                     } else {
                         console.error("Stripe session ID not found.");
                     }
