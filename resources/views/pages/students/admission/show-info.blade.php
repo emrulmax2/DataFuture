@@ -79,9 +79,9 @@
                                     </ul>
                                 </div>
                             </div>
-                        @elseif($applicant->status_id == 3 && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
+                        @elseif(($applicant->status_id == 3 || $applicant->status_id == 8) && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
                             <div class="dropdown inline-block" data-tw-placement="bottom-start">
-                                <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
+                                <button class="dropdown-toggle btn {{ $applicant->status_id == 8 ? 'btn-danger' : 'btn-primary' }}" aria-expanded="false" data-tw-toggle="dropdown">
                                     {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
                                 </button>
                                 <div class="dropdown-menu w-72">
@@ -92,6 +92,12 @@
                                         @if(!empty($allStatuses))
                                             @foreach($allStatuses as $sts)
                                                 @if(($applicant->status_id == 3 && in_array($sts->id, [8])))
+                                                <li>
+                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item rejectApplicationBtn">
+                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
+                                                    </a>
+                                                </li>
+                                                @elseif($applicant->status_id == 8 && in_array($sts->id, [3]))
                                                 <li>
                                                     <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item rejectApplicationBtn">
                                                         <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
