@@ -247,7 +247,7 @@
                             </div>
                             <div class="form-check form-switch">
                                 <input {{ (isset($priv['dashboard']['applicant_rejected']) && $priv['dashboard']['applicant_rejected'] == 1 ? 'checked' : '') }} id="permission_applicant_rejected_1" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][applicant_rejected]">
-                                <label class="form-check-label ml-4" for="permission_applicant_rejected_1">Reject Application</label>
+                                <label class="form-check-label ml-4" for="permission_applicant_rejected_1">Reject / In Progress Application</label>
                             </div>
                         </div>
                     </div>

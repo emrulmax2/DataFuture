@@ -119,11 +119,16 @@ import Dropzone from "dropzone";
         $(document).on('click', '.rejectApplicationBtn', function(e){
             let statusID = $(this).attr('data-statusid');
             let applicantID = $(this).attr('data-applicantid');
+            
 
             rejectedConfirmModal.show();
             document.getElementById("rejectedConfirmModal").addEventListener("shown.tw.modal", function (event) {
                 $("#rejectedConfirmModal .rejectedConfModTitle").html("Are you sure?" );
-                $("#rejectedConfirmModal .rejectedConfModDesc").html('Do you want to reject the applicantion? Please click on agree to continue.');
+                if(statusID == 3){
+                    $("#rejectedConfirmModal .rejectedConfModDesc").html('Would you like to move this applicant back to "In Progress" status? Please click on agree to continue.');
+                }else{
+                    $("#rejectedConfirmModal .rejectedConfModDesc").html('Do you want to reject the applicantion? Please click on agree to continue.');
+                }
                 $("#rejectedConfirmModal .agreeWith").attr('data-statusid', statusID);
             }); 
         });
