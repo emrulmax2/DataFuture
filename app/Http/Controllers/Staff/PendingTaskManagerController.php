@@ -1168,6 +1168,38 @@ class PendingTaskManagerController extends Controller
         $studentTaskDoucmentRequest->status = $request->status;
         $studentTaskDoucmentRequest->email_status = $email_sent;
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
+
+        if($request->status == 'Rejected') {
+            $approvedFound = false;
+            $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentTaskDoucmentRequest->student_order_id )->get();
+                    
+                    $totalLetterGeneratedCount = 0;
+                    
+                    foreach($AllDocumentRequestForm as $key => $value) {
+                        //find approved letter count
+                        if($value->status == 'Approved') {
+                            $approvedFound = true;
+                        //find rejected letter count
+                        }
+                        $totalLetterGeneratedCount += $value->letter_generated_count;
+                        
+                    }
+
+
+                    if(!$approvedFound) {
+
+                        StudentOrder::where('id', $studentTaskDoucmentRequest->student_order_id )->update(['status' => 'Rejected']);
+                    }else {
+
+                        $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - ($totalLetterGeneratedCount + 1);
+
+                        if($totalLetterGeneratedDiffFound <=0) {
+                            StudentOrder::where('id', $studentTaskDoucmentRequest->student_order_id )->update(['status' => 'Completed']);
+                        }
+                    }
+
+                 
+        }
         
         if($studentTaskDoucmentRequest->save()) {
             
@@ -1183,17 +1215,7 @@ class PendingTaskManagerController extends Controller
                     'from_email'    => $commonSmtp->smtp_user,
                     'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
                 ];
-
-                // $configuration = [
-                //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
-                //     'smtp_port' => '25',
-                //     'smtp_username' => 'e8ae09cfefd325',
-                //     'smtp_password' => 'ce7fa44b28281d',
-                //     'smtp_encryption' => 'tls',
-                    
-                //     'from_email'    => 'no-reply@lcc.ac.uk',
-                //     'from_name'    =>  'London Churchill College',
-                // ];
+                
                 $MAILHTML = str_replace('[status]', $request->status, $request->description);
                 $attachmentInfo = [];
                 $sendTo = [];

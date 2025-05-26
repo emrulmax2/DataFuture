@@ -96,7 +96,7 @@
                                
                                 @foreach ($order->studentOrderItems as $item)
                                 <a href="" class="font-medium whitespace-nowrap">{{ $item->letterSet->letter_title}} [ Qty: {{ $item->quantity }}]</a>
-                                @if ($item->product_type == 'Paid')   
+                                @if($item->product_type == 'Paid')   
                                     <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">Same Day (£10.00) [{{ $item->quantity - $item->number_of_free }}]</div>
                                 @else
                                     <div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">3 Working Days (Free)</div>
