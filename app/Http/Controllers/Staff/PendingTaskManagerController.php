@@ -290,9 +290,9 @@ class PendingTaskManagerController extends Controller
                     
                     $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? 1 : 0);
                     
-
+                    $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : $theStudentTask->createdBy->employee->full_name);
+                        
                     if($status != 'Pending'):
-                        $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
                     else:
                         $createOrUpdate = (isset($theStudentTask->created_at) && !empty($theStudentTask->created_at) ? date('jS M, Y', strtotime($theStudentTask->created_at)) : '');
