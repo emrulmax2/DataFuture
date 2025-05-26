@@ -290,9 +290,9 @@ class PendingTaskManagerController extends Controller
                     
                     $sudentTaskDocumentRequest = (isset($theStudentTask->student_document_request_form_id) && $theStudentTask->student_document_request_form_id > 0 ? 1 : 0);
                     
-
+                    $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : $theStudentTask->createdBy->employee->full_name);
+                        
                     if($status != 'Pending'):
-                        $createOrUpdateBy = (isset($theStudentTask->updatedBy->employee->full_name) && !empty($theStudentTask->updatedBy->employee->full_name) ? $theStudentTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theStudentTask->updated_at) && !empty($theStudentTask->updated_at) ? date('jS M, Y', strtotime($theStudentTask->updated_at)) : '');
                     else:
                         $createOrUpdate = (isset($theStudentTask->created_at) && !empty($theStudentTask->created_at) ? date('jS M, Y', strtotime($theStudentTask->created_at)) : '');
@@ -1168,6 +1168,38 @@ class PendingTaskManagerController extends Controller
         $studentTaskDoucmentRequest->status = $request->status;
         $studentTaskDoucmentRequest->email_status = $email_sent;
         $studentTaskDoucmentRequest->updated_by = auth()->user()->id;
+
+        if($request->status == 'Rejected') {
+            $approvedFound = false;
+            $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentTaskDoucmentRequest->student_order_id )->get();
+                    
+                    $totalLetterGeneratedCount = 0;
+                    
+                    foreach($AllDocumentRequestForm as $key => $value) {
+                        //find approved letter count
+                        if($value->status == 'Approved') {
+                            $approvedFound = true;
+                        //find rejected letter count
+                        }
+                        $totalLetterGeneratedCount += $value->letter_generated_count;
+                        
+                    }
+
+
+                    if(!$approvedFound) {
+
+                        StudentOrder::where('id', $studentTaskDoucmentRequest->student_order_id )->update(['status' => 'Rejected']);
+                    }else {
+
+                        $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - ($totalLetterGeneratedCount + 1);
+
+                        if($totalLetterGeneratedDiffFound <=0) {
+                            StudentOrder::where('id', $studentTaskDoucmentRequest->student_order_id )->update(['status' => 'Completed']);
+                        }
+                    }
+
+                 
+        }
         
         if($studentTaskDoucmentRequest->save()) {
             
@@ -1183,17 +1215,7 @@ class PendingTaskManagerController extends Controller
                     'from_email'    => $commonSmtp->smtp_user,
                     'from_name'    =>  strtok($commonSmtp->smtp_user, '@'),
                 ];
-
-                // $configuration = [
-                //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
-                //     'smtp_port' => '25',
-                //     'smtp_username' => 'e8ae09cfefd325',
-                //     'smtp_password' => 'ce7fa44b28281d',
-                //     'smtp_encryption' => 'tls',
-                    
-                //     'from_email'    => 'no-reply@lcc.ac.uk',
-                //     'from_name'    =>  'London Churchill College',
-                // ];
+                
                 $MAILHTML = str_replace('[status]', $request->status, $request->description);
                 $attachmentInfo = [];
                 $sendTo = [];

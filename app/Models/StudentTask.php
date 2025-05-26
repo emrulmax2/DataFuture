@@ -60,6 +60,9 @@ class StudentTask extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    public function createdBy(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
     public function excuse(){
         return $this->hasOne(AttendanceExcuse::class, 'student_task_id', 'id')->latestOfMany();
     }
