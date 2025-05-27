@@ -26,12 +26,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-4 text-right"></div>
-                <div class="col-span-12 sm:col-span-4 text-right">
+                <div class="col-span-12 sm:col-span-8 text-right">
                     <div class="flex justify-end items-center">
-                        <button id="studentIDSearchBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
-                        <button id="resetStudentSearch" type="button" class="btn btn-danger w-auto ml-2" ><i class="w-4 h-4 mr-2" data-lucide="rotate-cw"></i> Reset</button>
-                        <button id="advanceSearchToggle" type="button" class="btn btn-facebook ml-2 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
+                        <button id="studentIDSearchBtn" type="button" class="btn btn-success text-white ml-1 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search</button>
+                        <button id="resetStudentSearch" type="button" class="btn btn-danger w-auto ml-1" ><i class="w-4 h-4 mr-2" data-lucide="rotate-cw"></i> Reset</button>
+                        <button id="advanceSearchToggle" type="button" class="btn btn-facebook ml-1 w-auto">Advance Search <i class="w-4 h-4 ml-2" data-lucide="chevron-down"></i></button>
+                        
+                        <div id="communicationBtnsArea" style="display: none;">
+                            @if(isset(auth()->user()->priv()['send_sms']) && auth()->user()->priv()['send_sms'] == 1)
+                            <button type="button" class="sendBulkSmsBtn btn btn-pending shadow-md text-white ml-1"><i data-lucide="smartphone" class="w-4 h-4 mr-2"></i>Send SMS</button>
+                            @endif 
+                            @if(isset(auth()->user()->priv()['send_email']) && auth()->user()->priv()['send_email'] == 1)
+                            <button type="button" class="sendBulkMailBtn btn btn-success shadow-md text-white ml-1"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>
+                            @endif 
+                            @if(isset(auth()->user()->priv()['generage_latter']) && auth()->user()->priv()['generage_latter'] == 1)
+                            <button type="button" class="generateBulkLetterBtn btn btn-primary shadow-md text-white"><i data-lucide="mailbox" class="w-4 h-4 mr-2"></i>Generate Letter</button>
+                            @endif
+                        </div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-12">
@@ -242,12 +253,15 @@
             
         
         <div class="overflow-x-auto scrollbar-hidden">
-            <div id="liveStudentsListTable" class="mt-5 table-report table-report--tabulator"></div>
+            <div id="liveStudentsListTable" data-coummunication="{{ ((isset(auth()->user()->priv()['generage_latter']) && auth()->user()->priv()['generage_latter'] == 1) || (isset(auth()->user()->priv()['send_email']) && auth()->user()->priv()['send_email'] == 1) || (isset(auth()->user()->priv()['send_sms']) && auth()->user()->priv()['send_sms'] == 1) ? 1 : 0) }}" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
+
+    @include('pages.students.live.index-modal')
 @endsection
 
 @section('script')
     @vite('resources/js/students.js')
     @vite('resources/js/student-global.js')
+    @vite('resources/js/student-list-communication.js')
 @endsection
