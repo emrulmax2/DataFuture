@@ -382,8 +382,8 @@ class ResultComparisonController extends Controller
         $SubmissionIds = array_filter(array_unique($request->input('id')));
         //$query1 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->get();
 
-        $query2 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->delete();
-
+        //$query2 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->delete();
+        $query2 = 0;
 
         if($query2)
             return response()->json(['message' => 'Result successfully deleted.'], 200);
