@@ -133,6 +133,11 @@ var studentNotesListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const actionColumn = this.getColumn("id");
+                if (actionColumn) {
+                    const currentWidth = actionColumn.getWidth();
+                    actionColumn.setWidth(currentWidth - 1);
+                }
                 $('.view_attemptlist').on('click', function (e) {
                     let tthis = $(this);
                     let attempt = tthis.text();
