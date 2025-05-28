@@ -825,6 +825,11 @@ var classPlanAssessmentModuleTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const actionColumn = this.getColumn("id");
+                if (actionColumn) {
+                    const currentWidth = actionColumn.getWidth();
+                    actionColumn.setWidth(currentWidth - 1);
+                }
 
                 $(".uploadresult_btn").on('click',function(){
                     let id = $(this).attr('data-id');

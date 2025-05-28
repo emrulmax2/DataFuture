@@ -131,6 +131,13 @@ class StudentController extends Controller
             'academicYear' => AcademicYear::all()->sortByDesc('from_date'),
             'terms' => TermDeclaration::all()->sortByDesc('id'),
             'groups' => Group::all(),
+
+            
+            'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+            'letterSet' => LetterSet::where('live', 1)->where('status', 1)->orderBy('letter_type', 'ASC')->orderBy('letter_title', 'ASC')->get(),
+            'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+            'signatory' => Signatory::orderBy('signatory_name', 'ASC')->get()
             
         ]);
 

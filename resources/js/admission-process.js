@@ -66,6 +66,11 @@ var processTaskArchiveListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const actionColumn = this.getColumn("id");
+                if (actionColumn) {
+                    const currentWidth = actionColumn.getWidth();
+                    actionColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 
@@ -138,6 +143,7 @@ var processTaskLogTable = (function () {
                     headerSort: false,
                     hozAlign: "left",
                     headerHozAlign: "left",
+                    width: "180",
                     formatter(cell, formatterParams) {                        
                         var htms = "";
                             htms += '<div>';
@@ -158,6 +164,11 @@ var processTaskLogTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const actionColumn = this.getColumn("id");
+                if (actionColumn) {
+                    const currentWidth = actionColumn.getWidth();
+                    actionColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 
@@ -242,6 +253,7 @@ var applicantInterviewLogTable = (function () {
                     headerSort: false,
                     hozAlign: "left",
                     headerHozAlign: "left",
+                    width: "180",
                     formatter(cell, formatterParams) {                        
                         var htms = "";
                             htms += '<div>';
@@ -258,7 +270,12 @@ var applicantInterviewLogTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
-                });               
+                });  
+                const actionColumn = this.getColumn("file");
+                if (actionColumn) {
+                    const currentWidth = actionColumn.getWidth();
+                    actionColumn.setWidth(currentWidth - 1);
+                }             
 
             },
         });
