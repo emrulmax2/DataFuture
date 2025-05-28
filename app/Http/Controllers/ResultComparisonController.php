@@ -38,8 +38,6 @@ class ResultComparisonController extends Controller
 {
     public function index(Request $request, Plan $plan,$module_assessment=null)
     {
- 
-       
         $moduleCreation = ModuleCreation::find($plan->module_creation_id);
         
         $assessmentlist = $moduleCreation->module->assesments;
@@ -380,15 +378,26 @@ class ResultComparisonController extends Controller
     {
         
         $SubmissionIds = array_filter(array_unique($request->input('id')));
-        //$query1 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->get();
+        $query1SubmissionByStaff = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->get();
+        if($query1SubmissionByStaff->isEmpty()) {
+            return response()->json(['message' => 'No Result Submission found.'], 404);
+        }
+        foreach($query1SubmissionByStaff as $submission) {
+            
+            Result::where('student_id', $submission->student_id)
+                ->where('assessment_plan_id', $submission->assessment_plan_id)
+                ->delete();
 
-        $query2 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->delete();
+        }
 
+        //$query2 = ResultSubmissionByStaff::whereIn('id', $SubmissionIds)->delete();
 
-        if($query2)
+        
+ 
+        //if($query2)
             return response()->json(['message' => 'Result successfully deleted.'], 200);
-        else
-            return response()->json(['message' => 'Result could not be deleted'], 302);
+        //else
+           // return response()->json(['message' => 'Result could not be deleted'], 302);
         
     }
 }

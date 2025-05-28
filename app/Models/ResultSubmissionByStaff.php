@@ -12,6 +12,7 @@ class ResultSubmissionByStaff extends Model
     
     protected $fillable = [
         'plan_id',
+        'result_id',
         'student_id',
         'student_course_relation_id',
         'assessment_plan_id',
