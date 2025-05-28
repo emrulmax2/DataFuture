@@ -86,6 +86,7 @@ var admissionListTable = (function () {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
+                    width: "150",
                 }
             ],
             renderComplete() {
@@ -94,6 +95,12 @@ var admissionListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowClick:function(e, row){
                 window.open(row.getData().url, '_blank');
@@ -243,6 +250,7 @@ var educationQualTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    width: "150",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -263,6 +271,12 @@ var educationQualTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             }
         });
 
@@ -391,6 +405,7 @@ var employmentHistoryTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
+                    width: "150",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
@@ -411,6 +426,12 @@ var employmentHistoryTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             }
         });
 

@@ -71,6 +71,12 @@ var processTaskArchiveListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -143,6 +149,7 @@ var processTaskLogTable = (function () {
                     headerSort: false,
                     hozAlign: "left",
                     headerHozAlign: "left",
+                    width: 200,
                     formatter(cell, formatterParams) {                        
                         var htms = "";
                             htms += '<div>';
@@ -163,6 +170,12 @@ var processTaskLogTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -239,6 +252,7 @@ var studentInterviewLogTable = (function () {
                     title: "Interviewer",
                     field: "interviewer",
                     headerHozAlign: "left",
+                    width: 200,
                 }
             ],
             renderComplete() {
@@ -246,7 +260,13 @@ var studentInterviewLogTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
-                });               
+                });  
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }                
 
             },
         });

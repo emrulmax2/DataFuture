@@ -80,6 +80,7 @@ var employmentHistoryTable = (function () {
                     title: "Phone",
                     field: "contact_phone",
                     headerHozAlign: "left",
+                    width: 200,
                 },
 
             ],
@@ -89,6 +90,12 @@ var employmentHistoryTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             }
         });
 
@@ -185,6 +192,7 @@ var educationQualTable = (function () {
                     title: "Award Date",
                     field: "degree_award_date",
                     headerHozAlign: "left",
+                    width: 200,
                 },
  
             ],
@@ -194,6 +202,12 @@ var educationQualTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             }
         });
 

@@ -160,6 +160,7 @@ var statusListTable = (function () {
                     headerHozAlign: 'center',
                     hozAlign: 'center',
                     headerSort: false,
+                    width: 200,
                     formatter(cell, formatterParams) {
                         return (
                             '<div class="text-xs">' +
@@ -189,6 +190,12 @@ var statusListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
 
                 $('#classStatusFormBtn svg').removeClass('hidden');
                 $('#classStatusFormBtn svg.loadingClass').addClass('hidden');

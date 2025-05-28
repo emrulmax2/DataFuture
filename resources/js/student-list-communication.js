@@ -1,142 +1,10 @@
-import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
-import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
-("use strict");
-var communicationStudentListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let plans = $("#communicationStudentListTable").attr('data-plans') ? $("#communicationStudentListTable").attr('data-plans') : '';
-        let tableContent = new Tabulator("#communicationStudentListTable", {
-            ajaxURL: route("bulk.communication.student.list"),
-            ajaxParams: { plans: plans },
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: "remote",
-            paginationSize: 100,
-            paginationSizeSelector: [true, 50, 100, 200, 300, 500],
-            layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No assigned students were found under selected class plans.",
-            selectable:true,
-            columns: [
-                {
-                    formatter: "rowSelection", 
-                    titleFormatter: "rowSelection", 
-                    hozAlign: "left", 
-                    headerHozAlign: "left",
-                    width: "60",
-                    headerSort: false, 
-                    download: false,
-                    cellClick:function(e, cell){
-                        cell.getRow().toggleSelect();
-                    }
-                },
-                {
-                    title: "Student ID",
-                    field: "registration_no",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '<div class="break-all whitespace-normal">';
-                                html += cell.getData().registration_no;
-                                html += '<input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().id+'"/>';
-                            html += '</div>';
-                        return html;
-                    }
-                },
-                {
-                    title: "First Name",
-                    field: "first_name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Last Name",
-                    field: "last_name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Intek Semester",
-                    field: "semester",
-                    headerHozAlign: "left",
-                    headerSort: false,
-                },
-                {
-                    title: "Course",
-                    field: "course",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return '<div class="break-all whitespace-normal">'+cell.getData().course+'</div>';
-                    }
-                },
-                {
-                    title: "Status",
-                    field: "status_id",
-                    headerHozAlign: "left",
-                    headerSort: false,
-                    width: "150"
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            },
-            rowSelectionChanged:function(data, rows){
-                var ids = [];
-                if(rows.length > 0){
-                    $('#communicationBtnsArea').fadeIn();
-                }else{
-                    $('#communicationBtnsArea').fadeOut();
-                }
-            },
-            selectableCheck:function(row){
-                return row.getData().id > 0;
-            },
-            rowFormatter:function(row){
-                var data = row.getData();
-                if(data.checked == 1){
-                    row.select();
-                }
-            },
-        });
 
-        // Redraw table onresize     checked
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-    };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
 
 (function(){
-    if ($("#communicationStudentListTable").length) {
-        communicationStudentListTable.init();
-
-        function filterCommunicationSTDForm() {
-            communicationStudentListTable.init();
-        }
-    }
 
     let tomOptions = {
         plugins: {
@@ -235,7 +103,7 @@ var communicationStudentListTable = (function () {
         var $btn = $(this);
         var ids = [];
         
-        $('#communicationStudentListTable').find('.tabulator-row.tabulator-selected').each(function(){
+        $('#liveStudentsListTable').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
             ids.push($row.find('.student_ids').val());
         });
@@ -351,7 +219,7 @@ var communicationStudentListTable = (function () {
         var $btn = $(this);
         var ids = [];
         
-        $('#communicationStudentListTable').find('.tabulator-row.tabulator-selected').each(function(){
+        $('#liveStudentsListTable').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
             ids.push($row.find('.student_ids').val());
         });
@@ -476,7 +344,7 @@ var communicationStudentListTable = (function () {
         var $btn = $(this);
         var ids = [];
         
-        $('#communicationStudentListTable').find('.tabulator-row.tabulator-selected').each(function(){
+        $('#liveStudentsListTable').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
             ids.push($row.find('.student_ids').val());
         });

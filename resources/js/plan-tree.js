@@ -225,6 +225,7 @@ var classPlanTreeListTable = (function () {
                     hozAlign: 'center',
                     headerHozAlign: 'left',
                     download: false,
+                    width: 180,
                     formatter(cell, formatterParams) {
                         var tutorials = cell.getData().tutorial
                             ? cell.getData().tutorial
@@ -308,6 +309,12 @@ var classPlanTreeListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
             selectableCheck: function (row) {
                 return row.getData().id > 0; //allow selection of rows where the age is greater than 18
@@ -461,6 +468,7 @@ var assignedStudentModalListTable = (function () {
                     title: 'Status',
                     field: 'status_id',
                     headerHozAlign: 'left',
+                    width: 180,
                 },
             ],
             renderComplete() {
@@ -469,6 +477,12 @@ var assignedStudentModalListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
             rowClick: function (e, row) {
                 window.open(row.getData().url, '_blank');

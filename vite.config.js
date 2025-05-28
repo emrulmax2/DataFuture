@@ -387,7 +387,9 @@ export default defineConfig({
                 'resources/js/wp-company-supervisor.js',
                 'resources/js/workplacement-details.js',
                 'resources/js/wp-settings.js',
-                'resources/js/student-workplacement-documents.js'
+                'resources/js/student-workplacement-documents.js',
+
+                'resources/js/student-list-communication.js'
 
             ],
             refresh: true,

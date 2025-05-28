@@ -117,6 +117,7 @@ var agentComissionListTable = (function () {
                     title: "Received",
                     field: "receipt_amount",
                     headerHozAlign: "left",
+                    width: "150",
                     formatter(cell, formatterParams){
                         var html = cell.getData().receipt_amount;
                         if(cell.getData().receipt_count > 0){
@@ -143,6 +144,12 @@ var agentComissionListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowSelectionChanged:function(data, rows){
                 if(rows.length > 0){

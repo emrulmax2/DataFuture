@@ -9,6 +9,7 @@ var liveStudentsListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let form_data = $('#studentSearchForm').serialize();
+        let hasCommunication = ($('#liveStudentsListTable').attr('data-coummunication') ? $('#liveStudentsListTable').attr('data-coummunication') : 0);
 
         let tableContent = new Tabulator('#liveStudentsListTable', {
             ajaxURL: route('student.list'),
@@ -23,7 +24,21 @@ var liveStudentsListTable = (function () {
             layout: 'fitColumns',
             responsiveLayout: 'collapse',
             placeholder: 'No matching records found',
+            selectable: (hasCommunication == 1 ? true : false),
             columns: [
+                {
+                    formatter: "rowSelection", 
+                    titleFormatter: "rowSelection", 
+                    hozAlign: "left", 
+                    headerHozAlign: "left",
+                    width: "60",
+                    headerSort: false, 
+                    download: false,
+                    visible: (hasCommunication == 1 ? true : false),
+                    cellClick:function(e, cell){
+                        cell.getRow().toggleSelect();
+                    }
+                },
                 {
                     title: 'Reg. No',
                     field: 'registration_no',
@@ -48,18 +63,31 @@ var liveStudentsListTable = (function () {
 
                         html += '</div>';
                         html += '</div>';
+                        html += '<input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().id+'"/>';
                         return html;
                     },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: 'First Name',
                     field: 'first_name',
                     headerHozAlign: 'left',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: 'Last Name',
                     field: 'last_name',
                     headerHozAlign: 'left',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: '',
@@ -113,23 +141,40 @@ var liveStudentsListTable = (function () {
 
                         return html;
                     },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: 'Semester',
                     field: 'semester',
                     headerSort: false,
                     headerHozAlign: 'left',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: 'Course',
                     field: 'course',
                     headerSort: false,
                     headerHozAlign: 'left',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: 'Status',
                     field: 'status_id',
                     headerHozAlign: 'left',
+                    width: 180,
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
             ],
             ajaxResponse: function (url, params, response) {
@@ -156,6 +201,12 @@ var liveStudentsListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
 
                 $(document).find('.autoFillDropdown').html('').fadeOut();
                 $(document)
@@ -164,9 +215,17 @@ var liveStudentsListTable = (function () {
                         $(this).attr('href', 'javascript:void(0);');
                     });
             },
-            rowClick: function (e, row) {
-                window.open(row.getData().url, '_blank');
+            rowSelectionChanged:function(data, rows){
+                var ids = [];
+                if(rows.length > 0){
+                    $('#communicationBtnsArea').fadeIn();
+                }else{
+                    $('#communicationBtnsArea').fadeOut();
+                }
             },
+            // rowClick: function (e, row) {
+            //     window.open(row.getData().url, '_blank');
+            // },
         });
 
         // Redraw table onresize
@@ -1143,6 +1202,8 @@ var liveStudentsListTable = (function () {
             resetStudentIDSearch();
             location.reload();
             //filterStudentListTable();
+
+            $('#communicationBtnsArea').fadeOut();
             $('#liveStudentsListTable')
                 .html('')
                 .removeClass('tabulator')
@@ -1165,6 +1226,7 @@ var liveStudentsListTable = (function () {
             resetStudentIDSearch();
 
             //filterStudentListTable();
+            $('#communicationBtnsArea').fadeOut();
             $('#liveStudentsListTable')
                 .html('')
                 .removeClass('tabulator')
@@ -1186,6 +1248,7 @@ var liveStudentsListTable = (function () {
             }
 
             //filterStudentListTable();
+            $('#communicationBtnsArea').fadeOut();
             $('#liveStudentsListTable')
                 .html('')
                 .removeClass('tabulator')
@@ -1207,6 +1270,7 @@ var liveStudentsListTable = (function () {
             }
 
             //filterStudentListTable();
+            $('#communicationBtnsArea').fadeOut();
             $('#liveStudentsListTable')
                 .html('')
                 .removeClass('tabulator')

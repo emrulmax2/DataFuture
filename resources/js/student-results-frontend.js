@@ -133,6 +133,12 @@ var studentNotesListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
                 $('.view_attemptlist').on('click', function (e) {
                     let tthis = $(this);
                     let attempt = tthis.text();

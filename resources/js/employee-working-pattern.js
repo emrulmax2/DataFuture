@@ -77,6 +77,12 @@ var employeeWorkingPatternPaysListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 
@@ -144,6 +150,7 @@ var employeeWorkingPatternDaysListTable = (function () {
                     title: "Day Hour",
                     field: "total",
                     headerHozAlign: "left",
+                    width: "150"
                 }
             ],
             renderComplete() {
@@ -152,6 +159,12 @@ var employeeWorkingPatternDaysListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 
@@ -285,6 +298,12 @@ var employeePatternListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowFormatter: function(row, e) {
                 const employeeWorkingPatternId = row.getData().id;

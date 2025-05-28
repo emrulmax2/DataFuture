@@ -182,6 +182,7 @@ var attendanceListTable = (function () {
                     headerHozAlign: "center",
                     print: false,
                     download: false,
+                    width: 200,
                     formatter(cell, formatterParams) {
                         let dropdown = [];
                         
@@ -236,6 +237,12 @@ var attendanceListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                } 
                 $(".start-punch").on("click", function (event) {
                     let data = $(this).data('id');   
                     document.getElementById('employee_punch_number').focus();

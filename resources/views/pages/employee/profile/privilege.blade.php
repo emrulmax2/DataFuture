@@ -101,8 +101,22 @@
                     </div>
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
-                            <input {{ (isset($priv['top_menue']['student_manage']) && $priv['top_menue']['student_manage'] == 1 ? 'checked' : '') }} id="permission_menue_2" class="form-check-input" type="checkbox" value="1" name="permission[top_menue][student_manage]">
+                            <input {{ (isset($priv['top_menue']['student_manage']) && $priv['top_menue']['student_manage'] == 1 ? 'checked' : '') }} id="permission_menue_2" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[top_menue][student_manage]">
                             <label class="form-check-label ml-4" for="permission_menue_2">Student Management</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['live_students']['generage_latter']) && $priv['live_students']['generage_latter'] == 1 ? 'checked' : '') }} id="permission_live_student_com_1" class="form-check-input" type="checkbox" value="1" name="permission[live_students][generage_latter]">
+                                <label class="form-check-label ml-4" for="permission_live_student_com_1">Generate Latter</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['live_students']['send_email']) && $priv['live_students']['send_email'] == 1 ? 'checked' : '') }} id="permission_live_student_com_2" class="form-check-input" type="checkbox" value="1" name="permission[live_students][send_email]">
+                                <label class="form-check-label ml-4" for="permission_live_student_com_2">Send Email</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['live_students']['send_sms']) && $priv['live_students']['send_sms'] == 1 ? 'checked' : '') }} id="permission_live_student_com_3" class="form-check-input" type="checkbox" value="1" name="permission[live_students][send_sms]">
+                                <label class="form-check-label ml-4" for="permission_live_student_com_3">Send SMS</label>
+                            </div>
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-6">
