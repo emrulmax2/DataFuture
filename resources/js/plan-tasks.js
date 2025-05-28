@@ -172,6 +172,12 @@ var classPlanDateListsTutorTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -323,6 +329,7 @@ var classPlanDateListsTutorialTable = (function () {
                     headerSort: false,
                     print: false,
                     download: false,
+                    width: 200,
                     formatter(cell, formatterParams) {
                         let btn = '';
                         let attendanceInformation = cell.getData().attendance_information;
@@ -381,6 +388,12 @@ var classPlanDateListsTutorialTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -482,6 +495,7 @@ var classParticipantsTutorTable = (function () {
                     vertAlign: "middle",
                     headerHozAlign: "center",
                     hozAlign:  "center",
+                    width: 200,
                     formatter(cell, formatterParams) {
                         return `<div>
                             <div class="font-medium whitespace-nowrap">${
@@ -501,6 +515,12 @@ var classParticipantsTutorTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -653,6 +673,7 @@ var classStudentListTutorModuleTable = (function () {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
+                    width: 180,
                 }
                 
             ],
@@ -662,6 +683,12 @@ var classStudentListTutorModuleTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
             rowSelectionChanged:function(data, rows){
                 var ids = [];
@@ -797,6 +824,7 @@ var classPlanAssessmentModuleTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
+                    width: 180,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -825,11 +853,12 @@ var classPlanAssessmentModuleTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-                const actionColumn = this.getColumn("id");
-                if (actionColumn) {
-                    const currentWidth = actionColumn.getWidth();
-                    actionColumn.setWidth(currentWidth - 1);
-                }
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
 
                 $(".uploadresult_btn").on('click',function(){
                     let id = $(this).attr('data-id');

@@ -87,6 +87,7 @@ var manageHolidayListTable = (function () {
                     title: "Approved By",
                     field: "approved_by",
                     headerHozAlign: "left",
+                    width: "200",
                     visible: (type == 'approved' || type == 'rejected' ? true : false),
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block">';
@@ -103,6 +104,12 @@ var manageHolidayListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowClick:function(e, row){
                 var type = row.getData().type;

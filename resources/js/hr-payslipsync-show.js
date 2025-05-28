@@ -52,6 +52,7 @@ var hrPayslipListTable = (function () {
                     title: 'File Name',
                     field: 'file_name',
                     headerHozAlign: 'left',
+                    width: "200"
                 },
             ],
             renderComplete() {
@@ -60,6 +61,12 @@ var hrPayslipListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 

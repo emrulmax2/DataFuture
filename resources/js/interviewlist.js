@@ -122,6 +122,7 @@ var interviewListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     download: false,
+                    width: 180,
                     formatter(cell, formatterParams) {    
                         const data = cell.getValue();                    
                         var btns = ""; 
@@ -180,7 +181,13 @@ var interviewListTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
-                });               
+                });    
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }           
 
                 $("#checkbox-all").on("click",function(event){
                     
@@ -315,6 +322,7 @@ var applicantInterviewListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     download: false,
+                    width: 200,
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="applicantprofile-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
@@ -365,7 +373,13 @@ var applicantInterviewListTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
-                });               
+                });       
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }        
 
             },
         });
@@ -456,6 +470,7 @@ var interviewCompletedListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     download: false,
+                    width: 200,
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="completed-lock__button btn btn-secondary w-42 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
@@ -507,6 +522,12 @@ var interviewCompletedListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             }
         });
 

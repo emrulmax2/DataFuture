@@ -101,6 +101,7 @@ var submissionTable = (function () {
                     title: 'Uploaded By',
                     field: 'created_by',
                     headerHozAlign: 'left',
+                    width: 200,
                 },
             ],
             renderComplete() {
@@ -109,6 +110,12 @@ var submissionTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 
@@ -120,6 +127,7 @@ var submissionTable = (function () {
                 'stroke-width': 1.5,
                 nameAttr: 'data-lucide',
             });
+
         });
     };
     return {
@@ -195,7 +203,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').removeClass('hidden');
             $('.updateSubmission').removeClass('hidden');
-            //$('.deleteSubmission').removeClass('hidden');
+            $('.deleteSubmission').removeClass('hidden');
         } else {
             $.each($('.fill-box:not(:disabled)'), function () {
                 $(this).prop('checked', false);
@@ -206,7 +214,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
-            //$('.deleteSubmission').addClass('hidden');
+            $('.deleteSubmission').addClass('hidden');
         }
     });
 
@@ -224,14 +232,14 @@ var submissionTable = (function () {
                 checkFound = true;
                 $('.savedSubmission').removeClass('hidden');
                 $('.updateSubmission').removeClass('hidden');
-                //$('.deleteSubmission').removeClass('hidden');
+                $('.deleteSubmission').removeClass('hidden');
             }
         });
 
         if (!checkFound) {
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
-            //$('.deleteSubmission').addClass('hidden');
+            $('.deleteSubmission').addClass('hidden');
         }
     });
 

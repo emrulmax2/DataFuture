@@ -98,6 +98,7 @@ var contactListTable = (function () {
                     title:"", field:"emergency_email",
                     headerSort: false,
                     headerHozAlign: "left",
+                    width: 200,
                     formatter(cell, formatterParams) {  
                         return '<div class="col-sfont-bold whitespace-normal text-sm">E. Email: '+cell.getData().emergency_email+'</div>';
                     }
@@ -109,6 +110,12 @@ var contactListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 

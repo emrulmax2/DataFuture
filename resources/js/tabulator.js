@@ -199,6 +199,7 @@ import Tabulator from "tabulator-tables";
                     field: "images",
                     visible: false,
                     print: true,
+                    width: 200,
                     download: true,
                     formatterPrint(cell) {
                         return cell.getValue()[2];
@@ -211,6 +212,12 @@ import Tabulator from "tabulator-tables";
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
             },
         });
 

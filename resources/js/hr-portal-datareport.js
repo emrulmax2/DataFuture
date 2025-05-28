@@ -50,6 +50,7 @@ var starterListTable = (function () {
                     title: "Start Date",
                     field: "started_on",
                     headerHozAlign: "left",
+                    width: 200,
                 }
             ],
             renderStarted:function(){
@@ -61,6 +62,12 @@ var starterListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 

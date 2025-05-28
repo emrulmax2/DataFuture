@@ -88,6 +88,7 @@ var unsignedStudentList = (function () {
                     title: "Status",
                     field: "sts_name",
                     headerHozAlign: "left",
+                    width: 180,
                     formatter(cell, formatterParams){
                         return '<div class="font-medium">'+cell.getData().sts_name+'</div><input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().s_id+'">';
                     }
@@ -109,6 +110,12 @@ var unsignedStudentList = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                } 
             },
             rowSelectionChanged:function(data, rows){
                 var ids = [];

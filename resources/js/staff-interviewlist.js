@@ -91,6 +91,7 @@ var interviewListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     download: false,
+                    width: "200",
                     formatter(cell, formatterParams) {                        
                         var btns = ""; 
                         btns += '<button class="profile-lock__button btn btn-secondary w-48 mr-2 mb-2" data-id="'+ cell.getData().id + '" >\
@@ -141,7 +142,13 @@ var interviewListTable = (function () {
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
-                });               
+                });    
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }              
 
             },
         });
