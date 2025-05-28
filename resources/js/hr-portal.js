@@ -61,6 +61,7 @@ var employeeListTable = (function () {
                     field: "status",
                     headerHozAlign: "left",
                     headerSort: false,
+                    width: 150,
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 1){
                             return '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
@@ -80,6 +81,12 @@ var employeeListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowClick:function(e, row){
                 if((row.getData().locked_profile == 0 || row.getData().emp_can_access_all == 1) && (row.getData().status == 1 || row.getData().status == 0 || row.getData().status == 4)){

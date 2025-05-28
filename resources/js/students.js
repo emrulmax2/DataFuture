@@ -170,6 +170,7 @@ var liveStudentsListTable = (function () {
                     title: 'Status',
                     field: 'status_id',
                     headerHozAlign: 'left',
+                    width: 180,
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();
                         window.open(theRow.getData().url, '_blank');
@@ -200,6 +201,12 @@ var liveStudentsListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
 
                 $(document).find('.autoFillDropdown').html('').fadeOut();
                 $(document)

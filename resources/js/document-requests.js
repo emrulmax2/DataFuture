@@ -136,6 +136,12 @@ var admissionListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
             rowClick:function(e, row){
                 window.open(row.getData().url, '_blank');

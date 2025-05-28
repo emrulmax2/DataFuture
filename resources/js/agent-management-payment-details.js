@@ -84,6 +84,7 @@ var agentRemittPaymenDetailstsListTable = (function () {
                     field: "amount",
                     headerHozAlign: "center",
                     hozAlign: "center",
+                    width: "150",
                     headerSort: false,
                     formatter(cell, formatterParams){
                         var html = '';
@@ -101,6 +102,12 @@ var agentRemittPaymenDetailstsListTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }
             },
         });
 

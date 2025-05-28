@@ -74,6 +74,7 @@ var outStandingHolidayReportTable = (function () {
                     field: "status",
                     headerHozAlign: "left",
                     headerSort: false,
+                    width: 180,
                     formatter(cell, formatterParams) { 
                         if(cell.getData().status == 'Active'){
                             return '<span class="btn btn-success-soft px-1 py-0 rounded-0">Active</span>';
@@ -90,6 +91,12 @@ var outStandingHolidayReportTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
+                const columnLists = this.getColumns();
+                if (columnLists.length > 0) {
+                    const lastColumn = columnLists[columnLists.length - 1];
+                    const currentWidth = lastColumn.getWidth();
+                    lastColumn.setWidth(currentWidth - 1);
+                }   
 
                 $('#oshSearchBtn svg.theLoader').fadeOut();
                 $('#oshExportBtn').fadeIn();
