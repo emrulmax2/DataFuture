@@ -195,7 +195,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').removeClass('hidden');
             $('.updateSubmission').removeClass('hidden');
-            //$('.deleteSubmission').removeClass('hidden');
+            $('.deleteSubmission').removeClass('hidden');
         } else {
             $.each($('.fill-box:not(:disabled)'), function () {
                 $(this).prop('checked', false);
@@ -206,7 +206,7 @@ var submissionTable = (function () {
             });
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
-            //$('.deleteSubmission').addClass('hidden');
+            $('.deleteSubmission').addClass('hidden');
         }
     });
 
@@ -224,14 +224,14 @@ var submissionTable = (function () {
                 checkFound = true;
                 $('.savedSubmission').removeClass('hidden');
                 $('.updateSubmission').removeClass('hidden');
-                //$('.deleteSubmission').removeClass('hidden');
+                $('.deleteSubmission').removeClass('hidden');
             }
         });
 
         if (!checkFound) {
             $('.savedSubmission').addClass('hidden');
             $('.updateSubmission').addClass('hidden');
-            //$('.deleteSubmission').addClass('hidden');
+            $('.deleteSubmission').addClass('hidden');
         }
     });
 
