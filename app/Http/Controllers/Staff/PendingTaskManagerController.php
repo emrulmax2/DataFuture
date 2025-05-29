@@ -676,10 +676,15 @@ class PendingTaskManagerController extends Controller
 
                     $AllDocumentRequestForm = StudentDocumentRequestForm::where('student_order_id', $studentDoucmentRequestForm->student_order_id )->get();
                     $totalLetterGeneratedCount = 0;
+                    $rejectedFoundCount=0;
                     foreach($AllDocumentRequestForm as $key => $value) {
                         $totalLetterGeneratedCount += $value->letter_generated_count;
+
+                        if($value->status=="Rejected") {
+                            $rejectedFoundCount+=1;
+                        }
                     }
-                    $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - $totalLetterGeneratedCount;
+                    $totalLetterGeneratedDiffFound = $AllDocumentRequestForm->count() - ($totalLetterGeneratedCount + $rejectedFoundCount);
                     if($totalLetterGeneratedDiffFound <=0) {
                         StudentOrder::where('id', $studentDoucmentRequestForm->student_order_id )->update(['status' => 'Completed']);
                     }
