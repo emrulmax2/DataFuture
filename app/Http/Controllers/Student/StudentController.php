@@ -40,6 +40,7 @@ use App\Models\KinsRelation;
 use App\Models\LetterSet;
 use App\Models\LevelHours;
 use App\Models\MobileVerificationCode;
+use App\Models\ModduleCreation;
 use App\Models\Option;
 use App\Models\Plan;
 use App\Models\PlansDateList;
@@ -88,6 +89,7 @@ use App\Models\StudentStuloadInformation;
 use App\Models\StudentWorkplacementDocument;
 use App\Models\WorkplacementDetails;
 use App\Models\WorkplacementSetting;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -775,18 +777,25 @@ class StudentController extends Controller
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
             "attendanceIndicator" => $attendanceIndicator,
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'studentPlanIds' => Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray(),
+            'planSet' => Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray(),
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
 
             $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
+            $theInactiveCourse = StudentCourseRelation::where('student_id', $student->id)->where('active',0)->get()->first();
+            $theActiveCourse = StudentCourseRelation::where('student_id', $student->id)->where('active',1)->get()->first();
             sort($courseCreationIds);
-            $courseRelationActiveCourseId = $student->crel->creation->id;
+            
+            $courseCreationActiveData = $student->crel->creation;
+            $courseRelationSessionedCourseId = $courseCreationActiveData->id;
+            $courseId = $courseCreationActiveData->course_id;
             $maxCourseCreationId = max($courseCreationIds);
             $minCourseCreationId = min($courseCreationIds);
-
             $planSet= Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray();
+            ///$planSet= Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray();
 
             $termData = [];
             $lastAttendanceDate = [];
@@ -818,14 +827,24 @@ class StudentController extends Controller
                             ->leftJoin('groups as gp', 'gp.id', 'plan.group_id')
                             ->where('assign.student_id', $student->id)
                             ->whereIn('plan.id',$planSet)
-                            ->where('plan.course_creation_id','>=',$courseRelationActiveCourseId);
+                            ->where('plan.course_creation_id','>=',$courseRelationSessionedCourseId);
 
-                            if($courseRelationActiveCourseId < $maxCourseCreationId && $courseRelationActiveCourseId >= $minCourseCreationId) {
+                            if($courseRelationSessionedCourseId < $maxCourseCreationId && $courseRelationSessionedCourseId >= $minCourseCreationId) {
 
-                                $arrayCurrentKey = array_search($courseRelationActiveCourseId, $courseCreationIds);
+                                $arrayCurrentKey = array_search($courseRelationSessionedCourseId, $courseCreationIds);
                                 $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
-                                $QueryPart->where('plan.course_creation_id','<',$nextCourseCreationId);
+                                
+                                //Debugbar::addMessage($nextCourseCreationId, 'nextCourseCreationId');
+                                
+                                if($theInactiveCourse->course_creation_id > $theActiveCourse->course_creation_id) {
+                                    
+                                }else
+                                    $QueryPart->where('plan.course_creation_id','<',$nextCourseCreationId);
 
+                            }
+
+                            if($courseId > 0) {
+                                $QueryPart->where('plan.course_id', $courseId);
                             }
                             $QueryInner = $QueryPart->orderBy("pdl.date",'desc')->get();
                             
