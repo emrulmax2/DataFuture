@@ -21,7 +21,7 @@ class WorkplacementDocumentController extends Controller
 
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
-        $path = $document->storeAs('public/students/workplacement/documents/'.$student_id, $imageName, 's3');
+        $path = $document->storeAs('public/students/'.$student_id.'/workplacement', $imageName, 's3');
         $data = [];
         $data['student_id'] = $student_id;
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
@@ -97,7 +97,8 @@ class WorkplacementDocumentController extends Controller
 
         $studentDoc = StudentWorkplacementDocument::where('id',$row_id)->withTrashed()->get()->first();
         $student_id = $studentDoc->student_id;
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/workplacement/documents/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        //$tmpURL = Storage::disk('s3')->temporaryUrl('public/students/workplacement/documents/'.$student_id.'/'.$studentDoc->current_file_name, now()->addMinutes(5));
+        $tmpURL = Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/workplacement/'.$studentDoc->current_file_name, now()->addMinutes(5));
         return response()->json(['res' => $tmpURL], 200);
     }
 
