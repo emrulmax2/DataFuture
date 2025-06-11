@@ -263,6 +263,7 @@ class StudentResultReportController extends Controller
                     'intake_semester' => isset($result->student->crel) ? $result->student->crel->creation->semester->name : '',
                     'course' => isset($result->plan->cCreation) ? $result->plan->cCreation->course->name : '',
                     'award_body_reg_no' => isset($result->student->crel->abody->reference) ? $result->student->crel->abody->reference : '',
+                    'groups' => isset($result->plan->group->name) ? $result->plan->group->name : '',
                 ];
                 //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
                 
@@ -285,7 +286,8 @@ class StudentResultReportController extends Controller
         $headers[1][3] = 'Intake Semester';
         $headers[1][4] = 'Course';
         $headers[1][5] = 'Awarding Body Ref';
-        $statusIncrement = 6;
+        $headers[1][6] = 'Groups';
+        $statusIncrement = 7;
         $printed = false;
         foreach($moduleList as $module) :
             if($printed==false) {
@@ -305,7 +307,8 @@ class StudentResultReportController extends Controller
         $headers[2][3] = '';
         $headers[2][4] = '';
         $headers[2][5] = '';
-        $statusIncrement = 6;
+        $headers[2][6] = '';
+        $statusIncrement = 7;
 
         foreach($moduleList as $module) :
             $headers[2][$statusIncrement++] = $module;
@@ -323,8 +326,9 @@ class StudentResultReportController extends Controller
             $theCollection[$dataCount][3] = $studentDetails[$key]['intake_semester'];
             $theCollection[$dataCount][4] = $studentDetails[$key]['course'];
             $theCollection[$dataCount][5] = $studentDetails[$key]['award_body_reg_no'];
+            $theCollection[$dataCount][6] = $studentDetails[$key]['groups'];
 
-            $statusIncrement = 6;
+            $statusIncrement = 7;
             $unitCount = 0;
             foreach($moduleList as $module) :
                 if(isset($value[$module]) && ($value[$module]=='P' || $value[$module]=='M' || $value[$module]=='D')) {
