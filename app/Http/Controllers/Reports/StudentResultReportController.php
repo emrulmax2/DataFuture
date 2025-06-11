@@ -286,7 +286,7 @@ class StudentResultReportController extends Controller
         $headers[1][3] = 'Intake Semester';
         $headers[1][4] = 'Course';
         $headers[1][5] = 'Awarding Body Ref';
-        $headers[1][6] = 'Groups';
+        $headers[1][6] = 'Group';
         $statusIncrement = 7;
         $printed = false;
         foreach($moduleList as $module) :
