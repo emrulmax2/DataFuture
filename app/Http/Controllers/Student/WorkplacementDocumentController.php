@@ -22,12 +22,14 @@ class WorkplacementDocumentController extends Controller
         $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
         $path = $document->storeAs('public/students/'.$student_id.'/workplacement', $imageName, 's3');
+        
         $data = [];
         $data['student_id'] = $student_id;
         $data['hard_copy_check'] = ($hard_copy_check > 0 ? $hard_copy_check : 0);
         $data['doc_type'] = $document->getClientOriginalExtension();
         $data['path'] = Storage::disk('s3')->url($path);
-        $data['current_file_name'] = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : $imageName);
+        $data['display_file_name'] = (isset($request->display_file_name) && !empty($request->display_file_name) ? $request->display_file_name : $imageName);
+        $data['current_file_name'] =  $imageName;
         $data['created_by'] = auth()->user()->id;
 
         $data['student_work_placement_id'] = $request->student_workplacement_id;
@@ -53,7 +55,7 @@ class WorkplacementDocumentController extends Controller
 
         $query = StudentWorkplacementDocument::orderByRaw(implode(',', $sorts))->where('student_id', $studentId)->where('student_work_placement_id', $student_workplacement_id);
         if(!empty($queryStr)):
-            $query->where('current_file_name','LIKE','%'.$queryStr.'%');
+            $query->where('display_file_name','LIKE','%'.$queryStr.'%');
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -81,7 +83,7 @@ class WorkplacementDocumentController extends Controller
                     'sl' => $i,
                     'hard_copy_check' => $list->hard_copy_check,
                     'doc_type' => strtoupper($list->doc_type),
-                    'current_file_name'=> $list->current_file_name,
+                    'display_file_name'=> $list->display_file_name,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at

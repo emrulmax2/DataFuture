@@ -256,6 +256,7 @@ use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
 use App\Http\Controllers\Reports\StudentPerformanceReportController;
 use App\Http\Controllers\Reports\StudentProgressMonitoringReportController;
 use App\Http\Controllers\Reports\StudentResultReportController;
+use App\Http\Controllers\Reports\StudentWorkplacementReportController;
 use App\Http\Controllers\Reports\SystemReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
@@ -3337,6 +3338,12 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/accounts', 'accountsReports')->name('reports.accounts'); 
         Route::get('reports/intake-performance', 'intakePerformance')->name('reports.intake.performance'); 
         Route::get('reports/term-performance', 'termPerformance')->name('reports.term.performance'); 
+    });
+
+    Route::controller(StudentWorkplacementReportController::class)->prefix('reports')->group(function(){
+        Route::get('student-workplacement-reports', 'index')->name('report.student.workplacement.view'); 
+        Route::post('student-workplacement-reports-list', 'totalCount')->name('report.workplacement.reports.total'); 
+        Route::post('student-workplacement-excel-download', 'excelDownload')->name('report.workplacement.reports.excel'); 
     });
 
     Route::controller(CollectionReportController::class)->group(function(){
