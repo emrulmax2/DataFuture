@@ -389,11 +389,17 @@ class StudentProgressMonitoringReportController extends Controller
             }
            $inCompleteCount = 0;
            $CompleteCount = 0;
+           $totalCreditValue = 0;
+           $totalModuleCount = 0;
            foreach($term_declaration_ids as $term):
                 $i =1;
                 if(isset($resultSets[$term])):
                     $termBaseSingleInCompleteCount[$term] = 0;
+
+                    $termBaseSingleCreditValueCount[$term] = 0;
+
                     $termBaseSingleCompleteCount[$term] = 0;
+
                     foreach($resultSets[$term] as $module => $result):
                         $compeleteFound = false;
                         if(!isset($result['results']) || $result['results']=="") {
@@ -403,7 +409,9 @@ class StudentProgressMonitoringReportController extends Controller
                             ++$CompleteCount;
                             ++$termBaseSingleCompleteCount[$term];
                             $compeleteFound = true;
+                            $totalCreditValue += $result['credit_value'];
                         }
+                        $totalModuleCount += 1;
                         $theCollection[$dataCount][0] = "";
                         $theCollection[$dataCount][1] = "";
                         $theCollection[$dataCount][2] = "";
@@ -468,9 +476,9 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][4] = "";
                 $theCollection[$dataCount][5] = "";
                 $theCollection[$dataCount][6] = "";
-                $theCollection[$dataCount][7] = "";
+                $theCollection[$dataCount][7] = $totalModuleCount;
                 $theCollection[$dataCount][8] = "";
-                $theCollection[$dataCount][9] = "";
+                $theCollection[$dataCount][9] = $totalCreditValue;
                 $theCollection[$dataCount][10] = "";
                 $theCollection[$dataCount][11] = "";
                 $theCollection[$dataCount][12] = "";
