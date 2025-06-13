@@ -58,7 +58,6 @@
                     <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Performance Report" src="{{ asset('build/assets/images/report_icons/student_performance_report.png') }}">
                 </a>
             </div>
-
             
             
             <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
@@ -67,9 +66,23 @@
                 </a>
             </div>
 
+            
+            <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
+                <a href="{{ route('report.student.expected.result.view'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Expected Result Report" src="{{ asset('build/assets/images/report_icons/student_expected_report.png') }}">
+                </a>
+            </div>
+
             <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
                 <a href="{{ route('report.student.workplacement.view'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
                     <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Workplacement Report" src="{{ asset('build/assets/images/report_icons/student-workplacement-reports.png') }}">
+                </a>
+            </div>
+
+            
+            <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
+                <a href="{{ route('report.student.expected.result.view'); }}" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="Student Expected Result Report" src="{{ asset('build/assets/images/report_icons/student_expected_report.png') }}">
                 </a>
             </div>
             
