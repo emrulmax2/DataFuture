@@ -302,20 +302,22 @@ class StudentProgressMonitoringReportController extends Controller
         $theCollection[5][5] = 'Group';
         $theCollection[5][6] = 'Module Serial';			
         $theCollection[5][7] = 'Module';
-        $theCollection[5][8] = 'Tutor';
-        $theCollection[5][9] = 'Results';
-        $theCollection[5][10] = 'Attempts';
-        $theCollection[5][11] = 'Complete';
-        $theCollection[5][12] = 'Incomplete';
-        $theCollection[5][13] = 'Certificate Claimed';
-        $theCollection[5][14] = 'Certificate Claimed Date';
-        $theCollection[5][15] = 'Certificate Requested By';
-        $theCollection[5][16] = 'Certificate Received';
-        $theCollection[5][17] = 'Certificate Received Date';
-        $theCollection[5][18] = 'Certificate Released';
-        $theCollection[5][19] = 'Certificate Released Date';
-        $theCollection[5][20] = 'Awarded Date';
-        $theCollection[5][21] = 'Overall Result';
+        $theCollection[5][8] = 'Unit Value';
+        $theCollection[5][9] = 'Credit Value';
+        $theCollection[5][10] = 'Tutor';
+        $theCollection[5][11] = 'Results';
+        $theCollection[5][12] = 'Attempts';
+        $theCollection[5][13] = 'Complete';
+        $theCollection[5][14] = 'Incomplete';
+        $theCollection[5][15] = 'Certificate Claimed';
+        $theCollection[5][16] = 'Certificate Claimed Date';
+        $theCollection[5][17] = 'Certificate Requested By';
+        $theCollection[5][18] = 'Certificate Received';
+        $theCollection[5][19] = 'Certificate Received Date';
+        $theCollection[5][20] = 'Certificate Released';
+        $theCollection[5][21] = 'Certificate Released Date';
+        $theCollection[5][22] = 'Awarded Date';
+        $theCollection[5][23] = 'Overall Result';
              
         $studentIds = explode(",",$request->studentIds);
         
@@ -354,6 +356,8 @@ class StudentProgressMonitoringReportController extends Controller
                 $gradeFound = $result->grade->code;
                 $termId = $result->plan->term_declaration_id;
                 $moduleName = $result->plan->creations->module->name;
+                $unitValue = $result->plan->creations->unit_value;
+                $creditValue = $result->plan->creations->credit_value;
                 $termName = isset($result->plan->attenTerm) ? $result->plan->attenTerm->name : "";
                 $groupName = isset($result->plan->group) ? $result->plan->group->name : "";
                 $tutorEmployee = isset($result->plan->tutor->employee) ? $result->plan->tutor->employee->full_name : "";
@@ -368,6 +372,8 @@ class StudentProgressMonitoringReportController extends Controller
                 $resultSets[$termId][$moduleName]['attendance_term'] = $termName;
                 $resultSets[$termId][$moduleName]['group'] = $groupName;
                 $resultSets[$termId][$moduleName]['module'] = $moduleName;
+                $resultSets[$termId][$moduleName]['unit_value'] = $unitValue;
+                $resultSets[$termId][$moduleName]['credit_value'] = $creditValue;
                 $resultSets[$termId][$moduleName]['tutor'] = $tutorEmployee;
 
                 
@@ -385,13 +391,14 @@ class StudentProgressMonitoringReportController extends Controller
                     $termBaseSingleInCompleteCount[$term] = 0;
                     $termBaseSingleCompleteCount[$term] = 0;
                     foreach($resultSets[$term] as $module => $result):
-                        
+                        $compeleteFound = false;
                         if(!isset($result['results']) || $result['results']=="") {
                             ++$inCompleteCount;
                             ++$termBaseSingleInCompleteCount[$term];
                         }else{
                             ++$CompleteCount;
                             ++$termBaseSingleCompleteCount[$term];
+                            $compeleteFound = true;
                         }
                         $theCollection[$dataCount][0] = "";
                         $theCollection[$dataCount][1] = "";
@@ -401,11 +408,11 @@ class StudentProgressMonitoringReportController extends Controller
                         $theCollection[$dataCount][5] = $result['group'];
                         $theCollection[$dataCount][6] = $i++;
                         $theCollection[$dataCount][7] = $result['module'];
-                        $theCollection[$dataCount][8] = $result['tutor'];
-                        $theCollection[$dataCount][9] = isset($result['results']) ? $result['results'] : "";
-                        $theCollection[$dataCount][10] = $result['attempts'];
-                        $theCollection[$dataCount][11] = "";
-                        $theCollection[$dataCount][12] = "";
+                        $theCollection[$dataCount][8] = $result['unit_value'];
+                        $theCollection[$dataCount][9] =  $compeleteFound ? $result['credit_value'] : "";
+                        $theCollection[$dataCount][10] = $result['tutor'];
+                        $theCollection[$dataCount][11] = isset($result['results']) ? $result['results'] : "";
+                        $theCollection[$dataCount][12] = $result['attempts'];
                         $theCollection[$dataCount][13] = "";
                         $theCollection[$dataCount][14] = "";
                         $theCollection[$dataCount][15] = "";
@@ -415,6 +422,8 @@ class StudentProgressMonitoringReportController extends Controller
                         $theCollection[$dataCount][19] = "";
                         $theCollection[$dataCount][20] = "";
                         $theCollection[$dataCount][21] = "";
+                        $theCollection[$dataCount][22] = "";
+                        $theCollection[$dataCount][23] = "";
                         $dataCount++;
                     endforeach;
                 endif;
@@ -430,10 +439,10 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][8] = "";
                     $theCollection[$dataCount][9] = "";
                     $theCollection[$dataCount][10] = "";
-                    $theCollection[$dataCount][11] = $termBaseSingleCompleteCount[$term];
-                    $theCollection[$dataCount][12] = $termBaseSingleInCompleteCount[$term];
-                    $theCollection[$dataCount][13] = "";
-                    $theCollection[$dataCount][14] = "";
+                    $theCollection[$dataCount][11] = "";
+                    $theCollection[$dataCount][12] = "";
+                    $theCollection[$dataCount][13] = $termBaseSingleCompleteCount[$term];
+                    $theCollection[$dataCount][14] = $termBaseSingleInCompleteCount[$term];
                     $theCollection[$dataCount][15] = "";
                     $theCollection[$dataCount][16] = "";
                     $theCollection[$dataCount][17] = "";
@@ -441,6 +450,8 @@ class StudentProgressMonitoringReportController extends Controller
                     $theCollection[$dataCount][19] = "";
                     $theCollection[$dataCount][20] = "";
                     $theCollection[$dataCount][21] = "";
+                    $theCollection[$dataCount][22] = "";
+                    $theCollection[$dataCount][23] = "";
                     $dataCount++;
                 }
             endforeach;
@@ -455,17 +466,19 @@ class StudentProgressMonitoringReportController extends Controller
                 $theCollection[$dataCount][8] = "";
                 $theCollection[$dataCount][9] = "";
                 $theCollection[$dataCount][10] = "";
-                $theCollection[$dataCount][11] = $CompleteCount;
-                $theCollection[$dataCount][12] = $inCompleteCount;
-                $theCollection[$dataCount][13] = isset($student->awarded) ? $student->awarded->certificate_requested : "";
-                $theCollection[$dataCount][14] = isset($student->awarded->date_of_certificate_requested) ? $student->awarded->date_of_certificate_requested : "";
-                $theCollection[$dataCount][15] = isset($student->awarded->requested->employee) ? $student->awarded->requested->employee->full_name : "";
-                $theCollection[$dataCount][16] = isset($student->awarded->certificate_received) ? $student->awarded->certificate_received : "";
-                $theCollection[$dataCount][17] = isset($student->awarded->date_of_certificate_received) ? $student->awarded->date_of_certificate_received : "";
-                $theCollection[$dataCount][18] = isset($student->awarded->certificate_released) ? $student->awarded->certificate_released : "";
-                $theCollection[$dataCount][19] = isset($student->awarded->date_of_certificate_released) ? $student->awarded->date_of_certificate_released : "";
-                $theCollection[$dataCount][20] = isset($student->awarded->date_of_award) ? $student->awarded->date_of_award : "";
-                $theCollection[$dataCount][21] = isset($student->awarded->qual_award_result_id) ? $student->awarded->qual->name : "";
+                $theCollection[$dataCount][11] = "";
+                $theCollection[$dataCount][12] = "";
+                $theCollection[$dataCount][13] = $CompleteCount;
+                $theCollection[$dataCount][14] = $inCompleteCount;
+                $theCollection[$dataCount][15] = isset($student->awarded) ? $student->awarded->certificate_requested : "";
+                $theCollection[$dataCount][16] = isset($student->awarded->date_of_certificate_requested) ? $student->awarded->date_of_certificate_requested : "";
+                $theCollection[$dataCount][17] = isset($student->awarded->requested->employee) ? $student->awarded->requested->employee->full_name : "";
+                $theCollection[$dataCount][18] = isset($student->awarded->certificate_received) ? $student->awarded->certificate_received : "";
+                $theCollection[$dataCount][19] = isset($student->awarded->date_of_certificate_received) ? $student->awarded->date_of_certificate_received : "";
+                $theCollection[$dataCount][20] = isset($student->awarded->certificate_released) ? $student->awarded->certificate_released : "";
+                $theCollection[$dataCount][21] = isset($student->awarded->date_of_certificate_released) ? $student->awarded->date_of_certificate_released : "";
+                $theCollection[$dataCount][22] = isset($student->awarded->date_of_award) ? $student->awarded->date_of_award : "";
+                $theCollection[$dataCount][23] = isset($student->awarded->qual_award_result_id) ? $student->awarded->qual->name : "";
                 $dataCount++;		
         endforeach;
 
