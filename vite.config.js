@@ -389,7 +389,8 @@ export default defineConfig({
                 'resources/js/wp-settings.js',
                 'resources/js/student-workplacement-documents.js',
 
-                'resources/js/student-list-communication.js'
+                'resources/js/student-list-communication.js',
+                'resources/js/student-workplacement-form.js',
 
             ],
             refresh: true,

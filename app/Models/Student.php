@@ -364,5 +364,9 @@ class Student extends Model
         endif;
         return $count > 0 ? 2 : 0;
     }
+
+    public function workPlacements(){
+        return $this->hasMany(StudentWorkPlacement::class, 'student_id', 'id');
+    }
     
 }

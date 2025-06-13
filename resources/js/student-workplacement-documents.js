@@ -36,7 +36,7 @@ const studentWorkPlacementDocumentsTable = (function () {
                 },
                 {
                     title: "Name",
-                    field: "current_file_name",
+                    field: "display_file_name",
                     headerHozAlign: "left",
                     minWidth: 180,
                 },
@@ -267,42 +267,29 @@ export default studentWorkPlacementDocumentsTable;
 //         },
 //     };
 
-     if ($("#uploadDocumentForm").length > 0) {
-            let dzError = false;
-            Dropzone.autoDiscover = false;
-
-             if (Dropzone.instances.length > 0) {
-                    Dropzone.instances.forEach(dz => dz.destroy());
-                }
-
-            Dropzone.options.uploadDocumentForm = {
-                autoProcessQueue: false,
-                maxFiles: 10,
-                maxFilesize: 20,
-                parallelUploads: 10,
-                acceptedFiles:
-                    ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
-                addRemoveLinks: true,
-                thumbnailWidth: 100,
-                thumbnailHeight: 100,
-                /*accept: function(file, done) {
-                    if(!file.name.match(/[`!@#$%^&*+\-=\[\]{};':"\\|,<>\/?~]/)){
-                        alert("Invalid File Name");
-                        done('Invalid file name');
-                    }else { 
-                        done(); 
-                    }
-                },*/
-            };
-    
-            let options = {
-                accept: (file, done) => {
-                    console.log("Uploaded");
-                    done();
-                },
-            };
-    
-            var drzn1 = new Dropzone("#uploadDocumentForm", options);
+       if($("#uploadDocumentForm").length > 0){
+           let dzError = false;
+           Dropzone.autoDiscover = false;
+           Dropzone.options.uploadDocumentForm = {
+               autoProcessQueue: false,
+               maxFiles: 10,
+               maxFilesize: 20,
+               parallelUploads: 10,
+               acceptedFiles: ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
+               addRemoveLinks: true,
+               thumbnailWidth: 100,
+               thumbnailHeight: 100,
+           };
+   
+           let options = {
+               accept: (file, done) => {
+                   console.log("Uploaded");
+                   done();
+               },
+           };
+   
+   
+           var drzn1 = new Dropzone('#uploadDocumentForm', options);
     
             drzn1.on("addedfile", function (file) {
                 if (file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)) {
@@ -364,7 +351,7 @@ export default studentWorkPlacementDocumentsTable;
                                 "Congratulation!"
                             );
                             $("#successModal .successModalDesc").html(
-                                "Applicant document successfully uploaded."
+                                "document successfully uploaded."
                             );
                             $("#successModal .successCloser").attr(
                                 "data-action",
@@ -417,11 +404,7 @@ export default studentWorkPlacementDocumentsTable;
                     "display: inline-block;";
     
                 if (drzn1.files.length > 0) {
-                    if (
-                        $(
-                            '#uploadDocumentModal [name="hard_copy_check_status"]:checked'
-                        ).length > 0
-                    ) {
+                    if ($('#uploadDocumentModal [name="hard_copy_check_status"]:checked').length > 0) {
                         var hardCopyChecked = $(
                             '#uploadDocumentModal [name="hard_copy_check_status"]:checked'
                         ).val();
@@ -430,9 +413,7 @@ export default studentWorkPlacementDocumentsTable;
                         );
                         drzn1.processQueue();
                     } else {
-                        $(
-                            "#uploadDocumentModal .modal-content .uploadError"
-                        ).remove();
+                        $("#uploadDocumentModal .modal-content .uploadError").remove();
                         $("#uploadDocumentModal .modal-content").prepend(
                             '<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>'
                         );
