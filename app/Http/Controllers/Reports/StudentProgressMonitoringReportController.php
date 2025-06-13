@@ -356,8 +356,8 @@ class StudentProgressMonitoringReportController extends Controller
                 $gradeFound = $result->grade->code;
                 $termId = $result->plan->term_declaration_id;
                 $moduleName = $result->plan->creations->module->name;
-                $unitValue = $result->plan->creations->unit_value;
-                $creditValue = $result->plan->creations->credit_value;
+                $unitValue = $result->plan->creations->module->unit_value;
+                $creditValue = $result->plan->creations->module->credit_value;
                 $termName = isset($result->plan->attenTerm) ? $result->plan->attenTerm->name : "";
                 $groupName = isset($result->plan->group) ? $result->plan->group->name : "";
                 $tutorEmployee = isset($result->plan->tutor->employee) ? $result->plan->tutor->employee->full_name : "";
