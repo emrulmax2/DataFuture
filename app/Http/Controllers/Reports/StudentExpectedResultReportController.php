@@ -54,11 +54,11 @@ class StudentExpectedResultReportController extends Controller
             return Status::where('type', 'Student')->get();
         });
         
-        return view('pages.reports.result.index', [
+        return view('pages.reports.result.expected.index', [
             'title' => 'Student Result Reports - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => 'javascript:void(0);'],
-                ['label' => 'Student Result Reports', 'href' => 'javascript:void(0);']
+                ['label' => 'Student Expected Result Reports', 'href' => 'javascript:void(0);']
             ],
             'semesters' => $semesters,
             'courses' => $courses,
@@ -275,7 +275,7 @@ class StudentExpectedResultReportController extends Controller
                 //     dd($result);
                 // }
                 
-                if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory" || $assign->plan->class_type==Null)) {
+                if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
                         $moduleName = $assign->plan->creations->module->name; 
                         $data[$assign->student->id][$moduleName] = "Yes";
                         $moduleList[] = $moduleName;
@@ -302,8 +302,8 @@ class StudentExpectedResultReportController extends Controller
             }
         endforeach;
 
-        $headers[1][$statusIncrement++] = "Completed New Units";
-        $headers[1][$statusIncrement++] = "Assessment Board Outcome";
+        // $headers[1][$statusIncrement++] = "Completed New Units";
+        // $headers[1][$statusIncrement++] = "Assessment Board Outcome";
 
         $headers[2][0] = '';
         $headers[2][1] = '';
@@ -317,8 +317,8 @@ class StudentExpectedResultReportController extends Controller
         foreach($moduleList as $module) :
             $headers[2][$statusIncrement++] = $module;
         endforeach;
-        $headers[2][$statusIncrement++] = "";
-        $headers[2][$statusIncrement++] = "";
+        // $headers[2][$statusIncrement++] = "";
+        // $headers[2][$statusIncrement++] = "";
 
 
         
@@ -331,21 +331,21 @@ class StudentExpectedResultReportController extends Controller
             $theCollection[$dataCount][4] = $studentDetails[$key]['course'];
             $theCollection[$dataCount][5] = $studentDetails[$key]['award_body_reg_no'];
             $theCollection[$dataCount][6] = $studentDetails[$key]['groups'];
-
+            
             $statusIncrement = 7;
             $unitCount = 0;
             foreach($moduleList as $module) :
-                if(isset($value[$module]) && ($value[$module]=='P' || $value[$module]=='M' || $value[$module]=='D')) {
-                    $unitCount+=1;
-                }
-                $theCollection[$dataCount][$statusIncrement++] = isset($value[$module]) ? $value[$module] : '';
+                // if(isset($value[$module]) && ($value[$module]=='P' || $value[$module]=='M' || $value[$module]=='D')) {
+                //     $unitCount+=1;
+                // }
+                $theCollection[$dataCount][$statusIncrement++] = isset($value[$module]) ? $value[$module] : "";
             endforeach;
-            $theCollection[$dataCount][$statusIncrement++] = $unitCount;
-            $theCollection[$dataCount][$statusIncrement++] = '';
+            // $theCollection[$dataCount][$statusIncrement++] = $unitCount;
+            // $theCollection[$dataCount][$statusIncrement++] = '';
             $dataCount++;    
         endforeach;
 
-        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'board_result_report.xlsx');
+        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'board_expected_result_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
