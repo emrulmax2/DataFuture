@@ -122,7 +122,7 @@ var classPlanTreeListTable = (function () {
                     },
                 },
                 {
-                    title: 'Theory Days',
+                    title: 'Theory / Seminer Days',
                     field: 'tutor',
                     headerHozAlign: 'left',
                     width: 298,
