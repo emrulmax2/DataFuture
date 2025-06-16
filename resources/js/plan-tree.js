@@ -88,16 +88,17 @@ var classPlanTreeListTable = (function () {
                         return html;
                     },
                 },
-                {
-                    title: 'Tutor',
-                    field: 'tutor',
-                    headerHozAlign: 'left',
-                },
-                {
-                    title: 'Personal Tutor',
-                    field: 'personalTutor',
-                    headerHozAlign: 'left',
-                },
+                // {
+                //     title: 'Tutor',
+                //     field: 'tutor',
+                //     headerHozAlign: 'left',
+                // },
+                // {
+                //     title: 'Personal Tutor',
+                //     field: 'personalTutor',
+                //     headerHozAlign: 'left',
+                // },
+                
                 {
                     title: 'No of Student',
                     field: 'on_of_student',
@@ -122,14 +123,24 @@ var classPlanTreeListTable = (function () {
                 },
                 {
                     title: 'Theory Days',
-                    field: 'id',
+                    field: 'tutor',
                     headerHozAlign: 'left',
+                    width: 298,
                     formatter(cell, formatterParams) {
+                        var submissionAvailable = cell.getData().submissionAvailable;
+                        var uploadAssesment = cell.getData().uploadAssesment;
+                        var SubmissionDone = cell.getData().submissionDone;
+
                         var html = '';
+                        html +='<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +cell.getData().id +'"/>';
                         if (
                             cell.getData().class_type != 'Tutorial' &&
                             cell.getData().parent_id == 0
                         ) {
+                            var infoHtml = '';
+                            if(cell.getData().day_match != 1){
+                                infoHtml += '<span class="ml-2 tooltip" title="\'Plan\' days and \'Generate Days\' do not match. Please update the list of \'Generate Days\' by adding or removing dates to match the plan days"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 2;" class="w-4 h-4 text-danger lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>'
+                            }
                             if (cell.getData().dates > 0) {
                                 html +=
                                     '<a target="_blank" href="' +
@@ -141,10 +152,33 @@ var classPlanTreeListTable = (function () {
                                 html += '<span>0</span>';
                             }
                             html += '<div>';
-                            html +=
-                                '<span>' + cell.getData().day + '</span><br/>';
-                            html += '<span>' + cell.getData().time + '</span>';
+                                html += '<span class="inline-flex items-center">'+ cell.getData().day + infoHtml + '</span><br/>';
+                                html += '<span>' + cell.getData().time + '</span>';
+                                if(cell.getData().tutor != ''){
+                                    html += '<br/><span>' + cell.getData().tutor + '</span>';
+                                }else if(cell.getData().class_type == 'Seminar' && cell.getData().personalTutor != ''){
+                                    html += '<br/><span>' + cell.getData().personalTutor + '</span>';
+                                }
+                                html += '<br/><button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn mt-1 btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
                             html += '</div>';
+                        }
+
+                        if(uploadAssesment==1) {
+                            let btnColor = '';
+                            let btnText = '';
+                            if(SubmissionDone=="Yes") {
+                                btnColor = 'btn-success';
+                                btnText = 'View Result';
+                            }else {
+                                btnColor = 'btn-pending';
+                                btnText = 'Upload Submission';
+                            }
+                            html += '<a href="' +route( 'results-staff-submission.show', cell.getData().id) +'" type="button" class="mt-1 btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
+                        }
+                        if(submissionAvailable==1) {
+                            if(SubmissionDone!="Yes") {
+                                html += '<a href="'+route('result.comparison', cell.getData().id) +'" type="button" class="mt-1 btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
+                            }
                         }
 
                         return html;
@@ -152,8 +186,9 @@ var classPlanTreeListTable = (function () {
                 },
                 {
                     title: 'Tutorial Days',
-                    field: 'id',
+                    field: 'personalTutor',
                     headerHozAlign: 'left',
+                    width: 298,
                     formatter(cell, formatterParams) {
                         var html = '';
                         var tutorials = cell.getData().tutorial
@@ -174,18 +209,21 @@ var classPlanTreeListTable = (function () {
                                 html += '<span>0</span>';
                             }
                             html += '<div>';
-                            html +=
-                                '<span>' + cell.getData().day + '</span><br/>';
-                            html += '<span>' + cell.getData().time + '</span>';
+                                html += '<span>' + cell.getData().day + '</span><br/>';
+                                html += '<span>' + cell.getData().time + '</span>';
                             html += '</div>';
 
                             if (cell.getData().parent_id == 0) {
                                 html +=
                                     '<button  data-id="' +
                                     cell.getData().id +
-                                    '" data-tw-toggle="modal" data-tw-target="#syncTutorialModal" type="button" class="syncBtn btn btn-twitter rounded-full w-6 h-6 inline-flex justify-center items-center p-0"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>';
+                                    '" data-tw-toggle="modal" data-tw-target="#syncTutorialModal" type="button" class="syncBtn mr-2 btn btn-twitter rounded-full w-6 h-6 inline-flex justify-center items-center p-0"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>';
                             }
                         } else if (tutorials) {
+                            var infoHtml = '';
+                            if(tutorials.day_match != 1){
+                                infoHtml += '<span class="ml-2 tooltip" title="\'Plan\' days and \'Generate Days\' do not match. Please update the list of \'Generate Days\' by adding or removing dates to match the plan days"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 2;" class="w-4 h-4 text-danger lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>';
+                            }
                             if (tutorials.dates > 0) {
                                 html +=
                                     '<a target="_blank" href="' +
@@ -197,13 +235,14 @@ var classPlanTreeListTable = (function () {
                                 html += '<span>0</span>';
                             }
                             html += '<div>';
-                            html += '<span>' + tutorials.day + '</span><br/>';
-                            html += '<span>' + tutorials.time + '</span>';
+                                html += '<span class="inline-flex items-center">' + tutorials.day + infoHtml+'</span><br/>';
+                                html += '<span>' + tutorials.time + '</span>';
+                                if(cell.getData().personalTutor != ''){
+                                    html += '<br/><span>' + cell.getData().personalTutor + '</span>';
+                                }
+                                html += '<br/><button data-theory="' +cell.getData().id +'" data-tutorial="' +tutorials.id +'" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="mt-1 tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
                             html += '</div>';
-                            html +=
-                                '<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +
-                                tutorials.id +
-                                '"/>';
+                            html += '<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +tutorials.id +'"/>';
                         } else if (
                             cell.getData().class_type == 'Theory' &&
                             cell.getData().parent_id == 0 &&
@@ -218,82 +257,64 @@ var classPlanTreeListTable = (function () {
                         return html;
                     },
                 },
-                {
-                    title: 'Actions',
-                    field: 'id',
-                    headerSort: false,
-                    hozAlign: 'center',
-                    headerHozAlign: 'left',
-                    download: false,
-                    width: 180,
-                    formatter(cell, formatterParams) {
-                        var tutorials = cell.getData().tutorial
-                            ? cell.getData().tutorial
-                            : false;
-                        var submissionAvailable = cell.getData().submissionAvailable;
-                        var uploadAssesment = cell.getData().uploadAssesment;
-                        var SubmissionDone = cell.getData().submissionDone;
+                // {
+                //     title: 'Actions',
+                //     field: 'id',
+                //     headerSort: false,
+                //     hozAlign: 'center',
+                //     headerHozAlign: 'left',
+                //     download: false,
+                //     width: 180,
+                //     formatter(cell, formatterParams) {
+                //         var tutorials = cell.getData().tutorial
+                //             ? cell.getData().tutorial
+                //             : false;
+                //         var submissionAvailable = cell.getData().submissionAvailable;
+                //         var uploadAssesment = cell.getData().uploadAssesment;
+                //         var SubmissionDone = cell.getData().submissionDone;
                         
-                        var btns = '';
-                        if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
-                            if (tutorials) {
-                                btns +=
-                                    '<button data-theory="' +
-                                    cell.getData().id +
-                                    '" data-tutorial="' +
-                                    tutorials.id +
-                                    '" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
-                            }
-                            if(uploadAssesment==1) {
-                                let btnColor = '';
-                                let btnText = '';
-                                if(SubmissionDone=="Yes") {
-                                    btnColor = 'btn-success';
-                                    btnText = 'View Result';
-                                }else {
-                                    btnColor = 'btn-pending';
-                                    btnText = 'Upload Submission';
-                                }
-                            btns +=
-                                '<a href="' +
-                                route(
-                                    'results-staff-submission.show',
-                                    cell.getData().id
-                                ) +
-                                '" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
-                            }
-                            if(submissionAvailable==1) {
-                                if(SubmissionDone!="Yes") {
-                                btns +=
-                                    '<a href="' +
-                                    route(
-                                        'result.comparison',
-                                        cell.getData().id
-                                    ) +
-                                    '" type="button" class=" btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
-                                }
-                            }
-                            //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
-                        } else if (cell.getData().deleted_at != null) {
-                            //btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
+                //         var btns = '';
+                //         if (cell.getData().deleted_at == null) {
+                //             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
+                //             if (tutorials) {
+                //                 btns +=
+                //                     '<button data-theory="' +
+                //                     cell.getData().id +
+                //                     '" data-tutorial="' +
+                //                     tutorials.id +
+                //                     '" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
+                //             }
+                //             if(uploadAssesment==1) {
+                //                 let btnColor = '';
+                //                 let btnText = '';
+                //                 if(SubmissionDone=="Yes") {
+                //                     btnColor = 'btn-success';
+                //                     btnText = 'View Result';
+                //                 }else {
+                //                     btnColor = 'btn-pending';
+                //                     btnText = 'Upload Submission';
+                //                 }
+                //                 btns += '<a href="' +route( 'results-staff-submission.show', cell.getData().id) +'" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
+                //             }
+                //             if(submissionAvailable==1) {
+                //                 if(SubmissionDone!="Yes") {
+                //                     btns += '<a href="'+route('result.comparison', cell.getData().id) +'" type="button" class=" btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
+                //                 }
+                //             }
+                //             //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
+                //         } else if (cell.getData().deleted_at != null) {
+                //             //btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                //         }
 
-                        btns +=
-                            '<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +
-                            cell.getData().id +
-                            '"/>';
+                //         btns +='<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +cell.getData().id +'"/>';
 
-                        return (
-                            '<div style="white-space: normal; text-align: left;">' +
-                            btns +
-                            '</div>'
-                        );
-                    },
-                },
+                //         return (
+                //             '<div style="white-space: normal; text-align: left;">' +
+                //             btns +
+                //             '</div>'
+                //         );
+                //     },
+                // },
             ],
             rowSelectionChanged: function (data, rows) {
                 var ids = [];
@@ -308,13 +329,44 @@ var classPlanTreeListTable = (function () {
                     icons,
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
+                }); 
+
+                $(".tooltip").each(function () {
+                    let ttoptions = {
+                        content: $(this).attr("title"),
+                    };
+
+                    if ($(this).data("trigger") !== undefined) {
+                        ttoptions.trigger = $(this).data("trigger");
+                    }
+
+                    if ($(this).data("placement") !== undefined) {
+                        ttoptions.placement = $(this).data("placement");
+                    }
+
+                    if ($(this).data("theme") !== undefined) {
+                        ttoptions.theme = $(this).data("theme");
+                    }
+
+                    if ($(this).data("tooltip-content") !== undefined) {
+                        ttoptions.content = $($(this).data("tooltip-content"))[0];
+                    }
+
+                    $(this).removeAttr("title");
+
+                    tippy(this, {
+                        arrow: roundArrow,
+                        animation: "shift-away",
+                        ...ttoptions,
+                    });
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
+
+                const columnListss = this.getColumns();
+                if (columnListss.length > 0) {
+                    const lastColumns = columnListss[columnListss.length - 1];
+                    const currentWidths = lastColumns.getWidth();
+                    lastColumns.setWidth(currentWidths - 1);
+                }  
             },
             selectableCheck: function (row) {
                 return row.getData().id > 0; //allow selection of rows where the age is greater than 18

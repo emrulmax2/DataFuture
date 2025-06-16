@@ -2533,3 +2533,7 @@ fieldset.modInstSet legend{
 #workplacementDocumentsModal.modal .modal-dialog {
     width: 90% !important;
 }
+
+.noWrapTomselect .tom-selects .ts-input .item{
+    white-space: nowrap;
+}

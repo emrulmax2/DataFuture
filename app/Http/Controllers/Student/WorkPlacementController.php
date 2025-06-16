@@ -40,6 +40,17 @@ class WorkPlacementController extends Controller
 
 
     }
+
+    public function getWpLearningHour(Request $request){
+        $learning_hours_id = $request->theLearningHour;
+        $learning_hour = LearningHours::find($learning_hours_id);
+
+        return response()->json([
+            'learning_hour' => $learning_hour
+        ], 200);
+
+
+    }
     public function getWpSettingType(Request $request){
         $wp_setting_id = $request->theWpSetting;
         $wp_setting_types = WorkplacementSettingType::where('workplacement_setting_id', $wp_setting_id)->orderBy('type', 'ASC')->get();
@@ -154,8 +165,11 @@ class WorkPlacementController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
     public function wpHourList(Request $request){
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
+        $status = (isset($request->status) && !empty($request->status) ? $request->status : 'All');
         $student_id = (isset($request->student_id) && $request->student_id > 0 ? $request->student_id : 0);
+        $module_id = (isset($request->module_id) && $request->module_id > 0 ? $request->module_id : 0);
+        $level_hours_id = (isset($request->level_hours_id) && $request->level_hours_id > 0 ? $request->level_hours_id : 0);
+        $learning_hours_id = (isset($request->learning_hours_id) && $request->learning_hours_id > 0 ? $request->learning_hours_id : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -164,8 +178,13 @@ class WorkPlacementController extends Controller
         endforeach;
 
         $query = StudentWorkPlacement::orderByRaw(implode(',', $sorts))->where('student_id', $student_id);
-        if($status == 2):
+        if($module_id > 0): $query->where('assign_module_list_id', $module_id); endif;
+        if($level_hours_id > 0): $query->where('level_hours_id', $level_hours_id); endif;
+        if($learning_hours_id > 0): $query->where('learning_hours_id', $learning_hours_id); endif;
+        if($status == 'Archived'):
             $query->onlyTrashed();
+        elseif($status != 'Archived' && $status != 'All'):
+            $query->where('status', $status);
         endif;
 
         $total_rows = $query->count();
@@ -181,10 +200,20 @@ class WorkPlacementController extends Controller
                ->get();
 
         $data = array();
+        $completedHours = 0;
+        $pendingHours = 0;
+        $rejectedHours = 0;
 
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                if($list->status == 'Confirmed'):
+                    $completedHours += $list->hours;
+                elseif($list->status == 'Pending'):
+                    $pendingHours += $list->hours;
+                elseif($list->status == 'Rejected'):
+                    $rejectedHours += $list->hours;
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -202,6 +231,7 @@ class WorkPlacementController extends Controller
                     'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : 'Unknown Employee'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS M, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
+                    'module_name' => (isset($list->module->module_name) && !empty($list->module->module_name) ? $list->module->module_name : ''),
 
                     'can_edit' => (isset(auth()->user()->priv()['placement_edit']) && auth()->user()->priv()['placement_edit'] == 1 ? 1 : 0),
                     'can_delete' => (isset(auth()->user()->priv()['placement_delete']) && auth()->user()->priv()['placement_delete'] == 1 ? 1 : 0)
@@ -209,7 +239,13 @@ class WorkPlacementController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json([
+            'last_page' => $last_page, 
+            'data' => $data,
+            'completed_hours' => $completedHours.' Hours',
+            'pending_hours' => $pendingHours.' Hours',
+            'rejected_hours' => $rejectedHours.' Hours'
+        ]);
     }
 
     public function editHour($id){
@@ -250,6 +286,7 @@ class WorkPlacementController extends Controller
                                     $query->select('id', 'module_name');
                                 }])
                                 ->get()->pluck('plan.creations')->unique('id')->values();    
+        $learning_hour = LearningHours::find($learning_hours_id);
 
         return response()->json([
             'res' => $workplacement, 
@@ -266,7 +303,8 @@ class WorkPlacementController extends Controller
             'supervisors' => $supervisors,
             'supervisor_id' => $supervisor_id,
             'assign_module_lists' => $assign_module_lists, 
-            'asign_module_list_id' => $asign_module_list_id
+            'asign_module_list_id' => $asign_module_list_id,
+            'module_required' => (isset($learning_hour->module_required) && $learning_hour->module_required > 0 ? $learning_hour->module_required : 0)
         ], 200);
     }
 

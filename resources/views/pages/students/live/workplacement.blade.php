@@ -95,13 +95,44 @@
                     </div>
                 </div>
                 <div class="intro-y pt-5 pb-5">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
+                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-center">
+                        <form id="tabulatorFilterForm" class="noWrapTomselect xl:flex sm:mr-auto" >
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0 ">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Level</label>
+                                <select id="src_level_hours_id" name="src_level_hours_id" class="tom-selects w-full mt-2 sm:mt-0 sm:w-52" >
+                                    <option value="0">All</option>
+                                    @if(isset($workplacement_details->level_hours) && $workplacement_details->level_hours->count() > 0)
+                                        @foreach($workplacement_details->level_hours as $level_hour)
+                                            <option value="{{ $level_hour->id }}">{{ $level_hour->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0 ">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Learning</label>
+                                <select id="src_learning_hours_id" name="src_learning_hours_id" class="tom-selects w-full mt-2 sm:mt-0 sm:w-52" >
+                                    <option value="0">All</option>
+                                </select>
+                            </div>
+                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0 ">
+                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Modules</label>
+                                <select id="wp_modules" name="wp_modules" class="tom-selects w-full mt-2 sm:mt-0 sm:w-56" >
+                                    <option value="0">All</option>
+                                    @if($assign_modules->count() > 0)
+                                        @foreach($assign_modules as $aml)
+                                            <option value="{{ $aml->id }}">{{ $aml->module_name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
                             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
                                 <select id="wp_status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="2">Archived</option>
+                                    <option value="All">All</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Archived">Archived</option>
                                 </select>
                             </div>
                             <div class="mt-2 xl:mt-0">
@@ -109,6 +140,11 @@
                                 <button id="wp_tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                             </div>
                         </form>
+                        <div class="ml-auto totalHourCounter font-medium inline-flex items-center justify-end">
+                            <span class="btn inline-flex btn-success px-2 py-0 mr-1 text-white rounded-0 completedHours">0 Hours</span>
+                            <span class="btn inline-flex btn-pending px-2 py-0 mr-1 text-white rounded-0 pendingHours">0 Hours</span>
+                            <span class="btn inline-flex btn-danger px-2 py-0 text-white rounded-0 rejectedHours">0 Hours</span>
+                        </div>
                     </div>
                     <div class="overflow-x-auto scrollbar-hidden">
                         <div id="studentWorkPlacementNwTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
@@ -329,6 +365,7 @@
                                                 <option value="">Please Select</option>
                                             </select>
                                             <div class="acc__input-error error-learning_hours_id text-danger mt-2"></div>
+                                            <input type="hidden" name="module_required" value="0"/>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="workplacement_setting_id" class="form-label">Workplacement Setting <span class="text-danger">*</span></label>
@@ -370,7 +407,7 @@
                                             <div class="acc__input-error error-company_supervisor_id text-danger mt-2"></div>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
-                                            <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger">*</span></label>
+                                            <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger modReq hidden">*</span></label>
                                             <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id" required>
                                                 <option value="">Please Select</option>
                                                 @if($assign_modules->count() > 0)
@@ -407,7 +444,7 @@
                                     <div class="grid grid-cols-12 gap-4">
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="hours" class="form-label">Hours <span class="text-danger">*</span></label>
-                                            <input type="number" value="" id="hours" class="form-control" name="hours">
+                                            <input type="number" step="any" value="" id="hours" class="form-control" name="hours">
                                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
@@ -507,6 +544,7 @@
                                                 <option value="">Please Select</option>
                                             </select>
                                             <div class="acc__input-error error-learning_hours_id text-danger mt-2"></div>
+                                            <input type="hidden" name="module_required" value="0"/>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="workplacement_setting_id" class="form-label">Workplacement Setting <span class="text-danger">*</span></label>
@@ -548,7 +586,7 @@
                                             <div class="acc__input-error error-company_supervisor_id text-danger mt-2"></div>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
-                                            <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger">*</span></label>
+                                            <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger modReq hidden">*</span></label>
                                             <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id" required>
                                                 <option value="">Please Select</option>
                                                 @if($assign_modules->count() > 0)
@@ -585,7 +623,7 @@
                                     <div class="grid grid-cols-12 gap-4">
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="hours" class="form-label">Hours <span class="text-danger">*</span></label>
-                                            <input type="number" value="" id="hours" class="form-control" name="hours">
+                                            <input type="number" step="any" value="" id="hours" class="form-control" name="hours">
                                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">

@@ -13,7 +13,7 @@
                     {{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? '['.$theTerm->attenTerm->name.']' : '') }}
                 </h2>
                 <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
-                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 w-full sm:w-32">
                         <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
                         <select class="form-control w-full border-0" name="plan_status" id="planClassStatus" style="max-width: 230px;">
                             <option value="All">All</option>
@@ -24,9 +24,9 @@
                             <option value="Unknown">Unknown</option>
                         </select>
                     </div>
-                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2 w-full sm:w-48">
                         <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
-                        <select class="form-control w-full border-0" name="course_id" id="planCourseId" style="max-width: 230px;">
+                        <select class="form-control w-full pr-3 border-0" name="course_id" id="planCourseId" style="max-width: 230px;">
                             <option value="0">All Course</option>
                             @if(!empty($courses))
                                 @foreach($courses as $cr)
@@ -35,11 +35,33 @@
                             @endif
                         </select>
                     </div>
-                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2 w-full sm:w-44">
+                        <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
+                        <select class="form-control w-full pr-3 border-0" name="module_creation_id" id="planModuleCreationId" style="max-width: 230px;">
+                            <option value="0">All Modules</option>
+                            @if(!empty($modules))
+                                @foreach($modules as $mds)
+                                    <option value="{{ $mds->id }}">{{ $mds->module_name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2 w-full sm:w-40">
+                        <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
+                        <select class="form-control w-full pr-3 border-0" name="group_id" id="planGroupId" style="max-width: 230px;">
+                            <option value="0">All Groups</option>
+                            @if(!empty($groups))
+                                @foreach($groups as $gr)
+                                    <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2">
                         <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
                         <input type="text" name="class_date" class="w-full form-control border-0 classDate" id="theClassDate" value="{{ $theDate }}" style="max-width: 110px;"/>
                     </div>
-                    <button class="ml-3 btn box flex items-center text-slate-600 dark:text-slate-300">
+                    <button class="ml-2 btn box flex items-center text-slate-600 dark:text-slate-300">
                         <i data-lucide="calendar-clock" class="hidden sm:block w-4 h-4 mr-2"></i> <span id="theClock">{{ date('H:i:s') }}</span>
                     </button>
                 </div>

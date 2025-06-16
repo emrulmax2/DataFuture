@@ -154,5 +154,38 @@ class Plan extends Model
     public function theory(){
         return $this->belongsTo(Plan::class, 'parent_id');
     }
+
+    public function getGeneratedDayMatchAttribute(){
+        $planDay = '';
+        if($this->sat == 1){
+            $planDay = 'Sat';
+        }elseif($this->sun == 1){
+            $planDay = 'Sun';
+        }elseif($this->mon == 1){
+            $planDay = 'Mon';
+        }elseif($this->tue == 1){
+            $planDay = 'Tue';
+        }elseif($this->wed == 1){
+            $planDay = 'Wed';
+        }elseif($this->thu == 1){
+            $planDay = 'Thu';
+        }elseif($this->fri == 1){
+            $planDay = 'Fri';
+        }
+
+        $generateDays = PlansDateList::where('plan_id', $this->id)->get();
+        if($generateDays->count() > 0 && $planDay != ''){
+            $matchCount = 0;
+            foreach($generateDays as $days):
+                $classDay = date('D', strtotime($days->date));
+                if($planDay == $classDay):
+                    $matchCount += 1;
+                endif;
+            endforeach;
+            return $matchCount > 0 ? true : false;
+        }else{
+            return true;
+        }
+    }
     
 }

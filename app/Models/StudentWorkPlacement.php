@@ -88,4 +88,8 @@ class StudentWorkPlacement extends Model
     public function workplacement_setting_type(){
         return $this->belongsTo(WorkplacementSettingType::class, 'workplacement_setting_type_id');
     }
+
+    public function module(){
+        return $this->belongsTo(ModuleCreation::class, 'assign_module_list_id');
+    }
 }
