@@ -14,6 +14,7 @@ class LearningHours extends Model
         'hours',
         'active',
         'level_hours_id',
+        'module_required',
         'created_by',
         'updated_by',
     ];

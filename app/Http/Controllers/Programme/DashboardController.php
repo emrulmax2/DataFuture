@@ -59,7 +59,13 @@ class DashboardController extends Controller
             'termAttendanceRates' => $this->getTermAttendanceRateFull($theTermId),
             'tutors' => User::with('employee')->whereHas('employee', function($q){
                 $q->where('status', 1);
-            })->orderBy('name', 'ASC')->get()
+            })->orderBy('name', 'ASC')->get(),
+            'modules' => Plan::where('term_declaration_id', $theTermId)->with(['creations' => function($query) {
+                                    $query->select('id', 'module_name');
+                                }])->get()->pluck('creations')->unique('id')->values()->sortBy(function($item, $key) { return $item->module_name;}),
+            'groups' => Plan::where('term_declaration_id', $theTermId)->with(['group' => function($query) {
+                                    $query->select('id', 'name');
+                                }])->get()->pluck('group')->unique('id')->values()->sortBy(function($item, $key) { return $item->name;})
         ]);
     }
 
@@ -67,16 +73,18 @@ class DashboardController extends Controller
         $planClassStatus = $request->planClassStatus;
         $planCourseId = (isset($request->planCourseId) && $request->planCourseId > 0 ? $request->planCourseId : 0);
         $theClassDate = (isset($request->theClassDate) && !empty($request->theClassDate) ? date('Y-m-d', strtotime($request->theClassDate)) : date('Y-m-d'));
+        $planModuleCreationId = (isset($request->planModuleCreationId) && $request->planModuleCreationId > 0 ? $request->planModuleCreationId : 0);
+        $planGroupId = (isset($request->planGroupId) && $request->planGroupId > 0 ? $request->planGroupId : 0);
 
         $res = [];
-        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId, $planClassStatus);
-        $res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId);
-        $res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId);
+        $res['planTable'] = $this->getClassInfoHtml($theClassDate, $planCourseId, $planClassStatus, $planModuleCreationId, $planGroupId);
+        $res['tutors'] = $this->getClassTutorsHtml($theClassDate, $planCourseId, $planModuleCreationId, $planGroupId);
+        $res['ptutors'] = $this->getClassPersonalTutorsHtml($theClassDate, $planCourseId, $planModuleCreationId, $planGroupId);
 
         return response()->json(['res' => $res], 200);
     }
 
-    public function getClassInfoHtml($theDate = null, $course_id = 0, $planClassStatus = 'All'){
+    public function getClassInfoHtml($theDate = null, $course_id = 0, $planClassStatus = 'All', $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
 
         $html = '';
@@ -87,10 +95,10 @@ class DashboardController extends Controller
         endif;
         $query = $query->orderBy('start_time', 'ASC')->get();*/
 
-        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id){
-                    if($course_id > 0):
-                        $q->where('course_id', $course_id);
-                    endif;
+        $query = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('date', $theDate)->whereHas('plan', function($q) use($course_id, $moduleCreationId, $groupId){
+                    if($course_id > 0): $q->where('course_id', $course_id); endif;
+                    if($moduleCreationId > 0): $q->where('module_creation_id', $moduleCreationId); endif;
+                    if($groupId > 0): $q->where('group_id', $groupId); endif;
                 });
         if($planClassStatus != 'All'):
             $query->where('status', $planClassStatus);
@@ -284,7 +292,7 @@ class DashboardController extends Controller
         return $html;
     }
 
-    public function getClassTutorsHtml($theDate = null, $course_id = 0){
+    public function getClassTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
         $termDecs = Plan::whereIn('id', $classPlanIds);
@@ -298,6 +306,8 @@ class DashboardController extends Controller
         if($course_id > 0):
             $query->where('course_id', $course_id);
         endif;
+        if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
+        if($groupId > 0): $query->where('group_id', $groupId); endif;
         $classTutors = $query->pluck('tutor_id')->unique()->toArray();
         
         $html = '';
@@ -329,7 +339,7 @@ class DashboardController extends Controller
         return array('count' => (!empty($classTutors) ? count($classTutors) : 0), 'html' => $html);
     }
 
-    public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0){
+    public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
         $termDecs = Plan::whereIn('id', $classPlanIds);
@@ -340,9 +350,9 @@ class DashboardController extends Controller
         $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
 
         $query = Plan::where('term_declaration_id', $termDecId);
-        if($course_id > 0):
-            $query->where('course_id', $course_id);
-        endif;
+        if($course_id > 0): $query->where('course_id', $course_id); endif;
+        if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
+        if($groupId > 0): $query->where('group_id', $groupId); endif;
         $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
 
         $html = '';

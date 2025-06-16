@@ -255,6 +255,12 @@ $(".editLearningHours_btn").on("click", function () {
             $('#editLearningHoursForm input[name="hours"]').val(dataset.hours ? dataset.hours : '');
             $('#editLearningHoursModal #editLearningHoursForm').attr('data-form-id', editId);
             $('#editLearningHoursForm input[name="level_hours_id"]').val(dataset.level_hours_id);
+
+            if(dataset.module_required == 1){
+                $('#editLearningHoursForm input[name="module_required"]').prop('checked', true);
+            }else{
+                $('#editLearningHoursForm input[name="module_required"]').prop('checked', false);
+            }
         }
     })
     .catch((error) => {

@@ -29,6 +29,13 @@
             Student Performance
         </a>
     </li>
+    @if(isset($student->crel->creation->is_workplacement) && $student->crel->creation->is_workplacement == 1)
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('students.dashboard.workplacement') }}" class="nav-link md:py-4 {{ Route::currentRouteName() == 'students.dashboard.workplacement' ? 'active' : '' }}">
+            Work Placement
+        </a>
+    </li>
+    @endif
 </ul>
 <script>
     document.getElementById('studentProfileMenu').addEventListener('click', function() {

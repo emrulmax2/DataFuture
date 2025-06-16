@@ -18,7 +18,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
@@ -88,7 +88,7 @@
                         </div>
                         <div class="col-span-12">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                         </div>
                     </div>
@@ -138,7 +138,7 @@
                         </div>
                         <div class="col-span-12">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                         </div>
                     </div>
@@ -187,8 +187,14 @@
                         </div>
                         <div class="col-span-12">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label ml-0 mr-5" for="module_required_add">Module Required?</label>
+                                <input id="module_required_add" class="form-check-input mr-0" type="checkbox" name="module_required" value="1">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -236,8 +242,14 @@
                         </div>
                         <div class="col-span-12">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label ml-0 mr-5" for="module_required_edit">Module Required?</label>
+                                <input id="module_required_edit" class="form-check-input mr-0" type="checkbox" name="module_required" value="1">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -285,7 +297,7 @@
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="hours" class="form-label">Hours<span class="text-danger">*</span></label>
-                            <input type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
+                            <input step="any" type="number" placeholder="Enter Hours" id="hours" class="form-control w-full" name="hours">
                             <div class="acc__input-error error-hours text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">

@@ -121,6 +121,7 @@ class WorkplacementDetailsController extends Controller
             'name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
             'hours' => (isset($request->hours) && !empty($request->hours) ? $request->hours : null),
             'level_hours_id' => (isset($request->level_hours_id) && !empty($request->level_hours_id) ? $request->level_hours_id : null),
+            'module_required' => (isset($request->module_required) && $request->module_required > 0 ? $request->module_required : 0),
             'created_by' => Auth::user()->id
         ]);
     
@@ -143,6 +144,7 @@ class WorkplacementDetailsController extends Controller
             'name' => (isset($request->name) && !empty($request->name) ? $request->name : $learningHours->name),
             'hours' => (isset($request->hours) && !empty($request->hours) ? $request->hours : $learningHours->hours),
             'level_hours_id' => (isset($request->level_hours_id) && !empty($request->level_hours_id) ? $request->level_hours_id : $learningHours->level_hours_id),
+            'module_required' => (isset($request->module_required) && $request->module_required > 0 ? $request->module_required : 0),
             'updated_by' => Auth::user()->id
         ]);
 

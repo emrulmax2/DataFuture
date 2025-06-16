@@ -427,9 +427,9 @@ class StudentProgressMonitoringReportController extends Controller
                                 $totalLevel5CreditValue += $result['credit_value'];
                         }
                         if($result['unit_value'] == 4)
-                            $totalLevel4UnitValue += $result['unit_value'];
+                            $totalLevel4UnitValue += 1;
                         if($result['unit_value'] == 5)
-                            $totalLevel5UnitValue += $result['unit_value'];
+                            $totalLevel5UnitValue += 1;
 
                         $totalModuleCount += 1;
                         $theCollection[$dataCount][0] = "";

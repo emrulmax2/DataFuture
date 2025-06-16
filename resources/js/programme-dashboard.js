@@ -82,12 +82,14 @@ import tippy, { roundArrow } from "tippy.js";
         let theDate = theYear+'-'+theMonth+'-'+theDay;
         var planClassStatus = $('#planClassStatus').val();
         var planCourseId = $('#planCourseId').val();
+        var planModuleCreationId = $('#planModuleCreationId').val();
+        var planGroupId = $('#planGroupId').val();
         
         $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
         axios({
             method: 'post',
             url: route('programme.dashboard.class.info'),
-            data: {planClassStatus : planClassStatus, planCourseId : planCourseId, theClassDate : theDate},
+            data: {planClassStatus : planClassStatus, planCourseId : planCourseId, theClassDate : theDate, planModuleCreationId : planModuleCreationId, planGroupId : planGroupId},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
@@ -122,16 +124,18 @@ import tippy, { roundArrow } from "tippy.js";
     });
 
     /* On Change the Plan Status & Course */
-    $('#planClassStatus, #planCourseId').on('change', function(e){
+    $('#planClassStatus, #planCourseId, #planModuleCreationId, #planGroupId').on('change', function(e){
         var planClassStatus = $('#planClassStatus').val();
         var planCourseId = $('#planCourseId').val();
         var theClassDate = $('#theClassDate').val();
+        var planModuleCreationId = $('#planModuleCreationId').val();
+        var planGroupId = $('#planGroupId').val();
 
         $('.dailyClassInfoTableWrap .leaveTableLoader').addClass('active');
         axios({
             method: 'post',
             url: route('programme.dashboard.class.info'),
-            data: {planClassStatus : planClassStatus, planCourseId : planCourseId, theClassDate : theClassDate},
+            data: {planClassStatus : planClassStatus, planCourseId : planCourseId, theClassDate : theClassDate, planModuleCreationId : planModuleCreationId, planGroupId : planGroupId},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {

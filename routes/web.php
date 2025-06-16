@@ -589,6 +589,8 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('/dashboard/attendance-excuse', 'attendanceExcuse')->name('dashboard.attendance.excuse');
             Route::post('/dashboard/update-awarding-body-status', 'awardingBodyUpdateStatus')->name('awarding.body.status.update');
 
+
+            Route::get('/dashboard/workplacement', 'workplacement')->name('dashboard.workplacement');
         });
 
         Route::controller(StudentDocumentRequestFormController::class)->group(function() {
@@ -3103,6 +3105,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/get-companysupervisor', 'getCompanySupervisor')->name('student.get.companysupervisor'); 
         Route::post('student/get-wp-level-hours', 'getWpLevelHours')->name('student.get.wp.level.hours'); 
         Route::post('student/get-wp-learning-hours', 'getWpLearningHours')->name('student.get.wp.learning.hours'); 
+        Route::post('student/get-wp-learning-hour', 'getWpLearningHour')->name('student.get.wp.learning.hour'); 
         Route::post('student/get-wp-setting-type', 'getWpSettingType')->name('student.get.wp.setting.type'); 
         Route::post('student/store-work-placement-hour', 'storeHour')->name('student.store.work.placement.hour');
         Route::post('student/store-workplacement-hour', 'wpStoreHour')->name('student.store.workplacement.hour');
