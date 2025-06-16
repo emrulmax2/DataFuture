@@ -347,6 +347,7 @@ class PlanTreeController extends Controller
                     $tutorialSet['day'] = $list->tutorial->plan_day;
                     $tutorialSet['dates'] = (isset($list->tutorial->dates) && $list->tutorial->dates->count() > 0 ? $list->tutorial->dates->count() : 0);
                     $tutorialSet['time'] = (!empty($list->tutorial->start_time) ? date('H:i', strtotime($list->tutorial->start_time)) : '').' - '.(!empty($list->tutorial->end_time) ? date('H:i', strtotime($list->tutorial->end_time)) : '');
+                    $tutorialSet['day_match'] = (isset($list->tutorial->generated_day_match) && $list->tutorial->generated_day_match ? 1 : 0);
                 endif;
 
                 $assesmentPlanByStaffAssesment = AssessmentPlan::where('plan_id', $list->id)->where('upload_user_type','staff')->where('is_it_final',1)->orderBy('created_at','DESC')->get()->first();
@@ -395,6 +396,7 @@ class PlanTreeController extends Controller
                     'virtual_room'=> $list->virtual_room,
                     'group'=> (isset($list->group->name) ? $list->group->name : ''),
                     'day'=> $day,
+                    'day_match' => (isset($list->generated_day_match) && $list->generated_day_match ? 1 : 0),
                     'deleted_at' => $list->deleted_at,
                     'dates' => $list->dates->count() > 0 ? $list->dates->count() : 0,
                     'assigned_count' => $assignStudentListForPlans->count(),

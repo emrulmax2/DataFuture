@@ -172,10 +172,13 @@ var studentWorkPlacementNwTable = (function () {
     var _tableGen = function () {
         let student_id = $('#studentWorkPlacementNwTable').attr('data-student');
         let status = $("#wp_status").val() != "" ? $("#wp_status").val() : "";
+        let module_id = $("#wp_modules").val() != "" ? $("#wp_modules").val() : "";
+        let level_hours_id = $("#src_level_hours_id").val() != "" ? $("#src_level_hours_id").val() : "";
+        let learning_hours_id = $("#src_learning_hours_id").val() != "" ? $("#src_learning_hours_id").val() : "";
 
         let tableContent = new Tabulator("#studentWorkPlacementNwTable", {
             ajaxURL: route("student.workplacement.hour.list"),
-            ajaxParams: { status: status, student_id : student_id},
+            ajaxParams: { status: status, student_id : student_id, module_id : module_id, level_hours_id: level_hours_id, learning_hours_id : learning_hours_id},
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -200,6 +203,7 @@ var studentWorkPlacementNwTable = (function () {
                     headerHozAlign: "left",
                     width: "180",
                     minWidth: 180,
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -215,6 +219,7 @@ var studentWorkPlacementNwTable = (function () {
                     field: "start_date",
                     headerHozAlign: "left",
                     minWidth: 180,
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         let endDate = cell.getData().end_date != '' ? cell.getData().end_date : 'Present';
                         var html = '';
@@ -227,10 +232,11 @@ var studentWorkPlacementNwTable = (function () {
                     }
                 },
                 {
-                    title: "Hours",
+                    title: "Learning Type",
                     field: "level_hours",
                     headerHozAlign: "left",
                     minWidth: 180,
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -242,10 +248,30 @@ var studentWorkPlacementNwTable = (function () {
                     }
                 },
                 {
+                    title: "Module",
+                    field: "module_name",
+                    headerHozAlign: "left",
+                    minWidth: 180,
+                    headerSort: false,
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        
+                        if(cell.getData().module_name != ''){
+                            html += '<div>';
+                                html += '<div class="font-medium whitespace-normal">'+cell.getData().module_name+'</div>';
+                                html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().hours+' Hours</div>';
+                            html += '</div>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
                     title: "Settings",
                     field: "workplacement_setting",
                     headerHozAlign: "left",
                     minWidth: 180,
+                    headerSort: false,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
@@ -334,6 +360,14 @@ var studentWorkPlacementNwTable = (function () {
                     },
                 },
             ],
+            ajaxResponse: function (url, params, response) {
+
+                $('.completedHours').html(response.completed_hours);
+                $('.pendingHours').html(response.pending_hours);
+                $('.rejectedHours').html(response.rejected_hours);
+
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -400,6 +434,22 @@ var studentWorkPlacementNwTable = (function () {
 
 
 (function(){
+    let tomSelectOptions = {
+        plugins: {
+            dropdown_input: {}
+        },
+        placeholder: 'Search Here...',
+        persist: true,
+        create: true,
+        allowEmptyOption: true,
+        onDelete: function (values) {
+            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        },
+    };
+    let wp_modules = new TomSelect('#wp_modules', tomSelectOptions);
+    let src_level_hours_id = new TomSelect('#src_level_hours_id', tomSelectOptions);
+    let src_learning_hours_id = new TomSelect('#src_learning_hours_id', tomSelectOptions);
+
     if ($("#studentWorkPlacementTable").length) {
         // Init Table
         studentWorkPlacementTable.init();
@@ -461,34 +511,74 @@ var studentWorkPlacementNwTable = (function () {
 
         // On reset filter form
         $("#wp_tabulator-html-filter-reset").on("click", function (event) {
-            $("#wp_status").val("1");
+            $("#wp_status").val("All");
+            wp_modules.addItem('0');
+            src_level_hours_id.addItem('0');
+            src_learning_hours_id.clear(true);
+            src_learning_hours_id.clearOptions();
+            src_learning_hours_id.addOption({ value: '0', text: 'All' });
+            src_learning_hours_id.addItem('0');
             filterHTMLForm();
+        });
+
+        $(document).on('change', '#src_level_hours_id', function(e){
+            e.preventDefault();
+            let theLevelHours = $(this).val();
+            src_learning_hours_id.clear(true);
+            src_learning_hours_id.clearOptions();
+            src_learning_hours_id.disable(); 
+            
+            if(theLevelHours != '' && theLevelHours > 0){
+                axios({
+                    method: "post",
+                    url: route('student.get.wp.learning.hours'),
+                    data: {theLevelHours: theLevelHours},
+                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                }).then(response => {
+                    src_learning_hours_id.addOption({ value: '0', text: 'All' });
+                    src_learning_hours_id.enable();
+                    if(response.status == 200){  
+                        $.each(response.data.learning_hours, function(index, row) {
+                            src_learning_hours_id.addOption({
+                                value: row.id,
+                                text: row.name
+                            });
+                        });
+                        src_learning_hours_id.refreshOptions();
+                        src_learning_hours_id.addItem('0');
+                    }
+                }).catch(error => {
+                    src_learning_hours_id.addOption({ value: '0', text: 'All' });
+                    src_learning_hours_id.enable();
+                    src_learning_hours_id.addItem('0');
+                    if (error.response) {
+                        if (error.response.status == 304) {
+                            console.log('content not found');
+                        } else {
+                            console.log('error');
+                        }
+                    }
+                });
+            }else{
+                src_learning_hours_id.addOption({ value: '0', text: 'All' });
+                src_learning_hours_id.enable();
+                src_learning_hours_id.addItem('0');
+            }
         });
     }
 
-        $("#studentWorkPlacementNwTable").on('click', '.document_btn', function(e){
-            e.preventDefault();
-            let rowId = $(this).attr('data-id');
-            $("#studentWorkPlacementDocumentsTable").attr('data-row', rowId);
-            $("#uploadDocumentModal input[name='student_workplacement_id']").val(rowId);
+    $("#studentWorkPlacementNwTable").on('click', '.document_btn', function(e){
+        e.preventDefault();
+        let rowId = $(this).attr('data-id');
+        $("#studentWorkPlacementDocumentsTable").attr('data-row', rowId);
+        $("#uploadDocumentModal input[name='student_workplacement_id']").val(rowId);
 
-            studentWorkPlacementDocumentsTable.init();
+        studentWorkPlacementDocumentsTable.init();
+
+    });
+
+
     
-        });
-
-
-      let tomSelectOptions = {
-                plugins: {
-                    dropdown_input: {}
-                },
-                placeholder: 'Search Here...',
-                persist: true,
-                create: true,
-                allowEmptyOption: true,
-                onDelete: function (values) {
-                    return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-                },
-            };
     let wp_level_hours_add_select = new TomSelect('#addWpHourModal #level_hours_id', tomSelectOptions);
     let wp_learning_hours_add_select = new TomSelect('#addWpHourModal #learning_hours_id', tomSelectOptions);
     let wp_workplacement_setting_add_select = new TomSelect('#addWpHourModal #workplacement_setting_id', tomSelectOptions);
@@ -641,7 +731,7 @@ var studentWorkPlacementNwTable = (function () {
                     $.each(response.data.learning_hours, function(index, row) {
                         wp_learning_hours_add_select.addOption({
                             value: row.id,
-                            text: row.name,
+                            text: row.name
                         });
                     });
                     wp_learning_hours_add_select.refreshOptions();
@@ -658,6 +748,38 @@ var studentWorkPlacementNwTable = (function () {
             });
         }
     });
+
+    $(document).on('change', '#addWpHourForm [name="learning_hours_id"]', function(){
+        let $theLearningHour = $(this);
+        let theLearningHour = $theLearningHour.val();
+
+        if(theLearningHour > 0){
+            axios({
+                method: "post",
+                url: route('student.get.wp.learning.hour'),
+                data: {theLearningHour: theLearningHour},
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if(response.status == 200){  
+                    let learningHour = response.data.learning_hour;
+                    if(learningHour.module_required == 1){
+                        $('#addWpHourForm [name="module_required"]').val(1);
+                        $('#addWpHourForm .modReq').removeClass('hidden');
+                    }else{
+                        $('#addWpHourForm [name="module_required"]').val(0);
+                        $('#addWpHourForm .modReq').addClass('hidden');
+                    }
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $('#addWpHourForm [name="module_required"]').val(0);
+            $('#addWpHourForm .modReq').addClass('hidden');
+        }
+    })
 
     $(document).on('change', '#editWpHourForm [name="level_hours_id"]', function(e){
         e.preventDefault();
@@ -694,6 +816,38 @@ var studentWorkPlacementNwTable = (function () {
             });
         }
     });
+
+    $(document).on('change', '#editWpHourForm [name="learning_hours_id"]', function(){
+        let $theLearningHour = $(this);
+        let theLearningHour = $theLearningHour.val();
+
+        if(theLearningHour > 0){
+            axios({
+                method: "post",
+                url: route('student.get.wp.learning.hour'),
+                data: {theLearningHour: theLearningHour},
+                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if(response.status == 200){  
+                    let learningHour = response.data.learning_hour;
+                    if(learningHour.module_required == 1){
+                        $('#editWpHourForm [name="module_required"]').val(1);
+                        $('#editWpHourForm .modReq').removeClass('hidden');
+                    }else{
+                        $('#editWpHourForm [name="module_required"]').val(0);
+                        $('#editWpHourForm .modReq').addClass('hidden');
+                    }
+                }
+            }).catch(error => {
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            $('#editWpHourForm [name="module_required"]').val(0);
+            $('#editWpHourForm .modReq').addClass('hidden');
+        }
+    })
 
     $(document).on('change', '#addWpHourForm [name="workplacement_setting_id"]', function(e) {
         e.preventDefault();
@@ -1036,6 +1190,14 @@ var studentWorkPlacementNwTable = (function () {
                 (dataset.status ? wp_status_edit_select.addItem(dataset.status) : wp_status_edit_select.clear(true));
 
                 $('#editWpHourForm [name="id"]').val(row_id ? row_id : '');
+
+                if(response.data.module_required == 1){
+                    $('#editWpHourForm [name="module_required"]').val(1);
+                    $('#editWpHourForm .modReq').removeClass('hidden');
+                }else{
+                    $('#editWpHourForm [name="module_required"]').val(0);
+                    $('#editWpHourForm .modReq').addClass('hidden');
+                }
                 
             }
         }).catch((error) => {
@@ -1253,60 +1415,72 @@ var studentWorkPlacementNwTable = (function () {
         var currentStep = $(this).closest('.add-step1-wizard-step');
 
         let stepOneIsValid = true;
+        let errors = 0;
       
 
          if(!wp_level_hours_add_select.getValue()){
              $("#addWpHourModal .error-level_hours_id").text("Level Hours field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-level_hours_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
 
          if(!wp_learning_hours_add_select.getValue()){
              $("#addWpHourModal .error-learning_hours_id").text("Learning Hours field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-learning_hours_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
 
          if(!wp_workplacement_setting_add_select.getValue()){
              $("#addWpHourModal .error-workplacement_setting_id").text("Workplacement Setting field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-workplacement_setting_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
 
          if(!wp_workplacement_setting_type_add_select.getValue()){
              $("#addWpHourModal .error-workplacement_setting_type_id").text("Workplacement Setting Type field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-workplacement_setting_type_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
 
          if(!wp_company_add_select.getValue()){
              $("#addWpHourModal .error-company_id").text("Company field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-company_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
          if(!wp_company_supervisor_add_select.getValue()){
              $("#addWpHourModal .error-company_supervisor_id").text("Company Supervisor field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-company_supervisor_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
         }
-         if(!wp_assign_module_list_add_select.getValue()){
+        let moduleRequired = $('#addWpHourModal [name="module_required"]').val();
+        if(moduleRequired == 1 && !wp_assign_module_list_add_select.getValue()){
              $("#addWpHourModal .error-assign_module_list_id").text("Assign Module List field is required!");
-             stepOneIsValid = false;
+             //stepOneIsValid = false;
+             errors += 1;
         }else{
              $("#addWpHourModal .error-assign_module_list_id").text("");
-             stepOneIsValid = true;
+             //stepOneIsValid = true;
+        }
+        if(errors > 0){
+            stepOneIsValid = false;
         }
 
         // Validate current step before proceeding
@@ -1314,7 +1488,7 @@ var studentWorkPlacementNwTable = (function () {
             currentStep.hide();
             $('#' + nextStep).show();
             updateWizardProgress(nextStep);
-            console.log(nextStep);
+            //console.log(nextStep);
         }
     });
     
@@ -1427,59 +1601,72 @@ var studentWorkPlacementNwTable = (function () {
         let currentStep = $(this).closest('.edit-step1-wizard-step');
 
         let editStepOneIsValid = true;
+        let errors = 0;
       
          if(!wp_level_hours_edit_select.getValue()){
              $("#editWpHourModal .error-level_hours_id").text("Level Hours field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-level_hours_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
 
          if(!wp_learning_hours_edit_select.getValue()){
              $("#editWpHourModal .error-learning_hours_id").text("Learning Hours field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-learning_hours_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
 
          if(!wp_workplacement_setting_edit_select.getValue()){
              $("#editWpHourModal .error-workplacement_setting_id").text("Workplacement Setting field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-workplacement_setting_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
 
          if(!wp_workplacement_setting_type_edit_select.getValue()){
              $("#editWpHourModal .error-workplacement_setting_type_id").text("Workplacement Setting Type field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-workplacement_setting_type_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
 
          if(!wp_company_edit_select.getValue()){
              $("#editWpHourModal .error-company_id").text("Company field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-company_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
          if(!wp_company_supervisor_edit_select.getValue()){
              $("#editWpHourModal .error-company_supervisor_id").text("Company Supervisor field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-company_supervisor_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
         }
-         if(!wp_assign_module_list_edit_select.getValue()){
+        let moduleRequired = $('#editWpHourModal [name="module_required"]').val();
+        if(moduleRequired == 1 && !wp_assign_module_list_edit_select.getValue()){
              $("#editWpHourModal .error-assign_module_list_id").text("Assign Module List field is required!");
-             editStepOneIsValid = false;
+             //editStepOneIsValid = false;
+             errors += 1;
         }else{
              $("#editWpHourModal .error-assign_module_list_id").text("");
-             editStepOneIsValid = true;
+             //editStepOneIsValid = true;
+        }
+
+        if(errors > 0){
+            editStepOneIsValid = false;
         }
 
         if(editStepOneIsValid) {

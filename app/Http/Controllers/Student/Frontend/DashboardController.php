@@ -21,6 +21,7 @@ use App\Models\FeeEligibility;
 use App\Models\FormsTable;
 use App\Models\HesaGender;
 use App\Models\KinsRelation;
+use App\Models\LevelHours;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\PlanContent;
@@ -40,10 +41,12 @@ use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentConsent;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentUser;
+use App\Models\StudentWorkPlacement;
 use App\Models\TermTimeAccommodationType;
 use App\Models\Title;
 use App\Models\User;
 use App\Models\Venue;
+use App\Models\WorkplacementDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -631,5 +634,55 @@ class DashboardController extends Controller
         endif;
 
         return response()->json(['msg' => 'Student awarding body Successfully Updated.'], 200);
+    }
+
+
+    public function workplacement(){
+        $student_id = auth('student')->user()->id;
+        $student = Student::find($student_id);
+        $dateWiseClassList = $this->upcommingClass($student_id);
+
+        $courseStartDate = (isset($student->crel->course_start_date) && !empty($student->crel->course_start_date) ? date('Y-m-d', strtotime($student->crel->course_start_date)) : date('Y-m-d', strtotime($student->crel->creation->available->course_start_date)) );
+        $courseId = $student->crel->creation->course_id;
+
+        $workPlacementDetails = WorkplacementDetails::with('level_hours')->where('course_id', $courseId)
+                                ->where(function($q) use($courseStartDate){
+                                    $q->whereNull('end_date')->where('start_date', '<=', $courseStartDate);
+                                })->orWhere(function($q) use($courseStartDate){
+                                    $q->whereNotNull('end_date')->where('start_date', '<=', $courseStartDate)->where('end_date', '>=', $courseStartDate);
+                                })->orderBy('id', 'DESC')->get()->first();
+
+        $total_hours_calculations = [];
+        $confirmed_hours = [];
+        if($workPlacementDetails && $workPlacementDetails->id):
+            $total_hours_calculations = LevelHours::with('learning_hours')->where('workplacement_details_id', $workPlacementDetails->id)->get();
+            if($total_hours_calculations->count() > 0):
+                foreach($total_hours_calculations as $lavelHour):
+                    if(isset($lavelHour->learning_hours) && $lavelHour->learning_hours->count() > 0):
+                        foreach($lavelHour->learning_hours as $learningHour):
+                            $confirmedHours = StudentWorkPlacement::where('workplacement_details_id', $workPlacementDetails->id)->where('level_hours_id', $lavelHour->id)
+                                                        ->where('learning_hours_id', $learningHour->id)->where('status', 'Confirmed')->sum('hours');
+                            $confirmed_hours[$learningHour->id]['lavel_hours'] = $lavelHour->name;
+                            $confirmed_hours[$learningHour->id]['learning_hours'] = $learningHour->name;
+                            $confirmed_hours[$learningHour->id]['confirmed_hours'] = ($confirmedHours > 0 ? $confirmedHours.' Hours' : '');
+
+                        endforeach;
+                    endif;
+                endforeach;
+            endif;
+        endif;
+
+        return view('pages.students.frontend.dashboard.profile.workplacement', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Workplacement Details', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'datewiseClasses' => $dateWiseClassList,
+
+            'workplacement_details' => $workPlacementDetails,
+            'total_hours_calculations' => $total_hours_calculations ?? [],
+            'confirmed_hours' => $confirmed_hours
+        ]);
     }
 }
