@@ -114,6 +114,7 @@ class SubmissionPassRateReportController extends Controller
             $html .= '<thead>';
                 $html .= '<tr>';
                     $html .= '<th class="w-2/6">&nbsp;</th>';
+                    $html .= '<th>No Of Students</th>';
                     $html .= '<th>Expected Submission</th>';
                     $html .= '<th>Actual Submission</th>';
                     $html .= '<th>Passed</th>';
@@ -125,12 +126,13 @@ class SubmissionPassRateReportController extends Controller
                 if(isset($res['result']) && !empty($res['result'])):
                     $courseReplace = [];
                     $semesterReplace = [];
-                    $OA = $OC = $OD = $OM = $OP = $OR = $OS = $OU = $OW = $OTOTAL = $OPASS = 0;
+                    $OSTD = $OA = $OC = $OD = $OM = $OP = $OR = $OS = $OU = $OW = $OTOTAL = $OPASS = 0;
                     foreach($res['result'] as $semesterId => $theResult):
-                        $SA = $SC = $SD = $SM = $SP = $SR = $SS = $SU = $SW = $STOTAL = $SPASS = 0;
+                        $SSTD = $SA = $SC = $SD = $SM = $SP = $SR = $SS = $SU = $SW = $STOTAL = $SPASS = 0;
                         
                         $html .= '<tr class="semesterRow semesterRow_'.$semesterId.'" data-semesterid="'.$semesterId.'">';
                             $html .= '<th><a href="javascript:void(0);" class="semesterToggle" data-semesterid="'.$semesterId.'">+ '.$theResult['name'].'</a></th>';
+                            $html .= '<th class="semesterNoOfStudents">[SEM_NO_STD_'.$semesterId.']</th>';
                             $html .= '<th class="semesterExpSubmission">[SEM_EXP_SUB_'.$semesterId.']</th>';
                             $html .= '<th class="semesterActSubmission">[SEM_ACT_SUB_'.$semesterId.']</th>';
                             $html .= '<th class="semesterPass">[SEM_PASSED_'.$semesterId.']</th>';
@@ -140,9 +142,10 @@ class SubmissionPassRateReportController extends Controller
 
                         if(isset($theResult['course']) && !empty($theResult['course'])):
                             foreach($theResult['course'] as $theCourseId => $theCrRes):
-                                $CA = $CC = $CD = $CM = $CP = $CR = $CS = $CU = $CW = $CTOTAL = $CPASS = 0;
+                                $CSTD = $CA = $CC = $CD = $CM = $CP = $CR = $CS = $CU = $CW = $CTOTAL = $CPASS = 0;
                                 $html .= '<tr class="courseRow courseRow_'.$theCourseId.' semesterCourseRow_'.$semesterId.'" data-semesterid="'.$semesterId.'" data-courseid="'.$theCourseId.'" style="display: none;">';
                                     $html .= '<th style="padding-left: 25px"><a href="javascript:void(0);" class="courseToggle" data-semesterid="'.$semesterId.'" data-courseid="'.$theCourseId.'">+ '.$theCrRes['name'].'</a></th>';
+                                    $html .= '<th class="courceNoOfStudents">[CRS_NO_STD_'.$semesterId.'_'.$theCourseId.']</th>';
                                     $html .= '<th class="courceExpSubmission">[CRS_EXP_SUB_'.$semesterId.'_'.$theCourseId.']</th>';
                                     $html .= '<th class="courceActSubmission">[CRS_ACT_SUB_'.$semesterId.'_'.$theCourseId.']</th>';
                                     $html .= '<th class="courcePass">[CRS_PASSED_'.$semesterId.'_'.$theCourseId.']</th>';
@@ -163,6 +166,12 @@ class SubmissionPassRateReportController extends Controller
                                         $CPASS += $TOTALPASS;
                                         $OPASS += $TOTALPASS;
 
+                                        $STD = (isset($termResult->student_data_ids) && !empty($termResult->student_data_ids) ? explode(',', str_replace(' ', '', $termResult->student_data_ids)) : []);
+                                        $STD = (!empty($STD) ? count($STD) : 0);
+                                        $OSTD += $STD;
+                                        $SSTD += $STD;
+                                        $CSTD += $STD;
+
                                         $A = (isset($termResult->A) && $termResult->A > 0 ? $termResult->A : 0);
                                         $SA += $A;
                                         $CA += $A;
@@ -174,6 +183,7 @@ class SubmissionPassRateReportController extends Controller
                                         
                                         $html .= '<tr class="termRow semesterTermRow_'.$semesterId.' termRow_'.$semesterId.'_'.$theCourseId.'" style="display: none;">';
                                             $html .= '<td style="padding-left: 35px">'.$termResult->term_name.'</td>';
+                                            $html .= '<td>'.$STD.'</td>';
                                             $html .= '<td>'.$TOTAL.'</td>';
                                             $html .= '<td>'.($TOTAL - $A).'</td>';
                                             $html .= '<td>'.$TOTALPASS.'</td>';
@@ -192,6 +202,7 @@ class SubmissionPassRateReportController extends Controller
                                 $CRATE = ($CASUB > 0 ? ($CASUB / $CTOTAL) * 100 : 0);
                                 $CPASSRATE = ($CPASS > 0 ? ($CPASS / $CTOTAL) * 100 : 0);
 
+                                $courseReplace['[CRS_NO_STD_'.$semesterId.'_'.$theCourseId.']'] = $CSTD;
                                 $courseReplace['[CRS_EXP_SUB_'.$semesterId.'_'.$theCourseId.']'] = $CTOTAL;
                                 $courseReplace['[CRS_ACT_SUB_'.$semesterId.'_'.$theCourseId.']'] = $CASUB;
                                 $courseReplace['[CRS_PASSED_'.$semesterId.'_'.$theCourseId.']'] = $CPASS;
@@ -203,6 +214,7 @@ class SubmissionPassRateReportController extends Controller
                         $SRATE = ($SASUB > 0 ? ($SASUB / $STOTAL) * 100 : 0);
                         $SPASSRATE = ($SPASS > 0 ? ($SPASS / $STOTAL) * 100 : 0);
 
+                        $semesterReplace['[SEM_NO_STD_'.$semesterId.']'] = $SSTD;
                         $semesterReplace['[SEM_EXP_SUB_'.$semesterId.']'] = $STOTAL;
                         $semesterReplace['[SEM_ACT_SUB_'.$semesterId.']'] = $SASUB;
                         $semesterReplace['[SEM_PASSED_'.$semesterId.']'] = $SPASS;
@@ -226,6 +238,7 @@ class SubmissionPassRateReportController extends Controller
                     
                     $html .= '<tr>';
                         $html .= '<th>Overall</th>';
+                        $html .= '<th>'.$OSTD.'</th>';
                         $html .= '<th>'.$OTOTAL.'</th>';
                         $html .= '<th>'.$OASUB.'</th>';
                         $html .= '<th>'.$OPASS.'</th>';

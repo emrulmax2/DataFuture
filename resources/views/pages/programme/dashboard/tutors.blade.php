@@ -8,9 +8,27 @@
     <div class="grid grid-cols-12 gap-6">
         <div class="col-span-12 pt-5 relative">
             <div class="intro-y block sm:flex items-center h-10">
-                <h2 class="text-lg font-medium truncate mr-5">
-                    Tutors: {{ $termDeclaration->name }}
-                </h2>
+                <div class="inline-flex items-center">
+                    <!-- <span class="text-lg font-medium truncate mr-2">Tutors: </span> -->
+                    <div id="term-dropdown" class="dropdown w-1/2 sm:w-auto mr-auto"  data-tw-placement="bottom-start">
+                        <button id="selected-term" class="dropdown-toggle btn btn-outline-secondary bg-white w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                            <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> <i data-loading-icon="oval" class="w-4 h-4 mr-2 hidden"  data-color="white"></i> <span>{{ $termDeclaration->name }}</span> <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                        </button>
+                        <div class="dropdown-menu w-80">
+                            <ul class="dropdown-content max-h-96" style="overflow-x: hidden; overflow-y: auto;">
+                                @if(!empty($termDeclarations) && $termDeclarations->count() > 0)
+                                    @foreach($termDeclarations as $tds)
+                                        <li>
+                                            <a href="{{ route('programme.dashboard.tutors', $tds->id) }}" class="dropdown-item term-select {{ ($termDeclaration->id == $tds->id ? ' dropdown-active ' : '') }}">
+                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>  {{ $tds->name }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                @endif
+                            </ul>
+                        </div>
+                    </div> 
+                </div>
 
                 <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
                     <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">

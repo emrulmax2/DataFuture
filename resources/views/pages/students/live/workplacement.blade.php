@@ -368,7 +368,7 @@
                                             <input type="hidden" name="module_required" value="0"/>
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
-                                            <label for="workplacement_setting_id" class="form-label">Workplacement Setting <span class="text-danger">*</span></label>
+                                            <label for="workplacement_setting_id" class="form-label">Workplacement Setting <span class="text-danger">*</span></label>                                       
                                             <select id="workplacement_setting_id" class="form-control w-full tom-selects" name="workplacement_setting_id" required>
                                                 <option value="">Please Select</option>
                                                 @if($workplacement_settings->count() > 0)
@@ -408,7 +408,7 @@
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger modReq hidden">*</span></label>
-                                            <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id" required>
+                                            <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id">
                                                 <option value="">Please Select</option>
                                                 @if($assign_modules->count() > 0)
                                                     @foreach($assign_modules as $aml)
@@ -587,7 +587,7 @@
                                         </div>
                                         <div class="col-span-12 md:col-span-6 mt-3">
                                             <label for="assign_module_list_id" class="form-label">Assign Module List <span class="text-danger modReq hidden">*</span></label>
-                                            <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id" required>
+                                            <select id="assign_module_list_id" class="form-control w-full tom-selects" name="assign_module_list_id">
                                                 <option value="">Please Select</option>
                                                 @if($assign_modules->count() > 0)
                                                     @foreach($assign_modules as $aml)

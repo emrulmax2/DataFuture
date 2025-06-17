@@ -18,7 +18,7 @@
                                 @if(!empty($termDeclarations) && $termDeclarations->count() > 0)
                                     @foreach($termDeclarations as $tds)
                                         <li>
-                                            <a href="{{ route('programme.dashboard.personal.tutors.details', [$tds->id, $p_tutor_id]) }}" class="dropdown-item term-select {{ ($p_tutor_id == $tds->id ? ' dropdown-active ' : '') }}">
+                                            <a href="{{ route('programme.dashboard.tutors.details', [$tds->id, $p_tutor_id]) }}" class="dropdown-item term-select {{ ($termDeclaration->id == $tds->id ? ' dropdown-active ' : '') }}">
                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>  {{ $tds->name }}
                                             </a>
                                         </li>

@@ -13,13 +13,17 @@ class StudentWorkplacementReportExport implements FromCollection, WithHeadings, 
 {
     protected $data;
     protected $headers;
-    protected $moduleList;
+    protected $allModuleNames;
+    protected $allLevelHourNames;
+    protected $columnMergeData;
 
-    public function __construct(array $data, array $headers,array $moduleList)
+    public function __construct(array $data, array $headers, array $allModuleNames, array $allLevelHourNames, array $columnMergeData = [])
     {
         $this->data = $data;
         $this->headers = $headers;
-        $this->moduleList = $moduleList;
+        $this->allModuleNames = $allModuleNames;
+        $this->allLevelHourNames = $allLevelHourNames;
+        $this->columnMergeData = $columnMergeData;
     }
 
     public function collection()
@@ -33,61 +37,159 @@ class StudentWorkplacementReportExport implements FromCollection, WithHeadings, 
     }
 
     public function styles(Worksheet $sheet)
-    {
-        $styles = [];
-        foreach ($this->headers as $index => $header) {
-            $rowIndex = $index;
-            $styles[$rowIndex] = ['font' => ['bold' => true]];
+{
+    $styles = [];
+    $centerAlignment = ['horizontal' => 'center', 'vertical' => 'center'];
 
-            foreach ($header as $colIndex => $colValue) {
-                $columnLetter = Coordinate::stringFromColumnIndex($colIndex + 1);
-                $styles["{$columnLetter}{$rowIndex}"] = [
-                    'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '22d3ee']],
-                    'alignment' => ['horizontal' => 'center', 'vertical' => 'center']
-                ];
-                if ($rowIndex == 2) {
-                    $styles["{$columnLetter}{$rowIndex}"] = [
-                        'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '164e63']],
-                        'alignment' => ['horizontal' => 'center', 'vertical' => 'center' , 'textRotation' => 90],
-                        'font' => ['color' => ['rgb' => 'FFFFFF']]
-                    ];
-                    $sheet->getRowDimension($rowIndex)->setRowHeight(250);
-                }
-            }
+    $styles[1] = [
+        'font' => ['bold' => true],
+        'alignment' => $centerAlignment,
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => '22d3ee']
+        ]
+    ];
+
+    $styles[2] = [
+        'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+        'alignment' => $centerAlignment,
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['rgb' => '164e63']
+        ]
+    ];
+
+    $sheet->getRowDimension(2)->setRowHeight(250);
+    
+    $staticColumnCount = 5;
+    $headerColumnCount = count($this->headers[0]);
+
+    $totalHoursRequiredColIndex1Based = -1;
+    $totalHoursCompletedColIndex1Based = -1;
+    $headerRow1 = $this->headers[0];
+    for ($k = 0; $k < $headerColumnCount; $k++) {
+        if ($headerRow1[$k] === "Total Hours Required") {
+            $totalHoursRequiredColIndex1Based = $k + 1;
+        } elseif ($headerRow1[$k] === "Total Hours Completed") {
+            $totalHoursCompletedColIndex1Based = $k + 1;
         }
-
-        $sheet->mergeCells('F1:' . Coordinate::stringFromColumnIndex(count($this->moduleList) + 5) . '1');
-        
-        $highestRow = count($this->data) + count($this->headers);
-        for ($row = 3; $row <= $highestRow; $row++) {
-            for ($col = 3; $col <= Coordinate::columnIndexFromString($sheet->getHighestColumn()); $col++) {
-                $columnLetter = Coordinate::stringFromColumnIndex($col);
-                $styles["{$columnLetter}{$row}"]['alignment'] = ['horizontal' => 'center', 'vertical' => 'center'];
-            }
-        }
-
-
-        return $styles;
     }
 
-    
+    for ($col = 1; $col <= $headerColumnCount; $col++) {
+        $colLetter = Coordinate::stringFromColumnIndex($col);
+        if ($col > $staticColumnCount &&
+            $col !== $totalHoursRequiredColIndex1Based && 
+            $col !== $totalHoursCompletedColIndex1Based) {
+
+            $styles[$colLetter.'2']['alignment'] = [
+                'horizontal' => 'center',
+                'vertical' => 'center',
+                'textRotation' => 90
+            ];
+            $styles[$colLetter.'2']['fill'] = [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '164e63']
+            ];
+        } else {
+            $styles[$colLetter.'2'] = [
+                'alignment' => $centerAlignment,
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => [
+                    'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                    'startColor' => ['rgb' => '164e63']
+                ]
+            ];
+        }
+    }
+
+    if (isset($this->columnMergeData['row1'])) {
+        foreach ($this->columnMergeData['row1'] as $mergeInfo) {
+            if ($mergeInfo['span'] > 1) {
+                $startColChar = Coordinate::stringFromColumnIndex($mergeInfo['start_col_abs'] + 1);
+                $endColChar = Coordinate::stringFromColumnIndex($mergeInfo['start_col_abs'] + $mergeInfo['span']);
+                $sheet->mergeCells($startColChar.'1:'.$endColChar.'1');
+            }
+        }
+    }
+
+    $highestRow = count($this->data) + count($this->headers);
+    $highestColumnLetter = $sheet->getHighestDataColumn();
+
+    if ($highestRow > 2) {
+        $styles['A3:'.$highestColumnLetter.$highestRow] = [
+            'alignment' => $centerAlignment
+        ];
+    }
+
+    if ($highestRow > 0 && !empty($highestColumnLetter)) {
+        $cellRange = 'A1:' . $highestColumnLetter . $highestRow;
+        $styles[$cellRange]['borders'] = [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'FF000000'],
+            ],
+        ];
+    }
+
+    $sheet->getRowDimension(1)->setRowHeight(25);
+
+    return $styles;
+}
+
     public function columnWidths(): array
     {
         $widths = [
-            'A' => 20,
-            'B' => 40,
-            'C' => 25,
-            'D' => 25,
-            'E' => 65,
+            'A' => 15, // Student ID
+            'B' => 30, // Student Name
+            'C' => 15, // Status
+            'D' => 20, // Intake Semester
+            'E' => 30, // Course
         ];
 
-        $moduleStartColumnIndex = 6;
-        foreach ($this->moduleList as $index => $moduleName) {
-            $widths[Coordinate::stringFromColumnIndex($moduleStartColumnIndex + $index)] = 20;
+        $columnIndex = 6;
+
+        $headerRowForWpdAndModules = $this->headers[1];
+        $headerRowForTotals = $this->headers[0];
+        $wpdColumnsCount = 0;
+        $moduleColumnsCount = 0;
+        $totalColumnsCount = 0;
+
+        $staticCols = 5;
+        $inWpdSection = true;
+        $inModuleSection = false;
+
+        $totalHeaderColumns = count($this->headers[0]);
+
+        for ($i = $staticCols; $i < $totalHeaderColumns; $i++) {
+            $headerTextRow1 = $headerRowForTotals[$i];
+            $headerTextRow2 = isset($headerRowForWpdAndModules[$i]) ? $headerRowForWpdAndModules[$i] : '';
+
+            if ($headerTextRow1 === "Total Hours Required" || $headerTextRow1 === "Total Hours Completed") {
+                if ($inWpdSection) $inWpdSection = false;
+                if ($inModuleSection) $inModuleSection = false;
+                $totalColumnsCount++;
+            }
+            elseif ($headerTextRow2 === "Unassigned" || in_array($headerTextRow2, $this->allModuleNames) || ($headerTextRow1 === "Module List" && $headerTextRow2 === "")) {
+                if ($inWpdSection) $inWpdSection = false;
+                $inModuleSection = true;
+                $moduleColumnsCount++;
+            }
+            else {
+                if (!$inModuleSection)
+                    $wpdColumnsCount++;
+            }
         }
 
-        $totalHoursColumnLetter = Coordinate::stringFromColumnIndex($moduleStartColumnIndex + count($this->moduleList));
-        $widths[$totalHoursColumnLetter] = 30;
+        for ($i = 0; $i < $wpdColumnsCount; $i++) {
+            $widths[Coordinate::stringFromColumnIndex($columnIndex++)] = 12;
+        }
+
+        for ($i = 0; $i < $moduleColumnsCount; $i++) {
+            $widths[Coordinate::stringFromColumnIndex($columnIndex++)] = 18;
+        }
+
+        if ($totalColumnsCount > 0) $widths[Coordinate::stringFromColumnIndex($columnIndex++)] = 22;
+        if ($totalColumnsCount > 1) $widths[Coordinate::stringFromColumnIndex($columnIndex++)] = 25;
 
         return $widths;
     }

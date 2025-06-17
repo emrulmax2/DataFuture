@@ -92,4 +92,8 @@ class StudentWorkPlacement extends Model
     public function module(){
         return $this->belongsTo(ModuleCreation::class, 'assign_module_list_id');
     }
+
+    public function workplacementDetails(){
+        return $this->belongsTo(WorkplacementDetails::class, 'workplacement_details_id');
+    }
 }
