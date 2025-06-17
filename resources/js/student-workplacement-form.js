@@ -892,6 +892,7 @@ import TomSelect from 'tom-select';
             },
         })
             .then((response) => {
+                $('.searchResultBox').removeClass('hidden')
                 document
                     .querySelector('#studentGroupSearchSubmitBtn')
                     .removeAttribute('disabled');

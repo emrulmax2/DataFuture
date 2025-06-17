@@ -795,9 +795,8 @@ class StudentController extends Controller
             $maxCourseCreationId = max($courseCreationIds);
             $minCourseCreationId = min($courseCreationIds);
             $planSet= Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray();
-            
-            //$planSet= Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray();
-            
+            ///$planSet= Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray();
+
             $termData = [];
             $lastAttendanceDate = [];
             $data = [];
@@ -829,14 +828,13 @@ class StudentController extends Controller
                             ->where('assign.student_id', $student->id)
                             ->whereIn('plan.id',$planSet)
                             ->where('plan.course_creation_id','>=',$courseRelationSessionedCourseId);
-                            
-                            //Debugbar::addMessage($courseRelationSessionedCourseId, 'course_creation_id');
+
                             if($courseRelationSessionedCourseId < $maxCourseCreationId && $courseRelationSessionedCourseId >= $minCourseCreationId) {
 
                                 $arrayCurrentKey = array_search($courseRelationSessionedCourseId, $courseCreationIds);
                                 $nextCourseCreationId = $courseCreationIds[$arrayCurrentKey+1];
                                 
-                                
+                                //Debugbar::addMessage($nextCourseCreationId, 'nextCourseCreationId');
                                 
                                 if($theInactiveCourse->course_creation_id > $theActiveCourse->course_creation_id) {
                                     
@@ -2004,7 +2002,7 @@ class StudentController extends Controller
                 foreach($total_hours_calculations as $lavelHour):
                     if(isset($lavelHour->learning_hours) && $lavelHour->learning_hours->count() > 0):
                         foreach($lavelHour->learning_hours as $learningHour):
-                            $confirmedHours = StudentWorkPlacement::where('workplacement_details_id', $workPlacementDetails->id)->where('level_hours_id', $lavelHour->id)
+                            $confirmedHours = StudentWorkPlacement::where('student_id', $student_id)->where('workplacement_details_id', $workPlacementDetails->id)->where('level_hours_id', $lavelHour->id)
                                                         ->where('learning_hours_id', $learningHour->id)->where('status', 'Confirmed')->sum('hours');
                             $confirmed_hours[$learningHour->id]['lavel_hours'] = $lavelHour->name;
                             $confirmed_hours[$learningHour->id]['learning_hours'] = $learningHour->name;

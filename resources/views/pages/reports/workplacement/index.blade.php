@@ -94,7 +94,7 @@
             </div>
         </form>
     </div>
-    <div class=" intro-y box p-5 mt-10 mb-10">
+    <div class=" intro-y box p-5 mt-10 mb-10 hidden searchResultBox">
         <div class="grid grid-cols-12 items-center" id="reportRowCountWrap">
             <div id="reportTotalRowCount" class="col-span-12 sm:col-span-6 items-center text-left font-medium ">Total Student(s) Found: <div id="totalCount" class="inline-block ml-2"></div></div>
             <div class="col-span-12 sm:col-span-6 text-right">

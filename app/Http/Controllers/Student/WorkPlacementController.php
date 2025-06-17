@@ -279,7 +279,7 @@ class WorkPlacementController extends Controller
         $supervisors = CompanySupervisor::where('company_id', $company_id)->orderBy('name', 'ASC')->get();
         $level_hours = LevelHours::where('workplacement_details_id', $workplacement->workplacement_details_id)->orderBy('name', 'ASC')->get();
         $learning_hours = LearningHours::where('level_hours_id', $workplacement->level_hours_id)->orderBy('name', 'ASC')->get();
-        $workplacement_settings = WorkplacementSetting::where('id', $workplacement->workplacement_setting_id)->orderBy('name', 'ASC')->get();
+        $workplacement_settings = WorkplacementSetting::all();
         $workplacement_setting_types = WorkplacementSettingType::where('id', $workplacement->workplacement_setting_type_id)->get();
         $assign_module_lists = Assign::where('student_id', $workplacement->student_id)
                                 ->with(['plan.creations' => function($query) {

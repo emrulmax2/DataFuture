@@ -328,9 +328,9 @@ class DashboardController extends Controller
                 $html .= '</div>';
             endforeach;
             
-            if(isset($termDecId) && $termDecId > 0):
-                $html .= '<a href="'.route('programme.dashboard.tutors', $termDecId).'" class="ml-auto text-primary truncate">Show More</a>';
-            endif;
+            // if(isset($termDecId) && $termDecId > 0):
+            //     $html .= '<a href="'.route('programme.dashboard.tutors', $termDecId).'" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">Show More</a>';
+            // endif;
         else:
             $html .= '<div class="intro-x">';
                 $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
@@ -373,9 +373,9 @@ class DashboardController extends Controller
                 $html .= '</div>';
             endforeach;
             
-            if(isset($termDecId) && $termDecId > 0):
-                $html .= '<a href="'.route('programme.dashboard.personal.tutors', $termDecId).'" class="ml-auto text-primary truncate">Show More</a>';
-            endif;
+            // if(isset($termDecId) && $termDecId > 0):
+            //     $html .= '<a href="'.route('programme.dashboard.personal.tutors', $termDecId).'" class="ml-auto text-primary truncate">Show More</a>';
+            // endif;
         else:
             $html .= '<div class="intro-x">';
                 $html .= '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> No calss plan tutor found for the selected date.</div>';
@@ -515,6 +515,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'tutors' => $res,
             'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
             'selected_course' => $course_id
@@ -596,6 +597,7 @@ class DashboardController extends Controller
             'breadcrumbs' => [],
 
             'termDeclaration' => TermDeclaration::find($term_declaration_id),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'desc')->get(),
             'tutors' => $res,
             'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
             'selected_course' => $course_id
