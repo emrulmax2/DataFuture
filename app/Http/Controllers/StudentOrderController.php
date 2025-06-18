@@ -276,11 +276,11 @@ class StudentOrderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(StudentOrder $studentOrder)
+    public function destroy(StudentOrder $student_order)
     {
         
         // Logic to delete the order
-        $studentOrder->delete();
+        $student_order->delete();
 
         return response()->json(['message' => 'Order deleted successfully']);
     }
