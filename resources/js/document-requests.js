@@ -230,6 +230,7 @@ var admissionListTable = (function () {
 
     const succModal = tailwind.Modal.getOrCreateInstance(document.getElementById("successModal"));
     const errorModal = tailwind.Modal.getOrCreateInstance(document.getElementById("errorModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.getElementById("confirmModal"));
 
 
 
