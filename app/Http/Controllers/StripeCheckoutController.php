@@ -106,7 +106,7 @@ class StripeCheckoutController extends Controller
                         $studentDocumentRequestFormPaid->letter_set_id = $cartItem->letter_set_id;
                         $studentDocumentRequestFormPaid->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
                         $studentDocumentRequestFormPaid->description = $cartItem->description;
-                        $studentDocumentRequestFormPaid->service_type = 'Same Day (cost £10.00)';
+                        $studentDocumentRequestFormPaid->service_type = ($cartItem->letter_set_id!=159) ? 'Same Day (cost £10.00)' : '3 Working Days (cost £10.00)';
                         $studentDocumentRequestFormPaid->status = 'Pending';
                         $studentDocumentRequestFormPaid->email_status = 'Pending';
                         $studentDocumentRequestFormPaid->student_consent = 1;

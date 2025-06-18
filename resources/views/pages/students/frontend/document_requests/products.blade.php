@@ -55,11 +55,18 @@
                                 <i data-loading-icon="puff" class="w-5 h-5 ml-2 hidden" ></i>
                             </button>
                             @endif
+                            @if($letter_set->id != 159) 
                             <button type="button" data-letterid="{{ $letter_set->id }}" data-service_type="Same Day (cost £10.00)" data-studentid={{ $student->id }} class="add-topaid-cart ml-auto flex items-center btn btn-success text-white mr-auto shadow-md w-full  justify-center" href="javascript:; ">
                                 <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
                                  Same Day  (£10.00)
                                 <i data-loading-icon="puff" class="w-5 h-5 ml-2 hidden"></i>
                             </button>
+                            @else
+                            <button type="button" data-letterid="{{ $letter_set->id }}" data-service_type="3 Working Days (cost £10.00)" data-studentid={{ $student->id }} class="add-topaid-cart ml-auto flex items-center btn btn-success text-white mr-auto shadow-md w-full  justify-center" href="javascript:; ">
+                                <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
+                                 3 Working Days (cost £10.00)
+                                <i data-loading-icon="puff" class="w-5 h-5 ml-2 hidden"></i>
+                            @endif
                         </div>
                     </div>
                 </div>
