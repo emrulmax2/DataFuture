@@ -124,7 +124,7 @@
             }
         }).catch(error => {
             $btn.removeAttr('disabled');
-            $btn.find('svg:nth-of-type(2)').css('display', 'none');
+            $btn.find('svg').css('display', 'none');
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
