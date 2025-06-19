@@ -284,6 +284,7 @@ class StudentExpectedResultReportController extends Controller
             "plan.cCreation",
             "plan.cCreation.course",
             'student',
+            'student.status',
             'student.award',
             'student.crel',
             'student.crel.abody',
@@ -293,6 +294,9 @@ class StudentExpectedResultReportController extends Controller
                 if(!empty($selectedTerm)) {
                     $q->whereIn('term_declaration_id', $selectedTerm);
                 }
+            })->whereHas('student.status', function($q) {
+                $q->where('active', 1);
+                $q->where('type', 'Student');
             })
             ->orderBy('id','DESC')->get();
 
@@ -331,7 +335,26 @@ class StudentExpectedResultReportController extends Controller
 
                             $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
                             $moduleList[] = $moduleName;
+
                         }
+                    } else if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type==NULL)) {
+
+                        $moduleName = $assign->plan->creations->module->name;
+
+                        if(strpos($moduleName, 'Group Tutorial') === false) {
+
+                            if($assign->attendance === 0) {
+
+                                $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "No";
+                                $moduleList[] = $moduleName;
+
+                            } else {
+
+                                $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
+                                $moduleList[] = $moduleName;
+                            }
+                        } 
+                        
                     }
                     
                 }
