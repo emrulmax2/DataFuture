@@ -337,7 +337,7 @@ class StudentExpectedResultReportController extends Controller
                             $moduleList[] = $moduleName;
 
                         }
-                    } else if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type==NULL)) {
+                    } elseif(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type==NULL)) {
 
                         $moduleName = $assign->plan->creations->module->name;
 
