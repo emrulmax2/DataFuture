@@ -157,6 +157,13 @@ class CourseDetailController extends Controller
         $student_course_relation_id = $request->student_course_relation_id;
         $studentCourseRel = StudentCourseRelation::find($student_course_relation_id);
 
+        $currentProposedCourse = StudentProposedCourse::with('venue')->where('student_id',$student_id)
+                                ->where('course_creation_id',$studentCourseRel->course_creation_id)
+                                ->where('student_course_relation_id',$studentCourseRel->id)
+                                ->get()
+                                ->first();
+        $currentCourseVenue = CourseCreationVenue::where('course_creation_id',$currentProposedCourse->course_creation_id)->where('venue_id', $currentProposedCourse->venue_id)->get()->first();
+
         $courseVenue = CourseCreationVenue::where('course_creation_id', $request->course_id)->where('venue_id', $venue_id)->get()->first();
         $venueEW = ((isset($courseVenue->evening_and_weekend) && $courseVenue->evening_and_weekend == 1) && (isset($courseVenue->weekends) && $courseVenue->weekends > 0) ? true : false );
         $full_time = ($venueEW && isset($request->full_time) && $request->full_time > 0 ? $request->full_time : 0);
@@ -199,7 +206,42 @@ class CourseDetailController extends Controller
             if(!isset($courseCreation->id)):
                 $msg = 'Course Creation not found.';
             elseif($courseCreation->id == $studentCourseRel->course_creation_id):
-                $msg = 'The student already assigned under this course relation.';
+                if($currentCourseVenue->id != $venue_id):
+                    $studentProposedCourse = StudentProposedCourse::where('student_id', $student_id)
+                        ->where('course_creation_id', $studentCourseRel->course_creation_id)
+                        ->where('student_course_relation_id', $studentCourseRel->id)
+                        ->get()->first();
+
+                        // ->update([
+                        //     'venue_id' => $venue_id,
+                        //     'full_time' => $full_time,
+                        //     'updated_by' => auth()->user()->id
+                        // ]);
+                    $studentProposedCourse->venue_id = $venue_id;
+                    $studentProposedCourse->full_time = $full_time;
+                    $studentProposedCourse->updated_by = auth()->user()->id;
+                    $studentProposedCourse->save();
+                    
+                    if($studentProposedCourse->wasChanged()):
+                        $data = [];
+                        $data['student_id'] = $student_id;
+                        $data['table'] = 'student_proposed_courses';
+                        $data['field_name'] = 'venue_id';
+                        $data['field_value'] = $currentProposedCourse->venue_id;
+                        $data['field_new_value'] = $venue_id;
+                        $data['created_by'] = auth()->user()->id;
+
+                        StudentArchive::create($data);
+                        
+                        $msg = 'The student venue updated successfully.';
+                        return response()->json(['msg' => $msg], 200);
+                    else:
+                        $msg = 'The student venue not updated.';
+                        return response()->json(['msg' => $msg], 304);
+                    endif;
+                else:
+                    $msg = 'The student already assigned under this course relation.';
+                endif;
             endif;
 
             return response()->json(['msg' => $msg], 304);
