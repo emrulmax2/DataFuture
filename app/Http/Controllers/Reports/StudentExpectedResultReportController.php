@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Reports;
 
 use App\Exports\ArrayCollectionExport;
 use App\Exports\CustomArrayCollectionExport;
+use App\Exports\CustomExpectedResultCollectionExport;
 use App\Exports\Reports\StudentDataReportBySelectionExport;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
@@ -72,21 +73,51 @@ class StudentExpectedResultReportController extends Controller
 
     public function totalCount(Request $request) {
 
+
         //parse_str($request->form_data, $form);
-
+        $seratchCriteria = [];
         $groupParams = isset($request->group) && !empty($request->group) ? $request->group : [];
-
+        
         $sorts = [];
         
         $Query = Student::orderBy('id','desc');
         $itemSelected = false;
+        $term_declaration_ids = [];
         foreach($groupParams as $field => $value):
             $$field = (isset($value) && !empty($value) ? $value : '');
-
+            
             if($$field!='') {
                 $itemSelected = true;
+                //$seratchCriteria[] = $field;
+                
+
+                if(isset($academic_year))
+                    $seratchCriteria[$field] = AcademicYear::where('id',$academic_year)->get()->first()->name;
+                if(isset($attendance_semester)) {
+                    $seratchCriteria[$field] = TermDeclaration::whereIn('id',$attendance_semester)->pluck('name')->toArray();
+                    $term_declaration_ids = $attendance_semester;
+                } 
+
+                if(isset($course))
+                    $seratchCriteria[$field] = Course::where('id',$course)->get()->first()->name;
+                if(isset($group))
+                    $seratchCriteria[$field] = Group::where('id',$group)->get()->first()->name;
+                if(isset($intake_semester))
+                    $seratchCriteria[$field] = Semester::where('id',$intake_semester)->get()->first()->name;
+                if(isset($group_student_status))
+                    $seratchCriteria[$field] = Status::where('id',$group_student_status)->get()->first()->name;
+                if(isset($evening_weekend))
+                    $seratchCriteria[$field] = ($evening_weekend==0) ? "Evening" : "Weekend";
+                
             }
         endforeach;
+
+        if(!isset($attendance_semester)) {
+            //validation error check
+            return response()->json(['errors' => ['attendance_semester'=>'Please select a Attendance Semester'],
+                'message' => 'Please select a Attendance Semester'
+            ], 422);
+        }
         if($itemSelected==true) {
             $studentsIds = [];
                 $myRequest = new Request();
@@ -114,6 +145,7 @@ class StudentExpectedResultReportController extends Controller
                 if(isset($evening_weekend))
                     $myRequest->request->add(['evening_weekends' => $evening_weekend]);
 
+
                 $studentsIds = $this->callTheStudentListForGroup($myRequest);
                 
             if(!empty($studentsIds)): 
@@ -122,16 +154,18 @@ class StudentExpectedResultReportController extends Controller
                 $Query->whereIn('id', [0]); 
             endif;
             
+            
             $total_rows = $Query->count();
 
             $Query = $Query->get();
 
-    
-            return response()->json(['all_rows' => $total_rows, 'student_ids'=>$studentsIds],200);
+
+            return response()->json(['all_rows' => $total_rows, 'student_ids'=>$studentsIds,'search_criteria'=>$seratchCriteria, 'term' =>isset($term_declaration_ids) ? $term_declaration_ids : "",   "certificate_claimed"=>isset($certificate_claimed)?$certificate_claimed:null],200);
 
         } else {
             return response()->json(['all_rows' => 0, 'student_ids'=>[]],302);
         }
+
 
     }
 
@@ -235,6 +269,8 @@ class StudentExpectedResultReportController extends Controller
     {         
         $studentIds = explode(",",$request->studentIds);
 
+        $selectedTerm = isset($request->term) ? json_decode($request->term, true) : [];
+
         $StudentData = Student::with('crel','crel.creation')->whereIn('id',$studentIds)->get();
         $moduleList = [];
         $data = [];
@@ -242,6 +278,7 @@ class StudentExpectedResultReportController extends Controller
         //$QueryInner = Plan::with('creations','creations.module','creations.level')->whereIn('id',$planList)->orderBy('id','DESC')->get();
         $assignList = Assign::with(
             "plan",
+            "plan.attenTerm",
             "plan.creations",
             "plan.creations.module",
             "plan.cCreation",
@@ -251,34 +288,52 @@ class StudentExpectedResultReportController extends Controller
             'student.crel',
             'student.crel.abody',
             'student.crel.creation',
-            'student.crel.creation.semester')->whereIn('student_id', $studentIds)->where(function($q) {
-                    $q->where('attendance', 1)
-                    ->orWhereNull('attendance');
-            })->orderBy('id','DESC')->get();
+            'student.crel.creation.semester')->whereIn('student_id', $studentIds)
+            ->whereHas('plan', function($q) use($selectedTerm) {
+                if(!empty($selectedTerm)) {
+                    $q->whereIn('term_declaration_id', $selectedTerm);
+                }
+            })
+            ->orderBy('id','DESC')->get();
 
             $studentDetails = [];
             $data = [];
             foreach($assignList as $assign):
+                if(isset($assign->plan->term_declaration_id)) {
+                  
+                    $studentDetails[$assign->student->id][$assign->plan->term_declaration_id] = [
+                        'registration_no' => $assign->student->registration_no,
+                        'student_name' => $assign->student->full_name,
+                        'status' => $assign->student->status->name,
+                        'intake_semester' => isset($assign->student->crel) ? $assign->student->crel->creation->semester->name : '',
+                        'course' => isset($assign->plan->cCreation) ? $assign->plan->cCreation->course->name : '',
+                        'award_body_reg_no' => isset($assign->student->crel->abody->reference) ? $assign->student->crel->abody->reference : '',
+                        'attendance_term' => isset($assign->plan->attenTerm->name) ? $assign->plan->attenTerm->name : '',
+                        'groups' => isset($assign->plan->group->name) ? $assign->plan->group->name : '',
+                        
+                    ];
+                    //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
+                    
+                    // if(!isset($result->plan->creations)) {
+                    //     dd($result);
+                    // }
+                    
+                    if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
 
-                $studentDetails[$assign->student->id] = [
-                    'registration_no' => $assign->student->registration_no,
-                    'student_name' => $assign->student->full_name,
-                    'status' => $assign->student->status->name,
-                    'intake_semester' => isset($assign->student->crel) ? $assign->student->crel->creation->semester->name : '',
-                    'course' => isset($assign->plan->cCreation) ? $assign->plan->cCreation->course->name : '',
-                    'award_body_reg_no' => isset($assign->student->crel->abody->reference) ? $assign->student->crel->abody->reference : '',
-                    'groups' => isset($assign->plan->group->name) ? $assign->plan->group->name : '',
-                ];
-                //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
-                
-                // if(!isset($result->plan->creations)) {
-                //     dd($result);
-                // }
-                
-                if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
-                        $moduleName = $assign->plan->creations->module->name; 
-                        $data[$assign->student->id][$moduleName] = "Yes";
-                        $moduleList[] = $moduleName;
+                        $moduleName = $assign->plan->creations->module->name;
+
+                        if($assign->attendance === 0) {
+
+                            $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "No";
+                            $moduleList[] = $moduleName;
+
+                        } else {
+
+                            $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
+                            $moduleList[] = $moduleName;
+                        }
+                    }
+                    
                 }
             endforeach;
             $moduleList = array_unique($moduleList);
@@ -290,8 +345,9 @@ class StudentExpectedResultReportController extends Controller
         $headers[1][3] = 'Intake Semester';
         $headers[1][4] = 'Course';
         $headers[1][5] = 'Awarding Body Ref';
-        $headers[1][6] = 'Group';
-        $statusIncrement = 7;
+        $headers[1][6] = 'Attendance Term';
+        $headers[1][7] = 'Group';
+        $statusIncrement = 8;
         $printed = false;
         foreach($moduleList as $module) :
             if($printed==false) {
@@ -304,7 +360,7 @@ class StudentExpectedResultReportController extends Controller
 
         // $headers[1][$statusIncrement++] = "Completed New Units";
         // $headers[1][$statusIncrement++] = "Assessment Board Outcome";
-
+        
         $headers[2][0] = '';
         $headers[2][1] = '';
         $headers[2][2] = '';
@@ -312,40 +368,42 @@ class StudentExpectedResultReportController extends Controller
         $headers[2][4] = '';
         $headers[2][5] = '';
         $headers[2][6] = '';
-        $statusIncrement = 7;
+        $headers[2][7] = '';
+        $statusIncrement = 8;
 
         foreach($moduleList as $module) :
             $headers[2][$statusIncrement++] = $module;
         endforeach;
         // $headers[2][$statusIncrement++] = "";
         // $headers[2][$statusIncrement++] = "";
-
-
         
         $dataCount = 1;
-        foreach($data as $key => $value):
-            $theCollection[$dataCount][0] = $studentDetails[$key]['registration_no'];
-            $theCollection[$dataCount][1] = $studentDetails[$key]['student_name'];
-            $theCollection[$dataCount][2] = $studentDetails[$key]['status'];
-            $theCollection[$dataCount][3] = $studentDetails[$key]['intake_semester'];
-            $theCollection[$dataCount][4] = $studentDetails[$key]['course'];
-            $theCollection[$dataCount][5] = $studentDetails[$key]['award_body_reg_no'];
-            $theCollection[$dataCount][6] = $studentDetails[$key]['groups'];
-            
-            $statusIncrement = 7;
-            $unitCount = 0;
-            foreach($moduleList as $module) :
-                // if(isset($value[$module]) && ($value[$module]=='P' || $value[$module]=='M' || $value[$module]=='D')) {
-                //     $unitCount+=1;
-                // }
-                $theCollection[$dataCount][$statusIncrement++] = isset($value[$module]) ? $value[$module] : "";
-            endforeach;
-            // $theCollection[$dataCount][$statusIncrement++] = $unitCount;
-            // $theCollection[$dataCount][$statusIncrement++] = '';
-            $dataCount++;    
+        foreach($data as $studentId => $value):
+            foreach($selectedTerm as $term) :
+                if(!isset($studentDetails[$studentId][$term])) {
+                    continue;
+                }
+                $theCollection[$dataCount][0] = $studentDetails[$studentId][$term]['registration_no'];
+                $theCollection[$dataCount][1] = $studentDetails[$studentId][$term]['student_name'];
+                $theCollection[$dataCount][2] = $studentDetails[$studentId][$term]['status'];
+                $theCollection[$dataCount][3] = $studentDetails[$studentId][$term]['intake_semester'];
+                $theCollection[$dataCount][4] = $studentDetails[$studentId][$term]['course'];
+                $theCollection[$dataCount][5] = $studentDetails[$studentId][$term]['award_body_reg_no'];
+                $theCollection[$dataCount][6] = $studentDetails[$studentId][$term]['attendance_term'];
+                $theCollection[$dataCount][7] = $studentDetails[$studentId][$term]['groups'];
+
+                $statusIncrement = 8;
+                $unitCount = 0;
+                foreach($moduleList as $module) :
+                    
+                    $theCollection[$dataCount][$statusIncrement++] = isset($value[$term][$module]) ? $value[$term][$module] : "";
+                    
+                endforeach;
+                $dataCount++;   
+            endforeach; 
         endforeach;
 
-        return Excel::download(new CustomArrayCollectionExport($theCollection,$headers, $moduleList), 'board_expected_result_report.xlsx');
+        return Excel::download(new CustomExpectedResultCollectionExport($theCollection,$headers, $moduleList), 'board_expected_result_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
