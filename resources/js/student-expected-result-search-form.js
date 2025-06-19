@@ -870,6 +870,7 @@ import TomSelect from 'tom-select';
         evening_weekend.refreshOptions(false);
     }
     localStorage.removeItem('studentIdsList2024');
+    localStorage.removeItem('term25');
     /* Start List Table Inits */
 
     $('#studentGroupSearchForm').on('submit', function (event) {
@@ -885,7 +886,7 @@ import TomSelect from 'tom-select';
 
         axios({
             method: 'post',
-            url: route('report.student.data.total'),
+            url: route('report.student.expected.result.total'),
             data: form_data,
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -921,6 +922,11 @@ import TomSelect from 'tom-select';
                         'studentIdsList2024',
                         response.data.student_ids
                     );
+                    const jsonDataTerm = JSON.stringify(response.data.term);
+                    localStorage.setItem(
+                        'term25',
+                        jsonDataTerm
+                    );
                 }
             })
             .catch((error) => {
@@ -931,9 +937,12 @@ import TomSelect from 'tom-select';
                     '#studentGroupSearchSubmitBtn svg.loadingCall'
                 ).style.cssText = 'display: none;';
                 localStorage.setItem('studentIdsList2024', []);
+                localStorage.setItem('term25', []);
                 if (error.response) {
                     if (error.response.status == 422) {
-                        let total_student = 'OOPS! something went wrong.';
+                        let errorSet = error.response.data.errors;
+                        
+                        let total_student = errorSet.attendance_semester ? errorSet.attendance_semester : 'OOPS! something went wrong.';
                         $('#reportTotalRowCount').html(
                             '<button class="rounded bg-danger text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto mr-2 px-4 py-2">' +
                                 total_student +
@@ -981,10 +990,12 @@ import TomSelect from 'tom-select';
     $('#studentExcelForm').on('submit', function (event) {
         event.preventDefault();
         let studentIds = localStorage.getItem('studentIdsList2024');
+        let termData = localStorage.getItem('term25');
         if (studentIds.length > 0) {
             const form = document.getElementById('studentExcelForm');
             let form_data = new FormData(form);
             form_data.append('studentIds', studentIds);
+            form_data.append('term', termData);
             axios({
                 method: 'post',
                 url: route('report.student.expected.result.excel'),
@@ -1004,6 +1015,7 @@ import TomSelect from 'tom-select';
                         .querySelector('#studentDataReportExcelBtn')
                         .setAttribute('disabled', 'disabled');
                     localStorage.removeItem('studentIdsList2024');
+                    localStorage.removeItem('term25');
                     $('#totalCount').html('');
                     const url = window.URL.createObjectURL(
                         new Blob([response.data])
