@@ -60,7 +60,7 @@ class CustomExpectedResultCollectionExport implements FromCollection, WithHeadin
 
         // Merge cells for the first header row
         // first 7 row is reserved for header then merge next
-        $sheet->mergeCells('H1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->moduleList) + 8) . '1');
+        $sheet->mergeCells('I1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(count($this->moduleList) + 8) . '1');
         
         //Apply background color based on module values
         foreach ($this->data as $rowIndex => $row) {
