@@ -286,6 +286,7 @@ class StudentExpectedResultReportController extends Controller
             'student',
             'student.status',
             'student.award',
+            'student.activeCR',
             'student.crel',
             'student.crel.abody',
             'student.crel.creation',
@@ -294,15 +295,15 @@ class StudentExpectedResultReportController extends Controller
                 if(!empty($selectedTerm)) {
                     $q->whereIn('term_declaration_id', $selectedTerm);
                 }
-            })->whereHas('student.status', function($q) {
+            })->whereHas('student.activeCR', function($q) {
                 $q->where('active', 1);
-                $q->where('type', 'Student');
             })
             ->orderBy('id','DESC')->get();
 
             $studentDetails = [];
             $data = [];
             foreach($assignList as $assign):
+
                 if(isset($assign->plan->term_declaration_id)) {
                   
                     $studentDetails[$assign->student->id][$assign->plan->term_declaration_id] = [
@@ -321,7 +322,6 @@ class StudentExpectedResultReportController extends Controller
                     // if(!isset($result->plan->creations)) {
                     //     dd($result);
                     // }
-                    
                     if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
 
                         $moduleName = $assign->plan->creations->module->name;
