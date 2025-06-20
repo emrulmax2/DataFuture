@@ -295,53 +295,35 @@ class StudentExpectedResultReportController extends Controller
                 if(!empty($selectedTerm)) {
                     $q->whereIn('term_declaration_id', $selectedTerm);
                 }
-            })->whereHas('student.activeCR', function($q) {
-                $q->where('active', 1);
             })
             ->orderBy('id','DESC')->get();
 
             $studentDetails = [];
             $data = [];
             foreach($assignList as $assign):
-
-                if(isset($assign->plan->term_declaration_id)) {
-                  
-                    $studentDetails[$assign->student->id][$assign->plan->term_declaration_id] = [
-                        'registration_no' => $assign->student->registration_no,
-                        'student_name' => $assign->student->full_name,
-                        'status' => $assign->student->status->name,
-                        'intake_semester' => isset($assign->student->crel) ? $assign->student->crel->creation->semester->name : '',
-                        'course' => isset($assign->plan->cCreation) ? $assign->plan->cCreation->course->name : '',
-                        'award_body_reg_no' => isset($assign->student->crel->abody->reference) ? $assign->student->crel->abody->reference : '',
-                        'attendance_term' => isset($assign->plan->attenTerm->name) ? $assign->plan->attenTerm->name : '',
-                        'groups' => isset($assign->plan->group->name) ? $assign->plan->group->name : '',
-                        
-                    ];
-                    //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
+                if($assign->plan->cCreation->course->name == $assign->student->crel->creation->course->name) {
+                   
+                    if(isset($assign->plan->term_declaration_id)) {
                     
-                    // if(!isset($result->plan->creations)) {
-                    //     dd($result);
-                    // }
-                    if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
+                        $studentDetails[$assign->student->id][$assign->plan->term_declaration_id] = [
+                            'registration_no' => $assign->student->registration_no,
+                            'student_name' => $assign->student->full_name,
+                            'status' => $assign->student->status->name,
+                            'intake_semester' => isset($assign->student->crel) ? $assign->student->crel->creation->semester->name : '',
+                            'course' => isset($assign->plan->cCreation) ? $assign->plan->cCreation->course->name : '',
+                            'award_body_reg_no' => isset($assign->student->crel->abody->reference) ? $assign->student->crel->abody->reference : '',
+                            'attendance_term' => isset($assign->plan->attenTerm->name) ? $assign->plan->attenTerm->name : '',
+                            'groups' => isset($assign->plan->group->name) ? $assign->plan->group->name : '',
+                            
+                        ];
+                        //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
+                        
+                        // if(!isset($result->plan->creations)) {
+                        //     dd($result);
+                        // }
+                        if(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type=="Theory")) {
 
-                        $moduleName = $assign->plan->creations->module->name;
-
-                        if($assign->attendance === 0) {
-
-                            $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "No";
-                            $moduleList[] = $moduleName;
-
-                        } else {
-
-                            $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
-                            $moduleList[] = $moduleName;
-
-                        }
-                    } elseif(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type==NULL)) {
-
-                        $moduleName = $assign->plan->creations->module->name;
-
-                        if(strpos($moduleName, 'Group Tutorial') === false) {
+                            $moduleName = $assign->plan->creations->module->name;
 
                             if($assign->attendance === 0) {
 
@@ -352,11 +334,30 @@ class StudentExpectedResultReportController extends Controller
 
                                 $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
                                 $moduleList[] = $moduleName;
+
                             }
-                        } 
+                        } elseif(isset($assign->id) && isset($assign->plan->creations) && ($assign->plan->class_type==NULL)) {
+
+                            $moduleName = $assign->plan->creations->module->name;
+
+                            if(strpos($moduleName, 'Group Tutorial') === false) {
+
+                                if($assign->attendance === 0) {
+
+                                    $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "No";
+                                    $moduleList[] = $moduleName;
+
+                                } else {
+
+                                    $data[$assign->student->id][$assign->plan->term_declaration_id][$moduleName] = "Yes";
+                                    $moduleList[] = $moduleName;
+                                }
+                            } 
+                            
+                        }
                         
                     }
-                    
+                 
                 }
             endforeach;
             $moduleList = array_unique($moduleList);
