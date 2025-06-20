@@ -638,9 +638,10 @@ class DashboardController extends Controller
 
 
     public function workplacement(){
-        $student_id = auth('student')->user()->id;
-        $student = Student::find($student_id);
-        $dateWiseClassList = $this->upcommingClass($student_id);
+        $student_user_id = auth('student')->user()->id;
+        $student = Student::with('crel', 'course')->where("student_user_id", $student_user_id)->get()->first();
+
+        $dateWiseClassList = $this->upcommingClass($student->id);
 
         $courseStartDate = (isset($student->crel->course_start_date) && !empty($student->crel->course_start_date) ? date('Y-m-d', strtotime($student->crel->course_start_date)) : date('Y-m-d', strtotime($student->crel->creation->available->course_start_date)) );
         $courseId = $student->crel->creation->course_id;
