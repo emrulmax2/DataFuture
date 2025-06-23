@@ -1044,6 +1044,7 @@ import TomSelect from 'tom-select';
         } else {
             studentRowDetails.slideUp(function() {
                 $(this).addClass('hidden');
+                
             });
         }
     });
