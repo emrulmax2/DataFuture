@@ -1036,7 +1036,7 @@ import TomSelect from 'tom-select';
     $('.studentResultRowToggle').on('click', function (event) {
         event.preventDefault();
         let studentId = $(this).data('studentid');
-
+        console.log(studentId);
         //let studentRow = $('#studentRow-' + studentId);
         let studentRowDetails = $('.studentRowDetails-' + studentId);
         if (studentRowDetails.hasClass('hidden')) {
@@ -1044,7 +1044,7 @@ import TomSelect from 'tom-select';
         } else {
             studentRowDetails.slideUp(function() {
                 $(this).addClass('hidden');
-                
+
             });
         }
     });
