@@ -91,7 +91,9 @@
                                             <select id="vertical-form-12" name="ethnicity" class="tom-selects w-full lccToms tomRequire">
                                                 <option value="">Please Select</option>
                                                 @foreach($ethnicity as $ethnicities)
-                                                    <option  value="{{ $ethnicities->id }}">{{ $ethnicities->name }}</option>              
+                                                    @if($ethnicities->active == 1)
+                                                        <option  value="{{ $ethnicities->id }}">{{ $ethnicities->name }}</option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                             <div class="acc__input-error error-ethnicity text-danger mt-2"></div>
