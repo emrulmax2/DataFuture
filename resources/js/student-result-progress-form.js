@@ -1017,7 +1017,11 @@ import TomSelect from 'tom-select';
                     $('#progressTableContainer').removeClass('hidden');
 
                     $('#progressTableContainer div').html(response.data.htm);
-                    
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                     document
                         .querySelector('#studentDataReportViewBtn')
                         .setAttribute('disabled', 'disabled');
@@ -1040,9 +1044,13 @@ import TomSelect from 'tom-select';
 
         if (studentRowDetails.hasClass('hidden')) {
             studentRowDetails.removeClass('hidden').hide().slideDown();
+            $(this).find('.plusToggle').addClass('hidden');
+            $(this).find('.minusToggle').removeClass('hidden');
         } else {
             studentRowDetails.slideUp(function() {
                 $(this).addClass('hidden');
+                $(this).find('.minusToggle').addClass('hidden');
+                $(this).find('.plusToggle').removeClass('hidden');
             });
         }
     });
