@@ -66,7 +66,7 @@ class ApplicationController extends Controller
             ],
             'titles' => Title::all(),
             'country' => Country::all(),
-            'ethnicity' => Ethnicity::all(),
+            'ethnicity' => Ethnicity::where('active', 1)->get()(),
             'disability' => Disability::all(),
             'relations' => KinsRelation::all(),
             'bodies' => AwardingBody::all(),
