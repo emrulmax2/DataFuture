@@ -1049,13 +1049,15 @@ import TomSelect from 'tom-select';
 
         if (studentRowDetails.hasClass('hidden')) {
             studentRowDetails.removeClass('hidden').hide().slideDown();
-            $(this).find('.plusToggle').addClass('hidden');
-            $(this).find('.minusToggle').removeClass('hidden');
+            // $(this).find('.plusToggle').addClass('hidden');
+            // $(this).find('.minusToggle').removeClass('hidden');
+            $(this).find('.collapseIcon').text('-');
         } else {
             studentRowDetails.slideUp(function() {
                 $(this).addClass('hidden');
-                $(this).find('.minusToggle').addClass('hidden');
-                $(this).find('.plusToggle').removeClass('hidden');
+                // $(this).find('.minusToggle').addClass('hidden');
+                // $(this).find('.plusToggle').removeClass('hidden');
+                $(this).find('.collapseIcon').text('+');
             });
         }
     });
