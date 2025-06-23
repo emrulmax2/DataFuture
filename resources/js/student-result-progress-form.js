@@ -1033,18 +1033,16 @@ import TomSelect from 'tom-select';
                 });
         }
     });
-    $('.studentResultRowToggle').on('click', function (event) {
+    $('#progressTableContainer').on('click', '.studentResultRowToggle', function (event) {
         event.preventDefault();
         let studentId = $(this).data('studentid');
-        console.log(studentId);
-        //let studentRow = $('#studentRow-' + studentId);
         let studentRowDetails = $('.studentRowDetails-' + studentId);
+
         if (studentRowDetails.hasClass('hidden')) {
             studentRowDetails.removeClass('hidden').hide().slideDown();
         } else {
             studentRowDetails.slideUp(function() {
                 $(this).addClass('hidden');
-
             });
         }
     });
