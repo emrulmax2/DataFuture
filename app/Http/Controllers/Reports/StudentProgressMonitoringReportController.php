@@ -758,7 +758,7 @@ class StudentProgressMonitoringReportController extends Controller
         $html .= '<table class="table table-bordered table-sm studentResultProgressTable">';
             $html .= '<thead>';
                 $html .= '<tr>';
-                    $html .= '<th class="w-2/6">LCC ID</th>';
+                    $html .= '<th class="w-1/6">LCC ID</th>';
                     $html .= '<th>Name</th>';
                     $html .= '<th>Intake Semester</th>';
                     $html .= '<th>Total Module</th>';
@@ -784,7 +784,7 @@ class StudentProgressMonitoringReportController extends Controller
                     foreach($results as $studentId => $theResult):
                        
                         $html .= '<tr id="studentRow-'.$studentId.'">';
-                            $html .= '<td class="font-medium text-center">';
+                            $html .= '<td class="font-medium text-left">';
                                 $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle text-blue-500 hover:underline">';
                                     $html .= '+ '.$theResult['lcc_id'];
                                 $html .= '</a>';
