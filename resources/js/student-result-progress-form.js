@@ -1017,6 +1017,11 @@ import TomSelect from 'tom-select';
                     $('#progressTableContainer').removeClass('hidden');
 
                     $('#progressTableContainer div').html(response.data.htm);
+                    lucide.createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    }); // Re-initialize Lucide icons
                     createIcons({
                         icons,
                         "stroke-width": 1.5,
