@@ -785,8 +785,8 @@ class StudentProgressMonitoringReportController extends Controller
                        
                         $html .= '<tr id="studentRow-'.$studentId.'">';
                             $html .= '<td class="font-medium text-left">';
-                                $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle text-blue-500 hover:underline">';
-                                    $html .= '+ '.$theResult['lcc_id'];
+                                $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle font-medium hover:text-cyan-600">';
+                                    $html .= '<i data-lucide="circle-plus" class="w-4 h-4 mr-1 plusToggle"></i> <i data-lucide="circle-minus" class="w-4 h-4 mr-1 hidden minusToggle"></i>'.$theResult['lcc_id'];
                                 $html .= '</a>';
                             $html .= '</td>';
                             $html .= '<td>'.$theResult['name'].'</td>';
@@ -818,7 +818,7 @@ class StudentProgressMonitoringReportController extends Controller
                                     $html .= '<table class="table table-bordered table-sm">';
                                     $html .= '<thead>';
                                         $html .= '<tr>';
-                                            $html .= '<th class="w-2/6">Term</th>';
+                                            $html .= '<th class="w-1/6 text-center">Term</th>';
                                             $html .= '<th>Group</th>';
                                             $html .= '<th>Serial</th>';
                                             $html .= '<th>Module</th>';
