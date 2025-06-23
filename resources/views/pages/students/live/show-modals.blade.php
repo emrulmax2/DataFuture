@@ -79,10 +79,12 @@
                             <select id="ethnicity_id" class="lccTom lcc-tom-select w-full" name="ethnicity_id">
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($ethnicity))
-                                    @foreach($ethnicity as $n)
-                                        <option {{ isset($student->other->ethnicity_id) && $student->other->ethnicity_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
-                                    @endforeach 
-                                @endif 
+                                    @foreach($ethnicity as $n).
+                                        @if($n->active == 1)
+                                            <option {{ isset($student->other->ethnicity_id) && $student->other->ethnicity_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </select>
                             <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
                         </div>

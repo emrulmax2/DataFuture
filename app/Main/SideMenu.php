@@ -41,6 +41,7 @@ class SideMenu
             ];
         elseif(!is_null(\Auth::user())):
             $priv = auth()->user()->priv();
+            $remoteAccess = auth()->user()->remote_access;
             $menu = [
                 'dashboard' => [
                     'icon' => 'home',
@@ -49,7 +50,7 @@ class SideMenu
                     'params' => []
                 ],
             ];
-            if(auth()->user()->remote_access && isset($priv['course_manage']) && $priv['course_manage'] == 1):
+            if($remoteAccess && isset($priv['course_manage']) && $priv['course_manage'] == 1):
                 $menu['course.management'] = [
                     'icon' => 'book-open',
                     'title' => 'Courses Management',
@@ -57,7 +58,7 @@ class SideMenu
                     'params' => []
                 ];
             endif;
-            if(auth()->user()->remote_access && isset($priv['student_manage']) && $priv['student_manage'] == 1):
+            if($remoteAccess && isset($priv['student_manage']) && $priv['student_manage'] == 1):
                 $menu['students'] = [
                     'icon' => 'users',
                     'title' => 'Student Management',
@@ -80,7 +81,7 @@ class SideMenu
                     ]
                 ];
             endif;
-            if(auth()->user()->remote_access && isset($priv['settings']) && $priv['settings'] == 1):
+            if($remoteAccess && isset($priv['settings']) && $priv['settings'] == 1):
                 $menu['site.setting'] = [
                     'icon' => 'settings',
                     'title' => 'Settings',

@@ -35,6 +35,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpParser\Node\Expr\Cast\Unset_;
+
 ini_set('memory_limit', '512M'); // Increase memory limit
 ini_set('max_execution_time', '300'); // Increase execution time limit to 300 seconds
 
@@ -43,12 +45,9 @@ class StudentProgressMonitoringReportController extends Controller
     public function index(){
         $semesters = Cache::get('semesters', function () {
             $semesters = Semester::all()->sortByDesc("name");
-            $semesterData = [];
-            foreach ($semesters as $semester):
-                $studentProposedCourse = StudentProposedCourse::where('semester_id',$semester->id)->get()->first();
-                if(isset($studentProposedCourse->id))
-                    $semesterData[] = $semester;
-            endforeach;
+            $semesterList = $semesters->pluck('id')->unique()->toArray();
+            $semesterDataChecked = StudentProposedCourse::whereIn('semester_id',$semesterList)->pluck('semester_id')->unique()->toArray();
+            $semesterData = Semester::whereIn('id', $semesterDataChecked)->get()->sortByDesc("name");
             return $semesterData;
         });
 
@@ -541,5 +540,340 @@ class StudentProgressMonitoringReportController extends Controller
         return Excel::download(new ArrayCollectionExport($theCollection), 'student_progress_monitor_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
+    }
+
+    /**
+     * View the student progress monitoring report as an View file.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\Response
+     */
+    public function listProgressReport(Request $request)
+    {
+        $headers = [];
+       
+        $searchedCriteria = json_decode($request->searchedCriteria, true);
+        $selectedTerm = json_decode($request->term, true);
+        
+        $searchedCriteria = $searchedCriteria;
+        
+        $theCollection = [];
+
+
+
+        $studentIds = explode(",",$request->studentIds);
+        
+        $dataSet = [];
+        $termStatus = [];
+        $academicCriteriaList = AcademicCriteria::orderBy('point','desc')->get();
+        $GradeListForCount = $academicCriteriaList->pluck('code')->toArray();
+       
+
+        $dataSetByStudent = [];
+        $resultSetsByStudent = [];
+        foreach($studentIds as $studentId):
+            $dataSet[$studentId]['result'] = [];
+            $student = Student::with('status','activeCR.course','activeCR.propose.semester','awarded','awarded.qual','awarded.requested.employee')->where('id',$studentId)->get()->first();
+            $planList = Assign::where('student_id',$studentId)->get()->unique()->pluck('plan_id')->toArray();
+
+            $results = Result::with(['plan' => function($query) {
+                $query->orderBy('term_declaration_id','DESC'); 
+            }],'plan.creations.module','grade','plan.creations.module','plan.tutor.employee','plan.group','plan.attenTerm')
+            ->whereIn('plan_id',$planList)
+            ->where('student_id',$studentId)
+            ->where('published_at','<',Carbon::now())->orderBy('published_at','DESC')->get();
+
+            if(isset($selectedTerm) && !empty($selectedTerm)) {
+                
+                $term_declaration_ids = $selectedTerm;
+
+                //dd($term_declaration_ids);
+            } else {
+                $term_declaration_ids = $results->pluck('plan.term_declaration_id')->unique()->toArray();
+            }
+            
+
+            $resultSets = [];
+
+            if(isset($results))
+            foreach ($results as $result) {
+
+                $gradeFound = $result->grade->code;
+                $termId = $result->plan->term_declaration_id;
+
+                $moduleStatus = $result->plan->creations->status ? $result->plan->creations->status : $result->plan->creations->module->status;
+                $moduleName = $result->plan->creations->module->name;
+                $unitValue = $result->plan->creations->module->unit_value;
+                $creditValue = $result->plan->creations->module->credit_value;
+                $termName = isset($result->plan->attenTerm) ? $result->plan->attenTerm->name : "";
+                $groupName = isset($result->plan->group) ? $result->plan->group->name : "";
+                $tutorEmployee = isset($result->plan->tutor->employee) ? $result->plan->tutor->employee->full_name : "";
+                
+                
+                if(in_array($gradeFound,$GradeListForCount)) {
+                    $resultSets[$termId][$moduleName]['results'] = $gradeFound;
+                    
+                }
+                
+
+                $resultSets[$termId][$moduleName]['attendance_term'] = $termName;
+                $resultSets[$termId][$moduleName]['group'] = $groupName;
+                $resultSets[$termId][$moduleName]['module'] = $moduleName;
+                $resultSets[$termId][$moduleName]['unit_value'] = $unitValue;
+                $resultSets[$termId][$moduleName]['credit_value'] = $creditValue;
+                $resultSets[$termId][$moduleName]['module_status'] = strtoupper($moduleStatus[0]);
+                $resultSets[$termId][$moduleName]['tutor'] = $tutorEmployee;
+
+                
+                if(!isset($resultSets[$termId][$moduleName]['attempts'])) {
+                    $resultSets[$termId][$moduleName]['attempts'] = 1;
+                } else {
+                    $resultSets[$termId][$moduleName]['attempts']++;
+                }
+            }
+           $inCompleteCount = 0;
+           $CompleteCount = 0;
+           $totalLevel4CreditValue = 0;
+           $totalLevel5CreditValue = 0;
+           $totalLevel4UnitValue = 0;
+           $totalLevel5UnitValue = 0;
+           $totalCreditValue = 0;
+           $totalModuleCount = 0;
+           $dataCount = 0;
+           foreach($term_declaration_ids as $term):
+            $theCollection = [];
+                $i =1;
+                if(isset($resultSets[$term])):
+                    $termBaseSingleInCompleteCount[$term] = 0;
+
+                    $termBaseSingleCreditValueCount[$term] = 0;
+
+                    $termBaseSingleCompleteCount[$term] = 0;
+
+                    foreach($resultSets[$term] as $module => $result):
+                        $compeleteFound = false;
+                        if(!isset($result['results']) || $result['results']=="") {
+                            ++$inCompleteCount;
+                            ++$termBaseSingleInCompleteCount[$term];
+                        }else{
+                            ++$CompleteCount;
+                            ++$termBaseSingleCompleteCount[$term];
+                            $compeleteFound = true;
+                            $totalCreditValue += $result['credit_value'];
+
+                            if($result['unit_value'] == 4)
+                                $totalLevel4CreditValue += $result['credit_value'];
+                            if($result['unit_value'] == 5)
+                                $totalLevel5CreditValue += $result['credit_value'];
+                            
+                            if($result['unit_value'] == 4)
+                                $totalLevel4UnitValue += 1;
+                            if($result['unit_value'] == 5)
+                                $totalLevel5UnitValue += 1;
+                        }
+
+                        $totalModuleCount += 1;
+
+                        $theCollection[$dataCount][0] = ($i>1) ? "":$result['attendance_term'];
+                        $theCollection[$dataCount][1] = $result['group'];
+                        $theCollection[$dataCount][2] = $i++;
+                        $theCollection[$dataCount][3] = $result['module'];
+                        $theCollection[$dataCount][4] = $result['unit_value'];
+                        $theCollection[$dataCount][5] =  $compeleteFound ? $result['credit_value'] : "";    
+
+                        $theCollection[$dataCount][6] =  $result['module_status'];
+
+                        $theCollection[$dataCount][7] = $result['tutor'];
+                        $theCollection[$dataCount][8] = isset($result['results']) ? $result['results'] : "";
+                        $theCollection[$dataCount][9] = $result['attempts'];
+                        $theCollection[$dataCount][10] = "";
+                        $theCollection[$dataCount][11] = "";
+                        
+                        $dataCount++;
+                    endforeach;
+                endif;
+                if(count($term_declaration_ids)>1) {
+                    $theCollection[$dataCount][0] = "";
+                    $theCollection[$dataCount][1] = "";
+                    $theCollection[$dataCount][2] = "";
+                    $theCollection[$dataCount][3] = "";
+                    $theCollection[$dataCount][4] = "";
+                    $theCollection[$dataCount][5] = "";
+                    $theCollection[$dataCount][6] = "";
+                    $theCollection[$dataCount][7] = "";
+                    $theCollection[$dataCount][8] = "";
+                    $theCollection[$dataCount][9] = "";
+                    $theCollection[$dataCount][10] = $termBaseSingleCompleteCount[$term];
+                    $theCollection[$dataCount][11] = $termBaseSingleInCompleteCount[$term];
+
+                    $dataCount++;
+                    
+                    $dataSetByStudent[$studentId][$term] = $theCollection;
+                }
+                
+            endforeach;
+                    
+                $theCollection = [];
+                $theCollection['lcc_id'] = isset($student) ?$student->registration_no : "";
+                $theCollection['name'] = isset($student->full_name) ? $student->full_name : "";
+                $theCollection['status'] = isset($student->status) ? $student->status->name : "";
+                $theCollection['intake_semester'] = isset($student->activeCR->propose->semester) ? $student->activeCR->propose->semester->name : "";
+                $theCollection['course'] = isset($student->activeCR->course) ?  $student->activeCR->course->name : "";
+                
+                $theCollection['total_module'] = $totalModuleCount;
+                $theCollection['failed_module'] = $inCompleteCount;
+                $theCollection['pass_module'] = $CompleteCount;
+                $theCollection['total_credit_achieved'] = $totalCreditValue;
+                $theCollection['level_4_unit'] = $totalLevel4UnitValue;
+                $theCollection['level_4_credit'] = $totalLevel4CreditValue;
+                $theCollection['level_5_unit'] = $totalLevel5UnitValue;
+                $theCollection['level_5_credit'] = $totalLevel5CreditValue;
+                $theCollection['certificate_claimed'] = isset($student->awarded->certificate_requested) ? $student->awarded->certificate_requested : "";
+                $theCollection['certificate_claimed_date'] = isset($student->awarded->date_of_certificate_requested) ? $student->awarded->date_of_certificate_requested : "";
+                $theCollection['certificate_requested_by'] = isset($student->awarded->requested->employee) ? $student->awarded->requested->employee->full_name : "";
+                $theCollection['certificate_received'] = isset($student->awarded->certificate_received) ? $student->awarded->certificate_received : "";
+                $theCollection['certificate_received_date'] = isset($student->awarded->date_of_certificate_received) ? $student->awarded->date_of_certificate_received : "";
+                $theCollection['certificate_released'] = isset($student->awarded->certificate_released) ? $student->awarded->certificate_released : "";
+                $theCollection['certificate_released_date'] = isset($student->awarded->date_of_certificate_released) ? $student->awarded->date_of_certificate_released : "";
+                $theCollection['awarded_date'] = isset($student->awarded->date_of_award) ? $student->awarded->date_of_award : "";
+  
+                $resultSetsByStudent[$studentId] = $theCollection;
+                unset($theCollection);
+                $theCollection = [];
+        endforeach;
+        $createdBy = Employee::where('user_id',auth()->user()->id)->get()->first()->full_name;
+        $createdDateTime = Carbon::now()->format('jS M Y h:i a');
+
+        $html = $this->getHtml($resultSetsByStudent, $dataSetByStudent);
+        unset($resultSetsByStudent);
+        unset($dataSetByStudent);
+        return response()->json(['htm' => $html], 200);
+
+        //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
+    }
+
+    public function getHtml($results, $resultDetails){
+        
+        $html = '';
+        $html .= '<table class="table table-bordered table-sm studentResultProgressTable">';
+            $html .= '<thead>';
+                $html .= '<tr>';
+                    $html .= '<th class="w-2/6">LCC ID</th>';
+                    $html .= '<th>Name</th>';
+                    $html .= '<th>Intake Semester</th>';
+                    $html .= '<th>Total Module</th>';
+                    $html .= '<th>Failed Module</th>';
+                    $html .= '<th>Pass Module</th>';
+                    $html .= '<th>Total Credit Achieved</th>';
+                    $html .= '<th>Level 4 Unit</th>';
+                    $html .= '<th>L4 Credit</th>';
+                    $html .= '<th>Level 5 Unit</th>';
+                    $html .= '<th>L5 Credit</th>';
+                    $html .= '<th>Certificate Claimed</th>';
+                    $html .= '<th>Certificate Claimed Date</th>';
+                    $html .= '<th>Certificate Requested By</th>';
+                    $html .= '<th>Certificate Received</th>';
+                    $html .= '<th>Certificate Received Date</th>';
+                    $html .= '<th>Certificate Released</th>';
+                    $html .= '<th>Certificate Released Date</th>';
+                    $html .= '<th>Awarded Date</th>';
+                $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+                if(isset($results) && !empty($results)):
+                    foreach($results as $studentId => $theResult):
+                       
+                        $html .= '<tr id="studentRow-'.$studentId.'">';
+                            $html .= '<td class="font-medium text-center">';
+                                $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle text-blue-500 hover:underline">';
+                                    $html .= '+ '.$theResult['lcc_id'];
+                                $html .= '</a>';
+                            $html .= '</td>';
+                            $html .= '<td>'.$theResult['name'].'</td>';
+                            $html .= '<td>'.$theResult['intake_semester'].'</td>';
+                            $html .= '<td>'.$theResult['total_module'].'</td>';
+                            $html .= '<td>'.$theResult['failed_module'].'</td>';
+                            $html .= '<td>'.$theResult['pass_module'].'</td>';
+                            $html .= '<td>'.$theResult['total_credit_achieved'].'</td>';
+                            $html .= '<td>'.$theResult['level_4_unit'].'</td>';
+                            $html .= '<td>'.$theResult['level_4_credit'].'</td>';
+                            $html .= '<td>'.$theResult['level_5_unit'].'</td>';
+                            $html .= '<td>'.$theResult['level_5_credit'].'</td>';
+                            $html .= '<td>'.$theResult['certificate_claimed'].'</td>';
+                            $html .= '<td>'.(isset($theResult['certificate_claimed_date']) ? $theResult['certificate_claimed_date'] : '').'</td>';
+                            $html .= '<td>'.$theResult['certificate_requested_by'].'</td>';
+                            $html .= '<td>'.$theResult['certificate_received'].'</td>';
+                            $html .= '<td>'.(isset($theResult['certificate_received_date']) ? $theResult['certificate_received_date'] : '').'</td>';
+                            $html .= '<td>'.$theResult['certificate_released'].'</td>';
+                            $html .= '<td>'.(isset($theResult['certificate_released_date']) ? $theResult['certificate_released_date'] : '').'</td>';
+                            $html .= '<td>'.(isset($theResult['awarded_date']) ? $theResult['awarded_date'] : '').'</td>';
+                        $html .= '</tr>';
+                        //$dataSetByStudent[$studentId][$term]
+                        if(isset($resultDetails[$studentId]) && !empty($resultDetails[$studentId])):
+                        foreach ($resultDetails[$studentId] as $termId => $termBasedResult) {
+                            
+                            $html .= '<tr  class="hidden border-0 studentRowDetails-'.$studentId.'">';
+                                $html .= '<td colspan="19" class="text-center">';
+                                    //implementing a new table within the row for each student
+                                    $html .= '<table class="table table-bordered table-sm">';
+                                    $html .= '<thead>';
+                                        $html .= '<tr>';
+                                            $html .= '<th class="w-2/6">Term</th>';
+                                            $html .= '<th>Group</th>';
+                                            $html .= '<th>Serial</th>';
+                                            $html .= '<th>Module</th>';
+                                            $html .= '<th>Unit value</th>';
+                                            $html .= '<th>Credit value</th>';
+                                            $html .= '<th>Module status</th>';
+                                            $html .= '<th>Tutor</th>';
+                                            $html .= '<th>Results</th>';
+                                            $html .= '<th>Attempts</th>';
+                                            $html .= '<th>Completed</th>';
+                                            $html .= '<th>Incompleted</th>';
+                                        $html .= '</tr>';
+                                    $html .= '</thead>';
+                                    $html .= '<tbody>';
+
+                                    foreach ($termBasedResult as $collectionData) {
+                                        
+                                        $html .= '<tr>';
+                                            $html .= '<td class="text-center">'.$collectionData[0].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[1].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[2].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[3].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[4].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[5].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[6].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[7].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[8].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[9].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[10].'</td>';
+                                            $html .= '<td class="text-center">'.$collectionData[11].'</td>';
+                                        $html .= '</tr>';
+                                        
+                                    }
+
+                                    $html .= '</tbody>';
+                                    $html .= '</table>';
+                                $html .= '</td>';
+                                $html .= '</tr>';
+                        }
+                        endif;
+                    endforeach;
+                else:
+                    $html .= '<tr>';
+                        $html .= '<td colspan="12" class="font-medium text-center">';
+                            $html .= 'Data not found for selected semesters.';
+                        $html .= '</td>';
+                    $html .= '</tr>';
+                endif;
+            $html .= '</tbody>';
+            $html .= '<tfoot>';
+            $html .= '</tfoot>';
+        $html .= '</table>';
+
+
+
+        return $html;
     }
 }

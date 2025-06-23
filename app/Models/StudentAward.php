@@ -51,7 +51,8 @@ class StudentAward extends Model
     }
 
     public function setDateOfCertificateRequestedAttribute($value) {  
-        $this->attributes['date_of_certificate_requested'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
+        
+        $this->attributes['date_of_certificate_requested'] =  (!empty($value)  ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getDateOfCertificateRequestedAttribute($value) {

@@ -13,7 +13,10 @@
             <option value="">Please Select</option>
             @if($ethnicity->count() > 0)
                 @foreach($ethnicity as $opt)
-                    <option {{ (isset($student->other->ethnicity_id) && $student->other->ethnicity_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                    @if($opt->active == 1) 
+                        <option {{ (isset($student->other->ethnicity_id) && $student->other->ethnicity_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                    @endif;
+                    
                 @endforeach
             @endif
         </select>

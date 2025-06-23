@@ -48,7 +48,9 @@
                         <option value="" selected>Please Select</option>
                         @if(!empty($ethnicity))
                             @foreach($ethnicity as $n)
-                                <option {{ isset($employee->ethnicity_id) && $employee->ethnicity_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
+                                @if($n->active == 1)
+                                    <option {{ isset($employee->ethnicity_id) && $employee->ethnicity_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
+                                @endif
                             @endforeach 
                         @endif 
                     </select>

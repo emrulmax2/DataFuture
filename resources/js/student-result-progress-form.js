@@ -902,6 +902,7 @@ import TomSelect from 'tom-select';
                 if (response.status == 200) {
                     
                     $('#studentDataReportExcelBtn').removeAttr('disabled');
+                    $('#studentDataReportViewBtn').removeAttr('disabled');
 
                     if (total_student > 0)
                         $('#reportTotalRowCount').html(
@@ -971,16 +972,7 @@ import TomSelect from 'tom-select';
             });
     });
 
-    // $('input[type=checkbox]').on('click', function () {
-    //     let studentIds = localStorage.getItem('studentIdsList2024');
-    //     if (studentIds != null && studentIds.length > 0) {
-    //         if ($('input[type=checkbox]').is(':checked')) {
-    //             $('#studentDataReportExcelBtn').removeAttr('disabled');
-    //         }
-    //     } else {
-    //         $('#studentDataReportExcelBtn').attr('disabled', 'disabled');
-    //     }
-    // });
+
     $('#studentDataReportExcelBtn').on('click', function (e) {
         e.preventDefault();
 
@@ -989,6 +981,71 @@ import TomSelect from 'tom-select';
         ).style.cssText = 'display: inline-block;';
         $('#studentExcelForm').submit();
         
+    });
+
+    $('#studentDataReportViewBtn').on('click', function (e) {
+        e.preventDefault();
+
+        document.querySelector(
+            '#studentDataReportViewBtn svg.loadingCall'
+        ).style.cssText = 'display: inline-block;';
+        $('#studentViewForm').submit();
+        
+    });
+
+    $('#studentViewForm').on('submit', function (event) {
+        event.preventDefault();
+        let studentIds = localStorage.getItem('studentIdsList2024');
+        let searchedCriteria25 = localStorage.getItem('searchedCriteria25');
+        let termData = localStorage.getItem('term25');
+        if (studentIds.length > 0) {
+            const form = document.getElementById('studentViewForm');
+            let form_data = new FormData(form);
+            form_data.append('studentIds', studentIds);
+            form_data.append('searchedCriteria', searchedCriteria25);
+            form_data.append('term', termData);
+            axios({
+                method: 'post',
+                url: route('report.student.progress.details'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then((response) => {
+                    document.querySelector(
+                        '#studentDataReportViewBtn svg.loadingCall'
+                    ).style.cssText = 'display: none;';
+                    
+                    $('#progressTableContainer').removeClass('hidden');
+
+                    $('#progressTableContainer div').html(response.data.htm);
+                    
+                    document
+                        .querySelector('#studentDataReportViewBtn')
+                        .setAttribute('disabled', 'disabled');
+                    localStorage.removeItem('studentIdsList2024');
+                    localStorage.removeItem('searchedCriteria25');
+                    localStorage.removeItem('term25');
+                    $('#totalCount').html('');
+
+                })
+                .catch((error) => {
+                    console.log(error);
+                    //$('.loadingCallFromApart').remove();
+                });
+        }
+    });
+    $('.studentResultRowToggle').on('click', function (event) {
+        event.preventDefault();
+        let studentId = $(this).data('studentid');
+
+        //let studentRow = $('#studentRow-' + studentId);
+        let studentRowDetails = $('.studentRowDetails-' + studentId);
+        if (studentRowDetails.hasClass('hidden')) {
+            studentRowDetails.removeClass('hidden').hide().slideDown();
+        } else {
+            studentRowDetails.slideUp(function() {
+                $(this).addClass('hidden');
+            });
+        }
     });
 
     $('#studentExcelForm').on('submit', function (event) {
