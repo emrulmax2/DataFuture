@@ -786,7 +786,7 @@ class StudentProgressMonitoringReportController extends Controller
                         $html .= '<tr id="studentRow-'.$studentId.'">';
                             $html .= '<td class="font-medium text-left">';
                                 $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle font-medium hover:text-cyan-600">';
-                                    $html .= '<i data-lucide="circle-plus" class="w-4 h-4 mr-1 plusToggle"></i> <i data-lucide="circle-minus" class="w-4 h-4 mr-1 hidden minusToggle"></i>'.$theResult['lcc_id'];
+                                    $html .= '<span class="collapseIcon">+</span>'.$theResult['lcc_id'];
                                 $html .= '</a>';
                             $html .= '</td>';
                             $html .= '<td>'.$theResult['name'].'</td>';
