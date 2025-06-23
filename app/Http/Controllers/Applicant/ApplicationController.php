@@ -52,15 +52,15 @@ class ApplicationController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
-            'titles' => Title::all(),
+            'titles' => Title::where('active', 1)->get(),
             'venues' => Venue::all(),
-            'country' => Country::all(),
-            'ethnicity' => Ethnicity::all(),
-            'disability' => Disability::all(),
-            'relations' => KinsRelation::all(),
+            'country' => Country::where('active', 1)->get(),
+            'ethnicity' => Ethnicity::where('active', 1)->get(),
+            'disability' => Disability::where('active', 1)->get(),
+            'relations' => KinsRelation::where('active', 1)->get(),
             'bodies' => AwardingBody::all(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'sexid' => SexIdentifier::all(),
+            'sexid' => SexIdentifier::where('active', 1)->get(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => Applicant::where('applicant_user_id', \Auth::guard('applicant')->user()->id)->whereNull('submission_date')->orderBy('id', 'DESC')->first(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
