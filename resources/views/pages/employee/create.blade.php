@@ -186,8 +186,10 @@
                             <select id="vertical-form-12" name="ethnicity" class="lcc-tom-select w-full lccToms">
                                 <option value="">Please Select</option>
                                 @foreach($ethnicity as $ethnicities)
-                                    <option  {{ (isset($employee->ethnicity_id) && $employee->ethnicity_id == $ethnicities->id ? 'Selected' : '') }} value="{{ $ethnicities->id }}">{{ $ethnicities->name }}</option>              
-                                @endforeach
+                                    @if($ethnicities->active == 1) 
+                                        <option {{ (isset($employee->ethnicity_id) && $employee->ethnicity_id == $ethnicities->id ? 'Selected' : '') }} value="{{ $ethnicities->id }}">{{ $ethnicities->name }}</option>              
+                                    @endif
+                                    @endforeach
                             </select>
                             <div class="acc__input-error error-ethnicity text-danger mt-2"></div>
                         </div>

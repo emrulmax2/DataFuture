@@ -3334,6 +3334,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student-progress-reports', 'index')->name('report.student.progress.view'); 
         Route::post('student-progress-list', 'totalCount')->name('report.student.progress.total'); 
         Route::post('student-progress-excel-download', 'excelDownload')->name('report.student.progress.excel'); 
+        Route::post('student-progress-details', 'listProgressReport')->name('report.student.progress.details'); 
     });
 
     Route::controller(ReportsAttendanceReportController::class)->group(function(){

@@ -106,25 +106,24 @@
             </div>
         </form>
     </div>
-    {{-- <div class=" intro-y box p-5 mt-10 mb-10">
-        <div class="grid grid-cols-12 items-center" id="certificationClaimed">
-            <div class="col-span-12 sm:col-span-3">
-                <label class="font-medium">Certification Claimed ?</label>
-                <div class="form-check mt-2">
-                    <input id="hard_copy_check-1" class="form-check-input" type="radio" value="1" name="group[certificate_claimed]" value="vertical-radio-chris-evans">
-                    <label class="form-check-label" for="hard_copy_check-1">Yes</label>
-                </div>
-                <div class="form-check mt-2">
-                    <input id="hard_copy_check-2" class="form-check-input" type="radio" value="0" name="group[certificate_claimed]" value="vertical-radio-liam-neeson">
-                    <label class="form-check-label" for="hard_copy_check-2">No</label>
-                </div>
-            </div>
-        </div>
-    </div> --}}
     <div class=" intro-y box p-5 mt-10 mb-10">
         <div class="grid grid-cols-12 items-center" id="reportRowCountWrap">
             <div id="reportTotalRowCount" class="col-span-12 sm:col-span-6 items-center text-left font-medium ">Total Student(s) Found: <div id="totalCount" class="inline-block ml-2"></div></div>
+            
             <div class="col-span-12 sm:col-span-6 text-right">
+                <button type="button" id="studentDataReportViewBtn" class="btn btn-success w-auto text-white" disabled>
+                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>View Results 
+                    <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2 hidden loadingCall" style="display: none;">
+                        <g fill="none" fill-rule="evenodd">
+                            <g transform="translate(1 1)" stroke-width="4">
+                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                <path d="M36 18c0-9.94-8.06-18-18-18">
+                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                </button>
                 <button type="button" id="studentDataReportExcelBtn" class="btn btn-primary w-auto" disabled>
                     <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>Export Excel 
                     <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2 hidden loadingCall" style="display: none;">
@@ -146,6 +145,17 @@
         @csrf
         <input type="hidden" id="studentExcelFormInput" name="studentExcelFormInput" value="1">
     </form>
+
+    <form method="POST" id="studentViewForm">
+        @csrf
+        <input type="hidden" id="studentViewFormInput" name="studentViewFormInput" value="1">
+    </form>
+    <div id="progressTableContainer" class="intro-y box p-5 mt-10 mb-10 hidden">
+        <div class="overflow-x-auto">
+            
+        </div>
+    </div>
+    <!-- END: HTML Table Data -->
 @endsection
 
 @section('script')
