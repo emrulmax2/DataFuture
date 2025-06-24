@@ -758,7 +758,7 @@ class StudentProgressMonitoringReportController extends Controller
     public function getHtml($results, $resultDetails){
         
         $html = '';
-        $html .= '<table class="table table-bordered table-sm studentResultProgressTable">';
+        $html .= '<table class="table table-bordered table-sm studentResultProgressTable" style="transition: all 0.3s ease-in-out;">';
             $html .= '<thead>';
                 $html .= '<tr>';
                     $html .= '<th class="w-1/6">LCC ID</th>';
@@ -793,7 +793,7 @@ class StudentProgressMonitoringReportController extends Controller
                                     $html .= '<span class="collapseIcon">+</span> '.$theResult['lcc_id'];
                                 $html .= '</a>';
                             else:
-                                $html .= '<span class="text-cyan-600">'.$theResult['lcc_id']. '</span>';
+                                $html .= '<span style="color: #0891b2">'.$theResult['lcc_id']. '</span>';
                             endif;
                             $html .= '</td>';
                             $html .= '<td>'.$theResult['name'].'</td>';
