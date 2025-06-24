@@ -56,18 +56,18 @@ class DashboardController extends Controller
     public function index()
     {
         $userData = auth('student')->user();
-        $countries = Country::all();
-        $ethnicities = Ethnicity::all();
-        $religions = Religion::all();
-        $sexualOrientations = SexualOrientation::all();
-        $sexIdentifiers = SexIdentifier::all();
-        $genderIdentities = HesaGender::all();
+        $countries = Country::where('active', 1)->get();
+        $ethnicities = Ethnicity::where('active', 1)->get();
+        $religions = Religion::where('active', 1)->get();
+        $sexualOrientations = SexualOrientation::where('active', 1)->get();
+        $sexIdentifiers = SexIdentifier::where('active', 1)->get();
+        $genderIdentities = HesaGender::where('active', 1)->get();
         $studentData = Student::where("student_user_id", $userData->id)->get()->first();
         $studentContact = $studentData->contact;
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
         $permanentAddress = Address::find($studentContact->permanent_address_id);
-        $terTimeAccomadtionType = TermTimeAccommodationType::all();
+        $terTimeAccomadtionType = TermTimeAccommodationType::where('active', 1)->get();
         $consentList = ConsentPolicy::all();
         $data = [
             "student_id" => $studentData->id,
