@@ -787,7 +787,7 @@ class StudentProgressMonitoringReportController extends Controller
                             $html .= '<td class="font-medium text-left">';
                             if(isset($resultDetails[$studentId]) && !empty($resultDetails[$studentId])):
                                 $html .= '<a id="student-'.$studentId.'" data-studentid="'.$studentId.'" href="javascript:void(0);" class="studentResultRowToggle font-medium hover:text-cyan-600">';
-                                    $html .= '<span class="collapseIcon">+</span>'.$theResult['lcc_id'];
+                                    $html .= '<span class="collapseIcon">+</span> '.$theResult['lcc_id'];
                                 $html .= '</a>';
                             else:
                                 $html .= '<span class="text-cyan-600">'.$theResult['lcc_id']. '</span>';
