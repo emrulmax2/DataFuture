@@ -793,7 +793,7 @@ class StudentProgressMonitoringReportController extends Controller
                                     $html .= '<span class="collapseIcon">+</span> '.$theResult['lcc_id'];
                                 $html .= '</a>';
                             else:
-                                $html .= '<span class="text-cyan-600">'.$theResult['lcc_id']. '</span>';
+                                $html .= '<span style="color: #0891b2">'.$theResult['lcc_id']. '</span>';
                             endif;
                             $html .= '</td>';
                             $html .= '<td>'.$theResult['name'].'</td>';
