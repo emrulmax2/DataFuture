@@ -649,7 +649,7 @@ class StudentProgressMonitoringReportController extends Controller
                     $termBaseSingleCreditValueCount[$term] = 0;
 
                     $termBaseSingleCompleteCount[$term] = 0;
-
+                    
                     foreach($resultSets[$term] as $module => $result):
                         $compeleteFound = false;
                         if(!isset($result['results']) || $result['results']=="") {
@@ -690,9 +690,12 @@ class StudentProgressMonitoringReportController extends Controller
                         $theCollection[$dataCount][11] = "";
                         
                         $dataCount++;
+                        
                     endforeach;
+                    
                 endif;
-                if(count($term_declaration_ids)>1) {
+                
+                if(count($term_declaration_ids)>0 ) {
                     $theCollection[$dataCount][0] = "";
                     $theCollection[$dataCount][1] = "";
                     $theCollection[$dataCount][2] = "";
@@ -709,8 +712,8 @@ class StudentProgressMonitoringReportController extends Controller
                     $dataCount++;
                     
                     $dataSetByStudent[$studentId][$term] = $theCollection;
-                }
                 
+                }
             endforeach;
                     
                 $theCollection = [];

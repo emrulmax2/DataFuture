@@ -1057,8 +1057,9 @@ import TomSelect from 'tom-select';
                 $(this).addClass('hidden');
                 // $(this).find('.minusToggle').addClass('hidden');
                 // $(this).find('.plusToggle').removeClass('hidden');
-                $(this).find('.collapseIcon').html('+');
+               
             });
+            $(this).find('.collapseIcon').html('+');
         }
     });
 
