@@ -805,6 +805,7 @@ class AgentManagementController extends Controller
                                                 'agent_comission_id' => $agent_comission_id,
                                                 'slc_money_receipt_id' => $recipt->id,
                                                 'amount' => abs($comissionAmount) * -1,
+                                                'comission_for' => 'Refund',
                                                 'status' => 1,
                                                 'created_by' => auth()->user()->id,
                                             ]);

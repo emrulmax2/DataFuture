@@ -12,8 +12,8 @@ class StudentQualification extends Model
 
     protected $fillable = [
         'student_id',
+        'other_academic_qualification_id',
         'awarding_body',
-        'highest_academic',
         'subjects',
         'result',
         'qualification_grade_id',

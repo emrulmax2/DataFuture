@@ -166,6 +166,12 @@
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-5 text-slate-500 font-medium">Award Type</div>
+                        <div class="col-span-7 font-medium">{{ (isset($award->qual_award_type) && !empty($award->qual_award_type) ? $award->qual_award_type : 'N/A') }}</div>
+                    </div>
+                </div>
+                <div class="col-span-12 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-5 text-slate-500 font-medium">Overall Result</div>
                         <div class="col-span-7 font-medium">{{ (isset($award->qual->name) && !empty($award->qual->name) ? $award->qual->name : '') }}</div>
                     </div>
@@ -704,6 +710,14 @@
                         <label for="date_of_award" class="form-label">Date of award <span class="text-danger">*</span></label>
                         <input id="date_of_award" name="date_of_award" type="text" class="form-control w-full datepicker" value="" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true" />
                         <div class="acc__input-error error-date_of_award text-danger mt-2"></div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="qual_award_type" class="form-label">Qualification Award Type</label>
+                        <select id="qual_award_type" name="qual_award_type" class="form-control w-full">
+                            <option value="">Please Select</option>
+                            <option value="HND">HND</option>
+                            <option value="HNC">HNC</option>
+                        </select>
                     </div>
                     <div class="mt-3">
                         <label for="qual_award_result_id" class="form-label">Overall Result</label>

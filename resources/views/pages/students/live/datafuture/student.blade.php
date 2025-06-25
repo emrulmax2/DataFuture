@@ -270,11 +270,27 @@
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDID</label>
-                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->highest_academic) && !empty($student->qualHigest->highest_academic) ? $student->qualHigest->highest_academic : '') }}" type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/>
+                                                        <!-- <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->highest_academic) && !empty($student->qualHigest->highest_academic) ? $student->qualHigest->highest_academic : '') }}" type="text" name="ENTRYQUALAWARDID" class="w-full form-control" placeholder="ENTRYQUALAWARDID"/> -->
+                                                        <select name="ENTRYQUALAWARDID" class="w-full tom-selects df-tom-selects">
+                                                            <option value="">Please Select</option>
+                                                            @if($otherAcademicQualifications->count() > 0)
+                                                                @foreach($otherAcademicQualifications as $opt)
+                                                                    <option {{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->other_academic_qualification_id) && $student->qualHigest->other_academic_qualification_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }}</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
                                                     </div>
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">ENTRYQUALAWARDRESULT</label>
-                                                        <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->grade->name) && !empty($student->qualHigest->grade->name) ? $student->qualHigest->grade->name : '') }}" type="text" name="ENTRYQUALAWARDRESULT" class="w-full form-control" placeholder="ENTRYQUALAWARDRESULT"/>
+                                                        <!-- <input value="{{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->grade->name) && !empty($student->qualHigest->grade->name) ? $student->qualHigest->grade->name : '') }}" type="text" name="ENTRYQUALAWARDRESULT" class="w-full form-control" placeholder="ENTRYQUALAWARDRESULT"/> -->
+                                                        <select name="ENTRYQUALAWARDRESULT" class="w-full tom-selects df-tom-selects">
+                                                            <option value="">Please Select</option>
+                                                            @if($qualGrades->count() > 0)
+                                                                @foreach($qualGrades as $opt)
+                                                                    <option {{ (isset($student->other->is_education_qualification) && $student->other->is_education_qualification == 1 && isset($student->qualHigest->qualification_grade_id) && $student->qualHigest->qualification_grade_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
                                                     </div>
                                                     <div class="grid-column">
                                                         <label class="form-label uppercase">QUALTYPEID</label>
@@ -343,12 +359,27 @@
                                 <span class="accordionCollaps"></span>
                             </button>
                         </div>
+                        @php 
+                            $endStatuses = [21, 26, 27, 31, 42];
+                            $student_status_id = (isset($student->status_id) && $student->status_id > 0 ? $student->status_id : '');
+                            $termStatusId = (isset($student->termStatus->status_id) && !empty($student->termStatus->status_id) ? $student->termStatus->status_id : '');
+
+                            $ENGENDDATE = '';
+                            $RSNENGEND = '';
+                            $QUALRESULT = '';
+                            if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
+                                $ENGENDDATE = (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date) ? date('Y-m-d', strtotime($student->termStatus->status_end_date)) : '');
+                                $RSNENGEND = (isset($student->termStatus->reason_for_engagement_ending_id) && !empty($student->termStatus->reason_for_engagement_ending_id) ? $student->termStatus->reason_for_engagement_ending_id : '');
+                                $QUALRESULT = (isset($student->termStatus->other_academic_qualification_id) && !empty($student->termStatus->other_academic_qualification_id) ? $student->termStatus->other_academic_qualification_id : '');
+                            endif;
+                        @endphp
                         <div id="df-accr-Leaver-collapse-1" class="lcc-accordion-collapse lcc-show" style="display: block;">
                             <div class="lcc-accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                     <div class="grid-column">
                                         <label class="form-label uppercase">ENGENDDATE</label>
-                                        <input value="{{ (isset($student->df->ENGENDDATE) && !empty($student->df->ENGENDDATE) ? date('Y-m-d', strtotime($student->df->ENGENDDATE)) : '') }}" type="text" name="ENGENDDATE" class="w-full form-control df-datepicker" placeholder="ENGENDDATE"/>
+                                        <!-- <input value="{{ (isset($student->df->ENGENDDATE) && !empty($student->df->ENGENDDATE) ? date('Y-m-d', strtotime($student->df->ENGENDDATE)) : '') }}" type="text" name="ENGENDDATE" class="w-full form-control df-datepicker" placeholder="ENGENDDATE"/> -->
+                                        <input value="{{ $ENGENDDATE }}" type="text" name="ENGENDDATE" class="w-full form-control df-datepicker" placeholder="ENGENDDATE"/>
                                     </div>
                                     <div class="grid-column">
                                         <label class="form-label uppercase">RSNENGEND</label>
@@ -356,7 +387,7 @@
                                             <option value="">Please Select</option>
                                             @if($endreasons->count() > 0)
                                                 @foreach($endreasons as $opt)
-                                                    <option {{ (isset($student->df->RSNENGEND) && $student->df->RSNENGEND == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                    <option {{ ($RSNENGEND == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
                                                 @endforeach
                                             @endif
                                         </select>
@@ -395,7 +426,12 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                     <div class="grid-column">
                                         <label class="form-label uppercase">QUALAWARDID</label>
-                                        <input type="text" value="{{ $QUALAWARDID }}" name="QUALAWARDID" class="w-full form-control" placeholder="QUALAWARDID"/>
+                                        <!-- <input type="text" value="{{ $QUALAWARDID }}" name="QUALAWARDID" class="w-full form-control" placeholder="QUALAWARDID"/> -->
+                                        <select id="QUALAWARDID" name="QUALAWARDID" class="form-control w-full">
+                                            <option value="">Please Select</option>
+                                            <option {{ isset($student->awarded->qual_award_type) && $student->awarded->qual_award_type == 'HND' ? 'Selected' : '' }} value="HND">HND</option>
+                                            <option {{ isset($student->awarded->qual_award_type) && $student->awarded->qual_award_type == 'HNC' ? 'Selected' : '' }} value="HNC">HNC</option>
+                                        </select>
                                     </div>
                                     <div class="grid-column">
                                         <label class="form-label uppercase">QUALID</label>
@@ -403,7 +439,15 @@
                                     </div>
                                     <div class="grid-column">
                                         <label class="form-label uppercase">QUALRESULT</label>
-                                        <input type="text" value="{{ (isset($student->awarded->qual->name) && !empty($student->awarded->qual->name) ? $student->awarded->qual->name : '') }}" name="QUALRESULT" class="w-full form-control" placeholder="QUALRESULT"/>
+                                        <!-- <input type="text" value="{{ (isset($student->awarded->qual->name) && !empty($student->awarded->qual->name) ? $student->awarded->qual->name : '') }}" name="QUALRESULT" class="w-full form-control" placeholder="QUALRESULT"/> -->
+                                        <select id="QUALRESULT" name="QUALRESULT" class="form-control w-full">
+                                            <option value="">Please Select</option>
+                                            @if($qualAwards->count() > 0)
+                                                @foreach($qualAwards as $oaq)
+                                                    <option {{ isset($student->awarded->qual_award_result_id) && $student->awarded->qual_award_result_id == $oaq->id ? 'Selected' : '' }} value="{{ $oaq->id }}">{{ $oaq->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -425,6 +469,17 @@
                                 $hesaEndDate = (isset($stu->enddate) && !empty($stu->enddate) ? date('Y-m-d', strtotime($stu->enddate)) : '');
                                 $periodEndDate = (isset($stu->periodend) && !empty($stu->periodend) && $stu->periodend != '0000-00-00' ? date('Y-m-d', strtotime($stu->periodend)) : '');
                                 $periodStartDate = (isset($stu->periodstart) && !empty($stu->periodstart) && $stu->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($stu->periodstart)) : '');
+
+                                $SCSMODE = (isset($stu->mode_id) && $stu->mode_id > 0 ? $stu->mode_id : '');
+                                $SCSEXPECTEDENDDATE = $instanceEnd;
+                                $SCSENDDATE = $hesaEndDate;
+                                if(!empty($ENGENDDATE) && ($ENGENDDATE > $periodStartDate &&  $ENGENDDATE < $periodEndDate) && $ENGENDDATE < $instanceEnd):
+                                    $SCSENDDATE = $ENGENDDATE;
+                                    $SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
+                                elseif(empty($hesaEndDate) && (!empty($SCSEXPECTEDENDDATE) && $SCSEXPECTEDENDDATE < date('Y-m-d'))):
+                                    $SCSENDDATE = $SCSEXPECTEDENDDATE;
+                                    $SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
+                                endif;
 
                                 $RSNSCSEND = '';
                                 if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
@@ -479,7 +534,8 @@
                                             </div>
                                             <div class="grid-column">
                                                 <label class="form-label uppercase">SCSENDDATE</label>
-                                                <input type="text" value="{{ (isset($stu->enddate) && !empty($stu->enddate) ? date('Y-m-d', strtotime($stu->enddate)) : '') }}" name="SCS[{{ $stu->id }}][SCSENDDATE]" class="w-full form-control df-datepicker" placeholder="SCSENDDATE"/>
+                                                <!-- <input type="text" value="{{ (isset($stu->enddate) && !empty($stu->enddate) ? date('Y-m-d', strtotime($stu->enddate)) : '') }}" name="SCS[{{ $stu->id }}][SCSENDDATE]" class="w-full form-control df-datepicker" placeholder="SCSENDDATE"/> -->
+                                                <input type="text" value="{{ (!empty($SCSENDDATE) ? date('Y-m-d', strtotime($SCSENDDATE)) : '') }}" name="SCS[{{ $stu->id }}][SCSENDDATE]" class="w-full form-control df-datepicker" placeholder="SCSENDDATE"/>
                                             </div>
                                             <div class="grid-column">
                                                 <label class="form-label uppercase">SCSFEEAMOUNT</label>
@@ -491,7 +547,7 @@
                                                     <option value="">Please Select</option>
                                                     @if($modes->count() > 0)
                                                         @foreach($modes as $opt)
-                                                            <option {{ ($stu->mode_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                            <option {{ ($SCSMODE == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
                                                         @endforeach
                                                     @endif
                                                 </select>
@@ -723,6 +779,7 @@
                                         </div>
                                         <!-- END: Qualification Awarded -->
 
+                                        
                                         <!-- BEGIN: Session Status -->
                                         <div id="df-accordion-SessionStatus-{{$stu->id}}" class="lcc-accordion lcc-accordion-boxed mt-5">
                                             <div class="lcc-accordion-item">
@@ -734,16 +791,32 @@
                                                 </div>
                                                 <div id="df-accr-SessionStatus-collapse-{{$stu->id}}" class="lcc-accordion-collapse lcc-show" style="display: block;">
                                                     <div class="lcc-accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                                                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
-                                                            <div class="grid-column">
-                                                                <label class="form-label uppercase">STATUSVALIDFROM</label>
-                                                                <input type="text" value="{{ (isset($stu->periodstart) && !empty($stu->periodstart) ? date('Y-m-d', strtotime($stu->periodstart)) : '') }}" name="SCS[{{ $stu->id }}][STATUSVALIDFROM]" class="w-full form-control df-datepicker" placeholder="STATUSVALIDFROM"/>
+                                                        @if(isset($sessionStatuses[$stu->id]) && !empty($sessionStatuses[$stu->id]))
+                                                            @foreach($sessionStatuses[$stu->id] as $termDecId => $sts)
+                                                                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2 {{ !$loop->first ? 'border-t pt-3 mt-4' : '' }}">
+                                                                    <div class="grid-column">
+                                                                        <label class="form-label uppercase">STATUSVALIDFROM</label>
+                                                                        <input type="text" value="{{ (isset($sts['STATUSVALIDFROM']) && !empty($sts['STATUSVALIDFROM']) ? date('Y-m-d', strtotime($sts['STATUSVALIDFROM'])) : '') }}" name="SCS[{{ $stu->id }}][STATUSVALIDFROM]" class="w-full form-control df-datepicker" placeholder="STATUSVALIDFROM"/>
+                                                                    </div>
+                                                                    <div class="grid-column">
+                                                                        <label class="form-label uppercase">STATUSCHANGEDTO</label>
+                                                                        <!-- <input type="text" name="SCS[{{ $stu->id }}][STATUSCHANGEDTO]" class="w-full form-control df-datepicker" placeholder="STATUSCHANGEDTO"/> -->
+                                                                        <select name="SCS[{{ $stu->id }}][STATUSCHANGEDTO]" class="w-full tom-selects df-tom-selects">
+                                                                            <option value="">Please Select</option>
+                                                                            @if($sessionStatus->count() > 0)
+                                                                                @foreach($sessionStatus as $opt)
+                                                                                    <option {{ (isset($sts['STATUSCHANGEDTO']) && $sts['STATUSCHANGEDTO'] == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
+                                                                                @endforeach
+                                                                            @endif
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        @else
+                                                            <div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
+                                                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Session Status does not available.
                                                             </div>
-                                                            <div class="grid-column">
-                                                                <label class="form-label uppercase">STATUSCHANGEDTO</label>
-                                                                <input type="text" name="SCS[{{ $stu->id }}][STATUSCHANGEDTO]" class="w-full form-control df-datepicker" placeholder="STATUSCHANGEDTO"/>
-                                                            </div>
-                                                        </div>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -787,7 +860,7 @@
                                                         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">STUDYLOCID</label>
-                                                                <input type="text" name="SCS[{{ $stu->id }}][STUDYLOCID]" class="w-full form-control" placeholder="STUDYLOCID"/>
+                                                                <input type="text" value="{{ (isset($stu->studentCR->propose->venue->name) && !empty($stu->studentCR->propose->venue->name) ? $stu->studentCR->propose->venue->name : '') }}" name="SCS[{{ $stu->id }}][STUDYLOCID]" class="w-full form-control" placeholder="STUDYLOCID"/>
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">DISTANCE</label>
@@ -795,11 +868,11 @@
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">STUDYPROPORTION</label>
-                                                                <input  value="{{ (isset($stu->df->STUDYPROPORTION) && $stu->df->STUDYPROPORTION == $opt->id ? $stu->df->STUDYPROPORTION : '') }}" type="text" name="SCS[{{ $stu->id }}][STUDYPROPORTION]" class="w-full form-control" placeholder="STUDYPROPORTION"/>
+                                                                <input  value="{{ (isset($stu->df->STUDYPROPORTION) && $stu->df->STUDYPROPORTION == $opt->id ? $stu->df->STUDYPROPORTION : '100') }}" type="text" name="SCS[{{ $stu->id }}][STUDYPROPORTION]" class="w-full form-control" placeholder="STUDYPROPORTION"/>
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">VENUEID</label>
-                                                                <input type="text" name="SCS[{{ $stu->id }}][VENUEID]" class="w-full form-control" placeholder="VENUEID"/>
+                                                                <input type="text" value="{{ (isset($stu->studentCR->propose->venue->idnumber) && !empty($stu->studentCR->propose->venue->idnumber) ? $stu->studentCR->propose->venue->idnumber : '') }}" name="SCS[{{ $stu->id }}][VENUEID]" class="w-full form-control" placeholder="VENUEID"/>
                                                             </div>
                                                         </div>
                                                     </div>

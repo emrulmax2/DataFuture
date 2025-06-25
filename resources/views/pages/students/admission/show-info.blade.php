@@ -249,7 +249,7 @@
                                     <option value="">Please Select</option>
                                     @if($feeelegibility->count() > 0)
                                         @foreach($feeelegibility as $fl)
-                                            <option {{ isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id == $fl->id ? 'Selected' : '' }} value="{{ $fl->id }}">{{ $fl->name }}</option>
+                                            <option {{ isset($applicant->feeeligibility->fee_eligibility_id) && $applicant->feeeligibility->fee_eligibility_id == $fl->id ? 'Selected' : ($fl->id == 3 ? 'Selected' : '') }} value="{{ $fl->id }}">{{ $fl->name }}</option>
                                         @endforeach
                                     @endif
                                 </select>
