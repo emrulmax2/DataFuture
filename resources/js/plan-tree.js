@@ -127,12 +127,7 @@ var classPlanTreeListTable = (function () {
                     headerHozAlign: 'left',
                     width: 298,
                     formatter(cell, formatterParams) {
-                        var submissionAvailable = cell.getData().submissionAvailable;
-                        var uploadAssesment = cell.getData().uploadAssesment;
-                        var SubmissionDone = cell.getData().submissionDone;
-
                         var html = '';
-                        html +='<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +cell.getData().id +'"/>';
                         if (
                             cell.getData().class_type != 'Tutorial' &&
                             cell.getData().parent_id == 0
@@ -161,24 +156,6 @@ var classPlanTreeListTable = (function () {
                                 }
                                 html += '<br/><button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn mt-1 btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
                             html += '</div>';
-                        }
-
-                        if(uploadAssesment==1) {
-                            let btnColor = '';
-                            let btnText = '';
-                            if(SubmissionDone=="Yes") {
-                                btnColor = 'btn-success';
-                                btnText = 'View Result';
-                            }else {
-                                btnColor = 'btn-pending';
-                                btnText = 'Upload Submission';
-                            }
-                            html += '<a href="' +route( 'results-staff-submission.show', cell.getData().id) +'" type="button" class="mt-1 btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
-                        }
-                        if(submissionAvailable==1) {
-                            if(SubmissionDone!="Yes") {
-                                html += '<a href="'+route('result.comparison', cell.getData().id) +'" type="button" class="mt-1 btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
-                            }
                         }
 
                         return html;
@@ -211,14 +188,15 @@ var classPlanTreeListTable = (function () {
                             html += '<div>';
                                 html += '<span>' + cell.getData().day + '</span><br/>';
                                 html += '<span>' + cell.getData().time + '</span>';
+                                if(cell.getData().personalTutor != ''){
+                                    html += '<br/><span>' + cell.getData().personalTutor + '</span>';
+                                }
                             html += '</div>';
 
-                            if (cell.getData().parent_id == 0) {
-                                html +=
-                                    '<button  data-id="' +
-                                    cell.getData().id +
-                                    '" data-tw-toggle="modal" data-tw-target="#syncTutorialModal" type="button" class="syncBtn mr-2 btn btn-twitter rounded-full w-6 h-6 inline-flex justify-center items-center p-0"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>';
-                            }
+                            // if (cell.getData().parent_id == 0) {
+                            //     html += '<button  data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#syncTutorialModal" type="button" class="syncBtn mr-2 btn btn-twitter rounded-full w-6 h-6 inline-flex justify-center items-center p-0"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>';
+                            // }
+                            html += '<button data-theory="0" data-tutorial="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="mt-1 tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
                         } else if (tutorials) {
                             var infoHtml = '';
                             if(tutorials.day_match != 1){
@@ -257,64 +235,64 @@ var classPlanTreeListTable = (function () {
                         return html;
                     },
                 },
-                // {
-                //     title: 'Actions',
-                //     field: 'id',
-                //     headerSort: false,
-                //     hozAlign: 'center',
-                //     headerHozAlign: 'left',
-                //     download: false,
-                //     width: 180,
-                //     formatter(cell, formatterParams) {
-                //         var tutorials = cell.getData().tutorial
-                //             ? cell.getData().tutorial
-                //             : false;
-                //         var submissionAvailable = cell.getData().submissionAvailable;
-                //         var uploadAssesment = cell.getData().uploadAssesment;
-                //         var SubmissionDone = cell.getData().submissionDone;
+                {
+                    title: 'Results',
+                    field: 'id',
+                    headerSort: false,
+                    hozAlign: 'center',
+                    headerHozAlign: 'left',
+                    download: false,
+                    width: 180,
+                    formatter(cell, formatterParams) {
+                        var tutorials = cell.getData().tutorial
+                            ? cell.getData().tutorial
+                            : false;
+                        var submissionAvailable = cell.getData().submissionAvailable;
+                        var uploadAssesment = cell.getData().uploadAssesment;
+                        var SubmissionDone = cell.getData().submissionDone;
                         
-                //         var btns = '';
-                //         if (cell.getData().deleted_at == null) {
-                //             btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
-                //             if (tutorials) {
-                //                 btns +=
-                //                     '<button data-theory="' +
-                //                     cell.getData().id +
-                //                     '" data-tutorial="' +
-                //                     tutorials.id +
-                //                     '" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
-                //             }
-                //             if(uploadAssesment==1) {
-                //                 let btnColor = '';
-                //                 let btnText = '';
-                //                 if(SubmissionDone=="Yes") {
-                //                     btnColor = 'btn-success';
-                //                     btnText = 'View Result';
-                //                 }else {
-                //                     btnColor = 'btn-pending';
-                //                     btnText = 'Upload Submission';
-                //                 }
-                //                 btns += '<a href="' +route( 'results-staff-submission.show', cell.getData().id) +'" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
-                //             }
-                //             if(submissionAvailable==1) {
-                //                 if(SubmissionDone!="Yes") {
-                //                     btns += '<a href="'+route('result.comparison', cell.getData().id) +'" type="button" class=" btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
-                //                 }
-                //             }
-                //             //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
-                //         } else if (cell.getData().deleted_at != null) {
-                //             //btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                //         }
+                        var btns = '';
+                        if (cell.getData().deleted_at == null) {
+                            // btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editPlanModal" type="button" class="edit_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Plan</button>';
+                            // if (tutorials) {
+                            //     btns +=
+                            //         '<button data-theory="' +
+                            //         cell.getData().id +
+                            //         '" data-tutorial="' +
+                            //         tutorials.id +
+                            //         '" data-tw-toggle="modal" data-tw-target="#tutorialDetailsModal" type="button" class="tutorial_btn btn-round btn btn-primary text-xs text-white px-2 py-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> Edit Tutorial</button>';
+                            // }
+                            if(uploadAssesment==1) {
+                                let btnColor = '';
+                                let btnText = '';
+                                if(SubmissionDone=="Yes") {
+                                    btnColor = 'btn-success';
+                                    btnText = 'View Result';
+                                }else {
+                                    btnColor = 'btn-pending';
+                                    btnText = 'Upload Submission';
+                                }
+                                btns += '<a href="' +route( 'results-staff-submission.show', cell.getData().id) +'" type="button" class=" btn-round btn '+btnColor+' text-xs text-white px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> '+btnText+'</a>';
+                            }
+                            if(submissionAvailable==1) {
+                                if(SubmissionDone!="Yes") {
+                                    btns += '<a href="'+route('result.comparison', cell.getData().id) +'" type="button" class=" btn-round btn text-success text-xs btn-outline-success px-2 py-1 mr-1 mb-1"><i data-lucide="Pencil" class="w-4 h-4 mr-1"></i> View Submission</a>';
+                                }
+                            }
+                            //btns +='<button data-id="'+cell.getData().id +'"  class="delete_btn btn btn-danger text-xs text-white btn-round px-2 py-1 ml-1"><i data-lucide="Trash2" class="w-4 h-4 mr-1"></i> Delete</button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            //btns += '<button data-id="'+cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        }
 
-                //         btns +='<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +cell.getData().id +'"/>';
+                        btns +='<input type="hidden" class="classPlanId" name="classPlanIds[]" value="' +cell.getData().id +'"/>';
 
-                //         return (
-                //             '<div style="white-space: normal; text-align: left;">' +
-                //             btns +
-                //             '</div>'
-                //         );
-                //     },
-                // },
+                        return (
+                            '<div style="white-space: normal; text-align: left;">' +
+                            btns +
+                            '</div>'
+                        );
+                    },
+                },
             ],
             rowSelectionChanged: function (data, rows) {
                 var ids = [];
@@ -2194,9 +2172,7 @@ var assignedStudentModalListTable = (function () {
                             $('#successModalCP .successModalTitleCP').html(
                                 'Congratulation!'
                             );
-                            $('#successModalCP .successModalDescCP').html(
-                                'Tutorial plan data successfully saved.'
-                            );
+                            $('#successModalCP .successModalDescCP').html(response.data.msg);
                         });
 
                     setTimeout(function () {
@@ -2221,6 +2197,21 @@ var assignedStudentModalListTable = (function () {
                             );
                             $(`#tutorialDetailsForm  .error-${key}`).html(val);
                         }
+                    } else if(error.response.status == 304){
+                        warningModalCP.show();
+                        document
+                            .getElementById('warningModalCP')
+                            .addEventListener(
+                                'shown.tw.modal',
+                                function (event) {
+                                    $(
+                                        '#warningModalCP .warningModalTitleCP'
+                                    ).html('Error Found!');
+                                    $(
+                                        '#warningModalCP .warningModalDescCP'
+                                    ).html(error.response.data.msg);
+                                }
+                            );
                     } else {
                         console.log('error');
                     }

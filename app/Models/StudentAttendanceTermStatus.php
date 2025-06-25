@@ -16,6 +16,10 @@ class StudentAttendanceTermStatus extends Model
         'status_id',
         'status_change_reason',
         'status_change_date',
+        'status_end_date',
+        'reason_for_engagement_ending_id',
+        'qual_award_type',
+        'qual_award_result_id',
         'created_by',
         'updated_by',
     ];

@@ -292,6 +292,7 @@ use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
 use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
+use App\Http\Controllers\Settings\Studentoptions\SessionStatusController;
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
 use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
 use App\Http\Controllers\ShoppingCartController;
@@ -2233,6 +2234,19 @@ Route::middleware('auth')->group(function() {
         Route::post('titles/import', 'import')->name('titles.import');
     });
 
+    Route::controller(OtherAcademicQualificationController::class)->group(function() {
+        Route::get('other-academic-qualification/list', 'list')->name('other.academic.qualification.list'); 
+        Route::post('other-academic-qualification/store', 'store')->name('other.academic.qualification.store'); 
+        Route::get('other-academic-qualification/edit/{id}', 'edit')->name('other.academic.qualification.edit');
+        Route::post('other-academic-qualification/update', 'update')->name('other.academic.qualification.update');
+        Route::delete('other-academic-qualification/delete/{id}', 'destroy')->name('other.academic.qualification.destory');
+        Route::post('other-academic-qualification/restore/{id}', 'restore')->name('other.academic.qualification.restore');
+        Route::post('other-academic-qualification/update-status/{id}', 'updateStatus')->name('other.academic.qualification.update.status');
+    
+        Route::get('other-academic-qualification/export', 'export')->name('other.academic.qualification.export');
+        Route::post('other-academic-qualification/import', 'import')->name('other.academic.qualification.import');
+    });
+
     Route::controller(EquivalentOrLowerQualificationController::class)->group(function() {
         Route::get('equivalent-or-lower-qualification/list', 'list')->name('eqvorlwqf.list'); 
         Route::post('equivalent-or-lower-qualification/store', 'store')->name('eqvorlwqf.store'); 
@@ -3802,6 +3816,20 @@ Route::middleware('auth')->group(function() {
         // Route::post('reports/accounts/due/export', 'exportExcel')->name('reports.account.due.export'); 
         // Route::post('reports/accounts/due/get-course-status-by-semester', 'getCourseStatusBySemester')->name('reports.account.due.get.course.status'); 
         // Route::post('reports/accounts/due/get-status-by-semester-course', 'getStatusBySemesterCourse')->name('reports.account.due.get.statuses'); 
+    });
+
+    Route::controller(SessionStatusController::class)->group(function() {
+        Route::get('session-status', 'index')->name('session.status'); 
+        Route::get('session-status/list', 'list')->name('session.status.list'); 
+        Route::post('session-status/store', 'store')->name('session.status.store'); 
+        Route::get('session-status/edit/{id}', 'edit')->name('session.status.edit');
+        Route::post('session-status/update', 'update')->name('session.status.update');
+        Route::delete('session-status/delete/{id}', 'destroy')->name('session.status.destory');
+        Route::post('session-status/restore/{id}', 'restore')->name('session.status.restore');
+        Route::post('session-status/update-status/{id}', 'updateStatus')->name('session.status.update.status');
+    
+        Route::get('session-status/export', 'export')->name('session.status.export');
+        Route::post('session-status/import', 'import')->name('session.status.import');
     });
     
 });

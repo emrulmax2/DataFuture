@@ -205,6 +205,62 @@ import Dropzone from "dropzone";
             }
         })
 
+        $('#changeStudentModal #change_status_id').on('change', function(){
+            let $status_id = $(this);
+            let status_id = $status_id.val();
+
+            let $studyEndDateWrap = $('#changeStudentModal .studyEndDateWrap');
+            let $reasonIdWrap = $('#changeStudentModal .reasonIdWrap');
+            let $qualIdQrap = $('#changeStudentModal .qualIdQrap');
+            let $qualAwardTypeWrap = $('#changeStudentModal .qualAwardTypeWrap');
+
+            if(status_id == 21 || status_id == 26 || status_id == 27 || status_id == 31 || status_id == 42){
+                $studyEndDateWrap.fadeIn('fast', function(){
+                    $studyEndDateWrap.find('input').val('');
+                });
+                $reasonIdWrap.fadeIn('fast', function(){
+                    $reasonIdWrap.find('select').val('');
+                });
+            }else{
+                $studyEndDateWrap.fadeOut('fast', function(){
+                    $studyEndDateWrap.find('input').val('');
+                });
+                $reasonIdWrap.fadeOut('fast', function(){
+                    $reasonIdWrap.find('select').val('');
+                });
+            }
+            $qualIdQrap.fadeOut('fast', function(){
+                $qualIdQrap.find('select').val('');
+            });
+            $qualAwardTypeWrap.fadeOut('fast', function(){
+                $qualAwardTypeWrap.find('select').val('');
+            });
+        });
+
+        $('#changeStudentModal #reason_for_ending_id').on('change', function(){
+            let $ending_id = $(this);
+            let ending_id = $ending_id.val();
+
+            let $qualIdQrap = $('#changeStudentModal .qualIdQrap');
+            let $qualAwardTypeWrap = $('#changeStudentModal .qualAwardTypeWrap');
+
+            if(ending_id == 1){
+                $qualIdQrap.fadeIn('fast', function(){
+                    $qualIdQrap.find('select').val('');
+                });
+                $qualAwardTypeWrap.fadeIn('fast', function(){
+                    $qualAwardTypeWrap.find('select').val('');
+                });
+            }else{
+                $qualIdQrap.fadeOut('fast', function(){
+                    $qualIdQrap.find('select').val('');
+                });
+                $qualAwardTypeWrap.fadeOut('fast', function(){
+                    $qualAwardTypeWrap.find('select').val('');
+                });
+            }
+        });
+
         $('#changeStudentForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('changeStudentForm');

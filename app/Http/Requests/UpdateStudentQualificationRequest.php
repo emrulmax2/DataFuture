@@ -28,7 +28,7 @@ class UpdateStudentQualificationRequest extends FormRequest
 
             'highest_qualification_on_entry_id' => 'required',
             
-            'highest_academic' => 'required_unless:highest_qualification_on_entry_id,58',
+            // 'highest_academic' => 'required_unless:highest_qualification_on_entry_id,58',
             'qualification_grade_id' => 'required_unless:highest_qualification_on_entry_id,58',
             'degree_award_date' => 'required_unless:highest_qualification_on_entry_id,58',
             'qualification_type_identifier_id' => 'required_unless:highest_qualification_on_entry_id,58',
@@ -45,7 +45,7 @@ class UpdateStudentQualificationRequest extends FormRequest
 
             'qualification_type_identifier_id.required_unless' => 'This field is required.',
             'hesa_qualification_subject_id.required_unless' => 'This field is required.',
-            'highest_academic.required_unless' => 'This field is required.',
+            // 'highest_academic.required_unless' => 'This field is required.',
             'qualification_grade_id.required_unless' => 'This field is required.',
             'degree_award_date.required_unless' => 'This field is required.',
         ];

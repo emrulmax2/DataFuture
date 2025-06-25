@@ -386,19 +386,26 @@ var attendanceReportListTable = (function () {
                 url: route('report.attendance.reports.excel'),
                 data: { form_data : form_data},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                //responseType: 'blob',
+                responseType: 'blob',
             }).then(response => {
                 $theBtn.removeAttr('disabled');
                 $theBtn.find('svg.loading').fadeOut();
                 
                 if(response.status == 200){
-                    let url = response.data.url;
+                    // let url = response.data.url;
+                    // const link = document.createElement('a');
+                    // link.href = url;
+                    // link.setAttribute('download', 'Student_Attendance_Reports.xlsx');
+                    // document.body.appendChild(link);
+                    // link.click();
+                    // link.remove();
+
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
                     const link = document.createElement('a');
                     link.href = url;
-                    link.setAttribute('download', 'Student_Attendance_Reports.xlsx');
+                    link.setAttribute('download', 'Student_Attendance_Reports.xlsx'); 
                     document.body.appendChild(link);
                     link.click();
-                    link.remove();
                 }
             }).catch(error => {
                 $theBtn.removeAttr('disabled');

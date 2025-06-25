@@ -24,14 +24,15 @@ import TomSelect from "tom-select";
     const addStudentAwardInfoModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addStudentAwardInfoModal"));
 
     document.getElementById('addStudentAwardInfoModal').addEventListener('hide.tw.modal', function(event) {
-        $('#addSettingsModal .acc__input-error').html('');
-        $('#addSettingsModal .modal-body input:not([type="checkbox"])').val('');
-        $('#addSettingsModal .modal-body input[type="checkbox"]').prop('checked', false);
-        $('#addSettingsModal .modal-body .checkLabel').html('No');
+        $('#addStudentAwardInfoModal .acc__input-error').html('');
+        $('#addStudentAwardInfoModal .modal-body input:not([type="checkbox"])').val('');
+        $('#addStudentAwardInfoModal .modal-body input[type="checkbox"]').prop('checked', false);
+        $('#addStudentAwardInfoModal .modal-body .checkLabel').html('No');
         $('.cerReqWrap, .cerRcvdWrap, .cerRelsdWrap').fadeOut();
         qual_award_result_id.clear(true);
         certificate_requested_by.clear(true);
         certificate_released_by.clear(true);
+        $('#addStudentAwardInfoModal .modal-body select[name="qual_award_type"]').val('');
     });
 
     $("#successAWModal .successCloser").on('click', function(e){
@@ -149,6 +150,11 @@ import TomSelect from "tom-select";
                     qual_award_result_id.addItem(dataset.qual_award_result_id)
                 }else{
                     qual_award_result_id.clear(true);
+                }
+                if(dataset.qual_award_type != ''){
+                    $('#addStudentAwardInfoModal select[name="qual_award_type"]').val(dataset.qual_award_type);
+                }else{
+                    $('#addStudentAwardInfoModal select[name="qual_award_type"]').val('');
                 }
 
                 if(dataset.certificate_requested  == 'Yes'){

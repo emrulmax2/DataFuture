@@ -205,6 +205,7 @@ var studentEducationQualTable = (function () {
         highest_qualification_on_entry_id1.clear();
         hesa_exam_sitting_venue_id1.clear()
         qualification_grade_id.clear()
+        other_academic_qualification_id.clear()
     });
 
     const editQualificationModalEl = document.getElementById('editQualificationModal')
@@ -219,6 +220,7 @@ var studentEducationQualTable = (function () {
         highest_qualification_on_entry_id.clear(true);
         hesa_exam_sitting_venue_id.clear(true);
         edit_qualification_grade_id.clear(true);
+        edit_other_academic_qualification_id.clear(true);
     });
 
     let tomOptions = {
@@ -248,6 +250,9 @@ var studentEducationQualTable = (function () {
 
     var qualification_grade_id = new TomSelect('#qualification_grade_id', tomOptions);
     var edit_qualification_grade_id = new TomSelect('#edit_qualification_grade_id', tomOptions);
+
+    var other_academic_qualification_id = new TomSelect('#other_academic_qualification_id', tomOptions);
+    var edit_other_academic_qualification_id = new TomSelect('#edit_other_academic_qualification_id', tomOptions);
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -376,6 +381,7 @@ var studentEducationQualTable = (function () {
                     hesa_qualification_subject_id.clear(true);
                     highest_qualification_on_entry_id.clear(true);
                     edit_qualification_grade_id.clear(true);
+                    edit_other_academic_qualification_id.clear(true);
 
                     previous_provider_id.addItem(dataset.previous_provider_id);
                     qualification_type_identifier_id.addItem(dataset.qualification_type_identifier_id);
@@ -383,6 +389,7 @@ var studentEducationQualTable = (function () {
                     highest_qualification_on_entry_id.addItem(dataset.highest_qualification_on_entry_id);
                     hesa_exam_sitting_venue_id.addItem(dataset.hesa_exam_sitting_venue_id);
                     edit_qualification_grade_id.addItem(dataset.qualification_grade_id);
+                    edit_other_academic_qualification_id.addItem(dataset.other_academic_qualification_id);
                     
 
                     $('#editQualificationModal input[name="id"]').val(editId);

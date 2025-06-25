@@ -346,10 +346,12 @@ class AttendanceReportController extends Controller
             endforeach;
         endif;
 
-        if (Storage::disk('local')->exists('public/Student_Attendance_Reports.xlsx')):
-            Storage::disk('local')->delete('public/Student_Attendance_Reports.xlsx');
-        endif;
-        Excel::store(new ArrayCollectionExport($theCollection), 'public/Student_Attendance_Reports.xlsx', 'local');
-        return response()->json(['url' => url('storage/Student_Attendance_Reports.xlsx')], 200);
+        // if (Storage::disk('local')->exists('public/Student_Attendance_Reports.xlsx')):
+        //     Storage::disk('local')->delete('public/Student_Attendance_Reports.xlsx');
+        // endif;
+        // Excel::store(new ArrayCollectionExport($theCollection), 'public/Student_Attendance_Reports.xlsx', 'local');
+        // return response()->json(['url' => url('storage/Student_Attendance_Reports.xlsx')], 200);
+
+        return Excel::download(new ArrayCollectionExport($theCollection), 'Student_Attendance_Reports.xlsx');
     }
 }

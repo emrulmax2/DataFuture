@@ -8,8 +8,10 @@ use App\Models\ExamResultPrev;
 use App\Models\Grade;
 use App\Models\ModuleCreation;
 use App\Models\ModuleLevel;
+use App\Models\OtherAcademicQualification;
 use App\Models\Plan;
 use App\Models\QualAwardResult;
+use App\Models\ReasonForEngagementEnding;
 use App\Models\Result;
 use App\Models\Semester;
 use App\Models\Status;
@@ -108,6 +110,8 @@ class StudentResultController extends Controller
             "grades" =>$grades,
             "terms" =>TermDeclaration::orderBy('id','DESC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'prev_result_count' => $prevResultCount,
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),

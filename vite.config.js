@@ -392,6 +392,8 @@ export default defineConfig({
                 'resources/js/student-list-communication.js',
                 'resources/js/student-workplacement-form.js',
                 'resources/js/student-expected-result-search-form.js',
+                'resources/js/other-academic-qualifications.js',
+                'resources/js/session-status.js',
 
             ],
             refresh: true,

@@ -42,12 +42,15 @@ use App\Models\LevelHours;
 use App\Models\MobileVerificationCode;
 use App\Models\ModduleCreation;
 use App\Models\Option;
+use App\Models\OtherAcademicQualification;
 use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\PreviousProvider;
 use App\Models\ProcessList;
+use App\Models\QualAwardResult;
 use App\Models\QualificationGrade;
 use App\Models\QualificationTypeIdentifier;
+use App\Models\ReasonForEngagementEnding;
 use App\Models\ReferralCode;
 use App\Models\Religion;
 use App\Models\Result;
@@ -67,6 +70,7 @@ use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentAttendanceTermStatus;
+use App\Models\StudentAward;
 use App\Models\StudentConsent;
 use App\Models\StudentContact;
 use App\Models\StudentCourseRelation;
@@ -319,6 +323,9 @@ class StudentController extends Controller
             'StudyModes' => StudyMode::where('active', 1)->orderBy('id', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'qualgrades' => QualificationGrade::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -356,6 +363,9 @@ class StudentController extends Controller
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             "CourseRelation" => $student->crel,
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -373,7 +383,10 @@ class StudentController extends Controller
             'signatory' => Signatory::all(),
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -388,7 +401,10 @@ class StudentController extends Controller
             'allStatuses' => Status::where('type', 'Student')->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('live', '1')->get(),
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -407,6 +423,9 @@ class StudentController extends Controller
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'flags' => StudentFlag::orderBy('id', 'ASC')->get(),
             'cuser' => $userData,
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -451,7 +470,10 @@ class StudentController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
 
             'processGroup' => $processGroup,
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -549,7 +571,10 @@ class StudentController extends Controller
             'studentAttendanceIds' => SlcAttendance::where('student_id', $studentId)->pluck('id')->unique()->toArray(),
             'can_add' => (isset(auth()->user()->priv()['slc_history_add']) && auth()->user()->priv()['slc_history_add'] == 1 ? true : false),
             'can_edit' => (isset(auth()->user()->priv()['slc_history_edit']) && auth()->user()->priv()['slc_history_edit'] == 1 ? true : false),
-            'can_delete' => (isset(auth()->user()->priv()['slc_history_delete']) && auth()->user()->priv()['slc_history_delete'] == 1 ? true : false)
+            'can_delete' => (isset(auth()->user()->priv()['slc_history_delete']) && auth()->user()->priv()['slc_history_delete'] == 1 ? true : false),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -586,7 +611,10 @@ class StudentController extends Controller
             
             'can_add' => (isset(auth()->user()->priv()['student_account_add']) && auth()->user()->priv()['student_account_add'] == 1 ? true : false),
             'can_edit' => (isset(auth()->user()->priv()['student_account_edit']) && auth()->user()->priv()['student_account_edit'] == 1 ? true : false),
-            'can_delete' => (isset(auth()->user()->priv()['student_account_delete']) && auth()->user()->priv()['student_account_delete'] == 1 ? true : false)
+            'can_delete' => (isset(auth()->user()->priv()['student_account_delete']) && auth()->user()->priv()['student_account_delete'] == 1 ? true : false),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
     public function accountsInvoicePrint($student_id, $payment_id) {
@@ -780,6 +808,9 @@ class StudentController extends Controller
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'studentPlanIds' => Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray(),
             'planSet' => Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
     protected function PlanWithAttendanceSet(Student $student) {
@@ -1242,7 +1273,10 @@ class StudentController extends Controller
             "term" =>$termData,
             "grades" =>$grades,
             "planDetails" => $planDetails ?? null,
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -1365,7 +1399,10 @@ class StudentController extends Controller
             "attendanceFeedStatus" =>$attendanceFeedStatus,
             "moduleNameList" =>$moduleNameList,
             "ClassType" =>$ClassType,
-            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -2029,7 +2066,10 @@ class StudentController extends Controller
             'workplacement_settings' => WorkplacementSetting::all(),
             'assign_modules' => $assign_modules,
             'total_hours_calculations' => $total_hours_calculations ?? [],
-            'confirmed_hours' => $confirmed_hours
+            'confirmed_hours' => $confirmed_hours,
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -2434,7 +2474,26 @@ class StudentController extends Controller
             $data['status_change_reason'] = $status_change_reason;
             $data['status_change_date'] = $status_change_date;
             $data['created_by'] = auth()->user()->id;
+            
+            $endStatuses = [21, 26, 27, 31, 42];
+            $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
+            $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
+            $data['status_end_date'] = (in_array($status_id, $endStatuses) && !empty($request->status_end_date) ? date('Y-m-d', strtotime($request->status_end_date)) : null);
+            $data['reason_for_engagement_ending_id'] = (in_array($status_id, $endStatuses) && !empty($request->reason_for_engagement_ending_id) ? $request->reason_for_engagement_ending_id : null);
+            $data['qual_award_type'] = $qual_award_type;
+            $data['qual_award_result_id'] = $qual_award_result_id;
+
             StudentAttendanceTermStatus::create($data);
+            if((!empty($qual_award_type) || !empty($qual_award_result_id)) && $statusDetails->eligible_for_award == 1):
+                StudentAward::updateOrCreate([ 'student_id' => $student_id, 'student_course_relation_id' => $student->crel->id ], [
+                    'student_id' => $student_id,
+                    'student_course_relation_id' => $student->crel->id,
+                    'qual_award_result_id' => $qual_award_result_id,
+                    'qual_award_type' => $qual_award_type,
+                    'created_by' => auth()->user()->id,
+                    'updated_by' => auth()->user()->id,
+                ]);
+            endif;
 
             if(!empty($plan_ids)):
                 //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
@@ -2668,6 +2727,9 @@ class StudentController extends Controller
                 ['label' => 'Student Archives', 'href' => 'javascript:void(0);'],
             ],
             'student' => Student::find($studentId),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
 }

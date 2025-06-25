@@ -20,6 +20,7 @@ class AwardController extends Controller
 
         $data = [
             'date_of_award' => (!empty($request->date_of_award) ? date('Y-m-d', strtotime($request->date_of_award)) : null),
+            'qual_award_type' => ($request->qual_award_type > 0 ? $request->qual_award_type : null),
             'qual_award_result_id' => ($request->qual_award_result_id > 0 ? $request->qual_award_result_id : null),
             'certificate_requested' => $certificate_requested,
             'date_of_certificate_requested' => ($certificate_requested == 'Yes' && !empty($request->date_of_certificate_requested) ? date('Y-m-d', strtotime($request->date_of_certificate_requested)) : null),

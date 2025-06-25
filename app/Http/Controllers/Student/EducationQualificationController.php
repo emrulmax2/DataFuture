@@ -103,7 +103,8 @@ class EducationQualificationController extends Controller
         
         $data = StudentQualification::create([
             'student_id'=> $request->student_id,
-            'highest_academic'=> (!empty($request->highest_academic) ? $request->highest_academic : null),
+            'other_academic_qualification_id'=> (isset($request->other_academic_qualification_id) && $request->other_academic_qualification_id > 0 ? $request->other_academic_qualification_id : null),
+            // 'highest_academic'=> (!empty($request->highest_academic) ? $request->highest_academic : null),
             'awarding_body'=> (!empty($request->awarding_body) ? $request->awarding_body : null),
             'subjects'=> (!empty($request->subjects) ? $request->subjects : null),
             //'result'=> $request->result,
@@ -133,7 +134,8 @@ class EducationQualificationController extends Controller
     public function update(UpdateStudentQualificationRequest $request){      
         $data = StudentQualification::where('id', $request->id)->update([
             'student_id' => $request->student_id,
-            'highest_academic' => $request->highest_academic,
+            'other_academic_qualification_id'=> (isset($request->other_academic_qualification_id) && $request->other_academic_qualification_id > 0 ? $request->other_academic_qualification_id : null),
+            // 'highest_academic' => $request->highest_academic,
             'awarding_body' => $request->awarding_body,
             'subjects' => $request->subjects,
             //'result' => $request->result,

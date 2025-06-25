@@ -776,9 +776,21 @@
                     </a>
                 </div>
                 <div class="modal-body grid grid-cols-12 gap-4">
-                    <div class="col-span-12 sm:col-span-4">
+                    {{-- <div class="col-span-12 sm:col-span-4">
                         <label for="highest_academic" class="form-label">Highest Academic Qualification<span class="text-danger">*</span></label>
                         <input type="text" placeholder="Qualification" id="highest_academic" class="form-control w-full" name="highest_academic">
+                        <div class="acc__input-error error-highest_academic text-danger mt-2"></div>
+                    </div> --}}
+                    <div class="col-span-12 sm:col-span-4">
+                        <label for="other_academic_qualification_id" class="form-label">Other Academic Qualification<span class="text-danger">*</span></label>
+                        <select id="other_academic_qualification_id" class="w-full lcc-tom-select" name="other_academic_qualification_id">
+                            <option value="">Please Select</option>
+                            @if($otherAcademicQualifications->count() > 0)
+                                @foreach($otherAcademicQualifications as $oaq)
+                                    <option value="{{ $oaq->id }}">{{ $oaq->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
                         <div class="acc__input-error error-highest_academic text-danger mt-2"></div>
                     </div>
                     <div class="col-span-12 sm:col-span-4">
@@ -913,10 +925,22 @@
                     </a>
                 </div>
                 <div class="modal-body grid grid-cols-12 gap-4">
-                    <div class="col-span-12 sm:col-span-4">
+                    {{-- <div class="col-span-12 sm:col-span-4">
                         <label for="edit_highest_academic" class="form-label">Highest Academic Qualification <span class="text-danger">*</span></label>
                         <input type="text" placeholder="Qualification" id="edit_highest_academic" class="form-control w-full" name="highest_academic">
                         <div class="acc__input-error error-highest_academic text-danger mt-2"></div>
+                    </div> --}}
+                    <div class="col-span-12 sm:col-span-4">
+                        <label for="edit_other_academic_qualification_id" class="form-label">Other Academic Qualification <span class="text-danger">*</span></label>
+                        <select id="edit_other_academic_qualification_id" class="w-full lcc-tom-select" name="other_academic_qualification_id">
+                            <option value="">Please Select</option>
+                            @if($otherAcademicQualifications->count() > 0)
+                                @foreach($otherAcademicQualifications as $oaq)
+                                    <option value="{{ $oaq->id }}">{{ $oaq->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <div class="acc__input-error error-other_academic_qualification_id text-danger mt-2"></div>
                     </div>
                     <div  class="col-span-12 sm:col-span-4">
                         <label for="edit_awarding_body" class="form-label">Awarding Body </label>

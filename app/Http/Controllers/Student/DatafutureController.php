@@ -30,17 +30,22 @@ use App\Models\MajorSourceOfTuitionFee;
 use App\Models\ModuleOutcome;
 use App\Models\ModuleResult;
 use App\Models\NonRegulatedFeeFlag;
+use App\Models\OtherAcademicQualification;
 use App\Models\Plan;
 use App\Models\PreviousProvider;
+use App\Models\QualAwardResult;
+use App\Models\QualificationGrade;
 use App\Models\QualificationTypeIdentifier;
 use App\Models\ReasonForEngagementEnding;
 use App\Models\ReasonForEndingCourseSession;
 use App\Models\Religion;
 use App\Models\Semester;
+use App\Models\SessionStatus;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\SlcAttendance;
 use App\Models\Student;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAward;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentCourseSessionDatafuture;
@@ -53,6 +58,7 @@ use App\Models\StudentSupportEligibility;
 use App\Models\StudentTermStuload;
 use App\Models\StudyMode;
 use App\Models\SuspensionOfActiveStudy;
+use App\Models\TermDeclaration;
 use App\Models\TermTimeAccommodationType;
 use Google\Service\Datastore\Count;
 use Illuminate\Http\Request;
@@ -61,7 +67,7 @@ use Illuminate\Support\Facades\DB;
 class DatafutureController extends Controller
 {
     public function index(Student $student){
-        $student->load(['other', 'contact', 'qualHigest', 'disability']);
+        $student->load(['other', 'contact', 'qualHigest', 'disability', 'termStatus']);
         $course_id = $student->crel->creation->course_id;
         $module_ids = $this->getStudentModules($student->id, $course_id);
         
@@ -72,6 +78,8 @@ class DatafutureController extends Controller
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Documents', 'href' => 'javascript:void(0);'],
             ],
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'student' => $student,
             'course_id' => $course_id,
             'student_course_relation_id' => $student->crel->id,
@@ -108,6 +116,7 @@ class DatafutureController extends Controller
             'nonregfees' => NonRegulatedFeeFlag::where('active', 1)->orderBy('name', 'ASC')->get(),
             'fundLengths' => FundingLength::where('active', 1)->orderBy('name', 'ASC')->get(),
             'moduleInstances' => $this->getStuloadModuleInstance($student->id, $student->crel->id),
+            'sessionStatuses' => $this->getStuloadSessionStatuses($student->id, $student->crel->id),
             'modoutcom' => ModuleOutcome::where('active', 1)->orderBy('name', 'ASC')->get(),
             'modresult' => ModuleResult::where('active', 1)->orderBy('name', 'ASC')->get(),
             'disalls' => DisableAllowance::where('active', 1)->orderBy('name', 'ASC')->get(),
@@ -117,7 +126,10 @@ class DatafutureController extends Controller
             'notacts' => SuspensionOfActiveStudy::where('active', 1)->orderBy('name', 'ASC')->get(),
             'sseligs' => StudentSupportEligibility::where('active', 1)->orderBy('name', 'ASC')->get(),
             'quals' => HesaQualificationAward::where('active', 1)->orderBy('name', 'ASC')->get(),
-            'heapespops' => HeapesPopulation::where('active', 1)->orderBy('name', 'ASC')->get()
+            'heapespops' => HeapesPopulation::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'qualGrades' => QualificationGrade::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'sessionStatus' => SessionStatus::where('active', 1)->orderBy('id', 'ASC')->get(),
         ]);
     }
 
@@ -133,8 +145,8 @@ class DatafutureController extends Controller
             'NUMHUS' => $request->NUMHUS,
             'CARELEAVER' => $request->CARELEAVER,
             'ENTRYQUALAWARDID' => $request->ENTRYQUALAWARDID,
-            'ENGENDDATE' => (!empty($request->ENGENDDATE) ? date('Y-m-d', strtotime($request->ENGENDDATE)) : null),
-            'RSNENGEND' => $request->RSNENGEND
+            //'ENGENDDATE' => (!empty($request->ENGENDDATE) ? date('Y-m-d', strtotime($request->ENGENDDATE)) : null),
+            //'RSNENGEND' => $request->RSNENGEND
         ];
         if(isset($existSDDF->id) && $existSDDF->id > 0):
             $stdData['updated_by'] = auth()->user()->id;
@@ -336,6 +348,7 @@ class DatafutureController extends Controller
                 $instance = CourseCreationInstance::find($instance_id);
                 $stuLoadTotal = 0;
                 if(isset($instance->terms) && $instance->terms->count() > 0):
+                    $suspendedFound = false;
                     foreach($instance->terms as $term):
                         $term_declaration_id = $term->term_declaration_id;
                         $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
@@ -403,6 +416,50 @@ class DatafutureController extends Controller
                 endif;
                 $stuLoadTotal = ($stuLoadTotal == 99 ? 100 : $stuLoadTotal);
                 StudentStuloadInformation::where('id', $stu->id)->update(['student_load' => $stuLoadTotal]);
+            endforeach;
+        endif;
+
+        //dd($res);
+        return $res;
+    }
+
+    public function getStuloadSessionStatuses($student_id, $student_course_relation_id){
+        $res = [];
+        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
+        if($stuloads->count() > 0):
+            foreach($stuloads as $stu):
+                $instance_id = $stu->course_creation_instance_id;
+                $instance = CourseCreationInstance::find($instance_id);
+                if(isset($instance->terms) && $instance->terms->count() > 0):
+                    $suspendedFound = false;
+                    foreach($instance->terms as $term):
+                        $term_declaration_id = $term->term_declaration_id;
+                        $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
+
+                        $stdAttenTermStatus = StudentAttendanceTermStatus::where('term_declaration_id', $term_declaration_id)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+                        $lastAttendance = Attendance::where('student_id', $student_id)->whereHas('plan', function($q) use($term_declaration_id){
+                                    $q->where('term_declaration_id', $term_declaration_id);
+                                })->orderBy('attendance_date', 'DESC')->get()->first();
+                        if($suspendedFound):
+                            if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                            else:
+                                $termDeclaration = TermDeclaration::find($term_declaration_id);
+
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($termDeclaration->start_date) && !empty($termDeclaration->start_date) ? date('Y-m-d', strtotime($termDeclaration->start_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 1;
+                            endif;
+                        else:
+                            if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
+                                $suspendedFound = true;
+
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                            endif;
+                        endif;
+                    endforeach;
+                endif;
             endforeach;
         endif;
 

@@ -747,23 +747,34 @@ class PlanTreeController extends Controller
     }
 
     public function getTutorial(Request $request){
-        $theory_id = $request->theory_id;
+        $theory_id = (isset($request->theory_id) && $request->theory_id > 0 ? $request->theory_id : 0);
         $tutorial_id = (isset($request->tutorial_id) && $request->tutorial_id > 0 ? $request->tutorial_id : 0);
 
-        $theory = Plan::find($theory_id);
         $tutorial = Plan::find($tutorial_id);
         $start_time = (isset($tutorial->start_time) && !empty($tutorial->start_time) ? substr($tutorial->start_time, 0, 5) : '');
         $end_time = (isset($tutorial->end_time) && !empty($tutorial->end_time) ? substr($tutorial->end_time, 0, 5) : '');
 
         $data = [];
-        $data['term'] = (isset($theory->attenTerm->name) && !empty($theory->attenTerm->name) ? $theory->attenTerm->name : '---');
-        $data['course'] = (isset($theory->course->name) ? $theory->course->name : '---');
-        $data['group'] = (isset($theory->group->name) ? $theory->group->name : '---');
-        $data['module'] = (isset($theory->creations->module_name) && !empty($theory->creations->module_name) ? $theory->creations->module_name : '');
-        $data['venue'] = (isset($theory->venu->name) && !empty($theory->venu->name) ? $theory->venu->name : '---');
-        $data['group_id'] = $theory->group_id;
-        $data['venue_id'] = $theory->venue_id;
-        $data['pt_id'] = $theory->personal_tutor_id;
+        if($theory_id > 0):
+            $theory = Plan::find($theory_id);
+            $data['term'] = (isset($theory->attenTerm->name) && !empty($theory->attenTerm->name) ? $theory->attenTerm->name : '---');
+            $data['course'] = (isset($theory->course->name) ? $theory->course->name : '---');
+            $data['group'] = (isset($theory->group->name) ? $theory->group->name : '---');
+            $data['module'] = (isset($theory->creations->module_name) && !empty($theory->creations->module_name) ? $theory->creations->module_name : '');
+            $data['venue'] = (isset($theory->venu->name) && !empty($theory->venu->name) ? $theory->venu->name : '---');
+            $data['group_id'] = $theory->group_id;
+            $data['venue_id'] = $theory->venue_id;
+            $data['pt_id'] = $theory->personal_tutor_id;
+        else:
+            $data['term'] = (isset($tutorial->attenTerm->name) && !empty($tutorial->attenTerm->name) ? $tutorial->attenTerm->name : '---');
+            $data['course'] = (isset($tutorial->course->name) ? $tutorial->course->name : '---');
+            $data['group'] = (isset($tutorial->group->name) ? $tutorial->group->name : '---');
+            $data['module'] = (isset($tutorial->creations->module_name) && !empty($tutorial->creations->module_name) ? $tutorial->creations->module_name : '');
+            $data['venue'] = (isset($tutorial->venu->name) && !empty($tutorial->venu->name) ? $tutorial->venu->name : '---');
+            $data['group_id'] = $tutorial->group_id;
+            $data['venue_id'] = $tutorial->venue_id;
+            $data['pt_id'] = $tutorial->personal_tutor_id;
+        endif;
 
         $data['rooms_id'] = (isset($tutorial->rooms_id) && $tutorial->rooms_id > 0 ? $tutorial->rooms_id : '');
         $data['start_time'] = $start_time;
@@ -783,7 +794,7 @@ class PlanTreeController extends Controller
     }
 
     public function storeTutorial(StoreTutorialPlanRequest $request){
-        $theory_id = $request->theory_id;
+        $theory_id = (isset($request->theory_id) && $request->theory_id > 0 ? $request->theory_id : 0);
         $tutorial_id = (isset($request->tutorial_id) && $request->tutorial_id > 0 ? $request->tutorial_id : 0);
         $theory = Plan::find($theory_id);
 
@@ -810,7 +821,9 @@ class PlanTreeController extends Controller
         if($tutorial_id > 0):
             $data['updated_by'] = auth()->user()->id;
             Plan::where('id', $tutorial_id)->update($data);
-        else:
+
+            return response()->json(['msg' => 'Tutorial plan data successfully updated.'], 200);
+        elseif($theory_id > 0 && $tutorial_id == 0):
             $data['term_declaration_id'] = $theory->term_declaration_id;
             $data['academic_year_id'] = $theory->academic_year_id;
             $data['course_creation_id'] = $theory->course_creation_id;
@@ -883,8 +896,13 @@ class PlanTreeController extends Controller
                     endforeach;
                 endif;
                 /* Copy Assigns */
+                return response()->json(['msg' => 'Tutorial plan successfully created.'], 200);
+            else:
+                return response()->json(['msg' => 'Can not create Tutorial plan with given information. Please try again later.'], 304);
             endif;
+        else:
+            return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 304);
         endif;
-        return response()->json(['msg' => 'Successfully updated!'], 200);
+        
     }
 }

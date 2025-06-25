@@ -14,6 +14,7 @@ class StudentAward extends Model
         'student_id',
         'student_course_relation_id',
         'date_of_award',
+        'qual_award_type',
         'qual_award_result_id',
         'certificate_requested',
         'date_of_certificate_requested',

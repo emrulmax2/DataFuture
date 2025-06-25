@@ -319,6 +319,20 @@
                 <div class="col-span-12">
                     <div class="intro-y box optionBox">
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Other Academic Qualifications</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addOtherAcademicQualificationModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="otherAcademicQualificationsListTable">
+                            @include('pages.settings.studentoption.otherAcademicQualifications.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Previous provider</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                                 <button data-tw-toggle="modal" data-tw-target="#addPreviousproviderModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
@@ -383,6 +397,20 @@
                         </div>
                         <div class="optionBoxBody p-5" data-tableid="RsnengendListTable">
                             @include('pages.settings.studentoption.rsnengend.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Session Status</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addSessionStatusModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add Session Status</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="sessionStatusListTable">
+                            @include('pages.settings.studentoption.sessionstatus.index')
                         </div>
                     </div>
                 </div>
@@ -582,4 +610,6 @@
     @vite('resources/js/student-support-eligibility.js')
     @vite('resources/js/suspension-of-active-study.js')
     @vite('resources/js/qualification-grades.js')
+    @vite('resources/js/other-academic-qualifications.js')
+    @vite('resources/js/session-status.js')
 @endsection

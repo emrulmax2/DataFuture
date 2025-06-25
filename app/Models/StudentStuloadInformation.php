@@ -16,6 +16,10 @@ class StudentStuloadInformation extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
+    public function studentCR(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+
     public function instance(){
         return $this->belongsTo(CourseCreationInstance::class, 'course_creation_instance_id');
     }

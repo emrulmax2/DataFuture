@@ -235,6 +235,45 @@
                             <input type="text" name="status_change_date" id="status_change_date" value="<?php echo date('d-m-Y') ?>" class="form-control w-full datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
+                        @php 
+                            $endStatuses = [21, 26, 27, 31, 42];
+                            $studentStatusId = (isset($student->termStatus->status_id) && !empty($student->termStatus->status_id) ? $student->termStatus->status_id : '');
+                        @endphp
+                        <div class="mt-3 studyEndDateWrap" style="display: {{ in_array($studentStatusId, $endStatuses) ? 'block' : 'none' }};">
+                            <label for="status_end_date" class="form-label">End Date <span class="text-danger">*</span></label>
+                            <input value="{{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date)) ? date('d-m-Y', strtotime($student->termStatus->status_end_date)) : '' }}" type="text" name="status_end_date" id="status_end_date" value="" class="form-control w-full datepicker" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                            <div class="acc__input-error error-status_end_date text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3 reasonIdWrap" style="display: {{ in_array($studentStatusId, $endStatuses) ? 'block' : 'none' }};">
+                            <label for="reason_for_ending_id" class="form-label">End Reason <span class="text-danger">*</span></label>
+                            <select id="reason_for_ending_id" name="reason_for_engagement_ending_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if($reasonEndings->count() > 0)
+                                    @foreach($reasonEndings as $ersn)
+                                        <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == $ersn->id) ? 'Selected' : '' }} value="{{ $ersn->id }}">{{ $ersn->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="mt-3 qualAwardTypeWrap" style="display: {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) ? 'block' : 'none' }};">
+                            <label for="qual_award_type" class="form-label">Qualification Award Type</label>
+                            <select id="qual_award_type" name="qual_award_type" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HND') ? 'Selected' : '' }} value="HND">HND</option>
+                                <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HNC') ? 'Selected' : '' }} value="HNC">HNC</option>
+                            </select>
+                        </div>
+                        <div class="mt-3 qualIdQrap" style="display: {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) ? 'block' : 'none' }};">
+                            <label for="other_academic_qualification_id" class="form-label">Qualification Award Result</label>
+                            <select id="other_academic_qualification_id" name="qual_award_result_id" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @if($qualAwards->count() > 0)
+                                    @foreach($qualAwards as $oaq)
+                                        <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_result_id) && $student->termStatus->qual_award_result_id == $oaq->id) ? 'Selected' : '' }} value="{{ $oaq->id }}">{{ $oaq->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
