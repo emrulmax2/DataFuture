@@ -112,7 +112,7 @@
             
             <div class="col-span-12 sm:col-span-6 text-right">
                 <button type="button" id="studentDataReportViewBtn" class="btn btn-success w-auto text-white" disabled>
-                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>View Results 
+                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i>View Progress 
                     <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2 hidden loadingCall" style="display: none;">
                         <g fill="none" fill-rule="evenodd">
                             <g transform="translate(1 1)" stroke-width="4">
