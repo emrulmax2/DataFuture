@@ -80,7 +80,7 @@
                                 <option value="" selected>Please Select</option>
                                 @if(!empty($ethnicity))
                                     @foreach($ethnicity as $n)
-                                        @if($n->id == 1) 
+                                        @if($n->active == 1) 
                                         <option {{ isset($applicant->other->ethnicity_id) && $applicant->other->ethnicity_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
                                         @endif
                                     @endforeach 
