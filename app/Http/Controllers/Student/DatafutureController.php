@@ -130,6 +130,7 @@ class DatafutureController extends Controller
             'qualGrades' => QualificationGrade::where('active', 1)->orderBy('name', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
             'sessionStatus' => SessionStatus::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
         ]);
     }
 

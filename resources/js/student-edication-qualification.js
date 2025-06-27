@@ -40,13 +40,22 @@ var studentEducationQualTable = (function () {
                         return `<div class="whitespace-normal">${cell.getData().awarding_body}</div>`;
                     }
                 },
+                // {
+                //     title: "Highest Academic Qualification",
+                //     field: "highest_academic",
+                //     headerHozAlign: "left",
+                //     minWidth: 200,
+                //     formatter(cell, formatterParams) {
+                //         return `<div class="whitespace-normal">${cell.getData().highest_academic}</div>`;
+                //     }
+                // },
                 {
                     title: "Highest Academic Qualification",
-                    field: "highest_academic",
+                    field: "other_academic_qualification_id",
                     headerHozAlign: "left",
                     minWidth: 200,
                     formatter(cell, formatterParams) {
-                        return `<div class="whitespace-normal">${cell.getData().highest_academic}</div>`;
+                        return `<div class="whitespace-normal">${cell.getData().other_academic_qualification_id}</div>`;
                     }
                 },
                 {

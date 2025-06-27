@@ -63,4 +63,8 @@ class StudentQualification extends Model
     public function grade(){
         return $this->belongsTo(QualificationGrade::class, 'qualification_grade_id');
     }
+
+    public function qualification(){
+        return $this->belongsTo(OtherAcademicQualification::class, 'other_academic_qualification_id');
+    }
 }

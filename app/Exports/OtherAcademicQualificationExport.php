@@ -15,7 +15,7 @@ class OtherAcademicQualificationExport implements FromCollection, WithHeadings
     public function collection()
     {
         return new Collection([
-            ['','','','','',]
+            ['Test Name','1']
         ]);
     }
 
