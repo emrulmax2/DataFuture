@@ -22,7 +22,7 @@
                     <input type="hidden" name="student_course_relation_id" value="{{ $student_course_relation_id }}"/>
 
                     <button data-tw-toggle="modal" data-tw-target="#addHesaInstanceModal" type="button" class="btn btn-facebook w-auto text-white ml-1"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Instance</button>
-                    <a href="javascript:void(0);" class="btn btn-success w-auto text-white ml-1 hidden md:inline-flex"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download XML</a>
+                    <a href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#xmlExportModal" class="btn btn-success w-auto text-white ml-1 hidden md:inline-flex"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download XML</a>
                     <button type="submit" id="saveDFBTN" class="btn btn-primary w-auto text-white ml-1 hidden md:inline-flex">
                         <i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Update Data 
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

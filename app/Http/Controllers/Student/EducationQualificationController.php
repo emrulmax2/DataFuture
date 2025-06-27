@@ -84,6 +84,7 @@ class EducationQualificationController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'other_academic_qualification_id' => (isset($list->qualification->name) && !empty($list->qualification->name) ? $list->qualification->name : ''),
                     'awarding_body' => $list->awarding_body,
                     'highest_academic' => $list->highest_academic,
                     'subjects' => $list->subjects,

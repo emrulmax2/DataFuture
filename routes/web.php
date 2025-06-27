@@ -245,6 +245,7 @@ use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
 use App\Http\Controllers\Reports\ClassStatusByTermController;
+use App\Http\Controllers\Reports\DatafutureReportController;
 use App\Http\Controllers\Reports\IntakePerformance\AttendanceRateReportController;
 use App\Http\Controllers\Reports\IntakePerformance\AwardRateReportController;
 use App\Http\Controllers\Reports\StudentDataReportController;
@@ -290,6 +291,7 @@ use App\Http\Controllers\Settings\Studentoptions\MajorSourceOfTuitionFeeControll
 use App\Http\Controllers\Settings\Studentoptions\ModuleOutcomeController;
 use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
 use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
+use App\Http\Controllers\Settings\Studentoptions\OtherAcademicQualificationController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Settings\Studentoptions\SessionStatusController;
@@ -3830,6 +3832,11 @@ Route::middleware('auth')->group(function() {
     
         Route::get('session-status/export', 'export')->name('session.status.export');
         Route::post('session-status/import', 'import')->name('session.status.import');
+    });
+
+    Route::controller(DatafutureReportController::class)->group(function(){
+        Route::post('reports/datafuture/single-student', 'getSingleStudentXml')->name('reports.datafuture.single.student'); 
+        Route::post('reports/datafuture/multiple-student', 'getMultipleStudentXml')->name('reports.datafuture.multiple.student'); 
     });
     
 });

@@ -59,6 +59,18 @@ import Litepicker from "litepicker";
     let SSI_qual_id = new TomSelect('#SSI_qual_id', tomOptionsSDF);
     let SSI_heapespop_id = new TomSelect('#SSI_heapespop_id', tomOptionsSDF);
 
+    let tomOptionsSDFNew = {
+        ...tomOptionsSDF,
+        allowEmptyOption: false,
+        plugins: {
+            ...tomOptionsSDF.plugins,
+            remove_button: {
+                title: "Remove this item",
+            },
+        }
+    }
+    let term_declaration_id = new TomSelect('#terms_declaration_id', tomOptionsSDFNew);
+
     if($('.dfReportWrap .df-datepicker').length > 0){
         $('.dfReportWrap .df-datepicker').each(function(){
             new Litepicker({
@@ -78,11 +90,47 @@ import Litepicker from "litepicker";
         })
     }
 
+    if($('#xmlExportModal').length > 0){
+        stdDFLitepicker.format = 'DD-MM-YYYY';
+        let theFormDate = new Litepicker({
+            element: document.getElementById('from_date'),
+            ...stdDFLitepicker,
+        });
+        
+        
+        let theToDate = new Litepicker({
+            element: document.getElementById('to_date'),
+            ...stdDFLitepicker,
+        });
+
+        theFormDate.on('selected', (date1, date2) => {
+            theToDate.setOptions({
+                showWeekNumbers: false,
+                minDate: theFormDate.getDate(),
+                //startDate: theFormDate.getDate()
+            });
+        });
+    }
+
+    $('#terms_declaration_id').on('change', function(){
+        let $theTermDec = $(this);
+        let termDecs = $theTermDec.val();
+
+        let $from_date = $('#from_date');
+        let $to_date = $('#to_date');
+
+        if(termDecs.length > 0){
+            $from_date.val('');
+            $to_date.val('');
+        }
+    })
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const addHesaInstanceModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHesaInstanceModal"));
     const editStudentStuloadModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editStudentStuloadModal"));
+    const xmlExportModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#xmlExportModal"));
 
     const addHesaInstanceModalEl = document.getElementById('addHesaInstanceModal')
     addHesaInstanceModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -110,6 +158,14 @@ import Litepicker from "litepicker";
         SSI_sselig_id.clear(true);
         SSI_qual_id.clear(true);
         SSI_heapespop_id.clear(true);
+    });
+
+    const xmlExportModalEl = document.getElementById('xmlExportModal')
+    xmlExportModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#xmlExportModal .acc__input-error').html('');
+        $('#xmlExportModal .modal-body input)').val('');
+        
+        term_declaration_id.clear(true);
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -419,4 +475,43 @@ import Litepicker from "litepicker";
         }
     });
 
+
+    
+    $('#xmlExportForm').on('submit', function(e){
+        e.preventDefault();
+        let $form = $(this);
+        const form = document.getElementById('xmlExportForm');
+    
+        document.querySelector('#xmlDownBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#xmlDownBtn .theLoader").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            //url: route('reports.datafuture.single.student'),
+            url: route('reports.datafuture.multiple.student'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+            document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                console.log(response.data);
+            }
+        }).catch(error => {
+            document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+            document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#xmlExportForm .${key}`).addClass('border-danger');
+                        $(`#xmlExportForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
 })()
