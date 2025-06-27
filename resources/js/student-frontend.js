@@ -51,6 +51,7 @@ import { createApp } from 'vue';
     // const studenttermTimeAddressAlertModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#termtime-address-modal"));
     // const studentpermanentAddressAlertModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#permanent-address-modal"));
 
+    const disagreeCurrentAddressModal = tailwind.Modal.getOrCreateInstance(document.querySelector('#disagreeCurrentAddressModal'));
     // click on next button
     $('.form-wizard-next-btn').on('click', function (e) {
         e.preventDefault();
@@ -221,8 +222,8 @@ import { createApp } from 'vue';
 
     $('#agreeCurrentAddress').on('click', function (e) {
         e.preventDefault();
-
-        let addressId = $(this).data('addressid');
+        disagreeCurrentAddressModal.hide();
+        let addressId = $('#agreeCurrentAddress').data('addressid');
 
         $("input[name='disagree_current_address']").val(0);
 
@@ -231,23 +232,41 @@ import { createApp } from 'vue';
             $('#currentAddress').fadeIn(150, function (e) {
                 $('#currenAddress__yes').fadeIn();
             });
-            $('#askPermanentAdress').fadeIn();
+            //$('#askPermanentAdress').fadeIn();
             $('#accomodationType__next').fadeIn();
+            $('#agreePermanentAddress').trigger('click');
         });
     });
 
     $('#disagreeCurrentAddress').on('click', function (e) {
+        // e.preventDefault();
+        // let tthis = $(this);
+
+        // $("input[name='disagree_current_address']").val(1);
+
+        // $('#currentAdressQuestion').fadeOut(300, function (e) {
+        //     $('#currentAddress').fadeIn(150, function (e) {
+        //         $('#currenAdress__no').fadeIn();
+        //     });
+        //     $('#askPermanentAdress').fadeIn();
+        //     $('#accomodationType__next').fadeIn();
+        // });
+
         e.preventDefault();
-        let tthis = $(this);
+        disagreeCurrentAddressModal.show();
+        let addressId = $('#agreeCurrentAddress').data('addressid');
 
-        $("input[name='disagree_current_address']").val(1);
+        $("input[name='disagree_current_address']").val(0);
 
-        $('#currentAdressQuestion').fadeOut(300, function (e) {
-            $('#currentAddress').fadeIn(150, function (e) {
-                $('#currenAdress__no').fadeIn();
+        $("input[name='current_address_id']").val(addressId);
+        $('#currentAdressQuestion').fadeOut(500, function (e) {
+            
+            $('#currentAddress').fadeIn(1500, function (e) {
+                $('#currenAddress__yes').fadeIn();
             });
-            $('#askPermanentAdress').fadeIn();
+            //$('#askPermanentAdress').fadeIn();
             $('#accomodationType__next').fadeIn();
+            $('#agreePermanentAddress').trigger('click');
         });
     });
 
