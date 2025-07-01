@@ -131,31 +131,31 @@ class AdmissionController extends Controller
     use GenerateApplicantLetterTrait;
 
     //I want to upate admission status of the applicant at class construction
-    public function __construct()
-    {
-        $this->updateAdmissionStatus();
-    }
-    private function updateAdmissionStatus()
-    {
-        $completedApplicantIds = [];
-        //check status of applicants where all tasks are completed
-        $applicants = Applicant::where('status_id', 3)->get();
-        foreach ($applicants as $applicant) {
-            if ($applicant->tasks->where('status', 'completed')->count() === $applicant->tasks->count()) {
-                if( $applicant->status_id == 3) {
+    // public function __construct()
+    // {
+    //     $this->updateAdmissionStatus();
+    // }
+    // private function updateAdmissionStatus()
+    // {
+    //     $completedApplicantIds = [];
+    //     //check status of applicants where all tasks are completed
+    //     $applicants = Applicant::where('status_id', 3)->get();
+    //     foreach ($applicants as $applicant) {
+    //         if ($applicant->tasks->where('status', 'completed')->count() === $applicant->tasks->count()) {
+    //             if( $applicant->status_id == 3) {
 
-                    //$applicant->status_id = 4; // Assuming 4 is the next status for 'Completed'
-                    // input id into an array
-                    $completedApplicantIds[] = $applicant->id;
-                    //$applicant->save();
-                }
+    //                 //$applicant->status_id = 4; // Assuming 4 is the next status for 'Completed'
+    //                 // input id into an array
+    //                 $completedApplicantIds[] = $applicant->id;
+    //                 //$applicant->save();
+    //             }
                 
-            }
-        }
-        FacadesDebugbar::info('Updating Admission Status for Applicants: ' . implode(', ', $completedApplicantIds));
-        // Update the status of completed applicants
-        //Applicant::whereIn('id', $completedApplicantIds)->update(['status_id' => 4]);
-    }
+    //         }
+    //     }
+    //     FacadesDebugbar::info('Updating Admission Status for Applicants: ' . implode(', ', $completedApplicantIds));
+    //     // Update the status of completed applicants
+    //     //Applicant::whereIn('id', $completedApplicantIds)->update(['status_id' => 4]);
+    // }
     public function index(){
         
         $semesters = Cache::get('semesters', function () {
