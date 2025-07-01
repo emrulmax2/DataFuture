@@ -228,7 +228,8 @@ class LetterController extends Controller
                     'created_by'=> (isset($list->created_bys) ? $list->created_bys : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'issued_date'=> (isset($list->issued_date) && !empty($list->issued_date) ? date('jS F, Y', strtotime($list->issued_date)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'can_delete' => (isset(auth()->user()->priv()['communication_delete_letter']) && auth()->user()->priv()['communication_delete_letter'] == 1 ? 1 : 0)
                 ];
                 $i++;
             endforeach;

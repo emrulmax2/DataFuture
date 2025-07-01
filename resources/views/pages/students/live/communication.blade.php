@@ -20,7 +20,9 @@
                 <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2 hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print All
                 </a>
+                @if(isset(auth()->user()->priv()['communication_send_letter']) && auth()->user()->priv()['communication_send_letter'] == 1)
                 <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
+                @endif
                 <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Letters
                 </a>
@@ -60,7 +62,9 @@
                 <div class="font-medium text-base">Email</div>
             </div>
             <div class="col-span-6 text-right relative">
+                @if(isset(auth()->user()->priv()['communication_send_email']) && auth()->user()->priv()['communication_send_email'] == 1)
                 <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
+                @endif
                 <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Emails
                 </a>
@@ -100,7 +104,9 @@
                 <div class="font-medium text-base">SMS</div>
             </div>
             <div class="col-span-6 text-right relative">
+                @if(isset(auth()->user()->priv()['communication_send_sms']) && auth()->user()->priv()['communication_send_sms'] == 1)
                 <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
+                @endif
                 <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print SMS
                 </a>
