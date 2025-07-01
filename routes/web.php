@@ -1215,7 +1215,7 @@ Route::middleware('auth')->group(function() {
         Route::post('student/reassign-slc-payment-to-agreement', 'reAssignPaymentToAgreement')->name('student.sync.slc.payment.to.agreement');
     });
 
-    Route::controller(AdmissionController::class)->group(function() {
+    Route::controller(AdmissionController::class)->middleware('update.admission.status')->group(function() {
 
         Route::get('admission', 'index')->name('admission'); 
         Route::get('admission/list', 'list')->name('admission.list'); 
