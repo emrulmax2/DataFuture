@@ -27,4 +27,20 @@ class StudentCourseSessionDatafuture extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function elq(){
+        return $this->belongsTo(EquivalentOrLowerQualification::class, 'ELQ');
+    }
+
+    public function fundcomp(){
+        return $this->belongsTo(FundingCompletion::class, 'FUNDCOMP');
+    }
+
+    public function fundLength(){
+        return $this->belongsTo(FundingLength::class, 'FUNDLENGTH');
+    }
+
+    public function nonregfee(){
+        return $this->belongsTo(NonRegulatedFeeFlag::class, 'NONREGFEE');
+    }
 }
