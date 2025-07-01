@@ -24,4 +24,12 @@ class StudentModuleInstanceDatafuture extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function moduleoutcome(){
+        return $this->belongsTo(ModuleOutcome::class, 'MODULEOUTCOME');
+    }
+
+    public function moduleresult(){
+        return $this->belongsTo(ModuleResult::class, 'MODULERESULT');
+    }
 }

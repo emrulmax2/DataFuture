@@ -837,7 +837,7 @@
                                                         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">FINSUPTYPE</label>
-                                                                <input value="{{ (isset($stu->df->FINSUPTYPE) && $stu->df->FINSUPTYPE == $opt->id ? $stu->df->FINSUPTYPE : '') }}" type="text" name="SCS[{{ $stu->id }}][FINSUPTYPE]" class="w-full form-control" placeholder="FINSUPTYPE"/>
+                                                                <input value="{{ (isset($stu->df->FINSUPTYPE) && !empty($stu->df->FINSUPTYPE) ? $stu->df->FINSUPTYPE : '') }}" type="text" name="SCS[{{ $stu->id }}][FINSUPTYPE]" class="w-full form-control" placeholder="FINSUPTYPE"/>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -864,11 +864,11 @@
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">DISTANCE</label>
-                                                                <input  value="{{ (isset($stu->df->DISTANCE) && $stu->df->DISTANCE == $opt->id ? $stu->df->DISTANCE : '') }}" type="text" name="SCS[{{ $stu->id }}][DISTANCE]" class="w-full form-control" placeholder="DISTANCE"/>
+                                                                <input  value="{{ (isset($stu->df->DISTANCE) && !empty($stu->df->DISTANCE) ? $stu->df->DISTANCE : '') }}" type="text" name="SCS[{{ $stu->id }}][DISTANCE]" class="w-full form-control" placeholder="DISTANCE"/>
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">STUDYPROPORTION</label>
-                                                                <input  value="{{ (isset($stu->df->STUDYPROPORTION) && $stu->df->STUDYPROPORTION == $opt->id ? $stu->df->STUDYPROPORTION : '100') }}" type="text" name="SCS[{{ $stu->id }}][STUDYPROPORTION]" class="w-full form-control" placeholder="STUDYPROPORTION"/>
+                                                                <input  value="{{ (isset($stu->df->STUDYPROPORTION) && !empty($stu->df->STUDYPROPORTION) ? $stu->df->STUDYPROPORTION : '100') }}" type="text" name="SCS[{{ $stu->id }}][STUDYPROPORTION]" class="w-full form-control" placeholder="STUDYPROPORTION"/>
                                                             </div>
                                                             <div class="grid-column">
                                                                 <label class="form-label uppercase">VENUEID</label>

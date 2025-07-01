@@ -1,6 +1,7 @@
 import { createIcons, icons } from "lucide";
 import TomSelect from "tom-select";
 import Litepicker from "litepicker";
+import { saveAs } from 'file-saver';
 
 (function(){
     let stdDFLitepicker = {
@@ -475,7 +476,6 @@ import Litepicker from "litepicker";
         }
     });
 
-
     
     $('#xmlExportForm').on('submit', function(e){
         e.preventDefault();
@@ -488,16 +488,24 @@ import Litepicker from "litepicker";
         let form_data = new FormData(form);
         axios({
             method: "post",
-            //url: route('reports.datafuture.single.student'),
-            url: route('reports.datafuture.multiple.student'),
+            url: route('reports.datafuture.single.student'),
+            //url: route('reports.datafuture.multiple.student'),
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            //responseType: 'blob',
         }).then(response => {
             document.querySelector('#xmlDownBtn').removeAttribute('disabled');
             document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
 
             if (response.status == 200) {
                 console.log(response.data);
+saveAs(response.data, 'Data_future.xml');
+                // const url = window.URL.createObjectURL(new Blob([response.data]));
+                // const link = document.createElement('a');
+                // link.href = url;
+                // link.setAttribute('download', 'Data_future.xml'); 
+                // document.body.appendChild(link);
+                // link.click();
             }
         }).catch(error => {
             document.querySelector('#xmlDownBtn').removeAttribute('disabled');
@@ -508,6 +516,18 @@ import Litepicker from "litepicker";
                         $(`#xmlExportForm .${key}`).addClass('border-danger');
                         $(`#xmlExportForm  .error-${key}`).html(val);
                     }
+                } else if (error.response.status == 304){
+                    xmlExportModal.hide();
+
+                    warningModal.show(); 
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .warningModalTitle").html("Oops!" );
+                        $("#warningModal .warningModalDesc").html(error.response.data.msg);
+                    });  
+                    
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000);
                 } else {
                     console.log('error');
                 }

@@ -95,16 +95,20 @@
 
         </ul>
     </li>
+    @if(isset(auth()->user()->priv()['communication_view']) && auth()->user()->priv()['communication_view'] == 1)
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.communication', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.communication' ? 'active' : '' }}">
             Communications
         </a>
     </li>
+    @endif
+    @if(isset(auth()->user()->priv()['document_view']) && auth()->user()->priv()['document_view'] == 1)
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.uploads', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.uploads' ? 'active' : '' }}">
             Documents
         </a>
     </li>
+    @endif
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.notes', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.notes' ? 'active' : '' }}">
             Notes

@@ -92,7 +92,8 @@ class UploadController extends Controller
                     'current_file_name'=> $list->current_file_name,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'can_delete' => (isset(auth()->user()->priv()['document_delete']) && auth()->user()->priv()['document_delete'] == 1 ? 1 : 0)
                 ];
                 $i++;
             endforeach;

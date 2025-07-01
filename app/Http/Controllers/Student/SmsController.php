@@ -113,7 +113,8 @@ class SmsController extends Controller
                     'sms' => (isset($list->sms->sms) && !empty($list->sms->sms) ? (strlen(strip_tags($list->sms->sms)) > 40 ? substr(strip_tags($list->sms->sms), 0, 40).'...' : strip_tags($list->sms->sms)) : ''),
                     'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'can_delete' => (isset(auth()->user()->priv()['communication_delete_sms']) && auth()->user()->priv()['communication_delete_sms'] == 1 ? 1 : 0)
                 ];
                 $i++;
             endforeach;

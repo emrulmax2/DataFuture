@@ -612,6 +612,78 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-span-12 sm:col-span-6">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Communications</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_view']) && $priv['student_live_communication']['communication_view'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_1" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_view]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_1">View Communication</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_send_letter']) && $priv['student_live_communication']['communication_send_letter'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_2" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_send_letter]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_2">Send Letter</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_delete_letter']) && $priv['student_live_communication']['communication_delete_letter'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_3" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_delete_letter]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_3">Delete Letter</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_send_email']) && $priv['student_live_communication']['communication_send_email'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_4" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_send_email]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_4">Send Email</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_delete_email']) && $priv['student_live_communication']['communication_delete_email'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_5" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_delete_email]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_5">Delete Email</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_send_sms']) && $priv['student_live_communication']['communication_send_sms'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_6" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_send_sms]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_6">Send SMS</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_communication']['communication_delete_sms']) && $priv['student_live_communication']['communication_delete_sms'] == 1 ? 'checked' : '') }} id="permission_student_portal_communication_7" class="form-check-input" type="checkbox" value="1" name="permission[student_live_communication][communication_delete_sms]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_communication_7">Delete SMS</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Documents</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_document']['document_view']) && $priv['student_live_document']['document_view'] == 1 ? 'checked' : '') }} id="permission_student_portal_documents_1" class="form-check-input" type="checkbox" value="1" name="permission[student_live_document][document_view]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_documents_1">View</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_document']['document_add']) && $priv['student_live_document']['document_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_documents_2" class="form-check-input" type="checkbox" value="1" name="permission[student_live_document][document_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_documents_2">Add</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_document']['document_delete']) && $priv['student_live_document']['document_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_documents_3" class="form-check-input" type="checkbox" value="1" name="permission[student_live_document][document_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_documents_3">Delete</label>
+                            </div>
+                        </div>
+                    </div>
                     
                 </div>
             </div>

@@ -205,6 +205,7 @@ class EmailController extends Controller
                     'deleted_at' => $list->deleted_at,
                     'mail_pdf_file' => (isset($list->mail_pdf_file) && !empty($list->mail_pdf_file) ? $list->mail_pdf_file : ''),
                     'document_list' => (isset($list->document_list) && !empty($list->document_list) ? $list->document_list : []),
+                    'can_delete' => (isset(auth()->user()->priv()['communication_delete_email']) && auth()->user()->priv()['communication_delete_email'] == 1 ? 1 : 0)
                 ];
                 $i++;
             endforeach;
