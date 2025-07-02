@@ -360,17 +360,20 @@
                             </button>
                         </div>
                         @php 
-                            $endStatuses = [21, 26, 27, 31, 42];
-                            $student_status_id = (isset($student->status_id) && $student->status_id > 0 ? $student->status_id : '');
-                            $termStatusId = (isset($student->termStatus->status_id) && !empty($student->termStatus->status_id) ? $student->termStatus->status_id : '');
-
                             $ENGENDDATE = '';
                             $RSNENGEND = '';
                             $QUALRESULT = '';
-                            if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
-                                $ENGENDDATE = (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date) ? date('Y-m-d', strtotime($student->termStatus->status_end_date)) : '');
-                                $RSNENGEND = (isset($student->termStatus->reason_for_engagement_ending_id) && !empty($student->termStatus->reason_for_engagement_ending_id) ? $student->termStatus->reason_for_engagement_ending_id : '');
-                                $QUALRESULT = (isset($student->termStatus->other_academic_qualification_id) && !empty($student->termStatus->other_academic_qualification_id) ? $student->termStatus->other_academic_qualification_id : '');
+
+                            if(isset($student->crel->active) && $student->crel->active == 1):
+                                $endStatuses = [21, 26, 27, 31, 42];
+                                $student_status_id = (isset($student->status_id) && $student->status_id > 0 ? $student->status_id : '');
+                                $termStatusId = (isset($student->termStatus->status_id) && !empty($student->termStatus->status_id) ? $student->termStatus->status_id : '');
+
+                                if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
+                                    $ENGENDDATE = (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date) ? date('Y-m-d', strtotime($student->termStatus->status_end_date)) : '');
+                                    $RSNENGEND = (isset($student->termStatus->reason_for_engagement_ending_id) && !empty($student->termStatus->reason_for_engagement_ending_id) ? $student->termStatus->reason_for_engagement_ending_id : '');
+                                    $QUALRESULT = (isset($student->termStatus->other_academic_qualification_id) && !empty($student->termStatus->other_academic_qualification_id) ? $student->termStatus->other_academic_qualification_id : '');
+                                endif;
                             endif;
                         @endphp
                         <div id="df-accr-Leaver-collapse-1" class="lcc-accordion-collapse lcc-show" style="display: block;">

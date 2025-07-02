@@ -275,6 +275,9 @@
                         </select>
                         <div class="acc__input-error error-term_declaration_id text-danger mt-2"></div>
                     </div>
+                    <div class="h-[1px] bg-slate-200 relative mt-7 mb-6">
+                        <span class="px-2 py-1 bg-white absolute text-xs italic text-slate-500 font-medium w-[32px] l-0 r-0 mx-auto" style="top: -12px;">OR</span>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                         <div>
                             <label for="from_date" class="form-label">From</label>

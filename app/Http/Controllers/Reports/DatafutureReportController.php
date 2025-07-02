@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assign;
+use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\CourseBaseDatafutures;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseModule;
 use App\Models\InstanceTerm;
+use App\Models\ModuleCreation;
 use App\Models\Plan;
+use App\Models\SessionStatus;
 use App\Models\Student;
+use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAward;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentModuleInstanceDatafuture;
+use App\Models\StudentProposedCourse;
 use App\Models\StudentStuloadInformation;
 use App\Models\TermDeclaration;
 use App\Models\Venue;
@@ -185,7 +190,7 @@ class DatafutureReportController extends Controller
                 $COURSE_ROL = '';
 
                 $COURSE_XML .= '<COURSEID>'.$course_id.'</COURSEID>';
-                $COURSE_XML .= (isset($course->name) && !empty($course->name) ? '<COURSETITLE>'.$course_id.'</COURSETITLE>' : '');
+                $COURSE_XML .= (isset($course->name) && !empty($course->name) ? '<COURSETITLE>'.$course->name.'</COURSETITLE>' : '');
 
                 if($dfFields->count() > 0):
                     foreach($dfFields as $dfld):
@@ -286,7 +291,7 @@ class DatafutureReportController extends Controller
         /* QUALIFICATIONS XML END */
 
         /* SESSION YEARS XML START */
-        $sessionYears = $this->getAllSessionYears($student_ids, $dateRanges = []);
+        $sessionYears = $this->getAllSessionYears($student_ids, $dateRanges);
         if($sessionYears && $sessionYears->count() > 0):
             foreach($sessionYears as $SES):
                 $SESYEAR_XML = '';
@@ -397,24 +402,33 @@ class DatafutureReportController extends Controller
                                 /* ENTRY PROFILE XML END */
 
                                 /* LEAVER XML START */
-                                $endStatuses = [21, 26, 27, 31, 42];
-                                $student_status_id = (isset($STUDENT->status_id) && $STUDENT->status_id > 0 ? $STUDENT->status_id : '');
-                                $termStatusId = (isset($STUDENT->termStatus->status_id) && !empty($STUDENT->termStatus->status_id) ? $STUDENT->termStatus->status_id : '');
-
                                 $ENGENDDATE = '';
                                 $RSNENGEND = '';
                                 $QUALRESULT = '';
-                                if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
-                                    $ENGENDDATE = (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date) ? date('Y-m-d', strtotime($student->termStatus->status_end_date)) : '');
-                                    $RSNENGEND = (isset($student->termStatus->reason_for_engagement_ending_id) && !empty($student->termStatus->reason_for_engagement_ending_id) ? $student->termStatus->reason_for_engagement_ending_id : '');
-                                    $QUALRESULT = (isset($student->termStatus->other_academic_qualification_id) && !empty($student->termStatus->other_academic_qualification_id) ? $student->termStatus->other_academic_qualification_id : '');
-                                endif;
-                                if(!empty($ENGENDDATE) || !empty($RSNENGEND)):
+                                if(isset($STUDENT_CREL->active) && $STUDENT_CREL->active == 1):
+                                    $endStatuses = [21, 26, 27, 31, 42];
+                                    $student_status_id = (isset($STUDENT->status_id) && $STUDENT->status_id > 0 ? $STUDENT->status_id : '');
+                                    $termStatusId = (isset($STUDENT->termStatus->status_id) && !empty($STUDENT->termStatus->status_id) ? $STUDENT->termStatus->status_id : '');
+
+                                    if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
+                                        $ENGENDDATE = (isset($student->termStatus->status_end_date) && !empty($student->termStatus->status_end_date) ? date('Y-m-d', strtotime($student->termStatus->status_end_date)) : '');
+                                        $RSNENGEND = (isset($student->termStatus->reason_for_engagement_ending_id) && !empty($student->termStatus->reason_for_engagement_ending_id) ? $student->termStatus->reason_for_engagement_ending_id : '');
+                                        $QUALRESULT = (isset($student->termStatus->other_academic_qualification_id) && !empty($student->termStatus->other_academic_qualification_id) ? $student->termStatus->other_academic_qualification_id : '');
+                                    endif;
+
+                                    if(!empty($ENGENDDATE) || !empty($RSNENGEND)):
+                                        $Leaver_XML .= '<Leaver>';
+                                            $Leaver_XML .= (!empty($ENGENDDATE) ? '<ENGENDDATE>'.$ENGENDDATE.'</ENGENDDATE>' : '');
+                                            $Leaver_XML .= (!empty($RSNENGEND) ? '<RSNENGEND>'.$RSNENGEND.'</RSNENGEND>' : '');
+                                        $Leaver_XML .= '</Leaver>';
+                                    endif;
+                                else:
                                     $Leaver_XML .= '<Leaver>';
-                                        $Leaver_XML .= (!empty($ENGENDDATE) ? '<ENGENDDATE>'.$ENGENDDATE.'</ENGENDDATE>' : '');
-                                        $Leaver_XML .= (!empty($RSNENGEND) ? '<RSNENGEND>'.$RSNENGEND.'</RSNENGEND>' : '');
+                                        $Leaver_XML .= '<ENGENDDATE>'.$ENGENDDATE.'</ENGENDDATE>';
+                                        $Leaver_XML .= '<RSNENGEND>'.$RSNENGEND.'</RSNENGEND>';
                                     $Leaver_XML .= '</Leaver>';
                                 endif;
+                                
                                 /* LEAVER XML END */
 
                                 /* QUALIFICATION AWARDED START */
@@ -497,7 +511,7 @@ class DatafutureReportController extends Controller
 
                                         $MOD_INST_XML = '';
                                         $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID);
-                                        if(!empty($modules)):
+                                        if($modules && !empty($modules)):
                                             foreach($modules as $module):
                                                 $modDF = StudentModuleInstanceDatafuture::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)
                                                         ->where('student_stuload_information_id', $STU->id)->where('instance_term_id', $module->instance_term_id)
@@ -521,12 +535,18 @@ class DatafutureReportController extends Controller
                                         $REF_PRD_XML .= (!empty($RPSTULOAD) ? '<RPSTULOAD>'.$RPSTULOAD.'</RPSTULOAD>' : '');
                                         $COURSE_SESS_XML .= (!empty($REF_PRD_XML) ? '<ReferencePeriodStudentLoad>'.$REF_PRD_XML.'</ReferencePeriodStudentLoad>' : '');
 
-                                        /*if((!empty($SCRS->STATUSVALIDFROM) && $SCRS->STATUSVALIDFROM != '0000-00-00') || !empty($SCRS->STATUSCHANGEDTO)):
-                                            $StudentSingleCourseSession .= '<SessionStatus>';
-                                                $StudentSingleCourseSession .= (isset($SCRS->STATUSVALIDFROM) && !empty($SCRS->STATUSVALIDFROM) && $SCRS->STATUSVALIDFROM != '0000-00-00' ? '<STATUSVALIDFROM>'.$SCRS->STATUSVALIDFROM.'</STATUSVALIDFROM>' : '');
-                                                $StudentSingleCourseSession .= (isset($SCRS->STATUSCHANGEDTO) && !empty($SCRS->STATUSCHANGEDTO) ? '<STATUSCHANGEDTO>'.$SCRS->STATUSCHANGEDTO.'</STATUSCHANGEDTO>' : '');
-                                            $StudentSingleCourseSession .= '</SessionStatus>';
-                                        endif;*/
+                                        $CRS_SES_STS_XML = '';
+                                        $SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
+                                        if(isset($SESSIONSTATUES[$STU->id]) && !empty($SESSIONSTATUES[$STU->id])):
+                                            foreach($SESSIONSTATUES[$STU->id] as $TERMDECID => $CSTS):
+                                                $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
+                                                if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
+                                                    $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
+                                                    $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
+                                                endif;
+                                            endforeach;
+                                        endif;
+                                        $COURSE_SESS_XML .= (!empty($CRS_SES_STS_XML) ? '<SessionStatus>'.$CRS_SES_STS_XML.'</SessionStatus>' : '');
 
                                         if(isset($STU->df->FINSUPTYPE) && !empty($STU->df->FINSUPTYPE)):
                                             $COURSE_SESS_XML .= '<StudentFinancialSupport>';
@@ -601,36 +621,75 @@ class DatafutureReportController extends Controller
     public function getAllModuleIds($course_ids, $student_ids, $dateRanges = []){
         $plan_ids = [];
         $module_ids = [];
-        if(!empty($dateRanges)):
-            $whereRaw = "";
-            foreach($dateRanges as $date):
-                $FROM_DATE = $date['start'];
-                $TO_DATE = $date['end'];
-                $whereRaw .= (!empty($whereRaw) ? " OR " : '');
-                $whereRaw .= " (
-                    (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
-                    OR 
-                    ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
-                ) ";
-            endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->orderBy('student_id', 'ASC')->get();
 
-            if($stuloads->count() > 0):
-                $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
-                $instance_term = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->get();
-                $instance_term_ids = $instance_term->pluck('id')->unique()->toArray();
-                $plan_ids = Plan::whereIn('instance_term_id', $instance_term_ids)->whereIn('course_id', $course_ids)->whereHas('assign', function($q) use($student_ids){
-                                $q->whereIn('student_id', $student_ids);
-                            })->pluck('id')->unique()->toArray();
+        foreach($student_ids as $student_id):
+            if(!empty($dateRanges)):
+                $whereRaw = "";
+                foreach($dateRanges as $date):
+                    $FROM_DATE = $date['start'];
+                    $TO_DATE = $date['end'];
+                    $whereRaw .= (!empty($whereRaw) ? " OR " : '');
+                    $whereRaw .= " (
+                        (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
+                        OR 
+                        ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
+                    ) ";
+                endforeach;
+                $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->orderBy('student_id', 'ASC')->get();
+
+                if($stuloads->count() > 0):
+                    foreach($stuloads as $stu):
+                        $instance_id = $stu->course_creation_instance_id;
+                        $instance = CourseCreationInstance::find($instance_id);
+                        if(isset($instance->terms) && $instance->terms->count() > 0):
+                            foreach($instance->terms as $term):
+                                $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+                                $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+                                $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
+                                $plan_ids = array_merge($plan_ids, $student_plan_ids);
+                            endforeach;
+                        endif;
+                    endforeach;
+                endif;
             endif;
-        endif;
+        endforeach;
+
+        // if(!empty($dateRanges)):
+        //     $whereRaw = "";
+        //     foreach($dateRanges as $date):
+        //         $FROM_DATE = $date['start'];
+        //         $TO_DATE = $date['end'];
+        //         $whereRaw .= (!empty($whereRaw) ? " OR " : '');
+        //         $whereRaw .= " (
+        //             (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
+        //             OR 
+        //             ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
+        //         ) ";
+        //     endforeach;
+        //     $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->orderBy('student_id', 'ASC')->get();
+
+        //     if($stuloads->count() > 0):
+        //         $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
+        //         $instance_term_ids = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->pluck('id')->unique()->toArray();
+        //         $plan_ids = Plan::whereIn('instance_term_id', $instance_term_ids)->whereIn('course_id', $course_ids)->whereHas('assign', function($q) use($student_ids){
+        //                         $q->whereIn('student_id', $student_ids);
+        //                     })->pluck('id')->unique()->toArray();
+        //         return($student_ids);
+        //     endif;
+        // endif;
+
         if(!empty($plan_ids)):
-            $module_ids = DB::table('plans as pln')
-                        ->select('mc.course_module_id')
-                        ->leftJoin('module_creations as mc', 'pln.module_creation_id', 'mc.id')
-                        ->leftJoin('course_modules as cm', 'mc.course_module_id', 'cm.id')
-                        ->whereIn('pln.id', $plan_ids)->whereNotIn('pln.class_type', ['Tutorial', 'Seminar', 'Practical'])
-                        ->pluck('course_module_id')->unique()->toArray();
+            $plan_ids = array_unique($plan_ids);
+            $module_creation_ids = Plan::whereIn('id', $plan_ids)->where(function($q){
+                            $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+                        })->whereDoesntHave('creations', function($q){
+                            $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+                                    ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+                                    ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+                                    ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+                        })->pluck('module_creation_id')->unique()->toArray();
+            $module_ids = (!empty($module_creation_ids) ? ModuleCreation::whereIn('id', $module_creation_ids)->pluck('course_module_id')->unique()->toArray() : []);
         endif;
         
         return $module_ids;
@@ -700,14 +759,90 @@ class DatafutureReportController extends Controller
     }
 
     public function getStudentModuleInstances($stuload_id, $student_id, $course_id){
-        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get();
-        $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
-        $instance_term_ids = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->get()->pluck('id')->unique()->toArray();
+        $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get()->first();
+        $plan_ids = [];
+
+        $instance_id = $stuload->course_creation_instance_id;
+        $instance = CourseCreationInstance::find($instance_id);
+        if(isset($instance->terms) && $instance->terms->count() > 0):
+            foreach($instance->terms as $term):
+                $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+                $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+                $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
+                $plan_ids = array_merge($plan_ids, $student_plan_ids);
+            endforeach;
+        endif;
         
-        $plans = Plan::whereIn('instance_term_id', $instance_term_ids)->where('course_id', $course_id)->whereHas('assign', function($q) use($student_id){
-                        $q->where('student_id', $student_id);
+        if(!empty($plan_ids)):
+            return Plan::whereIn('id', $plan_ids)->where('course_id', $course_id)->where(function($q){
+                        $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+                    })->whereDoesntHave('creations', function($q){
+                        $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+                                ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
                     })->orderBy('id', 'DESC')->get();
+        else:
+            return false;
+        endif;
+
+        // $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get();
+        // $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
+        // $instance_term_ids = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->get()->pluck('id')->unique()->toArray();
+        
+        // $plans = Plan::whereIn('instance_term_id', $instance_term_ids)->where('course_id', $course_id)->whereHas('assign', function($q) use($student_id){
+        //                 $q->where('student_id', $student_id);
+        //             })->where(function($q){
+        //                 $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+        //             })->orderBy('id', 'DESC')->get();
         
         return $plans;
+    }
+
+    public function getStuloadSessionStatuses($student_id, $student_course_relation_id){
+        $res = [];
+        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
+        if($stuloads->count() > 0):
+            foreach($stuloads as $stu):
+                $instance_id = $stu->course_creation_instance_id;
+                $instance = CourseCreationInstance::find($instance_id);
+                if(isset($instance->terms) && $instance->terms->count() > 0):
+                    $suspendedFound = false;
+                    foreach($instance->terms as $term):
+                        $term_declaration_id = $term->term_declaration_id;
+                        $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
+
+                        $stdAttenTermStatus = StudentAttendanceTermStatus::where('term_declaration_id', $term_declaration_id)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+                        $lastAttendance = Attendance::where('student_id', $student_id)->whereHas('plan', function($q) use($term_declaration_id){
+                                    $q->where('term_declaration_id', $term_declaration_id);
+                                })->whereHas('feed', function($q){
+                                    $q->where('attendance_count', 1);
+                                })->orderBy('attendance_date', 'DESC')->get()->first();
+                        if($suspendedFound):
+                            if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                            else:
+                                $termDeclaration = TermDeclaration::find($term_declaration_id);
+
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($termDeclaration->start_date) && !empty($termDeclaration->start_date) ? date('Y-m-d', strtotime($termDeclaration->start_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 1;
+                            endif;
+                        else:
+                            if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
+                                $suspendedFound = true;
+
+                                $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
+                                $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                            endif;
+                        endif;
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
+
+        //dd($res);
+        return $res;
     }
 }
