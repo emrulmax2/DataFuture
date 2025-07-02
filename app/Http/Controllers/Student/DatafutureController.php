@@ -27,6 +27,7 @@ use App\Models\HighestQualificationOnEntry;
 use App\Models\InstanceTerm;
 use App\Models\LocationOfStudy;
 use App\Models\MajorSourceOfTuitionFee;
+use App\Models\ModuleCreation;
 use App\Models\ModuleOutcome;
 use App\Models\ModuleResult;
 use App\Models\NonRegulatedFeeFlag;
@@ -69,9 +70,9 @@ class DatafutureController extends Controller
     public function index(Student $student){
         $student->load(['other', 'contact', 'qualHigest', 'disability', 'termStatus']);
         $course_id = $student->crel->creation->course_id;
-        $module_ids = $this->getStudentModules($student->id, $course_id);
         
         $autoStuloads = $this->autoLoadStudentStuloads($student->id, $student->crel->id);
+        $module_ids = $this->getStudentModules($student->id, $student->crel->id, $course_id);
         return view('pages.students.live.datafuture', [
             'title' => 'Live Students - London Churchill College',
             'breadcrumbs' => [
@@ -394,7 +395,12 @@ class DatafutureController extends Controller
                         $plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
                         if(!empty($plan_ids)):
                             $plans = Plan::with('attenTerm')->whereIn('id', $plan_ids)->where(function($q){
-                                        $q->whereNotIn('class_type', ['Tutorial'])->orWhereNull('class_type');
+                                        $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+                                    })->whereDoesntHave('creations', function($q){
+                                        $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+                                                ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+                                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+                                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
                                     })->orderBy('id', 'DESC')->get();
                             
                             if($plans->count() > 0):
@@ -440,6 +446,8 @@ class DatafutureController extends Controller
                         $stdAttenTermStatus = StudentAttendanceTermStatus::where('term_declaration_id', $term_declaration_id)->where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
                         $lastAttendance = Attendance::where('student_id', $student_id)->whereHas('plan', function($q) use($term_declaration_id){
                                     $q->where('term_declaration_id', $term_declaration_id);
+                                })->whereHas('feed', function($q){
+                                    $q->where('attendance_count', 1);
                                 })->orderBy('attendance_date', 'DESC')->get()->first();
                         if($suspendedFound):
                             if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
@@ -599,17 +607,54 @@ class DatafutureController extends Controller
         return response()->json(['html' => $html], 200);
     }
 
-    public function getStudentModules($student_id, $course_id){
-        $plan_ids = Assign::where('student_id', $student_id)->pluck('plan_id')->unique()->toArray();
-        $module_ids = DB::table('plans as pln')
-                ->select('mc.course_module_id')
-                ->leftJoin('module_creations as mc', 'pln.module_creation_id', 'mc.id')
-                ->leftJoin('course_modules as cm', 'mc.course_module_id', 'cm.id')
-                ->whereIn('pln.id', $plan_ids)->where('pln.course_id', $course_id)
-                ->where('cm.course_id', $course_id)->where('mc.class_type', 'Theory')
-                ->pluck('course_module_id')->unique()->toArray();
+    public function getStudentModules($student_id, $crelid, $course_id){
+        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $crelid)->orderBy('id', 'ASC')->get();
+        $plan_ids = [];
+
+        if($stuloads->count() > 0):
+            foreach($stuloads as $stu):
+                $instance_id = $stu->course_creation_instance_id;
+                $instance = CourseCreationInstance::find($instance_id);
+                if(isset($instance->terms) && $instance->terms->count() > 0):
+                    foreach($instance->terms as $term):
+                        $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+                        $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+                        $std_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
+                        $plan_ids = array_merge($plan_ids, $std_plan_ids);
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
+
+        if(!empty($plan_ids)):
+            $module_creation_ids = Plan::whereIn('id', $plan_ids)->where('course_id', $course_id)->where(function($q){
+                        $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+                    })->whereDoesntHave('creations', function($q){
+                        $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+                                ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+                    })->pluck('module_creation_id')->unique()->toArray();
+            return (!empty($module_creation_ids) ? ModuleCreation::whereIn('id', $module_creation_ids)->pluck('course_module_id')->unique()->toArray() : []);
+        else:
+            return [];
+        endif;
+
+
+        // $module_creation_ids = Plan::where('course_id', $course_id)->whereHas('assign', function($q) use($student_id){
+        //                 $q->where('student_id', $student_id);
+        //             })->where(function($q){
+        //                 $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+        //             })->whereDoesntHave('creations', function($q){
+        //                 $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+        //                         ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+        //                         ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+        //                         ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+        //             })->pluck('module_creation_id')->unique()->toArray();
+        // $module_ids = (!empty($module_creation_ids) ? ModuleCreation::whereIn('id', $module_creation_ids)->pluck('course_module_id')->unique()->toArray() : []);
         
-        return $module_ids;
+        // return $module_ids;
     }
 
     function calculateSidNumber($student_reg_no){
