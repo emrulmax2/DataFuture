@@ -505,13 +505,6 @@ import { saveAs } from 'file-saver';
                 if (response.status == 200) {
                     //console.log(response.data);
                     saveAs(response.data, 'Data_future.xml');
-
-                    // const url = window.URL.createObjectURL(new Blob([response.data]));
-                    // const link = document.createElement('a');
-                    // link.href = url;
-                    // link.setAttribute('download', 'Data_future.xml'); 
-                    // document.body.appendChild(link);
-                    // link.click();
                 }
             }).catch(error => {
                 document.querySelector('#xmlDownBtn').removeAttribute('disabled');
