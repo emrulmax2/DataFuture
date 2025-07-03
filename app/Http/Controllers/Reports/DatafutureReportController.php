@@ -20,6 +20,7 @@ use App\Models\StudentCourseRelation;
 use App\Models\StudentModuleInstanceDatafuture;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentStuloadInformation;
+use App\Models\StudyMode;
 use App\Models\TermDeclaration;
 use App\Models\Venue;
 use Illuminate\Http\Request;
@@ -262,7 +263,7 @@ class DatafutureReportController extends Controller
                 $dfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
                                 $q->where('datafuture_field_category_id', 2);
                             })->where('course_id', $course_id)->get();
-
+                
                 $QUALIF_XML = '';
                 $QUALIF_ROL = '';
                 $QUALIF_SUB = '';
@@ -336,7 +337,7 @@ class DatafutureReportController extends Controller
                         $StudentCourseSession_XML = '';
 
                         /* STUDENT XML START */
-                            $StudentRoot_XML .= (isset($student->laststuload->sid_number) && !empty($student->laststuload->sid_number) ? '<SID>'.$student->laststuload->sid_number.'</SID>' : '');
+                            $StudentRoot_XML .= (isset($STUDENT->laststuload->sid_number) && !empty($STUDENT->laststuload->sid_number) ? '<SID>'.$STUDENT->laststuload->sid_number.'</SID>' : '');
                             $StudentRoot_XML .= (isset($STUDENT->date_of_birth) && !empty($STUDENT->date_of_birth) ? '<BIRTHDTE>'.date('Y-m-d', strtotime($STUDENT->date_of_birth)).'</BIRTHDTE>' : '');
                             $StudentRoot_XML .= (isset($STUDENT->other->ethnicity->df_code) && !empty($STUDENT->other->ethnicity->df_code) ? '<ETHNIC>'.$STUDENT->other->ethnicity->df_code.'</ETHNIC>' : '');
                             $StudentRoot_XML .= (isset($STUDENT->first_name) && !empty($STUDENT->first_name) ? '<FNAMES>'.$STUDENT->first_name.'</FNAMES>' : '');
@@ -472,6 +473,11 @@ class DatafutureReportController extends Controller
                                             $SCSENDDATE = $SCSEXPECTEDENDDATE;
                                             $SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
                                         endif;
+                                        
+                                        if($SCSMODE > 0):
+                                            $STUDYMODE = StudyMode::find($SCSMODE);
+                                            $SCSMODE = (isset($STUDYMODE->df_code) && !empty($STUDYMODE->df_code) ? $STUDYMODE->df_code : '');
+                                        endif;
 
                                         $RSNSCSEND = '';
                                         if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
@@ -485,6 +491,7 @@ class DatafutureReportController extends Controller
                                         $FUNDLENGTH = 3;
 
                                         $REFPERIOD_INC = ($S < 10 ? '0'.$S : $S);
+                                        $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
 
                                         $COURSE_SESS_XML = '';
                                         $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SCSESSIONID>'.$STU->course_creation_instance_id.'</SCSESSIONID>' : '');
@@ -497,6 +504,7 @@ class DatafutureReportController extends Controller
                                         $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
                                         $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
                                         $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
+                                        $COURSE_SESS_XML .= ($STULOAD > 0 ? '<STULOAD>'.$STULOAD.'</STULOAD>' : '');
                                         $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
                                         $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
 
@@ -556,7 +564,7 @@ class DatafutureReportController extends Controller
 
                                         $STD_LOC_XML = '';
                                         $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->name) && !empty($STU->studentCR->propose->venue->name) ? '<STUDYLOCID>'.$STU->studentCR->propose->venue->name.'</STUDYLOCID>' : '');
-                                        $STD_LOC_XML .= (isset($STU->df->STUDYPROPORTION) && !empty($STU->df->STUDYPROPORTION) ? '<STUDYPROPORTION>'.$STU->df->STUDYPROPORTION.'</STUDYPROPORTION>' : '');
+                                        $STD_LOC_XML .= (isset($STU->df->STUDYPROPORTION) && !empty($STU->df->STUDYPROPORTION) ? '<STUDYPROPORTION>'.$STU->df->STUDYPROPORTION.'</STUDYPROPORTION>' : '<STUDYPROPORTION>100</STUDYPROPORTION>');
                                         $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->idnumber) && !empty($STU->studentCR->propose->venue->idnumber) ? '<VENUEID>'.$STU->studentCR->propose->venue->idnumber.'</VENUEID>' : '');
                                         $COURSE_SESS_XML .= (!empty($STD_LOC_XML) ? '<StudyLocation>'.$STD_LOC_XML.'</StudyLocation>' : '');
 
