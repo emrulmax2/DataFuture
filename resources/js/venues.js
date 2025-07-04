@@ -31,6 +31,9 @@ var table = (function () {
                     title: "Venue Name",
                     field: "name",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        return '<div class="whitespace-normal">'+cell.getData().name+'</div>';
+                    }
                 },
                 {
                     title: "ID Number",
@@ -46,6 +49,14 @@ var table = (function () {
                     title: "Postal Code",
                     field: "postcode",
                     headerHozAlign: "left",
+                },
+                {
+                    title: "Full Address",
+                    field: "address",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) {  
+                        return '<div class=" whitespace-normal text-slate-500">'+cell.getData().address+'</div>';
+                    }
                 },
                 {
                     title: "IP",
@@ -225,6 +236,7 @@ var table = (function () {
                     $('#addForm #idnumber').val('');
                     $('#addForm #ukprn').val('');
                     $('#addForm #postcode').val('');
+                    $('#addForm #address').val('');
                     addModal.hide();
                     succModal.show();
                     document.getElementById("successModal")
@@ -271,6 +283,7 @@ var table = (function () {
                         $('#editVenueModal input[name="idnumber"]').val(dataset.idnumber ? dataset.idnumber : '');
                         $('#editVenueModal input[name="ukprn"]').val(dataset.ukprn ? dataset.ukprn : '');
                         $('#editVenueModal input[name="postcode"]').val(dataset.postcode ? dataset.postcode : '');
+                        $('#editVenueModal input[name="address"]').val(dataset.address ? dataset.address : '');
                         $('#editVenueModal textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : '');
 
                         $('#editVenueModal input[name="id"]').val(editId);

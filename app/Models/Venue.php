@@ -15,6 +15,7 @@ class Venue extends Model
         'name',
         'idnumber',
         'ukprn',
+        'address',
         'postcode',
         'created_by',
         'updated_by',

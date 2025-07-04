@@ -202,7 +202,7 @@ class DatafutureReportController extends Controller
                             $COURSE_INI .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
                         elseif($name == 'COURSEREFRNCID' || $name == 'COURSEREFRNCIDTYPE'):
                             $COURSE_REF .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
-                        elseif($name == 'HESAID' || $name == 'ROLETYPE' || $name == 'CRPROPORTION'):
+                        elseif($name == 'COURSEROLEHESAID' || $name == 'ROLETYPE' || $name == 'CRPROPORTION'):
                             $COURSE_ROL .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
                         else:
                             $COURSE_XML .= (!empty($name) && !empty($value) ? '<'.$name.'>'.$value.'</'.$name.'>' : '');
@@ -314,7 +314,7 @@ class DatafutureReportController extends Controller
 
                 if(!empty($student_crels)):
                     foreach($student_crels as $CRELID):
-                        $STUDENT_CREL = StudentCourseRelation::find($CRELID);
+                        $STUDENT_CREL = StudentCourseRelation::with('creation', 'creation.available')->find($CRELID);
                         if(isset($STUDENT_CREL->propose->venue_id) && $STUDENT_CREL->propose->venue_id > 0):
                             $VENUE_IDS[] = $STUDENT_CREL->propose->venue_id;
                         endif;
@@ -353,19 +353,23 @@ class DatafutureReportController extends Controller
                             $StudentRoot_XML .= (isset($STUDENT->contact->term_time_post_code) && !empty($STUDENT->contact->term_time_post_code) ? '<TTPCODE>'.$STUDENT->contact->term_time_post_code.'</TTPCODE>' : '');
 
                             /* DISABILITY XML START */
-                            if(isset($STUDENT->disability) && $STUDENT->disability->count() > 0):
+                            if(isset($STUDENT->other->disability_status) && $STUDENT->other->disability_status == 1 && isset($STUDENT->disability) && $STUDENT->disability->count() > 0):
                                 $Disability_XML .= '<Disability>';
                                     foreach($STUDENT->disability as $disability):
                                         $Disability_XML .= (isset($disability->disabilities->df_code) && !empty($disability->disabilities->df_code) ? '<DISABILITY>'.$disability->disabilities->df_code.'</DISABILITY>' : '');
                                     endforeach;
                                 $Disability_XML .= '</Disability>';
+                            else:
+                                $Disability_XML .= '<Disability><DISABILITY>95</DISABILITY></Disability>';
                             endif;
                             /* DISABILITY XML END */
 
                             /* ENGAGEMENT XML START */
-                            $EngagementRoot_XML .= (isset($STUDENT->df->NUMHUS) && !empty($STUDENT->df->NUMHUS) ? '<NUMHUS>'.$STUDENT->df->NUMHUS.'</NUMHUS>' : '');
-                            $EngagementRoot_XML .= (isset($STUDENT_CREL->course_end_date) && !empty($STUDENT_CREL->course_end_date) && $STUDENT_CREL->course_end_date != '0000-00-00' ? '<ENGEXPECTEDENDDATE>'.date('Y-m-d', strtotime($STUDENT_CREL->course_end_date)).'</ENGEXPECTEDENDDATE>' : '');
-                            $EngagementRoot_XML .= (isset($STUDENT_CREL->course_start_date) && !empty($STUDENT_CREL->course_start_date) && $STUDENT_CREL->course_start_date != '0000-00-00' ? '<ENGSTARTDATE>'.date('Y-m-d', strtotime($STUDENT_CREL->course_start_date)).'</ENGSTARTDATE>' : '');
+                            $ENGEXPECTEDENDDATE = (isset($STUDENT_CREL->course_end_date) && !empty($STUDENT_CREL->course_end_date) ? date('Y-m-d', strtotime($STUDENT_CREL->course_end_date)) : (isset($STUDENT_CREL->creation->available->course_end_date) && !empty($STUDENT_CREL->creation->available->course_end_date) ? date('Y-m-d', strtotime($STUDENT_CREL->creation->available->course_end_date)) : ''));
+                            $ENGSTARTDATE = (isset($STUDENT_CREL->course_start_date) && !empty($STUDENT_CREL->course_start_date) ? date('Y-m-d', strtotime($STUDENT_CREL->course_start_date)) : (isset($STUDENT_CREL->creation->available->course_start_date) && !empty($STUDENT_CREL->creation->available->course_start_date) ? date('Y-m-d', strtotime($STUDENT_CREL->creation->available->course_start_date)) : ''));
+                            $EngagementRoot_XML .= (isset($STUDENT->df->NUMHUS) && !empty($STUDENT->df->NUMHUS) ? '<NUMHUS>'.$STUDENT->df->NUMHUS.'</NUMHUS>' : '<NUMHUS>1</NUMHUS>');
+                            $EngagementRoot_XML .= (!empty($ENGEXPECTEDENDDATE) ? '<ENGEXPECTEDENDDATE>'.$ENGEXPECTEDENDDATE.'</ENGEXPECTEDENDDATE>' : '');
+                            $EngagementRoot_XML .= (!empty($ENGSTARTDATE) ? '<ENGSTARTDATE>'.$ENGSTARTDATE.'</ENGSTARTDATE>' : '');
                             $EngagementRoot_XML .= (isset($STUDENT_CREL->creation->semester->name) && !empty($STUDENT_CREL->creation->semester->name) ? '<OWNENGID>'.$STUDENT_CREL->creation->semester->name.'</OWNENGID>' : '');
                             $EngagementRoot_XML .= (isset($STUDENT_CREL->feeeligibility->elegibility->df_code) && !empty($STUDENT_CREL->feeeligibility->elegibility->df_code) ? '<FEEELIG>'.$STUDENT_CREL->feeeligibility->elegibility->df_code.'</FEEELIG>' : '');
                             
