@@ -122,6 +122,10 @@
                             <input id="postcode" type="text" name="postcode" class="form-control w-full">
                         </div>
                         <div class="mt-3">
+                            <label for="address" class="form-label">Full Address</label>
+                            <textarea id="address" name="address" class="form-control w-full"></textarea>
+                        </div>
+                        <div class="mt-3">
                             <label for="ip_addresses" class="form-label">IP Addresses</label>
                             <textarea id="ip_addresses" rows="3" name="ip_addresses" class="form-control w-full"></textarea>
                             <div class="form-help">Please insert multiple ip address using pipe (|) sign.</div>
@@ -181,6 +185,10 @@
                         <div class="mt-3">
                             <label for="postcode" class="form-label">Postal Code</label>
                             <input id="postcode" type="text" name="postcode" class="form-control w-full">
+                        </div>
+                        <div class="mt-3">
+                            <label for="address" class="form-label">Full Address</label>
+                            <textarea id="address" name="address" class="form-control w-full"></textarea>
                         </div>
                         <div class="mt-3">
                             <label for="edit_ip_addresses" class="form-label">IP Addresses</label>

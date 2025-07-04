@@ -160,11 +160,11 @@
                     </div>
                     <div class="grid-column">
                         <label class="form-label uppercase">ENGEXPECTEDENDDATE</label>
-                        <input type="text" value="{{(isset($student->crel->course_end_date) && !empty($student->crel->course_end_date) ? date('Y-m-d', strtotime($student->crel->course_end_date)) : '') }}" name="ENGEXPECTEDENDDATE" class="w-full form-control df-datepicker" placeholder="ENGEXPECTEDENDDATE"/>
+                        <input type="text" value="{{ (isset($student->crel->course_end_date) && !empty($student->crel->course_end_date) ? date('Y-m-d', strtotime($student->crel->course_end_date)) : (isset($student->crel->creation->available->course_end_date) && !empty($student->crel->creation->available->course_end_date) ? date('Y-m-d', strtotime($student->crel->creation->available->course_end_date)) : '')) }}" name="ENGEXPECTEDENDDATE" class="w-full form-control df-datepicker" placeholder="ENGEXPECTEDENDDATE"/>
                     </div>
                     <div class="grid-column">
                         <label class="form-label uppercase">ENGSTARTDATE</label>
-                        <input type="text" value="{{(isset($student->crel->course_start_date) && !empty($student->crel->course_start_date) ? date('Y-m-d', strtotime($student->crel->course_start_date)) : '') }}" name="ENGSTARTDATE" class="w-full form-control df-datepicker" placeholder="ENGSTARTDATE"/>
+                        <input type="text" value="{{(isset($student->crel->course_start_date) && !empty($student->crel->course_start_date) ? date('Y-m-d', strtotime($student->crel->course_start_date)) : (isset($student->crel->creation->available->course_start_date) && !empty($student->crel->creation->available->course_start_date) ? date('Y-m-d', strtotime($student->crel->creation->available->course_start_date)) : '')) }}" name="ENGSTARTDATE" class="w-full form-control df-datepicker" placeholder="ENGSTARTDATE"/>
                     </div>
                     <div class="grid-column">
                         <label class="form-label uppercase">OWNENGID</label>

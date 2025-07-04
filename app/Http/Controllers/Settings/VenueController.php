@@ -71,6 +71,7 @@ class VenueController extends Controller
                     'idnumber'=> $list->idnumber,
                     'ukprn'=> $list->ukprn,
                     'postcode'=> $list->postcode,
+                    'address'=> $list->address,
                     'ip' => $ip_addresses,
                     'deleted_at' => $list->deleted_at
                 ];
@@ -87,6 +88,7 @@ class VenueController extends Controller
             'idnumber'=> $request->idnumber,
             'ukprn'=> $request->ukprn,
             'postcode'=> $request->postcode,
+            'address'=> !empty($request->address) ? $request->address : null,
             'created_by' => auth()->user()->id
         ]);
         if(!empty($ip_addresses)):
@@ -121,6 +123,7 @@ class VenueController extends Controller
             'idnumber'=> $request->idnumber,
             'ukprn'=> $request->ukprn,
             'postcode'=> $request->postcode,
+            'address'=> !empty($request->address) ? $request->address : null,
             'updated_by' => auth()->user()->id
         ]);
 
