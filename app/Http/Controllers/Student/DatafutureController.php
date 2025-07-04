@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\Country;
+use App\Models\CountryOfPermanentAddress;
 use App\Models\Course;
 use App\Models\CourseBaseDatafutures;
 use App\Models\CourseCreation;
@@ -132,6 +133,7 @@ class DatafutureController extends Controller
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
             'sessionStatus' => SessionStatus::where('active', 1)->orderBy('id', 'ASC')->get(),
             'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'pcountry' => CountryOfPermanentAddress::orderBy('name', 'ASC')->where('active', 1)->get(),
         ]);
     }
 

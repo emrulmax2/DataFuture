@@ -55,6 +55,6 @@ class StudentContact extends Model
     }
 
     public function pcountry(){
-        return $this->belongsTo(Country::class, 'permanent_country_id');
+        return $this->belongsTo(CountryOfPermanentAddress::class, 'permanent_country_id');
     }
 }

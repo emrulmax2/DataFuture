@@ -495,8 +495,8 @@
                                 <label for="permanent_country_id" class="form-label">Permanent Country</label>
                                 <select class="lcc-tom-select lccTom w-full" name="permanent_country_id">
                                     <option value="">Please Select</option>
-                                    @if($country->count() > 0)
-                                        @foreach($country as $con)
+                                    @if($pcountry->count() > 0)
+                                        @foreach($pcountry as $con)
                                             <option {{ isset($student->contact->permanent_country_id) && $con->id == $student->contact->permanent_country_id ? 'Selected' : '' }} value="{{ $con->id }}">{{ $con->name }}</option>
                                         @endforeach
                                     @endif

@@ -210,8 +210,8 @@
                                         <label class="form-label uppercase">PERMADDCOUNTRY</label>
                                         <select name="PERMADDCOUNTRY" class="w-full tom-selects df-tom-selects">
                                             <option value="">Please Select</option>
-                                            @if($countries->count() > 0)
-                                                @foreach($countries as $opt)
+                                            @if($pcountry->count() > 0)
+                                                @foreach($pcountry as $opt)
                                                     <option {{ (isset($student->contact->permanent_country_id) && $student->contact->permanent_country_id == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }} {{ ($opt->is_hesa == 1 && !empty($opt->hesa_code) ? ' ['.$opt->hesa_code.']' : '') }} {{ ($opt->is_df == 1 && !empty($opt->df_code) ? ' ['.$opt->df_code.']' : '') }}</option>
                                                 @endforeach
                                             @endif
