@@ -283,7 +283,7 @@ var table = (function () {
                         $('#editVenueModal input[name="idnumber"]').val(dataset.idnumber ? dataset.idnumber : '');
                         $('#editVenueModal input[name="ukprn"]').val(dataset.ukprn ? dataset.ukprn : '');
                         $('#editVenueModal input[name="postcode"]').val(dataset.postcode ? dataset.postcode : '');
-                        $('#editVenueModal input[name="address"]').val(dataset.address ? dataset.address : '');
+                        $('#editVenueModal [name="address"]').val(dataset.address ? dataset.address : '');
                         $('#editVenueModal textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : '');
 
                         $('#editVenueModal input[name="id"]').val(editId);
