@@ -417,7 +417,7 @@ class DatafutureReportController extends Controller
 
                                     if($student_status_id == $termStatusId && in_array($student_status_id, $endStatuses)):
                                         $ENGENDDATE = (isset($STUDENT->termStatus->status_end_date) && !empty($STUDENT->termStatus->status_end_date) ? date('Y-m-d', strtotime($STUDENT->termStatus->status_end_date)) : '');
-                                        $RSNENGEND = (isset($STUDENT->termStatus->reason_for_engagement_ending_id) && !empty($STUDENT->termStatus->reason_for_engagement_ending_id) ? $STUDENT->termStatus->reason_for_engagement_ending_id : '');
+                                        $RSNENGEND = (isset($STUDENT->termStatus->reason->df_code) && !empty($STUDENT->termStatus->reason->df_code) ? $STUDENT->termStatus->reason->df_code : '');
                                         $QUALRESULT = (isset($STUDENT->termStatus->other_academic_qualification_id) && !empty($STUDENT->termStatus->other_academic_qualification_id) ? $STUDENT->termStatus->other_academic_qualification_id : '');
                                     endif;
 
@@ -467,20 +467,16 @@ class DatafutureReportController extends Controller
                                         $periodEndDate = (isset($STU->periodend) && !empty($STU->periodend) && $STU->periodend != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodend)) : '');
                                         $periodStartDate = (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodstart)) : '');
 
-                                        $SCSMODE = (isset($STU->mode_id) && $STU->mode_id > 0 ? $STU->mode_id : '');
+                                        //$SCSMODE = (isset($STU->mode_id) && $STU->mode_id > 0 ? $STU->mode_id : '');
+                                        $SCSMODE = (isset($STUDENT->other->mode->df_code) && $STUDENT->other->mode->df_code > 0 ? $STUDENT->other->mode->df_code : '01');
                                         $SCSEXPECTEDENDDATE = $instanceEnd;
                                         $SCSENDDATE = $hesaEndDate;
                                         if(!empty($ENGENDDATE) && ($ENGENDDATE > $periodStartDate &&  $ENGENDDATE < $periodEndDate) && $ENGENDDATE < $instanceEnd):
                                             $SCSENDDATE = $ENGENDDATE;
-                                            $SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
+                                            //$SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
                                         elseif(empty($hesaEndDate) && (!empty($SCSEXPECTEDENDDATE) && $SCSEXPECTEDENDDATE < date('Y-m-d'))):
                                             $SCSENDDATE = $SCSEXPECTEDENDDATE;
-                                            $SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
-                                        endif;
-                                        
-                                        if($SCSMODE > 0):
-                                            $STUDYMODE = StudyMode::find($SCSMODE);
-                                            $SCSMODE = (isset($STUDYMODE->df_code) && !empty($STUDYMODE->df_code) ? $STUDYMODE->df_code : '');
+                                            //$SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
                                         endif;
 
                                         $RSNSCSEND = '';
@@ -583,10 +579,12 @@ class DatafutureReportController extends Controller
                                 endif;
                                 /* COURSE SESSION END */
 
-                            if(!empty($EngagementRoot_XML) || !empty($EntryProfile_XML) || !empty($StudentCourseSession_XML)):
+                            if(!empty($EngagementRoot_XML) || !empty($EntryProfile_XML) || !empty($StudentCourseSession_XML) || !empty($Leaver_XML) || !empty($QualificationAwarded_XML)):
                                 $Engagement_XML .= '<Engagement>';
                                     $Engagement_XML .= (!empty($EngagementRoot_XML) ? $EngagementRoot_XML : '');
                                     $Engagement_XML .= (!empty($EntryProfile_XML) ? $EntryProfile_XML : '');
+                                    $Engagement_XML .= (!empty($Leaver_XML) ? $Leaver_XML : '');
+                                    $Engagement_XML .= (!empty($QualificationAwarded_XML) ? $QualificationAwarded_XML : '');
                                     $Engagement_XML .= (!empty($StudentCourseSession_XML) ? $StudentCourseSession_XML : '');
                                 $Engagement_XML .= '</Engagement>';
                             endif;
@@ -816,11 +814,13 @@ class DatafutureReportController extends Controller
         $res = [];
         $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
         if($stuloads->count() > 0):
+            $suspendedContinued = false;
             foreach($stuloads as $stu):
                 $instance_id = $stu->course_creation_instance_id;
                 $instance = CourseCreationInstance::find($instance_id);
                 if(isset($instance->terms) && $instance->terms->count() > 0):
                     $suspendedFound = false;
+                    $termCount = 1;
                     foreach($instance->terms as $term):
                         $term_declaration_id = $term->term_declaration_id;
                         $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
@@ -831,24 +831,31 @@ class DatafutureReportController extends Controller
                                 })->whereHas('feed', function($q){
                                     $q->where('attendance_count', 1);
                                 })->orderBy('attendance_date', 'DESC')->get()->first();
-                        if($suspendedFound):
+                        if($suspendedFound || ($suspendedContinued && $termCount == 1)):
                             if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
                                 $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
                                 $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                                //$res[$stu->id][$term_declaration_id]['CONTINUED'] = ($suspendedContinued ? 1 : 0);
+                                $suspendedContinued = ($instance->terms->count() == $termCount ? true : false);
                             else:
                                 $termDeclaration = TermDeclaration::find($term_declaration_id);
 
                                 $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($termDeclaration->start_date) && !empty($termDeclaration->start_date) ? date('Y-m-d', strtotime($termDeclaration->start_date)) : '');
                                 $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 1;
+                                //$res[$stu->id][$term_declaration_id]['CONTINUED'] = ($suspendedContinued ? 1 : 0);
+                                $suspendedContinued = ($suspendedContinued ? false : $suspendedContinued);
                             endif;
                         else:
                             if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
                                 $suspendedFound = true;
+                                $suspendedContinued = ($instance->terms->count() == $termCount ? true : false);
 
                                 $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
                                 $res[$stu->id][$term_declaration_id]['STATUSCHANGEDTO'] = 2;
+                                //$res[$stu->id][$term_declaration_id]['CONTINUED'] = ($suspendedContinued ? 1 : 0).$instance->terms->count().$termCount;
                             endif;
                         endif;
+                        $termCount++;
                     endforeach;
                 endif;
             endforeach;

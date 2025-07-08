@@ -473,6 +473,20 @@
                 <div class="col-span-12">
                     <div class="intro-y box optionBox">
                         <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
+                            <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Study Modes</h2>
+                            <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
+                                <button data-tw-toggle="modal" data-tw-target="#addStudyModeModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
+                                <i data-lucide="chevron-down" class="w-8 h-8 text-slate-600 arrowNavigation"></i>
+                            </div>
+                        </div>
+                        <div class="optionBoxBody p-5" data-tableid="studyModeListTable">
+                            @include('pages.settings.studentoption.studymode.index')
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12">
+                    <div class="intro-y box optionBox">
+                        <div class="flex flex-col optionBoxHeader sm:flex-row items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                             <h2 class="font-medium optionBoxTitle text-base mr-auto cursor-pointer">Suspension Of Active Study</h2>
                             <div class="w-full sm:w-auto sm:ml-auto mt-3 sm:mt-0">
                                 <button data-tw-toggle="modal" data-tw-target="#addSuspensionOfActiveStudyModal" type="button" class="add_btn btn btn-primary shadow-md mr-0 d-inline-flex items-center"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add New</button>
@@ -612,4 +626,5 @@
     @vite('resources/js/qualification-grades.js')
     @vite('resources/js/other-academic-qualifications.js')
     @vite('resources/js/session-status.js')
+    @vite('resources/js/study-modes.js')
 @endsection

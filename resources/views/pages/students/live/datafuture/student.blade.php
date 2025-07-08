@@ -473,15 +473,16 @@
                                 $periodEndDate = (isset($stu->periodend) && !empty($stu->periodend) && $stu->periodend != '0000-00-00' ? date('Y-m-d', strtotime($stu->periodend)) : '');
                                 $periodStartDate = (isset($stu->periodstart) && !empty($stu->periodstart) && $stu->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($stu->periodstart)) : '');
 
-                                $SCSMODE = (isset($stu->mode_id) && $stu->mode_id > 0 ? $stu->mode_id : '');
+                                //$SCSMODE = (isset($stu->mode_id) && $stu->mode_id > 0 ? $stu->mode_id : '');
+                                $SCSMODE = (isset($student->other->study_mode_id) && $student->other->study_mode_id > 0 ? $student->other->study_mode_id : 1);
                                 $SCSEXPECTEDENDDATE = $instanceEnd;
                                 $SCSENDDATE = $hesaEndDate;
                                 if(!empty($ENGENDDATE) && ($ENGENDDATE > $periodStartDate &&  $ENGENDDATE < $periodEndDate) && $ENGENDDATE < $instanceEnd):
                                     $SCSENDDATE = $ENGENDDATE;
-                                    $SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
+                                    //$SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
                                 elseif(empty($hesaEndDate) && (!empty($SCSEXPECTEDENDDATE) && $SCSEXPECTEDENDDATE < date('Y-m-d'))):
                                     $SCSENDDATE = $SCSEXPECTEDENDDATE;
-                                    $SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
+                                    //$SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
                                 endif;
 
                                 $RSNSCSEND = '';

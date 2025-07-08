@@ -296,6 +296,7 @@ use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Settings\Studentoptions\SessionStatusController;
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
+use App\Http\Controllers\Settings\Studentoptions\StudyModeController;
 use App\Http\Controllers\Settings\Studentoptions\SuspensionOfActiveStudyController;
 use App\Http\Controllers\ShoppingCartController;
 use App\Http\Controllers\Settings\WorkplacementCompanyController;
@@ -3837,6 +3838,20 @@ Route::middleware('auth')->group(function() {
     Route::controller(DatafutureReportController::class)->group(function(){
         Route::post('reports/datafuture/single-student', 'getSingleStudentXml')->name('reports.datafuture.single.student'); 
         Route::post('reports/datafuture/multiple-student', 'getMultipleStudentXml')->name('reports.datafuture.multiple.student'); 
+    });
+
+    Route::controller(StudyModeController::class)->group(function() {
+        Route::get('study-modes', 'index')->name('study.mode'); 
+        Route::get('study-modes/list', 'list')->name('study.mode.list'); 
+        Route::post('study-modes/store', 'store')->name('study.mode.store'); 
+        Route::get('study-modes/edit/{id}', 'edit')->name('study.mode.edit');
+        Route::post('study-modes/update', 'update')->name('study.mode.update');
+        Route::delete('study-modes/delete/{id}', 'destroy')->name('study.mode.destory');
+        Route::post('study-modes/restore/{id}', 'restore')->name('study.mode.restore');
+        Route::post('study-modes/update-status/{id}', 'updateStatus')->name('study.mode.update.status');
+    
+        Route::get('study-modes/export', 'export')->name('study.mode.export');
+        Route::post('study-modes/import', 'import')->name('study.mode.import');
     });
     
 });

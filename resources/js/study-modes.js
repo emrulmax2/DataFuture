@@ -3,13 +3,13 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
  
 ("use strict");
-var sessionStatusListTable = (function () {
+var studyModeListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-SESTS").val() != "" ? $("#query-SESTS").val() : "";
-        let status = $("#status-SESTS").val() != "" ? $("#status-SESTS").val() : "";
-        let tableContent = new Tabulator("#sessionStatusListTable", {
-            ajaxURL: route("session.status.list"),
+        let querystr = $("#query-STMOD").val() != "" ? $("#query-STMOD").val() : "";
+        let status = $("#status-STMOD").val() != "" ? $("#status-STMOD").val() : "";
+        let tableContent = new Tabulator("#studyModeListTable", {
+            ajaxURL: route("study.mode.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -60,7 +60,7 @@ var sessionStatusListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSessionStatusModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editStudyModeModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
@@ -96,29 +96,29 @@ var sessionStatusListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-SESTS").on("click", function (event) {
+        $("#tabulator-export-csv-STMOD").on("click", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-json-SESTS").on("click", function (event) {
+        $("#tabulator-export-json-STMOD").on("click", function (event) {
             tableContent.download("json", "data.json");
         });
 
-        $("#tabulator-export-xlsx-SESTS").on("click", function (event) {
+        $("#tabulator-export-xlsx-STMOD").on("click", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
                 sheetName: "Title Details",
             });
         });
 
-        $("#tabulator-export-html-SESTS").on("click", function (event) {
+        $("#tabulator-export-html-STMOD").on("click", function (event) {
             tableContent.download("html", "data.html", {
                 style: true,
             });
         });
 
         // Print
-        $("#tabulator-print-SESTS").on("click", function (event) {
+        $("#tabulator-print-STMOD").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -131,7 +131,7 @@ var sessionStatusListTable = (function () {
 
 (function () {
     // Tabulator
-    if ($("#sessionStatusListTable").length) {
+    if ($("#studyModeListTable").length) {
         $('.optionBoxTitle').on('click', function(e){
             e.preventDefault();
             var $title = $(this);
@@ -139,19 +139,19 @@ var sessionStatusListTable = (function () {
             var $boxBody = $title.parent('.optionBoxHeader').siblings('.optionBoxBody');
             var table = $boxBody.attr('data-tableid');
     
-            if($box.hasClass('active') && table == 'sessionStatusListTable'){
-                sessionStatusListTable.init();
+            if($box.hasClass('active') && table == 'studyModeListTable'){
+                studyModeListTable.init();
             }
         });
         
 
         // Filter function
         function filterTitleHTMLForm() {
-            sessionStatusListTable.init();
+            studyModeListTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm-SESTS")[0].addEventListener(
+        $("#tabulatorFilterForm-STMOD")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
@@ -163,127 +163,127 @@ var sessionStatusListTable = (function () {
         );
 
         // On click go button
-        $("#tabulator-html-filter-go-SESTS").on("click", function (event) {
+        $("#tabulator-html-filter-go-STMOD").on("click", function (event) {
             filterTitleHTMLForm();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-SESTS").on("click", function (event) {
-            $("#query-SESTS").val("");
-            $("#status-SESTS").val("1");
+        $("#tabulator-html-filter-reset-STMOD").on("click", function (event) {
+            $("#query-STMOD").val("");
+            $("#status-STMOD").val("1");
             filterTitleHTMLForm();
         });
 
-        const addSessionStatusModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addSessionStatusModal"));
-        const editSessionStatusModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editSessionStatusModal"));
-        const sessionStatusImportModal = tailwind.Modal.getOrCreateInstance("#sessionStatusImportModal");
+        const addStudyModeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addStudyModeModal"));
+        const editStudyModeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editStudyModeModal"));
+        const studyModeImportModal = tailwind.Modal.getOrCreateInstance("#studyModeImportModal");
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addSessionStatusModalEl = document.getElementById('addSessionStatusModal')
-        addSessionStatusModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addSessionStatusModal .acc__input-error').html('');
-            $('#addSessionStatusModal .modal-body input:not([type="checkbox"])').val('');
+        const addStudyModeModalEl = document.getElementById('addStudyModeModal')
+        addStudyModeModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#addStudyModeModal .acc__input-error').html('');
+            $('#addStudyModeModal .modal-body input:not([type="checkbox"])').val('');
 
-            $('#addSessionStatusModal input[name="is_hesa"]').prop('checked', false);
-            $('#addSessionStatusModal .hesa_code_area').fadeOut('fast', function(){
-                $('#addSessionStatusModal .hesa_code_area input').val('');
+            $('#addStudyModeModal input[name="is_hesa"]').prop('checked', false);
+            $('#addStudyModeModal .hesa_code_area').fadeOut('fast', function(){
+                $('#addStudyModeModal .hesa_code_area input').val('');
             });
-            $('#addSessionStatusModal input[name="is_df"]').prop('checked', false);
-            $('#addSessionStatusModal .df_code_area').fadeOut('fast', function(){
-                $('#addSessionStatusModal .df_code_area input').val('');
+            $('#addStudyModeModal input[name="is_df"]').prop('checked', false);
+            $('#addStudyModeModal .df_code_area').fadeOut('fast', function(){
+                $('#addStudyModeModal .df_code_area input').val('');
             });
-            $('#addSessionStatusModal input[name="active"]').prop('checked', true);
+            $('#addStudyModeModal input[name="active"]').prop('checked', true);
         });
         
-        const editSessionStatusModalEl = document.getElementById('editSessionStatusModal')
-        editSessionStatusModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editSessionStatusModal .acc__input-error').html('');
-            $('#editSessionStatusModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editSessionStatusModal input[name="id"]').val('0');
+        const editStudyModeModalEl = document.getElementById('editStudyModeModal')
+        editStudyModeModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#editStudyModeModal .acc__input-error').html('');
+            $('#editStudyModeModal .modal-body input:not([type="checkbox"])').val('');
+            $('#editStudyModeModal input[name="id"]').val('0');
 
-            $('#editSessionStatusModal input[name="is_hesa"]').prop('checked', false);
-            $('#editSessionStatusModal .hesa_code_area').fadeOut('fast', function(){
-                $('#editSessionStatusModal .hesa_code_area input').val('');
+            $('#editStudyModeModal input[name="is_hesa"]').prop('checked', false);
+            $('#editStudyModeModal .hesa_code_area').fadeOut('fast', function(){
+                $('#editStudyModeModal .hesa_code_area input').val('');
             });
-            $('#editSessionStatusModal input[name="is_df"]').prop('checked', false);
-            $('#editSessionStatusModal .df_code_area').fadeOut('fast', function(){
-                $('#editSessionStatusModal .df_code_area input').val('');
+            $('#editStudyModeModal input[name="is_df"]').prop('checked', false);
+            $('#editStudyModeModal .df_code_area').fadeOut('fast', function(){
+                $('#editStudyModeModal .df_code_area input').val('');
             })
-            $('#editSessionStatusModal input[name="active"]').prop('checked', false);
+            $('#editStudyModeModal input[name="active"]').prop('checked', false);
         });
         
-        $('#addSessionStatusForm input[name="is_hesa"]').on('change', function(){
+        $('#addStudyModeForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSessionStatusForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#addSessionStatusForm .hesa_code_area input').val('');
+                $('#addStudyModeForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#addStudyModeForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#addSessionStatusForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#addSessionStatusForm .hesa_code_area input').val('');
+                $('#addStudyModeForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#addStudyModeForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#addSessionStatusForm input[name="is_df"]').on('change', function(){
+        $('#addStudyModeForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#addSessionStatusForm .df_code_area').fadeIn('fast', function(){
-                    $('#addSessionStatusForm .df_code_area input').val('');
+                $('#addStudyModeForm .df_code_area').fadeIn('fast', function(){
+                    $('#addStudyModeForm .df_code_area input').val('');
                 })
             }else{
-                $('#addSessionStatusForm .df_code_area').fadeOut('fast', function(){
-                    $('#addSessionStatusForm .df_code_area input').val('');
+                $('#addStudyModeForm .df_code_area').fadeOut('fast', function(){
+                    $('#addStudyModeForm .df_code_area input').val('');
                 })
             }
         })
         
-        $('#editSessionStatusForm input[name="is_hesa"]').on('change', function(){
+        $('#editStudyModeForm input[name="is_hesa"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSessionStatusForm .hesa_code_area').fadeIn('fast', function(){
-                    $('#editSessionStatusForm .hesa_code_area input').val('');
+                $('#editStudyModeForm .hesa_code_area').fadeIn('fast', function(){
+                    $('#editStudyModeForm .hesa_code_area input').val('');
                 })
             }else{
-                $('#editSessionStatusForm .hesa_code_area').fadeOut('fast', function(){
-                    $('#editSessionStatusForm .hesa_code_area input').val('');
+                $('#editStudyModeForm .hesa_code_area').fadeOut('fast', function(){
+                    $('#editStudyModeForm .hesa_code_area input').val('');
                 })
             }
         })
         
-        $('#editSessionStatusForm input[name="is_df"]').on('change', function(){
+        $('#editStudyModeForm input[name="is_df"]').on('change', function(){
             if($(this).prop('checked')){
-                $('#editSessionStatusForm .df_code_area').fadeIn('fast', function(){
-                    $('#editSessionStatusForm .df_code_area input').val('');
+                $('#editStudyModeForm .df_code_area').fadeIn('fast', function(){
+                    $('#editStudyModeForm .df_code_area input').val('');
                 })
             }else{
-                $('#editSessionStatusForm .df_code_area').fadeOut('fast', function(){
-                    $('#editSessionStatusForm .df_code_area input').val('');
+                $('#editStudyModeForm .df_code_area').fadeOut('fast', function(){
+                    $('#editStudyModeForm .df_code_area input').val('');
                 })
             }
         })
 
-        $('#addSessionStatusForm').on('submit', function(e){
+        $('#addStudyModeForm').on('submit', function(e){
             e.preventDefault();
-            const form = document.getElementById('addSessionStatusForm');
+            const form = document.getElementById('addStudyModeForm');
         
-            document.querySelector('#saveSessionStatus').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveSessionStatus svg").style.cssText ="display: inline-block;";
+            document.querySelector('#saveStudyMode').setAttribute('disabled', 'disabled');
+            document.querySelector("#saveStudyMode svg").style.cssText ="display: inline-block;";
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('session.status.store'),
+                url: route('study.mode.store'),
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveSessionStatus').removeAttribute('disabled');
-                document.querySelector("#saveSessionStatus svg").style.cssText = "display: none;";
+                document.querySelector('#saveStudyMode').removeAttribute('disabled');
+                document.querySelector("#saveStudyMode svg").style.cssText = "display: none;";
                 
                 if (response.status == 200) {
-                    addSessionStatusModal.hide();
+                    addStudyModeModal.hide();
 
                     succModal.show();
-                    sessionStatusListTable.init();
+                    studyModeListTable.init();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                             $("#successModal .successModalTitle").html( "Congratulations!" );
                             $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
@@ -291,14 +291,14 @@ var sessionStatusListTable = (function () {
                 }
                 
             }).catch(error => {
-                sessionStatusListTable.init();
-                document.querySelector('#saveSessionStatus').removeAttribute('disabled');
-                document.querySelector("#saveSessionStatus svg").style.cssText = "display: none;";
+                studyModeListTable.init();
+                document.querySelector('#saveStudyMode').removeAttribute('disabled');
+                document.querySelector("#saveStudyMode svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addSessionStatusForm .${key}`).addClass('border-danger');
-                            $(`#addSessionStatusForm  .error-${key}`).html(val);
+                            $(`#addStudyModeForm .${key}`).addClass('border-danger');
+                            $(`#addStudyModeForm  .error-${key}`).html(val);
                         }
                     } else {
                         console.log('error');
@@ -307,13 +307,13 @@ var sessionStatusListTable = (function () {
             });
         });
 
-        $("#sessionStatusListTable").on("click", ".edit_btn", function () {      
+        $("#studyModeListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
             axios({
                 method: "get",
-                url: route("session.status.edit", editId),
+                url: route("study.mode.edit", editId),
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
@@ -321,36 +321,36 @@ var sessionStatusListTable = (function () {
                 .then((response) => {
                     if (response.status == 200) {
                         let dataset = response.data;
-                        $('#editSessionStatusModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                        $('#editStudyModeModal input[name="name"]').val(dataset.name ? dataset.name : '');
                         if(dataset.is_hesa == 1){
-                            $('#editSessionStatusModal input[name="is_hesa"]').prop('checked', true);
-                            $('#editSessionStatusModal .hesa_code_area').fadeIn('fast', function(){
-                                $('#editSessionStatusModal input[name="hesa_code"]').val(dataset.hesa_code);
+                            $('#editStudyModeModal input[name="is_hesa"]').prop('checked', true);
+                            $('#editStudyModeModal .hesa_code_area').fadeIn('fast', function(){
+                                $('#editStudyModeModal input[name="hesa_code"]').val(dataset.hesa_code);
                             })
                         }else{
-                            $('#editSessionStatusModal input[name="is_hesa"]').prop('checked', false);
-                            $('#editSessionStatusModal .hesa_code_area').fadeOut('fast', function(){
-                                $('#editSessionStatusModal input[name="hesa_code"]').val('');
+                            $('#editStudyModeModal input[name="is_hesa"]').prop('checked', false);
+                            $('#editStudyModeModal .hesa_code_area').fadeOut('fast', function(){
+                                $('#editStudyModeModal input[name="hesa_code"]').val('');
                             })
                         }
 
                         if(dataset.is_df == 1){
-                            $('#editSessionStatusModal input[name="is_df"]').prop('checked', true);
-                            $('#editSessionStatusModal .df_code_area').fadeIn('fast', function(){
-                                $('#editSessionStatusModal input[name="df_code"]').val(dataset.df_code);
+                            $('#editStudyModeModal input[name="is_df"]').prop('checked', true);
+                            $('#editStudyModeModal .df_code_area').fadeIn('fast', function(){
+                                $('#editStudyModeModal input[name="df_code"]').val(dataset.df_code);
                             })
                         }else{
-                            $('#editSessionStatusModal input[name="is_df"]').prop('checked', false);
-                            $('#editSessionStatusModal .df_code_area').fadeOut('fast', function(){
-                                $('#editSessionStatusModal input[name="df_code"]').val('');
+                            $('#editStudyModeModal input[name="is_df"]').prop('checked', false);
+                            $('#editStudyModeModal .df_code_area').fadeOut('fast', function(){
+                                $('#editStudyModeModal input[name="df_code"]').val('');
                             })
                         }
-                        $('#editSessionStatusModal input[name="id"]').val(editId);
+                        $('#editStudyModeModal input[name="id"]').val(editId);
 
                         if(dataset.active == 1){
-                            $('#editSessionStatusModal input[name="active"]').prop('checked', true);
+                            $('#editStudyModeModal input[name="active"]').prop('checked', true);
                         }else{
-                            $('#editSessionStatusModal input[name="active"]').prop('checked', false);
+                            $('#editStudyModeModal input[name="active"]').prop('checked', false);
                         }
                     }
                 })
@@ -360,28 +360,28 @@ var sessionStatusListTable = (function () {
         });
 
         // Update Course Data
-        $("#editSessionStatusForm").on("submit", function (e) {
+        $("#editStudyModeForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editSessionStatusForm input[name="id"]').val();
-            const form = document.getElementById("editSessionStatusForm");
+            let editId = $('#editStudyModeForm input[name="id"]').val();
+            const form = document.getElementById("editStudyModeForm");
 
-            document.querySelector('#updateSessionStatus').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateSessionStatus svg').style.cssText = 'display: inline-block;';
+            document.querySelector('#updateStudyMode').setAttribute('disabled', 'disabled');
+            document.querySelector('#updateStudyMode svg').style.cssText = 'display: inline-block;';
 
             let form_data = new FormData(form);
 
             axios({
                 method: "post",
-                url: route("session.status.update"),
+                url: route("study.mode.update"),
                 data: form_data,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
                 if (response.status == 200) {
-                    document.querySelector("#updateSessionStatus").removeAttribute("disabled");
-                    document.querySelector("#updateSessionStatus svg").style.cssText = "display: none;";
-                    editSessionStatusModal.hide();
+                    document.querySelector("#updateStudyMode").removeAttribute("disabled");
+                    document.querySelector("#updateStudyMode svg").style.cssText = "display: none;";
+                    editStudyModeModal.hide();
 
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -389,18 +389,18 @@ var sessionStatusListTable = (function () {
                         $("#successModal .successModalDesc").html('Titles data successfully updated.');
                     });
                 }
-                sessionStatusListTable.init();
+                studyModeListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateSessionStatus").removeAttribute("disabled");
-                document.querySelector("#updateSessionStatus svg").style.cssText = "display: none;";
+                document.querySelector("#updateStudyMode").removeAttribute("disabled");
+                document.querySelector("#updateStudyMode svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editSessionStatusForm .${key}`).addClass('border-danger')
-                            $(`#editSessionStatusForm  .error-${key}`).html(val)
+                            $(`#editStudyModeForm .${key}`).addClass('border-danger')
+                            $(`#editStudyModeForm  .error-${key}`).html(val)
                         }
                     }else if (error.response.status == 304) {
-                        editSessionStatusModal.hide();
+                        editStudyModeModal.hide();
 
                         let message = error.response.statusText;
                         succModal.show();
@@ -422,10 +422,10 @@ var sessionStatusListTable = (function () {
             let action = $agreeBTN.attr('data-action');
 
             $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETESESTS'){
+            if(action == 'DELETESTMOD'){
                 axios({
                     method: 'delete',
-                    url: route('session.status.destory', recordID),
+                    url: route('study.mode.destory', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -438,14 +438,14 @@ var sessionStatusListTable = (function () {
                             $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
                         });
                     }
-                    sessionStatusListTable.init();
+                    studyModeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'RESTORESESTS'){
+            } else if(action == 'RESTORESTMOD'){
                 axios({
                     method: 'post',
-                    url: route('session.status.restore', recordID),
+                    url: route('study.mode.restore', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -458,14 +458,14 @@ var sessionStatusListTable = (function () {
                             $('#successModal .successModalDesc').html('Record Successfully Restored!');
                         });
                     }
-                    sessionStatusListTable.init();
+                    studyModeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
-            } else if(action == 'CHANGESTATSESTS'){
+            } else if(action == 'CHANGESTATSTMOD'){
                 axios({
                     method: 'post',
-                    url: route('session.status.update.status', recordID),
+                    url: route('study.mode.update.status', recordID),
                     headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
                 }).then(response => {
                     if (response.status == 200) {
@@ -478,7 +478,7 @@ var sessionStatusListTable = (function () {
                             $('#successModal .successModalDesc').html('Record status successfully updated!');
                         });
                     }
-                    sessionStatusListTable.init();
+                    studyModeListTable.init();
                 }).catch(error =>{
                     console.log(error)
                 });
@@ -486,7 +486,7 @@ var sessionStatusListTable = (function () {
         })
 
         // Delete Course
-        $('#sessionStatusListTable').on('click', '.status_updater', function(){
+        $('#studyModeListTable').on('click', '.status_updater', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -495,12 +495,12 @@ var sessionStatusListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATSESTS');
+                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATSTMOD');
             });
         });
 
         // Delete Course
-        $('#sessionStatusListTable').on('click', '.delete_btn', function(){
+        $('#studyModeListTable').on('click', '.delete_btn', function(){
             let $statusBTN = $(this);
             let rowID = $statusBTN.attr('data-id');
 
@@ -509,12 +509,12 @@ var sessionStatusListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
                 $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETESESTS');
+                $('#confirmModal .agreeWith').attr('data-action', 'DELETESTMOD');
             });
         });
 
         // Restore Course
-        $('#sessionStatusListTable').on('click', '.restore_btn', function(){
+        $('#studyModeListTable').on('click', '.restore_btn', function(){
             let $statusBTN = $(this);
             let courseID = $statusBTN.attr('data-id');
 
@@ -523,14 +523,14 @@ var sessionStatusListTable = (function () {
                 $('#confirmModal .confModTitle').html(confModalDelTitle);
                 $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
                 $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORESESTS');
+                $('#confirmModal .agreeWith').attr('data-action', 'RESTORESTMOD');
             });
         });
 
-        $('#sessionStatusImportModal').on('click','#saveSessionStatus',function(e) {
+        $('#studyModeImportModal').on('click','#saveStudyMode',function(e) {
             e.preventDefault();
-            $('#sessionStatusImportModal .dropzone').get(0).dropzone.processQueue();
-            sessionStatusImportModal.hide();
+            $('#studyModeImportModal .dropzone').get(0).dropzone.processQueue();
+            studyModeImportModal.hide();
 
             succModal.show();   
             setTimeout(function() { succModal.hide(); }, 2000);          
