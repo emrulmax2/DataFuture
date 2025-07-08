@@ -19,6 +19,7 @@ use App\Models\ComonSmtp;
 use App\Models\Company;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
+use App\Models\CountryOfPermanentAddress;
 use App\Models\Course;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
@@ -299,6 +300,7 @@ class StudentController extends Controller
             'allStatuses' => Status::where('type', 'Student')->get(),
             'titles' => Title::where('active', 1)->get(),
             'country' => Country::where('active', 1)->get(),
+            'pcountry' => CountryOfPermanentAddress::orderBy('name', 'ASC')->where('active', 1)->get(),
             'ethnicity' => Ethnicity::where('active', 1)->get(),
             'disability' => Disability::where('active', 1)->get(),
             'relations' => KinsRelation::where('active', 1)->get(),
