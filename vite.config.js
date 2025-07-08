@@ -394,6 +394,7 @@ export default defineConfig({
                 'resources/js/student-expected-result-search-form.js',
                 'resources/js/other-academic-qualifications.js',
                 'resources/js/session-status.js',
+                'resources/js/study-modes.js',
 
             ],
             refresh: true,

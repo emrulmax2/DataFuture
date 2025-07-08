@@ -76,7 +76,7 @@ class PersonalDetailController extends Controller
         $studentOldRow = Student::find($student_id);
         $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();
 
-        $study_mode_id = (isset($request->study_mode_id) && $request->study_mode_id > 0 ? $request->study_mode_id : null);
+        $study_mode_id = (isset($request->study_mode_id) && $request->study_mode_id > 0 ? $request->study_mode_id : 1);
         $request->request->remove('ethnicity_id');
 
         $student = Student::find($student_id);

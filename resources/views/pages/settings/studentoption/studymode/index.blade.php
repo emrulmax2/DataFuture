@@ -2,26 +2,26 @@
 <!-- BEGIN: HTML Table Data -->
 <div class="relative">
     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-        <form id="tabulatorFilterForm-SESTS" class="xl:flex sm:mr-auto" >
+        <form id="tabulatorFilterForm-STMOD" class="xl:flex sm:mr-auto" >
             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                <input id="query-SESTS" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                <input id="query-STMOD" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
             </div>
             <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                 <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                <select id="status-SESTS" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                <select id="status-STMOD" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
                     <option value="1">Active</option>
                     <option value="0">In Active</option>
                     <option value="3">Archived</option>
                 </select>
             </div>
             <div class="mt-2 xl:mt-0">
-                <button id="tabulator-html-filter-go-SESTS" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                <button id="tabulator-html-filter-reset-SESTS" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                <button id="tabulator-html-filter-go-STMOD" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
+                <button id="tabulator-html-filter-reset-STMOD" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
             </div>
         </form>
         <div class="flex mt-5 sm:mt-0">
-            <button id="tabulator-print-SESTS" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+            <button id="tabulator-print-STMOD" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                 <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
             </button>
             <div class="dropdown w-1/2 sm:w-auto">
@@ -31,43 +31,43 @@
                 <div class="dropdown-menu w-40">
                     <ul class="dropdown-content">
                         <li>
-                            <a id="tabulator-export-csv-SESTS" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-csv-STMOD" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                             </a>
                         </li>
                         {{-- <li>
-                            <a id="tabulator-export-json-SESTS" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-json-STMOD" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
                             </a>
                         </li> --}}
                         <li>
-                            <a id="tabulator-export-xlsx-SESTS" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-xlsx-STMOD" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                             </a>
                         </li>
                         {{-- <li>
-                            <a id="tabulator-export-html-SESTS" href="javascript:;" class="dropdown-item">
+                            <a id="tabulator-export-html-STMOD" href="javascript:;" class="dropdown-item">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
                             </a>
                         </li> --}}
                     </ul>
                 </div>
             </div>
-            <button data-tw-toggle="modal" data-tw-target="#sessionStatusImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
+            <button data-tw-toggle="modal" data-tw-target="#studyModeImportModal" type="button" class="import_btn btn btn-sm btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import</button>
         </div>
     </div>
     <div class="overflow-x-auto scrollbar-hidden">
-        <div id="sessionStatusListTable" class="mt-5 table-report table-report--tabulator"></div>
+        <div id="studyModeListTable" class="mt-5 table-report table-report--tabulator"></div>
     </div>
 </div>
 <!-- END: HTML Table Data -->
 <!-- BEGIN: Add Modal -->
-<div id="addSessionStatusModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="addStudyModeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="#" id="addSessionStatusForm" enctype="multipart/form-data">
+        <form method="POST" action="#" id="addStudyModeForm" enctype="multipart/form-data">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Add Session Status</h2>
+                    <h2 class="font-medium text-base mr-auto">Add Study Mode</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -109,7 +109,7 @@
                         <input id="active" class="form-check-input m-0" name="active" checked value="1" type="checkbox">
                     </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="saveSessionStatus" class="btn btn-primary w-auto">     
+                    <button type="submit" id="saveStudyMode" class="btn btn-primary w-auto">     
                         Save                      
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -131,12 +131,12 @@
 </div>
 <!-- END: Add Modal -->
 <!-- BEGIN: Edit Modal -->
-<div id="editSessionStatusModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="editStudyModeModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form method="POST" action="#" id="editSessionStatusForm">
+        <form method="POST" action="#" id="editStudyModeForm">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Edit Session Status</h2>
+                    <h2 class="font-medium text-base mr-auto">Edit Study Mode</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -178,7 +178,7 @@
                         <input id="edit_active" class="form-check-input m-0" name="active" value="1" type="checkbox">
                     </div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="updateSessionStatus" class="btn btn-primary w-auto">
+                    <button type="submit" id="updateStudyMode" class="btn btn-primary w-auto">
                         Update
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -201,17 +201,17 @@
 </div>
 <!-- END: Edit Modal -->
 <!-- BEGIN: Import Modal -->
-<div id="sessionStatusImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+<div id="studyModeImportModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="font-medium text-base mr-auto">Import Session Status</h2>
+                <h2 class="font-medium text-base mr-auto">Import Study Mode</h2>
                 <a data-tw-dismiss="modal" href="javascript:;">
                     <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                 </a>
             </div>
             <div class="modal-body">
-                <form method="post"  action="{{ route('session.status.import') }}" class="dropzone" id="sessionStatusImportForm" enctype="multipart/form-data">
+                <form method="post"  action="{{ route('study.mode.import') }}" class="dropzone" id="studyModeImportForm" enctype="multipart/form-data">
                     @csrf
                     <div class="fallback">
                         <input name="import_title_file" type="file" />
@@ -224,10 +224,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <a style="float: left;" href="{{ route('session.status.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample</a>
+                <a style="float: left;" href="{{ route('study.mode.export') }}" id="downloadSample" class="btn btn-success text-white w-auto">Download Sample</a>
                 <button type="button" data-tw-dismiss="modal"
                     class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                <button id="saveSessionStatus" class="btn btn-primary w-auto">Upload</button>
+                <button id="saveStudyMode" class="btn btn-primary w-auto">Upload</button>
             </div>
         </div>
     </div>
