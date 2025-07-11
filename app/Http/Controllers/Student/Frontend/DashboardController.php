@@ -10,6 +10,7 @@ use App\Models\AttendanceExcuseDay;
 use App\Models\AwardingBody;
 use App\Models\ConsentPolicy;
 use App\Models\Country;
+use App\Models\CountryOfPermanentAddress;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseCreationVenue;
 use App\Models\Disability;
@@ -68,6 +69,7 @@ class DashboardController extends Controller
         $currentAddress = Address::find($studentContact->term_time_address_id);
         $permanentAddress = Address::find($studentContact->permanent_address_id);
         $terTimeAccomadtionType = TermTimeAccommodationType::where('active', 1)->get();
+        $pCountries = CountryOfPermanentAddress::where('active', 1)->get();
         $consentList = ConsentPolicy::all();
         $data = [
             "student_id" => $studentData->id,
@@ -80,11 +82,14 @@ class DashboardController extends Controller
             'hesa_gender_id' => $studentOtherDetails->hesa_gender_id,
             "current_address" => $currentAddress,
             "permanent_address" => $permanentAddress,
+            'permanent_country_id' => $studentContact->permanent_country_id,
+            'permanent_post_code_new' => $studentContact->permanent_post_code,
             "consents" => $consentList,
-            "term_time_accommodation_type_id" => $studentContact->term_time_accommodation_type_id
+            "term_time_accommodation_type_id" => $studentContact->term_time_accommodation_type_id,
+            'pCountries' =>$pCountries,
         ];
 
-        if($studentData->users->first_login==1 && !$studentData->users->isImpersonated()):
+        if($studentData->users->first_login==1 ):
             return view('pages.students.frontend.index', [
                 'title' => 'Student Dashboard - London Churchill College',
                 'breadcrumbs' => [],
@@ -97,7 +102,8 @@ class DashboardController extends Controller
                 "genderIdentities" => $genderIdentities,
                 "studentData" => $data,
                 "consents" =>$consentList,
-                "termTimeAccomadtionTypes" => $terTimeAccomadtionType
+                "termTimeAccomadtionTypes" => $terTimeAccomadtionType,
+                'pCountries' => $pCountries,
             ]);
         else:
             $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();

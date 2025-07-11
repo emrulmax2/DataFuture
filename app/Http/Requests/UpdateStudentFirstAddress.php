@@ -32,6 +32,8 @@ class UpdateStudentFirstAddress extends FormRequest
             'permanent_post_code'=> 'required_if:disagree_permanent_address,=,1',
             'permanent_city'=> 'required_if:disagree_permanent_address,=,1',
             'permanent_country'=> 'required_if:disagree_permanent_address,=,1',
+            'permanent_post_code_new'=> 'required',
+            'permanent_country_id'=> 'required',
         ];
     }
 
@@ -47,6 +49,8 @@ class UpdateStudentFirstAddress extends FormRequest
             'permanent_post_code.required_if' => 'Permanent postal code field is required if their is different permanent address set.',
             'permanent_city.required_if' => 'The permanent city field is required when their is different permanent address set.',
             'permanent_country.required_if' => 'The permanent country field is required when their is different permanent address set.',
+            'permanent_post_code_new.required' => 'The permanent post code field is required.',
+            'permanent_country_id.required' => 'The permanent country field is required.',
         ];
     }
 }
