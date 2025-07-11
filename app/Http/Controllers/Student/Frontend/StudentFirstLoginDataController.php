@@ -63,6 +63,14 @@ class StudentFirstLoginDataController extends Controller
         // "permanent_address_id" => null
         // "student_id" => "52"
         // "term_time_accommodation_type_id" => something
+            
+        
+
+            $studentContactId = StudentContact::where("student_id", $request->student_id)->get()->first();
+            $studentContact = StudentContact::find($studentContactId->id);
+            $studentContact->permanent_post_code = $request->permanent_post_code_new;
+            $studentContact->permanent_country_id = $request->permanent_country_id;
+            $studentContact->save();
 
         if($request->current_address_id==null) {
             // New Address insert then connect link

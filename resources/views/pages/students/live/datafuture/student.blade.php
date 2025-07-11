@@ -432,8 +432,13 @@
                                         <!-- <input type="text" value="{{ $QUALAWARDID }}" name="QUALAWARDID" class="w-full form-control" placeholder="QUALAWARDID"/> -->
                                         <select id="QUALAWARDID" name="QUALAWARDID" class="form-control w-full">
                                             <option value="">Please Select</option>
-                                            <option {{ isset($student->awarded->qual_award_type) && $student->awarded->qual_award_type == 'HND' ? 'Selected' : '' }} value="HND">HND</option>
-                                            <option {{ isset($student->awarded->qual_award_type) && $student->awarded->qual_award_type == 'HNC' ? 'Selected' : '' }} value="HNC">HNC</option>
+                                            @if($df_qualification_fields->count() > 0)
+                                                @foreach($df_qualification_fields as $dffileds)
+                                                    @if(isset($dffileds->field->name) && $dffileds->field->name == 'QUALAWARDID' && !empty($dffileds->field_value))
+                                                        <option {{ isset($student->awarded->qual_award_type) && $student->awarded->qual_award_type == trim($dffileds->field_value) ? 'Selected' : '' }} value="{{ trim($dffileds->field_value) }}">{{ trim($dffileds->field_value) }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                     <div class="grid-column">

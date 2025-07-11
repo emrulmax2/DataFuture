@@ -40,7 +40,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-4" class="form-label inline-flex">Nationality <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#nationality-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-4" name="nationality" class="w-full  lccTom lcc-tom-select">
-                            
+                            <option value="">Please Select</option>
                             @foreach($countries as $country)
                                 <option {{ ($studentData["nationality"] == $country->id  ? "selected":"") }} value="{{ $country->id }}">{{ $country->name }}</option>              
                             @endforeach
@@ -57,6 +57,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-4" class="form-label inline-flex">Country of Birth <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#country-birth-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-5" name="birth_country" class="w-full  lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
                             @foreach($countries as $country)
                                 <option  {{ ($studentData["nationality"] == $country->id  ? "selected":"") }}  value="{{ $country->id }}">{{ $country->name }}</option>              
                             @endforeach
@@ -74,7 +75,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-4" class="form-label inline-flex">Ethnicity <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#ethnicity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-6" name="ethnicity" class="w-full  lccTom lcc-tom-select">
-                            
+                                <option value="">Please Select</option>
                             @foreach($ethnicities as $ethnicity)
                                 <option {{ ($studentData["ethnicity"] == $ethnicity->id  ? "selected":"") }}  value="{{ $ethnicity->id }}">{{ $ethnicity->name }}</option>              
                             @endforeach
@@ -91,6 +92,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-3" class="form-label inline-flex">Religion or Belief /RELIGION <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#religion-belief-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-3" name="religion" class="w-full  lccTom lcc-tom-select">
+                                <option value="">Please Select</option>
                             @foreach($religions as $religion)
                                 <option {{ ($studentData["religion"] == $religion->id  ? "selected":"") }} value="{{ $religion->id }}">{{ $religion->name }}</option>              
                             @endforeach
@@ -108,6 +110,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6 ">
                         <label for="input-wizard-1" class="form-label inline-flex">Sexual Orientation <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-1" name="sexual_orientation" class="w-full lccTom lcc-tom-select" >
+                            <option value="">Please Select</option>
                             @foreach($sexualOrientations as $sexualOrientation)
                                 <option {{ ($studentData["sexualOrientation"] == $sexualOrientation->id  ? "selected":"") }} value="{{ $sexualOrientation->id }}">{{ $sexualOrientation->name }}</option>              
                             @endforeach
@@ -125,6 +128,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-2" class="form-label inline-flex">Gender identity <span class="text-danger"> *</span><i data-theme="light" data-tooltip-content="#gender-identity-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-2" name="gender" class="w-full  lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
                             @foreach($genderIdentities as $genderIdentity)
                                 <option  {{ ($studentData["hesa_gender_id"] == $genderIdentity->id  ? "selected":"") }} value="{{ $genderIdentity->id }}">{{ $genderIdentity->name }}</option>              
                             @endforeach
@@ -141,6 +145,7 @@
                     <div class="intro-y col-span-12 sm:col-span-6">
                         <label for="input-wizard-4" class="form-label inline-flex">Sex identifier/Gender <span class="text-danger"> *</span> <i data-theme="light" data-tooltip-content="#gender-tooltip" data-trigger="click" data-lucide="help-circle" class="tooltip w-5 h-5 ml-1 cursor-pointer"></i></label>
                         <select id="data-7" name="sex_identifier_id" class="w-full  lccTom lcc-tom-select">
+                            <option value="">Please Select</option>
                             @foreach($sexIdentifiers as $sexIdentifier)
                                 <option {{ ($studentData["sex_identifier_id"] == $sexIdentifier->id  ? "selected":"") }}  value="{{ $sexIdentifier->id }}">{{ $sexIdentifier->name }}</option>              
                             @endforeach
@@ -337,6 +342,22 @@
                         <div id="permanentAddress__yes" class="hidden" >
                             <input name="permanent_address_id" type="hidden" value="" />
                             <div class="font-medium text-base"><b>{{ $studentData["current_address"]->address_line_1 }},{{ !empty($studentData["current_address"]->address_line_2) ? $studentData["current_address"]->address_line_2."," : '' }} {{ !empty($studentData["current_address"]->post_code) ? $studentData["current_address"]->post_code."," : '' }} {{ !empty($studentData["current_address"]->city) ? $studentData["current_address"]->city."," : '' }} {{ $studentData["current_address"]->country }} </b></div>
+                        </div>
+                        
+                        <div id="" class="intro-y col-span-12 py-2" >
+                            <label for="data-5" class="form-label inline-flex">Please select your current permanent country <span class="text-danger">*</span> </label>
+                            <select id="data-5" name="permanent_country_id" class=" w-full ">
+                                <option value="">Please Select</option>
+                                @foreach($pCountries as $pCountry)
+                                    <option {{ ((($studentData["permanent_country_id"] == $pCountry->id && $studentData["permanent_country_id"] != 217) || $pCountry->id ==76)  ? "selected":"") }} value="{{ $pCountry->id }}">{{ $pCountry->name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-permanent_country_id text-danger mt-2"></div>
+                        </div>
+                        <div class="intro-y col-span-12 py-2">
+                            <label for="permanent_post_code_new" class="form-label inline-flex">Permanent Post Code <span class="text-danger"> *</span></label>
+                            <input id="permanent_post_code_new" type="text"  autocomplete="off" name="permanent_post_code_new" value=" {{ !empty($studentData["current_address"]->post_code && !isset($studentData["permanent_post_code_new"])) ? $studentData["current_address"]->post_code : $studentData["permanent_post_code_new"] }}" class="w-full text-sm" />
+                            <div class="acc__input-error error-permanent_post_code_new text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="intro-y col-span-12 flex items-center justify-center sm:justify-end mt-5">

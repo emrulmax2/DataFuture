@@ -25,6 +25,7 @@ class UpdateStudentFirstLoginData extends FormRequest
             'gender'=> 'required',
             'student_id'=> 'required',
             'nationality'=> 'required',
+            'religion'=> 'required',
             'birth_country'=> 'required',
             'sex_identifier_id'=> 'required',
             'sexual_orientation'=> 'required',
