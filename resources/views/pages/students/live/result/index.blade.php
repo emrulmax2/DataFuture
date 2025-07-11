@@ -715,8 +715,13 @@
                         <label for="qual_award_type" class="form-label">Qualification Award Type</label>
                         <select id="qual_award_type" name="qual_award_type" class="form-control w-full">
                             <option value="">Please Select</option>
-                            <option value="HND">HND</option>
-                            <option value="HNC">HNC</option>
+                            @if(isset($student->crel->course->dfQual) && $student->crel->course->dfQual->count() > 0)
+                                @foreach($student->crel->course->dfQual as $dffileds)
+                                    @if(isset($dffileds->field->name) && $dffileds->field->name == 'QUALAWARDID' && !empty($dffileds->field_value))
+                                        <option value="{{ trim($dffileds->field_value) }}">{{ trim($dffileds->field_value) }}</option>
+                                    @endif
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                     <div class="mt-3">

@@ -259,8 +259,15 @@
                             <label for="qual_award_type" class="form-label">Qualification Award Type</label>
                             <select id="qual_award_type" name="qual_award_type" class="form-control w-full">
                                 <option value="">Please Select</option>
-                                <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HND') ? 'Selected' : '' }} value="HND">HND</option>
-                                <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HNC') ? 'Selected' : '' }} value="HNC">HNC</option>
+                                <!-- <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HND') ? 'Selected' : '' }} value="HND">HND</option>
+                                <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == 'HNC') ? 'Selected' : '' }} value="HNC">HNC</option> -->
+                                @if(isset($student->crel->course->dfQual) && $student->crel->course->dfQual->count() > 0)
+                                    @foreach($student->crel->course->dfQual as $dffileds)
+                                        @if(isset($dffileds->field->name) && $dffileds->field->name == 'QUALAWARDID' && !empty($dffileds->field_value))
+                                            <option {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) && (isset($student->termStatus->qual_award_type) && $student->termStatus->qual_award_type == trim($dffileds->field_value)) ? 'Selected' : '' }} value="{{ trim($dffileds->field_value) }}">{{ trim($dffileds->field_value) }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div class="mt-3 qualIdQrap" style="display: {{ in_array($studentStatusId, $endStatuses) && (isset($student->termStatus->reason_for_engagement_ending_id) && $student->termStatus->reason_for_engagement_ending_id == 1) ? 'block' : 'none' }};">
