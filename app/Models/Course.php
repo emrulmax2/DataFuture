@@ -57,4 +57,10 @@ class Course extends Model
     public function df(){
         return $this->hasMany(CourseBaseDatafutures::class, 'course_id', 'id');
     }
+
+    public function dfQual(){
+        return $this->hasMany(CourseBaseDatafutures::class, 'course_id', 'id')->whereHas('field', function($q){
+                            $q->where('datafuture_field_category_id', 2);
+                        })->where('course_id', $this->id);
+    }
 }
