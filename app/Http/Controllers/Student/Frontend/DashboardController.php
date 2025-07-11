@@ -89,7 +89,7 @@ class DashboardController extends Controller
             'pCountries' =>$pCountries,
         ];
 
-        if($studentData->users->first_login==1 ):
+        if($studentData->users->first_login==1 && !$studentData->users->isImpersonated()):
             return view('pages.students.frontend.index', [
                 'title' => 'Student Dashboard - London Churchill College',
                 'breadcrumbs' => [],
