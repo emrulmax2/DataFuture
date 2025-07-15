@@ -20,6 +20,7 @@ use App\Models\StudentCourseRelation;
 use App\Models\StudentModuleInstanceDatafuture;
 use App\Models\StudentProposedCourse;
 use App\Models\StudentStuloadInformation;
+use App\Models\StudentTermStuload;
 use App\Models\StudyMode;
 use App\Models\TermDeclaration;
 use App\Models\Venue;
@@ -461,120 +462,123 @@ class DatafutureReportController extends Controller
                                 $S = 1;
                                 if($STULOADS && $STULOADS->count()):
                                     foreach($STULOADS as $STU):
-                                        $instanceStart = (isset($STU->instance->start_date) && !empty($STU->instance->start_date) ? date('Y-m-d', strtotime($STU->instance->start_date)) : '');
-                                        $instanceEnd = (isset($STU->instance->end_date) && !empty($STU->instance->end_date) ? date('Y-m-d', strtotime($STU->instance->end_date)) : '');
-                                        $hesaEndDate = (isset($STU->enddate) && !empty($STU->enddate) ? date('Y-m-d', strtotime($STU->enddate)) : '');
-                                        $periodEndDate = (isset($STU->periodend) && !empty($STU->periodend) && $STU->periodend != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodend)) : '');
-                                        $periodStartDate = (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodstart)) : '');
+                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID, $dateRanges);
+                                        if($modules && $modules->count() > 0):
+                                            $instanceStart = (isset($STU->instance->start_date) && !empty($STU->instance->start_date) ? date('Y-m-d', strtotime($STU->instance->start_date)) : '');
+                                            $instanceEnd = (isset($STU->instance->end_date) && !empty($STU->instance->end_date) ? date('Y-m-d', strtotime($STU->instance->end_date)) : '');
+                                            $hesaEndDate = (isset($STU->enddate) && !empty($STU->enddate) ? date('Y-m-d', strtotime($STU->enddate)) : '');
+                                            $periodEndDate = (isset($STU->periodend) && !empty($STU->periodend) && $STU->periodend != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodend)) : '');
+                                            $periodStartDate = (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($STU->periodstart)) : '');
 
-                                        //$SCSMODE = (isset($STU->mode_id) && $STU->mode_id > 0 ? $STU->mode_id : '');
-                                        $SCSMODE = (isset($STUDENT->other->mode->df_code) && $STUDENT->other->mode->df_code > 0 ? $STUDENT->other->mode->df_code : '01');
-                                        $SCSEXPECTEDENDDATE = $instanceEnd;
-                                        $SCSENDDATE = $hesaEndDate;
-                                        if(!empty($ENGENDDATE) && ($ENGENDDATE > $periodStartDate &&  $ENGENDDATE < $periodEndDate) && $ENGENDDATE < $instanceEnd):
-                                            $SCSENDDATE = $ENGENDDATE;
-                                            //$SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
-                                        elseif(empty($hesaEndDate) && (!empty($SCSEXPECTEDENDDATE) && $SCSEXPECTEDENDDATE < date('Y-m-d'))):
-                                            $SCSENDDATE = $SCSEXPECTEDENDDATE;
-                                            //$SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
-                                        endif;
+                                            //$SCSMODE = (isset($STU->mode_id) && $STU->mode_id > 0 ? $STU->mode_id : '');
+                                            $SCSMODE = (isset($STUDENT->other->mode->df_code) && $STUDENT->other->mode->df_code > 0 ? $STUDENT->other->mode->df_code : '01');
+                                            $SCSEXPECTEDENDDATE = $instanceEnd;
+                                            $SCSENDDATE = $hesaEndDate;
+                                            if(!empty($ENGENDDATE) && ($ENGENDDATE > $periodStartDate &&  $ENGENDDATE < $periodEndDate) && $ENGENDDATE < $instanceEnd):
+                                                $SCSENDDATE = $ENGENDDATE;
+                                                //$SCSMODE = (!empty($SCSMODE) ? 2 : $SCSMODE);
+                                            elseif(empty($hesaEndDate) && (!empty($SCSEXPECTEDENDDATE) && $SCSEXPECTEDENDDATE < date('Y-m-d'))):
+                                                $SCSENDDATE = $SCSEXPECTEDENDDATE;
+                                                //$SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
+                                            endif;
 
-                                        $RSNSCSEND = '';
-                                        if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
-                                            $RSNSCSEND = 4;
-                                        elseif($hesaEndDate != '' && $hesaEndDate > $instanceStart && $hesaEndDate < $instanceEnd):
-                                            $RSNSCSEND = 2;
-                                        else:
                                             $RSNSCSEND = '';
+                                            if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
+                                                $RSNSCSEND = 4;
+                                            elseif($hesaEndDate != '' && $hesaEndDate > $instanceStart && $hesaEndDate < $instanceEnd):
+                                                $RSNSCSEND = 2;
+                                            else:
+                                                $RSNSCSEND = '';
+                                            endif;
+                                            $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
+                                            $FUNDLENGTH = 3;
+
+                                            $REFPERIOD_INC = ($S < 10 ? '0'.$S : $S);
+                                            $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
+
+                                            $COURSE_SESS_XML = '';
+                                            $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SCSESSIONID>'.$STU->course_creation_instance_id.'</SCSESSIONID>' : '');
+                                            $COURSE_SESS_XML .= (isset($STU->courseaim_id) && !empty($STU->courseaim_id) ? '<COURSEID>'.$STU->courseaim_id.'</COURSEID>' : '');
+                                            $COURSE_SESS_XML .= (isset($STU->gross_fee) && !empty($STU->gross_fee) ? '<INVOICEFEEAMOUNT>'.$STU->gross_fee.'</INVOICEFEEAMOUNT>' : '');
+                                            $COURSE_SESS_XML .= '<INVOICEHESAID>5026</INVOICEHESAID>';
+                                            //$COURSE_SESS_XML .= (!empty($SCSEXPECTEDENDDATE) ? '<SCSEXPECTEDENDDATE>'.$SCSEXPECTEDENDDATE.'</SCSEXPECTEDENDDATE>' : '');
+                                            $COURSE_SESS_XML .= ($SCSENDDATE != '' ? '<SCSENDDATE>'.$SCSENDDATE.'</SCSENDDATE>' : '');
+                                            $COURSE_SESS_XML .= (isset($STU->netfee) && $STU->netfee > 0 ? '<SCSFEEAMOUNT>'.$STU->netfee.'</SCSFEEAMOUNT>' : '');
+                                            $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
+                                            $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
+                                            $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
+                                            $COURSE_SESS_XML .= '<STULOAD></STULOAD>';
+                                            $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
+                                            $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
+
+                                            $FUND_MON_XML = '';
+                                            $FUND_MON_XML .= (isset($STU->df->elq->df_code) && !empty($STU->df->elq->df_code) ? '<ELQ>'.$STU->df->elq->df_code.'</ELQ>' : '');
+                                            $FUND_MON_XML .= (isset($STU->df->fundcomp->df_code) && !empty($STU->df->fundcomp->df_code) ? '<FUNDCOMP>'.$STU->df->fundcomp->df_code.'</FUNDCOMP>' : '');
+                                            $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : '');
+                                            $FUND_MON_XML .= (isset($STU->df->nonregfee->df_code) && !empty($STU->df->nonregfee->df_code) ? '<NONREGFEE>'.$STU->df->nonregfee->df_code.'</NONREGFEE>' : '');
+                                            if(!empty($FUND_MON_XML)):
+                                                $COURSE_SESS_XML .= '<FundingAndMonitoring>'.$FUND_MON_XML.'</FundingAndMonitoring>';
+                                            endif;
+
+                                            $MOD_INST_XML = '';
+                                            if($modules && !empty($modules)):
+                                                foreach($modules as $module):
+                                                    $modDF = StudentModuleInstanceDatafuture::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)
+                                                            ->where('student_stuload_information_id', $STU->id)->where('instance_term_id', $module->instance_term_id)
+                                                            ->where('course_module_id', $module->creations->course_module_id)->get()->first();
+                                                    $MOD_INST_XML .= '<ModuleInstance>';
+                                                        $MOD_INST_XML .= (isset($module->id) && !empty($module->id) ? '<MODINSTID>'.$module->id.'</MODINSTID>' : '');
+                                                        $MOD_INST_XML .= (isset($module->creations->course_module_id) && !empty($module->creations->course_module_id) ? '<MODID>'.$module->creations->course_module_id.'</MODID>' : '');
+                                                        $MOD_INST_XML .= (isset($module->attenTerm->end_date) && !empty($module->attenTerm->end_date) && $module->attenTerm->end_date != '0000-00-00' ? '<MODINSTENDDATE>'.date('Y-m-d', strtotime($module->attenTerm->end_date)).'</MODINSTENDDATE>' : '');
+                                                        $MOD_INST_XML .= (isset($module->attenTerm->start_date) && !empty($module->attenTerm->start_date) && $module->attenTerm->start_date != '0000-00-00' ? '<MODINSTSTARTDATE>'.date('Y-m-d', strtotime($module->attenTerm->start_date)).'</MODINSTSTARTDATE>' : '');
+                                                        $MOD_INST_XML .= (isset($modDF->moduleoutcome->df_code) && !empty($modDF->moduleoutcome->df_code) ? '<MODULEOUTCOME>'.$modDF->moduleoutcome->df_code.'</MODULEOUTCOME>' : '');
+                                                        $MOD_INST_XML .= (isset($modDF->moduleresult->df_code) && !empty($modDF->moduleresult->df_code) ? '<MODULERESULT>'.$modDF->moduleresult->df_code.'</MODULERESULT>' : '');
+                                                    $MOD_INST_XML .= '</ModuleInstance>';
+                                                endforeach;
+                                            endif;
+                                            $COURSE_SESS_XML .= (!empty($MOD_INST_XML) ? $MOD_INST_XML : '');
+
+                                            $REF_PRD_XML = '';
+                                            $STU_RPSTULOAD = $this->getStudentPrStuload($STU->id, $STUDENT->id, $STUDENT_COURSE_ID, $dateRanges);
+                                            $RPSTULOAD = ($STU_RPSTULOAD > 0 ? ($STU_RPSTULOAD == 99 ? '100' : $STU_RPSTULOAD) : '');
+                                            $REF_PRD_XML .= (isset($REFPERIOD_INC) && !empty($REFPERIOD_INC) ? '<REFPERIOD>'.$REFPERIOD_INC.'</REFPERIOD>' : '');
+                                            $REF_PRD_XML .= (isset($STU->instance->year->from_date) && !empty($STU->instance->year->from_date) ? '<YEAR>'.date('Y', strtotime($STU->instance->year->from_date)).'</YEAR>' : '');
+                                            $REF_PRD_XML .= (!empty($RPSTULOAD) ? '<RPSTULOAD>'.$RPSTULOAD.'</RPSTULOAD>' : '');
+                                            $COURSE_SESS_XML .= (!empty($REF_PRD_XML) ? '<ReferencePeriodStudentLoad>'.$REF_PRD_XML.'</ReferencePeriodStudentLoad>' : '');
+
+                                            $CRS_SES_STS_XML = '';
+                                            $SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
+                                            if(isset($SESSIONSTATUES[$STU->id]) && !empty($SESSIONSTATUES[$STU->id])):
+                                                foreach($SESSIONSTATUES[$STU->id] as $TERMDECID => $CSTS):
+                                                    $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
+                                                    if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
+                                                        $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
+                                                        $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
+                                                    endif;
+                                                endforeach;
+                                            endif;
+                                            $COURSE_SESS_XML .= (!empty($CRS_SES_STS_XML) ? '<SessionStatus>'.$CRS_SES_STS_XML.'</SessionStatus>' : '');
+
+                                            if(isset($STU->df->FINSUPTYPE) && !empty($STU->df->FINSUPTYPE)):
+                                                $COURSE_SESS_XML .= '<StudentFinancialSupport>';
+                                                    $COURSE_SESS_XML .= '<FINSUPTYPE>'.$STU->df->FINSUPTYPE.'</FINSUPTYPE>';
+                                                $COURSE_SESS_XML .= '</StudentFinancialSupport>';
+                                            endif;
+
+                                            $STD_LOC_XML = '';
+                                            $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->name) && !empty($STU->studentCR->propose->venue->name) ? '<STUDYLOCID>'.$STU->studentCR->propose->venue->name.'</STUDYLOCID>' : '');
+                                            $STD_LOC_XML .= (isset($STU->df->STUDYPROPORTION) && !empty($STU->df->STUDYPROPORTION) ? '<STUDYPROPORTION>'.$STU->df->STUDYPROPORTION.'</STUDYPROPORTION>' : '<STUDYPROPORTION>100</STUDYPROPORTION>');
+                                            $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->idnumber) && !empty($STU->studentCR->propose->venue->idnumber) ? '<VENUEID>'.$STU->studentCR->propose->venue->idnumber.'</VENUEID>' : '');
+                                            $COURSE_SESS_XML .= (!empty($STD_LOC_XML) ? '<StudyLocation>'.$STD_LOC_XML.'</StudyLocation>' : '');
+
+                                            if(!empty($COURSE_SESS_XML)):
+                                                $StudentCourseSession_XML .= '<StudentCourseSession>';
+                                                    $StudentCourseSession_XML .= $COURSE_SESS_XML;
+                                                $StudentCourseSession_XML .= '</StudentCourseSession>';
+                                            endif;
+
+                                            $S++;
                                         endif;
-                                        $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
-                                        $FUNDLENGTH = 3;
-
-                                        $REFPERIOD_INC = ($S < 10 ? '0'.$S : $S);
-                                        $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
-
-                                        $COURSE_SESS_XML = '';
-                                        $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SCSESSIONID>'.$STU->course_creation_instance_id.'</SCSESSIONID>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->courseaim_id) && !empty($STU->courseaim_id) ? '<COURSEID>'.$STU->courseaim_id.'</COURSEID>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->gross_fee) && !empty($STU->gross_fee) ? '<INVOICEFEEAMOUNT>'.$STU->gross_fee.'</INVOICEFEEAMOUNT>' : '');
-                                        $COURSE_SESS_XML .= '<INVOICEHESAID>5026</INVOICEHESAID>';
-                                        //$COURSE_SESS_XML .= (!empty($SCSEXPECTEDENDDATE) ? '<SCSEXPECTEDENDDATE>'.$SCSEXPECTEDENDDATE.'</SCSEXPECTEDENDDATE>' : '');
-                                        $COURSE_SESS_XML .= ($SCSENDDATE != '' ? '<SCSENDDATE>'.$SCSENDDATE.'</SCSENDDATE>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->netfee) && $STU->netfee > 0 ? '<SCSFEEAMOUNT>'.$STU->netfee.'</SCSFEEAMOUNT>' : '');
-                                        $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
-                                        $COURSE_SESS_XML .= ($STULOAD > 0 ? '<STULOAD>'.$STULOAD.'</STULOAD>' : '');
-                                        $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
-                                        $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
-
-                                        $FUND_MON_XML = '';
-                                        $FUND_MON_XML .= (isset($STU->df->elq->df_code) && !empty($STU->df->elq->df_code) ? '<ELQ>'.$STU->df->elq->df_code.'</ELQ>' : '');
-                                        $FUND_MON_XML .= (isset($STU->df->fundcomp->df_code) && !empty($STU->df->fundcomp->df_code) ? '<FUNDCOMP>'.$STU->df->fundcomp->df_code.'</FUNDCOMP>' : '');
-                                        $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : '');
-                                        $FUND_MON_XML .= (isset($STU->df->nonregfee->df_code) && !empty($STU->df->nonregfee->df_code) ? '<NONREGFEE>'.$STU->df->nonregfee->df_code.'</NONREGFEE>' : '');
-                                        if(!empty($FUND_MON_XML)):
-                                            $COURSE_SESS_XML .= '<FundingAndMonitoring>'.$FUND_MON_XML.'</FundingAndMonitoring>';
-                                        endif;
-
-                                        $MOD_INST_XML = '';
-                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID);
-                                        if($modules && !empty($modules)):
-                                            foreach($modules as $module):
-                                                $modDF = StudentModuleInstanceDatafuture::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)
-                                                        ->where('student_stuload_information_id', $STU->id)->where('instance_term_id', $module->instance_term_id)
-                                                        ->where('course_module_id', $module->creations->course_module_id)->get()->first();
-                                                $MOD_INST_XML .= '<ModuleInstance>';
-                                                    $MOD_INST_XML .= (isset($module->id) && !empty($module->id) ? '<MODINSTID>'.$module->id.'</MODINSTID>' : '');
-                                                    $MOD_INST_XML .= (isset($module->creations->course_module_id) && !empty($module->creations->course_module_id) ? '<MODID>'.$module->creations->course_module_id.'</MODID>' : '');
-                                                    $MOD_INST_XML .= (isset($module->attenTerm->end_date) && !empty($module->attenTerm->end_date) && $module->attenTerm->end_date != '0000-00-00' ? '<MODINSTENDDATE>'.date('Y-m-d', strtotime($module->attenTerm->end_date)).'</MODINSTENDDATE>' : '');
-                                                    $MOD_INST_XML .= (isset($module->attenTerm->start_date) && !empty($module->attenTerm->start_date) && $module->attenTerm->start_date != '0000-00-00' ? '<MODINSTSTARTDATE>'.date('Y-m-d', strtotime($module->attenTerm->start_date)).'</MODINSTSTARTDATE>' : '');
-                                                    $MOD_INST_XML .= (isset($modDF->moduleoutcome->df_code) && !empty($modDF->moduleoutcome->df_code) ? '<MODULEOUTCOME>'.$modDF->moduleoutcome->df_code.'</MODULEOUTCOME>' : '');
-                                                    $MOD_INST_XML .= (isset($modDF->moduleresult->df_code) && !empty($modDF->moduleresult->df_code) ? '<MODULERESULT>'.$modDF->moduleresult->df_code.'</MODULERESULT>' : '');
-                                                $MOD_INST_XML .= '</ModuleInstance>';
-                                            endforeach;
-                                        endif;
-                                        $COURSE_SESS_XML .= (!empty($MOD_INST_XML) ? $MOD_INST_XML : '');
-
-                                        $REF_PRD_XML = '';
-                                        $RPSTULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
-                                        $REF_PRD_XML .= (isset($REFPERIOD_INC) && !empty($REFPERIOD_INC) ? '<REFPERIOD>'.$REFPERIOD_INC.'</REFPERIOD>' : '');
-                                        $REF_PRD_XML .= (isset($STU->instance->year->from_date) && !empty($STU->instance->year->from_date) ? '<YEAR>'.date('Y', strtotime($STU->instance->year->from_date)).'</YEAR>' : '');
-                                        $REF_PRD_XML .= (!empty($RPSTULOAD) ? '<RPSTULOAD>'.$RPSTULOAD.'</RPSTULOAD>' : '');
-                                        $COURSE_SESS_XML .= (!empty($REF_PRD_XML) ? '<ReferencePeriodStudentLoad>'.$REF_PRD_XML.'</ReferencePeriodStudentLoad>' : '');
-
-                                        $CRS_SES_STS_XML = '';
-                                        $SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
-                                        if(isset($SESSIONSTATUES[$STU->id]) && !empty($SESSIONSTATUES[$STU->id])):
-                                            foreach($SESSIONSTATUES[$STU->id] as $TERMDECID => $CSTS):
-                                                $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
-                                                if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
-                                                    $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
-                                                    $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
-                                                endif;
-                                            endforeach;
-                                        endif;
-                                        $COURSE_SESS_XML .= (!empty($CRS_SES_STS_XML) ? '<SessionStatus>'.$CRS_SES_STS_XML.'</SessionStatus>' : '');
-
-                                        if(isset($STU->df->FINSUPTYPE) && !empty($STU->df->FINSUPTYPE)):
-                                            $COURSE_SESS_XML .= '<StudentFinancialSupport>';
-                                                $COURSE_SESS_XML .= '<FINSUPTYPE>'.$STU->df->FINSUPTYPE.'</FINSUPTYPE>';
-                                            $COURSE_SESS_XML .= '</StudentFinancialSupport>';
-                                        endif;
-
-                                        $STD_LOC_XML = '';
-                                        $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->name) && !empty($STU->studentCR->propose->venue->name) ? '<STUDYLOCID>'.$STU->studentCR->propose->venue->name.'</STUDYLOCID>' : '');
-                                        $STD_LOC_XML .= (isset($STU->df->STUDYPROPORTION) && !empty($STU->df->STUDYPROPORTION) ? '<STUDYPROPORTION>'.$STU->df->STUDYPROPORTION.'</STUDYPROPORTION>' : '<STUDYPROPORTION>100</STUDYPROPORTION>');
-                                        $STD_LOC_XML .= (isset($STU->studentCR->propose->venue->idnumber) && !empty($STU->studentCR->propose->venue->idnumber) ? '<VENUEID>'.$STU->studentCR->propose->venue->idnumber.'</VENUEID>' : '');
-                                        $COURSE_SESS_XML .= (!empty($STD_LOC_XML) ? '<StudyLocation>'.$STD_LOC_XML.'</StudyLocation>' : '');
-
-                                        if(!empty($COURSE_SESS_XML)):
-                                            $StudentCourseSession_XML .= '<StudentCourseSession>';
-                                                $StudentCourseSession_XML .= $COURSE_SESS_XML;
-                                            $StudentCourseSession_XML .= '</StudentCourseSession>';
-                                        endif;
-
-                                        $S++;
                                     endforeach;
                                 endif;
                                 /* COURSE SESSION END */
@@ -768,7 +772,7 @@ class DatafutureReportController extends Controller
         return false;
     }
 
-    public function getStudentModuleInstances($stuload_id, $student_id, $course_id){
+    public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $dateRanges = []){
         $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get()->first();
         $plan_ids = [];
 
@@ -779,8 +783,10 @@ class DatafutureReportController extends Controller
                 $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
                 $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
 
-                $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
-                $plan_ids = array_merge($plan_ids, $student_plan_ids);
+                if($this->isTermInRange($dateRanges, $termStart, $termEnd)):
+                    $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
+                    $plan_ids = array_merge($plan_ids, $student_plan_ids);
+                endif;
             endforeach;
         endif;
         
@@ -792,22 +798,30 @@ class DatafutureReportController extends Controller
                                 ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
                                 ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
                                 ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+                    })->whereHas('assign', function($q) use($student_id){
+                        $q->where('student_id', $student_id);
                     })->orderBy('id', 'DESC')->get();
         else:
             return false;
         endif;
-
-        // $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get();
-        // $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
-        // $instance_term_ids = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->get()->pluck('id')->unique()->toArray();
-        
-        // $plans = Plan::whereIn('instance_term_id', $instance_term_ids)->where('course_id', $course_id)->whereHas('assign', function($q) use($student_id){
-        //                 $q->where('student_id', $student_id);
-        //             })->where(function($q){
-        //                 $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
-        //             })->orderBy('id', 'DESC')->get();
         
         return $plans;
+    }
+
+    public function isTermInRange($ranges, $termStart, $termEnd){
+        $inRange = false;
+        if(!empty($ranges) && !empty($termStart) && !empty($termEnd)):
+            $inRangeCount = 0;
+            foreach($ranges as $range):
+                $start = (isset($range['start']) && !empty($range['start']) ? $range['start'] : '');
+                $end = (isset($range['end']) && !empty($range['end']) ? $range['end'] : '');
+
+                $inRangeCount += (!empty($start) && !empty($end) && ($termStart >= $start && $termStart <= $end) ? 1 : 0);
+            endforeach;
+            $inRange = ($inRangeCount > 0 ? true : $inRange);
+        endif;
+
+        return $inRange;
     }
 
     public function getStuloadSessionStatuses($student_id, $student_course_relation_id){
@@ -863,5 +877,30 @@ class DatafutureReportController extends Controller
 
         //dd($res);
         return $res;
+    }
+
+
+    public function getStudentPrStuload($stuload_id, $student_id, $course_id, $dateRanges = []){
+        $stuload = StudentStuloadInformation::find($stuload_id);
+        $instance_id = $stuload->course_creation_instance_id;
+        $instance = CourseCreationInstance::find($instance_id);
+        $stuLoadTotal = 0;
+
+        if(isset($instance->terms) && $instance->terms->count() > 0):
+            foreach($instance->terms as $term):
+                $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+                $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+                if($this->isTermInRange($dateRanges, $termStart, $termEnd)):
+                    $termStuload = StudentTermStuload::where('student_id', $student_id)->where('student_course_relation_id', $stuload->student_course_relation_id)
+                                ->where('student_stuload_information_id', $stuload->id)->where('instance_term_id', $term->id)->get()->first();
+                    if(isset($termStuload->student_load) && $termStuload->student_load > 0):
+                        $stuLoadTotal += $termStuload->student_load;
+                    endif;
+                endif;
+            endforeach;
+        endif;
+
+        return $stuLoadTotal;
     }
 }
