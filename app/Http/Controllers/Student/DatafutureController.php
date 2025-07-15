@@ -403,6 +403,8 @@ class DatafutureController extends Controller
                                                 ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
                                                 ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
                                                 ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+                                    })->whereHas('assign', function($q) use($student_id){
+                                        $q->where('student_id', $student_id);
                                     })->orderBy('id', 'DESC')->get();
                             
                             if($plans->count() > 0):
