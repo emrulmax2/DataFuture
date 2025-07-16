@@ -446,9 +446,9 @@
                                         <input type="text" value="{{ $QUALID }}" name="QUALID" class="w-full form-control" placeholder="QUALID"/>
                                     </div>
                                     <div class="grid-column">
-                                        <label class="form-label uppercase">QUALRESULT</label>
+                                        <label class="form-label uppercase">QUALAWARDRESULT</label>
                                         <!-- <input type="text" value="{{ (isset($student->awarded->qual->name) && !empty($student->awarded->qual->name) ? $student->awarded->qual->name : '') }}" name="QUALRESULT" class="w-full form-control" placeholder="QUALRESULT"/> -->
-                                        <select id="QUALRESULT" name="QUALRESULT" class="form-control w-full">
+                                        <select id="QUALAWARDRESULT" name="QUALAWARDRESULT" class="form-control w-full">
                                             <option value="">Please Select</option>
                                             @if($qualAwards->count() > 0)
                                                 @foreach($qualAwards as $oaq)

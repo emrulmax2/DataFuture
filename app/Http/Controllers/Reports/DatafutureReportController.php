@@ -450,7 +450,7 @@ class DatafutureReportController extends Controller
 
                                 $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual_award_type) && !empty($STUDENT_AWARD->qual_award_type) ? '<QUALAWARDID>'.$STUDENT_AWARD->qual_award_type.'</QUALAWARDID>' : '');
                                 $QualificationAwardedRoot_XML .= (!empty($QUALID) ? '<QUALID>'.$QUALID.'</QUALID>' : '');
-                                $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual->df_code) && !empty($STUDENT_AWARD->qual->df_code) ? '<QUALRESULT>'.$STUDENT_AWARD->qual->df_code.'</QUALRESULT>' : '');
+                                $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual->df_code) && !empty($STUDENT_AWARD->qual->df_code) ? '<QUALAWARDRESULT>'.$STUDENT_AWARD->qual->df_code.'</QUALAWARDRESULT>' : '');
                                 
                                 if(!empty($QualificationAwardedRoot_XML)):
                                     $QualificationAwarded_XML .= '<QualificationAwarded>'.$QualificationAwardedRoot_XML.'</QualificationAwarded>';
@@ -493,7 +493,7 @@ class DatafutureReportController extends Controller
                                             $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
                                             $FUNDLENGTH = 3;
 
-                                            $REFPERIOD_INC = ($S < 10 ? '0'.$S : $S);
+                                            $REFPERIOD_INC = '01'; //($S < 10 ? '0'.$S : $S);
                                             $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
 
                                             $COURSE_SESS_XML = '';

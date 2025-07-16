@@ -2432,6 +2432,10 @@ class StudentController extends Controller
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
         $statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
         $attendance_indicator = (isset($request->attendance_indicator) && $request->attendance_indicator > 0 ? $request->attendance_indicator : 0);
+
+        $endStatuses = [21, 26, 27, 31, 42];
+        $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
+        $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
         
 
         $student = Student::find($student_id);
@@ -2475,15 +2479,12 @@ class StudentController extends Controller
             $data['status_id'] = $status_id;
             $data['status_change_reason'] = $status_change_reason;
             $data['status_change_date'] = $status_change_date;
-            $data['created_by'] = auth()->user()->id;
             
-            $endStatuses = [21, 26, 27, 31, 42];
-            $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
-            $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
             $data['status_end_date'] = (in_array($status_id, $endStatuses) && !empty($request->status_end_date) ? date('Y-m-d', strtotime($request->status_end_date)) : null);
             $data['reason_for_engagement_ending_id'] = (in_array($status_id, $endStatuses) && !empty($request->reason_for_engagement_ending_id) ? $request->reason_for_engagement_ending_id : null);
             $data['qual_award_type'] = $qual_award_type;
             $data['qual_award_result_id'] = $qual_award_result_id;
+            $data['created_by'] = auth()->user()->id;
 
             StudentAttendanceTermStatus::create($data);
             if((!empty($qual_award_type) || !empty($qual_award_result_id)) && $statusDetails->eligible_for_award == 1):
@@ -2504,7 +2505,32 @@ class StudentController extends Controller
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
         else:
-            return response()->json(['message' => 'Nothing was changed. Please try again.'], 304);
+            if(isset($lastTermStatus->id) && $lastTermStatus->id > 0):
+                $data = [];
+                $data['status_change_reason'] = $status_change_reason;
+                $data['status_change_date'] = $status_change_date;
+                $data['updated_by'] = auth()->user()->id;
+                $data['status_end_date'] = (in_array($status_id, $endStatuses) && !empty($request->status_end_date) ? date('Y-m-d', strtotime($request->status_end_date)) : null);
+                $data['reason_for_engagement_ending_id'] = (in_array($status_id, $endStatuses) && !empty($request->reason_for_engagement_ending_id) ? $request->reason_for_engagement_ending_id : null);
+                $data['qual_award_type'] = $qual_award_type;
+                $data['qual_award_result_id'] = $qual_award_result_id;
+                StudentAttendanceTermStatus::where('id', $lastTermStatus->id)->update($data);
+
+                if((!empty($qual_award_type) || !empty($qual_award_result_id)) && $statusDetails->eligible_for_award == 1):
+                    StudentAward::updateOrCreate([ 'student_id' => $student_id, 'student_course_relation_id' => $student->crel->id ], [
+                        'student_id' => $student_id,
+                        'student_course_relation_id' => $student->crel->id,
+                        'qual_award_result_id' => $qual_award_result_id,
+                        'qual_award_type' => $qual_award_type,
+                        'created_by' => auth()->user()->id,
+                        'updated_by' => auth()->user()->id,
+                    ]);
+                endif;
+
+                return response()->json(['message' => 'Related data updated except Status & Term Declaration'], 200);
+            else:
+                return response()->json(['message' => 'Nothing was changed. Please try again later.'], 304);
+            endif;
         endif;
     }
     public function verifyEmail(Request $request){
