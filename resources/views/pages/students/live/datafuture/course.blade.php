@@ -1,9 +1,7 @@
-<div class="grid grid-cols-12 gap-4"> 
-    <div class="col-span-12 sm:col-span-3">
-        <div class="grid grid-cols-12 gap-0">
-            <div class="col-span-4 text-slate-500 font-medium uppercase">Course</div>
-            <div class="col-span-8 font-medium">{{ $course->name }}</div>
-        </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
+    <div class="grid-column">
+        <div class="col-span-4 text-slate-500 uppercase">COURSE</div>
+        <div class="col-span-8 font-medium">{{ $course->name }}</div>
     </div>
     @if($df_course_fields->count() > 0)
         @foreach($df_course_fields as $dfld)
@@ -12,11 +10,9 @@
                 $value = (isset($dfld->field_value) && !empty($dfld->field_value) ? trim($dfld->field_value) : '');
             @endphp
 
-            <div class="col-span-12 sm:col-span-3">
-                <div class="grid grid-cols-12 md:gap-8">
-                    <div class="col-span-4 text-slate-500 font-medium uppercase">{{ (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : 'ID: '.$dfld->datafuture_field_id) }}</div>
-                    <div class="col-span-8 font-medium text-right md:text-left">{{ (!empty($value) ? $value : '---') }}</div>
-                </div>
+            <div class="grid-column">
+                <div class="col-span-4 text-slate-500 uppercase">{{ (isset($dfld->field->name) && !empty($dfld->field->name) ? $dfld->field->name : 'ID: '.$dfld->datafuture_field_id) }}</div>
+                <div class="col-span-8 font-medium">{{ (!empty($value) ? $value : '---') }}</div>
             </div>
         @endforeach
     @endif
