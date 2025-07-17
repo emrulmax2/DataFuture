@@ -379,7 +379,7 @@ class DatafutureReportController extends Controller
                                 $EntryProfileRoot_XML .= (isset($STUDENT->contact->pcountry->df_code) && !empty($STUDENT->contact->pcountry->df_code) ? '<PERMADDCOUNTRY>'.$STUDENT->contact->pcountry->df_code.'</PERMADDCOUNTRY>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->contact->permanent_post_code) && !empty($STUDENT->contact->permanent_post_code) ? '<PERMADDPOSTCODE>'.$STUDENT->contact->permanent_post_code.'</PERMADDPOSTCODE>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->other->is_education_qualification) && $STUDENT->other->is_education_qualification == 1 && isset($STUDENT->qualHigest->previous_providers->df_code) && !empty($STUDENT->qualHigest->previous_providers->df_code) ? '<PREVIOUSPROVIDER>'.$STUDENT->qualHigest->previous_providers->df_code.'</PREVIOUSPROVIDER>' : '');
-                                $EntryProfileRoot_XML .= (isset($STUDENT->other->religion->df_code) && !empty($STUDENT->other->religion->df_code) && $STUDENT->other->religion->df_code != '' ? '<RELIGIOUSBGROUND>'.$STUDENT->other->religion->df_code.'</RELIGIOUSBGROUND>' : '');
+                                //$EntryProfileRoot_XML .= (isset($STUDENT->other->religion->df_code) && !empty($STUDENT->other->religion->df_code) && $STUDENT->other->religion->df_code != '' ? '<RELIGIOUSBGROUND>'.$STUDENT->other->religion->df_code.'</RELIGIOUSBGROUND>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->other->is_education_qualification) && $STUDENT->other->is_education_qualification == 1 && isset($STUDENT->qualHigest->highest_qualification_on_entries->df_code) && !empty($STUDENT->qualHigest->highest_qualification_on_entries->df_code) ? '<HIGHESTQOE>'.$STUDENT->qualHigest->highest_qualification_on_entries->df_code.'</HIGHESTQOE>' : '');
 
                                     /* ENTRY QUALIFICATION AWARD XML START */
@@ -484,9 +484,9 @@ class DatafutureReportController extends Controller
 
                                             $RSNSCSEND = '';
                                             if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
-                                                $RSNSCSEND = 4;
+                                                $RSNSCSEND = '04';
                                             elseif($hesaEndDate != '' && $hesaEndDate > $instanceStart && $hesaEndDate < $instanceEnd):
-                                                $RSNSCSEND = 2;
+                                                $RSNSCSEND = '02';
                                             else:
                                                 $RSNSCSEND = '';
                                             endif;

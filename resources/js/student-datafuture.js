@@ -47,7 +47,7 @@ import { saveAs } from 'file-saver';
     });
 
     let semester_id = new TomSelect('#semester_id', tomOptionsSDF);
-    let DISABILITY_IDS = new TomSelect('#DISABILITY_IDS', tomOptionsSDFMul);
+    //let DISABILITY_IDS = new TomSelect('#DISABILITY_IDS', tomOptionsSDFMul);
 
     let SSI_disall_id = new TomSelect('#SSI_disall_id', tomOptionsSDF);
     let SSI_exchind_id = new TomSelect('#SSI_exchind_id', tomOptionsSDF);

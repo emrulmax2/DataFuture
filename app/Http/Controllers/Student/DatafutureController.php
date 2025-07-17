@@ -148,7 +148,7 @@ class DatafutureController extends Controller
             'student_course_relation_id' => $student_course_relation_id,
             'NUMHUS' => $request->NUMHUS,
             'CARELEAVER' => $request->CARELEAVER,
-            'ENTRYQUALAWARDID' => $request->ENTRYQUALAWARDID,
+            //'ENTRYQUALAWARDID' => $request->ENTRYQUALAWARDID,
             //'ENGENDDATE' => (!empty($request->ENGENDDATE) ? date('Y-m-d', strtotime($request->ENGENDDATE)) : null),
             //'RSNENGEND' => $request->RSNENGEND
         ];
@@ -174,8 +174,8 @@ class DatafutureController extends Controller
                 $SCSDATA['FUNDLENGTH'] = (!empty($SCS['FUNDLENGTH']) ? $SCS['FUNDLENGTH'] : null);
                 $SCSDATA['NONREGFEE'] = (!empty($SCS['NONREGFEE']) ? $SCS['NONREGFEE'] : null);
                 $SCSDATA['FINSUPTYPE'] = (!empty($SCS['FINSUPTYPE']) ? $SCS['FINSUPTYPE'] : null);
-                $SCSDATA['DISTANCE'] = (!empty($SCS['DISTANCE']) ? $SCS['DISTANCE'] : null);
-                $SCSDATA['STUDYPROPORTION'] = (!empty($SCS['STUDYPROPORTION']) ? $SCS['STUDYPROPORTION'] : 100);
+                //$SCSDATA['DISTANCE'] = (!empty($SCS['DISTANCE']) ? $SCS['DISTANCE'] : null);
+                //$SCSDATA['STUDYPROPORTION'] = (!empty($SCS['STUDYPROPORTION']) ? $SCS['STUDYPROPORTION'] : 100);
 
                 $rowExist = StudentCourseSessionDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)
                             ->where('student_stuload_information_id', $SCSID)->get()->first();
