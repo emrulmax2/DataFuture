@@ -412,20 +412,12 @@
                                     <div class="grid-column">
                                         <div class="col-span-4 text-slate-500 uppercase">QUALAWARDID</div>
                                         <div class="col-span-8 font-medium">
-                                            @if($df_qualification_fields->count() > 0)
-                                                @foreach($df_qualification_fields as $dffileds)
-                                                    @if(isset($dffileds->field->name) && $dffileds->field->name == 'QUALAWARDID' && !empty($dffileds->field_value))
-                                                        {{ trim($dffileds->field_value) }}
-                                                    @endif
-                                                @endforeach
-                                            @else 
-                                                {{ '---' }}
-                                            @endif
+                                            {{ (isset($student->awarded->qual_award_type) && !empty($student->awarded->qual_award_type) ? $student->awarded->qual_award_type : '---') }}
                                         </div>
                                     </div>
                                     <div class="grid-column">
                                         <div class="col-span-4 text-slate-500 uppercase">QUALID</div>
-                                        <div class="col-span-8 font-medium">{{ (!empty($QUALID) ? $QUALID : '---') }}</div>
+                                        <div class="col-span-8 font-medium">{{ (!empty($QUALID) && isset($student->awarded->qual_award_type) && !empty($student->awarded->qual_award_type) ? $QUALID : '---') }}</div>
                                     </div>
                                     <div class="grid-column">
                                         <div class="col-span-4 text-slate-500 uppercase">QUALAWARDRESULT</div>
