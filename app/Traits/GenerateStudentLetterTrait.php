@@ -224,7 +224,7 @@ trait GenerateStudentLetterTrait{
         return ['path' => Storage::disk('s3')->url('public/students/'.$student_id.'/'.$fileName), 'filename' => $fileName, 'the_content' => $the_content];
     }
 
-    public function parseLetterContent($student_id, $letter_title, $letter_content, $issued_date, $pin, $signatory = 0){
+    public function parseLetterContent($student_id, $letter_title, $letter_content, $issued_date, $signatory = 0){
         $student = Student::find($student_id);
         $issued_date = (!empty($issued_date) ? date('d/m/Y', strtotime($issued_date)) : date('d/m/Y'));
         $signature = Signatory::find($signatory);
