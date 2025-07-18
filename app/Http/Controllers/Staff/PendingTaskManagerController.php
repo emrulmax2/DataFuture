@@ -65,7 +65,7 @@ use PhpOffice\PhpSpreadsheet\Calculation\MathTrig\Sign;
 
 class PendingTaskManagerController extends Controller
 {
-    
+    use GenerateStudentLetterTrait;
 
     public function index()
     {
@@ -529,6 +529,7 @@ class PendingTaskManagerController extends Controller
     }
 
     public function completeTaskStudentEmailTask(Request $request){
+        
         $ids = $request->ids;
         if(!empty($ids)){
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
@@ -538,9 +539,9 @@ class PendingTaskManagerController extends Controller
                 'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
                 'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
                 'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
-                
                 'from_email'    => 'no-reply@lcc.ac.uk',
                 'from_name'    =>  'London Churchill College',
+                
             ];
             $letterSet = LetterSet::find(116);
 
@@ -554,7 +555,7 @@ class PendingTaskManagerController extends Controller
                     $mailTo[] = $student->contact->personal_email;
                 endif;
                 //$mailTo[] = 'limon@churchill.ac';
-
+                $issued_date = Carbon::now()->format('Y-m-d H:i:s');
                 $theEmailTask = TaskList::where('org_email', 'Yes')->orderBy('id', 'DESC')->get()->first();
                 $theStudentTask = StudentTask::where('task_list_id', $theEmailTask->id)->where('student_id', $student->id)->where('status', 'Pending')->get()->first();
                 if($orgEmail == $studentUserEmail && (isset($theStudentTask->id) && $theStudentTask->id > 0)):
@@ -570,8 +571,8 @@ class PendingTaskManagerController extends Controller
 
                     if(isset($letterSet->id) && $letterSet->id > 0 && !empty($letterSet->description)):
                         $subject = 'Welcome to London Churchill College';
-                        $MSGBODY = $letterSet->description;
-
+                        //$MSGBODY = $letterSet->description;
+                        $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,0,9);
                         UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
                     endif;
                 endif;
