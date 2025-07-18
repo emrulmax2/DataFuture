@@ -292,6 +292,7 @@ use App\Http\Controllers\Settings\Studentoptions\ModuleOutcomeController;
 use App\Http\Controllers\Settings\Studentoptions\ModuleResultController;
 use App\Http\Controllers\Settings\Studentoptions\NonRegulatedFeeFlagController;
 use App\Http\Controllers\Settings\Studentoptions\OtherAcademicQualificationController;
+use App\Http\Controllers\Settings\Studentoptions\QualAwardResultController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
 use App\Http\Controllers\Settings\Studentoptions\SessionStatusController;
@@ -3768,6 +3769,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/datafuture/{student}/update-stuload-information', 'updateStuloadInformation')->name('student.datafuture.update.hesa.instances');
 
         Route::delete('student/datafuture/{student}/destroy-stuload-information', 'destroyStuloadInformation')->name('student.datafuture.destory.student.stuload');
+
+        Route::post('student/datafuture/{student}/reset-course-sessions', 'resetCourseSessions')->name('student.datafuture.reset.course.sessions');
     });
 
     Route::controller(QualificationGradeController::class)->group(function() {
@@ -3852,6 +3855,20 @@ Route::middleware('auth')->group(function() {
     
         Route::get('study-modes/export', 'export')->name('study.mode.export');
         Route::post('study-modes/import', 'import')->name('study.mode.import');
+    });
+
+    Route::controller(QualAwardResultController::class)->group(function() {
+        Route::get('qual-award-result', 'index')->name('qual.award.result'); 
+        Route::get('qual-award-result/list', 'list')->name('qual.award.result.list'); 
+        Route::post('qual-award-result/store', 'store')->name('qual.award.result.store'); 
+        Route::get('qual-award-result/edit/{id}', 'edit')->name('qual.award.result.edit');
+        Route::post('qual-award-result/update', 'update')->name('qual.award.result.update');
+        Route::delete('qual-award-result/delete/{id}', 'destroy')->name('qual.award.result.destory');
+        Route::post('qual-award-result/restore/{id}', 'restore')->name('qual.award.result.restore');
+        Route::post('qual-award-result/update-status/{id}', 'updateStatus')->name('qual.award.result.update.status');
+    
+        Route::get('qual-award-result/export', 'export')->name('qual.award.result.export');
+        Route::post('qual-award-result/import', 'import')->name('qual.award.result.import');
     });
     
 });

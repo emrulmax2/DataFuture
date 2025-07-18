@@ -549,4 +549,34 @@ import { saveAs } from 'file-saver';
             }, 2000)
         }
     });
+
+
+    $('#resetBTN').on('click', function(e){
+        e.preventDefault();
+        let $theBtn = $(this);
+        let student_id = $theBtn.attr('data-student');
+        let student_crel_id = $theBtn.attr('data-student-crel');
+
+        $theBtn.attr('disabled', 'disabled');
+        $theBtn.find(".theLoader").fadeIn();
+
+        axios({
+            method: "post",
+            url: route('student.datafuture.reset.course.sessions', student_id),
+            data: {student_id : student_id, student_crel_id : student_crel_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                window.location.reload();
+            }
+        }).catch(error => {
+            $theBtn.removeAttr('disabled');
+            $theBtn.find(".theLoader").fadeOut();
+
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    })
+
 })()

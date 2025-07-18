@@ -12,6 +12,7 @@ use App\Models\CourseModule;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
+use App\MOdels\ReasonForEndingCourseSession;
 use App\Models\SessionStatus;
 use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
@@ -482,14 +483,19 @@ class DatafutureReportController extends Controller
                                                 //$SCSMODE = (!empty($SCSMODE) ? 4 : $SCSMODE);
                                             endif;
 
+                                            $RSNSCSEND_ID = '';
                                             $RSNSCSEND = '';
                                             if(($hesaEndDate == '' && $instanceEnd <= date('Y-m-d')) || ($hesaEndDate != '' && $hesaEndDate == $instanceEnd) || ($hesaEndDate != '' && $hesaEndDate > $instanceEnd && $instanceEnd <= date('Y-m-d'))):
-                                                $RSNSCSEND = '04';
+                                                $RSNSCSEND_ID = 4;
                                             elseif($hesaEndDate != '' && $hesaEndDate > $instanceStart && $hesaEndDate < $instanceEnd):
-                                                $RSNSCSEND = '02';
+                                                $RSNSCSEND_ID = 2;
                                             else:
                                                 $RSNSCSEND = '';
                                             endif;
+                                            $RSNSCSEND_ID = (isset($STU->df->RSNSCSEND) && !empty($STU->df->RSNSCSEND) ? $STU->df->RSNSCSEND : $RSNSCSEND_ID);
+                                            $RSNSCSEND_ROW = ($RSNSCSEND_ID > 0 ? ReasonForEndingCourseSession::find($RSNSCSEND_ID) : []);
+                                            $RSNSCSEND = (isset($RSNSCSEND_ROW->df_code) && !empty($RSNSCSEND_ROW->df_code) ? $RSNSCSEND_ROW->df_code : '');
+
                                             $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
                                             $FUNDLENGTH = 3;
 
@@ -500,14 +506,14 @@ class DatafutureReportController extends Controller
                                             $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SCSESSIONID>'.$STU->course_creation_instance_id.'</SCSESSIONID>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->courseaim_id) && !empty($STU->courseaim_id) ? '<COURSEID>'.$STU->courseaim_id.'</COURSEID>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->gross_fee) && !empty($STU->gross_fee) ? '<INVOICEFEEAMOUNT>'.$STU->gross_fee.'</INVOICEFEEAMOUNT>' : '');
-                                            $COURSE_SESS_XML .= '<INVOICEHESAID>5026</INVOICEHESAID>';
+                                            $COURSE_SESS_XML .= '<INVOICEHESAID>'.(isset($STU->df->INVOICEHESAID) && !empty($STU->df->INVOICEHESAID) ? $STU->df->INVOICEHESAID : '5026').'</INVOICEHESAID>';
                                             //$COURSE_SESS_XML .= (!empty($SCSEXPECTEDENDDATE) ? '<SCSEXPECTEDENDDATE>'.$SCSEXPECTEDENDDATE.'</SCSEXPECTEDENDDATE>' : '');
                                             $COURSE_SESS_XML .= ($SCSENDDATE != '' ? '<SCSENDDATE>'.$SCSENDDATE.'</SCSENDDATE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->netfee) && $STU->netfee > 0 ? '<SCSFEEAMOUNT>'.$STU->netfee.'</SCSFEEAMOUNT>' : '');
                                             $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
-                                            $COURSE_SESS_XML .= '<STULOAD></STULOAD>';
+                                            $COURSE_SESS_XML .= '<STULOAD> </STULOAD>';
                                             $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
                                             $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
 
@@ -550,14 +556,16 @@ class DatafutureReportController extends Controller
                                             $SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
                                             if(isset($SESSIONSTATUES[$STU->id]) && !empty($SESSIONSTATUES[$STU->id])):
                                                 foreach($SESSIONSTATUES[$STU->id] as $TERMDECID => $CSTS):
-                                                    $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
-                                                    if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
-                                                        $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
-                                                        $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
-                                                    endif;
+                                                    $CRS_SES_STS_XML .= '<SessionStatus>';
+                                                        $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
+                                                        if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
+                                                            $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
+                                                            $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
+                                                        endif;
+                                                    $CRS_SES_STS_XML .= '</SessionStatus>';
                                                 endforeach;
                                             endif;
-                                            $COURSE_SESS_XML .= (!empty($CRS_SES_STS_XML) ? '<SessionStatus>'.$CRS_SES_STS_XML.'</SessionStatus>' : '');
+                                            $COURSE_SESS_XML .= (!empty($CRS_SES_STS_XML) ? $CRS_SES_STS_XML : '');
 
                                             if(isset($STU->df->FINSUPTYPE) && !empty($STU->df->FINSUPTYPE)):
                                                 $COURSE_SESS_XML .= '<StudentFinancialSupport>';

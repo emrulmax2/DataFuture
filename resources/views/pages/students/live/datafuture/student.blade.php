@@ -476,6 +476,7 @@
                                 else:
                                     $RSNSCSEND = '';
                                 endif;
+                                $RSNSCSEND = (isset($stu->df->RSNSCSEND) && !empty($stu->df->RSNSCSEND) ? $stu->df->RSNSCSEND : $RSNSCSEND);
                                 $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 3 : 2));
                                 $FUNDLENGTH = 3;
 
@@ -511,9 +512,13 @@
                                                 <div class="col-span-4 text-slate-500 uppercase">INVOICEFEEAMOUNT</div>
                                                 <div class="col-span-8 font-medium">{{ $stu->gross_fee }}</div>
                                             </div>
-                                            <div class="grid-column">
+                                            <!-- <div class="grid-column">
                                                 <div class="col-span-4 text-slate-500 uppercase">INVOICEHESAID</div>
                                                 <div class="col-span-8 font-medium">5026</div>
+                                            </div> -->
+                                            <div class="grid-column">
+                                                <label class="form-label uppercase">INVOICEHESAID</label>
+                                                <input value="{{ (isset($stu->df->INVOICEHESAID) && !empty($stu->df->INVOICEHESAID) ? $stu->df->INVOICEHESAID : '5026' ) }}" type="text" name="SCS[{{ $stu->id }}][INVOICEHESAID]" class="w-full form-control" placeholder="INVOICEHESAID"/>
                                             </div>
                                             <div class="grid-column">
                                                 <div class="col-span-4 text-slate-500 uppercase">SCSEXPECTEDENDDATE</div>
@@ -551,12 +556,19 @@
                                                 <div class="col-span-4 text-slate-500 uppercase">SESSIONYEARID</div>
                                                 <div class="col-span-8 font-medium">{{ $stu->course_creation_instance_id }}</div>
                                             </div>
-                                            <div class="grid-column">
+                                            <!-- <div class="grid-column">
                                                 <div class="col-span-4 text-slate-500 uppercase">YEARPRG</div>
-                                                <div class="col-span-8 font-medium">{{ ($stu->yearprg > 0 ? $stu->yearprg : '---') }}</div>
-                                            </div>
+                                                <div class="col-span-8 font-medium">
+                                                    {{ ($stu->yearprg > 0 ? $stu->yearprg : '---') }}
+                                                </div>
+                                            </div> -->
                                             <div class="grid-column">
-                                                <div class="col-span-4 text-slate-500 uppercase">RSNSCSEND</div>
+                                                <label class="form-label uppercase">YEARPRG</label>
+                                                <input value="{{ ($stu->yearprg > 0 ? $stu->yearprg : '') }}" type="text" name="SCS[{{ $stu->id }}][YEARPRG]" class="w-full form-control" placeholder="YEARPRG"/>
+                                            </div>
+
+                                            <div class="grid-column">
+                                                <!-- <div class="col-span-4 text-slate-500 uppercase">RSNSCSEND</div>
                                                 <div class="col-span-8 font-medium">
                                                     @if($rsnscsends->count() > 0 && !empty($RSNSCSEND))
                                                         @foreach($rsnscsends as $opt)
@@ -569,7 +581,17 @@
                                                     @else 
                                                         {{ '---' }}
                                                     @endif
-                                                </div>
+                                                </div> -->
+
+                                                <label class="form-label uppercase">RSNSCSEND</label>
+                                                <select name="SCS[{{ $stu->id }}][RSNSCSEND]" class="w-full tom-selects df-tom-selects">
+                                                    <option value="">Please Select</option>
+                                                    @if($rsnscsends->count() > 0)
+                                                        @foreach($rsnscsends as $opt)
+                                                            <option {{ ($RSNSCSEND == $opt->id ? 'Selected' : '') }} value="{{ $opt->id }}">{{ $opt->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
                                             </div>
                                         </div>
 
