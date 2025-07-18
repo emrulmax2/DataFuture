@@ -12,7 +12,7 @@ use App\Models\CourseModule;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
-use App\MOdels\ReasonForEndingCourseSession;
+use App\Models\ReasonForEndingCourseSession;
 use App\Models\SessionStatus;
 use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
