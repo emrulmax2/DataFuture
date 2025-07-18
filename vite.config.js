@@ -395,6 +395,7 @@ export default defineConfig({
                 'resources/js/other-academic-qualifications.js',
                 'resources/js/session-status.js',
                 'resources/js/study-modes.js',
+                'resources/js/qual-award-results.js',
 
             ],
             refresh: true,

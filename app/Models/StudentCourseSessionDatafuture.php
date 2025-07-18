@@ -14,6 +14,8 @@ class StudentCourseSessionDatafuture extends Model
         'student_id',
         'student_course_relation_id',
         'student_stuload_information_id',
+        'INVOICEHESAID',
+        'RSNSCSEND',
         'ELQ',
         'FUNDCOMP',
         'FUNDLENGTH',

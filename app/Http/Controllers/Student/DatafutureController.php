@@ -165,16 +165,21 @@ class DatafutureController extends Controller
                 $SCSMS = (isset($SCS['SCSM']) && !empty($SCS['SCSM']) ? $SCS['SCSM'] : []);
                 $LOADS = (isset($SCS['LOADS']) && !empty($SCS['LOADS']) ? $SCS['LOADS'] : []);
 
+                $YEARPRG = (isset($SCS['YEARPRG']) && !empty($SCS['YEARPRG']) ? $SCS['YEARPRG'] : null);
+                $STULOADS = StudentStuloadInformation::where('id', $SCSID)->update(['yearprg' => $YEARPRG]);
+
+
                 $SCSDATA = [];
                 $SCSDATA['student_id'] = $student->id;
                 $SCSDATA['student_course_relation_id'] = $student_course_relation_id;
                 $SCSDATA['student_stuload_information_id'] = $SCSID;
+                $SCSDATA['INVOICEHESAID'] = (!empty($SCS['INVOICEHESAID']) ? $SCS['INVOICEHESAID'] : null);
                 $SCSDATA['ELQ'] = (!empty($SCS['ELQ']) ? $SCS['ELQ'] : null);
                 $SCSDATA['FUNDCOMP'] = (!empty($SCS['FUNDCOMP']) ? $SCS['FUNDCOMP'] : null);
                 $SCSDATA['FUNDLENGTH'] = (!empty($SCS['FUNDLENGTH']) ? $SCS['FUNDLENGTH'] : null);
                 $SCSDATA['NONREGFEE'] = (!empty($SCS['NONREGFEE']) ? $SCS['NONREGFEE'] : null);
                 $SCSDATA['FINSUPTYPE'] = (!empty($SCS['FINSUPTYPE']) ? $SCS['FINSUPTYPE'] : null);
-                //$SCSDATA['DISTANCE'] = (!empty($SCS['DISTANCE']) ? $SCS['DISTANCE'] : null);
+                $SCSDATA['RSNSCSEND'] = (!empty($SCS['RSNSCSEND']) ? $SCS['RSNSCSEND'] : null);
                 //$SCSDATA['STUDYPROPORTION'] = (!empty($SCS['STUDYPROPORTION']) ? $SCS['STUDYPROPORTION'] : 100);
 
                 $rowExist = StudentCourseSessionDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)
@@ -285,6 +290,8 @@ class DatafutureController extends Controller
                     $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
                     
 
+                    //$YEARPREG = (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1);
+                    $YEARPREG = $counts + 1;
                     $data = [
                         'student_id' => $student->id,
                         'student_course_relation_id' => $student_course_relation_id,
@@ -304,7 +311,7 @@ class DatafutureController extends Controller
                         'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
                         'priprov_id' => $priprov_id,
                         'sselig_id' => null,
-                        'yearprg' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                        'yearprg' => $YEARPREG > 1 ? 2 : $YEARPREG,
                         'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
                         'qual_id' => null,
                         'heapespop_id' => null,
@@ -749,5 +756,18 @@ class DatafutureController extends Controller
         StudentStuloadInformation::where('student_id', $student->id)->where('id', $id)->delete();
 
         return response()->json(['message' => 'Student course session successfully deleted.'], 200);
+    }
+
+    public function resetCourseSessions(Student $student, Request $request){
+        $student_crel_id = $request->student_crel_id;
+        $stuload_ids = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->pluck('id')->unique()->toArray();
+
+        StudentCourseSessionDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentModuleInstanceDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentTermStuload::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        
+        StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('id', $stuload_ids)->forceDelete();
+
+        return response()->json(['message' => 'Data successfully deleted'], 200);
     }
 }
