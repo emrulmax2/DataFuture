@@ -539,6 +539,7 @@ class DatafutureController extends Controller
             $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
             
 
+            $YEARPREG = (isset($student->stuload) && $student->stuload->count() > 0 ? ($student->stuload->count() > 1 ? 2 : $student->stuload->count() + 1) : 1);
             $data = [
                 'student_id' => $student->id,
                 'student_course_relation_id' => $student_course_relation_id,
@@ -558,7 +559,7 @@ class DatafutureController extends Controller
                 'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
                 'priprov_id' => $priprov_id,
                 'sselig_id' => null,
-                'yearprg' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                'yearprg' => $YEARPREG,
                 'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
                 'qual_id' => null,
                 'heapespop_id' => null,
