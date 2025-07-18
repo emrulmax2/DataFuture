@@ -450,7 +450,7 @@ class DatafutureReportController extends Controller
                                 $STUDENT_AWARD = StudentAward::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)->orderBy('id', 'DESC')->get()->first();
 
                                 $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual_award_type) && !empty($STUDENT_AWARD->qual_award_type) ? '<QUALAWARDID>'.$STUDENT_AWARD->qual_award_type.'</QUALAWARDID>' : '');
-                                $QualificationAwardedRoot_XML .= (!empty($QUALID) ? '<QUALID>'.$QUALID.'</QUALID>' : '');
+                                $QualificationAwardedRoot_XML .= (!empty($QUALID) && isset($STUDENT_AWARD->qual_award_type) && !empty($STUDENT_AWARD->qual_award_type) ? '<QUALID>'.$QUALID.'</QUALID>' : '');
                                 $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual->df_code) && !empty($STUDENT_AWARD->qual->df_code) ? '<QUALAWARDRESULT>'.$STUDENT_AWARD->qual->df_code.'</QUALAWARDRESULT>' : '');
                                 
                                 if(!empty($QualificationAwardedRoot_XML)):
