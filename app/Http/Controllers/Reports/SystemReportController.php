@@ -18,7 +18,9 @@ class SystemReportController extends Controller
             'title' => 'Site Reports - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'Reports', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            
+            'termDeclarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
         ]);
     }
     
