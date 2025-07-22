@@ -572,7 +572,7 @@ class PendingTaskManagerController extends Controller
                     if(isset($letterSet->id) && $letterSet->id > 0 && !empty($letterSet->description)):
                         $subject = 'Welcome to London Churchill College';
                         //$MSGBODY = $letterSet->description;
-                        $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,9);
+                        $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,23);
                         UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
                     endif;
                 endif;
