@@ -300,8 +300,8 @@ class DatafutureReportController extends Controller
                 $SESYEAR_XML = '';
                 $SESYEAR_XML .= (isset($SES->id) && !empty($SES->id) ? '<SESSIONYEARID>'.$SES->id.'</SESSIONYEARID>' : '');
                 $SESYEAR_XML .= (isset($SES->firstTerm->termDeclaration->name) && !empty($SES->firstTerm->termDeclaration->name) ? '<OWNSESSIONID>'.$SES->firstTerm->termDeclaration->name.'</OWNSESSIONID>' : '');
-                $SESYEAR_XML .= (isset($SES->end_date) && !empty($SES->end_date) && $SES->end_date != '0000-00-00' ? '<SYENDDATE>'.$SES->end_date.'</SYENDDATE>' : '');
-                $SESYEAR_XML .= (isset($SES->start_date) && !empty($SES->start_date) && $SES->start_date != '0000-00-00' ? '<SYSTARTDATE>'.$SES->start_date.'</SYSTARTDATE>' : '');
+                $SESYEAR_XML .= (isset($SES->end_date) && !empty($SES->end_date) && $SES->end_date != '0000-00-00' ? '<SYENDDATE>'.date('Y-m-d', strtotime($SES->end_date)).'</SYENDDATE>' : '');
+                $SESYEAR_XML .= (isset($SES->start_date) && !empty($SES->start_date) && $SES->start_date != '0000-00-00' ? '<SYSTARTDATE>'.date('Y-m-d', strtotime($SES->start_date)).'</SYSTARTDATE>' : '');
                 
                 if(!empty($SESYEAR_XML)): $XML .= '<SessionYear>'.$SESYEAR_XML.'</SessionYear>'; endif;
             endforeach;
