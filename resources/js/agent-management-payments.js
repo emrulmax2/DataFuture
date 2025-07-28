@@ -206,13 +206,14 @@ var agentRemittPaymentsListTable = (function () {
 
     const linkTransactionModalEl = document.getElementById('linkTransactionModal')
     linkTransactionModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#comissionGenerateModal .acc__input-error').html('');
-        $('#comissionGenerateModal #transaction_code').val('');
-        $('#comissionGenerateModal #transaction_id').val('');
-        $('#comissionGenerateModal .autoFillDropdown').html('').fadeOut();
+        $('#linkTransactionModal .acc__input-error').html('');
+        $('#linkTransactionModal #transaction_code').val('');
+        $('#linkTransactionModal #transaction_id').val('');
+        $('#linkTransactionModal .autoFillDropdown').html('').fadeOut();
 
-        $('#comissionGenerateModal [name="agent_comission_payment_id"]').val('0');
-        $('#comissionGenerateModal [name="agent_comission_total"]').val('0');
+        $('#linkTransactionModal [name="transaction_code"]').val('');
+        $('#linkTransactionModal [name="agent_comission_payment_id"]').val('0');
+        $('#linkTransactionModal [name="agent_comission_total"]').val('0');
         $('#linkTransactionModal .modal-body .amountError').remove();
 
     });

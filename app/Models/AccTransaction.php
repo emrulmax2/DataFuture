@@ -70,4 +70,8 @@ class AccTransaction extends Model
     public function assets(){
         return $this->hasOne(AccAssetRegister::class, 'acc_transaction_id', 'id');
     }
+
+    public function agentPayment(){
+        return $this->hasOne(AgentComissionPayment::class, 'acc_transaction_id', 'id')->latestOfMany();
+    }
 }
