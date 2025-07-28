@@ -62,7 +62,7 @@
       <div class="header">
         <table class="print_table">
             <tr>
-                <td colspan="2"> <img style="max-width: 150px; height: auto;" src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" /></td>
+                <td colspan="2"> <img style="max-width: 150px; height: auto;" src="{{ asset("build/assets/images/L1_logo.svg") }}" /></td>
                 <td colspan="2" style="text-color:gray; font-size:28px; text-align:right; padding-top:40px; text-transform:uppercase;" colspan="2">Money Receipt</td>
             </tr>
             <tr>
@@ -152,11 +152,11 @@
                         <td style="text-align: center; margin-top:2px;">Barclay Hall, 156B Green Street E7 8JQ</td>
                     </tr>
                     <tr>
-                        <td style="text-align: center; margin-top:2px;">Phone: +44 (0) 2073771077, Email: accounts@londonchurchillcollege.ac.uk</td>
+                        <td style="text-align: center; margin-top:2px;">Phone: +44 (0) 2073771077, Email: accounts@lcc.ac.uk</td>
                     </tr>
-                    <tr>
+                    {{-- <tr>
                         <td style="text-align: center; margin-top:2px;">Receiving Officer: {{ isset($payment->received->employee->full_name) && !empty($payment->received->employee->full_name) ? $payment->received->employee->full_name : '' }}</td>
-                    </tr>
+                    </tr> --}}
                 </tbody>
             </table>
       </div>
