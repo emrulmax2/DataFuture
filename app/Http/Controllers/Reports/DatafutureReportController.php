@@ -520,7 +520,7 @@ class DatafutureReportController extends Controller
                                             $FUND_MON_XML = '';
                                             $FUND_MON_XML .= (isset($STU->df->elq->df_code) && !empty($STU->df->elq->df_code) ? '<ELQ>'.$STU->df->elq->df_code.'</ELQ>' : '');
                                             $FUND_MON_XML .= (isset($STU->df->fundcomp->df_code) && !empty($STU->df->fundcomp->df_code) ? '<FUNDCOMP>'.$STU->df->fundcomp->df_code.'</FUNDCOMP>' : (!empty($FUNDCOMP) ? '<FUNDCOMP>'.$FUNDCOMP.'</FUNDCOMP>' : ''));
-                                            $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : (!empty($FUNDLENGTH) ? '<FUNDCOMP>'.$FUNDLENGTH.'</FUNDCOMP>' : ''));
+                                            $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : (!empty($FUNDLENGTH) ? '<FUNDLENGTH>'.$FUNDLENGTH.'</FUNDLENGTH>' : ''));
                                             $FUND_MON_XML .= (isset($STU->df->nonregfee->df_code) && !empty($STU->df->nonregfee->df_code) ? '<NONREGFEE>'.$STU->df->nonregfee->df_code.'</NONREGFEE>' : '');
                                             if(!empty($FUND_MON_XML)):
                                                 $COURSE_SESS_XML .= '<FundingAndMonitoring>'.$FUND_MON_XML.'</FundingAndMonitoring>';
