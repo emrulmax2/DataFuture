@@ -1343,7 +1343,7 @@ class AgentManagementController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query= $query->skip($offset)
+        $Query= $query->orderBy('id', 'DESC')->skip($offset)
                ->take($limit)
                ->get();
 
@@ -1391,7 +1391,7 @@ class AgentManagementController extends Controller
     public function searchTransactions(Request $request){
         $SearchVal = (isset($request->SearchVal) && !empty($request->SearchVal) ? trim($request->SearchVal) : '');
         $html = '';
-        $Query = AccTransaction::where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->orderBy('transaction_date_2', 'DESC')->get();
+        $Query = AccTransaction::where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->whereDoesntHave('agentPayment')->orderBy('transaction_date_2', 'DESC')->get();
         
         if($Query->count() > 0):
             foreach($Query as $qr):
@@ -1401,7 +1401,7 @@ class AgentManagementController extends Controller
             endforeach;
         else:
             $html .= '<li>';
-                $html .= '<a href="javascript:void(0);" class="dropdown-item">Nothing found!</a>';
+                $html .= '<a href="javascript:void(0);" class="dropdown-item">No Match found or Transaction already linked.</a>';
             $html .= '</li>';
         endif;
 
