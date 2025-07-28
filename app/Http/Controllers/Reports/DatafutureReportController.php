@@ -496,8 +496,8 @@ class DatafutureReportController extends Controller
                                             $RSNSCSEND_ROW = ($RSNSCSEND_ID > 0 ? ReasonForEndingCourseSession::find($RSNSCSEND_ID) : []);
                                             $RSNSCSEND = (isset($RSNSCSEND_ROW->df_code) && !empty($RSNSCSEND_ROW->df_code) ? $RSNSCSEND_ROW->df_code : '');
 
-                                            $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? 1 : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? 2 : 3));
-                                            $FUNDLENGTH = 3;
+                                            $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? '01' : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? '03' : '02'));
+                                            $FUNDLENGTH = '96';
 
                                             $REFPERIOD_INC = '01'; //($S < 10 ? '0'.$S : $S);
                                             $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
@@ -519,8 +519,8 @@ class DatafutureReportController extends Controller
 
                                             $FUND_MON_XML = '';
                                             $FUND_MON_XML .= (isset($STU->df->elq->df_code) && !empty($STU->df->elq->df_code) ? '<ELQ>'.$STU->df->elq->df_code.'</ELQ>' : '');
-                                            $FUND_MON_XML .= (isset($STU->df->fundcomp->df_code) && !empty($STU->df->fundcomp->df_code) ? '<FUNDCOMP>'.$STU->df->fundcomp->df_code.'</FUNDCOMP>' : '');
-                                            $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : '');
+                                            $FUND_MON_XML .= (isset($STU->df->fundcomp->df_code) && !empty($STU->df->fundcomp->df_code) ? '<FUNDCOMP>'.$STU->df->fundcomp->df_code.'</FUNDCOMP>' : (!empty($FUNDCOMP) ? '<FUNDCOMP>'.$FUNDCOMP.'</FUNDCOMP>' : ''));
+                                            $FUND_MON_XML .= (isset($STU->df->fundLength->df_code) && !empty($STU->df->fundLength->df_code) ? '<FUNDLENGTH>'.$STU->df->fundLength->df_code.'</FUNDLENGTH>' : (!empty($FUNDLENGTH) ? '<FUNDCOMP>'.$FUNDLENGTH.'</FUNDCOMP>' : ''));
                                             $FUND_MON_XML .= (isset($STU->df->nonregfee->df_code) && !empty($STU->df->nonregfee->df_code) ? '<NONREGFEE>'.$STU->df->nonregfee->df_code.'</NONREGFEE>' : '');
                                             if(!empty($FUND_MON_XML)):
                                                 $COURSE_SESS_XML .= '<FundingAndMonitoring>'.$FUND_MON_XML.'</FundingAndMonitoring>';
