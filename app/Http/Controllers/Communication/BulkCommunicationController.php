@@ -415,7 +415,7 @@ class BulkCommunicationController extends Controller
         if(!empty($student_ids)):
             $fileName = $this->generateGroupEmailPdf($subject, $request->body);
 
-            $docCounter = 1;
+            $docCounter = 0;
             $attachmentInfo = [];
             $attachments = [];
             if($request->hasFile('documents')):
