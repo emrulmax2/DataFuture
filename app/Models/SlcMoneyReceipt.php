@@ -28,6 +28,7 @@ class SlcMoneyReceipt extends Model
         'remarks',
         'acc_transaction_id',
         'force_entry',
+        'mailed_pdf_file',
         
         'received_by',
         'created_by',

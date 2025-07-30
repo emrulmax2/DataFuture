@@ -470,14 +470,14 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['attendance_edit']) && $priv['student_live_portal']['attendance_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_5" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_edit]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_5">Edit</label>
+                                <input {{ (isset($priv['student_live_portal']['attendance_edit']) && $priv['student_live_portal']['attendance_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_55" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_55">Edit</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['attendance_delete']) && $priv['student_live_portal']['attendance_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_delete]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_6">Delete</label>
+                                <input {{ (isset($priv['student_live_portal']['attendance_delete']) && $priv['student_live_portal']['attendance_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_66" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_66">Delete</label>
                             </div>
                         </div>
                     </div>
@@ -494,20 +494,20 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['student_account_add']) && $priv['student_live_portal']['student_account_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_4" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_add]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_4">Add</label>
+                                <input {{ (isset($priv['student_live_portal']['student_account_add']) && $priv['student_live_portal']['student_account_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_12" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_12">Add</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['student_account_edit']) && $priv['student_live_portal']['student_account_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_5" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_edit]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_5">Edit</label>
+                                <input {{ (isset($priv['student_live_portal']['student_account_edit']) && $priv['student_live_portal']['student_account_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_13" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_13">Edit</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['student_account_delete']) && $priv['student_live_portal']['student_account_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_delete]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_6">Delete</label>
+                                <input {{ (isset($priv['student_live_portal']['student_account_delete']) && $priv['student_live_portal']['student_account_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_14" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][student_account_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_14">Delete</label>
                             </div>
                         </div>
                     </div>
@@ -524,20 +524,20 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['slc_history_add']) && $priv['student_live_portal']['slc_history_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_4" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_add]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_4">Add</label>
+                                <input {{ (isset($priv['student_live_portal']['slc_history_add']) && $priv['student_live_portal']['slc_history_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_16" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_16">Add</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['slc_history_edit']) && $priv['student_live_portal']['slc_history_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_5" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_edit]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_5">Edit</label>
+                                <input {{ (isset($priv['student_live_portal']['slc_history_edit']) && $priv['student_live_portal']['slc_history_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_17" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_17">Edit</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['slc_history_delete']) && $priv['student_live_portal']['slc_history_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_6" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_delete]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_6">Delete</label>
+                                <input {{ (isset($priv['student_live_portal']['slc_history_delete']) && $priv['student_live_portal']['slc_history_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_18" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][slc_history_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_18">Delete</label>
                             </div>
                         </div>
                     </div>
