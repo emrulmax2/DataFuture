@@ -168,7 +168,7 @@
                         <td style="text-align: center; margin-top:2px;">Barclay Hall, 156B Green Street E7 8JQ</td>
                     </tr>
                     <tr>
-                        <td style="text-align: center; margin-top:2px;">Phone: +44 (0) 2073771077, Email: accounts@londonchurchillcollege.ac.uk</td>
+                        <td style="text-align: center; margin-top:2px;">Phone: +44 (0) 2073771077, Email: accounts@lcc.ac.uk</td>
                     </tr>
                     @if($studentOrders->payment_status == 'Completed')
                     <tr>

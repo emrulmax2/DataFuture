@@ -1,3 +1,4 @@
+import { set } from "lodash";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -6,6 +7,7 @@
 
     const addPaymentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addPaymentModal"));
     const editPaymentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editPaymentModal"));
+    const sendMailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#sendMailModal"));
 
     const addPaymentModalEl = document.getElementById('addPaymentModal')
     addPaymentModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -55,6 +57,72 @@
 
         $('#addPaymentModal [name="invoice_no"]').val(invoice_no);
         $('#addPaymentModal [name="slc_agreement_id"]').val(agreement_id);
+    });
+
+    $('.sendAccountMailBtn').on('click', function(e){
+        e.preventDefault();
+        
+        var $theBtn = $(this);
+        var payment_id = $theBtn.attr('data-id');
+        var student_id = $theBtn.attr('data-student');
+        $("#sendMailModal .agreeWith").attr('data-payment_id', payment_id);
+        sendMailModal.show();
+        // document.getElementById("sendMailModal").addEventListener("shown.tw.modal", function (event) {
+        //     setTimeout(function(){
+        //         $(".ring-loading").removeClass('hidden');
+        //         $(".success-on").addClass('hidden');
+        //     }, 1000);
+        //     $("#sendMailModal .sendMailModalTitle").html("Sending Mail" );
+            
+        // });
+    });
+
+    $('#sendMailModal .agreeWith').on('click', function(e){
+        e.preventDefault();
+        let $agreeBTN = $(this);
+        let payment_id = $agreeBTN.attr('data-payment_id');
+        let student = $agreeBTN.attr('data-student');
+        $('#sendMailModal button').attr('disabled', 'disabled');
+        $("#sendMailModal .sendMailModalTitle").html("Sending Mail..." );
+        $("#sendMailModal .sendMailModalDesc").html("Please wait while we send the email." );
+        $(".ring-loading").removeClass('hidden');
+        $(".success-on").addClass('hidden');
+        axios({
+                method: 'get',
+                url: route('student.accounts.send_mail',[student, payment_id]),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#sendMailModal button').removeAttr('disabled');
+                    
+                    $(".ring-loading").addClass('hidden');
+                    $(".success-on").removeClass('hidden');
+                    $("#sendMailModal .sendMailModalTitle").html("Email the money receipt?" );
+                    $("#sendMailModal .sendMailModalDesc").html("Money receipt will send to student e-mail" );
+                    
+                    sendMailModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student\'s payment mail successfully sent.');
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+
+                }
+            }).catch(error =>{
+                console.log(error);
+                $('#sendMailModal button').removeAttr('disabled');
+                $(".ring-loading").addClass('hidden');
+                $(".success-on").removeClass('hidden');
+                $("#sendMailModal .sendMailModalTitle").html("Email the money receipt?" );
+                $("#sendMailModal .sendMailModalDesc").html("Money receipt will send to student e-mail" );
+            });
     });
 
     $('#addPaymentForm').on('submit', function(e){

@@ -227,7 +227,12 @@
                                                 @if(isset($agr->payments) && $agr->payments->count() > 0)
                                                     @foreach($agr->payments as $payment)
                                                         <tr title="{!! $payment->remarks !!}" class="payment_row {{ !empty($payment->remarks) ? 'tooltip' : '' }} payment_row_{{ isset($payment->payment_type) && !empty($payment->payment_type) ? str_replace(' ', '_', strtolower($payment->payment_type)) : '' }}">
-                                                            <td>{{ $payment->invoice_no }}</td>
+                                                            <td><span class="flex">{{ $payment->invoice_no }}
+                                                                @if($payment->mailed_pdf_file!=null || $payment->mailed_pdf_file!='')
+                                                                    <i data-lucide="send" class="w-4 h-4 text-orange-500 ml-auto"></i></a>
+                                                                @endif
+                                                                </span>
+                                                            </td>
                                                             <td>{{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : '') }}</td>
                                                             <td>
                                                                 {{ isset($payment->declaraton->name) && !empty($payment->declaraton->name) ? $payment->declaraton->name : '' }}
@@ -240,7 +245,7 @@
                                                             <td>{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
                                                             <td>
                                                                 <a data-id="{{ $payment->id }}" href="{{ route('student.accounts.print',[$student->id, $payment->id]) }}" class="printBtn btn-rounded btn btn-primary text-white p-0 w-6 h-6"><i data-lucide="printer" class="w-3 h-3"></i></a>
-                                                                
+                                                                <a data-id="{{ $payment->id }}" data-student="{{ $student->id }}" href="{{ route('student.accounts.send_mail',[$student->id, $payment->id]) }}" data-tw-toggle="modal" data-tw-target="#sendMailModal" class="sendAccountMailBtn btn-rounded btn btn-warning text-white p-0 w-6 h-6"><i data-lucide="send" class="w-3 h-3"></i></a>
                                                                 @if($can_edit) <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button> @endif
                                                                 @if($can_delete) <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button> @endif
                                                                 @if(!empty($agreements) && $agreements->count() > 0 && $can_add)
@@ -880,6 +885,27 @@
     </div>
     <!-- END: Success Modal Content -->
 
+    <div id="sendMailModal" class="modal " tabindex="-1" aria-hidden="true" >
+        <div  class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div id="sendMailLoadingConfirm">
+                        <div class="p-5 text-center">
+                            <i data-loading-icon="rings" data-color="oklch(70.5% 0.213 47.604)" class="ring-loading w-20 h-20 mx-auto mt-3 hidden"></i>
+                            
+                            <i data-lucide="send" class="success-on w-16 h-16 text-success mx-auto mt-3"></i>
+                            <div class="text-3xl mt-5 sendMailModalTitle transition">Email the money receipt?</div>
+                            <div class="text-slate-500 mt-2 sendMailModalDesc">Money receipt will send to student e-mail</div>
+                        </div>
+                        <div class="px-5 pb-8 text-center">
+                            <button type="button" data-tw-dismiss="modal" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
+                            <button type="button" data-payment_id="" data-student="{{ $student->id }}" class="agreeWith btn btn-success text-white w-auto">Send Now<i data-lucide="send" class="w-4 h-4 ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- BEGIN: Warning Modal Content -->
     <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">

@@ -681,6 +681,131 @@ class StudentController extends Controller
         $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl','student','address','payment','statuses'));
         return $pdf->download('student_payment.pdf');
     }
+    private function createInvoicePrintToStorage($student_id, $payment_id) {
+        set_time_limit(300);
+		$opt = Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? url('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
+
+        $student = Student::find($student_id);
+        //Not using currently this part
+        $courseRelationId = (isset($student->crel->id) && $student->crel->id > 0 ? $student->crel->id : 0);
+        $courseCreationID = (isset($student->crel->course_creation_id) && $student->crel->course_creation_id > 0 ? $student->crel->course_creation_id : 0);
+
+        $currentCourse = StudentProposedCourse::with('venue')->where('student_id',$student->id)
+                        ->where('course_creation_id', $courseCreationID)
+                        ->where('student_course_relation_id', $courseRelationId)
+                        ->get()
+                        ->first();
+        $venue_id = (isset($currentCourse->venue_id) && $currentCourse->venue_id > 0 ? $currentCourse->venue_id : 0);
+        $CourseCreationVenue = CourseCreationVenue::where('course_creation_id', $courseCreationID)->where('venue_id', $venue_id)->get()->first();
+
+        $agreements = SlcAgreement::with('installments')->where('student_id', $student_id)->where(function($q) use($courseRelationId){
+                                $q->where('student_course_relation_id', $courseRelationId)->orWhere('student_course_relation_id', 0)->orWhereNull('student_course_relation_id');
+                            })->orderBy('id', 'ASC')->get();
+        //End of not using part
+
+        $address = '';
+        if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
+            if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                $address .= $student->contact->termaddress->address_line_1.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                $address .= $student->contact->termaddress->address_line_2.'<br/>';
+            endif;
+            if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                $address .= $student->contact->termaddress->city.', ';
+            endif;
+            if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                $address .= $student->contact->termaddress->state.', <br/>';
+            endif;
+            if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                $address .= $student->contact->termaddress->post_code.', ';
+            endif;
+            if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                $address .= '<br/>'.$student->contact->termaddress->country;
+            endif;
+        endif;
+        $payment = SlcMoneyReceipt::find($payment_id);
+        $statuses = Status::where('type', 'Student')->orderBy('id', 'ASC')->get();
+
+        // return view('pages.students.live.payment.pdf.moneyreceipt', [
+        //     'logoUrl' => $logoUrl,
+        //     'student' => $student,
+        //     'address' => $address,
+        //     'payment' => SlcMoneyReceipt::find($payment_id),
+        //     'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+        // ]);
+
+        $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl','student','address','payment','statuses'));
+       
+        // Define the storage path (e.g., storage/app/public/student_payment.pdf)
+        $fileName = 'student_payment_' . $student->id . '_' . $payment->id . '.pdf';
+        $path = 'public/students/'.$student_id.'/'.$fileName;
+        // Save the PDF to storage
+        Storage::disk('s3')->put($path, $pdf->output());
+
+        // Optionally, return the storage path or a response
+        return ["path" => $path, "fileName" => $fileName];
+    }
+    public function sendMail($student_id, $payment_id) {
+
+        $student = Student::find($student_id);
+        $payment = SlcMoneyReceipt::find($payment_id);
+        $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');
+        $siteEmail = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_email')->value('value');
+        $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
+
+                // $configuration = [
+                //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                //     'smtp_port' => '2525',
+                //     'smtp_username' => 'e8ae09cfefd325',
+                //     'smtp_password' => 'ce7fa44b28281d',
+                //     'smtp_encryption' => 'tls',
+                    
+                //     'from_email'    => 'no-reply@lcc.ac.uk',
+                //     'from_name'    =>  'London Churchill College',
+                // ];
+        $configuration = [
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  $siteName,
+        ];
+
+        $InvoiceStorage = $this->createInvoicePrintToStorage($student_id, $payment_id);
+        $payment->mailed_pdf_file = $InvoiceStorage['path'];
+        $payment->save();
+
+        $message = '';
+        $message .= 'Dear '.$student->full_name.',<br/>';
+        $message .= 'We are pleased to confirm that we have received your payment.<br/>';
+        $message .= 'Please find the attached document for a detailed breakdown of the transaction.<br/>';
+        $message .= 'Thank you for your prompt payment. If you have any questions or require further information, please do not hesitate to contact us.<br/><br/>';
+        $message .= 'Best regards,<br/>'.$siteName;
+
+        $attachmentFiles = [];
+        $attachmentFiles[] = [
+            "pathinfo" => $InvoiceStorage['path'],
+            "nameinfo" => $InvoiceStorage['fileName'],
+            "mimeinfo" => 'application/pdf',
+            "disk" => 's3'
+        ];
+        $studentEmails= [
+            $student->contact->institutional_email,
+            $student->contact->personal_email,
+        ];
+        UserMailerJob::dispatch($configuration,$studentEmails, new CommunicationSendMail('London Churchill College – Acknowledgement of Payment', $message, $attachmentFiles));
+
+
+
+        return response()->json(['message' => 'Email sent successfully.']);
+
+        
+    }
 
     public function sendMobileVerificationCode(Request $request){
         $student_id = $request->student_id;
