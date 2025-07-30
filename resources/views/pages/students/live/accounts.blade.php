@@ -889,13 +889,6 @@
         <div  class="modal-dialog ">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    {{-- <div id="sendMailLoadingSuccess" class="hidden">
-                        <div class="p-5 text-center">
-                            <i data-loading-icon="rings" data-color="oklch(70.5% 0.213 47.604)" class="ring-loading w-20 h-20 mx-auto mt-3"></i>
-                            <i data-lucide="check-circle" class="success-on w-16 h-16 text-success mx-auto mt-3 hidden"></i>
-                            <div class="text-3xl mx-auto mt-5 sendMailModalTitle">Sending Mail</div>
-                        </div>
-                    </div> --}}
                     <div id="sendMailLoadingConfirm">
                         <div class="p-5 text-center">
                             <i data-loading-icon="rings" data-color="oklch(70.5% 0.213 47.604)" class="ring-loading w-20 h-20 mx-auto mt-3 hidden"></i>
