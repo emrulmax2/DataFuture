@@ -368,5 +368,9 @@ class Student extends Model
     public function workPlacements(){
         return $this->hasMany(StudentWorkPlacement::class, 'student_id', 'id');
     }
+
+    public function visits(){
+        return $this->hasMany(StudentVisit::class, 'student_id', 'id');
+    }
     
 }

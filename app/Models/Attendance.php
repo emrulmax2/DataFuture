@@ -29,6 +29,7 @@ class Attendance extends Model
         "prev_plan_id",	
         'created_by',
         'updated_by',
+        'note',
     ];
     public function feed(){
         return $this->belongsTo(AttendanceFeedStatus::class, 'attendance_feed_status_id');
