@@ -3678,6 +3678,8 @@ Route::middleware('auth')->group(function() {
         Route::post('budget-management/get-transaction', 'getTransaction')->name('budget.management.get.transaction'); 
         Route::post('budget-management/mark-as-completed', 'markAsCompleted')->name('budget.management.req.mark.completed'); 
         Route::get('budget-management/requisition-trans-list', 'transactionList')->name('budget.management.req.trans.list'); 
+
+        Route::post('budget-management/get-budget-set-details', 'getBudgetSetDetails')->name('budget.management.get.budget.set'); 
     });
 
     Route::controller(BudgetYearController::class)->group(function() {

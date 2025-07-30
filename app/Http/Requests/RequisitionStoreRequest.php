@@ -23,6 +23,7 @@ class RequisitionStoreRequest extends FormRequest
     {
         return [
             'vendor_id' => 'required',
+            'budget_year_id' => 'required',
             'budget_set_detail_id' => 'required',
             'required_by' => 'required',
             'first_approver' => 'required',
@@ -34,6 +35,7 @@ class RequisitionStoreRequest extends FormRequest
     {
         return [
             'vendor_id.required' => 'This field is required.',
+            'budget_year_id.required' => 'This field is required.',
             'budget_set_detail_id.required' => 'This field is required.',
             'required_by.required' => 'This field is required.',
             'first_approver.required' => 'This field is required.',

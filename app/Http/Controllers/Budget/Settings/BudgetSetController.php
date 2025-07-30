@@ -144,6 +144,9 @@ class BudgetSetController extends Controller
         if(!empty($removedBNI)):
             BudgetSetDetail::where('budget_set_id', $id)->whereIn('budget_name_id', $removedBNI)->forceDelete();
         endif;
+
+        $existid = [];
+        $newid = [];
         if(!empty($budget_name_ids)):
             foreach($budget_name_ids as $budget_name_id):
                 if(isset($budgets[$budget_name_id]) && !empty($budgets[$budget_name_id])):
@@ -158,7 +161,7 @@ class BudgetSetController extends Controller
                     if($exist > 0):
                         $data['updated_by'] = auth()->user()->id;
                         BudgetSetDetail::where('budget_set_id', $id)->where('budget_name_id', $budget_name_id)->update($data);
-                    esle:
+                    else:
                         $data['created_by'] = auth()->user()->id;
                         BudgetSetDetail::create($data);
                     endif;
