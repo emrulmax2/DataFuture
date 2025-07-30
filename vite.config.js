@@ -396,7 +396,8 @@ export default defineConfig({
                 'resources/js/session-status.js',
                 'resources/js/study-modes.js',
                 'resources/js/qual-award-results.js',
-                'resources/js/hesa-all-students-reports.js'
+                'resources/js/hesa-all-students-reports.js',
+                'resources/js/student-visits.js',
 
             ],
             refresh: true,

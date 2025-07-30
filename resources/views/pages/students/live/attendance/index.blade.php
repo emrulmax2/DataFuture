@@ -184,13 +184,17 @@
                                                 @endif
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
+                                                @if(!empty($planDateList["attendance"]->note))
+                                                {{ date('d F, Y',strtotime($planDateList["attendance"]->attendance_date))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
+                                                @else
                                                 {{ date('d F, Y',strtotime($planDateList["date"]))  }}
+                                                @endif
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                 {{ $start_time }} - {{ $end_time  }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : "Tutor Not Found" }}
+                                                {{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : (!empty($planDateList["attendance"]->note) ? "N/A" : "Tutor Not Found") }}
                                             </td>
                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
                                                 {{ $planDateList["attendance"]->feed->code }}

@@ -42,6 +42,7 @@ use App\Models\LetterSet;
 use App\Models\LevelHours;
 use App\Models\MobileVerificationCode;
 use App\Models\ModduleCreation;
+use App\Models\ModuleCreation;
 use App\Models\Option;
 use App\Models\OtherAcademicQualification;
 use App\Models\Plan;
@@ -815,6 +816,37 @@ class StudentController extends Controller
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
+
+    public function VisitsDetails(Student $student) {
+        // $student = Student::find($studentId);
+        $studentVisits = $student->visits;
+        
+        $plans = Assign::where('student_id', $student->id)->pluck('plan_id')->toArray();
+        $termDeclarationIds = Plan::whereIn('id', $plans)->pluck('term_declaration_id')->toArray();
+
+
+         return view('pages.students.live.visits.index', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Student Communications', 'href' => 'javascript:void(0);'],
+            ],
+            'studentVisits' => $studentVisits,
+            'student' => Student::find($student->id),
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            "term" =>"",
+            "grades" => "",
+            "planDetails" => $planDetails ?? null,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'termDeclarations' => TermDeclaration::whereIn('id', $termDeclarationIds)->orderBy('id', 'DESC')->get(),
+            'moduleCreations' => [],
+            'termNames' => TermDeclaration::pluck('name', 'id')->toArray(),
+        ]);
+    }
+
     protected function PlanWithAttendanceSet(Student $student) {
 
             $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();

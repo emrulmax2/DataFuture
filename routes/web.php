@@ -321,6 +321,7 @@ use App\Http\Controllers\Student\WorkplacementDocumentController;
 use App\Http\Controllers\StudentApplicationPrintController;
 use App\Http\Controllers\StudentDocumentRequestFormController;
 use App\Http\Controllers\StudentOrderController;
+use App\Http\Controllers\StudentVisitController;
 use App\Http\Controllers\User\UserHolidayController;
 use App\Http\Controllers\User\UserProfileController;
 use App\Http\Controllers\Tutor\DashboardController as TutorDashboard;
@@ -333,6 +334,7 @@ use App\Models\AgentUser;
 use App\Models\EmployeeAttendancePunchHistory;
 use App\Models\HesaQualificationSubject;
 use App\Models\PaySlipUploadSync;
+use App\Models\StudentVisit;
 
 /*
 |--------------------------------------------------------------------------
@@ -933,6 +935,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/show/{id}', 'show')->name('student.show');
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
         Route::get('student/attendance/{student}', 'AttendanceDetails')->name('student.attendance');
+        Route::get('student/visits/{student}', 'VisitsDetails')->name('student.visits');
         Route::get('student/attendance/{student}/print', 'printAllAttendanceDetails')->name('student.attendance.print');
         Route::get('student/result/{student}', 'ResultDetails')->name('student.result');
         Route::get('student/attendance/{student}/edit', 'AttendanceEditDetail')->name('student.attendance.edit');
@@ -952,6 +955,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/slc-history/{id}', 'slcHistory')->name('student.slc.history');
         Route::get('student/accounts/{id}', 'accounts')->name('student.accounts');
         Route::get('student/accounts/{id}/print/{payment_id}', 'accountsInvoicePrint')->name('student.accounts.print');
+        Route::get('student/accounts/{id}/send_mail/{payment_id}', 'sendMail')->name('student.accounts.send_mail');
 
         Route::post('student/send-mobile-verification-code','sendMobileVerificationCode')->name('student.send.mobile.verification.code');
         Route::post('student/send-mobile-verify-code','verifyMobileVerificationCode')->name('student.mobile.verify.code');
@@ -3678,6 +3682,8 @@ Route::middleware('auth')->group(function() {
         Route::post('budget-management/get-transaction', 'getTransaction')->name('budget.management.get.transaction'); 
         Route::post('budget-management/mark-as-completed', 'markAsCompleted')->name('budget.management.req.mark.completed'); 
         Route::get('budget-management/requisition-trans-list', 'transactionList')->name('budget.management.req.trans.list'); 
+
+        Route::post('budget-management/get-budget-set-details', 'getBudgetSetDetails')->name('budget.management.get.budget.set'); 
     });
 
     Route::controller(BudgetYearController::class)->group(function() {
@@ -3882,5 +3888,18 @@ Route::controller(EmployeeFormController::class)->group(function(){
 Route::controller(StudentOrderController::class)->group(function() {
 
     Route::get('order/print/pdf/{student_order}', 'printPdf')->name('order.print.pdf'); 
+
+});
+
+Route::controller(StudentVisitController::class)->group(function() {
+
+    Route::post('student-visits/store', 'store')->name('student.visits.store');
+    Route::get('student-visits/list', 'list')->name('student.visits.list');
+    Route::get('student-visits/edit/{studentVisit}', 'edit')->name('student.visits.edit');
+    Route::get('student-visits/show/{studentVisit}', 'show')->name('student.visits.show');
+    Route::post('student-visits/edit/{studentVisit}', 'update')->name('student.visits.update');
+    Route::delete('student-visits/delete/{studentVisit}', 'destroy')->name('student.visits.destroy');
+    Route::post('student-visits/restore/{id}', 'restore')->name('student.visits.restore');
+    Route::get('student-visits/modules/{term}/{student}', 'showModulesByTerm')->name('student.visits.modules');
 
 });

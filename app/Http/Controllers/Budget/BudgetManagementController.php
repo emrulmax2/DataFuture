@@ -38,7 +38,7 @@ class BudgetManagementController extends Controller
             'breadcrumbs' => [
                 ['label' => 'Budget Management', 'href' => 'javascript:void(0);']
             ],
-            'years' => BudgetYear::orderBy('start_date', 'DESC')->get(),
+            'years' => BudgetYear::whereHas('budget')->orderBy('start_date', 'DESC')->get(),
             'names' => BudgetName::orderBy('name', 'ASC')->get(),
             'vendors' => Vendor::orderBy('name', 'ASC')->get(),
             'budgets' => BudgetSet::with('details')->whereHas('year', function($q){
@@ -614,5 +614,12 @@ class BudgetManagementController extends Controller
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function getBudgetSetDetails(Request $request){
+        $budget_year_id = $request->budget_year_id;
+        $budgetSet = BudgetSet::with('details', 'details.names')->where('budget_year_id', $budget_year_id)->get()->first();
+
+        return response()->json(['row' => $budgetSet], 200);
     }
 }
