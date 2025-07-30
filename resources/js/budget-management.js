@@ -236,12 +236,14 @@ var requisitionListTable = (function () {
     let budget_name_ids = new TomSelect('#budget_name_ids', tomOptions);
 
     let vendor_id = new TomSelect('#vendor_id', tomOptions);
+    let add_budget_year_id = new TomSelect('#add_budget_year_id', tomOptions);
     let budget_set_detail_id = new TomSelect('#budget_set_detail_id', tomOptions);
     let venue_id = new TomSelect('#venue_id', tomOptions);
     let first_approver = new TomSelect('#first_approver', tomOptions);
     let final_approver = new TomSelect('#final_approver', tomOptions);
 
     let edit_vendor_id = new TomSelect('#edit_vendor_id', tomOptions);
+    let edit_budget_year_id = new TomSelect('#edit_budget_year_id', tomOptions);
     let edit_budget_set_detail_id = new TomSelect('#edit_budget_set_detail_id', tomOptions);
     let edit_venue_id = new TomSelect('#edit_venue_id', tomOptions);
     let edit_first_approver = new TomSelect('#edit_first_approver', tomOptions);
@@ -348,6 +350,95 @@ var requisitionListTable = (function () {
         $('#editRequisitionModal .requisitionItemsTable tbody tr').remove();
         $('#editRequisitionModal .documentNoteName ').html('');
         $('#editRequisitionModal input[name="id"]').val('0');
+        $('#editRequisitionModal input[name="budget_set_id"]').val('0');
+    });
+
+    $('#add_budget_year_id').on('change', function(){
+        let $budgetYear = $(this);
+        let budget_year_id = $budgetYear.val();
+        let $budgetSet = $('#addRequisitionForm [name="budget_set_id"]');
+        let $budgetSetDetails = $('#addRequisitionForm #budget_set_detail_id');
+
+        budget_set_detail_id.clear(true);
+        budget_set_detail_id.clearOptions();
+        $budgetSet.val('0');
+
+        if(budget_year_id > 0){
+            axios({
+                method: "post",
+                url: route("budget.management.get.budget.set"),
+                data: { budget_year_id : budget_year_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let row = response.data.row;
+                    let budget_set_id = row.id;
+                    let budgetDetails = row.details;
+
+                    $budgetSet.val(budget_set_id);
+                    budget_set_detail_id.enable();
+
+                    $.each(budgetDetails, function(index, theRow) {
+                        budget_set_detail_id.addOption({
+                            value: theRow.id,
+                            text: theRow.names.name + (theRow.names.code ? ' ('+theRow.names.code+')' : ''),
+                        });
+                    });
+                    budget_set_detail_id.refreshOptions()
+                }
+            }).catch(error => {
+                budget_set_detail_id.disable();
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            budget_set_detail_id.disable();
+        }
+    });
+
+    $('#edit_budget_year_id').on('change', function(){
+        let $budgetYear = $(this);
+        let budget_year_id = $budgetYear.val();
+        let $budgetSet = $('#editRequisitionForm [name="budget_set_id"]');
+        let $budgetSetDetails = $('#editRequisitionForm #edit_budget_set_detail_id');
+
+        edit_budget_set_detail_id.clear(true);
+        edit_budget_set_detail_id.clearOptions();
+        $budgetSet.val('0');
+
+        if(budget_year_id > 0){
+            axios({
+                method: "post",
+                url: route("budget.management.get.budget.set"),
+                data: { budget_year_id : budget_year_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    let row = response.data.row;
+                    let budget_set_id = row.id;
+                    let budgetDetails = row.details;
+
+                    $budgetSet.val(budget_set_id);
+                    edit_budget_set_detail_id.enable();
+
+                    $.each(budgetDetails, function(index, theRow) {
+                        edit_budget_set_detail_id.addOption({
+                            value: theRow.id,
+                            text: theRow.names.name + (theRow.names.code ? ' ('+theRow.names.code+')' : ''),
+                        });
+                    });
+                    edit_budget_set_detail_id.refreshOptions()
+                }
+            }).catch(error => {
+                edit_budget_set_detail_id.disable();
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        }else{
+            budget_set_detail_id.disable();
+        }
     });
 
     let theBlankRow = '<tr class="requisition_item_row ajax_rows">\
@@ -617,6 +708,11 @@ var requisitionListTable = (function () {
                 }else{
                     edit_budget_set_detail_id.clearOptions();
                 }
+                if(row.budget_year_id > 0){
+                    edit_budget_year_id.addItem(row.budget_year_id, true);
+                }else{
+                    edit_budget_year_id.clear(true);
+                }
                 if(row.budget_set_detail_id > 0){
                     edit_budget_set_detail_id.addItem(row.budget_set_detail_id);
                 }else{
@@ -649,6 +745,7 @@ var requisitionListTable = (function () {
                 $('#editRequisitionModal input[name="required_by"]').val(row.required_by ? row.required_by : '');
                 $('#editRequisitionModal textarea[name="note"]').val(row.note ? row.note : '');
                 $('#editRequisitionModal input[name="id"]').val(editId);
+                $('#editRequisitionModal input[name="budget_set_id"]').val(row.budget_set_id ? row.budget_set_id : '0');
                 
                 var html = '';
                 var total = 0;
@@ -781,18 +878,18 @@ var requisitionListTable = (function () {
         $theTable.find('tr.requisition_item_row').each(function(e){
             var $theRow = $(this);
             var theQuantity = $theRow.find('.quantity').val() != '' ? parseInt($theRow.find('.quantity').val(), 10) : 0;
-            var thePrice = $theRow.find('.price').val() != '' ? parseInt($theRow.find('.price').val(), 10) : 0;
+            var thePrice = $theRow.find('.price').val() != '' ? $theRow.find('.price').val() * 1 : 0;
             
             if($theRow.find('.quantity').val() != '' && $theRow.find('.price').val() != ''){
                 var theRowTotal = theQuantity * thePrice;
-                $theRow.find('.total').val(theRowTotal);
+                $theRow.find('.total').val(theRowTotal.toFixed(2));
 
                 theTotal += theRowTotal;
             }
         });
 
         if(theTotal > 0){
-            $theTableTotal.val(theTotal);
+            $theTableTotal.val(theTotal.toFixed(2));
         }else{
             $theTableTotal.val('');
         }

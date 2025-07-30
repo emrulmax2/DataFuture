@@ -138,10 +138,24 @@
                                 <h3 class="font-medium mb-4">Requisitioner Informations</h3>
                                 <div class="grid grid-cols-12 gap-x-6 gap-y-1">
                                     <div class="col-span-12 sm:col-span-6">
+                                        <label for="add_budget_year_id" class="form-label">Budget Year <span class="text-danger">*</span></label>
+                                        <select name="budget_year_id" class="w-full tom-selects" id="add_budget_year_id">
+                                            <option value="">Please Select</option>
+                                            @if($years->count() > 0)
+                                                @foreach($years as $yr)
+                                                    @if($yr->active == 1)
+                                                        <option {{ (isset($budgets->budget_year_id) && $budgets->budget_year_id == $yr->id ? 'Selected' : '') }} value="{{ $yr->id }}">{{ $yr->title }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-budget_set_detail_id text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <label for="budget_set_detail_id" class="form-label">Budget Source <span class="text-danger">*</span></label>
                                         <select name="budget_set_detail_id" class="w-full tom-selects" id="budget_set_detail_id">
                                             <option value="">Please Select</option>
-                                            @if(isset($budgets->details) && $budgets->details->count() > 0)
+                                            @if(isset($budgets->details) && $budgets->details->count() > 0 && isset($budgets->year->active) && $budgets->year->active == 1)
                                                 @foreach($budgets->details as $det)
                                                     <option value="{{ $det->id }}">{{ (isset($det->names->name) && !empty($det->names->name) ? $det->names->name : 'Undefined').(isset($det->names->code) && !empty($det->names->code) ? ' ('.$det->names->code.')' : '') }}</option>
                                                 @endforeach
@@ -154,7 +168,7 @@
                                         <input id="required_by" type="text" name="required_by" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                                         <div class="acc__input-error error-required_by text-danger mt-2"></div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-12">
+                                    <div class="col-span-12 sm:col-span-6">
                                         <label for="venue_id" class="form-label">Delivery Location</label>
                                         <select name="venue_id" class="w-full tom-selects" id="venue_id">
                                             <option value="">Please Select</option>
@@ -258,7 +272,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="budget_set_id" value="{{ (isset($budgets->id) && $budgets->id > 0 ? $budgets->id : 0) }}"/>
-                        <input type="hidden" name="budget_year_id" value="{{ (isset($budgets->budget_year_id) && $budgets->budget_year_id > 0 ? $budgets->budget_year_id : 0) }}"/>
+                        <!-- <input type="hidden" name="budget_year_id" value="{{ (isset($budgets->budget_year_id) && $budgets->budget_year_id > 0 ? $budgets->budget_year_id : 0) }}"/> -->
                     </div>
                 </div>
             </form>
@@ -295,6 +309,18 @@
                             <div class="col-span-12 sm:col-span-7">
                                 <h3 class="font-medium mb-4">Requisitioner Informations</h3>
                                 <div class="grid grid-cols-12 gap-x-6 gap-y-1">
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_budget_year_id" class="form-label">Budget Year <span class="text-danger">*</span></label>
+                                        <select name="budget_year_id" class="w-full tom-selects" id="edit_budget_year_id">
+                                            <option value="">Please Select</option>
+                                            @if($years->count() > 0)
+                                                @foreach($years as $yr)
+                                                    <option value="{{ $yr->id }}">{{ $yr->title }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <div class="acc__input-error error-budget_set_detail_id text-danger mt-2"></div>
+                                    </div>
                                     <div class="col-span-12 sm:col-span-6">
                                         <label for="edit_budget_set_detail_id" class="form-label">Budget Source <span class="text-danger">*</span></label>
                                         <select name="budget_set_detail_id" class="w-full tom-selects" id="edit_budget_set_detail_id">
@@ -412,6 +438,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="id" value="0"/>
+                        <input type="hidden" name="budget_set_id" value="0"/>
                     </div>
                 </div>
             </form>
