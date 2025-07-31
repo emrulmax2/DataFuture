@@ -742,10 +742,10 @@ class StudentController extends Controller
         $fileName = 'student_payment_' . $student->id . '_' . $payment->id . '.pdf';
         $path = 'public/students/'.$student_id.'/'.$fileName;
         // Ensure the file didn't already exist
-        // if (Storage::disk('s3')->exists($path)) {
+        if (Storage::disk('s3')->exists($path)) {
             
-        //     Storage::disk('s3')->delete($path);
-        // }
+            Storage::disk('s3')->delete($path);
+        }
 
         // Save the PDF to storage
         Storage::disk('s3')->put($path, $pdf->output());
@@ -782,18 +782,18 @@ class StudentController extends Controller
             'from_name'    =>  $siteName,
         ];
         
-        if(empty($payment->mailed_pdf_file) || !Storage::disk('s3')->exists($payment->mailed_pdf_file)) {
+        //if(empty($payment->mailed_pdf_file) || !Storage::disk('s3')->exists($payment->mailed_pdf_file)) {
             // If the PDF file does not exist, create it
             $InvoiceStorage = $this->createInvoicePrintToStorage($student_id, $payment_id);
             $payment->mailed_pdf_file = $InvoiceStorage['path'];
             $payment->save();
-        }else {
-            // If the PDF file already exists, use the existing path
-            $InvoiceStorage = [
-                'path' => $payment->mailed_pdf_file,
-                'fileName' => basename($payment->mailed_pdf_file)
-            ];
-        }
+        // }else {
+        //     // If the PDF file already exists, use the existing path
+        //     $InvoiceStorage = [
+        //         'path' => $payment->mailed_pdf_file,
+        //         'fileName' => basename($payment->mailed_pdf_file)
+        //     ];
+        // }
 
         $message = '';
         $message .= 'Dear '.$student->full_name.',<br/>';
