@@ -126,7 +126,7 @@ class AttendanceReportController extends Controller
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
                     ->whereIn('atn.plan_id', $plan_ids)
-                    ->whereIsNull('atn.deleted_at')
+                    ->whereNull('atn.deleted_at')
                     ->where('pln.course_id', DB::raw('cc.course_id'));
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
@@ -282,7 +282,7 @@ class AttendanceReportController extends Controller
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
                     ->whereIn('atn.plan_id', $plan_ids)
-                    ->whereIsNull('atn.deleted_at')
+                    ->whereNull('atn.deleted_at')
                     ->where('pln.course_id', DB::raw('cc.course_id'));
         if(!empty($assign_student_ids)):
             $query->whereIn('atn.student_id', $assign_student_ids);
