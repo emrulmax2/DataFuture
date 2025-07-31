@@ -162,7 +162,8 @@ class DashboardController extends Controller
                             DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
                             DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
                             DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
-                        )
+                        ) 
+                        ->whereNull('atn.deleted_at')
                         ->whereIn('atn.plan_id', $plan_ids);
             if(!empty($student_ids)):
                 $query->whereIn('atn.student_id', $student_ids);
@@ -203,8 +204,9 @@ class DashboardController extends Controller
                     ->leftJoin('students as std', 'atn.student_id', '=', 'std.id')
                     ->whereIn('atn.plan_id', $term_plan_ids)
                     ->whereIn('atn.student_id', $student_ids)
-                    ->whereNotIn('std.status_id', $exculdeStatus);
-            
+                    ->whereNotIn('std.status_id', $exculdeStatus)
+                    ->whereNull('atn.deleted_at');
+
             $query->groupBy('atn.student_id')->havingRaw('percentage_withexcuse < '.$percentage.' OR round(percentage_withexcuse) = 0');
             $attendance = $query->get()->count();
 
@@ -591,6 +593,8 @@ class DashboardController extends Controller
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
                         DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
                     )
+                    
+                    ->whereNull('atn.deleted_at')
                     ->whereIn('atn.plans_date_list_id', $date_ids);
         if(!empty($student_ids)):
             $query->whereIn('atn.student_id', $student_ids);
@@ -761,7 +765,7 @@ class DashboardController extends Controller
         $query = DB::table('attendances as atn')
                 ->select(
                     DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
-                )->whereIn('atn.plan_id', $plan_ids)->where('atn.student_id', $student_id)->get()->first();
+                )->whereIn('atn.plan_id', $plan_ids)->whereNull('atn.deleted_at')->where('atn.student_id', $student_id)->get()->first();
         return (isset($query->percentage_withexcuse) && $query->percentage_withexcuse > 0 ? $query->percentage_withexcuse : 0);
     }
 

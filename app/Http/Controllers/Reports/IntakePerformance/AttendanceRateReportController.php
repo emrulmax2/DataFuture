@@ -374,6 +374,7 @@ class AttendanceRateReportController extends Controller
                                             ->leftJoin('term_declarations as trm', 'pln.term_declaration_id', 'trm.id')
                                             ->whereIn('atn.plan_id', $class_plan_ids)
                                             ->whereIn('atn.student_id', $registered_std_ids)
+                                            ->whereNull('atn.deleted_at')
                                             ->groupBy('pln.term_declaration_id')
                                             ->orderBY('pln.term_declaration_id', 'ASC')->get();
                                     $res['result'][$semester_id]['course'][$course_id]['term_result'] = $query;
