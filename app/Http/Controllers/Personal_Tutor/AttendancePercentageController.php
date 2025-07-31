@@ -39,6 +39,7 @@ class AttendancePercentageController extends Controller
                         ->whereIn('atn.plan_id', $plan_ids)
                         ->whereIn('atn.student_id', $student_ids)
                         ->whereNotIn('std.status_id', $exculdeStatus)
+                        ->whereNull('atn.deleted_at')
                         ->groupBy('atn.student_id')
                         ->havingRaw('percentage_withexcuse < 60 OR round(percentage_withexcuse) = 0')->pluck('student_id')->unique()->toArray();
                 if(!empty($attn_student_ids)):
@@ -96,6 +97,8 @@ class AttendancePercentageController extends Controller
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
                     ->whereIn('atn.plan_id', $term_plan_ids)
                     ->whereNotIn('std.status_id', $exculdeStatus)
+                    
+                    ->whereNull('atn.deleted_at')
                     ->groupBy('atn.student_id');
         if($student_ids > 0):
             $Query->where('atn.student_id', $student_ids);
