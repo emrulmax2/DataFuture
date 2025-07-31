@@ -852,6 +852,7 @@ class DashboardController extends Controller
                     )
                     ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                     ->leftJoin('students as std', 'atn.student_id', 'std.id')
+                    ->whereNull('atn.deleted_at')
                     ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                     ->whereIn('atn.plans_date_list_id', $date_ids);
         if(!empty($plan_ids)):
