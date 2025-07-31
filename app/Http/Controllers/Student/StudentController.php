@@ -742,10 +742,10 @@ class StudentController extends Controller
         $fileName = 'student_payment_' . $student->id . '_' . $payment->id . '.pdf';
         $path = 'public/students/'.$student_id.'/'.$fileName;
         // Ensure the file didn't already exist
-        if (Storage::disk('s3')->exists($path)) {
+        // if (Storage::disk('s3')->exists($path)) {
             
-            Storage::disk('s3')->delete($path);
-        }
+        //     Storage::disk('s3')->delete($path);
+        // }
 
         // Save the PDF to storage
         Storage::disk('s3')->put($path, $pdf->output());
