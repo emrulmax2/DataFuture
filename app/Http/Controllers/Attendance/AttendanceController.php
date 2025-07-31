@@ -18,6 +18,7 @@ use App\Models\Plan;
 use App\Models\PlansDateList;
 use App\Models\Semester;
 use App\Models\Student;
+use App\Models\StudentVisit;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -527,7 +528,18 @@ class AttendanceController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id){
+    public function destroy($id) {
+
+        $studentVisit = StudentVisit::where('attendance_id', $id)->first();
+
+        if(isset($studentVisit) && !empty($studentVisit)){
+
+            $studentVisit->attendance_deleted_by = Auth::user()->id;
+            $studentVisit->updated_by = Auth::user()->id;
+            $studentVisit->save();
+
+        }
+
         $data = Attendance::find($id)->delete();
         return response()->json($data);
     }
