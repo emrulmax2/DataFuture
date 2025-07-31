@@ -120,6 +120,7 @@ class TermAttendancePerformanceReportController extends Controller
                 ->leftJoin('students as std', 'atn.student_id', 'std.id')
                 ->whereIn('atn.plan_id', $plan_ids)
                 ->whereIn('atn.student_id', $student_ids)
+                ->whereNull('atn.deleted_at')
                 ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                 ->groupBy('pln.course_id')->orderBy('pln.course_id', 'ASC')->get();
         return $query;
@@ -186,6 +187,7 @@ class TermAttendancePerformanceReportController extends Controller
                             ->whereIn('atn.plan_id', $plan_ids)
                             ->whereIn('atn.student_id', $student_ids)
                             ->where('pln.course_id', $course_id)
+                            ->whereNull('atn.deleted_at')
                             ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                             ->where(function($q) use($batchStart, $batchEnd){
                                 $q->whereDate('atn.attendance_date', '>=', $batchStart)->whereDate('atn.attendance_date', '<=', $batchEnd);
@@ -249,6 +251,7 @@ class TermAttendancePerformanceReportController extends Controller
                 ->where('pln.course_id', $course_id)
                 ->whereIn('atn.plan_id', $plan_ids)
                 ->whereIn('atn.student_id', $student_ids)
+                ->whereNull('atn.deleted_at')
                 ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                 ->groupBy('gr.name')->orderBy('gr.name', 'ASC')->get();
         return $query;
@@ -321,6 +324,7 @@ class TermAttendancePerformanceReportController extends Controller
                         ->leftJoin('students as std', 'atn.student_id', 'std.id')
                         ->whereIn('atn.plan_id', $plan_ids)
                         ->whereIn('atn.student_id', $student_ids)
+                        ->whereNull('atn.deleted_at')
                         ->whereIn('pln.group_id', $group_ids)
                         ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                         ->where(function($q) use($batchStart, $batchEnd){
@@ -390,6 +394,7 @@ class TermAttendancePerformanceReportController extends Controller
                 ->whereIn('atn.student_id', $student_ids)
                 ->where('pln.course_id', $course_id)
                 ->whereIn('pln.group_id', $group_ids)
+                ->whereNull('atn.deleted_at')
                 ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                 ->groupBy('pln.module_creation_id')->orderBy('mc.module_name', 'ASC')->get();
         return $query;
@@ -463,6 +468,7 @@ class TermAttendancePerformanceReportController extends Controller
                             ->whereIn('atn.plan_id', $plan_ids)
                             ->whereIn('atn.student_id', $student_ids)
                             ->where('pln.module_creation_id', $mod_id)
+                            ->whereNull('atn.deleted_at')
                             ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
                             ->where(function($q) use($batchStart, $batchEnd){
                                 $q->whereDate('atn.attendance_date', '>=', $batchStart)->whereDate('atn.attendance_date', '<=', $batchEnd);

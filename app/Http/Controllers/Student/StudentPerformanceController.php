@@ -15,6 +15,7 @@ use App\Models\ModuleCreation;
 use App\Models\ModuleLevel;
 use App\Models\Plan;
 use App\Models\QualAwardResult;
+use App\Models\ReasonForEngagementEnding;
 use App\Models\Result;
 use App\Models\Semester;
 use App\Models\Status;
@@ -120,6 +121,8 @@ class StudentPerformanceController extends Controller
             'termAttendanceCount' => $termAttendanceCount,
             'TopAttendanceCriteria' => $TopAttendanceCriteria,
             'perTermModuleCriteria' => $perTermModuleCriteria,
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
         ]);
     }
