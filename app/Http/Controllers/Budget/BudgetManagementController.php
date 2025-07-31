@@ -51,6 +51,8 @@ class BudgetManagementController extends Controller
     }
 
     public function list(Request $request){
+        $user_id = auth()->user()->id;
+        $assigned_budget_name_ids = $this->getAssignedBudgetNameIds($user_id);
         $date_range = (isset($request->date_range) && !empty($request->date_range) ? explode(' - ', $request->date_range) : []);
         $start_date = (isset($date_range[0]) && !empty($date_range[0]) ? date('Y-m-d', strtotime($date_range[0])) : '');
         $end_date = (isset($date_range[1]) && !empty($date_range[1]) ? date('Y-m-d', strtotime($date_range[1])) : '');
@@ -64,14 +66,22 @@ class BudgetManagementController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = BudgetRequisition::with('year', 'budget', 'requisitioners', 'vendor')->orderByRaw(implode(',', $sorts));
+        $query = BudgetRequisition::with('year', 'budget', 'requisitioners', 'vendor')->orderByRaw(implode(',', $sorts))->where(function($q) use($user_id, $budget_name_ids, $assigned_budget_name_ids){
+            $q->where('first_approver', $user_id)->orWhere('final_approver', $user_id)->orWhere('created_by', $user_id);
+            if($budget_name_ids > 0 || !empty($assigned_budget_name_ids)):
+                $q->orWhereHas('budget', function($sq) use($budget_name_ids, $assigned_budget_name_ids){
+                    if($budget_name_ids > 0 && !empty($assigned_budget_name_ids)):
+                        $sq->where('budget_name_id', $budget_name_ids)->orWhereIn('budget_name_id', $assigned_budget_name_ids);
+                    elseif($budget_name_ids == 0 && !empty($assigned_budget_name_ids)):
+                        $sq->whereIn('budget_name_id', $assigned_budget_name_ids);
+                    elseif($budget_name_ids > 0 && empty($assigned_budget_name_ids)):
+                        $sq->where('budget_name_id', $budget_name_ids);
+                    endif;
+                });
+            endif;
+        });
         if($budget_year_ids > 0):
             $query->where('budget_year_id', $budget_year_ids);
-        endif;
-        if($budget_name_ids > 0):
-            $query->whereHas('budget', function($q) use($budget_name_ids){
-                $q->where('budget_name_id', $budget_name_ids);
-            });
         endif;
         if(!empty($start_date) && !empty($end_date)):
             $query->where(function($q) use($start_date, $end_date){
@@ -118,7 +128,7 @@ class BudgetManagementController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, $assigned_budget_name_ids]);
     }
 
     public function storeRequisition(RequisitionStoreRequest $request){
@@ -621,5 +631,15 @@ class BudgetManagementController extends Controller
         $budgetSet = BudgetSet::with('details', 'details.names')->where('budget_year_id', $budget_year_id)->get()->first();
 
         return response()->json(['row' => $budgetSet], 200);
+    }
+
+    public function getAssignedBudgetNameIds($user_id){
+        $holders = BudgetNameHolder::where('user_id', $user_id)->pluck('budget_name_id')->unique()->toArray();
+        $requester = BudgetNameRequester::where('user_id', $user_id)->pluck('budget_name_id')->unique()->toArray();
+        $approver = BudgetNameApprover::where('user_id', $user_id)->pluck('budget_name_id')->unique()->toArray();
+
+        $budget_name_ids = array_merge($requester, $holders, $approver);
+
+        return $budget_name_ids;
     }
 }

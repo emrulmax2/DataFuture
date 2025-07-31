@@ -91,14 +91,16 @@ var requisitionListTable = (function () {
                     headerSort: false,
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        if(cell.getData().active == 4){
-                            return '<span class="btn btn-sm btn-success text-white px-2 py-1">Completed</span>';
+                        if(cell.getData().active == 5){
+                            return '<span class="btn btn-sm btn-success text-white px-2 py-1">Paid</span>';
+                        }else if(cell.getData().active == 4){
+                            return '<span class="btn btn-sm btn-pending text-white px-2 py-1">Awaiting Payment</span>';
                         }else if(cell.getData().active == 3){
-                            return '<span class="btn btn-sm btn-primary text-white px-2 py-1">Approved</span>';
+                            return '<span class="btn btn-sm btn-warning text-white px-2 py-1">Second Approval Done</span>';
                         }else if(cell.getData().active == 2){
-                            return '<span class="btn btn-sm btn-pending text-white px-2 py-1">First Approval</span>';
+                            return '<span class="btn btn-sm btn-pending text-white px-2 py-1">First Approval Done</span>';
                         }else if(cell.getData().active == 1){
-                            return '<span class="btn btn-sm btn-warning text-white px-2 py-1">Active</span>';
+                            return '<span class="btn btn-sm btn-primary text-white px-2 py-1">New</span>';
                         }else if(cell.getData().active == 0){
                             return '<span class="btn btn-sm btn-danger text-white px-2 py-1">Cancelled</span>';
                         }
