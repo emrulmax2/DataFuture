@@ -775,10 +775,19 @@ class StudentController extends Controller
             'from_email'    => $commonSmtp->smtp_user,
             'from_name'    =>  $siteName,
         ];
-
-        $InvoiceStorage = $this->createInvoicePrintToStorage($student_id, $payment_id);
-        $payment->mailed_pdf_file = $InvoiceStorage['path'];
-        $payment->save();
+        
+        if(empty($payment->mailed_pdf_file) || !Storage::disk('s3')->exists($payment->mailed_pdf_file)) {
+            // If the PDF file does not exist, create it
+            $InvoiceStorage = $this->createInvoicePrintToStorage($student_id, $payment_id);
+            $payment->mailed_pdf_file = $InvoiceStorage['path'];
+            $payment->save();
+        }else {
+            // If the PDF file already exists, use the existing path
+            $InvoiceStorage = [
+                'path' => $payment->mailed_pdf_file,
+                'fileName' => basename($payment->mailed_pdf_file)
+            ];
+        }
 
         $message = '';
         $message .= 'Dear '.$student->full_name.',<br/>';
