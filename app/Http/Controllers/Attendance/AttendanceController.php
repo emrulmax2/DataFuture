@@ -537,7 +537,7 @@ class AttendanceController extends Controller
             $studentVisit->attendance_deleted_by = Auth::user()->id;
             $studentVisit->updated_by = Auth::user()->id;
             $studentVisit->save();
-
+            $studentVisit->delete();
         }
 
         $data = Attendance::find($id)->delete();
