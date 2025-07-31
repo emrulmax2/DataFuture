@@ -104,7 +104,11 @@
                                            
                                                 <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                                     <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                        {{ date('d F, Y',strtotime($planDateList["date"]))  }}
+                                                        @if(!empty($planDateList["attendance"]->note))
+                                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
+                                                        @else
+                                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }}
+                                                        @endif
                                                     </td>
                                                     <input name="id[]" value="{{ $planDateList["attendance"]->id }}" type="hidden" />
                                                     @foreach($attendanceFeedStatus as $status)
@@ -116,7 +120,7 @@
                                                             </td>
                                                         @else
                                                             <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                                <input data-tw-merge  id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}"  type="radio" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"/>
+                                                                <input {{ (!empty($planDateList["attendance"]->note)) ? 'disabled' : '' }} data-tw-merge  id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}"  type="radio" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"/>
                                                                 <label data-tw-merge for="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" class="cursor-pointer ml-2">{{ $status->name }}</label>
                                                                 
                                                             </td>

@@ -1098,9 +1098,9 @@ class StudentController extends Controller
                         $precision = 2;
                         $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
 
-                        $data[$list->term_id][$list->plan_id][$list ->date] = [
+                        $data[$list->term_id][$list->plan_id][$list->id] = [
                                 "id" => $list->id,
-                                "date" => date("d-m-Y", strtotime($list ->date)),
+                                "date" => date("d-m-Y", strtotime($list->date)),
                                 "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
                                 "attendance"=> ($attendance) ?? null,
                                 "term_id"=> $list->term_id,
@@ -1201,9 +1201,9 @@ class StudentController extends Controller
                             $avaragePercentage[$list->term_id][$list->plan_id] = 0;
                         }
 
-                        $data[$list->term_id][$list->plan_id][$list ->date] = [
+                        $data[$list->term_id][$list->plan_id][$list->id] = [
                                 "id" => $list->id,
-                                "date" => date("d-m-Y", strtotime($list ->date)),
+                                "date" => date("d-m-Y", strtotime($list->date)),
                                 "attendance_information" => null,
                                 "attendance"=> null,
                                 "term_id"=> $list->term_id,
@@ -1299,7 +1299,7 @@ class StudentController extends Controller
                         $precision = 2;
                         $avarage = number_format($avaragePercentage[$plan->term_declaration_id][$plan->id], $precision, '.', '');
                     
-                        $data[$plan->term_declaration_id][$plan->id][$list->date] = [
+                        $data[$plan->term_declaration_id][$plan->id][$list->id] = [
                                 "id" => $list->id,
                                 "date" => date("d-m-Y", strtotime($list->date)),
                                 "attendance_information" => isset($attendanceInformation) ? $attendanceInformation: null,
@@ -1501,9 +1501,9 @@ class StudentController extends Controller
                         $avarage = number_format($avaragePercentage[$list->term_id][$list->plan_id], $precision, '.', '');
                     
 
-                    $data[$list->term_id][$list->plan_id][$list ->date] = [
+                    $data[$list->term_id][$list->plan_id][$list->id] = [
                             "id" => $list->id,
-                            "date" => date("d-m-Y", strtotime($list ->date)),
+                            "date" => date("d-m-Y", strtotime($list->date)),
                             "attendance_information" => ($attendanceInformation) ?? null,
                             "attendance"=> ($attendance) ?? null,
                             "term_id"=> $list->term_id,
