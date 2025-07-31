@@ -237,7 +237,8 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- Dashboard Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -326,7 +327,7 @@
                 </div>
             </div>
         </div>
-
+        <!-- Staff Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -347,7 +348,8 @@
                 </div>
             </div>
         </div>
-
+        
+        <!-- HR Portal Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -399,6 +401,7 @@
                 </div>
             </div>
         </div>
+        <!-- Live Student Portal Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -464,20 +467,20 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['attendance_add']) && $priv['student_live_portal']['attendance_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_4" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_add]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_4">Add</label>
+                                <input {{ (isset($priv['student_live_portal']['attendance_add']) && $priv['student_live_portal']['attendance_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_8" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_8">Add</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['attendance_edit']) && $priv['student_live_portal']['attendance_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_55" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_edit]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_55">Edit</label>
+                                <input {{ (isset($priv['student_live_portal']['attendance_edit']) && $priv['student_live_portal']['attendance_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_9" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_9">Edit</label>
                             </div>
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['student_live_portal']['attendance_delete']) && $priv['student_live_portal']['attendance_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_66" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_delete]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_66">Delete</label>
+                                <input {{ (isset($priv['student_live_portal']['attendance_delete']) && $priv['student_live_portal']['attendance_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_10" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][attendance_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_10">Delete</label>
                             </div>
                         </div>
                     </div>
@@ -612,6 +615,35 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Visit</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['visit_view']) && $priv['student_live_portal']['visit_view'] == 1 ? 'checked' : '') }} id="permission_student_portal_33" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][visit_view]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_33">View</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['visit_add']) && $priv['student_live_portal']['visit_add'] == 1 ? 'checked' : '') }} id="permission_student_portal_34" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][visit_add]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_34">Add</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['visit_edit']) && $priv['student_live_portal']['visit_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_35" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][visit_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_35">Edit</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['visit_delete']) && $priv['student_live_portal']['visit_delete'] == 1 ? 'checked' : '') }} id="permission_student_portal_36" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][visit_delete]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_36">Delete</label>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="col-span-12 sm:col-span-6">
                         <div class="form-check form-switch">
@@ -688,6 +720,8 @@
                 </div>
             </div>
         </div>
+
+        <!-- Module Content Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -732,6 +766,8 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Library Management Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -752,11 +788,11 @@
                 </div>
             </div>
         </div>
-
+        <!-- Result Management Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
-                    <div class="font-medium text-base">Result Manament Privileges</div>
+                    <div class="font-medium text-base">Result Management Privileges</div>
                 </div>
                 <div class="col-span-6 text-right relative">
                     <button type="submit" class="btn btn-primary shadow-md mr-2"><i data-lucide="save-all" class="w-4 h-4 mr-2"></i>Save All</button>
@@ -783,6 +819,7 @@
                 </div>
             </div>
         </div>
+        <!-- Internal Links Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
