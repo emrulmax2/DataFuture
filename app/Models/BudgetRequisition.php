@@ -10,7 +10,22 @@ class BudgetRequisition extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function boot(){
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->reference_no = self::generateUniqueReferenceNumber();
+        });
+
+        static::updating(function ($model) {
+            if(empty($model->reference_no)) {
+                $model->reference_no = static::generateUniqueReferenceNumber();
+            }
+        });
+    }
+
     protected $fillable = [
+        'reference_no',
         'budget_year_id',
         'budget_set_id',
         'vendor_id',
@@ -55,6 +70,10 @@ class BudgetRequisition extends Model
 
     public function items(){
         return $this->hasMany(BudgetRequisitionItem::class, 'budget_requisition_id', 'id');
+    }
+
+    public function documents(){
+        return $this->hasMany(BudgetRequisitionDocument::class, 'budget_requisition_id', 'id');
     }
 
     public function year(){
@@ -103,5 +122,17 @@ class BudgetRequisition extends Model
         endif;
 
         return $total;
+    }
+
+    private static function generateUniqueReferenceNumber(){
+        do{
+            $number = mt_rand(100000, 999999);
+        } while (self::where('reference_no', $number)->exists());
+
+        return $number;
+    }
+
+    public function history(){
+        return $this->hasMany(BudgetRequisitionHistory::class, 'budget_requisition_id', 'id')->where('approver', '>', 0)->orderBy('id', 'ASC');
     }
 }

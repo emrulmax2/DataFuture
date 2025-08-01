@@ -13,6 +13,7 @@ use App\Models\BudgetNameHolder;
 use App\Models\BudgetNameRequester;
 use App\Models\BudgetRequisition;
 use App\Models\BudgetRequisitionDocument;
+use App\Models\BudgetRequisitionHistory;
 use App\Models\BudgetRequisitionItem;
 use App\Models\BudgetRequisitionTransaction;
 use App\Models\BudgetSet;
@@ -24,6 +25,7 @@ use App\Models\User;
 use App\Models\Vendor;
 use App\Models\Venue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Number;
 
 class BudgetManagementController extends Controller
 {
@@ -366,6 +368,7 @@ class BudgetManagementController extends Controller
     }
 
     public function showRequisition(BudgetRequisition $requisition){
+        $requisition->load('items', 'year');
         return view('pages.budget.requisition.show', [
             'title' => 'Budget Management - London Churchill College',
             'breadcrumbs' => [
@@ -378,16 +381,26 @@ class BudgetManagementController extends Controller
     }
 
     public function updateRequisitionStatus(Request $request){
-        $record_id = explode('_', $request->record_id);
+        $requisition_id = $request->record_id;
+        $active = $request->status;
+        $approver = $request->approver;
+        $note = (isset($request->note) && !empty($request->note) ? $request->note : null);
 
-        if(isset($record_id[0]) && $record_id[0] > 0 && isset($record_id[1])):
-            $requisition_id = $record_id[0];
-            $active = $record_id[1];
+        if($requisition_id > 0):
             $requisition = BudgetRequisition::find($requisition_id);
 
             BudgetRequisition::where('id', $requisition_id)->update([
                 'active' => $active,
                 'updated_by' => auth()->user()->id
+            ]);
+
+            BudgetRequisitionHistory::create([
+                'budget_requisition_id' => $requisition_id,
+                'approver' => $approver,
+                'status' => $active,
+                'note' => $note,
+
+                'created_by' => auth()->user()->id,
             ]);
 
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
@@ -463,7 +476,7 @@ class BudgetManagementController extends Controller
 
                 
                 //$tmpTo[] = 'limon@churchill.ac';
-                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
             if($active == 3):
                 $subject = 'Requisition Approved - Action Needed';
@@ -478,7 +491,7 @@ class BudgetManagementController extends Controller
                 $MAILBODY .= 'Best regards,<br/>';  
                 $MAILBODY .= 'London Churchill College<br/>';
 
-                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
 
             return response()->json(['msg' => 'Status successfully updated.'], 200);
