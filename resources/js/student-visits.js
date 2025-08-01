@@ -117,8 +117,12 @@ var studentVisitsListTable = (function () {
                         if (cell.getData().deleted_at == null) {
                             
                             btns  = '<button data-id="' +cell.getData().id +'" type="button" class="show_btn btn-rounded btn btn-twitter text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            if (cell.getData().edit_permission) {
+                                btns += '<button data-id="' +cell.getData().id +'" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            }
+                            if (cell.getData().delete_permission) {
+                                btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            }
                         }  else {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }

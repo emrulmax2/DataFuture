@@ -86,6 +86,8 @@ class StudentVisitController extends Controller
                     'deleted_at' => $list->deleted_at ? $list->deleted_at : null,
                     'module_name' => $moduleName,
                     'plan_id' => isset($list->plan_id) ? $list->plan_id : null,
+                    'edit_permission' => (isset(auth()->user()->priv()['visit_edit']) && auth()->user()->priv()['visit_edit'] == 1 ? true : false),
+                    'delete_permission' => (isset(auth()->user()->priv()['visit_delete']) && auth()->user()->priv()['visit_delete'] == 1 ? true : false),
                 ];
                 $i++;
             endforeach;
