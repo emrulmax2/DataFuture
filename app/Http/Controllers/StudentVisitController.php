@@ -71,22 +71,27 @@ class StudentVisitController extends Controller
                     $planSet = Plan::with('creations','creations.module')->where('id', $list->plan_id)->first();
                     $moduleName = $planSet ? $planSet->creations->module->name.' - '. $planSet->creations->module->code . ($planSet->class_type ? ' ['. $planSet->class_type. ']' : '') : '';
                 endif;
-
-                $data[] = [
-                    'id' => $list->id,
-                    'sl' => $i,
-                    'student_id' => $list->student_id,
-                    'visit_type' => $list->visit_type,
-                    'visit_date' => $list->visit_date ? $list->visit_date : '',
-                    'attendance_deleted_by' => isset($list->attendance_deleted_by) ? $list->attendanceDeletedBy->employee->full_name : '',
-                    'visit_duration' => $list->visit_duration,
-                    'visit_notes' => $list->visit_notes ? $list->visit_notes : '',
-                    'created_by' => $list->createdBy && $list->createdBy->employee ? $list->createdBy->employee->full_name : '',
-                    'updated_by' => $list->updatedBy && $list->updatedBy->employee ? $list->updatedBy->employee->full_name : '',
-                    'deleted_at' => $list->deleted_at ? $list->deleted_at : null,
-                    'module_name' => $moduleName,
-                    'plan_id' => isset($list->plan_id) ? $list->plan_id : null,
-                ];
+                if(isset(auth()->user()->priv()['visit_view']) && auth()->user()->priv()['visit_view'] == 1):
+                    $data[] = [
+                        'id' => $list->id,
+                        'sl' => $i,
+                        'student_id' => $list->student_id,
+                        'visit_type' => $list->visit_type,
+                        'visit_date' => $list->visit_date ? $list->visit_date : '',
+                        'attendance_deleted_by' => isset($list->attendance_deleted_by) ? $list->attendanceDeletedBy->employee->full_name : '',
+                        'visit_duration' => $list->visit_duration,
+                        'visit_notes' => $list->visit_notes ? $list->visit_notes : '',
+                        'created_by' => $list->createdBy && $list->createdBy->employee ? $list->createdBy->employee->full_name : '',
+                        'updated_by' => $list->updatedBy && $list->updatedBy->employee ? $list->updatedBy->employee->full_name : '',
+                        'deleted_at' => $list->deleted_at ? $list->deleted_at : null,
+                        'module_name' => $moduleName,
+                        'plan_id' => isset($list->plan_id) ? $list->plan_id : null,
+                        'edit_permission' => (isset(auth()->user()->priv()['visit_edit']) && auth()->user()->priv()['visit_edit'] == 1 ? true : false),
+                        'delete_permission' => (isset(auth()->user()->priv()['visit_delete']) && auth()->user()->priv()['visit_delete'] == 1 ? true : false),
+                    ];
+                else:
+                    $data = [];
+                endif;
                 $i++;
             endforeach;
         endif;

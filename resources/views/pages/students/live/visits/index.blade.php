@@ -16,9 +16,11 @@
                 <div class="font-medium text-base">Visits</div>
             </div>
             <div class="col-span-7 md:col-span-6 text-right relative">
+                @if(isset(auth()->user()->priv()['visit_add']) && auth()->user()->priv()['visit_add'] == 1)
                 <a href="javascript:void(0)" class="btn btn-success text-white shadow-md mr-2 hidden md:inline-flex" data-tw-toggle="modal" data-tw-target="#addVisitModal">
                     <i data-lucide="plus" class="stroke-1.5 w-4 h-4 mr-2"></i> Add New Visit
                 </a>
+                @endif
             </div>
         </div>
         <div class="intro-y mt-5">

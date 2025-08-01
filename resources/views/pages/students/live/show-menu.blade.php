@@ -33,7 +33,7 @@
                 </a>
             </li>
             @endif
-            @if(isset(auth()->user()->priv()['attendance_view']) && auth()->user()->priv()['attendance_view'] == 1)
+            @if(isset(auth()->user()->priv()['visit_view']) && auth()->user()->priv()['visit_view'] == 1)
             <li class="nav-item ml-3" role="presentation">
                 <a href="{{ route('student.visits', $student->id) }}" class="nav-link md:py-4 {{ (Route::currentRouteName() == 'student.visits.edit' || Route::currentRouteName() == 'student.visits') ? 'active' : '' }}" class="nav-link md:py-4">
                     Visits
