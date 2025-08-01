@@ -104,7 +104,7 @@ var requisitionItemListTable = (function () {
 
 
 (function(){
-    requisitionItemListTable.init();
+    /*requisitionItemListTable.init();
 
     function filterRIHTMLForm() {
         requisitionItemListTable.init();
@@ -132,7 +132,7 @@ var requisitionItemListTable = (function () {
         $("#query-RI").val("");
         $("#status-RI").val("1");
         filterRIHTMLForm();
-    });
+    });*/
 
     const addRequisitionItemModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addRequisitionItemModal"));
     const editRequisitionItemModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editRequisitionItemModal"));
@@ -144,6 +144,15 @@ var requisitionItemListTable = (function () {
     const successModalEl = document.getElementById('successModal')
     successModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#successModal .successCloser').attr('data-action', 'NONE');
+    });
+
+    $('#successModal .successCloser').on('click', function(e){
+        e.preventDefault();
+        if($(this).attr('data-action') == 'RELOAD'){
+            window.location.reload();
+        }else{
+            succModal.hide();
+        }
     });
 
     const addRequisitionItemModalEl = document.getElementById('addRequisitionItemModal')
@@ -207,13 +216,15 @@ var requisitionItemListTable = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html('Requisition item Successfully inserted.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });  
                 
                 setTimeout(() => {
                     succModal.hide();
+                    window.location.reload();
                 }, 2000);
             }
-            requisitionItemListTable.init();
+            //requisitionItemListTable.init();
         }).catch(error => {
             document.querySelector('#saveItemBtn').removeAttribute('disabled');
             document.querySelector("#saveItemBtn svg").style.cssText = "display: none;";
@@ -243,6 +254,7 @@ var requisitionItemListTable = (function () {
         }).then((response) => {
             if (response.status == 200) {
                 let dataset = response.data;
+
                 $('#editRequisitionItemModal input[name="description"]').val(dataset.description ? dataset.description : '');
                 $('#editRequisitionItemModal input[name="quantity"]').val(dataset.quantity ? dataset.quantity : '');
                 $('#editRequisitionItemModal input[name="price"]').val(dataset.price ? dataset.price : '');
@@ -278,13 +290,15 @@ var requisitionItemListTable = (function () {
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );
                     $("#successModal .successModalDesc").html('Requisition item Successfully updated.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
                 });  
                 
                 setTimeout(() => {
                     succModal.hide();
+                    window.location.reload();
                 }, 2000);
             }
-            requisitionItemListTable.init();
+            //requisitionItemListTable.init();
         }).catch(error => {
             document.querySelector('#updateItemBtn').removeAttribute('disabled');
             document.querySelector("#updateItemBtn svg").style.cssText = "display: none;";
@@ -323,9 +337,15 @@ var requisitionItemListTable = (function () {
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('WOW!');
                         $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
                     });
+                
+                    setTimeout(() => {
+                        succModal.hide();
+                        window.location.reload();
+                    }, 2000);
                 }
-                requisitionItemListTable.init();
+                //requisitionItemListTable.init();
             }).catch(error =>{
                 console.log(error)
             });
@@ -343,9 +363,15 @@ var requisitionItemListTable = (function () {
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('WOW!');
                         $('#successModal .successModalDesc').html('Record Successfully Restored!');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
                     });
+                
+                    setTimeout(() => {
+                        succModal.hide();
+                        window.location.reload();
+                    }, 2000);
                 }
-                requisitionItemListTable.init();
+                //requisitionItemListTable.init();
             }).catch(error =>{
                 console.log(error)
             });
@@ -363,9 +389,15 @@ var requisitionItemListTable = (function () {
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('WOW!');
                         $('#successModal .successModalDesc').html('Record status successfully updated!');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
                     });
+                
+                    setTimeout(() => {
+                        succModal.hide();
+                        window.location.reload();
+                    }, 2000);
                 }
-                requisitionItemListTable.init();
+                //requisitionItemListTable.init();
             }).catch(error =>{
                 console.log(error)
             });

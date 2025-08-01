@@ -8,6 +8,7 @@ use App\Models\BudgetSet;
 use App\Models\BudgetSetDetail;
 use App\Models\BudgetYear;
 use Illuminate\Http\Request;
+use Illuminate\Support\Number;
 
 class BudgetReportController extends Controller
 {
@@ -147,10 +148,10 @@ class BudgetReportController extends Controller
                             $html .= '<tr class="cursor-pointer budgetReportRow" data-url="'.route('budget.management.reports.details', [$budget_year_id, $budget_set->id, $budget->id]).'">';
                                 $html .= '<td>'.$sl.'</td>';
                                 $html .= '<td>'.(isset($budget->names->name) && !empty($budget->names->name) ? $budget->names->name : '').'</td>';
-                                $html .= '<td>£'.number_format($budgetAmount, 2).'</td>';
-                                $html .= '<td>£'.number_format($requisitionTotal, 2).'</td>';
-                                $html .= '<td>£'.number_format($paidTotal, 2).'</td>';
-                                $html .= '<td>£'.number_format($balance, 2).'</td>';
+                                $html .= '<td>'.Number::currency($budgetAmount, 'GBP').'</td>';
+                                $html .= '<td>'.Number::currency($requisitionTotal, 'GBP').'</td>';
+                                $html .= '<td>'.Number::currency($paidTotal, 'GBP').'</td>';
+                                $html .= '<td>'.Number::currency($balance, 'GBP').'</td>';
                             $html .= '</tr>';
 
                             $totalbudget += $budgetAmount;
@@ -172,10 +173,10 @@ class BudgetReportController extends Controller
                 $html .= '<tfoot>';
                     $html .= '<tr>';
                         $html .= '<th colspan="2">Total</th>';
-                        $html .= '<th>£'.number_format($totalbudget, 2).'</th>';
-                        $html .= '<th>£'.number_format($totalRequisition, 2).'</th>';
-                        $html .= '<th>£'.number_format($TotalPaid, 2).'</th>';
-                        $html .= '<th>£'.number_format($totalBalance, 2).'</th>';
+                        $html .= '<th>'.Number::currency($totalbudget, 'GBP').'</th>';
+                        $html .= '<th>'.Number::currency($totalRequisition, 'GBP').'</th>';
+                        $html .= '<th>'.Number::currency($TotalPaid, 'GBP').'</th>';
+                        $html .= '<th>'.Number::currency($totalBalance, 'GBP').'</th>';
                     $html .= '</tr>';
                 $html .= '</tfoot>';
                 endif;

@@ -17,7 +17,7 @@ var requisitionTransListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
-            paginationSize: 10,
+            paginationSize: true,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
@@ -182,6 +182,7 @@ var requisitionTransListTable = (function () {
     
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const approverConfirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#approverConfirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const markRequisitionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#markRequisitionModal"));
     let confModalDelTitle = 'Are you sure?';
@@ -190,6 +191,15 @@ var requisitionTransListTable = (function () {
     const successModalEl = document.getElementById('successModal')
     successModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#successModal .successCloser').attr('data-action', 'NONE');
+    });
+
+    const approverConfirmModalEl = document.getElementById('approverConfirmModal')
+    approverConfirmModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#approverConfirmModal .agreeWith').attr('data-approver', '0');
+        $('#approverConfirmModal .agreeWith').attr('data-status', '0');
+        $('#approverConfirmModal .agreeWith').attr('data-id', '0');
+        $('#approverConfirmModal .agreeWith').attr('data-action', 'none');
+        $('#approverConfirmModal [name="note"]').val('');
     });
 
     const markRequisitionModalEl = document.getElementById('markRequisitionModal')
@@ -316,34 +326,40 @@ var requisitionTransListTable = (function () {
         e.preventDefault();
         var $theLink = $(this);
         var status = $theLink.attr('data-active');
+        var approver = $theLink.attr('data-approver');
         var requisition_id = $theLink.attr('data-id');
 
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', requisition_id+'_'+status);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTATRIQ');
+        approverConfirmModal.show();
+        document.getElementById('approverConfirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#approverConfirmModal .approverConfModTitle').html(confModalDelTitle);
+            $('#approverConfirmModal .approverConfModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#approverConfirmModal .agreeWith').attr('data-id', requisition_id);
+            $('#approverConfirmModal .agreeWith').attr('data-status', status);
+            $('#approverConfirmModal .agreeWith').attr('data-approver', approver);
+            $('#approverConfirmModal .agreeWith').attr('data-action', 'CHANGESTATRIQ');
         });
     });
 
     // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function(){
+    $('#approverConfirmModal .agreeWith').on('click', function(){
         let $agreeBTN = $(this);
         let recordID = $agreeBTN.attr('data-id');
+        let status = $agreeBTN.attr('data-status');
+        let approver = $agreeBTN.attr('data-approver');
         let action = $agreeBTN.attr('data-action');
+        let note = $('#approverConfirmModal [name="note"]').val();
 
-        $('#confirmModal button').attr('disabled', 'disabled');
+        $('#approverConfirmModal button').attr('disabled', 'disabled');
         if(action == 'CHANGESTATRIQ'){
             axios({
                 method: 'post',
                 url: route('budget.management.update.req.status'),
-                data: {record_id : recordID},
+                data: {record_id : recordID, status : status, approver : approver, note : note},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
+                    $('#approverConfirmModal button').removeAttr('disabled');
+                    approverConfirmModal.hide();
 
                     succModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
