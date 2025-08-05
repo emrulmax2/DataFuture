@@ -1029,6 +1029,7 @@ import TomSelect from 'tom-select';
             $('#checkbox-switch-' + i).trigger('click');
         }
     });
+
     $('#checkbox-all-course').on('click', function (e) {
         for (let i = 15; i < 24; i++) {
             $('#checkbox-switch-' + i).trigger('click');
@@ -1067,6 +1068,13 @@ import TomSelect from 'tom-select';
 
     $('#checkbox-all-acc').on('click', function (e) {
         for (let i = 60; i < 66; i++) {
+            $('#checkbox-switch-' + i).trigger('click');
+        }
+    });
+
+    
+    $('#checkbox-all-additional').on('click', function (e) {
+        for (let i = 67; i < 73; i++) {
             $('#checkbox-switch-' + i).trigger('click');
         }
     });

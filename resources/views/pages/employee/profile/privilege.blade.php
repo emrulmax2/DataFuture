@@ -307,6 +307,12 @@
                                 <label class="form-check-label ml-4" for="permission_programme_dashboard_1">Reports</label>
                             </div>
                         </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12">
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['student_other_details_report_show']) && $priv['programme_dashboard']['student_other_details_report_show'] == 1 ? 'checked' : '') }} id="permission_programme_dashboard_2" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][student_other_details_report_show]">
+                                <label class="form-check-label ml-4" for="permission_programme_dashboard_2">Student Data Report Other Details Show</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-span-12 sm:col-span-3">
                         <div class="form-check form-switch">
