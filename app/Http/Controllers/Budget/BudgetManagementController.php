@@ -227,8 +227,7 @@ class BudgetManagementController extends Controller
                 
                 $subject = 'New Budget Requisition Needs Approval';
                 $MAILBODY = 'Dear '.$approverName.', <br/><br/>';
-                $MAILBODY .= '<p>A new requisition has been submitted by '.$requisitionerName.'. And we need you to look at it. The details about the 
-                            requisition are noted bellow: </p>';
+                $MAILBODY .= '<p>A new requisition has been submitted by '.$requisitionerName.', and your review is required. Please find the details below.</p>';
                 $MAILBODY .= '<table style="border-collapse: collapse; border-spacing: 0; width: 100%; margin: 0 0 15px">';
                     $MAILBODY .= '<tr>';
                         $MAILBODY .= '<td>Budget Year</td>';
@@ -422,8 +421,7 @@ class BudgetManagementController extends Controller
 
                 $subject = 'New Budget Requisition Needs Approval';
                 $MAILBODY = 'Dear '.$approverName.', <br/><br/>';
-                $MAILBODY .= '<p>A new requisition has been submitted by '.(isset($requisition->requisitioners->employee->full_name) && !empty($requisition->requisitioners->employee->full_name) ? $requisition->requisitioners->employee->full_name : $requisition->requisitioners->name).'. And we need you to look at it. The details about the 
-                            requisition are noted bellow: </p>';
+                $MAILBODY .= '<p>A new requisition has been submitted by '.(isset($requisition->requisitioners->employee->full_name) && !empty($requisition->requisitioners->employee->full_name) ? $requisition->requisitioners->employee->full_name : $requisition->requisitioners->name).', and your review is required. Please find the details below.</p>';
                 $MAILBODY .= '<table style="border-collapse: collapse; border-spacing: 0; width: 100%; margin: 0 0 15px">';
                     $MAILBODY .= '<tr>';
                         $MAILBODY .= '<td>Budget Year</td>';
@@ -468,30 +466,30 @@ class BudgetManagementController extends Controller
                     $MAILBODY .= '</table>';
                 endif;
 
-                $MAILBODY .= '<p>Please <a href="'.route('budget.management.show.req', $requisition->id).'">click here</a> and take a action.</p>';
-                $MAILBODY .= '<p>If the "Click here" button isn\'t working, please copy the following link and paste it into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
+                $MAILBODY .= '<p>Please <a href="'.route('budget.management.show.req', $requisition->id).'">click here</a> to take action.</p>';
+                $MAILBODY .= '<p>If the "click here" button does not work, copy and paste the following link into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
 
                 $MAILBODY .= '<br/>Regards<br/>';
                 $MAILBODY .= 'London Churchill College';
 
                 
                 //$tmpTo[] = 'limon@churchill.ac';
-                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
             if($active == 3):
                 $subject = 'Requisition Approved - Action Needed';
                 $to = ['accounts@lcc.ac.uk'];
 
                 $MAILBODY = 'Hi, <br/><br/>';
-                $MAILBODY .= '<p>Your requisition has been approved. Please complete the following actions to proceed:</p>';
+                $MAILBODY .= '<p>Your requisition has been approved. Please complete the actions below to proceed.</p>';
                 $MAILBODY .= '<p>Please <a href="'.route('budget.management.show.req', $requisition->id).'">click here</a> to view.</p>';
-                $MAILBODY .= '<p>If the "Click here" button isn\'t working, please copy the following link and paste it into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
+                $MAILBODY .= '<p>If the "click here" button does not work, copy and paste the following link into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
                 $MAILBODY .= '<p>Let me know if you have any questions. Kindly complete these steps by '.(isset($requisition->required_by) && !empty($requisition->required_by) ? date('Y-m-d', strtotime($requisition->required_by)) : null).'.</p>';
 
                 $MAILBODY .= 'Best regards,<br/>';  
                 $MAILBODY .= 'London Churchill College<br/>';
 
-                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
 
             return response()->json(['msg' => 'Status successfully updated.'], 200);
