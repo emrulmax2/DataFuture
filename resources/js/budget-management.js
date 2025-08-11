@@ -33,7 +33,11 @@ var requisitionListTable = (function () {
                     field: "year",
                     headerHozAlign: "left",
                     headerSort: false,
-                    width: '90'
+                    width: '90',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: "Vendor",
@@ -42,6 +46,10 @@ var requisitionListTable = (function () {
                     headerSort: false,
                     formatter(cell, formatterParams){
                         return '<div class="whitespace-normal">'+cell.getData().vendor+'</div>';
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -49,14 +57,22 @@ var requisitionListTable = (function () {
                     field: "date",
                     headerHozAlign: "left",
                     headerSort: false,
-                    width: '115'
+                    width: '115',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: "By",
                     field: "required_by",
                     headerSort: false,
                     headerHozAlign: "left",
-                    width: '115'
+                    width: '115',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
                 },
                 {
                     title: "Requisitioner",
@@ -65,6 +81,10 @@ var requisitionListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return '<div class="whitespace-normal">'+cell.getData().requisitioners+'</div>';
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -74,6 +94,10 @@ var requisitionListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return '<div class="whitespace-normal">'+cell.getData().budget+'</div>';
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -83,6 +107,10 @@ var requisitionListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return '<div class="whitespace-normal">'+cell.getData().venue+'</div>';
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -94,14 +122,18 @@ var requisitionListTable = (function () {
                         if(cell.getData().active == 4){
                             return '<span class="btn btn-sm btn-success text-white px-2 py-1">Paid</span>';
                         }else if(cell.getData().active == 3){
-                            return '<span class="btn btn-sm btn-warning text-white px-2 py-1">Second Approval Done</span>';
+                            return '<span class="btn btn-sm btn-warning text-white px-2 py-1">Awaiting Payment</span>';
                         }else if(cell.getData().active == 2){
-                            return '<span class="btn btn-sm btn-pending text-white px-2 py-1">First Approval Done</span>';
+                            return '<span class="btn btn-sm btn-pending text-white px-2 py-1">Stage one approved.</span>';
                         }else if(cell.getData().active == 1){
                             return '<span class="btn btn-sm btn-primary text-white px-2 py-1">New</span>';
                         }else if(cell.getData().active == 0){
                             return '<span class="btn btn-sm btn-danger text-white px-2 py-1">Cancelled</span>';
                         }
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -112,6 +144,10 @@ var requisitionListTable = (function () {
                     width: '115',
                     formatter(cell, formatterParams){
                         return '<div class="font-medium">'+cell.getData().total+'</div>';
+                    },
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
                     }
                 },
                 {
@@ -125,7 +161,7 @@ var requisitionListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<a href="'+route('budget.management.show.req', cell.getData().id)+'" class="btn-rounded btn btn-twitter text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
+                            //btns += '<a href="'+route('budget.management.show.req', cell.getData().id)+'" class="btn-rounded btn btn-twitter text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editRequisitionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
                             btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
