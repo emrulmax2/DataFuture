@@ -125,7 +125,8 @@ class BudgetManagementController extends Controller
                     'vendor' => (isset($list->vendor->name) && !empty($list->vendor->name) ? $list->vendor->name : ''),
                     'venue' => (isset($list->venue->name) && !empty($list->venue->name) ? $list->venue->name : ''),
                     'active' => $list->active,
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'url' => route('budget.management.show.req', $list->id)
                 ];
                 $i++;
             endforeach;
@@ -457,9 +458,9 @@ class BudgetManagementController extends Controller
                             foreach($requisition->items as $item):
                                 $MAILBODY .= '<tr>';
                                     $MAILBODY .= '<td>'.$item->description.'</td>';
-                                    $MAILBODY .= '<td>'.(isset($item->price) && !empty($item->price) ? $item->price : '').'</td>';
+                                    $MAILBODY .= '<td>'.(isset($item->price) && !empty($item->price) ? Number::currency($item->price, 'GBP') : '').'</td>';
                                     $MAILBODY .= '<td>'.(isset($item->quantity) && !empty($item->quantity) ? $item->quantity : '').'</td>';
-                                    $MAILBODY .= '<td>'.(isset($item->total) && !empty($item->total) ? $item->total : '').'</td>';
+                                    $MAILBODY .= '<td>'.(isset($item->total) && !empty($item->total) ? Number::currency($item->total, 'GBP') : '').'</td>';
                                 $MAILBODY .= '</tr>';
                             endforeach;
                         $MAILBODY .= '</tbody>';

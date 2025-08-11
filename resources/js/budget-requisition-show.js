@@ -329,10 +329,19 @@ var requisitionTransListTable = (function () {
         var approver = $theLink.attr('data-approver');
         var requisition_id = $theLink.attr('data-id');
 
+        var message = 'Do you really want to change status of this record? If yes then please click on the agree btn.';
+        if(status == 2 || status == 3){
+            message = '';
+            confModalDelTitle = 'Click Yes to confirm authorisation';
+        }else if(status == 0){
+            confModalDelTitle = 'Do you wish to reject this requisition';
+            message = '';
+        }
+
         approverConfirmModal.show();
         document.getElementById('approverConfirmModal').addEventListener('shown.tw.modal', function(event){
             $('#approverConfirmModal .approverConfModTitle').html(confModalDelTitle);
-            $('#approverConfirmModal .approverConfModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
+            $('#approverConfirmModal .approverConfModDesc').html(message);
             $('#approverConfirmModal .agreeWith').attr('data-id', requisition_id);
             $('#approverConfirmModal .agreeWith').attr('data-status', status);
             $('#approverConfirmModal .agreeWith').attr('data-approver', approver);
