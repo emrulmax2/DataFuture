@@ -28,7 +28,7 @@
                         </li>
                         <li>
                             <a href="javascript:void(0);" data-approver="1" data-active="0" data-id="{{ $requisition->id }}" class="statusUpdater dropdown-item text-danger">
-                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Cancelled
+                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Cancel
                             </a>
                         </li>
                         @elseif($requisition->active == 2 && $requisition->final_approver == auth()->user()->id)
@@ -39,7 +39,7 @@
                         </li>
                         <li>
                             <a href="javascript:void(0);" data-approver="2" data-active="0" data-id="{{ $requisition->id }}" class="statusUpdater dropdown-item text-danger">
-                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Cancelled
+                                <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> Cancel
                             </a>
                         </li>
                         @elseif($requisition->active == 0)
@@ -184,7 +184,7 @@
                                         @elseif($history->status == 1)
                                             <span class="btn btn-sm btn-primary text-white px-2 py-1">New</span>
                                         @elseif($history->status == 0)
-                                            <span class="btn btn-sm btn-danger text-white px-2 py-1">Cancelled</span>
+                                            <span class="btn btn-sm btn-danger text-white px-2 py-1">Cancel</span>
                                         @endif
                                     </td>
                                     <td class="w-44">
