@@ -13,14 +13,11 @@ class BudgetRequisition extends Model
     protected static function boot(){
         parent::boot();
 
-        static::creating(function ($model) {
-            $model->reference_no = self::generateUniqueReferenceNumber();
-        });
-
-        static::updating(function ($model) {
-            if(empty($model->reference_no)) {
-                $model->reference_no = static::generateUniqueReferenceNumber();
-            }
+        static::created(function ($model) {
+            $budgetSetDetails = BudgetSetDetail::with('names')->find($model->budget_set_detail_id);
+            $code = (isset($budgetSetDetails->names->code) && !empty($budgetSetDetails->names->code) ? $budgetSetDetails->names->code : '');
+            $model->reference_no = $code.self::generateUniqueReferenceNumber();
+            $model->save();
         });
     }
 

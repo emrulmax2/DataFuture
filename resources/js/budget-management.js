@@ -29,6 +29,17 @@ var requisitionListTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
+                    title: "Ref:",
+                    field: "reference_no",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    width: '90',
+                    cellClick:function(e, cell){
+                        let theRow = cell.getRow();
+                        window.open(theRow.getData().url, '_blank');
+                    }
+                },
+                {
                     title: "Year",
                     field: "year",
                     headerHozAlign: "left",
@@ -162,9 +173,13 @@ var requisitionListTable = (function () {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
                             //btns += '<a href="'+route('budget.management.show.req', cell.getData().id)+'" class="btn-rounded btn btn-twitter text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editRequisitionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
+                            if(cell.getData().can_edit == 1){
+                                btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editRequisitionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                            }
+                            if(cell.getData().can_delete == 1){
+                                btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            }
+                        }  else if (cell.getData().deleted_at != null && cell.getData().can_delete == 1) {
                             btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
