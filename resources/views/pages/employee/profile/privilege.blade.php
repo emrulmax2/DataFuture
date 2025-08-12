@@ -321,6 +321,14 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['budget_edit']) && $priv['programme_dashboard']['budget_edit'] == 1 ? 'checked' : '') }} id="permission_dashboard_12" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][budget_edit]">
+                                <label class="form-check-label ml-4" for="permission_dashboard_12">Edit Budget</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
+                                <input {{ (isset($priv['programme_dashboard']['budget_delete']) && $priv['programme_dashboard']['budget_delete'] == 1 ? 'checked' : '') }} id="permission_dashboard_13" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][budget_delete]">
+                                <label class="form-check-label ml-4" for="permission_dashboard_13">Delete Settings</label>
+                            </div>
+                            <div class="form-check form-switch mb-4">
                                 <input {{ (isset($priv['programme_dashboard']['budget_settings']) && $priv['programme_dashboard']['budget_settings'] == 1 ? 'checked' : '') }} id="permission_dashboard_10" class="form-check-input" type="checkbox" value="1" name="permission[programme_dashboard][budget_settings]">
                                 <label class="form-check-label ml-4" for="permission_dashboard_10">Budget Settings</label>
                             </div>

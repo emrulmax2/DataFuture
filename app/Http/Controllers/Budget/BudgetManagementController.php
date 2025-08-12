@@ -113,9 +113,17 @@ class BudgetManagementController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $canEdit = 0;
+                if($list->active > 1 && ($list->first_approver == auth()->user()->id || $list->final_approver == auth()->user()->id) && (isset(auth()->user()->priv()['budget_edit']) && auth()->user()->priv()['budget_edit'] == 1 )):
+                    $canEdit = 1;
+                elseif($list->active < 2 && (isset(auth()->user()->priv()['budget_edit']) && auth()->user()->priv()['budget_edit'] == 1 )):
+                    $canEdit = 1;
+                endif;
+
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'reference_no' => $list->reference_no,
                     'date' => (!empty($list->date) ? date('jS M, Y', strtotime($list->date)) : ''),
                     'required_by' => (!empty($list->required_by) ? date('jS M, Y', strtotime($list->required_by)) : ''),
                     'year' => (isset($list->year->title) && !empty($list->year->title) ? $list->year->title : ''),
@@ -126,7 +134,9 @@ class BudgetManagementController extends Controller
                     'venue' => (isset($list->venue->name) && !empty($list->venue->name) ? $list->venue->name : ''),
                     'active' => $list->active,
                     'deleted_at' => $list->deleted_at,
-                    'url' => route('budget.management.show.req', $list->id)
+                    'url' => route('budget.management.show.req', $list->id),
+                    'can_edit' => $canEdit,
+                    'can_delete' => (isset(auth()->user()->priv()['budget_delete']) && auth()->user()->priv()['budget_delete'] == 1 ? 1 : 0),
                 ];
                 $i++;
             endforeach;
@@ -272,7 +282,7 @@ class BudgetManagementController extends Controller
                 $MAILBODY .= 'London Churchill College';
 
                 //$tmpTo[] = 'limon@churchill.ac';
-                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
             return response()->json(['msg' => 'Budget requisition successfully inserted.'], 200);
         else:
