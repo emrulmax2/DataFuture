@@ -265,24 +265,7 @@ class StudentDataReportController extends Controller
         $slcAccountData  = $request->slcAccount;
         $StudentPlanData  = $request->StudentPlan;
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assignSingle','assignSingle.plan','assignSingle.plan.venu','assignSingle.plan.group')->whereIn('id',$studentIds)->get();
-
-        // need only latest assign Id for each student
-        // $latestAssigns = Assign::with('plan', 'plan.venu')->whereIn('student_id', $studentIds)
-        //             ->orderBy('id', 'desc')
-        //             ->get()
-        //             ->groupBy('student_id')
-        //             ->map(function($assigns) {
-        //                 return $assigns->first(); // latest assign by ID
-        //             });
-
-        // // Get only the Plan list from latest assigns
-        // $planList = $latestAssigns->map(function($assign) {
-        //     return $assign->plan; // or $assign->plan_id if you only want IDs
-        // })->filter(); // filter out nulls if any
-
-        // // If you want a collection of Plan models:
-        // $planModels = $planList->unique('id')->values();
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -571,7 +554,7 @@ class StudentDataReportController extends Controller
                             }
 
                     endforeach; 
-                    
+
                     if(!empty($StudentAwardingBodyDetailsData))
                     foreach($StudentAwardingBodyDetailsData as $key =>$value):
                         if(strpos( $key, '_id') !== false) {
