@@ -535,23 +535,23 @@ class StudentDataReportController extends Controller
                     if(!empty($StudentPlanData))
                     foreach($StudentPlanData as $key =>$value):
                         $key = strtolower($key);
-                            switch ($key) {
-                                case "group_id":
+                            // switch ($key) {
+                            //     case "group_id":
 
-                                    $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
+                            //         $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
 
                                     
-                                  break;
+                            //       break;
 
-                                case "venue_id":
+                            //     case "venue_id":
 
-                                    $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
+                            //         $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
 
-                                  break;
+                            //       break;
                                 
-                                default:
-                                    break;
-                            }
+                            //     default:
+                            //         break;
+                            // }
 
                     endforeach; 
 
