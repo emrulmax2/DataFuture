@@ -239,6 +239,42 @@
             </div>
         </div>
         @endif
+
+        <div class="intro-y box p-5 mt-5">
+            <div class="grid grid-cols-12 items-center">
+                <div class="col-span-12 sm:col-span-12 items-center accordion accordion-boxed">
+                    <div class="accordion-item bg-white mb-3 border-0 rounded">
+                        <div id="datareportAccordion-1" class="accordion-header">
+                            <button class="accordion-button  relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#datareportAccordion-collapse-1" aria-expanded="true" aria-controls="datareportAccordion-collapse-1">
+                                <span class="font-normal">Plan Data
+                                <span class="accordionCollaps"></span>
+                            </button>
+                        </div>
+                        <div id="datareportAccordion-collapse-1" class="accordion-collapse " aria-labelledby="datareportAccordion-1" data-tw-parent="#datareportAccordion">
+                            <div class="accordion-body px-5 border-t pt-5">
+                                <div class="grid grid-cols-12 gap-6">
+                                    <div class="col-span-12 intro-y border-b mb-2">
+                                        <div data-tw-merge class="flex items-center mt-2 "><input id="checkbox-all-plandata" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" />
+                                            <label data-tw-merge for="checkbox-all-plandata" class="cursor-pointer ml-2 ">Select All</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-12 gap-6">
+                                    <div class="col-span-12 sm:col-span-4 intro-y">
+                                        <div data-tw-merge class="flex items-center mt-2"><input name="StudentPlan[group_Id]" id="checkbox-switch-72" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  />
+                                            <label data-tw-merge for="checkbox-switch-72" class="cursor-pointer ml-2">Group</label>
+                                        </div>
+                                        <div data-tw-merge class="flex items-center mt-2"><input name="StudentPlan[venue_Id]" id="checkbox-switch-73" value="1"  data-tw-merge type="checkbox" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"  />
+                                            <label data-tw-merge for="checkbox-switch-73" class="cursor-pointer ml-2"> Venue</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 items-center">
                 <div class="col-span-12 sm:col-span-12 items-center accordion accordion-boxed">

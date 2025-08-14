@@ -372,5 +372,8 @@ class Student extends Model
     public function visits(){
         return $this->hasMany(StudentVisit::class, 'student_id', 'id');
     }
-    
+    public function assignSingle(){
+        return $this->hasOne(Assign::class, 'student_id', 'id')->latestOfMany();
+    }
+
 }

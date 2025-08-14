@@ -263,12 +263,26 @@ class StudentDataReportController extends Controller
         $StudentQualificationData  = $request->StudentQualification;
         $AgentReferralCodeData  = $request->AgentReferralCode;
         $slcAccountData  = $request->slcAccount;
-        
-       
+        $StudentPlanData  = $request->StudentPlan;
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assignSingle','assignSingle.plan','assignSingle.plan.venu','assignSingle.plan.group')->whereIn('id',$studentIds)->get();
 
-        
+        // need only latest assign Id for each student
+        // $latestAssigns = Assign::with('plan', 'plan.venu')->whereIn('student_id', $studentIds)
+        //             ->orderBy('id', 'desc')
+        //             ->get()
+        //             ->groupBy('student_id')
+        //             ->map(function($assigns) {
+        //                 return $assigns->first(); // latest assign by ID
+        //             });
+
+        // // Get only the Plan list from latest assigns
+        // $planList = $latestAssigns->map(function($assign) {
+        //     return $assign->plan; // or $assign->plan_id if you only want IDs
+        // })->filter(); // filter out nulls if any
+
+        // // If you want a collection of Plan models:
+        // $planModels = $planList->unique('id')->values();
 
         $theCollection = [];
         $i=1;
@@ -301,6 +315,8 @@ class StudentDataReportController extends Controller
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
 
+        
+
         if(!empty($StudentCourseRelationData))
         foreach($StudentCourseRelationData as $key =>$value):
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
@@ -321,6 +337,14 @@ class StudentDataReportController extends Controller
             
         endforeach; 
 
+        
+        if(!empty($StudentPlanData))
+        foreach($StudentPlanData as $key =>$value):
+
+            $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+            
+        endforeach; 
+
         if(!empty($StudentAwardingBodyDetailsData))
         foreach($StudentAwardingBodyDetailsData as $key =>$value):
             
@@ -332,6 +356,7 @@ class StudentDataReportController extends Controller
             
             $theCollection[$i][$j++] = ucwords(str_replace('_',' ', $key));
         endforeach; 
+
         
         if(!empty($StudentContactData))
         foreach($StudentContactData as $key =>$value):
@@ -523,7 +548,30 @@ class StudentDataReportController extends Controller
                             $theCollection[$row][$j++] = (isset($student->termStatusLatest)) ? $student->termStatusLatest->$key : "";
                         }
                     endforeach; 
-            
+
+                    if(!empty($StudentPlanData))
+                    foreach($StudentPlanData as $key =>$value):
+                        $key = strtolower($key);
+                            switch ($key) {
+                                case "group_id":
+
+                                    $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
+
+                                    
+                                  break;
+
+                                case "venue_id":
+
+                                    $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
+
+                                  break;
+                                
+                                default:
+                                    continue;
+                            }
+
+                    endforeach; 
+                    
                     if(!empty($StudentAwardingBodyDetailsData))
                     foreach($StudentAwardingBodyDetailsData as $key =>$value):
                         if(strpos( $key, '_id') !== false) {
@@ -677,6 +725,7 @@ class StudentDataReportController extends Controller
                         }
                         
                     endforeach;
+
                 $row++;
             endforeach;
         endif;
