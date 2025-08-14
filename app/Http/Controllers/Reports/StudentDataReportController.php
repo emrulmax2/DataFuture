@@ -550,7 +550,7 @@ class StudentDataReportController extends Controller
                                   break;
                                 
                                 default:
-                                    continue;
+                                    break;
                             }
 
                     endforeach; 
