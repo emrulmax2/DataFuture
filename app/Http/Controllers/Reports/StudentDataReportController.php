@@ -542,7 +542,7 @@ class StudentDataReportController extends Controller
                                     
                             elseif($key == "venue_id"):
 
-                                $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venue)) ? $student->assignSingle->plan->venue->name : "";
+                                $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
                             endif;
                     endforeach; 
 
