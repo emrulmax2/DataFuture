@@ -265,7 +265,7 @@ class StudentDataReportController extends Controller
         $slcAccountData  = $request->slcAccount;
         $StudentPlanData  = $request->StudentPlan;
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -535,24 +535,15 @@ class StudentDataReportController extends Controller
                     if(!empty($StudentPlanData))
                     foreach($StudentPlanData as $key =>$value):
                         $key = strtolower($key);
-                            // switch ($key) {
-                            //     case "group_id":
-
-                            //         $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
+                            if($key == "group_id"):
+                                
+                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
 
                                     
-                            //       break;
+                            elseif($key == "venue_id"):
 
-                            //     case "venue_id":
-
-                            //         $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venu)) ? $student->assignSingle->plan->venu->name : "";
-
-                            //       break;
-                                
-                            //     default:
-                            //         break;
-                            // }
-
+                                $theCollection[$row][$j++] = (isset($student->assignSingle->plan->venue)) ? $student->assignSingle->plan->venue->name : "";
+                            endif;
                     endforeach; 
 
                     if(!empty($StudentAwardingBodyDetailsData))
