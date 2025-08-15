@@ -30,11 +30,13 @@ use Illuminate\Support\Number;
 class BudgetManagementController extends Controller
 {
     public function index(){
+        //--- Career work ---//
         $holders = BudgetNameHolder::pluck('user_id')->unique()->toArray();
         $requester = BudgetNameRequester::pluck('user_id')->unique()->toArray();
         $approver = BudgetNameApprover::pluck('user_id')->unique()->toArray();
         $allApprover = array_merge($requester, $holders, $approver);
         $allApprover = (!empty($allApprover) ? array_unique($allApprover) : [0]);
+
         return view('pages.budget.index', [
             'title' => 'Budget Management - London Churchill College',
             'breadcrumbs' => [
