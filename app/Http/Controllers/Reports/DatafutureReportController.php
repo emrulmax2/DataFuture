@@ -57,7 +57,7 @@ class DatafutureReportController extends Controller
             $dateRanges[1]['end'] = date('Y-m-d', strtotime($to_date));
         endif;
 
-        $student_ids = [$student_id];
+        $student_ids = [];
         $course_ids = [];
         if(!empty($dateRanges)):
             $whereRaw = "";
@@ -71,9 +71,10 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->orderBy('student_id', 'ASC')->get();
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
 
             if($stuloads->count() > 0):
+                $student_ids = $stuloads->pluck('student_id')->unique()->toArray();
                 $student_course_relation_ids = $stuloads->pluck('student_course_relation_id')->unique()->toArray();
                 $course_ids = DB::table('student_course_relations as scr')
                             ->select('cc.course_id')
@@ -140,7 +141,7 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->orderBy('student_id', 'ASC')->get();
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
             //dd(DB::getQueryLog());
 
             if($stuloads->count() > 0):
@@ -657,7 +658,7 @@ class DatafutureReportController extends Controller
                         ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                     ) ";
                 endforeach;
-                $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->orderBy('student_id', 'ASC')->get();
+                $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
 
                 if($stuloads->count() > 0):
                     foreach($stuloads as $stu):
@@ -689,7 +690,7 @@ class DatafutureReportController extends Controller
         //             ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
         //         ) ";
         //     endforeach;
-        //     $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->orderBy('student_id', 'ASC')->get();
+        //     $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
 
         //     if($stuloads->count() > 0):
         //         $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
@@ -730,7 +731,7 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->orderBy('student_id', 'ASC')->get();
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
 
             if($stuloads->count() > 0):
                 $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
@@ -754,7 +755,7 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)
+            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
                         ->orderBy('student_course_relation_id', 'ASC')->get()->pluck('student_course_relation_id')->unique()->toArray();
         endif;
 
@@ -774,14 +775,14 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_course_relation_id', $student_course_relation_id)->where('student_id', $student_id)->orderBy('id', 'ASC')->get();
+            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_course_relation_id', $student_course_relation_id)->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get();
         endif;
 
         return false;
     }
 
     public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $dateRanges = []){
-        $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->orderBy('student_id', 'ASC')->get()->first();
+        $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get()->first();
         $plan_ids = [];
 
         $instance_id = $stuload->course_creation_instance_id;
@@ -834,7 +835,7 @@ class DatafutureReportController extends Controller
 
     public function getStuloadSessionStatuses($student_id, $student_course_relation_id){
         $res = [];
-        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
+        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get();
         if($stuloads->count() > 0):
             $suspendedContinued = false;
             foreach($stuloads as $stu):

@@ -771,4 +771,16 @@ class DatafutureController extends Controller
 
         return response()->json(['message' => 'Data successfully deleted'], 200);
     }
+
+    public function updateVisibility(Student $student, Request $request){
+        $stuload_id = $request->stuload_id;
+        $report_visibility = $request->report_visibility;
+
+        $studentStuload = StudentStuloadInformation::find($stuload_id);
+        $visibility = (isset($studentStuload->report_visibility) && $studentStuload->report_visibility > 0 ? 0 : 1);
+
+        StudentStuloadInformation::where('student_id', $student->id)->where('id', $stuload_id)->update(['report_visibility' => $visibility]);
+
+        return response()->json(['message' => 'Status successfully updated'], 200);
+    }
 }

@@ -157,6 +157,22 @@
             </div>
         </div>
         @endif
+        @if($requisition->first_approver > 0 || $requisition->final_approver)
+        <div class="pt-20 grid grid-cols-12 gap-4 gap-y-2">
+            @if($requisition->first_approver > 0)
+            <div class="col-span-12"><h4 class="font-medium">First Approver:</h4></div>
+            <div class="col-span-12">
+                {{ isset($requisition->fapprover->employee->full_name) && !empty($requisition->fapprover->employee->full_name) ? $requisition->fapprover->employee->full_name : $requisition->fapprover->name }}
+            </div>
+            @endif
+            @if($requisition->final_approver > 0)
+            <div class="col-span-12"><h4 class="font-medium">Final Approver:</h4></div>
+            <div class="col-span-12">
+                {{ isset($requisition->lapprover->employee->full_name) && !empty($requisition->lapprover->employee->full_name) ? $requisition->lapprover->employee->full_name : $requisition->fapprover->name }}
+            </div>
+            @endif
+        </div>
+        @endif
         <div class="pt-20 grid grid-cols-12 gap-4 gap-y-2">
             <div class="col-span-12"><h4 class="font-medium">History:</h4></div>
             <div class="col-span-12">

@@ -577,6 +577,31 @@ import { saveAs } from 'file-saver';
                 console.log('error');
             }
         });
-    })
+    });
+
+    $('.report_visibility').on('change', function(e){
+        let $reportVisibility = $(this);
+        let report_visibility = $reportVisibility.val();
+        let stuload_id = $reportVisibility.attr('data-id');
+        let student_id = $reportVisibility.attr('data-student-id');
+
+        axios({
+            method: "post",
+            url: route('student.datafuture.update.visibility', student_id),
+            data: {student_id : student_id, stuload_id : stuload_id, report_visibility : report_visibility},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                window.location.reload();
+            }
+        }).catch(error => {
+            $theBtn.removeAttr('disabled');
+            $theBtn.find(".theLoader").fadeOut();
+
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    });
 
 })()

@@ -282,7 +282,7 @@ class BudgetManagementController extends Controller
                 $MAILBODY .= 'London Churchill College';
 
                 //$tmpTo[] = 'limon@churchill.ac';
-                //UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
+                UserMailerJob::dispatch($configuration, $to, new CommunicationSendMail($subject, $MAILBODY, []));
             endif;
             return response()->json(['msg' => 'Budget requisition successfully inserted.'], 200);
         else:

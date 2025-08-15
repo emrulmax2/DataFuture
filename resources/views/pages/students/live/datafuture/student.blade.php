@@ -488,6 +488,11 @@
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
+                                    <div class="absolute right-[50px] top-0 bottom-0 mt-auto mb-auto">
+                                        <div class="form-check form-switch m-0">
+                                            <input {{ isset($stu->report_visibility) && $stu->report_visibility == 1 ? 'Checked' : '' }} id="report_visibility_{{$stu->id}}" class="form-check-input report_visibility" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" type="checkbox" value="{{ $stu->report_visibility }}" name="report_visibility">
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="df-accr-Student-Course-Session-collapse-{{ $i }}" class="lcc-accordion-collapse lcc-show" style="display: block;">
                                     <div class="lcc-accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">

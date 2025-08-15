@@ -207,8 +207,9 @@
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
+                            <input type="hidden" name="is_assigned" value="{{ isset($student->is_assigned) && $student->is_assigned ? 1 : 0}}"/>
                             <label for="term_declaration_id" class="form-label">
-                                Term <span class="text-danger">*</span>
+                                Term <span class="text-danger">{{ isset($student->is_assigned) && $student->is_assigned ? '*' : '' }}</span>
                                 <i data-loading-icon="three-dots" class="w-6 h-3 ml-3 inline-flex dotLoader"></i>
                             </label>
                             <select id="term_declaration_id" name="term_declaration_id" class="form-control w-full">
