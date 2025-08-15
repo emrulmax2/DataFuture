@@ -255,6 +255,11 @@ class Student extends Model
         endif;
     }
 
+    public function getIsAssignedAttribute(){
+        $assigned = Assign::where('student_id', $this->id)->count();
+        return $assigned > 0 ? true : false;
+    }
+
 
     public function termStatus(){
         return $this->hasOne(StudentAttendanceTermStatus::class, 'student_id')->orderBy('term_declaration_id', 'DESC')->orderBy('id', 'DESC');

@@ -3777,6 +3777,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('student/datafuture/{student}/destroy-stuload-information', 'destroyStuloadInformation')->name('student.datafuture.destory.student.stuload');
 
         Route::post('student/datafuture/{student}/reset-course-sessions', 'resetCourseSessions')->name('student.datafuture.reset.course.sessions');
+        Route::post('student/datafuture/{student}/update-visibility', 'updateVisibility')->name('student.datafuture.update.visibility');
     });
 
     Route::controller(QualificationGradeController::class)->group(function() {
