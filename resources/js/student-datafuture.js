@@ -592,12 +592,9 @@ import { saveAs } from 'file-saver';
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                window.location.reload();
+                //window.location.reload();
             }
         }).catch(error => {
-            $theBtn.removeAttr('disabled');
-            $theBtn.find(".theLoader").fadeOut();
-
             if (error.response) {
                 console.log('error');
             }

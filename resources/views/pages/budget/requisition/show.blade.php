@@ -99,8 +99,8 @@
                 <table class="table table-sm table-bordered" id="requisitionItemListTable">
                     <thead>
                         <tr>
-                            <th class="whitespace-nowrap w-24">QTY</th>
                             <th class="whitespace-nowrap">DESCRIPTION</th>
+                            <th class="whitespace-nowrap w-24">QTY</th>
                             <th class="whitespace-nowrap w-24 text-right">UNIT PRICE</th>
                             <th class="whitespace-nowrap w-24 text-right">LINE TOTAL</th>
                         </tr>
@@ -109,7 +109,6 @@
                         @if(isset($requisition->items) && $requisition->items->count() > 0)
                             @foreach($requisition->items as $item)
                                 <tr class="cursor-pointer">
-                                    <td class="w-24">{{ $item->quantity }}</td>
                                     <td>
                                         <div class="flex items-center justify-start">
                                             <span class="inline-flex mr-3">
@@ -119,6 +118,7 @@
                                             {!! $item->description !!}
                                         </div>
                                     </td>
+                                    <td class="w-24">{{ $item->quantity }}</td>
                                     <td class="text-right w-24">{{ Number::currency($item->price, 'GBP') }}</td>
                                     <td class="text-right w-24">
                                         {{ Number::currency($item->total, 'GBP') }}
@@ -610,7 +610,7 @@
                     </div>
                     <div class="px-5 pb-8 text-center">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-danger w-auto mr-1">No, Cancel</button>
-                        <button data-phase="" type="button" data-approver="0" data-status="0" data-id="0" data-action="none" class="agreeWith btn btn-success w-auto">Yes</button>
+                        <button data-phase="" type="button" data-approver="0" data-status="0" data-id="0" data-action="none" class="agreeWith btn btn-success text-white w-auto">Yes</button>
                     </div>
                 </div>
             </div>
