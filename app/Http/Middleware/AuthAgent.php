@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthAgent
 {
@@ -16,7 +17,7 @@ class AuthAgent
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!is_null(\Auth::guard('agent')->user())) {
+        if (!is_null(Auth::guard('agent')->user())) {
             return $next($request);
         } else {
             return redirect()->route('agent.login');

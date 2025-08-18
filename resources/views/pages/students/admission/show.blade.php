@@ -11,8 +11,14 @@
         
         <div class="ml-auto flex justify-end">
             <button data-tw-toggle="modal" data-tw-target="#progressBarModal" type="button" class="add_btn btn btn-danger shadow-md mr-2 hidden">Progress Bar</button>
-            <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto">Download Pdf</a>
+            <a style="float: right;" href="{{ route('applicantprofile.print',$applicant->id) }}" data-id="{{ $applicant->id }}" class="btn btn-success text-white w-auto mr-1">Download Pdf</a>
             <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+
+            @if(isset(auth()->user()->priv()['login_as_applicant']) && auth()->user()->priv()['login_as_applicant'] == 1)
+                <a target="__blank" href="{{ route('impersonate', ['id' =>$applicant->applicant_user_id,'guardName' =>'applicant']) }}" class="btn btn-warning min-w-max">
+                    Login As Applicant <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
+                </a>
+            @endif
         </div>
         
     </div>
