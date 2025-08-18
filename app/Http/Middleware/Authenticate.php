@@ -21,7 +21,11 @@ class Authenticate
             
             return redirect()->route('students.login');
 
-        }  else {
+        }else if (!is_null(Auth::guard('applicant')->user())) {
+
+            return redirect()->route('applicant.login');
+
+        }else {
             return redirect('login');
         }
     }

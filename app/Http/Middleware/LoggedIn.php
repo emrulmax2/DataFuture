@@ -21,6 +21,10 @@ class LoggedIn
             
             return redirect()->route('students.login');
 
+        }else if (!is_null(Auth::guard('applicant')->user())) {
+            
+            return redirect()->route('applicant.login');
+
         }else if (!is_null(Auth::guard('agent')->user())) {
             
             return redirect()->route('agent.login');
