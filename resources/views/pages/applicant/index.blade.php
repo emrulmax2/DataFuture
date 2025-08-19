@@ -8,11 +8,11 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Welcome! </h2>
         @if ($user->email_verified_at != NULL)
-         @if(!isset($applicant))
+         {{-- @if(!isset($applicant)) --}}
             <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                 <a href="{{ route('applicant.application') }}" class="btn btn-primary shadow-md mr-2">Apply For a Course</a>
             </div>
-         @endif
+         {{-- @endif --}}
         @endif
     </div>
     <div class="intro-y box p-5 mt-5">
