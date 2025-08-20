@@ -167,6 +167,8 @@ import TomSelect from "tom-select";
 
     /* Potential Student Search Start*/
     $('#potentialStudentSearch').on('keyup', function(){
+        let $assignToCourseId = $('#assignToCourseId');
+        let assignToCourseId = $assignToCourseId.val();
         var $theInput = $(this);
         var theValue = $theInput.val();
         var existingStudents = [];
@@ -182,7 +184,7 @@ import TomSelect from "tom-select";
             axios({
                 method: "post",
                 url: route('assign.get.potential.student.list.by.search'),
-                data: {theValue : theValue, existingStudents : existingStudents},
+                data: {theValue : theValue, existingStudents : existingStudents, assignToCourseId : assignToCourseId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $('.assignStudentsList.potentialStudentList').removeClass('loading');

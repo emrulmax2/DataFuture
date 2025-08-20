@@ -199,6 +199,7 @@ class AssignController extends Controller
 
         $existingStudents = (isset($request->existingStudents) && !empty($request->existingStudents) ? $request->existingStudents : []);
         $theValue = $request->theValue;
+        $courseid = (isset($request->assignToCourseId) && $request->assignToCourseId > 0 ? $request->assignToCourseId : 0);
         $students = Student::where(function($q) use ($theValue){
             $q->where('registration_no', 'LIKE', '%'.$theValue.'%')
                 ->orWhere('first_name', 'LIKE', '%'.$theValue.'%')
@@ -231,9 +232,11 @@ class AssignController extends Controller
                             $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
                         $res['htm'] .= '</li>';
                         foreach($students as $std):
-                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
+                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
+                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course->name : 0);
+                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
                                 $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
+                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
                             $res['htm'] .= '</li>';
                         endforeach;
                     endif;
@@ -251,6 +254,7 @@ class AssignController extends Controller
         ];
         $student_ids = (isset($request->student_ids) && !empty($request->student_ids) ? $request->student_ids : []);
         $existingStudents = (isset($request->existingStudents) && !empty($request->existingStudents) ? $request->existingStudents : []);
+        $courseid = (isset($request->assignToCourseId) && $request->assignToCourseId > 0 ? $request->assignToCourseId : 0);
         if(!empty($student_ids)):
             $statuses = Student::whereIn('id', $student_ids)->orderBy('status_id', 'ASC')->pluck('status_id')->unique()->toArray();
             if(!empty($statuses)):
@@ -263,9 +267,11 @@ class AssignController extends Controller
                             $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
                         $res['htm'] .= '</li>';
                         foreach($students as $std):
-                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
+                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
+                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course->name : 0);
+                            $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
                                 $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
+                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
                             $res['htm'] .= '</li>';
                         endforeach;
                     endif;
@@ -360,10 +366,12 @@ class AssignController extends Controller
                                 $res['students']['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
                             $res['students']['htm'] .= '</li>';
                             foreach($students as $std):
+                                $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
+                                $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course_id : 0);
                                 $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $planIds)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
-                                $res['students']['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
+                                $res['students']['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) || $std_course_id != $courseid ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
                                     $res['students']['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                    $res['students']['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
+                                    $res['students']['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
                                     if(!empty($assignedTo)):
                                         $res['students']['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
                                     endif;
@@ -420,10 +428,12 @@ class AssignController extends Controller
                             $res['htm'] .= '<label><i data-lucide="list-checks" class="w-4 h-4 mr-1"></i>'.$status->name.'</label>';
                         $res['htm'] .= '</li>';
                         foreach($students as $std):
+                            $std_course_id = (isset($std->activeCR->creation->course_id) && $std->activeCR->creation->course_id > 0 ? $std->activeCR->creation->course_id : 0);
+                            $std_course_name = (isset($std->activeCR->creation->course->name) && $std->activeCR->creation->course->name != '' ? $std->activeCR->creation->course_id : 0);
                             $assignedTo = Assign::select('plan_id')->whereIn('plan_id', $moduleid)->where('student_id', $std->id)->groupBy('plan_id')->pluck('plan_id')->unique()->toArray();
                             $res['htm'] .= '<li class="'.(in_array($std->id, $existingStudents) ? 'existThere' : '').'" data-studentid="'.$std->id.'" data-reg="'.$std->registration_no.'" data-name="'.$std->full_name.'">';
                                 $res['htm'] .= '<input type="checkbox" name="potentialStudents[]" value="'.$std->id.'" id="potentialStudents_'.$std->id.'"/>';
-                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.'</label>';
+                                $res['htm'] .= '<label for="potentialStudents_'.$std->id.'"><i data-lucide="arrow-right-circle" class="w-4 h-4 mr-1"></i>'.$std->registration_no.' - '.$std->full_name.($std_course_id != $courseid ? ' - '.$std_course_name : '').'</label>';
                                 if(!empty($assignedTo)):
                                     $res['htm'] .= '&nbsp;<a data-ids="'.implode(',', $assignedTo).'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#showAllModulesModal" class="font-medium text-primary showAllModules">('.count($assignedTo).')</a>';
                                 endif;
