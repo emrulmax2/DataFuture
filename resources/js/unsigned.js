@@ -202,6 +202,8 @@ var unsignedStudentList = (function () {
         e.preventDefault();
         var $theBtn = $(this);
         var ids = [];
+        let $assignToCourseId = $('#assignToCourseId');
+        let assignToCourseId = $assignToCourseId.val();
 
         $('#unsignedStudentList').find('.tabulator-row.tabulator-selected').each(function(){
             var $row = $(this);
@@ -220,7 +222,7 @@ var unsignedStudentList = (function () {
             axios({
                 method: "post",
                 url: route('assign.generage.potential.list.from.unsigned.list'),
-                data: {student_ids : ids, existingStudents : existingStudents},
+                data: {student_ids : ids, existingStudents : existingStudents, assignToCourseId : assignToCourseId},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 $('html, body').animate({ scrollTop: $("#studentListArea").offset().top - 50 }, 1000);
