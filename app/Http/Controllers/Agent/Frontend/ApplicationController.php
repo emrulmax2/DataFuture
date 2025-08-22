@@ -32,6 +32,7 @@ use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
 use App\Models\ReferralCode;
 use App\Models\SexIdentifier;
+use App\Models\Student;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
