@@ -131,7 +131,7 @@ class ApplicationController extends Controller
                     $referral = ReferralCode::where('code',$applicant->referral_code)->get()->first();
                     if($referral->type=="Agent") {
                         $applicant->agent_user_id = $referral->agent_user_id;
-                        $applicant->is_referral_verified = 1;
+                        $applicant->is_referral_varified = 1;
                     }
                     
                 }
