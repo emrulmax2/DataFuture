@@ -13,6 +13,7 @@ class DashboardController extends Controller
         
         $userData = \Auth::guard('applicant')->user();
         $applicant = Applicant::with('status')->orderBy('id','DESC')->where('applicant_user_id', $userData->id)->get()->first();
+
         return view('pages.applicant.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],

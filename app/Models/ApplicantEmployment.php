@@ -42,4 +42,9 @@ class ApplicantEmployment extends Model
     public function reference(){
         return $this->hasMany(EmploymentReference::class, 'applicant_employment_id', 'id');
     }
+
+    public function referenceSingle()
+    {
+        return $this->hasOne(EmploymentReference::class, 'applicant_employment_id', 'id')->latestOfMany();
+    }
 }

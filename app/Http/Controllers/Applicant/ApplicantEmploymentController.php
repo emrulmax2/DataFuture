@@ -18,8 +18,11 @@ class ApplicantEmploymentController extends Controller
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'ASC']));
         $sorts = [];
+
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            // if($sort['field'] != 'contact_phone' && $sort['field'] != 'contact_position' && $sort['field'] != 'name'):
+                $sorts[] = $sort['field'].' '.$sort['dir'];
+            //endif;
         endforeach;
 
         $query = ApplicantEmployment::orderByRaw(implode(',', $sorts))->where('applicant_id', $applicantId);
@@ -45,7 +48,7 @@ class ApplicantEmploymentController extends Controller
                ->get();
 
         $data = array();
-
+        
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):

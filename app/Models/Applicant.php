@@ -32,6 +32,8 @@ class Applicant extends Model
         'proof_id',
         'proof_expiredate',
         'agent_user_id',
+        'is_referral_verified',
+        'referral_code',
         'created_by',
         'updated_by',
     ];
@@ -65,6 +67,14 @@ class Applicant extends Model
 
     public function quals(){
         return $this->hasMany(ApplicantQualification::class, 'applicant_id', 'id');
+    }
+
+    public function HighestQualification(){
+        return $this->hasOne(ApplicantQualification::class)->latestOfMany();
+    }
+
+    public function previousStudent(){
+        return $this->belongsTo(Student::class, 'previous_student_id');
     }
 
     public function employment(){
@@ -104,7 +114,7 @@ class Applicant extends Model
     }
 
     public function setSubmissionDateAttribute($value) {  
-        $this->attributes['submission_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['submission_date'] = (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
     public function getSubmissionDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');

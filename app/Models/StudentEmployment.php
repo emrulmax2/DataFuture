@@ -37,7 +37,9 @@ class StudentEmployment extends Model
     public function reference(){
         return $this->hasMany(StudentEmploymentReference::class, 'student_employment_id', 'id');
     }
-    
+    public function referenceSingle(){
+        return $this->hasOne(StudentEmploymentReference::class, 'student_employment_id', 'id')->latestOfMany();
+    }
     public function address(){
         return $this->belongsTo(Address::class, 'address_id');
     }
