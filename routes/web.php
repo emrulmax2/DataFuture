@@ -382,7 +382,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
     Route::get('/impersonate/leave', function () {
         auth('applicant')->user()->leaveImpersonation();
         return redirect()->route('dashboard');
-    })->name('applicant.impersonate.leave');
+    })->name('impersonate.leave');
 
     Route::controller(LoginController::class)->middleware('applicant.loggedin')->group(function() {
         Route::get('login', 'loginView')->name('login');
