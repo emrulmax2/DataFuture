@@ -332,7 +332,7 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
             @endImpersonating
         @elseif(Auth::guard('applicant')->check())
             @impersonating($guard='applicant')
-                <a href="{{ route('impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6">
+                <a href="{{ route('applicant.impersonate.leave') }}" class="btn btn-success text-white w-auto  mr-4 sm:mr-6">
                     Leave impersonating <i data-lucide="log-out" class="w-4 h-4 ml-2"></i>
                 </a>
             @endImpersonating
