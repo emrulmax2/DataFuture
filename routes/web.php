@@ -378,6 +378,12 @@ Route::impersonate();
 //All applicant have a prefix route name applicant.* value
 Route::prefix('/applicant')->name('applicant.')->group(function() {
 
+
+    Route::get('/impersonate/leave', function () {
+        auth('applicant')->user()->leaveImpersonation();
+        return redirect()->route('dashboard');
+    })->name('applicant.impersonate.leave');
+
     Route::controller(LoginController::class)->middleware('applicant.loggedin')->group(function() {
         Route::get('login', 'loginView')->name('login');
         Route::post('login', 'login')->name('check');
