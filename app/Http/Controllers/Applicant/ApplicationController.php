@@ -527,26 +527,26 @@ class ApplicationController extends Controller
         $siteName = (!empty($siteName) ? $siteName : 'London Churchill College');
         $siteEmail = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_email')->value('value');
         $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
-        // $configuration = [
-        //     'smtp_host'    => $commonSmtp->smtp_host,
-        //     'smtp_port'    => $commonSmtp->smtp_port,
-        //     'smtp_username'  => $commonSmtp->smtp_user,
-        //     'smtp_password'  => $commonSmtp->smtp_pass,
-        //     'smtp_encryption'  => $commonSmtp->smtp_encryption,
-            
-        //     'from_email'    => $commonSmtp->smtp_user,
-        //     'from_name'    =>  (!empty($siteName) ? $siteName : 'London Churchill College'),
-        // ];
         $configuration = [
-                    'smtp_host' => 'sandbox.smtp.mailtrap.io',
-                    'smtp_port' => '2525',
-                    'smtp_username' => 'e8ae09cfefd325',
-                    'smtp_password' => 'ce7fa44b28281d',
-                    'smtp_encryption' => 'tls',
+            'smtp_host'    => $commonSmtp->smtp_host,
+            'smtp_port'    => $commonSmtp->smtp_port,
+            'smtp_username'  => $commonSmtp->smtp_user,
+            'smtp_password'  => $commonSmtp->smtp_pass,
+            'smtp_encryption'  => $commonSmtp->smtp_encryption,
+            
+            'from_email'    => $commonSmtp->smtp_user,
+            'from_name'    =>  (!empty($siteName) ? $siteName : 'London Churchill College'),
+        ];
+        // $configuration = [
+        //             'smtp_host' => 'sandbox.smtp.mailtrap.io',
+        //             'smtp_port' => '2525',
+        //             'smtp_username' => 'e8ae09cfefd325',
+        //             'smtp_password' => 'ce7fa44b28281d',
+        //             'smtp_encryption' => 'tls',
                     
-                    'from_email'    => 'no-reply@lcc.ac.uk',
-                    'from_name'    =>  'London Churchill College',
-                ];
+        //             'from_email'    => 'no-reply@lcc.ac.uk',
+        //             'from_name'    =>  'London Churchill College',
+        //         ];
 
         $applicant_id = $request->applicant_id;
         Applicant::where('id', $applicant_id)->update([
