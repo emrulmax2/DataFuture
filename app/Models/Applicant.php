@@ -32,7 +32,7 @@ class Applicant extends Model
         'proof_id',
         'proof_expiredate',
         'agent_user_id',
-        'is_referral_verified',
+        'is_referral_varified',
         'referral_code',
         'created_by',
         'updated_by',
