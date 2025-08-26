@@ -517,9 +517,21 @@ var employmentHistoryTable = (function () {
                 $('.form-wizard-next-btn, .form-wizard-previous-btn', parentForm).removeAttr('disabled');
                 $('.form-wizard-next-btn svg', parentForm).fadeOut();
                 if(jqXHR.status == 422){
+                    let lastKey = "";
                     for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
                         $(`#${formID} .${key}`).addClass('border-danger');
                         $(`#${formID}  .error-${key}`).html(val);
+                        lastKey = key;
+                    }
+                    
+                    // Scroll to the last error element
+                    const $errorElements = $(`#${formID} .error-${lastKey}`);
+
+                    if ($errorElements.length > 0) {
+                        const $lastError = $errorElements.last();
+                        $('html, body').animate({
+                            scrollTop: $lastError.offset().top - 400 // adjust offset as needed
+                        }, 500);
                     }
                 }else{
                     console.log(textStatus+' => '+errorThrown);

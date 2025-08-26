@@ -9,7 +9,7 @@
             </div>
             <div class="modal-body">
                 <h5 class=" font-medium text-md mb-5">Are you sure you want to create an application account for this applicant?</h5>
-                <p class="mt-3 mx-auto"><b>Note:</b> an applicant password change email will sent to the applicant personal email. please check the email</p>
+                <p class="mt-3 mx-auto"><b>Note:</b> an applicant password change email will sent to the applicant personal email. Please check the email to create password.</p>
                 {{-- <ul>
                     <li>Full Name: <span id="studentFullName"></span></li>
                     <li>Date of Birth: <span id="studentDOB"></span></li>
