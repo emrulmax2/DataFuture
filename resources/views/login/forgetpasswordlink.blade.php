@@ -1,7 +1,7 @@
 @extends('../layout/' . $layout)
 
 @section('head')
-    <title>Applicant Forget Password Page For London Churchill College</title>
+    <title>Applicant Password Change For London Churchill College</title>
 @endsection
 
 @section('content')

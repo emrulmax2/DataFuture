@@ -87,8 +87,7 @@ use App\Jobs\ProcessStudentSms;
 use App\Jobs\ProcessStudentLetter;
 use App\Jobs\ProcessStudentInterview;
 use App\Jobs\ProcessStudentEmail;
-
-
+use App\Mail\ResetPasswordLink;
 use App\Models\AcademicYear;
 use App\Models\Agent;
 use App\Models\ApplicantInterview;
@@ -125,6 +124,7 @@ use GuzzleHttp\Client;
 use App\Traits\GenerateApplicantLetterTrait;
 use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
 use DebugBar\DebugBar;
+use Illuminate\Auth\Events\Registered;
 
 class AdmissionController extends Controller
 {
@@ -249,8 +249,8 @@ class AdmissionController extends Controller
                ->get();
 
         $data = array();
-
-        if(!empty($Query)):
+        
+        if($Query->isNotEmpty()):
             $i = 1;
             foreach($Query as $list):
                 $data[] = [
@@ -269,10 +269,39 @@ class AdmissionController extends Controller
                     'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
                     'url' => route('admission.show', $list->id),
                     'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
-                    'photo_url' => $list->photo_url
+                    'photo_url' => $list->photo_url,
+                    'create_account' => false,
+                    'apply_ready' => false,
                 ];
                 $i++;
             endforeach;
+        else:
+            if(!empty($refno)):
+                $i = 1;
+                $list = Student::where('application_no', $refno)->get()->first();
+
+                $applicantFound = ApplicantUser::where('email', $list->contact->personal_email)->first();
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'application_no' => (empty($list->application_no) ? $list->id : $list->application_no),
+                    'first_name' => ucfirst($list->first_name),
+                    'last_name' => ucfirst($list->last_name),
+                    'full_name' => ucfirst($list->first_name)." ".ucfirst($list->last_name),
+                    
+                    'date_of_birth'=> $list->date_of_birth,
+                    'course'=> (isset($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                    'semester'=> (isset($list->course->semester->name) ? $list->course->semester->name : ''),
+                    'full_time'=> (isset($list->course->full_time) ? "Yes": "No"),
+                    'gender'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                    'status_id'=> (isset($list->status->name) ? $list->status->name : ''),
+                    'url' => route('admission.show', $list->id),
+                    'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
+                    'photo_url' => $list->photo_url,
+                    'create_account' => true,
+                    'apply_ready' => isset($applicantFound) ? $applicantFound->id : false,
+                ];
+            endif;
         endif;
         
         return response()->json(['last_page' => $last_page, 'data' => $data]);
@@ -468,6 +497,67 @@ class AdmissionController extends Controller
         ]);
     }
 
+    public function CreateAccountForStudent(Request $request){
+
+        $student = Student::find($request->input('student_id'));
+        $mobileVerifiedAt = now();
+        $emailVerifiedAt = now();
+        // if(!isset($student->contact->mobile_verification)) {
+        //     $mobileVerifiedAt = now();
+        // } else {
+        //     $mobileVerifiedAt = $student->contact->mobile_verified_at;
+        // }
+        // if(!isset($student->contact->personal_email_verification)) {
+        //     $emailVerifiedAt = now();
+        // } else {
+        //     $emailVerifiedAt = $student->contact->personal_email_verified_at;
+        // }
+
+        // convert $student->date_of_birth to DDMMYYYY
+        $dob = Carbon::parse($student->date_of_birth)->format('dmY');
+
+        $ApplicantUser = ApplicantUser::create([
+            'email' => $student->contact->personal_email,
+            'phone' => $student->contact->mobile,
+            'password' => Hash::make($dob),
+            'student_id' => $student->id,
+            'email_verified_at' => $emailVerifiedAt,
+            'phone_verified_at' => $mobileVerifiedAt,
+            'active' => 1,
+        ]);
+
+        //event(new Registered($ApplicantUser));
+        $token = base64_encode($ApplicantUser->email);
+        DB::table('password_resets')->insert([
+            'email' => $ApplicantUser->email,
+            'token' => $token,
+            'created_at' => Carbon::now()
+        ]);
+
+        Mail::to($ApplicantUser->email)->send(new ResetPasswordLink($token));
+
+       return response()->json(['status' => 'success', 'message' => 'Account created successfully', 'data' => $ApplicantUser]); 
+    }
+
+    public function passwordChangeForApplicant(Request $request, ApplicantUser $applicant_user)
+    {
+        //$applicant_user = ApplicantUser::find($applicant_user);
+        $token = base64_encode($applicant_user->email);
+        if($applicant_user) {
+
+                DB::table('password_resets')->insert([
+                    'email' => $applicant_user->email, 
+                    'token' => $token, 
+                    'created_at' => Carbon::now()
+                ]);
+
+                Mail::to($applicant_user->email)->send(new ResetPasswordLink($token));
+
+                return response()->json(['message'=>'A mail has been sent'],200);
+        }else    
+            return response()->json(['message'=>'No User Found'],422);
+        
+    }
 
     public function updatePersonalDetails(AdmissionPersonalDetailsRequest $request){
         $applicant_id = $request->id;
