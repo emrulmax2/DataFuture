@@ -433,6 +433,12 @@
                             <label class="form-check-label ml-4" for="permission_applicant_portal_2">Login as Applicant</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['applicant_live_portal']['create_an_applicant']) && $priv['applicant_live_portal']['create_an_applicant'] == 1 ? 'checked' : '') }} id="permission_create_applicant_portal_2" class="form-check-input" type="checkbox" value="1" name="permission[applicant_live_portal][create_an_applicant]">
+                            <label class="form-check-label ml-4" for="permission_create_applicant_portal_2">Create Applicant Account</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

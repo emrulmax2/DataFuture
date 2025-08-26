@@ -279,7 +279,7 @@ class AdmissionController extends Controller
             if(!empty($refno)):
                 $i = 1;
                 $list = Student::where('application_no', $refno)->get()->first();
-
+                $createPermission = auth()->user()->priv()['create_an_applicant'];
                 $applicantFound = ApplicantUser::where('email', $list->contact->personal_email)->first();
                 $data[] = [
                     'id' => $list->id,
@@ -298,7 +298,7 @@ class AdmissionController extends Controller
                     'url' => route('admission.show', $list->id),
                     'ccid' => implode(',', $courses).' - '.implode(',', $courseCreationId),
                     'photo_url' => $list->photo_url,
-                    'create_account' => true,
+                    'create_account' => (isset($createPermission) && $createPermission==1) ? true : false,
                     'apply_ready' => isset($applicantFound) ? $applicantFound->id : false,
                 ];
             endif;
