@@ -308,10 +308,10 @@
 				<tr>
 					<td style="padding: 30px 30px; text-align: justify;">
 						<div class="text" style="padding: 0 2.5em; text-align: center;">
-            				<h2>Please Reset Applicant password</h2>
-            				<h3>You are receiving this email because we received a password request for your account</h3>
-            				<p><a href="{{ route('applicant.reset.password.get',$token) }}" class="btn btn-primary">RESET PASSWORD</a></p>
-							<p>This password email link will be expire in 60 mins. If you do not request a password reset no further action required.</p>
+            				<h2>Please Set a New Applicant Password</h2>
+            				<h3>You are receiving this email because we received a password change request for your account</h3>
+            				<p><a href="{{ route('applicant.reset.password.get',$token) }}" class="btn btn-primary">SET NEW PASSWORD</a></p>
+							<p>This password email link will be expire in 60 mins. If you do not request a password change no further action required.</p>
             			</div>
 					</td>
 				</tr>

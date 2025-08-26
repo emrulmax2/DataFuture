@@ -1230,6 +1230,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(AdmissionController::class)->middleware('update.admission.status')->group(function() {
 
         Route::get('admission', 'index')->name('admission'); 
+        Route::post('admission/create-acc-from-student', 'CreateAccountForStudent')->name('admission.create.account.from.student'); 
+        Route::get('admission/password-change/{applicant_user}', 'passwordChangeForApplicant')->name('admission.applicant.password.change'); 
+
+
         Route::get('admission/list', 'list')->name('admission.list'); 
         Route::get('admission/export', 'export')->name('admission.export');
         Route::get('admission/show/{applicantId}', 'show')->name('admission.show');

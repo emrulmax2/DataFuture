@@ -157,6 +157,10 @@
             <div id="admissionListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
+
+    @include('pages.students.admission.modals.confirmation')
+    @include('pages.students.admission.modals.success')
+    @include('pages.students.admission.modals.error')
 @endsection
 
 @section('script')

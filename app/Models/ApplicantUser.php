@@ -18,6 +18,7 @@ class ApplicantUser extends Authenticatable  implements MustVerifyEmail
     protected $fillable = [
         'email',
         'phone',
+        'student_id',
         'password',
         'active',
         'email_verified_at', 

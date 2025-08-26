@@ -5,6 +5,7 @@ import TomSelect from "tom-select";
 import {createApp} from 'vue'
 
 import IMask from 'imask';
+import { set } from "lodash";
 
 ("use strict");
 var admissionListTable = (function () {
@@ -84,10 +85,31 @@ var admissionListTable = (function () {
                 },
                 {
                     title: "Status",
-                    field: "status_id",
-                    headerHozAlign: "left",
-                    width: "150",
-                }
+                    field: "id",
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: "180",
+                    download: false,
+                    formatter(cell, formatterParams) { 
+                        let status = cell.getData().status_id;
+                        let btns = status;
+                        if (cell.getData().create_account == true) {
+                            if(cell.getData().apply_ready!=false) {
+                                let url = route('impersonate', { id: cell.getData().apply_ready, guardName: 'applicant' });
+                                btns = '<a target="__blank" href="' + url + '" class="btn btn-warning min-w-max mr-1"><i data-lucide="log-in" class="w-5 h-5"></i></a>';
+                                btns += '<button data-id="' + cell.getData().apply_ready + '" class="sendMail btn btn-success text-white min-w-max"><i data-lucide="send" class="w-5 h-5 "></i></button>';
+
+                            } else {
+                                btns = '<button  data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#addNewAccountConfirm" type="button" class="create_new_account btn-rounded-md btn btn-primary text-white  ml-1"><i data-lucide="plus" class="w-4 h-4"></i> Create Account</button>';
+
+                            }
+                        }
+
+                        return btns;
+                    }
+                },
+                
             ],
             renderComplete() {
                 createIcons({
@@ -101,9 +123,60 @@ var admissionListTable = (function () {
                     const currentWidth = lastColumn.getWidth();
                     lastColumn.setWidth(currentWidth - 1);
                 }
+
+                $(".sendMail").on("click", function (e) {
+                    e.preventDefault();
+                    let $tthis =$(this);
+                    let id = $tthis.data("id");
+                    // Call your send mail function here
+                    $tthis.html('<i data-loading-icon="oval" data-color="white" class="w-5 h-5 mx-auto"></i>')
+                    tailwind.svgLoader()
+                    $tthis.attr("disabled", "disabled");
+                    axios({
+                        method: "get",
+                        url: route("admission.applicant.password.change",id),
+                        headers: {
+                            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                        },
+                    })
+                    .then((response) => {
+                            $tthis.removeAttr("disabled");
+                            $tthis.html('<i data-lucide="send" class="w-5 h-5 "></i>')
+                            createIcons({
+                                icons,
+                                "stroke-width": 1.5,
+                                nameAttr: "data-lucide",
+                            });
+                            const successModalStart = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+                            successModalStart.show();
+                            document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                                $("#successModal .successModalTitle").html("Email Sent!" );
+                                $("#successModal .successModalDesc").html('An Password Change Email Sent to your personal email');
+                            }); 
+
+                            setTimeout(() => {
+                                successModalStart.hide();
+                            }, 3000);
+                    })
+                    .catch((error) => {
+                            console.log(error);
+                            $tthis.removeAttr("disabled");
+                    });
+                });
+            
+                
             },
             rowClick:function(e, row){
-                window.open(row.getData().url, '_blank');
+                // check if cell has status has button then below code will not work
+                if (row.getData().create_account==false) {
+                    window.open(row.getData().url, '_blank');
+                }
+
+                //set the student_id
+                const studentIdInput = document.getElementById("student_id");
+                if (studentIdInput) {
+                    studentIdInput.value = row.getData().id;
+                }
             }
         });
 
@@ -1254,6 +1327,7 @@ var employmentHistoryTable = (function () {
         })
     }
 
+
     /*Address Modal*/
     if($('#addressModal').length > 0){
         const addressModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressModal"));
@@ -2011,6 +2085,72 @@ var employmentHistoryTable = (function () {
             });
         });
     }
+    
+    // 10011500 
+    if($('#addNewAccountConfirm').length > 0){
+        
+        const addNewAccountConfirm = tailwind.Modal.getOrCreateInstance(document.querySelector("#addNewAccountConfirm"));
+        const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+        const errorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#errorModal"));
+        
+         const addNewAccountConfirmEl = document.getElementById('addNewAccountConfirm');
+        $(".create_new_account").on("click", function() {
+            var $$this = $(this);
+            var studentId = $$this.data("id");
+            $('#student_id').val(studentId);
+        });
+        addNewAccountConfirmEl.addEventListener('hide.tw.modal', function(event) {
+            $('#student_id').val('');
+        });
+
+
+        $('#addNewAccountConfirm .agreeWith').on('click', function(e){
+            e.preventDefault();
+            var $btn = $(this);
+            var student_id = $('#student_id').val();
+           
+            $('svg',$btn).show();
+            $btn.attr('disabled', 'disabled');
+            $btn.siblings('.disAgreeWith').attr('disabled', 'disabled');
+
+            axios({
+                method: "post",
+                url: route('admission.create.account.from.student'),
+                data: {student_id : student_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $btn.removeAttr('disabled');
+                    $btn.siblings('.disAgreeWith').removeAttr('disabled');
+                    $('svg',$btn).hide();
+                    addNewAccountConfirm.hide();
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Account Created!" );
+                        $("#successModal .successModalDesc").html('Please check the applicant personal email for password.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });      
+                    
+                    setTimeout(function(){
+                        successModal.show();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error => {
+                $btn.removeAttr('disabled');
+                $btn.siblings('.disAgreeWith').removeAttr('disabled');
+
+                if (error.response) {
+                    console.log('error');
+                }
+            });
+        });
+
+        
+    }
+
+
+
 
     
 })();
