@@ -97,8 +97,8 @@ var admissionListTable = (function () {
                         if (cell.getData().create_account == true) {
                             if(cell.getData().apply_ready!=false) {
                                 let url = route('impersonate', { id: cell.getData().apply_ready, guardName: 'applicant' });
-                                btns = '<a target="__blank" href="' + url + '" class="btn btn-warning min-w-max mr-1"><i data-lucide="log-in" class="w-5 h-5"></i></a>';
-                                btns += '<button data-id="' + cell.getData().apply_ready + '" class="sendMail btn btn-success text-white min-w-max"><i data-lucide="send" class="w-5 h-5 "></i></button>';
+                                btns = '<a target="__blank" href="' + url + '" title="Login As Applicant" class="btn btn-warning min-w-max mr-1 tooltip"><i data-lucide="log-in" class="w-5 h-5"></i></a>';
+                                btns += '<button title="Send Mail" data-id="' + cell.getData().apply_ready + '" class="sendMail tooltip btn btn-success text-white min-w-max"><i data-lucide="send" class="w-5 h-5 "></i></button>';
 
                             } else {
                                 btns = '<button  data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#addNewAccountConfirm" type="button" class="create_new_account btn-rounded-md btn btn-primary text-white  ml-1"><i data-lucide="plus" class="w-4 h-4"></i> Create Account</button>';
