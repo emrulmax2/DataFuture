@@ -125,12 +125,15 @@ class ApplicationController extends Controller
                 $applicant->nationality_id = $student->nationality_id;
                 $applicant->country_id = $student->country_id;
                 $applicant->sex_identifier_id = $student->sex_identifier_id;
-                $applicant->referral_code = $student->referral_code ?? NULL;
+                
                 if(isset($student->referral_code)) {
                     $referral = ReferralCode::where('code',$student->referral_code)->get()->first();
-                    if(isset($referral) && $referral->type=="Agent") {
-                        $applicant->agent_user_id = $referral->agent_user_id;
-                        $applicant->is_referral_varified = 1;
+                    if(isset($referral)) {
+                        if($referral->type=="Agent") {
+                         $applicant->agent_user_id = $referral->agent_user_id;
+                         $applicant->is_referral_varified = 1;
+                        }
+                        $applicant->referral_code = $student->referral_code ?? NULL;
                     }
                     
                 }
@@ -291,9 +294,12 @@ class ApplicationController extends Controller
                 $applicant->referral_code = $student->referral_code ?? NULL;
                 if(isset($student->referral_code)) {
                     $referral = ReferralCode::where('code',$student->referral_code)->get()->first();
-                    if($referral->type=="Agent") {
-                        $applicant->agent_user_id = $referral->agent_user_id;
-                        $applicant->is_referral_varified = 1;
+                    if(isset($referral)) {
+                        if($referral->type=="Agent") {
+                         $applicant->agent_user_id = $referral->agent_user_id;
+                         $applicant->is_referral_varified = 1;
+                        }
+                        $applicant->referral_code = $student->referral_code ?? NULL;
                     }
                     
                 }
