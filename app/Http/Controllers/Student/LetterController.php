@@ -185,10 +185,10 @@ class LetterController extends Controller
                         ->leftJoin('student_letters_documents as sld', 'sl.id', '=', 'sld.student_letter_id')
                         ->where('sl.student_id', '=', $student_id);
         if(!empty($queryStr)):
-            $query->where('ls.letter_type','LIKE','%'.$queryStr.'%');
-            $query->orWhere('ls.letter_title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sg.signatory_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('sg.signatory_post','LIKE','%'.$queryStr.'%');
+            $query->where(function($q) use($queryStr){
+                $q->where('ls.letter_type','LIKE','%'.$queryStr.'%')->orWhere('ls.letter_title','LIKE','%'.$queryStr.'%')
+                        ->orWhere('sg.signatory_name','LIKE','%'.$queryStr.'%')->orWhere('sg.signatory_post','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->whereNotNull('sl.deleted_at');

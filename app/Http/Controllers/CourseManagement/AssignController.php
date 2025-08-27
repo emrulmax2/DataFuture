@@ -294,10 +294,12 @@ class AssignController extends Controller
         if(!$groups->isEmpty()):
             $i = 1;
             foreach($groups as $gr):
-                $theGroup = Group::where('name', $gr->name)->where('course_id', $courseid)->where('term_declaration_id', $termdeclarationid)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
-                $res[$i]['id'] = $theGroup->id;
-                $res[$i]['name'] = $theGroup->name;
-                $i++;
+                $theGroup = Group::where('name', trim($gr->name))->where('course_id', $courseid)->where('term_declaration_id', $termdeclarationid)->where('active', 1)->orderBy('id', 'DESC')->get()->first();
+                if(isset($theGroup->id) && $theGroup->id > 0):
+                    $res[$i]['id'] = $theGroup->id;
+                    $res[$i]['name'] = $theGroup->name;
+                    $i++;
+                endif;
             endforeach;
         endif;
 
