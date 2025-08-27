@@ -19,6 +19,7 @@ class Student extends Model
         'applicant_user_id',
         'applicant_id',
         'student_user_id',
+        'parent_student_id',
         'application_no',
         'registration_no',
         'ssn_no',
@@ -65,6 +66,25 @@ class Student extends Model
     public function applicant(){
         return $this->belongsTo(Applicant::class, 'applicant_id');
     }
+    public function parent()
+    {
+        return $this->belongsTo(Student::class, 'parent_student_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Student::class, 'parent_student_id');
+    }
+
+    public function descendants()
+    {
+        return $this->children()->with('descendants');
+    }
+
+    public function ancestors()
+    {
+        return $this->parent()->with('ancestors');
+}
 
     public function getPhotoAttribute($value){
         return $value;

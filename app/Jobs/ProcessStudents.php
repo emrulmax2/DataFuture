@@ -50,12 +50,12 @@ class ProcessStudents implements ShouldQueue
         $availibility = CourseCreationAvailability::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get()->first();
         
         $registration_no = '';
-        // if(isset($this->applicant->previouse_student_id)):
+        if(isset($this->applicant->previouse_student_id) && $this->applicant->previouse_student_id!=""):
             
-        //     $prevStudent = Student::find($this->applicant->previouse_student_id);
-        //     $registration_no = $prevStudent->registration_no;
+            $prevStudent = Student::find($this->applicant->previouse_student_id);
+            $registration_no = $prevStudent->registration_no;
 
-        if(isset($availibility->admission_end_date) && !empty($availibility->admission_end_date)):
+        elseif(isset($availibility->admission_end_date) && !empty($availibility->admission_end_date)):
             
             $year = date('Y', strtotime($availibility->admission_end_date));
             $temRegistrationNo = 'LCC'.$year;
@@ -79,6 +79,7 @@ class ProcessStudents implements ShouldQueue
         $applicantArray = [
             'applicant_id' => $this->applicant->id,
             'applicant_user_id' => $this->applicant->applicant_user_id,
+            'parent_student_id' => isset($this->applicant->previouse_student_id) ? $this->applicant->previouse_student_id : null,
             'student_user_id' => $user->id,
             'application_no'=> $this->applicant->application_no,
             'title_id'=> $this->applicant->title_id,
