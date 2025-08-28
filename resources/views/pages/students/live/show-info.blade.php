@@ -55,6 +55,7 @@
                                 @endforeach
                             @endif
                         @elseif(isset($student->parent)  && is_object($student->parent))
+                                    {{ dd($student->ancestors) }}
                             @if(isset($student->ancestors))
                                 @foreach($student->ancestors as $ancestor)
                                     @if($ancestor  && is_object($student->ancestor))
