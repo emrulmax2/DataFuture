@@ -55,22 +55,20 @@
                                 @endforeach
                             @endif
                         @elseif(isset($student->parent)  && is_object($student->parent))
-                                    {{ dd($student->ancestors) }}
-                            @if(isset($student->ancestors))
+                                    
+                            @if($student->ancestors->count())
                                 @foreach($student->ancestors as $ancestor)
-                                    @if($ancestor  && is_object($student->ancestor))
                                     <li>
                                         <a href="{{ route('student.show', $ancestor->id) }}" class="dropdown-item">
                                             <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
                                         </a>
                                     </li>
-                                    @endif
                                 @endforeach
                             @else
                                 <li>
-                                    <a href="{{ route('student.show', $student->parent->id) }}" class="dropdown-item">
-                                        <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $student->parent->course->semester->name }}
-                                    </a>
+                                    <span class="dropdown-item">
+                                        <i data-lucide="circle-slash-2" class="w-4 h-4 mr-2"></i> No Record
+                                    </span>
                                 </li>
                             @endif
                         @else

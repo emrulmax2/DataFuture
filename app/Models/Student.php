@@ -83,8 +83,19 @@ class Student extends Model
 
     public function ancestors()
     {
-        return $this->parent()->with('ancestors');
-}
+            return $this->parent()->with('ancestors');
+    }
+
+    public function getAncestorsAttribute()
+    {
+        $ancestors = collect();
+        $parent = $this->parent;
+        while ($parent) {
+            $ancestors->push($parent);
+            $parent = $parent->parent;
+        }
+        return $ancestors;
+    }
 
     public function getPhotoAttribute($value){
         return $value;
