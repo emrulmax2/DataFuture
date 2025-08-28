@@ -54,14 +54,16 @@
                                     </li>
                                 @endforeach
                             @endif
-                        @elseif(isset($student->parent))
+                        @elseif(isset($student->parent)  && is_object($student->parent))
                             @if(isset($student->ancestors))
                                 @foreach($student->ancestors as $ancestor)
+                                    @if($ancestor  && is_object($student->ancestor))
                                     <li>
                                         <a href="{{ route('student.show', $ancestor->id) }}" class="dropdown-item">
                                             <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
                                         </a>
                                     </li>
+                                    @endif
                                 @endforeach
                             @else
                                 <li>
