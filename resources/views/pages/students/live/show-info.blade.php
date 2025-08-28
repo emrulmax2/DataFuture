@@ -5,6 +5,7 @@
     </div>
 
     <div class="md:ml-auto md:w-full flex flex-wrap sm:flex-row gap-2 justify-end">
+        
         @if(isset(auth()->user()->priv()['edit_student_print']) && auth()->user()->priv()['edit_student_print'] == 1 && isset($student->applicant->id) && !empty($student->applicant->id))
             <a href="{{ route('studentapplication.print',$student->id) }}" data-id="{{ $student->id }}" class="btn btn-outline-pending flex-1 sm:flex-none">
                 <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Print Pdf
@@ -25,8 +26,61 @@
             <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary text-white tooltip" title="Change Status">
                 <i data-lucide="check-circle" class="w-4 h-4"></i>
             </button>
-            @endif
-            <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+        @endif
+        <input type="hidden" name="applicant_id" value="{{ $student->id }}"/>
+            <div class="dropdown ml-auto sm:ml-0">
+                <button class="dropdown-toggle btn px-2 btn-outline-success" aria-expanded="false" data-tw-toggle="dropdown">
+                    <span class="w-5 h-5 flex items-center justify-center">
+                        <i class="w-4 h-5" data-lucide="users"></i>
+                    </span>
+                </button>
+                <div class="dropdown-menu w-40">
+                    <ul class="dropdown-content">
+                        @if(isset($student->children) && count($student->children) > 0)
+                            @if(isset($student->descendants))
+                                @foreach($student->descendants as $descendant)
+                                    <li>
+                                        <a href="{{ route('student.show', $descendant->id) }}" class="dropdown-item">
+                                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $descendant->course->semester->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            @else
+                                @foreach($student->children as $child)
+                                    <li>
+                                        <a href="{{ route('student.show', $child->id) }}" class="dropdown-item">
+                                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $child->course->semester->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            @endif
+                        @elseif(isset($student->parent)  && is_object($student->parent))
+                                    
+                            @if($student->ancestors->count())
+                                @foreach($student->ancestors as $ancestor)
+                                    <li>
+                                        <a href="{{ route('student.show', $ancestor->id) }}" class="dropdown-item">
+                                            <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            @else
+                                <li>
+                                    <span class="dropdown-item">
+                                        <i data-lucide="circle-slash-2" class="w-4 h-4 mr-2"></i> No Record
+                                    </span>
+                                </li>
+                            @endif
+                        @else
+                            <li>
+                                <span class="dropdown-item">
+                                    <i data-lucide="circle-slash-2" class="w-4 h-4 mr-2"></i> No Record
+                                </span>
+                            </li>
+                        @endif
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -64,6 +118,7 @@
                         if($student->other->disability_status==1):
                             $html .= '<div class="inline-flex  intro-x  ml-auto" style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
                         endif;
+                        
                     $html .= '</div>';
                 @endphp
                 <div class="ml-5">
