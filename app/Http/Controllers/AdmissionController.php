@@ -2862,7 +2862,7 @@ class AdmissionController extends Controller
 
     public function sendDocusealForm($applicant_id){
         $applicant = Applicant::find($applicant_id);
-
+        
         $DOCUSEALAPI = env("DOCUSEAL_API_KEY", false);
         $OFFER_ACCEPTANCE_TEMPLATE_ID = env("OFFER_ACCEPTANCE_FORM_TEMPLATE_ID", false);
         if($DOCUSEALAPI && $OFFER_ACCEPTANCE_TEMPLATE_ID):
@@ -2928,7 +2928,7 @@ class AdmissionController extends Controller
                     ],
                     [
                         'role' => 'Applicant',
-                        'email' => $applicant->users->email, //$applicant->users->email limon@churchill.ac sakib@lcc.ac.uk
+                        'email' => env('DOCUSEAL_TEST_EMAIL'), //$applicant->users->email, //$applicant->users->email limon@churchill.ac sakib@lcc.ac.uk
                     ]
                 ]
             ];
