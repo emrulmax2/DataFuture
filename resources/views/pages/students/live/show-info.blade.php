@@ -34,7 +34,7 @@
                         <i class="w-4 h-5" data-lucide="users"></i>
                     </span>
                 </button>
-                <div class="dropdown-menu w-40">
+                <div class="dropdown-menu w-50">
                     <ul class="dropdown-content">
                         @if(isset($student->children) && count($student->children) > 0)
                             @if(isset($student->descendants))
