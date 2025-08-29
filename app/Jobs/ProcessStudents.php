@@ -54,6 +54,8 @@ class ProcessStudents implements ShouldQueue
             
             $prevStudent = Student::find($this->applicant->previous_student_id);
             $registration_no = $prevStudent->registration_no;
+            $SSN = $prevStudent->ssn_no;
+            $UHN = $prevStudent->uhn_no;
 
         elseif(isset($availibility->admission_end_date) && !empty($availibility->admission_end_date)):
             
@@ -73,6 +75,7 @@ class ProcessStudents implements ShouldQueue
         /* Registration No */
 
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
+        
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
         
         $student = new Student();
@@ -97,6 +100,8 @@ class ProcessStudents implements ShouldQueue
             'is_referral_varified' => $this->applicant->is_referral_varified,
             'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             'registration_no'=> (!empty($registration_no) ? $registration_no : null),
+            'ssn_no' => isset($SSN) ? $SSN : null,
+            'uhn_no' => isset($UHN) ? $UHN : null
         ];
         $student->fill($applicantArray);
 

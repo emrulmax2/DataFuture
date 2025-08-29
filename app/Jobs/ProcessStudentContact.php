@@ -44,7 +44,13 @@ class ProcessStudentContact implements ShouldQueue
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
         $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
         $student = Student::where(["student_user_id"=> $user->id])->get()->first(); 
+        
         //StudentContacts
+        if(isset($this->applicant->previous_student_id) && $this->applicant->previous_student_id!=""):
+            
+            $prevStudent = Student::find($this->applicant->previous_student_id);
+            
+        endif;
         $applicantContactData= ApplicantContact::where('applicant_id',$this->applicant->id)->get();
         foreach($applicantContactData as $applicantContact):
             $dataArray = [
@@ -59,6 +65,15 @@ class ProcessStudentContact implements ShouldQueue
                 
                 'created_by'=> ($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
             ];
+
+            if(isset($this->applicant->previous_student_id) && $this->applicant->previous_student_id!=""):
+                $prevStudentData = [
+                    'term_time_accommodation_type_id' => isset($prevStudent->contact->term_time_accommodation_type_id) ? $prevStudent->contact->term_time_accommodation_type_id : null,
+                    'permanent_address_id' => isset($prevStudent->contact->permanent_address_id) ? $prevStudent->contact->permanent_address_id : null,
+                ];
+                $dataArray = array_merge($dataArray, $prevStudentData);
+            endif;
+            
 
             if($applicantContact->country_id) {
                 $dataArray = array_merge($dataArray,['country_id' => $applicantContact->country_id]);

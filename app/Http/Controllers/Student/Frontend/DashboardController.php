@@ -63,7 +63,7 @@ class DashboardController extends Controller
         $sexualOrientations = SexualOrientation::where('active', 1)->get();
         $sexIdentifiers = SexIdentifier::where('active', 1)->get();
         $genderIdentities = HesaGender::where('active', 1)->get();
-        $studentData = Student::where("student_user_id", $userData->id)->get()->first();
+        $studentData = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->get()->first();
         $studentContact = $studentData->contact;
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
@@ -106,7 +106,7 @@ class DashboardController extends Controller
                 'pCountries' => $pCountries,
             ]);
         else:
-            $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->get()->first();
+            $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->orderBy('id', 'DESC')->get()->first();
             $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
             $DoItOnline = FormsTable::all();
             if($studentAssigned)
@@ -176,7 +176,7 @@ class DashboardController extends Controller
 
     public function profileView() {
         
-        $student = $studentData = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->get()->first();
+        $student = $studentData = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->orderBy('id','DESC')->get()->first();
         $courseRelationCreation = $student->crel->creation;
         $studentCourseAvailability = $courseRelationCreation->availability;
         $courseCreationQualificationData = $courseRelationCreation->qualification;
@@ -222,7 +222,7 @@ class DashboardController extends Controller
     protected function moduleList() {
 
         $userData = StudentUser::find(auth('student')->user()->id);
-        $studentData = Student::where("student_user_id",$userData->id)->get()->first();
+        $studentData = Student::where("student_user_id",$userData->id)->orderBy('id', 'DESC')->get()->first();
 
         $Query = DB::table('plans as plan')
         ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','module.class_type as module_class_type','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
@@ -645,7 +645,7 @@ class DashboardController extends Controller
 
     public function workplacement(){
         $student_user_id = auth('student')->user()->id;
-        $student = Student::with('crel', 'course')->where("student_user_id", $student_user_id)->get()->first();
+        $student = Student::with('crel', 'course')->where("student_user_id", $student_user_id)->orderBy('id', 'DESC')->get()->first();
 
         $dateWiseClassList = $this->upcommingClass($student->id);
 
