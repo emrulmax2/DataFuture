@@ -75,13 +75,9 @@ class ProcessStudents implements ShouldQueue
         /* Registration No */
 
         $ApplicantUser = ApplicantUser::find($this->applicant->applicant_user_id);
-        if(isset($this->applicant->previous_student_id) && $this->applicant->previous_student_id!=""):
-            $prevStudent = Student::find($this->applicant->previous_student_id);
-            $user = StudentUser::find(["id"=> $prevStudent->student_user_id]);
-        else:
-            $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
-        endif;
-
+        
+        $user = StudentUser::where(["email"=> $ApplicantUser->email])->get()->first();
+        
         $student = new Student();
         $applicantArray = [
             'applicant_id' => $this->applicant->id,

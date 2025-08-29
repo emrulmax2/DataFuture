@@ -13,6 +13,7 @@ use App\Models\Applicant;
 use App\Models\User;
 use App\Models\ApplicantUser;
 use App\Models\Role;
+use App\Models\Student;
 use App\Models\StudentUser;
 use App\Models\UserRole;
 
