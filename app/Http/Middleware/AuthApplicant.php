@@ -20,6 +20,7 @@ class AuthApplicant
         if (!is_null(Auth::guard('applicant')->user())) {
             return $next($request);
         } else {
+            session()->forget('selected_student_id');
             return redirect()->route('applicant.login');
         }
     }
