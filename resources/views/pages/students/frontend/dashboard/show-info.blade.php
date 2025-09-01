@@ -14,6 +14,9 @@
         <button type="button" class="btn btn-success text-white w-auto sm:mr-1 mb-0">
             {{ $student->status->name }}
         </button>
+        
+    </div>
+    <div class="sm:ml-auto flex justify-center sm:justify-end mt-4 sm:mt-0">
         <div class="dropdown-menu w-52">
             <ul class="dropdown-content">
                 @if(isset($student->children) && count($student->children) > 0)
