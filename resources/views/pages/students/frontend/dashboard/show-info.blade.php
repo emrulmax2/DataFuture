@@ -14,39 +14,49 @@
         <button type="button" class="btn btn-success text-white w-auto sm:mr-1 mb-0">
             {{ $student->status->name }}
         </button>
-        
-    </div>
-    <div class="sm:ml-auto flex justify-center sm:justify-end mt-4 sm:mt-0">
-        <div class="dropdown-menu w-52">
-            <ul class="dropdown-content">
-                @if(isset($student->children) && count($student->children) > 0)
-                    @if(isset($student->descendants))
-                        @foreach($student->descendants as $descendant)
+        <div class="dropdown ml-auto sm:ml-0">
+            <button class="dropdown-toggle btn px-2 btn-outline-success" aria-expanded="false" data-tw-toggle="dropdown">
+                <span class="w-5 h-5 flex items-center justify-center">
+                    <i class="w-4 h-5" data-lucide="users"></i>
+                </span>
+            </button>
+            <div class="dropdown-menu w-52">
+                <ul class="dropdown-content">
+                    @if(isset($student->children) && count($student->children) > 0)
+                        @if(isset($student->descendants))
+                            @foreach($student->descendants as $descendant)
+                                <li>
+                                    <a href="{{ route('students.dashboard.student.select', $descendant->id) }}" class="dropdown-item">
+                                        <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $descendant->course->semester->name }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        @else
+                            @foreach($student->children as $child)
+                                <li>
+                                    <a href="{{ route('students.dashboard.student.select', $child->id) }}" class="dropdown-item">
+                                        <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $child->course->semester->name }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endif
+                    @elseif(isset($student->parent)  && is_object($student->parent))
+                                
+                        @if($student->ancestors->count())
+                            @foreach($student->ancestors as $ancestor)
+                                <li>
+                                    <a href="{{ route('students.dashboard.student.select', $ancestor->id) }}" class="dropdown-item">
+                                        <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        @else
                             <li>
-                                <a href="{{ route('students.dashboard.student.select', $descendant->id) }}" class="dropdown-item">
-                                    <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $descendant->course->semester->name }}
-                                </a>
+                                <span class="dropdown-item">
+                                    <i data-lucide="circle-slash-2" class="w-4 h-4 mr-2"></i> No Record
+                                </span>
                             </li>
-                        @endforeach
-                    @else
-                        @foreach($student->children as $child)
-                            <li>
-                                <a href="{{ route('students.dashboard.student.select', $child->id) }}" class="dropdown-item">
-                                    <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $child->course->semester->name }}
-                                </a>
-                            </li>
-                        @endforeach
-                    @endif
-                @elseif(isset($student->parent)  && is_object($student->parent))
-                            
-                    @if($student->ancestors->count())
-                        @foreach($student->ancestors as $ancestor)
-                            <li>
-                                <a href="{{ route('students.dashboard.student.select', $ancestor->id) }}" class="dropdown-item">
-                                    <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
-                                </a>
-                            </li>
-                        @endforeach
+                        @endif
                     @else
                         <li>
                             <span class="dropdown-item">
@@ -54,14 +64,8 @@
                             </span>
                         </li>
                     @endif
-                @else
-                    <li>
-                        <span class="dropdown-item">
-                            <i data-lucide="circle-slash-2" class="w-4 h-4 mr-2"></i> No Record
-                        </span>
-                    </li>
-                @endif
-            </ul>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
