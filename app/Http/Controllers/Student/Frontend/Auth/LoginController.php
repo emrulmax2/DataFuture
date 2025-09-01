@@ -45,6 +45,7 @@ class LoginController extends Controller
      */
     public function logout()
     {
+        session()->forget('selected_student_id');
         \Auth::guard('student')->logout();
         return redirect()->route('students.login');
     }
