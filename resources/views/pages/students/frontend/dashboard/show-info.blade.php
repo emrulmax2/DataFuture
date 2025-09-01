@@ -20,7 +20,7 @@
                     @if(isset($student->descendants))
                         @foreach($student->descendants as $descendant)
                             <li>
-                                <a href="{{ route('dashboard.student.select', $descendant->id) }}" class="dropdown-item">
+                                <a href="{{ route('students.dashboard.student.select', $descendant->id) }}" class="dropdown-item">
                                     <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $descendant->course->semester->name }}
                                 </a>
                             </li>
@@ -28,7 +28,7 @@
                     @else
                         @foreach($student->children as $child)
                             <li>
-                                <a href="{{ route('dashboard.student.select', $child->id) }}" class="dropdown-item">
+                                <a href="{{ route('students.dashboard.student.select', $child->id) }}" class="dropdown-item">
                                     <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $child->course->semester->name }}
                                 </a>
                             </li>
@@ -39,7 +39,7 @@
                     @if($student->ancestors->count())
                         @foreach($student->ancestors as $ancestor)
                             <li>
-                                <a href="{{ route('dashboard.student.select', $ancestor->id) }}" class="dropdown-item">
+                                <a href="{{ route('students.dashboard.student.select', $ancestor->id) }}" class="dropdown-item">
                                     <i data-lucide="user" class="w-4 h-4 mr-2"></i> View {{ $ancestor->course->semester->name }}
                                 </a>
                             </li>
