@@ -61,9 +61,9 @@ class DashboardController extends Controller
         $selectedStudentId = session('selected_student_id');
         $userData = auth('student')->user();
         if ($selectedStudentId) {
-            $studentDataList = $studentData = Student::find($selectedStudentId);
+            $studentDataList = $studentData = $student =Student::find($selectedStudentId);
         } else {
-            $studentDataList = $studentData = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+            $studentDataList = $studentData = $student = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
         }
 
         $userData = auth('student')->user();
@@ -73,7 +73,6 @@ class DashboardController extends Controller
         $sexualOrientations = SexualOrientation::where('active', 1)->get();
         $sexIdentifiers = SexIdentifier::where('active', 1)->get();
         $genderIdentities = HesaGender::where('active', 1)->get();
-        $studentData = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->get()->first();
         $studentContact = $studentData->contact;
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
@@ -118,8 +117,7 @@ class DashboardController extends Controller
                 'selectedStudentId' => session('selected_student_id')
             ]);
         else:
-            $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->orderBy('id', 'DESC')->get()->first();
-            $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
+           $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
             $DoItOnline = FormsTable::all();
             if($studentAssigned)
              $dataBox = $this->moduleList();
