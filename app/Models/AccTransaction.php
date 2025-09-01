@@ -74,4 +74,8 @@ class AccTransaction extends Model
     public function agentPayment(){
         return $this->hasOne(AgentComissionPayment::class, 'acc_transaction_id', 'id')->latestOfMany();
     }
+
+    public function requisition(){
+        return $this->hasOne(BudgetRequisitionTransaction::class, 'acc_transaction_id', 'id');
+    }
 }

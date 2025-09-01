@@ -540,7 +540,7 @@ class BudgetManagementController extends Controller
         $SearchVal = $request->SearchVal;
 
         $html = '';
-        $Query = AccTransaction::orderBy('transaction_code', 'ASC')->where('parent', '0')->where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->get();
+        $Query = AccTransaction::whereDoesntHave('requisition')->orderBy('transaction_code', 'ASC')->where('parent', '0')->where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->get();
         
         if($Query->count() > 0):
             foreach($Query as $qr):

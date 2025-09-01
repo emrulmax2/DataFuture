@@ -43,6 +43,9 @@ var storageTransList = (function () {
                                     if(cell.getData().doc_url != ''){
                                         html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                     }
+                                    if(cell.getData().has_requisition != ''){
+                                        html += '<span class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="briefcase" class="w-4 h-4"></i></span>';
+                                    }
                                     if(cell.getData().has_assets != ''){
                                         html += '<span class="text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="package-check" class="w-4 h-4"></i></span>';
                                     }
