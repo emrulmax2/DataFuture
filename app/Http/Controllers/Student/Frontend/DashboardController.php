@@ -737,11 +737,10 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function selectStudent(Request $request)
+    public function selectStudent(Request $request , Student $student)
     {
-        $studentId = $request->input('student_id');
-        if ($studentId && Student::find($studentId)) {
-            session(['selected_student_id' => $studentId]);
+        if ($student && Student::find($student->id)) {
+            session(['selected_student_id' => $student->id]);
             return redirect()->route('students.dashboard');
         }
         return response()->json(['success' => false, 'message' => 'Invalid student ID']);

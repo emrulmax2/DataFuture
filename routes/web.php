@@ -604,7 +604,7 @@ Route::prefix('/students')->name('students.')->group(function() {
 
 
             Route::get('/dashboard/workplacement', 'workplacement')->name('dashboard.workplacement');
-            Route::get('/dashboard/student/select/{student_id}', 'selectStudent')->name('dashboard.student.select');
+            Route::get('/dashboard/student/select/{student}', 'selectStudent')->name('dashboard.student.select');
         });
 
         Route::controller(StudentDocumentRequestFormController::class)->group(function() {
