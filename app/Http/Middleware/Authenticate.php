@@ -18,14 +18,15 @@ class Authenticate
         if (!is_null(request()->user())) {
             return $next($request);
         }else if (!is_null(Auth::guard('student')->user())) {
-            
+            session()->forget('selected_student_id');
             return redirect()->route('students.login');
 
         }else if (!is_null(Auth::guard('applicant')->user())) {
-
+            session()->forget('selected_student_id');
             return redirect()->route('applicant.login');
 
         }else {
+            session()->forget('selected_student_id');
             return redirect('login');
         }
     }

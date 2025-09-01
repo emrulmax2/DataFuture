@@ -54,8 +54,18 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    //implement a session management system where selected Student Id will show all the relevant data
+    
     public function index()
     {
+        $selectedStudentId = session('selected_student_id');
+        $userData = auth('student')->user();
+        if ($selectedStudentId) {
+            $studentDataList = $studentData = $student =Student::find($selectedStudentId);
+        } else {
+            $studentDataList = $studentData = $student = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+        }
+
         $userData = auth('student')->user();
         $countries = Country::where('active', 1)->get();
         $ethnicities = Ethnicity::where('active', 1)->get();
@@ -63,7 +73,6 @@ class DashboardController extends Controller
         $sexualOrientations = SexualOrientation::where('active', 1)->get();
         $sexIdentifiers = SexIdentifier::where('active', 1)->get();
         $genderIdentities = HesaGender::where('active', 1)->get();
-        $studentData = Student::where("student_user_id", $userData->id)->orderBy('id', 'DESC')->get()->first();
         $studentContact = $studentData->contact;
         $studentOtherDetails = $studentData->other;
         $currentAddress = Address::find($studentContact->term_time_address_id);
@@ -104,10 +113,11 @@ class DashboardController extends Controller
                 "consents" =>$consentList,
                 "termTimeAccomadtionTypes" => $terTimeAccomadtionType,
                 'pCountries' => $pCountries,
+                'studentDataList' => $studentDataList,
+                'selectedStudentId' => session('selected_student_id')
             ]);
         else:
-            $student = $studentData = Student::where("student_user_id", auth('student')->user()->id)->orderBy('id', 'DESC')->get()->first();
-            $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
+           $studentAssigned = Assign::where('student_id',$student->id)->get()->first();
             $DoItOnline = FormsTable::all();
             if($studentAssigned)
              $dataBox = $this->moduleList();
@@ -169,14 +179,24 @@ class DashboardController extends Controller
                 "currenTerm" => $dataBox["currenTerm"],
                 "doItOnline" => $DoItOnline,
                 "datewiseClasses" => $dateWiseClassList,
+                
+                'studentDataList' => $studentDataList,
+                'selectedStudentId' => session('selected_student_id')
             ]);
         endif;
 
     }
 
     public function profileView() {
+         
+        $selectedStudentId = session('selected_student_id');
+        $userData = auth('student')->user();
+        if ($selectedStudentId) {
+            $student = $studentData = Student::with('crel', 'course')->find($selectedStudentId);
+        } else {
+            $student = $studentData = Student::with('crel', 'course')->where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+        }
         
-        $student = $studentData = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->orderBy('id','DESC')->get()->first();
         $courseRelationCreation = $student->crel->creation;
         $studentCourseAvailability = $courseRelationCreation->availability;
         $courseCreationQualificationData = $courseRelationCreation->qualification;
@@ -187,6 +207,8 @@ class DashboardController extends Controller
                         ->first();
         $CourseCreationVenue = CourseCreationVenue::where('course_creation_id',$courseRelationCreation->id)->where('venue_id', $currentCourse->venue_id)->get()->first();
         $dateWiseClassList = $this->upcommingClass($student->id);
+        
+        $studentDataList = Student::where("student_user_id", auth('student')->user()->id)->orderBy('id', 'DESC')->get();
 
         return view('pages.students.frontend.dashboard.profile.index', [
             'title' => 'Live Students - London Churchill College',
@@ -215,14 +237,21 @@ class DashboardController extends Controller
             "venue" =>(!empty($CourseCreationVenue)) ? $currentCourse->venue->name : "",
             'studentCourseAvailability' => $studentCourseAvailability,
             "datewiseClasses" => $dateWiseClassList,
+            'studentDataList' => $studentDataList,
+            'selectedStudentId' => session('selected_student_id')
         ]);
 
     }
 
     protected function moduleList() {
 
+        $selectedStudentId = session('selected_student_id');
         $userData = StudentUser::find(auth('student')->user()->id);
-        $studentData = Student::where("student_user_id",$userData->id)->orderBy('id', 'DESC')->get()->first();
+        if ($selectedStudentId) {
+            $student = $studentData = Student::with('crel', 'course')->find($selectedStudentId);
+        } else {
+            $student = $studentData = Student::with('crel', 'course')->where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+        }
 
         $Query = DB::table('plans as plan')
         ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','module.class_type as module_class_type','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
@@ -503,8 +532,15 @@ class DashboardController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
-    public function attendanceExcuse(){
-        $student = Student::with('crel', 'course')->where("student_user_id", auth('student')->user()->id)->get()->first();
+    public function attendanceExcuse() {
+        $selectedStudentId = session('selected_student_id');
+        $userData = StudentUser::find(auth('student')->user()->id);
+        if ($selectedStudentId) {
+            $student = $studentData = Student::with('crel', 'course')->find($selectedStudentId);
+        } else {
+            $student = $studentData = Student::with('crel', 'course')->where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+        }
+   
         $dateWiseClassList = $this->upcommingClass($student->id);
 
         return view('pages.students.frontend.dashboard.profile.excuse', [
@@ -644,8 +680,14 @@ class DashboardController extends Controller
 
 
     public function workplacement(){
-        $student_user_id = auth('student')->user()->id;
-        $student = Student::with('crel', 'course')->where("student_user_id", $student_user_id)->orderBy('id', 'DESC')->get()->first();
+
+        $selectedStudentId = session('selected_student_id');
+        $userData = $student_user_id = StudentUser::find(auth('student')->user()->id);
+        if ($selectedStudentId) {
+            $student = $studentData = Student::with('crel', 'course')->find($selectedStudentId);
+        } else {
+            $student = $studentData = Student::with('crel', 'course')->where("student_user_id", $userData->id)->orderBy('id', 'DESC')->first();
+        }
 
         $dateWiseClassList = $this->upcommingClass($student->id);
 
@@ -691,5 +733,14 @@ class DashboardController extends Controller
             'total_hours_calculations' => $total_hours_calculations ?? [],
             'confirmed_hours' => $confirmed_hours
         ]);
+    }
+
+    public function selectStudent(Request $request , Student $student)
+    {
+        if ($student && Student::find($student->id)) {
+            session(['selected_student_id' => $student->id]);
+            return redirect()->route('students.dashboard');
+        }
+        return response()->json(['success' => false, 'message' => 'Invalid student ID']);
     }
 }

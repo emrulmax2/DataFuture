@@ -18,15 +18,15 @@ class LoggedIn
         if (!is_null(request()->user())) {
             return redirect('/');
         }else if (!is_null(Auth::guard('student')->user())) {
-            
+            session()->forget('selected_student_id');
             return redirect()->route('students.login');
 
         }else if (!is_null(Auth::guard('applicant')->user())) {
-            
+            session()->forget('selected_student_id');
             return redirect()->route('applicant.login');
 
         }else if (!is_null(Auth::guard('agent')->user())) {
-            
+            session()->forget('selected_student_id');
             return redirect()->route('agent.login');
 
         }  else {
