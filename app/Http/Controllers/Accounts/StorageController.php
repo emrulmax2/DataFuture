@@ -148,7 +148,7 @@ class StorageController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AccTransaction::with('category', 'bank', 'assets', 'tbank')->orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
+        $query = AccTransaction::with('category', 'bank', 'assets', 'tbank', 'requisition')->orderByRaw(implode(',', $sorts))->where('acc_bank_id', $storage)->where('parent', 0)->whereIn('audit_status', $audit_status);
         if(!empty($openingDate)):
             $query->where('transaction_date_2', '>=', $openingDate);
         endif;
@@ -220,6 +220,7 @@ class StorageController extends Controller
                     'has_assets' => (isset($list->assets->id) && $list->assets->id > 0 ? 1 : 0),
                     'has_payments' => (isset($list->has_payments) && $list->has_payments > 0 ? 1 : 0),
                     'can_eidt' => $canEdit,
+                    'has_requisition' => (isset($list->requisition->id) && $list->requisition->id > 0 ? 1 : 0)
                 ];
                 $i++;
             endforeach;
