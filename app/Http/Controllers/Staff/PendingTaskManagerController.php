@@ -460,19 +460,17 @@ class PendingTaskManagerController extends Controller
             foreach($ids as $id):
                 if($id > 0):
                     $student = Student::find($id);
-                    $studentUserEmail = $student->users->email;
-                    $studentUserEmailVerifiedA = (isset($student->users->email_verified_at) && !empty($student->users->email_verified_at) ? 1 : 0);
                     $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
                     $newPassword = date('dmY', strtotime($student->date_of_birth)); //strtolower($student->last_name);
 
-                    /*if($studentUserEmail != $orgEmail):*/
+                    
+                    
                         $studentContact = $studentContactOld = StudentContact::find($student->contact->id);
                         $studentContact->fill([
-                            //'personal_email' => $studentUserEmail, 
-                            //'personal_email_verification' => $studentUserEmailVerifiedA,
                             'institutional_email' => $orgEmail, 
                             'institutional_email_verification' => 1,
                         ]);
+
                         $changes = $studentContact->getDirty();
                         $studentContact->save();
                         if($studentContact->wasChanged() && !empty($changes)):
@@ -489,25 +487,46 @@ class PendingTaskManagerController extends Controller
                             endforeach;
                         endif;
 
-                        $studentUser = $studentUserOld = StudentUser::find($student->users->id);
-                        
+                        if(isset($student->users->id)):
+                            $studentUser =$oldUser = StudentUser::find($student->users->id);
+                        endif;
+
                         $findUserFromOrgEmail = StudentUser::where('email', $orgEmail)->first();
+
                         if(!$findUserFromOrgEmail):
 
-                            $studentUser->fill([
-                                'email' => $orgEmail,
-                                'password' => Hash::make($newPassword)
-                            ]);
+                            if(!isset($studentUser->id)):
+                                $studentUser = new StudentUser();
+                                $studentUser->fill([
+                                    'email' => $orgEmail,
+                                    'name' => $student->full_name,
+                                    'password' => Hash::make($newPassword)
+                                ]);
+                                $studentUser->save();
+                                $oldUser = $studentUser;
 
-                            $changes = $studentUser->getDirty();
-                            $studentUser->save();
+                                $student->student_user_id = $studentUser->id;
+                                $student->save();
+                            else:
+                                
+                                $studentUser->fill([
+                                    'email' => $orgEmail,
+                                    'password' => Hash::make($newPassword)
+                                ]);
+
+                                $changes = $studentUser->getDirty();
+                                $studentUser->save();
+                            endif;
+
 
                         else:
 
                             $student->student_user_id = $findUserFromOrgEmail->id;
                             $changes = $student->getDirty();
                             $student->save();
-                            
+
+                            $studentUser =$oldUser= StudentUser::find($findUserFromOrgEmail->id);
+                            //update changed archive via student
                             if($student->wasChanged() && !empty($changes)):
                                 foreach($changes as $field => $value):
 
@@ -515,7 +534,7 @@ class PendingTaskManagerController extends Controller
                                     $data['student_id'] = $id;
                                     $data['table'] = 'students';
                                     $data['field_name'] = $field;
-                                    $data['field_value'] = $studentUserOld->id;
+                                    $data['field_value'] = $findUserFromOrgEmail->id;
                                     $data['field_new_value'] = $value;
                                     $data['created_by'] = auth()->user()->id;
                                     StudentArchive::create($data);
@@ -523,13 +542,15 @@ class PendingTaskManagerController extends Controller
                                 endforeach;
                             endif;
                         endif;
+
+
                         if($studentUser->wasChanged() && !empty($changes)):
                             foreach($changes as $field => $value):
                                 $data = [];
                                 $data['student_id'] = $id;
                                 $data['table'] = 'student_users';
                                 $data['field_name'] = $field;
-                                $data['field_value'] = $studentUserOld->$field;
+                                $data['field_value'] = $oldUser->$field;
                                 $data['field_new_value'] = $value;
                                 $data['created_by'] = auth()->user()->id;
                 
