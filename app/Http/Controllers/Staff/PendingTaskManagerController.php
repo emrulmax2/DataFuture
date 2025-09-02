@@ -509,15 +509,19 @@ class PendingTaskManagerController extends Controller
                                 ]);
                                 $studentUser->save();
                                 $oldUser = $studentUser;
-                                    dd($studentUser);
                                 $student->student_user_id = $studentUser->id;
                                 $student->save();
+
+                                
                             else:
                                 
+
                                 $studentUser->fill([
                                     'email' => $orgEmail,
                                     'password' => Hash::make($newPassword),
                                 ]);
+                                $changes = $studentUser->getDirty();
+                                $studentUser->save();
 
                                 if($studentUser->wasChanged() && !empty($changes)):
                                     foreach($changes as $field => $value):
@@ -533,18 +537,19 @@ class PendingTaskManagerController extends Controller
                                     endforeach;
                                 endif;
 
-                                $changes = $studentUser->getDirty();
-                                $studentUser->save();
+                                $student->student_user_id = $studentUser->id;
+                                $student->save();
+                                
                             endif;
 
 
                         else:
+                            
                             $privValue = $student->student_user_id;
                             $student->student_user_id = $findUserFromOrgEmail->id;
                             $changes = $student->getDirty();
                             $student->save();
 
-                            $studentUser =$oldUser= StudentUser::find($findUserFromOrgEmail->id);
                             //update changed archive via student
                             if($student->wasChanged() && !empty($changes)):
                                 foreach($changes as $field => $value):
