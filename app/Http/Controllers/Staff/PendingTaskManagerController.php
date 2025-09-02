@@ -500,7 +500,11 @@ class PendingTaskManagerController extends Controller
                                 $studentUser->fill([
                                     'email' => $orgEmail,
                                     'name' => $student->full_name,
-                                    'password' => Hash::make($newPassword)
+                                    'password' => Hash::make($newPassword),
+                                    'email_verified_at' => now(),
+                                    'gender' => isset($student->sexid->name) ? $student->sexid->name : 'Male',
+                                    'active' => 1,
+
                                 ]);
                                 $studentUser->save();
                                 $oldUser = $studentUser;
@@ -511,7 +515,11 @@ class PendingTaskManagerController extends Controller
                                 
                                 $studentUser->fill([
                                     'email' => $orgEmail,
-                                    'password' => Hash::make($newPassword)
+                                    'name' => $student->full_name,
+                                    'password' => Hash::make($newPassword),
+                                    'email_verified_at' => now(),
+                                    'gender' => isset($student->sexid->name) ? $student->sexid->name : 'Male',
+                                    'active' => 1,
                                 ]);
 
                                 $changes = $studentUser->getDirty();
