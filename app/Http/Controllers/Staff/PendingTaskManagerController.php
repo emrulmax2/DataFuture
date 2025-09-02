@@ -488,9 +488,9 @@ class PendingTaskManagerController extends Controller
                         endif;
 
                         $findUserFromOrgEmail = StudentUser::where('email', $orgEmail)->first();
-                        dd($findUserFromOrgEmail);
+                        
                         if(!isset($findUserFromOrgEmail)):
-
+                            dd($findUserFromOrgEmail);
                             if(isset($student->users->id)):
                                 $studentUser =$oldUser = StudentUser::find($student->users->id);
                             endif;
