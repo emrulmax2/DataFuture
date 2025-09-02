@@ -493,16 +493,21 @@ class PendingTaskManagerController extends Controller
                         
                         $findUserFromOrgEmail = StudentUser::where('email', $orgEmail)->first();
                         if(!$findUserFromOrgEmail):
+
                             $studentUser->fill([
                                 'email' => $orgEmail,
                                 'password' => Hash::make($newPassword)
                             ]);
+
                             $changes = $studentUser->getDirty();
                             $studentUser->save();
+
                         else:
+
                             $student->student_user_id = $findUserFromOrgEmail->id;
                             $changes = $student->getDirty();
                             $student->save();
+                            
                             if($student->wasChanged() && !empty($changes)):
                                 foreach($changes as $field => $value):
 
@@ -517,7 +522,6 @@ class PendingTaskManagerController extends Controller
 
                                 endforeach;
                             endif;
-                            $studentUser->forceDelete();
                         endif;
                         if($studentUser->wasChanged() && !empty($changes)):
                             foreach($changes as $field => $value):
