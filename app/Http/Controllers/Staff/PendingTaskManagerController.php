@@ -487,13 +487,14 @@ class PendingTaskManagerController extends Controller
                             endforeach;
                         endif;
 
-                        if(isset($student->users->id)):
-                            $studentUser =$oldUser = StudentUser::find($student->users->id);
-                        endif;
-
                         $findUserFromOrgEmail = StudentUser::where('email', $orgEmail)->first();
 
                         if(!$findUserFromOrgEmail):
+
+                            
+                            if(isset($student->users->id)):
+                                $studentUser =$oldUser = StudentUser::find($student->users->id);
+                            endif;
 
                             if(!isset($studentUser->id)):
                                 $studentUser = new StudentUser();
@@ -515,12 +516,22 @@ class PendingTaskManagerController extends Controller
                                 
                                 $studentUser->fill([
                                     'email' => $orgEmail,
-                                    'name' => $student->full_name,
                                     'password' => Hash::make($newPassword),
-                                    'email_verified_at' => now(),
-                                    'gender' => isset($student->sexid->name) ? $student->sexid->name : 'Male',
-                                    'active' => 1,
                                 ]);
+
+                                if($studentUser->wasChanged() && !empty($changes)):
+                                    foreach($changes as $field => $value):
+                                        $data = [];
+                                        $data['student_id'] = $student->id;
+                                        $data['table'] = 'student_users';
+                                        $data['field_name'] = $field;
+                                        $data['field_value'] = $oldUser->$field;
+                                        $data['field_new_value'] = $value;
+                                        $data['created_by'] = auth()->user()->id;
+                        
+                                        StudentArchive::create($data);
+                                    endforeach;
+                                endif;
 
                                 $changes = $studentUser->getDirty();
                                 $studentUser->save();
@@ -528,7 +539,7 @@ class PendingTaskManagerController extends Controller
 
 
                         else:
-
+                            $privValue = $student->student_user_id;
                             $student->student_user_id = $findUserFromOrgEmail->id;
                             $changes = $student->getDirty();
                             $student->save();
@@ -542,7 +553,7 @@ class PendingTaskManagerController extends Controller
                                     $data['student_id'] = $id;
                                     $data['table'] = 'students';
                                     $data['field_name'] = $field;
-                                    $data['field_value'] = $findUserFromOrgEmail->id;
+                                    $data['field_value'] = $privValue;
                                     $data['field_new_value'] = $value;
                                     $data['created_by'] = auth()->user()->id;
                                     StudentArchive::create($data);
@@ -552,19 +563,7 @@ class PendingTaskManagerController extends Controller
                         endif;
 
 
-                        if($studentUser->wasChanged() && !empty($changes)):
-                            foreach($changes as $field => $value):
-                                $data = [];
-                                $data['student_id'] = $id;
-                                $data['table'] = 'student_users';
-                                $data['field_name'] = $field;
-                                $data['field_value'] = $oldUser->$field;
-                                $data['field_new_value'] = $value;
-                                $data['created_by'] = auth()->user()->id;
-                
-                                StudentArchive::create($data);
-                            endforeach;
-                        endif;
+                        
 
                         /* Excel Data Array */
                         $theCollection[$row][] = $student->registration_no;
