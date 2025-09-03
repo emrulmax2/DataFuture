@@ -488,26 +488,30 @@ class PendingTaskManagerController extends Controller
                         endif;
                         if(isset($student->users)):
                             
-                            
-                            $studentUser = $studentUserOld = StudentUser::find($student->users->id);
-                            $studentUser->fill([
-                                'email' => $orgEmail,
-                                'password' => Hash::make($newPassword)
-                            ]);
-                            $changes = $studentUser->getDirty();
-                            $studentUser->save();
-                            if($studentUser->wasChanged() && !empty($changes)):
-                                foreach($changes as $field => $value):
-                                    $data = [];
-                                    $data['student_id'] = $id;
-                                    $data['table'] = 'student_users';
-                                    $data['field_name'] = $field;
-                                    $data['field_value'] = $studentUserOld->$field;
-                                    $data['field_new_value'] = $value;
-                                    $data['created_by'] = auth()->user()->id;
-                    
-                                    StudentArchive::create($data);
-                                endforeach;
+                            $existRegistration = StudentUser::where('email', $orgEmail)->first();
+                            if($existRegistration):
+                                Student::where('id', $student->id)->update(['student_user_id' => $existRegistration->id]);
+                            else:
+                                $studentUser = $studentUserOld = StudentUser::find($student->users->id);
+                                $studentUser->fill([
+                                    'email' => $orgEmail,
+                                    'password' => Hash::make($newPassword)
+                                ]);
+                                $changes = $studentUser->getDirty();
+                                $studentUser->save();
+                                if($studentUser->wasChanged() && !empty($changes)):
+                                    foreach($changes as $field => $value):
+                                        $data = [];
+                                        $data['student_id'] = $id;
+                                        $data['table'] = 'student_users';
+                                        $data['field_name'] = $field;
+                                        $data['field_value'] = $studentUserOld->$field;
+                                        $data['field_new_value'] = $value;
+                                        $data['created_by'] = auth()->user()->id;
+                        
+                                        StudentArchive::create($data);
+                                    endforeach;
+                                endif;
                             endif;
                         else:
                             // check if there is any entry of orgEmail present if present then update student with the entry
