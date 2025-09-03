@@ -460,6 +460,10 @@ class PendingTaskManagerController extends Controller
             foreach($ids as $id):
                 if($id > 0):
                     $student = Student::find($id);
+                    if("LCC20250646"==$student->registration_no) {
+                        dd($student->student_user_id);
+                        
+                    }
                     $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
                     $newPassword = date('dmY', strtotime($student->date_of_birth)); //strtolower($student->last_name);
 
