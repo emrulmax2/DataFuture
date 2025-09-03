@@ -486,7 +486,7 @@ class PendingTaskManagerController extends Controller
                                 StudentArchive::create($data);
                             endforeach;
                         endif;
-                        if(isset($student->users->id) && $student->users->id > 0):
+                        if(isset($student->users)):
                             
                             
                             $studentUser = $studentUserOld = StudentUser::find($student->users->id);
@@ -510,9 +510,18 @@ class PendingTaskManagerController extends Controller
                                 endforeach;
                             endif;
                         else:
+                            $studentUser = StudentUser::create([
+                                'email' => $orgEmail,
+                                'password' => Hash::make($newPassword),
+                                'email_verified_at' => now(),
+                                'name' => $student->first_name.' '.$student->last_name,
+                                'gender' => $student->sexid->name,
+                                'active' => 1,
+                                'created_by' => auth()->user()->id
 
-                            return response()->json(['msg' => 'Student Login Not Found!', 'id' => $student->student_user_id], 422);
-
+                            ]);
+                            //get the id
+                            Student::where('id', $student->id)->update(['student_user_id' => $studentUser->id]);
                         endif;
 
                         /* Excel Data Array */
