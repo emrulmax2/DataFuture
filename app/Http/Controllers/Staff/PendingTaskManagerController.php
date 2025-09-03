@@ -510,18 +510,24 @@ class PendingTaskManagerController extends Controller
                                 endforeach;
                             endif;
                         else:
-                            $studentUser = StudentUser::create([
-                                'email' => $orgEmail,
-                                'password' => Hash::make($newPassword),
-                                'email_verified_at' => now(),
-                                'name' => $student->first_name.' '.$student->last_name,
-                                'gender' => $student->sexid->name,
-                                'active' => 1,
-                                'created_by' => auth()->user()->id
+                            // check if there is any entry of orgEmail present if present then update student with the entry
+                            $existRegistration = StudentUser::where('email', $orgEmail)->first();
+                            if($existRegistration):
+                                Student::where('id', $student->id)->update(['student_user_id' => $existRegistration->id]);
+                            else:
+                                $studentUser = StudentUser::create([
+                                    'email' => $orgEmail,
+                                    'password' => Hash::make($newPassword),
+                                    'email_verified_at' => now(),
+                                    'name' => $student->first_name.' '.$student->last_name,
+                                    'gender' => $student->sexid->name,
+                                    'active' => 1,
+                                    'created_by' => auth()->user()->id
 
-                            ]);
-                            //get the id
-                            Student::where('id', $student->id)->update(['student_user_id' => $studentUser->id]);
+                                ]);
+                                //get the id
+                                Student::where('id', $student->id)->update(['student_user_id' => $studentUser->id]);
+                            endif;
                         endif;
 
                         /* Excel Data Array */
