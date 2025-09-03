@@ -485,26 +485,52 @@ class PendingTaskManagerController extends Controller
                                 StudentArchive::create($data);
                             endforeach;
                         endif;
+                        if(isset($student->users->id) && $student->users->id > 0):
+                            
+                            $studentUser = $studentUserOld = StudentUser::find($student->users->id);
+                            $studentUser->fill([
+                                'email' => $orgEmail,
+                                'password' => Hash::make($newPassword)
+                            ]);
+                            $changes = $studentUser->getDirty();
+                            $studentUser->save();
+                            if($studentUser->wasChanged() && !empty($changes)):
+                                foreach($changes as $field => $value):
+                                    $data = [];
+                                    $data['student_id'] = $id;
+                                    $data['table'] = 'student_users';
+                                    $data['field_name'] = $field;
+                                    $data['field_value'] = $studentUserOld->$field;
+                                    $data['field_new_value'] = $value;
+                                    $data['created_by'] = auth()->user()->id;
+                    
+                                    StudentArchive::create($data);
+                                endforeach;
+                            endif;
+                        else:
+                            $studentUser = new StudentUser();
+                            $studentUser->fill([
+                                'id' => $student->student_user_id,
+                                'email' => $orgEmail,
+                                'password' => Hash::make($newPassword),
+                                'email_verified_at' => now(),
+                                'name' => $student->first_name.' '.$student->last_name,
+                                'gender' => $student->sexid->name,
+                                'active' => 1
+                            ]);
+                            $studentUser->save();
 
-                        $studentUser = $studentUserOld = StudentUser::find($student->users->id);
-                        $studentUser->fill([
-                            'email' => $orgEmail,
-                            'password' => Hash::make($newPassword)
-                        ]);
-                        $changes = $studentUser->getDirty();
-                        $studentUser->save();
-                        if($studentUser->wasChanged() && !empty($changes)):
-                            foreach($changes as $field => $value):
-                                $data = [];
-                                $data['student_id'] = $id;
-                                $data['table'] = 'student_users';
-                                $data['field_name'] = $field;
-                                $data['field_value'] = $studentUserOld->$field;
-                                $data['field_new_value'] = $value;
-                                $data['created_by'] = auth()->user()->id;
-                
-                                StudentArchive::create($data);
-                            endforeach;
+                            $data = [];
+                            $data['student_id'] = $id;
+                            $data['table'] = 'student_users';
+                            $data['field_name'] = 'email';
+                            $data['field_value'] = $studentContact->personal_email;
+                            $data['field_new_value'] = $value;
+                            $data['created_by'] = auth()->user()->id;
+            
+                            StudentArchive::create($data);
+
+                            
                         endif;
 
                         /* Excel Data Array */
