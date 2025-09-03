@@ -510,29 +510,9 @@ class PendingTaskManagerController extends Controller
                                 endforeach;
                             endif;
                         else:
-                            $studentUser = new StudentUser();
-                            $studentUser->fill([
-                                'id' => $student->student_user_id,
-                                'email' => $orgEmail,
-                                'password' => Hash::make($newPassword),
-                                'email_verified_at' => now(),
-                                'name' => $student->first_name.' '.$student->last_name,
-                                'gender' => $student->sexid->name,
-                                'active' => 1
-                            ]);
-                            $studentUser->save();
 
-                            $data = [];
-                            $data['student_id'] = $id;
-                            $data['table'] = 'student_users';
-                            $data['field_name'] = 'email';
-                            $data['field_value'] = $studentContact->personal_email;
-                            $data['field_new_value'] = $value;
-                            $data['created_by'] = auth()->user()->id;
-            
-                            StudentArchive::create($data);
+                            return response()->json(['msg' => 'Student Login Not Found!', 'id' => $student->student_user_id], 422);
 
-                            
                         endif;
 
                         /* Excel Data Array */
