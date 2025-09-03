@@ -460,11 +460,11 @@ class PendingTaskManagerController extends Controller
             foreach($ids as $id):
                 if($id > 0):
                     $student = Student::find($id);
+                    
                     $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
                     $newPassword = date('dmY', strtotime($student->date_of_birth)); //strtolower($student->last_name);
 
-                    
-                    
+                    /*if($studentUserEmail != $orgEmail):*/
                         $studentContact = $studentContactOld = StudentContact::find($student->contact->id);
                         $studentContact->fill([
                             'institutional_email' => $orgEmail, 
@@ -486,89 +486,53 @@ class PendingTaskManagerController extends Controller
                                 StudentArchive::create($data);
                             endforeach;
                         endif;
-
-                        $findUserFromOrgEmail = StudentUser::where('email', $orgEmail)->first();
-                        
-                        if(!isset($findUserFromOrgEmail)):
+                        if(isset($student->users)):
                             
-                            if(isset($student->users->id)):
-                                $studentUser =$oldUser = StudentUser::find($student->users->id);
-                            endif;
-
-                            if(!isset($studentUser->id)):
-                                
-                                $studentUser = new StudentUser();
-                                $studentUser->fill([
-                                    'email' => $orgEmail,
-                                    'name' => $student->full_name,
-                                    'password' => Hash::make($newPassword),
-                                    'email_verified_at' => now(),
-                                    'gender' => isset($student->sexid->name) ? $student->sexid->name : 'Male',
-                                    'active' => 1,
-
-                                ]);
-                                $studentUser->save();
-                                $oldUser = $studentUser;
-                                $student->student_user_id = $studentUser->id;
-                                $student->save();
-
-                                
+                            $existRegistration = StudentUser::where('email', $orgEmail)->first();
+                            if($existRegistration):
+                                Student::where('id', $student->id)->update(['student_user_id' => $existRegistration->id]);
                             else:
-                                
-
+                                $studentUser = $studentUserOld = StudentUser::find($student->users->id);
                                 $studentUser->fill([
                                     'email' => $orgEmail,
-                                    'password' => Hash::make($newPassword),
+                                    'password' => Hash::make($newPassword)
                                 ]);
                                 $changes = $studentUser->getDirty();
                                 $studentUser->save();
-
                                 if($studentUser->wasChanged() && !empty($changes)):
                                     foreach($changes as $field => $value):
                                         $data = [];
-                                        $data['student_id'] = $student->id;
+                                        $data['student_id'] = $id;
                                         $data['table'] = 'student_users';
                                         $data['field_name'] = $field;
-                                        $data['field_value'] = $oldUser->$field;
+                                        $data['field_value'] = $studentUserOld->$field;
                                         $data['field_new_value'] = $value;
                                         $data['created_by'] = auth()->user()->id;
                         
                                         StudentArchive::create($data);
                                     endforeach;
                                 endif;
-
-                                $student->student_user_id = $studentUser->id;
-                                $student->save();
-                                
                             endif;
-
-
                         else:
-                            
-                            $privValue = $student->student_user_id;
-                            $student->student_user_id = $findUserFromOrgEmail->id;
-                            $changes = $student->getDirty();
-                            $student->save();
+                            // check if there is any entry of orgEmail present if present then update student with the entry
+                            $existRegistration = StudentUser::where('email', $orgEmail)->first();
+                            if($existRegistration):
+                                Student::where('id', $student->id)->update(['student_user_id' => $existRegistration->id]);
+                            else:
+                                $studentUser = StudentUser::create([
+                                    'email' => $orgEmail,
+                                    'password' => Hash::make($newPassword),
+                                    'email_verified_at' => now(),
+                                    'name' => $student->first_name.' '.$student->last_name,
+                                    'gender' => $student->sexid->name,
+                                    'active' => 1,
+                                    'created_by' => auth()->user()->id
 
-                            //update changed archive via student
-                            if($student->wasChanged() && !empty($changes)):
-                                foreach($changes as $field => $value):
-
-                                    $data = [];
-                                    $data['student_id'] = $id;
-                                    $data['table'] = 'students';
-                                    $data['field_name'] = $field;
-                                    $data['field_value'] = $privValue;
-                                    $data['field_new_value'] = $value;
-                                    $data['created_by'] = auth()->user()->id;
-                                    StudentArchive::create($data);
-
-                                endforeach;
+                                ]);
+                                //get the id
+                                Student::where('id', $student->id)->update(['student_user_id' => $studentUser->id]);
                             endif;
                         endif;
-
-
-                        
 
                         /* Excel Data Array */
                         $theCollection[$row][] = $student->registration_no;
