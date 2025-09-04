@@ -222,7 +222,7 @@ class ApplicationController extends Controller
                 $applicantKin->country = $student->kin->address->country;
                 $applicantKin->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantKin->save();
-
+                FacadesDebugbar::info('Here is the proof of id: ' . $student->ProofOfIdLatest);
                 $applicantProofofId = new ApplicantProofOfId();
                 $applicantProofofId->applicant_id = $applicant->id;
                 $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
