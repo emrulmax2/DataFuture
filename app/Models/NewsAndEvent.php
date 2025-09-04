@@ -7,18 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class StudentSms extends Model
+class NewsAndEvent extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'student_id',
-        //'sms_template_id',
-        'student_sms_content_id',
-        'phone',
-        //'subject',
-        //'sms',
-        'show_as_news',
+        'title',
+        'content',
+        'fol_all',
+        'active',
+
         'created_by',
         'updated_by',
     ];
@@ -30,21 +28,17 @@ class StudentSms extends Model
      */
     protected $dates = ['deleted_at'];
 
-    public function student(){
-        return $this->belongsTo(Student::class, 'student_id');
+    public function students(){
+        return $this->hasMany(NewsAndEventStudent::class, 'news_and_event_id', 'id');
     }
 
-    public function sms(){
-        return $this->belongsTo(StudentSmsContent::class, 'student_sms_content_id');
+    public function documents(){
+        return $this->hasMany(NewsAndEventDocument::class, 'news_and_event_id', 'id');
     }
-    
-    public function user(){
+
+    public function createdBy(){
         return $this->belongsTo(User::class, 'created_by');
     }
-    
-    /*public function template(){
-        return $this->belongsTo(SmsTemplate::class, 'sms_template_id');
-    }*/
 
     public function getCreatedAtHumanTimeAttribute(){
         $theInstance = Carbon::parse($this->created_at);

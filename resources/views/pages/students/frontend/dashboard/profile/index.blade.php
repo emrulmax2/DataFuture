@@ -394,5 +394,7 @@
 </div><!--End GRID-->   
 @endsection
 
-
+@section('script')
+    @vite('resources/js/student-frontend-global.js')
+@endsection
 

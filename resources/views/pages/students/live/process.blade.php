@@ -192,7 +192,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-span-3 sm:col-span-4">
+                                                    <div class="col-span-3 sm:col-span-3">
                                                         <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
                                                             <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
                                                             @if(isset($task->task->users) && !empty($task->task->users))
@@ -222,7 +222,7 @@
                                                         endif;
                                                     @endphp
                                                     @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
-                                                    <div class="col-span-3 sm:col-span-4 text-right">
+                                                    <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
                                                                 <button class="dropdown-toggle btn btn-warning text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Update  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
@@ -247,10 +247,17 @@
                                                                             </a>
                                                                         </li>
                                                                         @endif
-                                                                        @if($task->task->attendance_excuses == 'No' && ($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
+                                                                        @if($task->task->address_request == 'No' && $task->task->attendance_excuses == 'No' && ($task->task->status == 'No' || ($task->task->status == 'Yes' && $task->task_status_id > 0)) && ($task->task->upload == 'No' || ($task->task->upload == 'Yes' && $task->documents->count() > 0)))
                                                                         <li>
                                                                             <a data-recordid="{{ $task->id }}" href="javascript:void(0);" class="markAsCompleted dropdown-item">
                                                                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
+                                                                        @if($task->task->address_request == 'Yes')
+                                                                        <li>
+                                                                            <a data-studentid="{{ $student->id }}" data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAddressUpdateReqModal" class="viewAddrUpReq dropdown-item">
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Address Update Request
                                                                             </a>
                                                                         </li>
                                                                         @endif
@@ -330,7 +337,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="col-span-3 sm:col-span-4">
+                                                    <div class="col-span-3 sm:col-span-3">
                                                         <div class="flex items-center justify-end assignedUserWrap" id="assignedUserWrap_{{ $task->id }}">
                                                             <div class="font-medium text-base mr-5 ml-auto">Assigned To:</div>
                                                             @if(isset($task->task->users) && !empty($task->task->users))
@@ -360,7 +367,7 @@
                                                         endif;
                                                     @endphp
                                                     @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
-                                                    <div class="col-span-3 sm:col-span-4 text-right">
+                                                    <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
                                                                 <button class="dropdown-toggle btn btn-warning text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Update  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
@@ -528,7 +535,7 @@
                                                         endif;
                                                     @endphp
                                                     @if(!empty($user_ids) && in_array(auth()->user()->id, $user_ids))
-                                                    <div class="col-span-3 sm:col-span-4 text-right">
+                                                    <div class="col-span-3 sm:col-span-3 text-right">
                                                         <div class="flex justify-end">
                                                             <div class="dropdown">
                                                                 <button class="dropdown-toggle btn btn-success text-white" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-5 h-5 mr-2"></i> Actions  <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
@@ -539,6 +546,13 @@
                                                                                 <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Log
                                                                             </a>
                                                                         </li>
+                                                                        @if($task->task->address_request == 'Yes')
+                                                                        <li>
+                                                                            <a data-studentid="{{ $student->id }}" data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAddressUpdateReqModal" class="viewAddrUpReq dropdown-item">
+                                                                                <i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Address Update Request
+                                                                            </a>
+                                                                        </li>
+                                                                        @endif
                                                                         @if($task->task->attendance_excuses == 'Yes')
                                                                             <li>
                                                                                 <a data-recordid="{{ $task->id }}" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAttendanceExcuseModal" class="viewExcuse dropdown-item">
@@ -582,6 +596,66 @@
             </div>
         @endif
     </div>
+
+    <!-- BEGIN: View Address Update Request Modal -->
+    <div id="viewAddressUpdateReqModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form method="POST" action="#" id="viewAddressUpdateReqForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Address Update Request</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="loaderWrap flex justify-center items-center py-5">
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(30, 41, 59)" class="w-8 h-8">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>              
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="float-left">
+                            <select name="task_status" id="task_status" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0">
+                                <option value="Pending">Pending</option>
+                                <option value="In Progress">Hold</option>
+                                <option value="Completed">Approve & Complete</option>
+                                <option value="Canceled">Cancel</option>
+                            </select>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Close</button>
+                        <button type="submit" id="updateAdrUpReqBtn" class="btn btn-primary w-auto">
+                            Submit
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                        <input type="hidden" name="student_task_id" value="0"/>
+                        <input type="hidden" name="student_address_update_request_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: View Address Update Request Modal -->
 
     
     <!-- BEGIN: View Excuse Modal -->
@@ -646,9 +720,6 @@
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
                 </div>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
                 <div class="modal-body">
                     <div class="overflow-x-auto scrollbar-hidden">
                         <div id="processTaskLogTable" data-interview="0" data-studentid="{{ $student->id }}" data-studenttaskid="0" class="mt-0 table-report table-report--tabulator"></div>

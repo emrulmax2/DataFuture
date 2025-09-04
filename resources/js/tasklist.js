@@ -89,6 +89,11 @@ var taskListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Address Req",
+                    field: "address_request",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Assigned User",
                     field: "user",
                     headerHozAlign: "left",
@@ -430,6 +435,11 @@ var taskListTable = (function () {
                             $('#editTaskModal input[name="pearson_reg"][value="Yes"]').prop('checked', true);
                         }else{
                             $('#editTaskModal input[name="pearson_reg"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.address_request == 'Yes'){
+                            $('#editTaskModal input[name="address_request"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="address_request"][value="No"]').prop('checked', true);
                         }
                         
                         if(dataset.external_link == 1){

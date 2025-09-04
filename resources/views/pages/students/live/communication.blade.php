@@ -308,6 +308,10 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="show_as_news">Show As News</label>
+                            <input id="show_as_news" class="form-check-input m-0" name="show_as_news" value="1" type="checkbox">
+                        </div>
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="sendSMSBtn" class="btn btn-primary w-auto">     
                             Send SMS                      

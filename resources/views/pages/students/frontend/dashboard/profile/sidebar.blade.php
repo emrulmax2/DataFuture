@@ -14,6 +14,8 @@
                     </div>
                 </div>
             </div> --}}
+
+            @if((isset($newsEvents) && $newsEvents->count() > 0) || (isset($smsNews) && $smsNews->count() > 0))
             <!-- BEGIN: Important Notes -->
             <div class="col-span-12 md:col-span-6 xl:col-span-12 xl:col-start-1 xl:row-start-1 2xl:col-start-auto 2xl:row-start-auto mt-3">
                 <div class="intro-x flex items-center h-10">
@@ -28,46 +30,56 @@
                 <div class="mt-5 intro-x">
                     <div class="box zoom-in bg-primary text-white">
                         <div class="tiny-slider" id="important-notes">
-                            <div class="p-5">
-                                <div class="flex items-center">
-                                    <div class="font-medium text-lg">Welcome Student! </div>
-                                    <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div>
+                            @if(isset($newsEvents) && $newsEvents->count() > 0)
+                                @foreach($newsEvents as $nv)
+                                <div class="p-5">
+                                    <div class="flex items-center">
+                                        <div class="font-medium text-lg">{{ $nv->title}} </div>
+                                        <!-- <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div> -->
+                                    </div>
+                                    <div class="mt-1">{{ $nv->created_at_human_time}}</div>
+                                    <div class="text-justify mt-1">{!! $nv->content !!}</div>
+                                    @if(isset($nv->documents) && $nv->documents->count() > 0)
+                                        <div class="dropdown inline-flex mt-5" data-tw-placement="bottom-start">
+                                            <button type="button" class="dropdown-toggle btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400" aria-expanded="false" data-tw-toggle="dropdown">Attachments <i data-lucide="paperclip" class="w-4 h-4 ml-2"></i></button>
+                                            <div class="dropdown-menu w-64">
+                                                <ul class="dropdown-content">
+                                                    @foreach($nv->documents as $doc)
+                                                        <li class="flex jsutify-start items-start">
+                                                            <a data-docid="{{ $doc->id }}" href="javascript:void(0);" class="dropdown-item downloadEventDoc whitespace-normal text-success break-all" style="align-items: flex-start;">
+                                                                <i data-lucide="check-circle" class="w-4 h-4 mr-2" style="flex: 0 0 .8rem;"></i>{{ $doc->display_file_name }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
                                 </div>
-                                <div class="mt-1">1 Day ago</div>
-                                <div class="text-justify mt-1">Welcome to your new student portal.<br /> September Term will start on 09 September 2024 and
-                                    end on 22 November 2024</div>
-                                {{-- <div class="font-medium flex mt-5">
-                                    <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
-                                    <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
-                                </div> --}}
-                            </div>
-                            {{-- <div class="p-5">
-                                <div class="flex items-center">
-                                    <div class="font-medium text-lg">September Term</div>
-                                </div>
-                                <div class=" mt-1">1 Day ago</div>
-                                <div class=" text-justify mt-1">Start  Date 09 September 2024 To End Date 22 November 2024</div>
-                                <div class="font-medium flex mt-5">
-                                    <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
-                                    <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
-                                </div>
-                            </div> --}}
-                            {{-- <div class="p-5">
-                                <div class="flex items-center">
-                                    <div class="font-medium text-lg">Lorem Ipsum is simply dummy text</div>
-                                </div>
-                                <div class=" mt-1">2 Days ago</div>
-                                <div class=" text-justify mt-1">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.</div>
-                                <div class="font-medium flex mt-5">
-                                    <button type="button" class="btn py-1 px-2 border-white text-white dark:text-slate-300 dark:bg-darkmode-400 dark:border-darkmode-400">Take Action</button>
-                                    <button type="button" class="btn py-1 px-2 border-transparent text-white dark:border-transparent ml-auto">Dismiss</button>
-                                </div>
-                            </div> --}}
+                                @endforeach
+                            @endif
+                            @if(isset($smsNews) && $smsNews->count() > 0)
+                                @foreach($smsNews as $smn)
+                                    @if(isset($smn->sms->sms) && !empty($smn->sms->sms))
+                                        <div class="p-5">
+                                            @if(isset($smn->sms->subject) && !empty($smn->sms->subject))
+                                            <div class="flex items-center">
+                                                <div class="font-medium text-lg">{{ $smn->sms->subject }} </div>
+                                                <!-- <div class="text-xs bg-white dark:bg-primary dark:text-white text-slate-700 px-1 rounded-md ml-auto">New</div> -->
+                                            </div>
+                                            @endif
+                                            <div class="mt-1">{{ $smn->created_at_human_time}}</div>
+                                            <div class="text-justify mt-1">{!! $smn->sms->sms !!}</div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
             <!-- END: Important Notes -->
+             @endif
              
             <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3 2xl:mt-8">
                 <div class="grid grid-cols-12 gap-4">

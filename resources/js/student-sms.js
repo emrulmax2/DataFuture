@@ -77,6 +77,18 @@ var studentCommSMSListTable = (function () {
                     }
                 },
                 {
+                    title: "IS News",
+                    field: "show_as_news",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    minWidth: 100,
+                    formatter(cell, formatterParams){
+                        var html = (cell.getData().show_as_news == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
+
+                        return html;
+                    }
+                },
+                {
                     title: "Issued By",
                     field: "created_by",
                     headerHozAlign: "left",

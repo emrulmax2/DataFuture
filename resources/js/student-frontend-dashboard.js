@@ -1,4 +1,93 @@
 import { createIcons, icons } from "lucide";
+import INTAddressLookUps from "./address_lookup";
+
+(function(){
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const addressUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressUpdateModal"));
+
+    // INIT Address Lookup
+    if($('.theAddressWrap').length > 0){
+        INTAddressLookUps();
+    }
+
+    $('#addressUpdateModal #addrProofDocument').on('change', function(){
+        var inputs = document.getElementById('addrProofDocument');
+        var html = '';
+        for (var i = 0; i < inputs.files.length; ++i) {
+            var name = inputs.files.item(i).name;
+            html += '<div class="mb-1 text-primary font-medium flex justify-start items-center"><i data-lucide="disc" class="w-3 h3 mr-2"></i>'+name+'</div>';
+        }
+
+        $('#addressUpdateModal .addrProofDocumentNames').fadeIn().html(html);
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    });
+
+    $('#addressUpdateForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addressUpdateForm');
+    
+        document.querySelector('#updtAddress').setAttribute('disabled', 'disabled');
+        document.querySelector("#updtAddress svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        form_data.append('file', $('#addressUpdateForm input[name="document"]')[0].files[0]);
+        axios({
+            method: "post",
+            url: route('students.update.address.request'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updtAddress').removeAttribute('disabled');
+            document.querySelector("#updtAddress svg").style.cssText = "display: none;";
+
+            if (response.status == 200) {
+                addressUpdateModal.hide();
+
+                successModal.show(); 
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html(response.data.message);
+                });  
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#updtAddress').removeAttribute('disabled');
+            document.querySelector("#updtAddress svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#addressUpdateForm .${key}`).addClass('border-danger');
+                        $(`#addressUpdateForm  .error-${key}`).html(val);
+                    }
+                } else if(error.response.status == 304){
+                    addressUpdateModal.hide();
+                    
+                    warningModal.show(); 
+                    document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#warningModal .successModalTitle").html("Error!" );
+                        $("#warningModal .successModalDesc").html(error.response.data.message);
+                    }); 
+                
+                    setTimeout(function(){
+                        warningModal.hide();
+                    }, 2000);
+                }else {
+                    console.log('error');
+                }
+            }
+        });
+    });
+})();
+
 
 /* Profile Menu Start */
 if($('.liveStudentMainMenu').length > 0){
