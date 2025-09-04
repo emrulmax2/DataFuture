@@ -839,25 +839,34 @@ class StudentController extends Controller
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
 
-            if($active_api == 1 && !empty($textlocal_api)):
-                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                    'apikey' => $textlocal_api, 
-                    'message' => 'Your verification code: '.$verificationCode, 
-                    'sender' => 'London Churchill College', 
-                    'numbers' => $mobileNo
-                ]);
-            elseif($active_api == 2 && !empty($smseagle_api)):
-                $response = Http::withHeaders([
-                        'access-token' => $smseagle_api,
-                        'Content-Type' => 'application/json',
-                    ])->withoutVerifying()->withOptions([
-                        "verify" => false
-                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                        'to' => [$mobileNo],
-                        'text' => 'Your verification code: '.$verificationCode
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                
+                    \Log::info('SMS OTP: '.$verificationCode.' sent to '.$mobileNo);
+                    Debugbar::info('SMS OTP: '.$verificationCode.' sent to '.$mobileNo);
+
+            } else {
+
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => 'Your verification code: '.$verificationCode, 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $mobileNo
                     ]);
-                //return response()->json(['Message' => $response->json()], 200);
-            endif;
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::withHeaders([
+                            'access-token' => $smseagle_api,
+                            'Content-Type' => 'application/json',
+                        ])->withoutVerifying()->withOptions([
+                            "verify" => false
+                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                            'to' => [$mobileNo],
+                            'text' => 'Your verification code: '.$verificationCode
+                        ]);
+                    //return response()->json(['Message' => $response->json()], 200);
+                endif;
+
+            }
             return response()->json(['Message' => 'Verification code successfully send to the mobile nuber.'], 200);
         else:
             return response()->json(['Message' => 'Something went wrong. Please try later'], 422);
@@ -2740,27 +2749,33 @@ class StudentController extends Controller
             $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
 
-            if($active_api == 1 && !empty($textlocal_api)):
-                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                    'apikey' => $textlocal_api, 
-                    'message' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
-                                    ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
-                    'sender' => 'London Churchill College', 
-                    'numbers' => $student->temp_mobile
-                ]);
-            elseif($active_api == 2 && !empty($smseagle_api)):
-                $response = Http::withHeaders([
-                    'access-token' => $smseagle_api,
-                    'Content-Type' => 'application/json',
-                ])->withoutVerifying()->withOptions([
-                    "verify" => false
-                ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                    'to' => [$student->temp_mobile],
-                    'text' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
-                                ".Use this OTP to complete the application. OTP will valid for next 24 hours",
-                ]);
-            endif;
+                    \Log::info('SMS OTP: '.$student->temp_mobile_verify_code.' sent to '.$student->temp_mobile);
+                    Debugbar::info('SMS OTP: '.$student->temp_mobile_verify_code.' sent to '.$student->temp_mobile);
+
+            } else {
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
+                                        ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $student->temp_mobile
+                    ]);
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::withHeaders([
+                        'access-token' => $smseagle_api,
+                        'Content-Type' => 'application/json',
+                    ])->withoutVerifying()->withOptions([
+                        "verify" => false
+                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                        'to' => [$student->temp_mobile],
+                        'text' => "One Time Password (OTP) for your application account is ".$student->temp_mobile_verify_code.
+                                    ".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                    ]);
+                endif;
+            }
 
         }
         $changes = $student->getDirty();

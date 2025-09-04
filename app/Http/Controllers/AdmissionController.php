@@ -2184,24 +2184,31 @@ class AdmissionController extends Controller
                 $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
                 $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
                 $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
-                if($active_api == 1 && !empty($textlocal_api)):
-                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                        'apikey' => $textlocal_api, 
-                        'message' => $request->sms, 
-                        'sender' => 'London Churchill College', 
-                        'numbers' => $applicantContact->mobile
-                    ]);
-                elseif($active_api == 2 && !empty($smseagle_api)):
-                    $response = Http::withHeaders([
-                            'access-token' => $smseagle_api,
-                            'Content-Type' => 'application/json',
-                        ])->withoutVerifying()->withOptions([
-                            "verify" => false
-                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                            'to' => [$applicantContact->mobile],
-                            'text' => $request->sms
+                
+                if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                        \Log::info('SMS: '.$request->sms.' sent to '.$applicantContact->mobile);
+                        FacadesDebugbar::info('SMS: '.$request->sms.' sent to '.$applicantContact->mobile);
+
+                } else {
+                    if($active_api == 1 && !empty($textlocal_api)):
+                        $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                            'apikey' => $textlocal_api, 
+                            'message' => $request->sms, 
+                            'sender' => 'London Churchill College', 
+                            'numbers' => $applicantContact->mobile
                         ]);
-                endif;
+                    elseif($active_api == 2 && !empty($smseagle_api)):
+                        $response = Http::withHeaders([
+                                'access-token' => $smseagle_api,
+                                'Content-Type' => 'application/json',
+                            ])->withoutVerifying()->withOptions([
+                                "verify" => false
+                            ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                                'to' => [$applicantContact->mobile],
+                                'text' => $request->sms
+                            ]);
+                    endif;
+                }
                 $message = 'SMS successfully stored and sent to the student.';
             else:
                 $message = 'SMS stored into database but not sent due to missing mobile number.';
@@ -2635,25 +2642,30 @@ class AdmissionController extends Controller
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
             $message = 'London Churchill College requested you to verify your mobile number. Please use your verification code '.$verificationCode.' to verify.  Thank you.';
 
-            if($active_api == 1 && !empty($textlocal_api)):
-                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                    'apikey' => $textlocal_api, 
-                    'message' => $message,
-                    'sender' => $siteName, 
-                    'numbers' => $mobileNo
-                ]);
-            elseif($active_api == 2 && !empty($smseagle_api)):
-                $response = Http::withHeaders([
-                        'access-token' => $smseagle_api,
-                        'Content-Type' => 'application/json',
-                    ])->withoutVerifying()->withOptions([
-                        "verify" => false
-                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                        'to' => [$mobileNo],
-                        'text' => $message
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                \Log::info('SMS: '.$message.' sent to '.$mobileNo);
+                FacadesDebugbar::info('SMS: '.$message.' sent to '.$mobileNo);
+            } else {
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => $message,
+                        'sender' => $siteName, 
+                        'numbers' => $mobileNo
                     ]);
-                //return response()->json(['Message' => $response->json()], 200);
-            endif;
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::withHeaders([
+                            'access-token' => $smseagle_api,
+                            'Content-Type' => 'application/json',
+                        ])->withoutVerifying()->withOptions([
+                            "verify" => false
+                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                            'to' => [$mobileNo],
+                            'text' => $message
+                        ]);
+                    //return response()->json(['Message' => $response->json()], 200);
+                endif;
+            }
             return response()->json(['Message' => 'Verification code successfully send to the mobile nuber.'], 200);
         else:
             return response()->json(['Message' => 'Something went wrong. Please try later'], 422);

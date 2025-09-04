@@ -601,6 +601,9 @@ class PendingTaskManagerController extends Controller
                         //$MSGBODY = $letterSet->description;
                         $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,23);
                         UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
+                        //save email communication
+                        
+                        
                     endif;
                 endif;
             endforeach;
@@ -778,6 +781,7 @@ class PendingTaskManagerController extends Controller
         endif;
 
         return response()->json(['res' => 'Selected student task status successfully updated.'], 200);
+        
     }
 
     public function downloadTaskStudentListExcel(Request $request){
