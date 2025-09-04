@@ -35,7 +35,6 @@ export default function INTAddressLookUps(){
             $('#'+parentid+' .postal_code').val('').removeAttr('disabled');
             $('#'+parentid+' .latitude').val(lat);
             $('#'+parentid+' .longitude').val(lng);
-            //console.log(place.address_components);
 
             let street_address = '';
             for (let component of place.address_components) {
@@ -43,27 +42,29 @@ export default function INTAddressLookUps(){
 
                 if (componentForm[addressType]) {
                     if(addressType == 'locality'){
-                        $('#'+parentid+' .city').val(component[componentForm[addressType]]);
+                        $('#'+parentid+' .city').val(component[componentForm[addressType]].toUpperCase());
                     }else if(addressType == 'postal_town' && $('#'+parentid+' .city').val() == ''){
-                        $('#'+parentid+' .city').val(component[componentForm[addressType]]);
+                        $('#'+parentid+' .city').val(component[componentForm[addressType]].toUpperCase());
                     }else if(addressType == 'administrative_area_level_1'){
-                        $('#'+parentid+' .state').val(component[componentForm[addressType]]);
+                        $('#'+parentid+' .state').val(component[componentForm[addressType]].toUpperCase());
                     }else if(addressType == 'country'){
-                        $('#'+parentid+' .country').val(component[componentForm[addressType]]);
+                        $('#'+parentid+' .country').val(component[componentForm[addressType]].toUpperCase());
                     }else if(addressType == 'postal_code'){
-                        $('#'+parentid+' .postal_code').val(component[componentForm[addressType]]);
+                        $('#'+parentid+' .postal_code').val(component[componentForm[addressType]].toUpperCase());
                     }else if(addressType == 'street_number'){
-                        $('#'+parentid+' .address_line_1').val(component[componentForm[addressType]]);
+                        //$('#'+parentid+' .address_line_1').val(component[componentForm[addressType]].toUpperCase());
                         street_address += component[componentForm[addressType]]+' ';
+                        $('#'+parentid+' .address_line_1').val(street_address);
                     }else if(addressType == 'route'){
-                        $('#'+parentid+' .address_line_2').val(component[componentForm[addressType]]);
-                        street_address += component[componentForm[addressType]];
+                        //$('#'+parentid+' .address_line_1').val(component[componentForm[addressType]].toUpperCase());
+                        street_address += component[componentForm[addressType]].toUpperCase();
+                        $('#'+parentid+' .address_line_1').val(street_address);
                     }
                 }
             }
-            /*if(street_address != ''){
-                $('#'+parentid+' .theAddressLookup').val(street_address);
-            }*/
+            // if(street_address != ''){
+            //     $('#'+parentid+' .theAddressLookup').val(street_address);
+            // }
         });
     });
 }

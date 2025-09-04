@@ -23,6 +23,7 @@ var taskAssignedStudentTable = (function () {
         let interview = ($("#taskAssignedStudentTable").attr('data-interview') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-interview') : 'No');
         let excuse = ($("#taskAssignedStudentTable").attr('data-excuse') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-excuse') : 'No');
         let pearsonreg = ($("#taskAssignedStudentTable").attr('data-pearsonreg') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-pearsonreg') : 'No');
+        let addressrequest = ($("#taskAssignedStudentTable").attr('data-addressrequest') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-addressrequest') : 'No');
         
         
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
@@ -295,7 +296,7 @@ var taskAssignedStudentTable = (function () {
                                                         html += '</li>';
                                                         }
                                                     }
-                                                    if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
+                                                    if(cell.getData().is_completable == 1 && cell.getData().task_address_request == 'No' && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
 
                                                         html += '<li>';
                                                             html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
@@ -312,6 +313,13 @@ var taskAssignedStudentTable = (function () {
                                                                         </g>\
                                                                     </g>\
                                                                 </svg>';
+                                                            html += '</a>';
+                                                        html += '</li>';
+                                                    }
+                                                    if(cell.getData().is_completable == 1 && cell.getData().task_address_request == 'Yes'){
+                                                        html += '<li>';
+                                                            html += '<a data-recordid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAddressUpdateReqModal" class="viewAddrUpReq dropdown-item">';
+                                                                html += '<i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Address Update Request';
                                                             html += '</a>';
                                                         html += '</li>';
                                                     }
@@ -372,7 +380,7 @@ var taskAssignedStudentTable = (function () {
                                                             html += '</li>';
                                                         }
                                                 }
-                                                if(cell.getData().is_completable == 1 && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
+                                                if(cell.getData().is_completable == 1 && cell.getData().task_address_request == 'No' && cell.getData().task_excuse == 'No' && cell.getData().student_document_request_form_id == null ){
                                                     html += '<li>';
                                                         html += '<a data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" class="markAsSingleComplete dropdown-item">';
                                                             html += '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Mark as Complete';
@@ -388,6 +396,13 @@ var taskAssignedStudentTable = (function () {
                                                                     </g>\
                                                                 </g>\
                                                             </svg>';
+                                                        html += '</a>';
+                                                    html += '</li>';
+                                                }
+                                                if(cell.getData().is_completable == 1 && cell.getData().task_address_request == 'Yes'){
+                                                    html += '<li>';
+                                                        html += '<a data-recordid="'+cell.getData().student_task_id+'" data-phase="'+cell.getData().phase+'" data-taskid="'+cell.getData().task_id+'" data-studentid="'+cell.getData().id +'" href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#viewAddressUpdateReqModal" class="viewAddrUpReq dropdown-item">';
+                                                            html += '<i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Address Update Request';
                                                         html += '</a>';
                                                     html += '</li>';
                                                 }
@@ -442,7 +457,7 @@ var taskAssignedStudentTable = (function () {
                         if(pearsonreg == 'Yes'){
                             $('#exportPearsonRegStudentList').fadeIn();
                         }
-                        if(excuse == 'No'){
+                        if(excuse == 'No' && addressrequest == 'No'){
                             $('#exportTaskStudentListBtn').fadeIn();
                             $('#commonActionBtns').fadeIn();
                         }
@@ -570,6 +585,7 @@ var taskAssignedStudentTable = (function () {
     const updateTaskDocumentRequestOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskDocumentRequestOutcomeModal"));
 
     const uploadPearsonRegConfModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadPearsonRegConfModal"));
+    const viewAddressUpdateReqModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAddressUpdateReqModal"));
 
     const downloadIDCardEl = document.getElementById('downloadIDCard')
     downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
@@ -1774,4 +1790,103 @@ London Churchill College`;
     })
 
     /* Pearson Reg. Conf End */
+
+
+    /* Address Update Start */
+    $(document).on('click', '.viewAddrUpReq', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        var student_task_id = $theLink.attr('data-recordid');
+        var student_id = $theLink.attr('data-studentid');
+
+        axios({
+            method: "post",
+            url: route('student.process.task.view.address.request'), 
+            data: {student_id : student_id, student_task_id : student_task_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                $('#viewAddressUpdateReqModal .modal-body').html(response.data.html);
+                $('#viewAddressUpdateReqModal [name="student_id"]').val(student_id);
+                $('#viewAddressUpdateReqModal [name="student_task_id"]').val(student_task_id);
+                $('#viewAddressUpdateReqModal [name="student_address_update_request_id"]').val(response.data.student_address_update_request_id);
+                
+                $('#viewAddressUpdateReqModal [name="task_status"]').val(response.data.task_status).trigger('change');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            } 
+        }).catch(error => {
+            if(error.response){
+                console.log('error');
+            }
+        });
+    });
+
+    $('#viewAddressUpdateReqModal #task_status').on('change', function(){
+        let $theStatus = $(this);
+        let theStatus = $theStatus.val();
+
+        if(theStatus == 'In Progress'){
+            var html = '<div class="mt-4 noteWrap">';
+                    html += '<label for="note" class="form-label">Notes</label>';
+                    html += '<textarea name="note" class="w-full form-control" placeholder="note"></textarea>';
+                html += '</div>';
+
+            $('#viewAddressUpdateReqModal .modal-body').append(html);
+        }else{
+            $('#viewAddressUpdateReqModal .modal-body .noteWrap').remove();
+        }
+    });
+
+    $('#viewAddressUpdateReqForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('viewAddressUpdateReqForm');
+    
+        document.querySelector('#updateAdrUpReqBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateAdrUpReqBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.process.update.address.request.task'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateAdrUpReqBtn').removeAttribute('disabled');
+            document.querySelector("#updateAdrUpReqBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                viewAddressUpdateReqModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student address update request task status successfully updated');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });    
+
+                setTimeout(() => {
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateAdrUpReqBtn').removeAttribute('disabled');
+            document.querySelector("#updateAdrUpReqBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#viewAddressUpdateReqForm .${key}`).addClass('border-danger');
+                        $(`#viewAddressUpdateReqForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+    /* Address Update End */
 })();

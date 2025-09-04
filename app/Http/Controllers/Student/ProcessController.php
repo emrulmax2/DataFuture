@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProcessAndExcuseUpdateRequest;
+use App\Models\Address;
 use App\Models\Attendance;
 use App\Models\AttendanceExcuse;
 use App\Models\AttendanceExcuseDay;
@@ -11,7 +12,10 @@ use App\Models\AttendanceFeedStatus;
 use App\Models\Plan;
 use App\Models\ProcessList;
 use App\Models\Student;
+use App\Models\StudentAddressUpdateRequest;
+use App\Models\StudentAddressUpdateRequestNote;
 use App\Models\StudentArchive;
+use App\Models\StudentContact;
 use App\Models\StudentDocument;
 use App\Models\StudentTask;
 use App\Models\StudentTaskDocument;
@@ -153,6 +157,7 @@ class ProcessController extends Controller
         $student = $request->student;
         $recordid = $request->recordid;
         $studentRow = Student::find($student);
+        $theTask = StudentTask::with('task')->find($recordid);
 
 
         $studentTask = StudentTask::where('id', $recordid)->where('student_id', $student)->update(['status' => 'Pending', 'updated_by' => auth()->user()->id]);
@@ -164,6 +169,12 @@ class ProcessController extends Controller
             'current_field_value' => 'Pending',
             'created_by' => auth()->user()->id
         ]);
+
+        if(isset($theTask->task->address_request) && $theTask->task->address_request == 'Yes'):
+            StudentAddressUpdateRequest::where('student_id', $student)->where('student_task_id', $recordid)->update([
+                'status' => 'Pending'
+            ]);
+        endif;
 
         return response()->json(['message' => 'Data updated'], 200);
     }
@@ -551,5 +562,183 @@ class ProcessController extends Controller
         StudentTask::where('id', $student_task_id)->where('student_id', $student_id)->update(['status' => 'Completed', 'updated_by' => auth()->user()->id]);
 
         return response()->json(['message' => 'Excuse successfully reviewd and updated.'], 200);
+    }
+
+
+    public function addressUpdateRequestView(Request $request){
+        $student_id = $request->student_id;
+        $student_task_id = $request->student_task_id;
+
+        $student = Student::with('contact')->find($student_id);
+        $req = StudentAddressUpdateRequest::with('docs', 'notes', 'task')->where('student_task_id', $student_task_id)->where('student_id', $student_id)->get()->first();
+        $HTML = '';
+        if(isset($req->id) && $req->id > 0):
+            $HTML .= '<div>';
+                $HTML .= '<div class="font-medium mb-1 flex items-center">';
+                    $HTML .= '<i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Old Address';
+                $HTML .= '</div>';
+                $HTML .= '<div class="pl-6 text-slate-500 uppercase">';
+                    if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
+                        if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)):
+                            $HTML .= '<span>'.$student->contact->termaddress->address_line_1.'</span>';
+                        endif;
+                        if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)):
+                            $HTML .= '<span>'.$student->contact->termaddress->address_line_2.'</span>';
+                        endif;
+                        $HTML .= '<br/>';
+                        if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)):
+                            $HTML .= '<span>'.$student->contact->termaddress->city.'</span>,';
+                        endif;
+                        if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)):
+                            $HTML .= '<span>'.$student->contact->termaddress->state.'</span>,';
+                        endif;
+                        if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)):
+                            $HTML .= '<span>'.$student->contact->termaddress->post_code.'</span>,';
+                        endif;
+                        $HTML .= '<br/>';
+                        if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)):
+                            $HTML .= '<span>'.$student->contact->termaddress->country.'</span>';
+                        endif;
+                    else: 
+                        $HTML .= '<span class="font-normal text-warning">Old address not found</span><br/>';
+                    endif;
+                $HTML .= '</div>';
+            $HTML .= '</div>';
+
+            $HTML .= '<div class="font-medium mt-5 mb-2 flex items-center">';
+                $HTML .= '<i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Requested Address';
+            $HTML .= '</div>';
+            $HTML .= '<div class="pl-6 text-slate-500 uppercase">';
+                if(isset($req->id) && $req->id > 0):
+                    if(isset($req->address_line_1) && !empty($req->address_line_1)):
+                        $HTML .= '<span>'.$req->address_line_1.'</span>';
+                    endif;
+                    if(isset($req->address_line_2) && !empty($req->address_line_2)):
+                        $HTML .= '<span>'.$req->address_line_2.'</span>';
+                    endif;
+                    $HTML .= '<br/>';
+                    if(isset($req->city) && !empty($req->city)):
+                        $HTML .= '<span>'.$req->city.'</span>,';
+                    endif;
+                    if(isset($req->state) && !empty($req->state)):
+                        $HTML .= '<span>'.$req->state.'</span>,';
+                    endif;
+                    if(isset($req->postal_code) && !empty($req->postal_code)):
+                        $HTML .= '<span>'.$req->postal_code.'</span>,';
+                    endif;
+                    $HTML .= '<br/>';
+                    if(isset($req->country) && !empty($req->country)):
+                        $HTML .= '<span>'.$req->country.'</span>';
+                    endif;
+                else: 
+                    $HTML .= '<span class="font-normal text-warning">Requested address not found.</span>';
+                endif;
+            $HTML .= '</div>';
+
+            if (isset($req->docs) && !empty($req->docs)):
+                $HTML .= '<div class="font-medium mt-5 mb-2 flex items-center">';
+                    $HTML .= '<i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i>Download Proofs';
+                $HTML .= '</div>';
+                foreach($req->docs as $doc):
+                    if(Storage::disk('s3')->exists('public/students/'.$student_id.'/'.$doc->current_file_name)):
+                        $HTML .= '<a target="_blank" href="'.Storage::disk('s3')->temporaryUrl('public/students/'.$student_id.'/'.$doc->current_file_name, now()->addMinutes(15)).'" class="mb-2 text-primary font-medium flex justify-start items-start">';
+                            $HTML .= '<i data-lucide="disc" class="w-4 h-4 mr-2"></i>';
+                            $HTML .= '<span>';
+                                $HTML .= (isset($doc->created_at) && !empty($doc->created_at) ? '<span class="block mb-1 text-slate-500">[ '.date('jS M, Y \- h:i A', strtotime($doc->created_at)).' ]</span>' : '');
+                                $HTML .= '<span class="block">'.$doc->display_file_name.'</span>';
+                            $HTML .= '</span>';
+                        $HTML .= '</a>';
+                    endif;
+                endforeach;
+            endif;
+
+            if (isset($req->notes) && $req->notes->count() > 0):
+                $HTML .= '<div class="font-medium mt-5 mb-2 flex items-center">';
+                    $HTML .= '<i data-lucide="pencil" class="w-4 h-4 mr-2"></i>Notes';
+                $HTML .= '</div>';
+                foreach($req->notes as $not):
+                    $HTML .= '<ul>';
+                        $HTML .= '<li class="mb-1 flex justify-start items-start">';
+                            $HTML .= '<i data-lucide="disc" class="w-4 h-4 mr-2"></i>';
+                            $HTML .= '<div>';
+                                $HTML .= '<div class="font-medium text-slate-500 mb-1">'.(isset($not->created_at) && !empty($not->created_at) ? date('jS M, Y \- h:i A', strtotime($not->created_at)) : '').'</div>';
+                                $HTML .= '<div>'.$not->note.'</div>';
+                            $HTML .= '</div>';
+                        $HTML .= '</li>';
+                    $HTML .= '</ul>';
+                endforeach;
+            endif;
+        else:
+            $HTML .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Request details not found.</div>';
+        endif;
+
+        return response()->json(['html' => $HTML, 'student_address_update_request_id' => $req->id, 'task_status' => (isset($req->task->status) && !empty($req->task->status) ? $req->task->status : 'Pending')], 200);
+    }
+
+    public function updateAddressRequestTask(Request $request){
+        $student_id = $request->student_id;
+        $student_task_id = $request->student_task_id;
+        $student_address_update_request_id = $request->student_address_update_request_id;
+        $status = (isset($request->task_status) && !empty($request->task_status) ? $request->task_status : 'Pending');
+        $note = (isset($request->note) && !empty($request->note) ? $request->note : null);
+
+        $studentTask = StudentTask::where('student_id', $student_id)->where('id', $student_task_id)->update([
+            'status' => $status,
+            'updated_by' => auth()->user()->id,
+        ]);
+        $addressRequest = StudentAddressUpdateRequest::where('id', $student_address_update_request_id)->update([
+            'status' => $status,
+        ]);
+
+        if($status == 'In Progress' && !empty($note)):
+            $requestNote = StudentAddressUpdateRequestNote::create([
+                'student_address_update_request_id' => $student_address_update_request_id,
+                'note' => $note,
+                'created_by' => auth()->user()->id,
+            ]);
+        endif;
+
+        if($status == 'Completed'):
+            $studentContactOld = StudentContact::where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
+            $studentContactId = $studentContactOld->id;
+            $theRequest = StudentAddressUpdateRequest::find($student_address_update_request_id);
+            $newTermTimePostCode = (isset($theRequest->postal_code) && !empty($theRequest->postal_code) ? $theRequest->postal_code : null);
+            $newTermAddress = Address::create([
+                'address_line_1' => (isset($theRequest->address_line_1) && !empty($theRequest->address_line_1) ? $theRequest->address_line_1 : null),
+                'address_line_2' => (isset($theRequest->address_line_2) && !empty($theRequest->address_line_2) ? $theRequest->address_line_2 : null),
+                'state' => (isset($theRequest->state) && !empty($theRequest->state) ? $theRequest->state : null),
+                'post_code' => (isset($theRequest->postal_code) && !empty($theRequest->postal_code) ? $theRequest->postal_code : null),
+                'city' => (isset($theRequest->city) && !empty($theRequest->city) ? $theRequest->city : null),
+                'country' => (isset($theRequest->country) && !empty($theRequest->country) ? $theRequest->country : null),
+                'active' => 1,
+                'created_by' => auth()->user()->id,
+            ]);
+
+            $contact = StudentContact::find($studentContactId);
+            $contact->fill([
+                'term_time_address_id' => $newTermAddress->id,
+                'term_time_post_code' => $newTermTimePostCode,
+                'updated_by' => auth()->user()->id
+            ]);
+            $changes = $contact->getDirty();
+            $contact->save();
+
+            if($contact->wasChanged() && !empty($changes)):
+                foreach($changes as $field => $value):
+                    $data = [];
+                    $data['student_id'] = $student_id;
+                    $data['table'] = 'student_contacts';
+                    $data['field_name'] = $field;
+                    $data['field_value'] = $studentContactOld->$field;
+                    $data['field_new_value'] = $value;
+                    $data['created_by'] = auth()->user()->id;
+
+                    StudentArchive::create($data);
+                endforeach;
+            endif;
+        endif;
+
+        return response()->json(['message' => 'Student address update task status successfully updated.'], 200);
+
     }
 }

@@ -70,4 +70,7 @@ class StudentTask extends Model
     public function studentDocumentRequestForm(){
         return $this->belongsTo(StudentDocumentRequestForm::class, 'student_document_request_form_id', 'id');
     }
+    public function addressUpdateRequest(){
+        return $this->hasOne(StudentAddressUpdateRequest::class, 'student_task_id', 'id')->latestOfMany();
+    }
 }

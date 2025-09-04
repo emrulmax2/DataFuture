@@ -126,3 +126,6 @@
 <!-- END: Success Modal Content -->
 @endsection
 
+@section('script')
+    @vite('resources/js/student-frontend-global.js')
+@endsection

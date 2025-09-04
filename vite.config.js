@@ -399,6 +399,11 @@ export default defineConfig({
                 'resources/js/hesa-all-students-reports.js',
                 'resources/js/student-visits.js',
 
+                'resources/js/news-updates.js',
+                'resources/js/news-updates-create.js',
+                'resources/js/news-updates-edits.js',
+                'resources/js/student-frontend-global.js',
+
             ],
             refresh: true,
         }),

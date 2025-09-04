@@ -235,6 +235,19 @@
                                         </div>
                                     </div>
                                     <div class="col-span-12 sm:col-span-6">
+                                        <label for="address_request" class="form-label">Address Update Request</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="address_request-yes" class="form-check-input" type="radio" name="address_request" value="Yes">
+                                                <label class="form-check-label" for="address_request-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="address_request-no" class="form-check-input" type="radio" name="address_request" value="No">
+                                                <label class="form-check-label" for="address_request-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <div>
                                             <div class="form-check form-switch">
                                                 <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
@@ -447,6 +460,19 @@
                                             <div class="form-check mr-2">
                                                 <input checked id="edit_pearson_reg-no" class="form-check-input" type="radio" name="pearson_reg" value="No">
                                                 <label class="form-check-label" for="edit_pearson_reg-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_address_request" class="form-label">Address Update Request</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="edit_address_request-yes" class="form-check-input" type="radio" name="address_request" value="Yes">
+                                                <label class="form-check-label" for="edit_address_request-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="edit_address_request-no" class="form-check-input" type="radio" name="address_request" value="No">
+                                                <label class="form-check-label" for="edit_address_request-no">No</label>
                                             </div>
                                         </div>
                                     </div>
