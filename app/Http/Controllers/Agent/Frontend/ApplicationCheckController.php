@@ -9,6 +9,7 @@ use App\Mail\ApplicantAgentBasisEmailVerification;
 use App\Models\AgentApplicationCheck;
 use App\Models\Applicant;
 use App\Models\Option;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Mail;
@@ -53,26 +54,35 @@ class ApplicationCheckController extends Controller
         $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
-        if($active_api == 1 && !empty($textlocal_api)):
-            $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                'apikey' => $textlocal_api, 
-                'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                                ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
-                'sender' => 'London Churchill College', 
-                'numbers' => $data->mobile
-            ]);
-        elseif($active_api == 2 && !empty($smseagle_api)):
-            $response = Http::withHeaders([
-                'access-token' => $smseagle_api,
-                'Content-Type' => 'application/json',
-            ])->withoutVerifying()->withOptions([
-                "verify" => false
-            ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                'to' => [$data->mobile],
-                'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                            ".Use this OTP to complete the application. OTP will valid for next 24 hours",
-            ]);
-        endif;
+
+        
+        if(in_array(env('APP_ENV'), ['development', 'local'])) {
+
+                    \Log::info('SMS OTP: '.$data->mobile.' sent to '.$data->verify_code);
+                    Debugbar::info('SMS OTP: '.$data->mobile.' sent to '.$data->verify_code);
+
+        } else {
+            if($active_api == 1 && !empty($textlocal_api)):
+                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                    'apikey' => $textlocal_api, 
+                    'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                    ".use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                    'sender' => 'London Churchill College', 
+                    'numbers' => $data->mobile
+                ]);
+            elseif($active_api == 2 && !empty($smseagle_api)):
+                $response = Http::withHeaders([
+                    'access-token' => $smseagle_api,
+                    'Content-Type' => 'application/json',
+                ])->withoutVerifying()->withOptions([
+                    "verify" => false
+                ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                    'to' => [$data->mobile],
+                    'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                ".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                ]);
+            endif;
+        }
 
         Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));
 
@@ -197,28 +207,38 @@ class ApplicationCheckController extends Controller
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
         if($request->type=="mobile") {
-            if($active_api == 1 && !empty($textlocal_api)):
-                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                    'apikey' => $textlocal_api, 
-                    'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                                    ".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
-                    'sender' => 'London Churchill College', 
-                    'numbers' => $data->mobile
-                ]);
-            elseif($active_api == 2 && !empty($smseagle_api)):
 
-                $response = Http::withHeaders([
-                    'access-token' => $smseagle_api,
-                    'Content-Type' => 'application/json',
-                ])->withoutVerifying()->withOptions([
-                    "verify" => false
-                ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                    'to' => [$data->mobile],
-                    'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
-                                ".Use this OTP to complete the application. OTP will valid for next 24 hours",
-                ]);
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
 
-            endif;
+                    \Log::info('SMS OTP: '.$data->verify_code.' sent to '.$data->mobile);
+                    Debugbar::info('SMS OTP: '.$data->verify_code.' sent to '.$data->mobile);
+
+            } else {
+
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                        ".Use this OTP to complete the application. OTP will valid for next 24 hours.", 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $data->mobile
+                    ]);
+                elseif($active_api == 2 && !empty($smseagle_api)):
+
+                    $response = Http::withHeaders([
+                        'access-token' => $smseagle_api,
+                        'Content-Type' => 'application/json',
+                    ])->withoutVerifying()->withOptions([
+                        "verify" => false
+                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                        'to' => [$data->mobile],
+                        'text' => "One Time Password (OTP) for your application account is ".$data->verify_code.
+                                    ".Use this OTP to complete the application. OTP will valid for next 24 hours",
+                    ]);
+
+                endif;
+
+            }
         }
         if($request->type=="email")
             Mail::to($data->email)->send(new ApplicantAgentBasisEmailVerification($data->first_name." ".$data->last_name, $data->email, $data->email_verify_code));

@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\GenerateStudentLetterTrait;
 use App\Traits\GenerateBulkCommunicationPdfTrait;
+use Barryvdh\Debugbar\Facades\Debugbar;
 
 class BulkCommunicationController extends Controller
 {
@@ -573,26 +574,33 @@ class BulkCommunicationController extends Controller
                         'created_by' => auth()->user()->id,
                     ]);
                     if(isset($studentContact->mobile) && !empty($studentContact->mobile)):
-                        if($active_api == 1 && !empty($textlocal_api)):
-                            $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                                'apikey' => $textlocal_api, 
-                                'message' => $request->sms, 
-                                'sender' => 'London Churchill College', 
-                                'numbers' => $studentContact->mobile
-                            ]);
+                        if(in_array(env('APP_ENV'), ['development', 'local'])) {
+
+                            \Log::info('SMS: '.$request->sms.' sent to '.$studentContact->mobile);
+                            Debugbar::info('SMS: '.$request->sms.' sent to '.$studentContact->mobile);
                             $smsSentCount += 1;
-                        elseif($active_api == 2 && !empty($smseagle_api)):
-                            $response = Http::withHeaders([
-                                    'access-token' => $smseagle_api,
-                                    'Content-Type' => 'application/json',
-                                ])->withoutVerifying()->withOptions([
-                                    "verify" => false
-                                ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                                    'to' => [$studentContact->mobile],
-                                    'text' => $request->sms
+                        } else {
+                            if($active_api == 1 && !empty($textlocal_api)):
+                                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                                    'apikey' => $textlocal_api, 
+                                    'message' => $request->sms, 
+                                    'sender' => 'London Churchill College', 
+                                    'numbers' => $studentContact->mobile
                                 ]);
-                            $smsSentCount += 1;
-                        endif;
+                                $smsSentCount += 1;
+                            elseif($active_api == 2 && !empty($smseagle_api)):
+                                $response = Http::withHeaders([
+                                        'access-token' => $smseagle_api,
+                                        'Content-Type' => 'application/json',
+                                    ])->withoutVerifying()->withOptions([
+                                        "verify" => false
+                                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                                        'to' => [$studentContact->mobile],
+                                        'text' => $request->sms
+                                    ]);
+                                $smsSentCount += 1;
+                            endif;
+                        }
                     endif;
                 endforeach;
 

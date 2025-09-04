@@ -2,10 +2,19 @@
 namespace App\Traits;
 
 use App\Models\Option;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Support\Facades\Http;
 
 trait SendSmsTrait{
     public function sendSms($phone, $message, $sender = 'London Churchill College'){
+
+        // if in development or local environment then do not send sms
+        if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                \Log::info('SMS: '.$message.' sent to '.$phone);
+                Debugbar::info('SMS: '.$message.' sent to '.$phone);
+                return true;
+        }
+        
         $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
         $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
         $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();

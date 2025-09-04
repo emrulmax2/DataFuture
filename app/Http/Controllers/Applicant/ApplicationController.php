@@ -760,25 +760,31 @@ class ApplicationController extends Controller
             $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
             $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
             $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference number '.$theApplicant->application_no.' for all future correspondence.';
-            
-            if($active_api == 1 && !empty($textlocal_api)):
-                $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
-                    'apikey' => $textlocal_api, 
-                    'message' => $sms, 
-                    'sender' => 'London Churchill College', 
-                    'numbers' => $theApplicant->contact->mobile
-                ]);
-            elseif($active_api == 2 && !empty($smseagle_api)):
-                $response = Http::withHeaders([
-                        'access-token' => $smseagle_api,
-                        'Content-Type' => 'application/json',
-                    ])->withoutVerifying()->withOptions([
-                        "verify" => false
-                    ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                        'to' => [$theApplicant->contact->mobile],
-                        'text' => $sms
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+
+                    \Log::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
+                    FacadesDebugbar::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
+
+            } else {
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => $sms, 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $theApplicant->contact->mobile
                     ]);
-            endif;
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::withHeaders([
+                            'access-token' => $smseagle_api,
+                            'Content-Type' => 'application/json',
+                        ])->withoutVerifying()->withOptions([
+                            "verify" => false
+                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                            'to' => [$theApplicant->contact->mobile],
+                            'text' => $sms
+                        ]);
+                endif;
+            }
         endif;
         if(isset($commonSmtp->id) && $commonSmtp->id > 0):
             $theApplicantEmail = (isset($theApplicant->users->email) && !empty($theApplicant->users->email) ? $theApplicant->users->email : '');
