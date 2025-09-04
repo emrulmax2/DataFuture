@@ -113,6 +113,11 @@
                                                         <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> Change Mobile
                                                     </a>
                                                 </li>
+                                                <li>
+                                                    <a href="javascript:void(0);"  data-tw-toggle="modal" data-tw-target="#addressUpdateModal" class="dropdown-item">
+                                                        <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i> Change Address
+                                                    </a>
+                                                </li>
                                             </ul>
                                         </div>
                                     </div>

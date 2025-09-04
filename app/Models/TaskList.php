@@ -29,6 +29,7 @@ class TaskList extends Model
         'id_card',
         'attendance_excuses',
         'pearson_reg',
+        'address_request',
         'created_by',
         'updated_by',
     ];

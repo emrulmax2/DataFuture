@@ -210,5 +210,6 @@
 @endsection
 
 @section('script')
+    @vite('resources/js/student-frontend-global.js')
     @vite('resources/js/student-attendance-excuse.js')
 @endsection

@@ -220,7 +220,7 @@ class StorageController extends Controller
                     'has_assets' => (isset($list->assets->id) && $list->assets->id > 0 ? 1 : 0),
                     'has_payments' => (isset($list->has_payments) && $list->has_payments > 0 ? 1 : 0),
                     'can_eidt' => $canEdit,
-                    'has_requisition' => (isset($list->requisition->id) && $list->requisition->id > 0 ? 1 : 0)
+                    'has_requisition' => (isset($list->requisition->budget_requisition_id) && $list->requisition->budget_requisition_id > 0 ? $list->requisition->budget_requisition_id : 0)
                 ];
                 $i++;
             endforeach;

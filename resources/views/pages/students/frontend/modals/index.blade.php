@@ -307,3 +307,205 @@
         
     </div>
 </div>
+
+<div id="addressUpdateModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form method="POST" action="#" id="addressUpdateForm" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Address Update  Request</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="validation_status" value="{{ (isset($student->addressUpdateRequest->task->status) && !empty($student->addressUpdateRequest->task->status) ? $student->addressUpdateRequest->task->status : 'NEW') }}"/>
+                    @if(isset($student->addressUpdateRequest->task->status) && ($student->addressUpdateRequest->task->status == 'Pending' || $student->addressUpdateRequest->task->status == 'In Progress') )
+                        <div class="mb-5">
+                            @if($student->addressUpdateRequest->task->status == 'Pending')
+                                <span class="bg-pending py-1 px-3 w-auto text-white font-medium rounded">Pending</span>
+                            @elseif($student->addressUpdateRequest->task->status == 'In Progress')
+                                <span class="bg-warning py-1 px-3 w-auto text-white font-medium rounded">Hold</span>
+                            @endif
+                        </div>
+                    @endif
+                    <div>
+                        <div class="font-medium mb-1 flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Old Address
+                        </div>
+                        <div class="pl-6 text-slate-500 uppercase">
+                            @if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0)
+                                @if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1))
+                                    <span>{{ $student->contact->termaddress->address_line_1 }}</span>
+                                @endif
+                                @if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2))
+                                    <span>{{ $student->contact->termaddress->address_line_2 }}</span>
+                                @endif
+                                <br/>
+                                @if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city))
+                                    <span>{{ $student->contact->termaddress->city }}</span>,
+                                @endif
+                                @if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state))
+                                    <span>{{ $student->contact->termaddress->state }}</span>,
+                                @endif
+                                @if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code))
+                                    <span>{{ $student->contact->termaddress->post_code }}</span>,
+                                @endif
+                                <br/>
+                                @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
+                                    <span>{{ $student->contact->termaddress->country }}</span>
+                                @endif
+                            @else 
+                                <span class="font-normal text-warning">Not Set Yet!</span><br/>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if(isset($student->addressUpdateRequest->task->status) && ($student->addressUpdateRequest->task->status == 'Pending' || $student->addressUpdateRequest->task->status == 'In Progress') )
+                        <div class="font-medium mt-5 mb-2 flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>Requested Address
+                        </div>
+                        <div class="pl-6 text-slate-500 uppercase">
+                            @if(isset($student->addressUpdateRequest->id) && $student->addressUpdateRequest->id > 0)
+                                @if(isset($student->addressUpdateRequest->address_line_1) && !empty($student->addressUpdateRequest->address_line_1))
+                                    <span>{{ $student->addressUpdateRequest->address_line_1 }}</span>
+                                @endif
+                                @if(isset($student->addressUpdateRequest->address_line_2) && !empty($student->addressUpdateRequest->address_line_2))
+                                    <span>{{ $student->addressUpdateRequest->address_line_2 }}</span>
+                                @endif
+                                <br/>
+                                @if(isset($student->addressUpdateRequest->city) && !empty($student->addressUpdateRequest->city))
+                                    <span>{{ $student->addressUpdateRequest->city }}</span>,
+                                @endif
+                                @if(isset($student->addressUpdateRequest->state) && !empty($student->addressUpdateRequest->state))
+                                    <span>{{ $student->addressUpdateRequest->state }}</span>,
+                                @endif
+                                @if(isset($student->addressUpdateRequest->postal_code) && !empty($student->addressUpdateRequest->postal_code))
+                                    <span>{{ $student->addressUpdateRequest->postal_code }}</span>,
+                                @endif
+                                <br/>
+                                @if(isset($student->addressUpdateRequest->country) && !empty($student->addressUpdateRequest->country))
+                                    <span>{{ $student->addressUpdateRequest->country }}</span>
+                                @endif
+                            @else 
+                                <span class="font-normal text-warning">Not Set Yet!</span><br/>
+                            @endif
+                        </div>
+
+                        @if (isset($student->addressUpdateRequest->docs) && !empty($student->addressUpdateRequest->docs))
+                            <div class="font-medium mt-5 mb-2 flex items-center">
+                                <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i>Download Proofs
+                            </div>
+                            @foreach($student->addressUpdateRequest->docs as $doc)
+                                @if(Storage::disk('s3')->exists('public/students/'.$student->id.'/'.$doc->current_file_name))
+                                    <a target="_blank" href="{{ Storage::disk('s3')->temporaryUrl('public/students/'.$student->id.'/'.$doc->current_file_name, now()->addMinutes(30)) }}" class="text-primary font-medium flex justify-start items-start {{ $loop->last ? '' : 'mb-2' }}">
+                                        <i data-lucide="disc" class="w-4 h-4 mr-2"></i>
+                                        <span>
+                                            {!! (isset($doc->created_at) && !empty($doc->created_at) ? '<span class="block mb-1 text-slate-500">[ '.date('jS M, Y \- h:i A', strtotime($doc->created_at)).' ]</span>' : '') !!}
+                                            <span class="block">{!! $doc->display_file_name !!}</span>
+                                        </span>
+                                    </a>
+                                @endif
+                            @endforeach
+                        @endif
+
+                        @if (isset($student->addressUpdateRequest->notes) && $student->addressUpdateRequest->notes->count() > 0)
+                            <div class="font-medium mt-5 mb-2 flex items-center">
+                                <i data-lucide="pencil" class="w-4 h-4 mr-2"></i>Notes
+                            </div>
+                            @foreach($student->addressUpdateRequest->notes as $not)
+                                <ul>
+                                    <li class="mb-1 flex justify-start items-start">
+                                        <i data-lucide="disc" class="w-4 h-4 mr-2"></i>
+                                        <div>
+                                            <div class="font-medium text-slate-500 mb-1">{{ (isset($not->created_at) && !empty($not->created_at) ? date('jS M, Y \- h:i A', strtotime($not->created_at)) : '') }}</div>
+                                            <div>{!! $not->note !!}</div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            @endforeach
+                        @endif
+
+                        @if(isset($student->addressUpdateRequest->task->status) && $student->addressUpdateRequest->task->status == 'In Progress' )
+                            <div class="mt-6 flex justify-start items-center relative">
+                                <label for="addrProofDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                                    <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-white"></i> Upload New Document
+                                </label>
+                                <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addrProofDocument"/>
+                            </div>
+                            <div id="addrProofDocumentNames" class="addrProofDocumentNames mt-3" style="display: none"></div>
+                            <div class="acc__input-error error-document text-danger mt-2"></div>
+                        @endif
+                        <input type="hidden" name="id" value="{{ isset($student->addressUpdateRequest->id) && $student->addressUpdateRequest->id > 0 ? $student->addressUpdateRequest->id : 0 }}"/>
+                    @else
+                        <div class="font-medium mt-5 mb-2 flex items-center">
+                            <i data-lucide="map-pin" class="w-4 h-4 mr-2"></i>New Address
+                        </div>
+                        <div class=" theAddressWrap grid grid-cols-12 gap-x-4 gap-y-3" id="studentAddressWrap">
+                            <div class="col-span-12">
+                                <label for="address_lookup" class="form-label">Address Lookup</label>
+                                <input type="text" placeholder="Search address here..." id="address_lookup" class="theAddressLookup form-control w-full address_line_1" name="address_lookup">
+                            </div>
+                            <div class="col-span-12">
+                                <label for="address_line_1" class="form-label">Address Line 1 <span class="text-danger ml-2">*</span></label>
+                                <input type="text" placeholder="Address Line 1" id="address_line_1" class="address_line_1 form-control w-full" name="address_line_1">
+                                <div class="acc__input-error error-address_line_1 text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-12">
+                                <label for="address_line_2" class="form-label">Address Line 2</label>
+                                <input type="text" placeholder="Address Line 2 (optional)" id="address_line_2" class="address_line_2 form-control w-full" name="address_line_2">
+                            </div>
+                            <div class="col-span-4">
+                                <label for="city" class="form-label">Town/City<span class="text-danger ml-2">*</span></label>
+                                <input type="text" placeholder="Town / City" id="city" class="city form-control w-full" name="city">
+                                <div class="acc__input-error error-city text-danger mt-2"></div>
+                            </div>
+                            <div class="col-span-4">
+                                <label for="state" class="form-label">Region/County</label>
+                                <input type="text" placeholder="Region/County" id="state" class="state form-control w-full" name="state">
+                            </div>
+                            <div class="col-span-4">
+                                <label for="postal_code" class="form-label">Post Code <span class="text-danger ml-2">*</span></label>
+                                <input type="text" placeholder="Post Code" id="postal_code" class="postal_code form-control w-full" name="postal_code">
+                                <div class="acc__input-error error-postal_code text-danger mt-2"></div>
+                            </div>
+                            <input type="hidden" id="country" class="country form-control w-full" name="country">
+                            <input type="hidden" id="latitude" class="latitude form-control w-full" name="latitude">
+                            <input type="hidden" id="longitude" class="longitude form-control w-full" name="longitude">
+                        </div>
+                        <div class="mt-6 flex justify-start items-center relative">
+                            <label for="addrProofDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
+                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-white"></i> Upload Proof
+                            </label>
+                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addrProofDocument"/>
+                        </div>
+                        <div id="addrProofDocumentNames" class="addrProofDocumentNames mt-3" style="display: none"></div>
+                        <div class="acc__input-error error-document text-danger mt-2"></div>
+                        <input type="hidden" name="id" value="0"/>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    @if(!isset($student->addressUpdateRequest->task->status) || ($student->addressUpdateRequest->task->status != 'Pending' || $student->addressUpdateRequest->task->status != 'In Progress'))
+                    <button type="submit" id="updtAddress" class="btn btn-primary w-auto">     
+                        Submit Request                    
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    @endif
+                    <input type="hidden" name="student_id" value="{{ $student->id }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

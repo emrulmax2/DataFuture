@@ -113,6 +113,7 @@ class TaskListController extends Controller
                     'id_card' => $list->id_card,
                     'attendance_excuses' => $list->attendance_excuses,
                     'pearson_reg' => $list->pearson_reg,
+                    'address_request' => $list->address_request,
                     'image_url' => $list->image_url,
                     'deleted_at' => $list->deleted_at
                 ];
@@ -224,6 +225,7 @@ class TaskListController extends Controller
             'upload'=> $request->upload,
             'org_email'=> $request->org_email,
             'id_card'=> $request->id_card,
+            'address_request'=> $request->address_request,
             'attendance_excuses'=> (isset($request->attendance_excuses) && !empty($request->attendance_excuses) ? $request->attendance_excuses : 'No'),
             'pearson_reg'=> (isset($request->pearson_reg) && !empty($request->pearson_reg) ? $request->pearson_reg : 'No'),
             'external_link' => (isset($request->external_link) ? $request->external_link : '0'),

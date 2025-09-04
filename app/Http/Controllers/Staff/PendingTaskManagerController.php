@@ -236,6 +236,7 @@ class PendingTaskManagerController extends Controller
                         'is_completable' => ($task->interview != 'Yes' &&  ($theApplicantTask->task->status == 'No' || ($theApplicantTask->task->status == 'Yes' && $theApplicantTask->task_status_id > 0)) && ($theApplicantTask->task->upload == 'No' || ($theApplicantTask->task->upload == 'Yes' && $theApplicantTask->documents->count() > 0)) ? 1 : 0),
                         'downloads' => $taskDownloads,
                         'task_excuse' => 'No',
+                        'task_address_request' => 'No',
                         'student_task_id' => (isset($theApplicantTask->id) && $theApplicantTask->id > 0 ? $theApplicantTask->id : 0)
                     ];
                     $i++;
@@ -353,6 +354,7 @@ class PendingTaskManagerController extends Controller
                                 'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
                                 'downloads' => $taskDownloads,
                                 'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
+                                'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
                                 
@@ -360,38 +362,39 @@ class PendingTaskManagerController extends Controller
                             
                         $i++;
                         }
+                    } else {
+                        $data[] = [
+                            'id' => $list->id,
+                            'sl' => $i,
+                            'registration_no' => (empty($list->registration_no) ? $list->id : $list->registration_no),
+                            'first_name' => $list->first_name,
+                            'last_name' => $list->last_name,
+                            'date_of_birth'=> (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : ''),
+                            'course'=> (isset($list->course->creation->course->name) && !empty($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
+                            'semester'=> (isset($list->course->creation->semester->name) && !empty($list->course->creation->semester->name) ? $list->course->creation->semester->name : ''),
+                            'sex_identifier_id'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
+                            'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
+                            'url' => route('student.show', $list->id),
+                            'task_id' => $task_id,
+                            'task_created_by' => $createOrUpdateBy,
+                            'task_created' => $createOrUpdate,
+                            'task_status' => $status,
+                            'ids' => $list->id,
+                            'phase' => $phase,
+                            'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
+                            'interview' => [],
+                            'has_task_status' => ($task->interview != 'Yes' && isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
+                            'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
+                            'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
+                            'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
+                            'downloads' => $taskDownloads,
+                            'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
+                            'task_address_request' => (isset($task->address_request) && $task->address_request == 'Yes' ? 'Yes' : 'No'),
+                            'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
+                            'student_document_request_form_id' => null,
+                        ];
+                        $i++;
                     }
-                    else
-                    $data[] = [
-                        'id' => $list->id,
-                        'sl' => $i,
-                        'registration_no' => (empty($list->registration_no) ? $list->id : $list->registration_no),
-                        'first_name' => $list->first_name,
-                        'last_name' => $list->last_name,
-                        'date_of_birth'=> (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : ''),
-                        'course'=> (isset($list->course->creation->course->name) && !empty($list->course->creation->course->name) ? $list->course->creation->course->name : ''),
-                        'semester'=> (isset($list->course->creation->semester->name) && !empty($list->course->creation->semester->name) ? $list->course->creation->semester->name : ''),
-                        'sex_identifier_id'=> (isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : ''),
-                        'status_id'=> (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
-                        'url' => route('student.show', $list->id),
-                        'task_id' => $task_id,
-                        'task_created_by' => $createOrUpdateBy,
-                        'task_created' => $createOrUpdate,
-                        'task_status' => $status,
-                        'ids' => $list->id,
-                        'phase' => $phase,
-                        'canceled_reason' => ($status == 'Canceled' && isset($theStudentTask->canceled_reason) && !empty($theStudentTask->canceled_reason) ? $theStudentTask->canceled_reason : ''),
-                        'interview' => [],
-                        'has_task_status' => ($task->interview != 'Yes' && isset($theStudentTask->task->status) && !empty($theStudentTask->task->status) ? $theStudentTask->task->status : 'No'),
-                        'has_task_upload' => ($task->interview != 'Yes' && isset($theStudentTask->task->upload) && !empty($theStudentTask->task->upload) ? $theStudentTask->task->status : 'No'),
-                        'outcome' => ($task->interview != 'Yes' && isset($theStudentTask->task_status_id) && isset($theStudentTask->studentTaskStatus->name) && !empty($theStudentTask->studentTaskStatus->name) ? $theStudentTask->studentTaskStatus->name : ''),
-                        'is_completable' => ($task->interview != 'Yes' &&  ($theStudentTask->task->status == 'No' || ($theStudentTask->task->status == 'Yes' && $theStudentTask->task_status_id > 0)) && ($theStudentTask->task->upload == 'No' || ($theStudentTask->task->upload == 'Yes' && $theStudentTask->documents->count() > 0)) ? 1 : 0),
-                        'downloads' => $taskDownloads,
-                        'task_excuse' => (isset($task->attendance_excuses) && $task->attendance_excuses == 'Yes' ? 'Yes' : 'No'),
-                        'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
-                        'student_document_request_form_id' => null,
-                    ];
-                    $i++;
                 endforeach;
             endif;
         endif;

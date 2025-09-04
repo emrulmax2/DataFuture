@@ -319,6 +319,7 @@ var studentInterviewLogTable = (function () {
     const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
     const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
     const viewAttendanceExcuseModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAttendanceExcuseModal"));
+    const viewAddressUpdateReqModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewAddressUpdateReqModal"));
 
     const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
     document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
@@ -358,6 +359,25 @@ var studentInterviewLogTable = (function () {
         $("#viewAttendanceExcuseModal .modal-body").html(loaderHtml);
         $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
         $('#viewAttendanceExcuseModal input[name="attendance_excuse_id"]').val('0');
+    });
+
+    const viewAddressUpdateReqModalEl = document.getElementById('viewAddressUpdateReqModal')
+    viewAddressUpdateReqModalEl.addEventListener('hide.tw.modal', function(event) {
+        var loaderHtml = '<div class="loaderWrap flex justify-center items-center py-5">\
+                            <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(30, 41, 59)" class="w-8 h-8">\
+                                <g fill="none" fill-rule="evenodd">\
+                                    <g transform="translate(1 1)" stroke-width="4">\
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>\
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">\
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>\
+                                        </path>\
+                                    </g>\
+                                </g>\
+                            </svg>\
+                        </div>';
+        $("#viewAttendanceExcuseModal .modal-body").html(loaderHtml);
+        $('#viewAttendanceExcuseModal input[name="student_task_id"]').val('0');
+        $('#viewAttendanceExcuseModal input[name="student_address_update_request_id"]').val('0');
     });
 
     
@@ -1015,5 +1035,104 @@ var studentInterviewLogTable = (function () {
         });
     })
     /* Attendance Excuse End */
+
+
+    /* Address Update Request Start */
+    $(document).on('click', '.viewAddrUpReq', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        var student_task_id = $theLink.attr('data-recordid');
+        var student_id = $theLink.attr('data-studentid');
+
+        axios({
+            method: "post",
+            url: route('student.process.task.view.address.request'), 
+            data: {student_id : student_id, student_task_id : student_task_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200){
+                $('#viewAddressUpdateReqModal .modal-body').html(response.data.html);
+                $('#viewAddressUpdateReqModal [name="student_id"]').val(student_id);
+                $('#viewAddressUpdateReqModal [name="student_task_id"]').val(student_task_id);
+                $('#viewAddressUpdateReqModal [name="student_address_update_request_id"]').val(response.data.student_address_update_request_id);
+                
+                $('#viewAddressUpdateReqModal [name="task_status"]').val(response.data.task_status).trigger('change');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            } 
+        }).catch(error => {
+            if(error.response){
+                console.log('error');
+            }
+        });
+    });
+
+    $('#viewAddressUpdateReqModal #task_status').on('change', function(){
+        let $theStatus = $(this);
+        let theStatus = $theStatus.val();
+
+        if(theStatus == 'In Progress'){
+            var html = '<div class="mt-4 noteWrap">';
+                    html += '<label for="note" class="form-label">Notes</label>';
+                    html += '<textarea name="note" class="w-full form-control" placeholder="note"></textarea>';
+                html += '</div>';
+
+            $('#viewAddressUpdateReqModal .modal-body').append(html);
+        }else{
+            $('#viewAddressUpdateReqModal .modal-body .noteWrap').remove();
+        }
+    });
+
+    $('#viewAddressUpdateReqForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('viewAddressUpdateReqForm');
+    
+        document.querySelector('#updateAdrUpReqBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#updateAdrUpReqBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('student.process.update.address.request.task'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#updateAdrUpReqBtn').removeAttribute('disabled');
+            document.querySelector("#updateAdrUpReqBtn svg").style.cssText = "display: none;";
+            if (response.status == 200) {
+                viewAddressUpdateReqModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html("Congratulation!" );
+                    $("#successModal .successModalDesc").html('Student address update request task status successfully updated');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                });    
+
+                setTimeout(() => {
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#updateAdrUpReqBtn').removeAttribute('disabled');
+            document.querySelector("#updateAdrUpReqBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#viewAddressUpdateReqForm .${key}`).addClass('border-danger');
+                        $(`#viewAddressUpdateReqForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    })
+    /* Address Update Request End */
 
 })()

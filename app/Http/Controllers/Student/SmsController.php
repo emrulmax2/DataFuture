@@ -31,6 +31,7 @@ class SmsController extends Controller
                 //'sms_template_id' => $smsTemplateID,
                 'student_sms_content_id' => $studentSmsContent->id,
                 'phone' => $studentContact->mobile,
+                'show_as_news' => (isset($request->show_as_news) && $request->show_as_news > 0 ? $request->show_as_news : 0),
                 //'subject' => $request->subject,
                 //'sms' => $request->sms,
                 'created_by' => auth()->user()->id,
@@ -123,6 +124,7 @@ class SmsController extends Controller
                     'created_by'=> (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'deleted_at' => $list->deleted_at,
+                    'show_as_news' => (isset($list->show_as_news) && $list->show_as_news > 0 ? $list->show_as_news : 0),
                     'can_delete' => (isset(auth()->user()->priv()['communication_delete_sms']) && auth()->user()->priv()['communication_delete_sms'] == 1 ? 1 : 0)
                 ];
                 $i++;

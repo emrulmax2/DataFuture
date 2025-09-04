@@ -232,6 +232,7 @@ use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
 use App\Http\Controllers\LibraryManagement\LibraryBookController;
 use App\Http\Controllers\LibraryManagementController;
+use App\Http\Controllers\NewsUpdates\NewsUpdateController;
 use App\Http\Controllers\PayPalCheckOutController;
 use App\Http\Controllers\PaySlipUploadSyncController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
@@ -605,6 +606,7 @@ Route::prefix('/students')->name('students.')->group(function() {
 
             Route::get('/dashboard/workplacement', 'workplacement')->name('dashboard.workplacement');
             Route::get('/dashboard/student/select/{student}', 'selectStudent')->name('dashboard.student.select');
+            Route::post('/dashboard/update-address-request', 'updateAddressRequest')->name('update.address.request');
         });
 
         Route::controller(StudentDocumentRequestFormController::class)->group(function() {
@@ -1141,6 +1143,9 @@ Route::middleware('auth')->group(function() {
         
         Route::post('student/process-task-view-excuse', 'processTaskViewExcuse')->name('student.process.task.view.excuse');
         Route::post('student/update-process-task-and-excuse', 'updateProcessTaskAndExcuse')->name('student.process.update.task.and.excuse');
+
+        Route::post('student/address-update-request-view', 'addressUpdateRequestView')->name('student.process.task.view.address.request');
+        Route::post('student/update-address-request-task', 'updateAddressRequestTask')->name('student.process.update.address.request.task');
     });
 
     Route::controller(ArchiveController::class)->group(function() {
@@ -3887,6 +3892,27 @@ Route::middleware('auth')->group(function() {
     
         Route::get('qual-award-result/export', 'export')->name('qual.award.result.export');
         Route::post('qual-award-result/import', 'import')->name('qual.award.result.import');
+    });
+
+    
+
+    Route::controller(NewsUpdateController::class)->group(function() {
+        Route::get('news-updates', 'index')->name('news.updates'); 
+        Route::get('news-updates/create', 'create')->name('news.updates.create'); 
+        Route::post('news-updates/find-students', 'findStudents')->name('news.updates.find.students'); 
+        Route::post('news-updates/store', 'store')->name('news.updates.store'); 
+        Route::get('news-updates/list', 'list')->name('news.updates.list');
+        Route::get('news-updates/edit/{event}', 'edit')->name('news.updates.edit');
+        Route::post('news-updates/update', 'update')->name('news.updates.update');
+
+        Route::delete('news-updates/delete/{id}', 'destroy')->name('news.updates.destory');
+        Route::post('news-updates/restore/{id}', 'restore')->name('news.updates.restore');
+        Route::post('news-updates/update-status/{id}', 'updateStatus')->name('news.updates.update.status');
+
+        Route::post('news-updates/download-document', 'eventDocumentDownload')->name('news.updates.document.download');
+        Route::get('news-updates/assigned-list', 'assignedList')->name('news.updates.assigned.list');
+
+        Route::post('news-updates/delete-document', 'deleteEventDocument')->name('news.updates.document.delete');
     });
     
 });

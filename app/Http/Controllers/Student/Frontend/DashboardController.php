@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student\Frontend;
 
 use App\Exports\FeeEligibilityExport;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentAddressUpdateRequestRequest;
 use App\Models\Address;
 use App\Models\Assign;
 use App\Models\AttendanceExcuseDay;
@@ -24,6 +25,7 @@ use App\Models\HesaGender;
 use App\Models\KinsRelation;
 use App\Models\LevelHours;
 use App\Models\ModuleCreation;
+use App\Models\NewsAndEvent;
 use App\Models\Plan;
 use App\Models\PlanContent;
 use App\Models\PlanContentUpload;
@@ -37,12 +39,17 @@ use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\StudentAddressUpdateRequest;
+use App\Models\StudentAddressUpdateRequestDocument;
 use App\Models\StudentArchive;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentConsent;
 use App\Models\StudentProposedCourse;
+use App\Models\StudentSms;
+use App\Models\StudentTask;
 use App\Models\StudentUser;
 use App\Models\StudentWorkPlacement;
+use App\Models\TaskList;
 use App\Models\TermTimeAccommodationType;
 use App\Models\Title;
 use App\Models\User;
@@ -51,6 +58,7 @@ use App\Models\WorkplacementDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -181,7 +189,11 @@ class DashboardController extends Controller
                 "datewiseClasses" => $dateWiseClassList,
                 
                 'studentDataList' => $studentDataList,
-                'selectedStudentId' => session('selected_student_id')
+                'selectedStudentId' => session('selected_student_id'),
+                'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
+                                    $q->where('student_id', $student->id);
+                                })->orderBy('created_at', 'DESC')->get(),
+                'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get()
             ]);
         endif;
 
@@ -238,7 +250,11 @@ class DashboardController extends Controller
             'studentCourseAvailability' => $studentCourseAvailability,
             "datewiseClasses" => $dateWiseClassList,
             'studentDataList' => $studentDataList,
-            'selectedStudentId' => session('selected_student_id')
+            'selectedStudentId' => session('selected_student_id'),
+            'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
+                                $q->where('student_id', $student->id);
+                            })->orderBy('created_at', 'DESC')->get(),
+            'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get()
         ]);
 
     }
@@ -552,6 +568,10 @@ class DashboardController extends Controller
             'datewiseClasses' => $dateWiseClassList,
             'pastDateList' => $this->getAbsentExcuseDateList($student->id),
             'futureDateList' => $this->getFutureExcuseDateList($student->id),
+            'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
+                                $q->where('student_id', $student->id);
+                            })->orderBy('created_at', 'DESC')->get(),
+            'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get()
         ]);
     }
 
@@ -731,7 +751,11 @@ class DashboardController extends Controller
 
             'workplacement_details' => $workPlacementDetails,
             'total_hours_calculations' => $total_hours_calculations ?? [],
-            'confirmed_hours' => $confirmed_hours
+            'confirmed_hours' => $confirmed_hours,
+            'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
+                                $q->where('student_id', $student->id);
+                            })->orderBy('created_at', 'DESC')->get(),
+            'smsNews' => StudentSms::with('sms')->where('student_id', $student->id)->where('show_as_news', 1)->orderBy('id', 'DESC')->get()
         ]);
     }
 
@@ -742,5 +766,91 @@ class DashboardController extends Controller
             return redirect()->route('students.dashboard');
         }
         return response()->json(['success' => false, 'message' => 'Invalid student ID']);
+    }
+    
+    public function updateAddressRequest(StudentAddressUpdateRequestRequest $request){
+        $student_id = $request->student_id;
+        $id = (isset($request->id) && $request->id > 0 ? $request->id : 0);
+
+        if($id > 0):
+            $address = StudentAddressUpdateRequest::find($id);
+            if($request->hasFile('document') && isset($address->id) && $address->id > 0):
+                $document = $request->file('document');
+                $documentName = time().'_'.$document->getClientOriginalName();
+                $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
+
+                $data = [];
+                $data['student_address_update_request_id'] = $id;
+                $data['hard_copy_check'] = 0;
+                $data['doc_type'] = $document->getClientOriginalExtension();
+                $data['disk_type'] = 's3';
+                $data['path'] = Storage::disk('s3')->url($path);
+                $data['display_file_name'] = $documentName;
+                $data['current_file_name'] = $documentName;
+                $data['created_by'] = auth('student')->user()->id;
+                $reqDoc = StudentAddressUpdateRequestDocument::create($data);
+
+                StudentTask::where('student_id', $student_id)->where('id', $address->student_task_id)->update([
+                    'status' => 'Pending',
+                ]);
+                StudentAddressUpdateRequest::where('student_id', $student_id)->where('id', $id)->update([
+                    'status' => 'Pending',
+                ]);
+                return response()->json(['message' => 'Address update request new dowcument successfully uploaded.'], 200);
+            else:
+                return response()->json(['message' => 'Something went wrong. Please try again later.'], 422);
+            endif;
+        else:
+            $address = StudentAddressUpdateRequest::create([
+                'student_id' => $student_id,
+                'address_line_1' => (isset($request->address_line_1) && !empty($request->address_line_1) ? $request->address_line_1 : null),
+                'address_line_2' => (isset($request->address_line_2) && !empty($request->address_line_2) ? $request->address_line_2 : null),
+                'city' => (isset($request->city) && !empty($request->city) ? $request->city : null),
+                'state' => (isset($request->state) && !empty($request->state) ? $request->state : null),
+                'postal_code' => (isset($request->postal_code) && !empty($request->postal_code) ? $request->postal_code : null),
+                'country' => (isset($request->country) && !empty($request->country) ? $request->country : null),
+                'latitude' => (isset($request->latitude) && !empty($request->latitude) ? $request->latitude : null),
+                'longitude' => (isset($request->longitude) && !empty($request->longitude) ? $request->longitude : null),
+                'status' => 'Pending',
+
+                'created_by' => auth('student')->user()->id,
+            ]);
+
+            if($address->id):
+                if($request->hasFile('document')):
+                    $document = $request->file('document');
+                    $documentName = time().'_'.$document->getClientOriginalName();
+                    $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
+
+                    $data = [];
+                    $data['student_address_update_request_id'] = $address->id;
+                    $data['hard_copy_check'] = 0;
+                    $data['doc_type'] = $document->getClientOriginalExtension();
+                    $data['disk_type'] = 's3';
+                    $data['path'] = Storage::disk('s3')->url($path);
+                    $data['display_file_name'] = $documentName;
+                    $data['current_file_name'] = $documentName;
+                    $data['created_by'] = auth('student')->user()->id;
+                    $reqDoc = StudentAddressUpdateRequestDocument::create($data);
+                endif;
+
+                $excuseTask = TaskList::where('address_request', 'Yes')->orderBy('id', 'desc')->get()->first();
+                if(isset($excuseTask->id) && $excuseTask->id > 0):
+                    $studentTask = StudentTask::create([
+                        'student_id' => $student_id,
+                        'task_list_id' => $excuseTask->id,
+                        'status' => 'Pending',
+                        'created_by' => 1,
+                    ]);
+                    if($studentTask):
+                        StudentAddressUpdateRequest::where('id', $address->id)->update(['student_task_id' => $studentTask->id]);
+                    endif;
+                endif;
+
+                return response()->json(['message' => 'Address update request successully placed.'], 200);
+            else:
+                return response()->json(['message' => 'Something went wrong. Please try again later.'], 422);
+            endif;
+        endif;
     }
 }
