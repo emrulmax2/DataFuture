@@ -26,6 +26,7 @@ use App\Models\ApplicantDisability;
 use App\Models\ApplicantEmployment;
 use App\Models\ApplicantKin;
 use App\Models\ApplicantOtherDetail;
+use App\Models\ApplicantProofOfId;
 use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantQualification;
 use App\Models\ApplicantUser;
@@ -44,6 +45,7 @@ use DebugBar\DebugBar;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ApplicationController extends Controller
 {
@@ -117,7 +119,6 @@ class ApplicationController extends Controller
                 $applicant = new Applicant();
                 $applicant->applicant_user_id = $applicantUser->id;
                 $applicant->previous_student_id = $student->id;
-                $applicant->photo = $student->photo;
                 $applicant->first_name = $student->first_name;
                 $applicant->last_name = $student->last_name;
                 $applicant->date_of_birth = $student->date_of_birth;
@@ -142,8 +143,24 @@ class ApplicationController extends Controller
                 $applicant->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
                 $applicant->status_id = 1;
                 $applicant->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+
                 $applicant->save();
 
+                //check file exists in local storage
+                if(Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo)) {
+                    //put this photo in applicant photo folder
+                    $applicantPhotoPath = 'public/applicants/'.$applicant->id.'/';
+                    
+                    Storage::makeDirectory($applicantPhotoPath);
+
+                    $applicantPhotoName = $student->photo;
+
+                    Storage::copy('public/students/'.$student->id.'/'.$student->photo, $applicantPhotoPath.$applicantPhotoName);
+                    
+                    $applicant->photo = $applicantPhotoName;
+
+                    $applicant->save();
+                }
                 $applicantOther = new ApplicantOtherDetail();
                 $applicantOther->applicant_id = $applicant->id;
                 $applicantOther->ethnicity_id = $student->other->ethnicity_id;
@@ -205,6 +222,15 @@ class ApplicationController extends Controller
                 $applicantKin->country = $student->kin->address->country;
                 $applicantKin->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantKin->save();
+
+                $applicantProofofId = new ApplicantProofOfId();
+                $applicantProofofId->applicant_id = $applicant->id;
+                $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
+                $applicantProofofId->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
+                $applicantProofofId->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
+                $applicantProofofId->document = isset($student->ProofOfIdLatest->document) ? $student->ProofOfIdLatest->document : null;
+                $applicantProofofId->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+                $applicantProofofId->save();
 
                 if(isset($student->qualHighest) && $applicantOther->is_edication_qualification ==1){
                     $qual = $student->qualHighest;
@@ -260,6 +286,8 @@ class ApplicationController extends Controller
                         $employmentReference->save();
                     endforeach;
                 endif;
+
+
                     
                 return $applicant;
             }
@@ -309,7 +337,21 @@ class ApplicationController extends Controller
                 $applicant->status_id = 1;
                 $applicant->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicant->save();
+                //check file exists in local storage
+                if(Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo)) {
+                    //put this photo in applicant photo folder
+                    $applicantPhotoPath = 'public/applicants/'.$applicant->id.'/';
+                    
+                    Storage::makeDirectory($applicantPhotoPath);
 
+                    $applicantPhotoName = $student->photo;
+
+                    Storage::copy('public/students/'.$student->id.'/'.$student->photo, $applicantPhotoPath.$applicantPhotoName);
+                    
+                    $applicant->photo = $applicantPhotoName;
+
+                    $applicant->save();
+                }
                 $applicantOther = new ApplicantOtherDetail();
                 $applicantOther->applicant_id = $applicant->id;
                 $applicantOther->ethnicity_id = $student->other->ethnicity_id;
@@ -371,6 +413,15 @@ class ApplicationController extends Controller
                 $applicantKin->country = $student->kin->address->country;
                 $applicantKin->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantKin->save();
+
+                $applicantProofofId = new ApplicantProofOfId();
+                $applicantProofofId->applicant_id = $applicant->id;
+                $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
+                $applicantProofofId->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
+                $applicantProofofId->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
+                $applicantProofofId->document = isset($student->ProofOfIdLatest->document) ? $student->ProofOfIdLatest->document : null;
+                $applicantProofofId->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+                $applicantProofofId->save();
 
                 if(isset($student->qualHighest) && $applicantOther->is_edication_qualification ==1){
                     $qual = $student->qualHighest;
@@ -444,6 +495,22 @@ class ApplicationController extends Controller
         $newApplication->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
         $newApplication->save();
 
+
+        //check file exists in local storage
+        if(Storage::disk('local')->exists('public/students/'.$prevApplicant->id.'/'.$prevApplicant->photo)) {
+            //put this photo in applicant photo folder
+            $applicantPhotoPath = 'public/applicants/'.$newApplication->id.'/';
+            
+            Storage::makeDirectory($applicantPhotoPath);
+
+            $applicantPhotoName = $prevApplicant->photo;
+
+            Storage::copy('public/students/'.$prevApplicant->id.'/'.$prevApplicant->photo, $applicantPhotoPath.$applicantPhotoName);
+
+            $newApplication->photo = $applicantPhotoName;
+
+            $newApplication->save();
+        }
         // I want duplicate related model ApplicantOtherDetail for new Application
         // it will 1to1 mapping
         if(isset($prevApplicant->other)) {
@@ -482,6 +549,18 @@ class ApplicationController extends Controller
                 $newQualification->created_at = now();
                 $newQualification->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $newQualification->save();
+            }
+        }
+
+        if(isset($prevApplicant->proofs)) {
+            foreach ($prevApplicant->proofs as $proof)
+            {
+                $newProof = $proof->replicate();
+                $newProof->id = null;
+                $newProof->applicant_id = $newApplication->id;
+                $newProof->created_at = now();
+                $newProof->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+                $newProof->save();
             }
         }
 
