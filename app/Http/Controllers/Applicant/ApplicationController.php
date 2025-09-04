@@ -228,7 +228,6 @@ class ApplicationController extends Controller
                 $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
                 $applicantProofofId->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
                 $applicantProofofId->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
-                $applicantProofofId->document = isset($student->ProofOfIdLatest->document) ? $student->ProofOfIdLatest->document : null;
                 $applicantProofofId->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantProofofId->save();
 
@@ -419,7 +418,6 @@ class ApplicationController extends Controller
                 $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
                 $applicantProofofId->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
                 $applicantProofofId->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
-                $applicantProofofId->document = isset($student->ProofOfIdLatest->document) ? $student->ProofOfIdLatest->document : null;
                 $applicantProofofId->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
                 $applicantProofofId->save();
 
