@@ -177,7 +177,7 @@ class StudentController extends Controller
 
             if(!empty($student_name)): 
                 $Query->where(function($q) use($student_name){
-                    $q->where('first_name','LIKE','%'.$student_name.'%')->orWhere('last_name','LIKE','%'.$student_name.'%');
+                    $q->where(DB::raw("CONCAT(first_name,' ', last_name)"), 'LIKE', '%' . $student_name . '%');
                 }); 
             endif;
             if(!empty($student_dob)): $Query->where('date_of_birth', $student_dob); endif;
