@@ -26,12 +26,12 @@ var studentDueReportList = (function () {
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             columns: [
-                {
-                    title: "#SL",
-                    field: "sl",
-                    width: "60",
-                    headerSort: false,
-                },
+                // {
+                //     title: "#SL",
+                //     field: "sl",
+                //     width: "60",
+                //     headerSort: false,
+                // },
                 {
                     title: "Student ID",
                     field: "student_id",
@@ -77,6 +77,9 @@ var studentDueReportList = (function () {
                     field: "no_of_agreement",
                     headerHozAlign: "left",
                     headerSort: false,
+                    formatter(cell, formatterParams) {
+                        return '<div class="font-medium"><span class="text-danger">'+cell.getData().no_of_agreement+'</span>/<span class="text-success">'+cell.getData().no_of_agreement_all+'</span></div>';
+                    },
                 },
                 {
                     title: "Claim Total",
