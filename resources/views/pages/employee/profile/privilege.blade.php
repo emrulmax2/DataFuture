@@ -344,6 +344,12 @@
                             <label class="form-check-label ml-4" for="permission_dashboard_14">News & Events</label>
                         </div>
                     </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['dashboard']['student_due_rep']) && $priv['dashboard']['student_due_rep'] == 1 ? 'checked' : '') }} id="permission_dashboard_15" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][student_due_rep]">
+                            <label class="form-check-label ml-4" for="permission_dashboard_15">Student Due Report</label>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

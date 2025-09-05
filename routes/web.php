@@ -255,6 +255,7 @@ use App\Http\Controllers\Reports\IntakePerformance\RetentionRateReportController
 use App\Http\Controllers\Reports\IntakePerformance\SubmissionPassRateReportController;
 use App\Http\Controllers\Reports\SlcDataReportController;
 use App\Http\Controllers\Reports\SlcReports\SlcRecordReportController;
+use App\Http\Controllers\Reports\StudentDueReportController;
 use App\Http\Controllers\Reports\StudentExpectedResultReportController;
 use App\Http\Controllers\Reports\StudentPerformanceReportController;
 use App\Http\Controllers\Reports\StudentProgressMonitoringReportController;
@@ -3913,6 +3914,14 @@ Route::middleware('auth')->group(function() {
         Route::get('news-updates/assigned-list', 'assignedList')->name('news.updates.assigned.list');
 
         Route::post('news-updates/delete-document', 'deleteEventDocument')->name('news.updates.document.delete');
+    });
+
+    
+
+    Route::controller(StudentDueReportController::class)->group(function() {
+        Route::get('reports/student-due-report', 'index')->name('report.student.due'); 
+        Route::get('reports/student-due-report/list', 'list')->name('report.student.due.list'); 
+        Route::post('reports/student-due-report/download', 'excelDownload')->name('report.student.due.xl.download'); 
     });
     
 });
