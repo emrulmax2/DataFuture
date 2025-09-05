@@ -46,10 +46,11 @@ class StudentDueCron extends Command
         $semester_id = 121;
 
         $creation_ids = CourseCreation::orderBy('id', 'ASC')->where('semester_id', '>=', $semester_id)->pluck('id')->unique()->toArray();
-        $students = StudentCourseRelation::whereIn('course_creation_id', $creation_ids)->where('active', 1)
-                    ->whereHas('student', function($q) use($status_ids){
-                        $q->where('status_id', $status_ids);
-                    })->pluck('student_id')->unique()->toArray();
+        $students = StudentCourseRelation::whereIn('course_creation_id', $creation_ids)->where('active', 1)->pluck('student_id')->unique()->toArray();
+                    // ->whereHas('student', function($q) use($status_ids){
+                    //     $q->where('status_id', $status_ids);
+                    // })
+                    
         if(!empty($students)):
             foreach($students as $student_id):
                 $student = Student::with('activeCR')->where('id', $student_id)->get()->first();
