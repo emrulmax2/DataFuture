@@ -24,6 +24,7 @@ class SlcAgreement extends Model
         'discount',
         'total',
         'note',
+        'has_due',
 
         'created_by',
         'updated_by',

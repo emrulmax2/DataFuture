@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Number;
 
 class Student extends Model
 {
@@ -38,6 +39,7 @@ class Student extends Model
         'country_id',
         'referral_code',
         'is_referral_varified',
+        'has_due',
         'created_by',
         'updated_by', 
     ];

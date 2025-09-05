@@ -101,6 +101,11 @@
                                     <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/group_email.png') }}">
                                 </a>
                                 @endif
+                                @if(isset(auth()->user()->priv()['student_due_rep']) && auth()->user()->priv()['student_due_rep'] == 1)
+                                <a href="{{ route('report.student.due') }}" class="block relative col-span-6 2xl:col-span-4 mb-3">
+                                    <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/student_due.png') }}">
+                                </a>
+                                @endif
                             </div>
                         </div>
                         @endif

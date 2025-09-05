@@ -403,6 +403,7 @@ export default defineConfig({
                 'resources/js/news-updates-create.js',
                 'resources/js/news-updates-edits.js',
                 'resources/js/student-frontend-global.js',
+                'resources/js/student-due-reports.js',
 
             ],
             refresh: true,
