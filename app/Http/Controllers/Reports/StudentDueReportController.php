@@ -74,6 +74,8 @@ class StudentDueReportController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $studentCourseRelation = $list->activeCR->id;
+                $allAgreementCount = SlcAgreement::where('student_course_relation_id', $studentCourseRelation)->where('student_id', $list->id)
+                                    ->get()->count();
                 $agreement_ids = SlcAgreement::where('student_course_relation_id', $studentCourseRelation)->where('student_id', $list->id)
                                 ->where('date', '<=', $due_date)->where('has_due', 1)->orderBy('id', 'ASC')->get()
                                 ->pluck('id')->unique()->toArray();
@@ -97,6 +99,7 @@ class StudentDueReportController extends Controller
                     'end_date' => (isset($list->activeCR->course_end_date) && !empty($list->activeCR->course_end_date) ? date('d-m-Y', strtotime($list->activeCR->course_end_date)) : ''),
                     'status' => (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : ''),
                     'no_of_agreement' => (!empty($agreement_ids) ? count($agreement_ids) : 0),
+                    'no_of_agreement_all' => (!empty($allAgreementCount) ? $allAgreementCount : 0),
                     'claim_total' => ($totalInstallment > 0 ? Number::currency($totalInstallment, 'GBP') : Number::currency(0, 'GBP')),
                     'received_total' =>  ($receivedTotal > 0 ? Number::currency($receivedTotal, 'GBP') : Number::currency(0, 'GBP')),
                     'due' => ($due > 0 ? Number::currency($due, 'GBP') : Number::currency(0, 'GBP')),
