@@ -37,6 +37,8 @@ use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentContact;
 use App\Models\StudentDocument;
 use App\Models\StudentDocumentRequestForm;
+use App\Models\StudentLetter;
+use App\Models\StudentLettersDocument;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentOrder;
@@ -554,6 +556,58 @@ class PendingTaskManagerController extends Controller
             return response()->json(['msg' => 'Error Found!'], 422);
         endif;
     }
+    protected function generateEmailPdf($student_email_id, $student_id, $subject, $body){
+        $user = User::where('id', auth()->user()->id)->get()->first();
+
+        $PDFHTML = '';
+        $PDFHTML .= '<html>';
+            $PDFHTML .= '<head>';
+                $PDFHTML .= '<title>'.$subject.'</title>';
+                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+                $PDFHTML .= '<style>
+                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
+                                table{margin-left: 0px; width: 100%;}
+                                figure{margin: 0;}
+                                .text-center{text-align: center;}
+                                .text-left{text-align: left;}
+                                .text-right{text-align: right;}
+                                @media print{ .pageBreak{page-break-after: always;} }
+                                .pageBreak{page-break-after: always;}
+                                .vtop{vertical-align: top;}
+                                .mailContentTable tr th, .mailContentTable tr td{ padding: 0 0 10px 0; vertical-align: top;}
+                            </style>';
+            $PDFHTML .= '</head>';
+            $PDFHTML .= '<body>';
+                $PDFHTML .= '<table class="mailContentTable">';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued Date</th>';
+                            $PDFHTML .= '<td>'.date('d-m-Y').'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Issued BY</th>';
+                            $PDFHTML .= '<td>'.(isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name).'</td>';
+                        $PDFHTML .= '</tr>';
+                        $PDFHTML .= '<tr>';
+                            $PDFHTML .= '<th style="width: 150px;" class="text-left">Email Body</th>';
+                            $PDFHTML .= '<td>'.$body.'</td>';
+                        $PDFHTML .= '</tr>';
+                $PDFHTML .= '</table>';
+                
+            $PDFHTML .= '</body>';
+        $PDFHTML .= '</html>';
+
+        $fileName = $student_email_id.'_'.$student_id.'.pdf';
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+            ->setPaper('a4', 'portrait')
+            ->setWarnings(false);
+        $content = $pdf->output();
+        Storage::disk('s3')->put('public/students/'.$student_id.'/'.$fileName, $content );
+
+        $studentEmail = StudentEmail::where('id', $student_email_id)->update([
+            'mail_pdf_file' => $fileName
+        ]);
+        return $studentEmail;
+    }
 
     public function completeTaskStudentEmailTask(Request $request){
         
@@ -601,9 +655,95 @@ class PendingTaskManagerController extends Controller
                         //$MSGBODY = $letterSet->description;
                         $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,23);
                         UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
-                        //save email communication
                         
+                        //save to Generate Letter communication
+                        $pin = time();
+                        $issued_date = date('Y-m-d');
+                        $letter_title = (isset($letterSet->letter_title) && !empty($letterSet->letter_title) ? $letterSet->letter_title : 'Letter from LCC');
                         
+                        $data = [];
+                        $data['student_id'] = $student->id;
+                        $data['letter_set_id'] = $letterSet->id;
+                        $data['pin'] = $pin;
+                        $data['signatory_id'] = 23;
+                        $data['comon_smtp_id'] = ($commonSmtp->id > 0 ? $commonSmtp->id : null);
+                        $data['is_email_or_attachment'] = 2;
+                        $data['issued_by'] = auth()->user()->id;
+                        $data['issued_date'] = $issued_date;
+                        $data['created_by'] = auth()->user()->id;
+
+                        $letter = StudentLetter::create($data);
+                        $attachmentFiles = [];
+                        if($letter):
+                            $generatedLetter = $this->generateLetter($student->id, $letter_title, $letterSet->description, $issued_date, $pin, 23);
+
+                            $data = [];
+                            $data['student_id'] = $student->id;
+                            $data['student_letter_id'] = $letter->id;
+                            $data['hard_copy_check'] = 0;
+                            $data['doc_type'] = 'pdf';
+                            $data['path'] = Storage::disk('s3')->url('public/students/'.$student->id.'/'.$generatedLetter['filename']);
+                            $data['display_file_name'] = $letter_title;
+                            $data['current_file_name'] = $generatedLetter['filename'];
+                            $data['created_by'] = auth()->user()->id;
+                            StudentLettersDocument::create($data);
+                            /* Generate PDF End */
+                        endif;
+                        //save
+                        
+                        // $studentEmail = StudentEmail::create([
+                        //     'student_id' => $student->id,
+                        //     'common_smtp_id' => $commonSmtp->id,
+                        //     'email_template_id' => NULL,
+                        //     'subject' => $request->subject,
+                        //     'created_by' => auth()->user()->id,
+                        // ]); 
+                        // if($studentEmail):
+                        //     $subject = "Welcome Message to Students";
+
+                        //     $this->generateEmailPdf($studentEmail->id, $student->id,$subject, $MSGBODY);
+
+                        //     $MAILHTML = '';
+                        //     $MAILHTML .= $request->body;
+
+                        //     if($request->hasFile('documents')):
+                        //         $documents = $request->file('documents');
+                        //         $docCounter = 1;
+                        //         $attachmentInfo = [];
+                        //         foreach($documents as $document):
+                        //             $documentName = time().'_'.$document->getClientOriginalName();
+                        //             $path = $document->storeAs('public/students/'.$student_id, $documentName, 's3');
+
+                        //             $data = [];
+                        //             $data['student_id'] = $student_id;
+                        //             $data['student_email_id'] = $studentEmail->id;
+                        //             $data['hard_copy_check'] = 0;
+                        //             $data['doc_type'] = $document->getClientOriginalExtension();
+                        //             $data['path'] = Storage::disk('s3')->url($path);
+                        //             $data['display_file_name'] = $documentName;
+                        //             $data['current_file_name'] = $documentName;
+                        //             $data['created_by'] = auth()->user()->id;
+                        //             $studentEmailDocument = StudentEmailsDocument::create($data);
+
+                        //             if($studentEmailDocument):
+                        //                 $attachmentInfo[$docCounter++] = [
+                        //                     "pathinfo" => $path,
+                        //                     "nameinfo" => $document->getClientOriginalName(),
+                        //                     "mimeinfo" => $document->getMimeType(),
+                        //                     'disk'     => 's3'      
+                        //                 ];
+                        //                 $docCounter++;
+                        //             endif;
+                        //         endforeach;
+                        //         UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+                        //     else:
+                        //         UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, []));
+                        //     endif;
+                        //     return response()->json(['message' => 'Email successfully sent to Student'], 200);
+                        // else:
+                        //     return response()->json(['message' => 'Something went wrong. Please try later'], 422);
+                        // endif;
+
                     endif;
                 endif;
             endforeach;
