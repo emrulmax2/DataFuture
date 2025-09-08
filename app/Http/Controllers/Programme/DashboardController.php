@@ -258,6 +258,7 @@ class DashboardController extends Controller
                             $btnHtml .= '<li>';
                                 $btnHtml .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Feed Attendance</a>';
                             $btnHtml .= '</li>';
+                            
                             endif;
                         endif;
                         if($pln->status == 'Ongoing' && $pln->feed_given == 1 && $orgEnd < $currentTime):
