@@ -89,7 +89,11 @@ trait GenerateStudentLetterTrait{
                 elseif($table == 'letter_issuing'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $issued_date, $letter_content);
                 elseif($table == 'courses'):
-                    $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''), $letter_content);
+                    if($field == 'degree_offered'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->course->degree_offered) ? $student->activeCR->creation->course->degree_offered : ''), $letter_content);
+                    elseif($field == 'name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''), $letter_content);
+                    endif;
                 elseif($table == 'semesters'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($student->activeCR->creation->semester->name) ? $student->activeCR->creation->semester->name : ''), $letter_content);
                 elseif($table == 'student_proposed_courses'):

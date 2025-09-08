@@ -89,7 +89,7 @@
                         data-parent="{{ $parent_id }}" 
 
                         data-href="{{ ($theFile->download_url ? $theFile->download_url : '') }}" 
-                        class="fileFolderWrap cursor-pointer fileWrap"
+                        class="fileFolderWrap cursor-pointer fileWrap relative"
                         >
                         <div class="fileItem gridItems filesFoldersBox text-center">
                             <div class="fileFolderImg">
@@ -113,8 +113,14 @@
                                 <div class="ownedBy"></div>
                             @endif
                         </div>
+                        @if(isset($theFile->childrens) && $theFile->childrens->count() > 0)
+                        <button type="button" class="btn btn-facebook p-0 w-[30px] h-[30px] text-white rounded-full rounded-tr-none absolute top-0 right-0"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                        @endif
                     </div>
                 @endforeach
+            @endif
+            @if(isset($theFile->childrens) && $theFile->childrens->count() > 0)
+
             @endif
 
         </div>
@@ -576,7 +582,16 @@
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4 gap-y-1">
-                            <div class="col-span-6">
+                            <div class="col-span-6 pb-3">
+                                <div class="mt-7 flex justify-start items-center relative">
+                                    <label for="fileUploaderDocument" class="inline-flex items-center w-full text-primary justify-center btn btn-secondary  cursor-pointer">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-primary"></i> Upload Documents <span class="text-danger ml-1">*</span>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="fileUploaderDocument"/>
+                                </div>
+                                <div id="fileUploaderDocumentNames" class="fileUploaderDocumentNames mt-3" style="display: none"></div>
+                            </div>
+                            <!-- <div class="col-span-6">
                                 <label for="document" class="form-label">Upload Document <span class="text-danger">*</span></label>
                                 <label class="uploadWrap form-control relative border flex justify-start items-center cursor-pointer" for="addDocument">
                                     <input accept=".jpg,.jpeg,.png,.doc,.docx,.xl,.xlsx,.xls,.ppt,.pptx,.pdf,.txt,.zip" id="addDocument" type="file" name="document" class="w-full" style="position: absolute; width: 0; height: 0; opacity: 0; visibility: hidden;">
@@ -584,7 +599,7 @@
                                     <span id="addDocumentName" class="ml-3"></span>
                                 </label>
                                 <div class="acc__input-error error-document text-danger mt-2"></div>
-                            </div>
+                            </div> -->
                             {{--<div class="col-span-6">
                                 <label for="linked_document" class="form-label">Linked Document </label>
                                 <input id="linked_document" type="url" name="linked_document" class="form-control w-full">
@@ -906,6 +921,7 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
+    
 @endsection
 
 @section('script')
