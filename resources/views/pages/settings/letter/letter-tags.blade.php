@@ -27,6 +27,7 @@
             <li class="dropdown-item">[DATA=student_kins]name[/DATA]</li>
             <li class="dropdown-item">[DATA=student_kins]mobile[/DATA]</li>
             <li class="dropdown-item">[DATA=courses]name[/DATA]</li>
+            <li class="dropdown-item">[DATA=courses]degree_offered[/DATA]</li>
             <li class="dropdown-item">[DATA=semesters]name[/DATA]</li>
             <li class="dropdown-item">[DATA=student_proposed_courses]awarding_body[/DATA]</li>
             <li class="dropdown-item">[DATA=student_proposed_courses]evening_and_weekends[/DATA]</li>
@@ -50,6 +51,7 @@
             <li class="dropdown-item">[DATA=applicant_contacts]post_code[/DATA]</li>
             <li class="dropdown-item">[DATA=applicant_contacts]country[/DATA]</li>
             <li class="dropdown-item">[DATA=courses]name[/DATA]</li>
+            <li class="dropdown-item">[DATA=courses]degree_offered[/DATA]</li>
             <li class="dropdown-item">[DATA=applicant_proposed_courses]full_time[/DATA]</li>
             <li class="dropdown-item">[DATA=applicant_proposed_courses]course_start_date[/DATA]</li>
             <li class="dropdown-item">[DATA=applicant_proposed_courses]course_end_date[/DATA]</li>

@@ -53,7 +53,7 @@ class FilemanagerController extends Controller
                 $q->where('employee_id', $employee_id);
             })->orderBy('name', 'ASC')->get();
             $root_permission = [];
-            $documentInfos = DocumentInfo::where('document_folder_id', 0)->where('file_type', 1)->orWhere(function($q){
+            $documentInfos = DocumentInfo::with('childrens')->where('parent_id', 0)->where('document_folder_id', 0)->where('file_type', 1)->orWhere(function($q){
                 $q->where('file_type', 2)->where('created_by', auth()->user()->id);
             })->orderBy('display_file_name', 'ASC')->get();
         else:
@@ -61,7 +61,7 @@ class FilemanagerController extends Controller
             $root_permission = DocumentFolderPermission::where('employee_id', $employee_id)->whereHas('folder', function($q) use($root){
                 $q->where('slug', $root);
             })->get()->first();
-            $documentInfos = DocumentInfo::where('document_folder_id', $parent_id)->where('file_type', 1)->orWhere(function($q){
+            $documentInfos = DocumentInfo::with('childrens')->where('parent_id', 0)->where('document_folder_id', $parent_id)->where('file_type', 1)->orWhere(function($q){
                 $q->where('file_type', 2)->where('created_by', auth()->user()->id);
             })->orderBy('display_file_name', 'ASC')->get();
         endif;
@@ -395,46 +395,68 @@ class FilemanagerController extends Controller
         $current_file_name = null;
         $filePath = null;
         $docType = null;
-        if($request->hasFile('document')):
-            $document = $request->file('document');
-            $docType = $document->getClientOriginalExtension();
-            $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
-            $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
-        
+        $parentFileName = (isset($request->file_names) && !empty($request->file_names) ? $request->file_names : '');
+        if($request->hasFile('documents')):
+            $documents = $request->file('documents');
+            $firstDocument = $documents[0];
+            $firstDocumentName = $firstDocument->getClientOriginalName();
+            $parentFileName = !empty($parentFileName) ? $parentFileName : $firstDocumentName;
 
-            $data = [];
-            $data['document_folder_id'] = $folder_id;
-            $data['doc_type'] = $docType;
-            $data['disk_type'] = 'local';
-            $data['path'] = $params;
-            $data['display_file_name'] = $request->name;
-            $data['current_file_name'] = $current_file_name;
-            $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
-            $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
-            $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
-            $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
-            $data['created_by'] = auth()->user()->id;
+            $loop = 1;
+            $parent_id = 0;
+            $child_ids = [];
+            foreach($request->file('documents') as $document):
+                $docType = $document->getClientOriginalExtension();
+                $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+                $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
 
-            $documentInfo = DocumentInfo::create($data);
-            if($documentInfo->id):
-                unset($data['document_folder_id']);
-                $data['document_info_id'] = $documentInfo->id;
-                $documentRwo = Document::create($data);
+                $data = [];
+                $data['document_folder_id'] = $folder_id;
+                $data['doc_type'] = $docType;
+                $data['disk_type'] = 'local';
+                $data['path'] = $params;
+                $data['display_file_name'] = ($parentFileName != $document->getClientOriginalName() ? 'Child Of ' : '').$request->name;
+                $data['current_file_name'] = $current_file_name;
+                $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
+                $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
+                $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
+                $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
+                $data['created_by'] = auth()->user()->id;
 
-                if(isset($request->tag_ids) && !empty($request->tag_ids)):
-                    foreach($request->tag_ids as $tag_id):
-                        $data = [];
-                        $data['document_info_id'] = $documentInfo->id;
-                        $data['document_tag_id'] = $tag_id;
+                $documentInfo = DocumentInfo::create($data);
+                if($documentInfo->id):
+                    if($parentFileName == $document->getClientOriginalName()):
+                        $parent_id = $documentInfo->id;
+                    endif;
+                    if($parentFileName != $document->getClientOriginalName()):
+                        $child_ids[] = $documentInfo->id;
+                    endif;
 
-                        DocumentInfoTag::create($data);
-                    endforeach;
+                    unset($data['document_folder_id']);
+                    $data['document_info_id'] = $documentInfo->id;
+                    $documentRwo = Document::create($data);
+
+                    if(isset($request->tag_ids) && !empty($request->tag_ids)):
+                        foreach($request->tag_ids as $tag_id):
+                            $data = [];
+                            $data['document_info_id'] = $documentInfo->id;
+                            $data['document_tag_id'] = $tag_id;
+
+                            DocumentInfoTag::create($data);
+                        endforeach;
+                    endif;
                 endif;
+
+                $loop++;
+            endforeach;
+
+            if($parent_id > 0 && !empty($child_ids)):
+                DocumentInfo::whereIn('id', $child_ids)->update(['parent_id' => $parent_id]);
             endif;
 
             return response()->json(['suc' => 1, 'res' => 'File successfully uploaded.'], 200);
         else:
-            return response()->json(['suc' => 2, 'res' => 'Something went wrong. Please try later.'], 200);
+            return response()->json(['suc' => 2, 'res' => 'Something went wrong. Please try later.'], 304);
         endif;
     }
 

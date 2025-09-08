@@ -932,6 +932,26 @@ var fileVersionHistoryListTable = (function () {
         });
     });
 
+    $('#addFileForm #fileUploaderDocument').on('change', function(){
+        var inputs = document.getElementById('fileUploaderDocument');
+        var html = '<div class="mb-2">';
+        for (var i = 0; i < inputs.files.length; ++i) {
+            var name = inputs.files.item(i).name;
+            html += '<div class="form-check mt-2 mr-5">';
+                html += '<input '+(i == 0 ? 'Checked' : '')+' id="fileInput_'+i+'" class="form-check-input" type="radio" name="file_names" value="'+name+'">';
+                html += '<label class="form-check-label font-medium" for="fileInput_'+i+'">'+name+'</label>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        $('#addFileForm .fileUploaderDocumentNames').fadeIn().html(html);
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    });
+
     $('#addFileForm').on('submit', function(e){
         e.preventDefault();
         var $form = $(this);
@@ -941,7 +961,7 @@ var fileVersionHistoryListTable = (function () {
         document.querySelector("#uploadFile svg").style.cssText ="display: inline-block;";
         
         let form_data = new FormData(form);
-        form_data.append('file', $('#addFileForm input[name="document"]')[0].files[0]); 
+        form_data.append('file', $('#addFileForm input#fileUploaderDocument')[0].files[0]); 
         axios({
             method: "post",
             url: route('file.manager.upload.file'),

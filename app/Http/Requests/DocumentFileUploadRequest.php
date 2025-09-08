@@ -22,7 +22,7 @@ class DocumentFileUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'document' => 'required',
+            'documents' => 'required',
             'name' => 'required',
         ];
     }

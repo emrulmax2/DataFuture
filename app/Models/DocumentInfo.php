@@ -14,6 +14,7 @@ class DocumentInfo extends Model
     protected $appends = ['download_url', 'tags_html'];
 
     protected $fillable = [
+        'parent_id',
         'document_folder_id',
         'doc_type',
         'disk_type',
@@ -87,5 +88,9 @@ class DocumentInfo extends Model
         }
 
         return $html;
+    }
+
+    public function childrens(){
+        return $this->hasMany(DocumentInfo::class, 'parent_id', 'id');
     }
 }

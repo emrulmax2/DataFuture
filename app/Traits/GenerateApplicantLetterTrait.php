@@ -53,7 +53,11 @@ trait GenerateApplicantLetterTrait{
                 elseif($table == 'letter_issuing'):
                     $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", $issued_date, $letter_content);
                 elseif($table == 'courses'):
-                    $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : ''), $letter_content);
+                    if($field == 'degree_offered'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->course->degree_offered) ? $applicant->course->creation->course->degree_offered : ''), $letter_content);
+                    elseif($field == 'name'):
+                        $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->creation->course->name) ? $applicant->course->creation->course->name : ''), $letter_content);
+                    endif;
                 elseif($table == 'applicant_proposed_courses'):
                     if($field == 'full_time'):
                         $letter_content = str_replace("[DATA=" . $table . "]" . $field . "[/DATA]", (isset($applicant->course->full_time) && $applicant->course->full_time == 1 ? 'Yes' : 'No'), $letter_content);
