@@ -52,13 +52,32 @@ class DueReportController extends Controller
             $row = 2;
             foreach($Query as $list):
                 $studentCourseRelation = $list->activeCR->id;
+                $stdInstallment = 0;
+                $stdReceived = 0;
+                $stdRefund = 0;
+                $dueCount = 0;
                 $slcAgreement = SlcAgreement::where('student_course_relation_id', $studentCourseRelation)->where('student_id', $list->id)->where('date', '<=', $due_date)->orderBy('id', 'ASC')->get();
-                $agreement_ids = $slcAgreement->pluck('id')->unique()->toArray();
+                if(!empty($slcAgreement)):
+                    foreach($slcAgreement as $agreement):
+                        $installment = SlcInstallment::where('slc_agreement_id', $agreement->id)->where('student_id', $list->id)->where('installment_date', '<=', $due_date)->sum('amount');
+                        $totalReceived = SlcMoneyReceipt::where('slc_agreement_id', $agreement->id)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '!=', 'Refund')->sum('amount');
+                        $totalRefund = SlcMoneyReceipt::where('slc_agreement_id', $agreement->id)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '=', 'Refund')->sum('amount');
+                        $due = $installment - $totalReceived + $totalRefund;
+                        if($due > 0):
+                            $stdInstallment += $installment;
+                            $stdReceived += $totalReceived;
+                            $stdRefund += $totalRefund;
+                            $dueCount += 1;
+                        endif;
+                    endforeach;
+                endif;
+                // $agreement_ids = $slcAgreement->pluck('id')->unique()->toArray();
 
-                $installment = SlcInstallment::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('installment_date', '<=', $due_date)->sum('amount');
-                $totalReceived = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '!=', 'Refund')->sum('amount');
-                $totalRefund = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '=', 'Refund')->sum('amount');
-                $due = $installment - $totalReceived + $totalRefund;
+                // $installment = SlcInstallment::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('installment_date', '<=', $due_date)->sum('amount');
+                // $totalReceived = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '!=', 'Refund')->sum('amount');
+                // $totalRefund = SlcMoneyReceipt::whereIn('slc_agreement_id', $agreement_ids)->where('student_id', $list->id)->where('payment_date', '<=', $due_date)->where('payment_type', '=', 'Refund')->sum('amount');
+                //$due = $installment - $totalReceived + $totalRefund;
+                $due = $stdInstallment - $stdReceived + $stdRefund;
 
                 if($due > 0):
                     $theCollection[$row][] = $i;
@@ -67,9 +86,9 @@ class DueReportController extends Controller
                     $theCollection[$row][] = (isset($list->activeCR->course_start_date) && !empty($list->activeCR->course_start_date) ? date('d-m-Y', strtotime($list->activeCR->course_start_date)) : '');
                     $theCollection[$row][] = (isset($list->activeCR->course_end_date) && !empty($list->activeCR->course_end_date) ? date('d-m-Y', strtotime($list->activeCR->course_end_date)) : '');
                     $theCollection[$row][] = (isset($list->status->name) && !empty($list->status->name) ? $list->status->name : '');
-                    $theCollection[$row][] = $slcAgreement->count();
-                    $theCollection[$row][] = $installment;
-                    $theCollection[$row][] = $totalReceived - $totalRefund;
+                    $theCollection[$row][] = $dueCount;
+                    $theCollection[$row][] = $stdInstallment;
+                    $theCollection[$row][] = $stdReceived - $stdRefund;
                     $theCollection[$row][] = $due;
 
                     $i++;

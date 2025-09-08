@@ -105,7 +105,7 @@ var studentDueReportList = (function () {
                     headerHozAlign: "left",
                     headerSort: false,
                     formatter(cell, formatterParams) {
-                        return '<div class="whitespace-normal text-xs">'+cell.getData().due_date+'</div>';
+                        return '<div class="whitespace-normal break-words text-xs">'+cell.getData().due_date+'</div>';
                     },
                 },
             ],
