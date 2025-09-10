@@ -24,6 +24,30 @@ class DocumentFileUploadRequest extends FormRequest
         return [
             'documents' => 'required',
             'name' => 'required',
+            'email_reminder' => 'sometimes',
+            'subject' => 'required_if:email_reminder,1',
+            'message' => 'required_if:email_reminder,1',
+            'employee_ids' => 'required_if:email_reminder,1',
+
+            'is_repeat_reminder' => 'sometimes',
+            'single_reminder_date' => 'required_if:is_repeat_reminder,0',
+            'frequency' => 'required_if:is_repeat_reminder,1',
+            'repeat_reminder_start' => 'required_if:is_repeat_reminder,1',
+        ];
+    }
+
+    public function messages(){
+        return [
+            'documents.required' => 'Please upload 1 or more document.',
+            'name.required' => 'This field is required.',
+            'subject.required_if' => 'This field is required.',
+            'message.required_if' => 'This field is required.',
+            'employee_ids.required_if' => 'This field is required.',
+
+            'single_reminder_date.required_if' => 'This field is required.',
+            'frequency.required_if' => 'This field is required.',
+            'repeat_reminder_start.required_if' => 'This field is required.',
+
         ];
     }
 }

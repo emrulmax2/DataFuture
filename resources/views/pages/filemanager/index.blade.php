@@ -113,14 +113,13 @@
                                 <div class="ownedBy"></div>
                             @endif
                         </div>
-                        @if(isset($theFile->childrens) && $theFile->childrens->count() > 0)
-                        <button type="button" class="btn btn-facebook p-0 w-[30px] h-[30px] text-white rounded-full rounded-tr-none absolute top-0 right-0"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                        @if(isset($theFile->latestVersion->attachments) && $theFile->latestVersion->attachments->count() > 0)
+                        <button type="button" data-tw-toggle="modal" data-tw-target="#fileAttachmentModal" data-id="{{ $theFile->latestVersion->id }}" class="attachmentToggleBtn btn btn-facebook p-0 w-[30px] h-[30px] text-white rounded-full rounded-tr-none absolute top-0 right-0">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        </button>
                         @endif
                     </div>
                 @endforeach
-            @endif
-            @if(isset($theFile->childrens) && $theFile->childrens->count() > 0)
-
             @endif
 
         </div>
@@ -163,14 +162,14 @@
             </li>
             <li class="editFileLink">
                 <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#editFileModal" href="javascript:void(0);" class="editFile dropdown-item">
-                    <i data-lucide="pencil-line" class="text-success w-4 h-4 mr-2"></i> Edit File
-                </a>
-            </li>
-            <li class="uploadVersionLink">
-                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#uploadFileVersionModal" href="javascript:void(0);" class="uploadNewVersion dropdown-item">
                     <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
                 </a>
             </li>
+            <!-- <li class="uploadVersionLink">
+                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#uploadFileVersionModal" href="javascript:void(0);" class="uploadNewVersion dropdown-item">
+                    <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
+                </a>
+            </li> -->
             <li class="versionHistoryLink">
                 <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
                     <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
@@ -181,11 +180,11 @@
                     <i data-lucide="user-cog" class="text-info w-4 h-4 mr-2"></i> Edit Permission
                 </a>
             </li>--}}
-            <li class="reminderLink">
+            <!-- <li class="reminderLink">
                 <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileReminderModal" href="javascript:void(0);" class="fileReminderBtn dropdown-item">
                     <i data-lucide="bell" class="text-info w-4 h-4 mr-2"></i> Reminder
                 </a>
-            </li>
+            </li> -->
             <li class="deleteFileLink">
                 <a data-name="" data-id="0" href="javascript:void(0);" class="deleteFile dropdown-item">
                     <i data-lucide="trash-2" class="text-danger w-4 h-4 mr-2"></i> Delete File
@@ -196,7 +195,47 @@
     <!-- BEGIN: File Dropdown End -->
 
 
-    <!-- BEGIN: File Reminder Modal -->
+    <!-- BEGIN: File Attachment Modal -->
+    <div id="fileAttachmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <form method="POST" action="#" id="fileAttachmentForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Attachment of  <span class="displayName underline font-bold"></span></h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Close</button>
+                        <!-- <button type="submit" id="saveReminder" class="btn btn-primary w-auto">     
+                            Save                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button> -->
+                        <input type="hidden" name="document_info_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: File Attachment Modal -->
+
+
+    <!-- BEGIN: File Reminder Modal
     <div id="fileReminderModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <form method="POST" action="#" id="fileReminderForm" enctype="multipart/form-data">
@@ -297,7 +336,7 @@
             </form>
         </div>
     </div>
-    <!-- END: Edit File Permission Modal -->
+    END: Edit File Permission Modal -->
 
     <!-- BEGIN: Edit File Permission Modal -->
     <div id="editFilePermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -393,7 +432,7 @@
     </div>
     <!-- END: File History Modal -->
 
-    <!-- BEGIN: File New Version Modal -->
+    <!-- BEGIN: File New Version Modal
     <div id="uploadFileVersionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="uploadFileVersionForm" enctype="multipart/form-data">
@@ -446,7 +485,7 @@
             </form>
         </div>
     </div>
-    <!-- END: File New Version Modal -->
+    END: File New Version Modal -->
 
     <!-- BEGIN: Edit File Modal -->
     <div id="editFileModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -454,27 +493,36 @@
             <form method="POST" action="#" id="editFileForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit File</h2>
+                        <h2 class="font-medium text-base mr-auto">Update File</h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
                     </div>
                     <div class="modal-body">
                         <div class="grid grid-cols-12 gap-4 gap-y-1">
+                            <div class="col-span-6 pb-3">
+                                <div class="mt-7 flex justify-start items-center relative">
+                                    <label for="editFileUploaderDocument" class="inline-flex items-center w-full text-primary justify-center btn btn-secondary  cursor-pointer">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 mr-2 text-primary"></i> Upload New Version Documents</span>
+                                    </label>
+                                    <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editFileUploaderDocument"/>
+                                </div>
+                                <div id="editFileUploaderDocumentNames" class="editFileUploaderDocumentNames mt-3" style="display: none"></div>
+                            </div>
                             <div class="col-span-6">
                                 <label for="edit_name" class="form-label">Document Name <span class="text-danger">*</span></label>
                                 <input id="edit_name" type="text" name="name" class="form-control w-full">
                                 <div class="acc__input-error error-name text-danger mt-2"></div>
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="edit_expire_at" class="form-label">Exipiry Date</label>
                                 <input id="edit_expire_at" type="text" name="expire_at" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="edit_publish_date" class="form-label">Website Publish Date</label>
                                 <input id="edit_publish_date" type="text" name="publish_date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
                             </div>
-                            <div class="col-span-6">
+                            <div class="col-span-4">
                                 <label for="edit_file_type" class="form-label">File Type</label>
                                 <div class="flex flex-col sm:flex-row">
                                     <div class="form-check mr-2">
@@ -496,6 +544,79 @@
                                 <div class="fileTagsWrap border rounded relative">
                                     <input type="text" name="tag_search" class="tag_search"/>
                                     <ul class="autoFillDropdown"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <div class="form-check form-switch">
+                                <input id="edit_email_reminder" class="form-check-input" name="email_reminder" type="checkbox" value="1">
+                                <label class="form-check-label ml-5" for="edit_email_reminder">Email Reminder</label>
+                            </div>
+                        </div>
+                        <div class="emailReminderWrap mt-5" style="display: none;">
+                            <div>
+                                <label for="edit_subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                <input type="text" name="subject" class="form-control w-full" id="edit_subject"/>
+                            </div>
+                            <div class="mt-3">
+                                <label for="edit_message" class="form-label">Message <span class="text-danger">*</span></label>
+                                <textarea rows="4" name="message" class="form-control w-full" id="edit_message"></textarea>
+                            </div>
+                            <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                <div class="col-span-3">
+                                    <div class="form-check" style="padding-top: 38px;">
+                                        <input id="edit_is_repeat_reminder" name="is_repeat_reminder" class="form-check-input" type="checkbox" value="1">
+                                        <label class="form-check-label" for="edit_is_repeat_reminder">Repeat Reminder</label>
+                                    </div>
+                                </div>
+                                <div class="col-span-3">
+                                    <div class="form-check" style="padding-top: 38px;">
+                                        <input id="edit_is_send_email" name="is_send_email" class="form-check-input" type="checkbox" value="1">
+                                        <label class="form-check-label" for="edit_is_send_email">Send Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-span-6">
+                                    <label for="edit_reminder_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                    <select name="employee_ids[]" id="edit_reminder_employee_ids" class="w-full tom-selects" multiple>
+                                        @if(!empty($employee))
+                                            @foreach($employee as $emp)
+                                                <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="reminderSingleWrap">
+                                <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                    <div class="col-span-4">
+                                        <label for="edit_single_reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" name="single_reminder_date" class="form-control w-full datepicker" id="edit_single_reminder_date" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reminderMultiWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                    <div class="col-span-4">
+                                        <label for="edit_frequency" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                        <select id="edit_frequency" name="frequency" class="form-control w-full">
+                                            <option value="">Please Select</option>
+                                            <option value="Daily" class="ng-star-inserted">Daily</option>
+                                            <option value="Weekly" class="ng-star-inserted">Weekly</option>
+                                            <option value="Monthly" class="ng-star-inserted">Monthly</option>
+                                            <option value="Quarterly" class="ng-star-inserted">Quarterly</option>
+                                            <option value="Half Yearly" class="ng-star-inserted">Half Yearly</option>
+                                            <option value="Yearly" class="ng-star-inserted">Yearly</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-4">
+                                        <label for="edit_repeat_reminder_start" class="form-label">Reminder Start <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" name="repeat_reminder_start" class="form-control w-full datepicker" id="edit_repeat_reminder_start" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
+                                    <div class="col-span-4">
+                                        <label for="repeat_reminder_end" class="form-label">Reminder End</label>
+                                        <input type="text" value="" name="edit_repeat_reminder_end" class="form-control w-full datepicker" id="edit_repeat_reminder_end" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -639,6 +760,79 @@
                                 <div class="fileTagsWrap border rounded relative">
                                     <input type="text" name="tag_search" class="tag_search"/>
                                     <ul class="autoFillDropdown"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-5">
+                            <div class="form-check form-switch">
+                                <input id="email_reminder" class="form-check-input" name="email_reminder" type="checkbox" value="1">
+                                <label class="form-check-label ml-5" for="email_reminder">Email Reminder</label>
+                            </div>
+                        </div>
+                        <div class="emailReminderWrap mt-5" style="display: none;">
+                            <div>
+                                <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                <input type="text" name="subject" class="form-control w-full" id="subject"/>
+                            </div>
+                            <div class="mt-3">
+                                <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
+                                <textarea rows="4" name="message" class="form-control w-full" id="message"></textarea>
+                            </div>
+                            <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                <div class="col-span-3">
+                                    <div class="form-check" style="padding-top: 38px;">
+                                        <input id="is_repeat_reminder" name="is_repeat_reminder" class="form-check-input" type="checkbox" value="1">
+                                        <label class="form-check-label" for="is_repeat_reminder">Repeat Reminder</label>
+                                    </div>
+                                </div>
+                                <div class="col-span-3">
+                                    <div class="form-check" style="padding-top: 38px;">
+                                        <input id="is_send_email" name="is_send_email" class="form-check-input" type="checkbox" value="1">
+                                        <label class="form-check-label" for="is_send_email">Send Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-span-6">
+                                    <label for="reminder_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                    <select name="employee_ids[]" id="reminder_employee_ids" class="w-full tom-selects" multiple>
+                                        @if(!empty($employee))
+                                            @foreach($employee as $emp)
+                                                <option value="{{ $emp->id }}">{{ $emp->full_name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="reminderSingleWrap">
+                                <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                    <div class="col-span-4">
+                                        <label for="single_reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" name="single_reminder_date" class="form-control w-full datepicker" id="single_reminder_date" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="reminderMultiWrap" style="display: none;">
+                                <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
+                                    <div class="col-span-4">
+                                        <label for="frequency" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                        <select id="frequency" name="frequency" class="form-control w-full">
+                                            <option value="">Please Select</option>
+                                            <option value="Daily" class="ng-star-inserted">Daily</option>
+                                            <option value="Weekly" class="ng-star-inserted">Weekly</option>
+                                            <option value="Monthly" class="ng-star-inserted">Monthly</option>
+                                            <option value="Quarterly" class="ng-star-inserted">Quarterly</option>
+                                            <option value="Half Yearly" class="ng-star-inserted">Half Yearly</option>
+                                            <option value="Yearly" class="ng-star-inserted">Yearly</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-span-4">
+                                        <label for="repeat_reminder_start" class="form-label">Reminder Start <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" name="repeat_reminder_start" class="form-control w-full datepicker" id="repeat_reminder_start" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
+                                    <div class="col-span-4">
+                                        <label for="repeat_reminder_end" class="form-label">Reminder End</label>
+                                        <input type="text" value="" name="repeat_reminder_end" class="form-control w-full datepicker" id="repeat_reminder_end" data-format="DD-MM-YYYY" data-single-mode="true"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>

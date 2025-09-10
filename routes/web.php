@@ -3281,9 +3281,12 @@ Route::middleware('auth')->group(function() {
         Route::post('file-manager/file-restore-version', 'fileRestoreVersion')->name('file.manager.file.restore.version'); 
         Route::post('file-manager/edit-file-permission', 'editFilePermission')->name('file.manager.edit.file.permission'); 
         Route::post('file-manager/update-file-permission', 'updateFilePermission')->name('file.manager.update.file.permission'); 
-        Route::post('file-manager/store-file-reminder', 'storeFileReminder')->name('file.manager.store.file.reminder'); 
-        Route::post('file-manager/edit-file-reminder', 'editFileReminder')->name('file.manager.edit.file.reminder'); 
+        //Route::post('file-manager/store-file-reminder', 'storeFileReminder')->name('file.manager.store.file.reminder'); 
+        //Route::post('file-manager/edit-file-reminder', 'editFileReminder')->name('file.manager.edit.file.reminder'); 
         Route::delete('file-manager/destroy-file', 'destroyFile')->name('file.manager.destroy.file'); 
+
+        Route::post('file-manager/get-file-attachments', 'getFileAttachments')->name('file.manager.get.file.attachment'); 
+        Route::delete('file-manager/destroy-attachment', 'destroyAttachment')->name('file.manager.destroy.attachment'); 
     });
 
     Route::controller(DocumentTagController::class)->group(function() {

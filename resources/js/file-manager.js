@@ -28,14 +28,21 @@ var fileVersionHistoryListTable = (function () {
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "Created At",
-                    field: "created_at",
+                    title: "Name",
+                    field: "display_file_name",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Created By",
-                    field: "created_by",
+                    title: "Created",
+                    field: "created_at",
                     headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<div>';
+                                html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                                html += '<div class="text-slate-500 text-xs whitespace-nowrap"> By '+cell.getData().created_by+'</div>';
+                            html += '</div>';
+                        return html;
+                    }
                 },
                 {
                     title: "Actions",
@@ -45,14 +52,27 @@ var fileVersionHistoryListTable = (function () {
                     headerHozAlign: "center",
                     width: "180",
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {         
+                        let attachments = cell.getData().attachments;  
+                        console.log(attachments)             
                         var btns = "";
-                        if(cell.getData().current_version == 1){
-                            btns += '<span class="btn btn-success py-0 px-2 text-white rounded-0">Current Version</span>';
-                        }else{
+                            if(typeof attachments === 'object' || attachments !== null){
+                                btns += '<div class="dropdown inline-flex ml-1">';
+                                    btns += '<button class="dropdown-toggle btn btn-facebook text-white btn-rounded ml-1 p-0 w-7 h-7" aria-expanded="false" data-tw-toggle="dropdown"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip-icon lucide-paperclip w-3 h-3"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551"/></svg></button>';
+                                    btns += '<div class="dropdown-menu w-64">';
+                                        btns += '<ul class="dropdown-content">';
+                                            $.each(attachments, function(index, attachment){
+                                                btns += '<li>';
+                                                    btns += '<a href="'+attachment.url+'" class="dropdown-item break-all whitespace-normal" style="align-items: flex-start;"><i style="flex: 0 0 1rem;" data-lucide="download-cloud" class="w-4 h-4 mr-2 text-success"></i> '+attachment.name+'</a>';
+                                                btns += '</li>';
+                                            });
+                                        btns += '</div>';
+                                    btns += '</div>';
+                                btns += '</div>';
+                            }
                             btns += '<a href="'+cell.getData().download_url+'" download class="downloadDoc relative btn btn-success text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="cloud-lightning" class="w-3 h-3"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="rotate-cw" class="w-3 h-3"></i></button>';
-                        }
+                            //btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn relative btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="rotate-cw" class="w-3 h-3"></i></button>';
+
                         return btns;
                     },
                 },
@@ -110,6 +130,7 @@ var fileVersionHistoryListTable = (function () {
     let editEmployeeIds = ($('#edit_employee_ids').length > 0 ? new TomSelect('#edit_employee_ids', tomOptions) : null);
     let editFileEmployeeIds = ($('#edit_file_employee_ids').length > 0 ? new TomSelect('#edit_file_employee_ids', tomOptions) : null);
     let reminderEmployeeIds = ($('#reminder_employee_ids').length > 0 ? new TomSelect('#reminder_employee_ids', tomOptions) : null);
+    let editReminderEmployeeIds = ($('#edit_reminder_employee_ids').length > 0 ? new TomSelect('#edit_reminder_employee_ids', tomOptions) : null);
 
 
     const addFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFolderModal"));
@@ -118,7 +139,8 @@ var fileVersionHistoryListTable = (function () {
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const editFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFolderModal"));
     const editFolderPermissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFolderPermissionModal"));
-    const fileReminderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileReminderModal"));
+    //const fileReminderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileReminderModal"));
+    const fileAttachmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileAttachmentModal"));
     let confModalDelTitle = 'Are you sure?';
 
     const confirmModalEl = document.getElementById('confirmModal')
@@ -171,19 +193,25 @@ var fileVersionHistoryListTable = (function () {
         $('#editFolderPermissionModal .modal-footer input[name="id"]').val('0');
     });
 
-    const fileReminderModalEl = document.getElementById('fileReminderModal')
-    fileReminderModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#fileReminderModal .acc__input-error').html('');
-        $('#fileReminderModal .displayName').html('');
-        $('#fileReminderModal .modal-body input:not([type="checkbox"])').val('');
-        $('#fileReminderModal .modal-body textarea').val('');
-        $('#fileReminderModal .modal-body [name="is_repeat_reminder"]').prop('checked', false);
-        $('#fileReminderModal .modal-body [name="is_send_email"]').prop('checked', false);
-        $('#fileReminderModal .modal-body .reminderSingleWrap').fadeIn();
-        $('#fileReminderModal .modal-body .reminderMultiWrap').fadeOut();
+    // const fileReminderModalEl = document.getElementById('fileReminderModal')
+    // fileReminderModalEl.addEventListener('hide.tw.modal', function(event) {
+    //     $('#fileReminderModal .acc__input-error').html('');
+    //     $('#fileReminderModal .displayName').html('');
+    //     $('#fileReminderModal .modal-body input:not([type="checkbox"])').val('');
+    //     $('#fileReminderModal .modal-body textarea').val('');
+    //     $('#fileReminderModal .modal-body [name="is_repeat_reminder"]').prop('checked', false);
+    //     $('#fileReminderModal .modal-body [name="is_send_email"]').prop('checked', false);
+    //     $('#fileReminderModal .modal-body .reminderSingleWrap').fadeIn();
+    //     $('#fileReminderModal .modal-body .reminderMultiWrap').fadeOut();
 
-        reminderEmployeeIds.clear(true);
-        $('#fileReminderModal .modal-footer input[name="document_info_id"]').val('0');
+    //     reminderEmployeeIds.clear(true);
+    //     $('#fileReminderModal .modal-footer input[name="document_info_id"]').val('0');
+    // });
+
+    const fileAttachmentModalEl = document.getElementById('fileAttachmentModal')
+    fileAttachmentModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#fileAttachmentModal .displayName').html('');
+        $('#fileAttachmentModal .modal-body').html('');
     });
 
 
@@ -630,7 +658,7 @@ var fileVersionHistoryListTable = (function () {
     /* File Upload Code Start */
     const addFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFileModal"));
     const editFileModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFileModal"));
-    const uploadFileVersionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadFileVersionModal"));
+    //const uploadFileVersionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadFileVersionModal"));
     const fileHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileHistoryModal"));
     const editFilePermissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFilePermissionModal"));
     const addTagModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTagModal"));
@@ -662,13 +690,13 @@ var fileVersionHistoryListTable = (function () {
         $('#editFileModal .fileTagsWrap .autoFillDropdown').fadeOut().val();
     });
 
-    const uploadFileVersionModalEl = document.getElementById('uploadFileVersionModal')
-    uploadFileVersionModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#uploadFileVersionModal .acc__input-error').html('');
-        $('#uploadFileVersionModal .modal-body input:not([type="checkbox"])').val('');
-        $('#uploadFileVersionModal .modal-footer input[name="id"]').val('0');
-        $('#uploadFileVersionModal #editDocumentName').html('');
-    });
+    // const uploadFileVersionModalEl = document.getElementById('uploadFileVersionModal')
+    // uploadFileVersionModalEl.addEventListener('hide.tw.modal', function(event) {
+    //     $('#uploadFileVersionModal .acc__input-error').html('');
+    //     $('#uploadFileVersionModal .modal-body input:not([type="checkbox"])').val('');
+    //     $('#uploadFileVersionModal .modal-footer input[name="id"]').val('0');
+    //     $('#uploadFileVersionModal #editDocumentName').html('');
+    // });
 
     const editFilePermissionModalEl = document.getElementById('editFilePermissionModal')
     editFilePermissionModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -697,9 +725,9 @@ var fileVersionHistoryListTable = (function () {
         showFileName('addDocument', 'addDocumentName');
     });
     
-    $('#uploadFileVersionModal').on('change', '#editDocument', function(){
-        showFileName('editDocument', 'editDocumentName');
-    });
+    // $('#uploadFileVersionModal').on('change', '#editDocument', function(){
+    //     showFileName('editDocument', 'editDocumentName');
+    // });
 
     function showFileName(inputId, targetPreviewId) {
         let fileInput = document.getElementById(inputId);
@@ -952,6 +980,44 @@ var fileVersionHistoryListTable = (function () {
         });
     });
 
+    $('#email_reminder').on('change', function(e){
+        let $theCheckbox = $(this);
+        let $wrap = $('#addFileForm .emailReminderWrap');
+        if($theCheckbox.prop('checked')){
+            $wrap.fadeIn('fast');
+        }else{
+            $wrap.fadeOut('fast');
+        }
+        $wrap.find('input:not([type="radio"]):not([type="checkbox"])').val('');
+        $wrap.find('textarea').val('');
+        $wrap.find('input[type="radio"]').prop('checked', false).trigger('change');
+        $wrap.find('input[type="checkbox"]').prop('checked', false).trigger('change');
+        $wrap.find('select').val('');
+
+        reminderEmployeeIds.clear(true);
+    });
+
+    $('#addFileForm [name="is_repeat_reminder"]').on('change', function(e){
+        let $checkBox = $(this);
+        if($checkBox.prop('checked')){
+            $('#addFileForm .reminderSingleWrap').fadeOut('fast', function(){
+                $('#addFileForm .reminderSingleWrap input').val('');
+            });
+            $('#addFileForm .reminderMultiWrap').fadeIn('fast', function(){
+                $('#addFileForm .reminderMultiWrap', this).val('');
+                $('#addFileForm .reminderMultiWrap input').val('');
+            });
+        }else{
+            $('#addFileForm .reminderSingleWrap').fadeIn('fast', function(){
+                $('#addFileForm .reminderSingleWrapinput').val('');
+            });
+            $('#addFileForm .reminderMultiWrap').fadeOut('fast', function(){
+                $('#addFileForm .reminderMultiWrap', this).val('');
+                $('#addFileForm .reminderMultiWrap input').val('');
+            });
+        }
+    })
+
     $('#addFileForm').on('submit', function(e){
         e.preventDefault();
         var $form = $(this);
@@ -970,7 +1036,8 @@ var fileVersionHistoryListTable = (function () {
         }).then(response => {
             document.querySelector('#uploadFile').removeAttribute('disabled');
             document.querySelector("#uploadFile svg").style.cssText = "display: none;";
-            
+            //console.log(response.data);
+            //return false;
             if (response.status == 200) {
                 addFileModal.hide();
                 var suc = response.data.suc;
@@ -1048,6 +1115,52 @@ var fileVersionHistoryListTable = (function () {
                     $('#editFileModal .fileTagsWrap .fileTag').remove();
                 }
 
+                let $reminderWrap = $('#editFileForm .emailReminderWrap');
+                if(row.email_reminder == 1){
+                    let reminder = row.reminder;
+                    $('#editFileForm #edit_email_reminder').prop('checked', true);
+                    $('#editFileForm .emailReminderWrap').fadeIn('fast', function(){
+                        $('#edit_subject').val(reminder.subject);
+                        $('#edit_message').val(reminder.message);
+                        if(reminder.is_repeat_reminder == 1){
+                            $('#editFileForm #edit_is_repeat_reminder').prop('checked', true);
+                            $('#editFileForm .reminderSingleWrap').fadeOut('fast', function(){
+                                $('#editFileForm .reminderSingleWrap input').val('');
+                            });
+                            $('#editFileForm .reminderMultiWrap').fadeIn('fast', function(){
+                                $('#edit_frequency').val(reminder.frequency);
+                                $('#edit_repeat_reminder_start').val(reminder.repeat_reminder_start);
+                                $('#edit_repeat_reminder_end').val(reminder.repeat_reminder_end);
+                            });
+                        }else{
+                            $('#editFileForm #edit_is_repeat_reminder').prop('checked', false);
+                            $('#editFileForm .reminderSingleWrap').fadeIn('fast', function(){
+                                $('#edit_single_reminder_date').val(reminder.single_reminder_date);
+                            });
+                            $('#editFileForm .reminderMultiWrap').fadeOut('fast', function(){
+                                $('#editFileForm .reminderMultiWrap select').val('');
+                                $('#editFileForm .reminderMultiWrap input').val('');
+                            });
+                        }
+                        if(reminder.is_send_email == 1){
+                            $('#edit_is_send_email').prop('checked', true);
+                        }else{
+                            $('#edit_is_send_email').prop('checked', false);
+                        }
+
+                        let employee_ids = reminder.employee;
+                        if(typeof employee_ids === 'object' || employee_ids !== null){
+                            $.each(employee_ids, function(index, row) {
+                                editReminderEmployeeIds.addItem(row.employee_id);
+                            });
+                        }else{
+                            editReminderEmployeeIds.clear(true);
+                        }
+                    })
+                }else{
+                    $('#editFileForm #edit_email_reminder').prop('checked', false).trigger('change');
+                }
+
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -1060,6 +1173,64 @@ var fileVersionHistoryListTable = (function () {
             }
         });
     });
+
+    $('#editFileForm #editFileUploaderDocument').on('change', function(){
+        var inputs = document.getElementById('editFileUploaderDocument');
+        var html = '<div class="mb-2">';
+        for (var i = 0; i < inputs.files.length; ++i) {
+            var name = inputs.files.item(i).name;
+            html += '<div class="form-check mt-2 mr-5">';
+                html += '<input '+(i == 0 ? 'Checked' : '')+' id="fileInput_'+i+'" class="form-check-input" type="radio" name="file_names" value="'+name+'">';
+                html += '<label class="form-check-label font-medium" for="fileInput_'+i+'">'+name+'</label>';
+            html += '</div>';
+        }
+        html += '</div>';
+
+        $('#editFileForm .editFileUploaderDocumentNames').fadeIn().html(html);
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    });
+
+    $('#edit_email_reminder').on('change', function(e){
+        let $theCheckbox = $(this);
+        let $wrap = $('#editFileForm .emailReminderWrap');
+        if($theCheckbox.prop('checked')){
+            $wrap.fadeIn('fast');
+        }else{
+            $wrap.fadeOut('fast');
+        }
+        $wrap.find('input:not([type="radio"]):not([type="checkbox"])').val('');
+        $wrap.find('textarea').val('');
+        $wrap.find('input[type="radio"]').prop('checked', false).trigger('change');
+        $wrap.find('input[type="checkbox"]').prop('checked', false).trigger('change');
+        $wrap.find('select').val('');
+
+        editReminderEmployeeIds.clear(true);
+    });
+
+    $('#editFileForm [name="is_repeat_reminder"]').on('change', function(e){
+        let $checkBox = $(this);
+        if($checkBox.prop('checked')){
+            $('#editFileForm .reminderSingleWrap').fadeOut('fast', function(){
+                $('#editFileForm .reminderSingleWrap input').val('');
+            });
+            $('#editFileForm .reminderMultiWrap').fadeIn('fast', function(){
+                $('#editFileForm .reminderMultiWrap select').val('');
+                $('#editFileForm .reminderMultiWrap input').val('');
+            });
+        }else{
+            $('#editFileForm .reminderSingleWrap').fadeIn('fast', function(){
+                $('#editFileForm .reminderSingleWrapinput').val('');
+            });
+            $('#editFileForm .reminderMultiWrap').fadeOut('fast', function(){
+                $('#editFileForm .reminderMultiWrap select').val('');
+                $('#editFileForm .reminderMultiWrap input').val('');
+            });
+        }
+    })
 
     $('#editFileForm').on('submit', function(e){
         e.preventDefault();
@@ -1109,63 +1280,63 @@ var fileVersionHistoryListTable = (function () {
         });
     });
 
-    $(document).on('click', '.uploadNewVersion', function(e){
-        e.preventDefault();
-        let $theLink = $(this);
-        let row_id = $theLink.attr('data-id');
+    // $(document).on('click', '.uploadNewVersion', function(e){
+    //     e.preventDefault();
+    //     let $theLink = $(this);
+    //     let row_id = $theLink.attr('data-id');
 
-        $('#uploadFileVersionModal [name="id"]').val(row_id);
-    });
+    //     $('#uploadFileVersionModal [name="id"]').val(row_id);
+    // });
 
-    $('#uploadFileVersionForm').on('submit', function(e){
-        e.preventDefault();
-        var $form = $(this);
-        const form = document.getElementById('uploadFileVersionForm');
+    // $('#uploadFileVersionForm').on('submit', function(e){
+    //     e.preventDefault();
+    //     var $form = $(this);
+    //     const form = document.getElementById('uploadFileVersionForm');
     
-        document.querySelector('#uploadNV').setAttribute('disabled', 'disabled');
-        document.querySelector("#uploadNV svg").style.cssText ="display: inline-block;";
+    //     document.querySelector('#uploadNV').setAttribute('disabled', 'disabled');
+    //     document.querySelector("#uploadNV svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
-        form_data.append('file', $('#uploadFileVersionForm input[name="document"]')[0].files[0]); 
+    //     let form_data = new FormData(form);
+    //     form_data.append('file', $('#uploadFileVersionForm input[name="document"]')[0].files[0]); 
         
-        axios({
-            method: "post",
-            url: route('file.manager.upload.new.version'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#uploadNV').removeAttribute('disabled');
-            document.querySelector("#uploadNV svg").style.cssText = "display: none;";
+    //     axios({
+    //         method: "post",
+    //         url: route('file.manager.upload.new.version'),
+    //         data: form_data,
+    //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    //     }).then(response => {
+    //         document.querySelector('#uploadNV').removeAttribute('disabled');
+    //         document.querySelector("#uploadNV svg").style.cssText = "display: none;";
             
-            if (response.status == 200) {
-                uploadFileVersionModal.hide();
+    //         if (response.status == 200) {
+    //             uploadFileVersionModal.hide();
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Congratulations!" );
-                    $("#successModal .successModalDesc").html('Document new version successfully uploaded.');
-                }); 
+    //             successModal.show();
+    //             document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+    //                 $("#successModal .successModalTitle").html( "Congratulations!" );
+    //                 $("#successModal .successModalDesc").html('Document new version successfully uploaded.');
+    //             }); 
                 
-                setTimeout(function(){
-                    successModal.hide();
-                    window.location.reload();
-                }, 2000);
-            }
-        }).catch(error => {
-            document.querySelector('#uploadNV').removeAttribute('disabled');
-            document.querySelector("#uploadNV svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#uploadFileVersionForm .${key}`).addClass('border-danger');
-                        $(`#uploadFileVersionForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
+    //             setTimeout(function(){
+    //                 successModal.hide();
+    //                 window.location.reload();
+    //             }, 2000);
+    //         }
+    //     }).catch(error => {
+    //         document.querySelector('#uploadNV').removeAttribute('disabled');
+    //         document.querySelector("#uploadNV svg").style.cssText = "display: none;";
+    //         if (error.response) {
+    //             if (error.response.status == 422) {
+    //                 for (const [key, val] of Object.entries(error.response.data.errors)) {
+    //                     $(`#uploadFileVersionForm .${key}`).addClass('border-danger');
+    //                     $(`#uploadFileVersionForm  .error-${key}`).html(val);
+    //                 }
+    //             } else {
+    //                 console.log('error');
+    //             }
+    //         }
+    //     });
+    // });
 
     $(document).on('click', '.versionHistory', function(e){
         let $theLink = $(this);
@@ -1250,6 +1421,34 @@ var fileVersionHistoryListTable = (function () {
                     setTimeout(function(){
                         successModal.hide();
                         window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
+        }else if(action == 'DELETEATM'){
+            axios({
+                method: 'delete',
+                url: route('file.manager.destroy.attachment'),
+                data: {row_id : row_id},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    $('#fileAttachmentModal').find('#attachment_'+row_id).remove();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Selected file successfully deleted.');
+                        $('#successModal .successCloser').attr('data-action', 'NONE');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        //window.location.reload();
                     }, 2000);
                 }
             }).catch(error =>{
@@ -1367,138 +1566,117 @@ var fileVersionHistoryListTable = (function () {
         }
     });
 
-    $('.fileReminderBtn').on('click', function(e){
-        e.preventDefault();
-        let $theBtn = $(this);
-        let row_id = $theBtn.attr('data-id');
-        let displayName = $theBtn.attr('data-name');
+    // $('.fileReminderBtn').on('click', function(e){
+    //     e.preventDefault();
+    //     let $theBtn = $(this);
+    //     let row_id = $theBtn.attr('data-id');
+    //     let displayName = $theBtn.attr('data-name');
 
-        $('#fileReminderModal .displayName').html(displayName);
-        $('#fileReminderModal [name="document_info_id"]').val(row_id);
+    //     $('#fileReminderModal .displayName').html(displayName);
+    //     $('#fileReminderModal [name="document_info_id"]').val(row_id);
 
-        axios({
-            method: "post",
-            url: route('file.manager.edit.file.reminder'),
-            data: {row_id : row_id},
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            if (response.status == 200) {
-                var row = response.data.row;
-                $('#fileReminderModal [name="subject"]').val(row.subject ? row.subject : '');
-                $('#fileReminderModal [name="message"]').val(row.message ? row.message : '');
+    //     axios({
+    //         method: "post",
+    //         url: route('file.manager.edit.file.reminder'),
+    //         data: {row_id : row_id},
+    //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    //     }).then(response => {
+    //         if (response.status == 200) {
+    //             var row = response.data.row;
+    //             $('#fileReminderModal [name="subject"]').val(row.subject ? row.subject : '');
+    //             $('#fileReminderModal [name="message"]').val(row.message ? row.message : '');
 
-                if(row.is_repeat_reminder == 1){
-                    $('#fileReminderModal [name="is_repeat_reminder"]').prop('checked', true);
-                    $('#fileReminderModal .reminderSingleWrap').fadeOut('fast', function(){
-                        $('#fileReminderModal [name="single_reminder_date"]').val('');
-                    });
-                    $('#fileReminderModal .reminderMultiWrap').fadeIn('fast', function(){
-                        $('#fileReminderModal [name="frequency"]').val(row.frequency ? row.frequency : '');
-                        $('#fileReminderModal [name="repeat_reminder_start"]').val(row.repeat_reminder_start ? row.repeat_reminder_start : '');
-                        $('#fileReminderModal [name="repeat_reminder_end"]').val(row.repeat_reminder_end ? row.repeat_reminder_end : '');
-                    });
-                }else{
-                    $('#fileReminderModal [name="is_repeat_reminder"]').prop('checked', false);
-                    $('#fileReminderModal .reminderSingleWrap').fadeIn('fast', function(){
-                        $('#fileReminderModal [name="single_reminder_date"]').val(row.single_reminder_date ? row.single_reminder_date : '');
-                    });
-                    $('#fileReminderModal .reminderMultiWrap').fadeOut('fast', function(){
-                        $('select', this).val('');
-                        $('input', this).val('');
-                    });
-                }
-                if(row.is_send_email == 1){
-                    $('#fileReminderModal [name="is_send_email"]').prop('checked', true);
-                }else{
-                    $('#fileReminderModal [name="is_send_email"]').prop('checked', false);
-                }
+    //             if(row.is_repeat_reminder == 1){
+    //                 $('#fileReminderModal [name="is_repeat_reminder"]').prop('checked', true);
+    //                 $('#fileReminderModal .reminderSingleWrap').fadeOut('fast', function(){
+    //                     $('#fileReminderModal [name="single_reminder_date"]').val('');
+    //                 });
+    //                 $('#fileReminderModal .reminderMultiWrap').fadeIn('fast', function(){
+    //                     $('#fileReminderModal [name="frequency"]').val(row.frequency ? row.frequency : '');
+    //                     $('#fileReminderModal [name="repeat_reminder_start"]').val(row.repeat_reminder_start ? row.repeat_reminder_start : '');
+    //                     $('#fileReminderModal [name="repeat_reminder_end"]').val(row.repeat_reminder_end ? row.repeat_reminder_end : '');
+    //                 });
+    //             }else{
+    //                 $('#fileReminderModal [name="is_repeat_reminder"]').prop('checked', false);
+    //                 $('#fileReminderModal .reminderSingleWrap').fadeIn('fast', function(){
+    //                     $('#fileReminderModal [name="single_reminder_date"]').val(row.single_reminder_date ? row.single_reminder_date : '');
+    //                 });
+    //                 $('#fileReminderModal .reminderMultiWrap').fadeOut('fast', function(){
+    //                     $('select', this).val('');
+    //                     $('input', this).val('');
+    //                 });
+    //             }
+    //             if(row.is_send_email == 1){
+    //                 $('#fileReminderModal [name="is_send_email"]').prop('checked', true);
+    //             }else{
+    //                 $('#fileReminderModal [name="is_send_email"]').prop('checked', false);
+    //             }
 
-                var employee_ids = row.employee_ids;
-                if(employee_ids.length > 0){
-                    for (var employee_id of employee_ids) {
-                        reminderEmployeeIds.addItem(employee_id, true);
-                    }
-                }else{
-                    reminderEmployeeIds.clear(true); 
-                }
+    //             var employee_ids = row.employee_ids;
+    //             if(employee_ids.length > 0){
+    //                 for (var employee_id of employee_ids) {
+    //                     reminderEmployeeIds.addItem(employee_id, true);
+    //                 }
+    //             }else{
+    //                 reminderEmployeeIds.clear(true); 
+    //             }
 
-                $('#editFileModal [name="document_info_id"]').val(row_id);
-            }
-        }).catch(error => {
-            if (error.response) {
-                console.log('error');
-            }
-        });
-    });
+    //             $('#editFileModal [name="document_info_id"]').val(row_id);
+    //         }
+    //     }).catch(error => {
+    //         if (error.response) {
+    //             console.log('error');
+    //         }
+    //     });
+    // });
 
-    $('#fileReminderForm [name="is_repeat_reminder"]').on('change', function(e){
-        let $checkBox = $(this);
-        if($checkBox.prop('checked')){
-            $('#fileReminderForm .reminderSingleWrap').fadeOut('fast', function(){
-                $('input', this).val('');
-            });
-            $('#fileReminderForm .reminderMultiWrap').fadeIn('fast', function(){
-                $('select', this).val('');
-                $('input', this).val('');
-            });
-        }else{
-            $('#fileReminderForm .reminderSingleWrap').fadeIn('fast', function(){
-                $('input', this).val('');
-            });
-            $('#fileReminderForm .reminderMultiWrap').fadeOut('fast', function(){
-                $('select', this).val('');
-                $('input', this).val('');
-            });
-        }
-    })
-
-    $('#fileReminderForm').on('submit', function(e){
-        e.preventDefault();
-        var $form = $(this);
-        const form = document.getElementById('fileReminderForm');
+    // $('#fileReminderForm').on('submit', function(e){
+    //     e.preventDefault();
+    //     var $form = $(this);
+    //     const form = document.getElementById('fileReminderForm');
     
-        document.querySelector('#saveReminder').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveReminder svg").style.cssText ="display: inline-block;";
+    //     document.querySelector('#saveReminder').setAttribute('disabled', 'disabled');
+    //     document.querySelector("#saveReminder svg").style.cssText ="display: inline-block;";
 
-        let form_data = new FormData(form);
-        axios({
-            method: "post",
-            url: route('file.manager.store.file.reminder'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveReminder').removeAttribute('disabled');
-            document.querySelector("#saveReminder svg").style.cssText = "display: none;";
+    //     let form_data = new FormData(form);
+    //     axios({
+    //         method: "post",
+    //         url: route('file.manager.store.file.reminder'),
+    //         data: form_data,
+    //         headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+    //     }).then(response => {
+    //         document.querySelector('#saveReminder').removeAttribute('disabled');
+    //         document.querySelector("#saveReminder svg").style.cssText = "display: none;";
             
-            if (response.status == 200) {
-                fileReminderModal.hide();
+    //         if (response.status == 200) {
+    //             fileReminderModal.hide();
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Congratulations!" );
-                    $("#successModal .successModalDesc").html('Document reminder successfully save.');
-                }); 
+    //             successModal.show();
+    //             document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+    //                 $("#successModal .successModalTitle").html( "Congratulations!" );
+    //                 $("#successModal .successModalDesc").html('Document reminder successfully save.');
+    //             }); 
                 
-                setTimeout(function(){
-                    successModal.hide();
-                    window.location.reload();
-                }, 2000);
-            }
-        }).catch(error => {
-            document.querySelector('#saveReminder').removeAttribute('disabled');
-            document.querySelector("#saveReminder svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#fileReminderForm .${key}`).addClass('border-danger');
-                        $(`#fileReminderForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
-        });
-    });
+    //             setTimeout(function(){
+    //                 successModal.hide();
+    //                 window.location.reload();
+    //             }, 2000);
+    //         }
+    //     }).catch(error => {
+    //         document.querySelector('#saveReminder').removeAttribute('disabled');
+    //         document.querySelector("#saveReminder svg").style.cssText = "display: none;";
+    //         if (error.response) {
+    //             if (error.response.status == 422) {
+    //                 for (const [key, val] of Object.entries(error.response.data.errors)) {
+    //                     $(`#fileReminderForm .${key}`).addClass('border-danger');
+    //                     $(`#fileReminderForm  .error-${key}`).html(val);
+    //                 }
+    //             } else {
+    //                 console.log('error');
+    //             }
+    //         }
+    //     });
+    // });
 
     $('.deleteFile').on('click', function(e){
         e.preventDefault();
@@ -1512,6 +1690,49 @@ var fileVersionHistoryListTable = (function () {
             $("#confirmModal .confModDesc").html('Want to delete this file "'+row_name+'"? Please click on agree to continue.');
             $("#confirmModal .agreeWith").attr('data-id', row_id);
             $("#confirmModal .agreeWith").attr('data-action', 'DELETEFILE');
+        });
+    });
+
+    $(document).on('click', '.attachmentToggleBtn', function(e){
+        e.preventDefault();
+        let $parentToggleBtn = $(this);
+        let document_id = $parentToggleBtn.attr('data-id');
+        
+        axios({
+            method: "post",
+            url: route('file.manager.get.file.attachment'),
+            data: {document_id : document_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                $('#fileAttachmentModal .modal-body').html(response.data.html);
+                $('#fileAttachmentModal .displayName').html(response.data.name);
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    })
+
+    $(document).on('click', '.deleteAttachment', function(e){
+        e.preventDefault();
+        let $theLink = $(this);
+        var row_id = $theLink.attr('data-id');
+        var row_name = $theLink.attr('data-name');
+
+        confirmModal.show();
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .confModTitle").html("Are you sure?" );
+            $("#confirmModal .confModDesc").html('Want to delete this attachment? Please click on agree to continue.');
+            $("#confirmModal .agreeWith").attr('data-id', row_id);
+            $("#confirmModal .agreeWith").attr('data-action', 'DELETEATM');
         });
     });
     /* File Upload Code END */
@@ -1571,7 +1792,6 @@ var fileVersionHistoryListTable = (function () {
     $('.folderDropdown li a').on('click', function(e){
         var  f = $(this);
     });
-
 
     $('body').on('contextmenu', '.fileWrap', function(e) {
         let id = $(this).attr('data-id');
@@ -1689,5 +1909,8 @@ var fileVersionHistoryListTable = (function () {
         }
     })
     /* Common Scripts END */
+
+
+
 
 })();

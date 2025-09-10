@@ -15,6 +15,7 @@ use App\Models\Document;
 use App\Models\DocumentFolder;
 use App\Models\DocumentFolderPermission;
 use App\Models\DocumentInfo;
+use App\Models\DocumentAttachment;
 use App\Models\DocumentInfoHasEmployees;
 use App\Models\DocumentInfoReminder;
 use App\Models\DocumentInfoReminderEmployee;
@@ -53,7 +54,7 @@ class FilemanagerController extends Controller
                 $q->where('employee_id', $employee_id);
             })->orderBy('name', 'ASC')->get();
             $root_permission = [];
-            $documentInfos = DocumentInfo::with('childrens')->where('parent_id', 0)->where('document_folder_id', 0)->where('file_type', 1)->orWhere(function($q){
+            $documentInfos = DocumentInfo::with('latestVersion')->where('document_folder_id', 0)->where('file_type', 1)->orWhere(function($q){
                 $q->where('file_type', 2)->where('created_by', auth()->user()->id);
             })->orderBy('display_file_name', 'ASC')->get();
         else:
@@ -61,7 +62,7 @@ class FilemanagerController extends Controller
             $root_permission = DocumentFolderPermission::where('employee_id', $employee_id)->whereHas('folder', function($q) use($root){
                 $q->where('slug', $root);
             })->get()->first();
-            $documentInfos = DocumentInfo::with('childrens')->where('parent_id', 0)->where('document_folder_id', $parent_id)->where('file_type', 1)->orWhere(function($q){
+            $documentInfos = DocumentInfo::with('latestVersion')->where('document_folder_id', $parent_id)->where('file_type', 1)->orWhere(function($q){
                 $q->where('file_type', 2)->where('created_by', auth()->user()->id);
             })->orderBy('display_file_name', 'ASC')->get();
         endif;
@@ -391,7 +392,8 @@ class FilemanagerController extends Controller
         $folder_id = $request->folder_id;
         $params = $request->params;
         $linkedDocument = (isset($request->linked_document) && !empty($request->linked_document) ? $request->linked_document : null);
-
+        $email_reminder = (isset($request->email_reminder) && $request->email_reminder > 0 ? $request->email_reminder : 0);
+        
         $current_file_name = null;
         $filePath = null;
         $docType = null;
@@ -403,55 +405,97 @@ class FilemanagerController extends Controller
             $parentFileName = !empty($parentFileName) ? $parentFileName : $firstDocumentName;
 
             $loop = 1;
-            $parent_id = 0;
-            $child_ids = [];
-            foreach($request->file('documents') as $document):
-                $docType = $document->getClientOriginalExtension();
-                $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
-                $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
+            $document_id = 0;
+            foreach($documents as $document):
+                if($parentFileName == $document->getClientOriginalName()):
+                    $docType = $document->getClientOriginalExtension();
+                    $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+                    $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
 
-                $data = [];
-                $data['document_folder_id'] = $folder_id;
-                $data['doc_type'] = $docType;
-                $data['disk_type'] = 'local';
-                $data['path'] = $params;
-                $data['display_file_name'] = ($parentFileName != $document->getClientOriginalName() ? 'Child Of ' : '').$request->name;
-                $data['current_file_name'] = $current_file_name;
-                $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
-                $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
-                $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
-                $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
-                $data['created_by'] = auth()->user()->id;
+                    $data = [];
+                    $data['document_folder_id'] = $folder_id;
+                    $data['doc_type'] = $docType;
+                    $data['disk_type'] = 'local';
+                    $data['path'] = $params;
+                    $data['display_file_name'] = ($parentFileName != $document->getClientOriginalName() ? 'Child Of ' : '').$request->name;
+                    $data['current_file_name'] = $current_file_name;
+                    $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
+                    $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
+                    $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
+                    $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
+                    $data['email_reminder'] = $email_reminder;
+                    $data['created_by'] = auth()->user()->id;
 
-                $documentInfo = DocumentInfo::create($data);
-                if($documentInfo->id):
-                    if($parentFileName == $document->getClientOriginalName()):
-                        $parent_id = $documentInfo->id;
-                    endif;
-                    if($parentFileName != $document->getClientOriginalName()):
-                        $child_ids[] = $documentInfo->id;
-                    endif;
+                    $documentInfo = DocumentInfo::create($data);
+                    if($documentInfo->id):
+                        $document_info_id = $documentInfo->id;
+                        unset($data['document_folder_id']);
+                        unset($data['email_reminder']);
+                        $data['document_info_id'] = $documentInfo->id;
+                        $documentRwo = Document::create($data);
+                        $document_id = ($documentRwo->id ? $documentRwo->id : 0);
 
-                    unset($data['document_folder_id']);
-                    $data['document_info_id'] = $documentInfo->id;
-                    $documentRwo = Document::create($data);
+                        if(isset($request->tag_ids) && !empty($request->tag_ids)):
+                            foreach($request->tag_ids as $tag_id):
+                                $data = [];
+                                $data['document_info_id'] = $documentInfo->id;
+                                $data['document_tag_id'] = $tag_id;
 
-                    if(isset($request->tag_ids) && !empty($request->tag_ids)):
-                        foreach($request->tag_ids as $tag_id):
+                                DocumentInfoTag::create($data);
+                            endforeach;
+                        endif;
+
+                        if($email_reminder == 1):
+                            $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+                            $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
+                            $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
+
                             $data = [];
-                            $data['document_info_id'] = $documentInfo->id;
-                            $data['document_tag_id'] = $tag_id;
+                            $data['document_info_id'] = $document_info_id;
+                            $data['subject'] = $request->subject;
+                            $data['message'] = $request->message;
+                            $data['is_repeat_reminder'] = $is_repeat_reminder;
+                            $data['is_send_email'] = $is_send_email;
+                            $data['single_reminder_date'] = ($is_repeat_reminder == 0 && !empty($request->single_reminder_date) ? date('Y-m-d', strtotime($request->single_reminder_date)) : null);
+                            $data['frequency'] = ($is_repeat_reminder == 1 && !empty($request->frequency) ? $request->frequency : null);
+                            $data['repeat_reminder_start'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_start) ? date('Y-m-d', strtotime($request->repeat_reminder_start)) : null);
+                            $data['repeat_reminder_end'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_end) ? date('Y-m-d', strtotime($request->repeat_reminder_end)) : null);
+                            $data['created_by'] = auth()->user()->id;
+                            $reminder = DocumentInfoReminder::create($data);
+                            if($reminder->id && !empty($employee_ids)):
+                                foreach($employee_ids as $employee_id):
+                                    $data = [];
+                                    $data['document_info_reminder_id'] = $reminder->id;
+                                    $data['employee_id'] = $employee_id;
 
-                            DocumentInfoTag::create($data);
-                        endforeach;
+                                    DocumentInfoReminderEmployee::create($data);
+                                endforeach;
+                            endif;
+                        endif;
                     endif;
+
+                    $loop++;
                 endif;
-
-                $loop++;
             endforeach;
+            if($document_id && $document_id > 0):
+                foreach($documents as $document):
+                    if($parentFileName != $document->getClientOriginalName()):
+                        $docType = $document->getClientOriginalExtension();
+                        $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+                        $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
 
-            if($parent_id > 0 && !empty($child_ids)):
-                DocumentInfo::whereIn('id', $child_ids)->update(['parent_id' => $parent_id]);
+                        $data = [];
+                        $data['document_id'] = $document_id;
+                        $data['doc_type'] = $docType;
+                        $data['disk_type'] = 'local';
+                        $data['path'] = $params;
+                        $data['display_file_name'] = $current_file_name;
+                        $data['current_file_name'] = $current_file_name;
+                        $data['created_by'] = auth()->user()->id;
+
+                        $DocumentAttachment = DocumentAttachment::create($data);
+                    endif;
+                endforeach;
             endif;
 
             return response()->json(['suc' => 1, 'res' => 'File successfully uploaded.'], 200);
@@ -462,17 +506,19 @@ class FilemanagerController extends Controller
 
     public function getFileData(Request $request){
         $row_id = $request->row_id;
-        $documentInfo = DocumentInfo::find($row_id);
+        $documentInfo = DocumentInfo::with('reminder', 'reminder.employee')->find($row_id);
         return response()->json(['res' => $documentInfo], 200);
     }
 
     public function updateFile(UpdateDocumentInfoRequest $request){
+        $folder_id = $request->folder_id;
+        $params = $request->params;
         $id = $request->id;
-        $document = Document::where('document_info_id', $id)->orderBy('id', 'DESC')->get()->first();
-        $document_id = $document->id;
+        $documentOldRow = Document::where('document_info_id', $id)->orderBy('id', 'DESC')->get()->first();
         $existingDocumentTags = DocumentInfoTag::where('document_info_id', $id)->pluck('document_tag_id')->unique()->toArray();
         $tagIds = (isset($request->tag_ids) && !empty($request->tag_ids) ? $request->tag_ids : []);
         $deleteTags = array_diff($existingDocumentTags, $tagIds);
+        $email_reminder = (isset($request->email_reminder) && $request->email_reminder > 0 ? $request->email_reminder : 0);
 
         if(!empty($deleteTags)):
             DocumentInfoTag::where('document_info_id', $id)->whereIn('document_tag_id', $deleteTags)->forceDelete();
@@ -490,6 +536,7 @@ class FilemanagerController extends Controller
             endforeach;
         endif;
 
+
         $docInfo = DocumentInfo::find($id);
         $docInfo->fill([
             'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
@@ -497,32 +544,154 @@ class FilemanagerController extends Controller
             'publish_date' => (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : null),
             'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
             'file_type' => (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1),
+            'email_reminder' => $email_reminder,
             'updated_by' => auth()->user()->id,
         ]);
         $docInfo->save();
 
-        $documentRow = Document::find($document_id);
-        $documentRow->fill([
-            'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
-            'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
-            'publish_date' => (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : null),
-            'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
-            'updated_by' => auth()->user()->id,
-        ]);
-        $changes = $documentRow->getDirty();
-        $documentRow->save();
+        
+        $parentFileName = (isset($request->file_names) && !empty($request->file_names) ? $request->file_names : '');
+        if($request->hasFile('documents')):
+            $documents = $request->file('documents');
+            $firstDocument = $documents[0];
+            $firstDocumentName = $firstDocument->getClientOriginalName();
+            $parentFileName = !empty($parentFileName) ? $parentFileName : $firstDocumentName;
 
-        if($documentRow->wasChanged() && !empty($changes)):
-            foreach($changes as $field => $value):
-                $data = [];
-                $data['document_id'] = $document_id;
-                $data['field_name'] = $field;
-                $data['field_previous_value'] = $document->$field;
-                $data['field_current_value'] = $value;
-                $data['created_by'] = auth()->user()->id;
+            $loop = 1;
+            $new_document_id = 0;
+            foreach($documents as $document):
+                if($parentFileName == $document->getClientOriginalName()):
+                    $docType = $document->getClientOriginalExtension();
+                    $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+                    $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
 
-                DocumentRevision::create($data);
+                    $data = [];
+                    $data['document_info_id'] = $id;
+                    $data['doc_type'] = $docType;
+                    $data['disk_type'] = 'local';
+                    $data['path'] = $params;
+                    $data['display_file_name'] = ($parentFileName != $document->getClientOriginalName() ? 'Child Of ' : '').$request->name;
+                    $data['current_file_name'] = $current_file_name;
+                    $data['expire_at'] = (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : NULL);
+                    $data['publish_date'] = (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : NULL);
+                    $data['description'] = (isset($request->description) && !empty($request->description) ? $request->description : null);
+                    $data['file_type'] = (isset($request->file_type) && $request->file_type > 0 ? $request->file_type : 1);
+                    $data['created_by'] = auth()->user()->id;
+
+                    $document = Document::create($data);
+                    if($document->id):
+                        $new_document_id = $document->id;
+                        DocumentInfo::where('id', $id)->update([
+                            'display_file_name' => $request->name,
+                            'current_file_name' => $current_file_name
+                        ]);
+                    endif;
+                    $loop++;
+                endif;
             endforeach;
+            if($new_document_id && $new_document_id > 0):
+                foreach($documents as $document):
+                    if($parentFileName != $document->getClientOriginalName()):
+                        $docType = $document->getClientOriginalExtension();
+                        $current_file_name = time().'_'.str_replace(' ', '_', $document->getClientOriginalName());
+                        $filePath = $document->storeAs('public/file-manager/'.$params.'/', $current_file_name, 'local');
+
+                        $data = [];
+                        $data['document_id'] = $new_document_id;
+                        $data['doc_type'] = $docType;
+                        $data['disk_type'] = 'local';
+                        $data['path'] = $params;
+                        $data['display_file_name'] = $current_file_name;
+                        $data['current_file_name'] = $current_file_name;
+                        $data['created_by'] = auth()->user()->id;
+
+                        $DocumentAttachment = DocumentAttachment::create($data);
+                    endif;
+                endforeach;
+            endif;
+        else:
+            $document_id = $documentOldRow->id;
+            $documentRow = Document::find($document_id);
+            $documentRow->fill([
+                'display_file_name' => (isset($request->name) && !empty($request->name) ? $request->name : null),
+                'expire_at' => (isset($request->expire_at) && !empty($request->expire_at) ? date('Y-m-d', strtotime($request->expire_at)) : null),
+                'publish_date' => (isset($request->publish_date) && !empty($request->publish_date) ? date('Y-m-d', strtotime($request->publish_date)) : null),
+                'description' => (isset($request->description) && !empty($request->description) ? $request->description : null),
+                'updated_by' => auth()->user()->id,
+            ]);
+            $changes = $documentRow->getDirty();
+            $documentRow->save();
+
+            if($documentRow->wasChanged() && !empty($changes)):
+                foreach($changes as $field => $value):
+                    $data = [];
+                    $data['document_id'] = $document_id;
+                    $data['field_name'] = $field;
+                    $data['field_previous_value'] = $documentOldRow->$field;
+                    $data['field_current_value'] = $value;
+                    $data['created_by'] = auth()->user()->id;
+
+                    DocumentRevision::create($data);
+                endforeach;
+            endif;
+        endif;
+
+        if($email_reminder == 1):
+            $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+            $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
+            $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
+
+            $existReminder = DocumentInfoReminder::where('document_info_id', $id)->get()->first();
+            $reminder_exist = (isset($existReminder->id) && $existReminder->id > 0 ? true : false);
+
+            $reminder_id = 0;
+            $data = [];
+            $data['subject'] = $request->subject;
+            $data['message'] = $request->message;
+            $data['is_repeat_reminder'] = $is_repeat_reminder;
+            $data['is_send_email'] = $is_send_email;
+            $data['single_reminder_date'] = ($is_repeat_reminder == 0 && !empty($request->single_reminder_date) ? date('Y-m-d', strtotime($request->single_reminder_date)) : null);
+            $data['frequency'] = ($is_repeat_reminder == 1 && !empty($request->frequency) ? $request->frequency : null);
+            $data['repeat_reminder_start'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_start) ? date('Y-m-d', strtotime($request->repeat_reminder_start)) : null);
+            $data['repeat_reminder_end'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_end) ? date('Y-m-d', strtotime($request->repeat_reminder_end)) : null);
+        
+            if($reminder_exist):
+                $data['updated_by'] = auth()->user()->id;
+                $reminder = DocumentInfoReminder::where('id', $existReminder->id)->where('document_info_id', $id)->update($data);
+                $reminder_id = $existReminder->id;
+            else:
+                $data['document_info_id'] = $id;
+                $data['created_by'] = auth()->user()->id;
+                $reminder = DocumentInfoReminder::create($data);
+                $reminder_id = $reminder->id;
+            endif;
+
+            if($reminder_exist):
+                $existEmployeeIds = (isset($existReminder->employee_ids) && !empty($existReminder->employee_ids) ? $existReminder->employee_ids : []);
+                $removedEmpIds = array_diff($existEmployeeIds, $employee_ids);
+                if(!empty($removedEmpIds)):
+                    DocumentInfoReminderEmployee::where('document_info_reminder_id', $reminder_id)->whereIn('employee_id', $removedEmpIds)->forceDelete();
+                endif;
+            endif;
+
+            if(!empty($employee_ids)):
+                foreach($employee_ids as $employee_id):
+                    $empExist = DocumentInfoReminderEmployee::where('document_info_reminder_id', $reminder_id)->where('employee_id', $employee_id)->get()->count();
+                    if($empExist == 0):
+                        $data = [];
+                        $data['document_info_reminder_id'] = $reminder_id;
+                        $data['employee_id'] = $employee_id;
+
+                        DocumentInfoReminderEmployee::create($data);
+                    endif;
+                endforeach;
+            endif;
+        else:
+            $existReminder = DocumentInfoReminder::where('document_info_id', $id)->get()->first();
+            if(isset($existReminder->id) && $existReminder->id > 0):
+                DocumentInfoReminderEmployee::where('document_info_reminder_id', $existReminder->id)->forceDelete();
+            endif;
+            DocumentInfoReminder::where('document_info_id', $id)->forceDelete();
         endif;
 
         return response()->json(['res' => 'File data successfully updated.'], 200);
@@ -569,8 +738,8 @@ class FilemanagerController extends Controller
 
     public function fileVersionHistoryList(Request $request){
         $doc_info_id = (isset($request->file_id) && $request->file_id > 0 ? $request->file_id : 0);
-        $currentVersion = Document::where('document_info_id', $doc_info_id)->orderBy('id', 'desc')->get()->first();
-        $currentVerId = (isset($currentVersion->id) && $currentVersion->id > 0 ? $currentVersion->id : 0);
+        $documentInfo = DocumentInfo::with('latestVersion')->find($doc_info_id);
+        $currentVerId = (isset($documentInfo->latestVersion->id) && $documentInfo->latestVersion->id > 0 ? $documentInfo->latestVersion->id : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -578,7 +747,7 @@ class FilemanagerController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = Document::where('document_info_id', $doc_info_id)->orderByRaw(implode(',', $sorts));
+        $query = Document::with('attachments')->where('document_info_id', $doc_info_id)->orderByRaw(implode(',', $sorts));
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
@@ -597,14 +766,27 @@ class FilemanagerController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $attachments = [];
+                if(isset($list->attachments) && $list->attachments->count() > 0):
+                    $i = 1;
+                    foreach($list->attachments as $theFile):
+                        $attachments[$i] = [
+                            'url' => $theFile->download_url,
+                            'name' => $theFile->display_file_name
+                        ];
+                        $i++;
+                    endforeach;
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'display_file_name' => (isset($list->display_file_name) && !empty($list->display_file_name) ? $list->display_file_name : ''),
                     'current_version' => ($list->id == $currentVerId ? 1 : 0),
                     'created_at' => date('jS F, Y h:i A', strtotime($list->created_at)),
                     'created_by' => (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : ''),
                     'download_url' => $list->download_url,
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'attachments' => $attachments
                 ];
                 $i++;
             endforeach;
@@ -726,72 +908,120 @@ class FilemanagerController extends Controller
         return response()->json(['res' => 'Document Permission successfully updated.'], 200);
     }
 
-    public function storeFileReminder(FileReminderRequest $request){
-        $document_info_id = $request->document_info_id;
-        $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
-        $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
-        $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
+    // public function storeFileReminder(FileReminderRequest $request){
+    //     $document_info_id = $request->document_info_id;
+    //     $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+    //     $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
+    //     $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
 
-        $existReminder = DocumentInfoReminder::where('document_info_id', $document_info_id)->get()->first();
-        $reminder_exist = (isset($existReminder->id) && $existReminder->id > 0 ? true : false);
+    //     $existReminder = DocumentInfoReminder::where('document_info_id', $document_info_id)->get()->first();
+    //     $reminder_exist = (isset($existReminder->id) && $existReminder->id > 0 ? true : false);
 
-        $reminder_id = 0;
-        $data = [];
-        $data['subject'] = $request->subject;
-        $data['message'] = $request->message;
-        $data['is_repeat_reminder'] = $is_repeat_reminder;
-        $data['is_send_email'] = $is_send_email;
-        $data['single_reminder_date'] = ($is_repeat_reminder == 0 && !empty($request->single_reminder_date) ? date('Y-m-d', strtotime($request->single_reminder_date)) : null);
-        $data['frequency'] = ($is_repeat_reminder == 1 && !empty($request->frequency) ? $request->frequency : null);
-        $data['repeat_reminder_start'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_start) ? date('Y-m-d', strtotime($request->repeat_reminder_start)) : null);
-        $data['repeat_reminder_end'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_end) ? date('Y-m-d', strtotime($request->repeat_reminder_end)) : null);
+    //     $reminder_id = 0;
+    //     $data = [];
+    //     $data['subject'] = $request->subject;
+    //     $data['message'] = $request->message;
+    //     $data['is_repeat_reminder'] = $is_repeat_reminder;
+    //     $data['is_send_email'] = $is_send_email;
+    //     $data['single_reminder_date'] = ($is_repeat_reminder == 0 && !empty($request->single_reminder_date) ? date('Y-m-d', strtotime($request->single_reminder_date)) : null);
+    //     $data['frequency'] = ($is_repeat_reminder == 1 && !empty($request->frequency) ? $request->frequency : null);
+    //     $data['repeat_reminder_start'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_start) ? date('Y-m-d', strtotime($request->repeat_reminder_start)) : null);
+    //     $data['repeat_reminder_end'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_end) ? date('Y-m-d', strtotime($request->repeat_reminder_end)) : null);
         
-        if($reminder_exist):
-            $data['updated_by'] = auth()->user()->id;
-            $reminder = DocumentInfoReminder::where('id', $existReminder->id)->where('document_info_id', $document_info_id)->update($data);
-            $reminder_id = $existReminder->id;
-        else:
-            $data['document_info_id'] = $document_info_id;
-            $data['created_by'] = auth()->user()->id;
-            $reminder = DocumentInfoReminder::create($data);
-            $reminder_id = $reminder->id;
-        endif;
+    //     if($reminder_exist):
+    //         $data['updated_by'] = auth()->user()->id;
+    //         $reminder = DocumentInfoReminder::where('id', $existReminder->id)->where('document_info_id', $document_info_id)->update($data);
+    //         $reminder_id = $existReminder->id;
+    //     else:
+    //         $data['document_info_id'] = $document_info_id;
+    //         $data['created_by'] = auth()->user()->id;
+    //         $reminder = DocumentInfoReminder::create($data);
+    //         $reminder_id = $reminder->id;
+    //     endif;
         
-        if($reminder_exist):
-            $existEmployeeIds = (isset($existReminder->employee_ids) && !empty($existReminder->employee_ids) ? $existReminder->employee_ids : []);
-            $removedEmpIds = array_diff($existEmployeeIds, $employee_ids);
-            if(!empty($removedEmpIds)):
-                DocumentInfoReminderEmployee::where('document_info_reminder_id', $existReminder->id)->whereIn('employee_id', $removedEmpIds)->forceDelete();
-            endif;
-        endif;
+    //     if($reminder_exist):
+    //         $existEmployeeIds = (isset($existReminder->employee_ids) && !empty($existReminder->employee_ids) ? $existReminder->employee_ids : []);
+    //         $removedEmpIds = array_diff($existEmployeeIds, $employee_ids);
+    //         if(!empty($removedEmpIds)):
+    //             DocumentInfoReminderEmployee::where('document_info_reminder_id', $existReminder->id)->whereIn('employee_id', $removedEmpIds)->forceDelete();
+    //         endif;
+    //     endif;
 
-        if(!empty($employee_ids)):
-            foreach($employee_ids as $employee_id):
-                $empExist = DocumentInfoReminderEmployee::where('document_info_reminder_id', $reminder_id)->where('employee_id', $employee_id)->get()->count();
-                if($empExist == 0):
-                    $data = [];
-                    $data['document_info_reminder_id'] = $reminder_id;
-                    $data['employee_id'] = $employee_id;
+    //     if(!empty($employee_ids)):
+    //         foreach($employee_ids as $employee_id):
+    //             $empExist = DocumentInfoReminderEmployee::where('document_info_reminder_id', $reminder_id)->where('employee_id', $employee_id)->get()->count();
+    //             if($empExist == 0):
+    //                 $data = [];
+    //                 $data['document_info_reminder_id'] = $reminder_id;
+    //                 $data['employee_id'] = $employee_id;
 
-                    DocumentInfoReminderEmployee::create($data);
-                endif;
-            endforeach;
-        endif;
+    //                 DocumentInfoReminderEmployee::create($data);
+    //             endif;
+    //         endforeach;
+    //     endif;
 
-        return response()->json(['res' => 'Reminder Successfully saved.'], 200);
-    }
+    //     return response()->json(['res' => 'Reminder Successfully saved.'], 200);
+    // }
 
-    public function editFileReminder(Request $request){
-        $row_id = $request->row_id;
-        $reminder = DocumentInfoReminder::where('document_info_id', $row_id)->get()->first();
+    // public function editFileReminder(Request $request){
+    //     $row_id = $request->row_id;
+    //     $reminder = DocumentInfoReminder::where('document_info_id', $row_id)->get()->first();
 
-        return response()->json(['row' => $reminder], 200);
-    }
+    //     return response()->json(['row' => $reminder], 200);
+    // }
 
     public function destroyFile(Request $request){
         $row_id = $request->row_id;
+        $documents_ids = Document::where('document_info_id', $row_id)->get()->pluck('id')->unique()->toArray();
         DocumentInfo::where('id', $row_id)->delete();
         Document::where('document_info_id', $row_id)->delete();
+        DocumentAttachment::whereIn('document_id', $documents_ids)->delete();
+
+        return response()->json(['res' => 'File successfully deleted'], 200);
+    }
+
+
+    public function getFileAttachments(Request $request){
+        $document_id = $request->document_id;
+        $document = Document::with('attachments')->find($document_id);
+
+        $HTML = '';
+        if(isset($document->attachments) && $document->attachments->count() > 0):
+            $HTML .= '<div class="grid grid-cols-5 gap-x-4 gap-y-3">';
+                foreach($document->attachments as $theFile):
+                    $currentFileName = explode('.', $theFile->current_file_name);
+                    $fileExtension = end($currentFileName);
+
+                    $HTML .= '<div class="gridItem cursor-pointer relative" id="attachment_'.$theFile->id.'">';
+                        $HTML .= '<div class="fileItem gridItems filesFoldersBox text-center">';
+                            $HTML .= '<div class="fileFolderImg">';
+                                $HTML .= '<img src="'.asset('build/assets/images/file_icons/'.strtolower($fileExtension).'.png').'" alt="'.$theFile->display_file_name.'"/>';
+                            $HTML .= '</div>';
+                            $HTML .= '<h5 class="px-1 whitespace-normal break-all">'.$theFile->display_file_name.'</h5>';
+                            $HTML .= '<span class="fileFolderUpdated">'.(!empty($theFile->updated_at) ? date('jS F, Y', strtotime($theFile->updated_at)) : date('jS F, Y', strtotime($theFile->created_at))).'</span>';
+                        $HTML .= '</div>';
+                        $HTML .= '<a href="'.$theFile->download_url.'" target="_blank" download data-id="'.$theFile->id.'" class="downloadAttachment btn btn-success p-0 w-[30px] h-[30px] text-white rounded-full rounded-tr-none absolute top-0 right-0">';
+                            $HTML .= '<i data-lucide="download-cloud" class="w-4 h-4"></i>';
+                        $HTML .= '</a>';
+                        $HTML .= '<button type="button" data-id="'.$theFile->id.'" class="deleteAttachment btn btn-danger p-0 w-[30px] h-[30px] text-white rounded-full rounded-tl-none  absolute left-0 top-0">';
+                            $HTML .= '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+                        $HTML .= '</button>';
+                    $HTML .= '</div>';
+                endforeach;
+            $HTML .= '</div>';
+        else:
+            $HTML .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
+                $HTML .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Attachment not found';
+            $HTML .= '</div>';
+        endif;
+
+        return response()->json(['name' => $document->display_file_name, 'html' => $HTML], 200);
+    }
+
+
+    public function destroyAttachment(Request $request){
+        $row_id = $request->row_id;
+        DocumentAttachment::where('id', $row_id)->delete();
 
         return response()->json(['res' => 'File successfully deleted'], 200);
     }

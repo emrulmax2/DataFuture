@@ -26,6 +26,7 @@ class DocumentInfo extends Model
         'description',
         'file_type',
         'publish_date',
+        'email_reminder',
         
         'created_by',
         'updated_by',
@@ -50,7 +51,7 @@ class DocumentInfo extends Model
         $this->attributes['expire_at'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
-    public function getDateOfBirthAttribute($value) {
+    public function getExpireAtAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 
@@ -90,7 +91,11 @@ class DocumentInfo extends Model
         return $html;
     }
 
-    public function childrens(){
-        return $this->hasMany(DocumentInfo::class, 'parent_id', 'id');
+    public function latestVersion(){
+        return $this->hasOne(Document::class, 'document_info_id', 'id')->latestOfMany();
+    }
+
+    public function reminder(){
+        return $this->hasOne(DocumentInfoReminder::class, 'document_info_id', 'id');
     }
 }
