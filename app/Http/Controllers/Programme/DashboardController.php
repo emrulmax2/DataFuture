@@ -239,14 +239,19 @@ class DashboardController extends Controller
                             $btnHtml .= '</li>';
                         endif;
                         if($pln->status == 'Completed'):
+                            if(isset($pln->plan->tutor_id) || isset($pln->plan->personal_tutor_id)):
                             $btnHtml .= '<li>';
                                 $btnHtml .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass dropdown-item text-primary"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view w-4 h-4 mr-3"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg> '.($pln->feed_given == 1 && $pln->attendances->count() > 0 ? 'View Feed' : 'Feed Attendance').'</a>';
                             $btnHtml .= '</li>';
+                            endif;
                         endif;
                         if($pln->status == 'Scheduled' && ($orgStart > $currentTime || ($orgStart < $currentTime && $orgEnd > $currentTime)) && ($pln->proxy_tutor_id == null || $pln->proxy_tutor_id == 0)):
+                            
+                            if(isset($pln->plan->tutor_id) || isset($pln->plan->personal_tutor_id)):
                             $btnHtml .= '<li>';
                                 $btnHtml .= '<a data-tutorid="'.($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : ($pln->plan->personal_tutor_id > 0 ? $pln->plan->personal_tutor_id : 0)).'" data-planid="'.$pln->plan_id.'" data-plandateid="'.$pln->id.'" data-tw-toggle="modal" data-tw-target="#proxyClassModal" href="javascript:void(0);" class="proxyClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="arrow-right-left" class="lucide lucide-arrow-right-left w-4 h-4 mr-3"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg> Swap Class</a>';
                             $btnHtml .= '</li>';
+                            endif;
                         endif;
                         if($pln->status == 'Scheduled' || $pln->status == 'Unknown'):
                             $btnHtml .= '<li>';
@@ -254,11 +259,10 @@ class DashboardController extends Controller
                             $btnHtml .= '</li>';
                         endif;
                         if($pln->status == 'Ongoing' && $pln->feed_given != 1):
-                            if($pln->plan->tutor_id > 0): 
+                            if(isset($pln->plan->tutor_id) || isset($pln->plan->personal_tutor_id)):
                             $btnHtml .= '<li>';
                                 $btnHtml .= '<a href="'.route('tutor-dashboard.attendance', [($pln->plan->tutor_id > 0 ? $pln->plan->tutor_id : $pln->plan->personal_tutor_id), $pln->id, 2]).'" class="cancelClass text-success dropdown-item"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle w-4 h-4 mr-3"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg> Feed Attendance</a>';
                             $btnHtml .= '</li>';
-                            
                             endif;
                         endif;
                         if($pln->status == 'Ongoing' && $pln->feed_given == 1 && $orgEnd < $currentTime):
