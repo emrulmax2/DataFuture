@@ -2541,3 +2541,7 @@ fieldset.modInstSet legend{
 .pac-container{
     z-index: 99999;
 }
+
+.grid-cols-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
