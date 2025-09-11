@@ -76,6 +76,11 @@
                         <a href="{{ route('news.updates') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
                             <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/news_and_events.jpg') }}">
                         </a>
+                        @endif 
+                        @if(!$work_history_lock && auth()->user()->remote_access && isset(auth()->user()->priv()['file_manager']) && auth()->user()->priv()['file_manager'] == 1)
+                        <a href="{{ route('file.manager') }}" class="col-span-12 sm:col-span-6 xl:col-span-3 intro-y">  
+                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/file_manager.png') }}">
+                        </a>
                         @endif  
                     </div>
                 </div>
@@ -104,6 +109,11 @@
                                 @if(isset(auth()->user()->priv()['student_due_rep']) && auth()->user()->priv()['student_due_rep'] == 1)
                                 <a href="{{ route('report.student.due') }}" class="block relative col-span-6 2xl:col-span-4 mb-3">
                                     <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/student_due.png') }}">
+                                </a>
+                                @endif
+                                @if(isset(auth()->user()->priv()['expired_docs']) && auth()->user()->priv()['expired_docs'] == 1 && $hasDocumentReminder)
+                                <a href="{{ route('file.manager.reminder') }}" class="block relative col-span-6 2xl:col-span-4 mb-3">
+                                    <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/expired_document_2.png') }}">
                                 </a>
                                 @endif
                             </div>

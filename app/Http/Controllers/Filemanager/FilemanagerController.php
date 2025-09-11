@@ -138,9 +138,11 @@ class FilemanagerController extends Controller
     }
 
     public function createFolder(CreateFolderRequest $request){
+        $myEmployment = Employee::where('user_id', auth()->user()->id)->get()->first();
         $folderName = $request->name;
         $parent_id = (isset($request->parent_id) && $request->parent_id > 0 ? $request->parent_id : 0);
         $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+        $employee_ids[] = $myEmployment->id;
         $permission = (isset($request->permission) && !empty($request->permission) ? $request->permission : []);
         $params = (isset($request->params) && !empty($request->params) ? $request->params : '');
 
