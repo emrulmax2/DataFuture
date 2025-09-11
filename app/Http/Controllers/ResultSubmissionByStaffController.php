@@ -251,7 +251,7 @@ class ResultSubmissionByStaffController extends Controller
             //already a result is submitted for this assessment plan
             if(isset($resultComparison) && count($resultComparison) > 0){
 
-                $numberOfFailedStudents = Result::whereIn('assessment_plan_id', $resultComparison)->whereNotIn('grade_id', [4,5,6])
+                $numberOfFailedStudents = Result::whereIn('assessment_plan_id', $resultComparison)->whereNotIn('grade_id', [4,5,6,10])
                 ->pluck('student_id')->unique()->toArray();
 
                 $missingStudents = array_diff($numberOfFailedStudents ,$submittedStudents );

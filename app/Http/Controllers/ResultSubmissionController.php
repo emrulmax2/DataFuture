@@ -143,8 +143,9 @@ class ResultSubmissionController extends Controller
                             ->where('plan_id', $plan->id)
                             ->where('assessment_plan_id', $assessmentPlanStaff->id)
                             ->where(function ($query) {
-                                $query->whereBetween('grade_id', [4, 6]);
-                                
+                                    $query->whereBetween('grade_id', [4, 6])
+                                        ->orWhere('grade_id', 10);
+                               
                             })->get()->first();
                     else:
                         $foundResult = null;
@@ -222,7 +223,8 @@ class ResultSubmissionController extends Controller
                             ->where('plan_id', $plan->id)
                             ->where('assessment_plan_id', $assessmentPlanStaff->id)
                             ->where(function ($query) {
-                                $query->whereBetween('grade_id', [4, 6]);
+                                $query->whereBetween('grade_id', [4, 6])
+                                        ->orWhere('grade_id', 10);
                                 
                             })->get()->first();
                     else:
