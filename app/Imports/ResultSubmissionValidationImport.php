@@ -74,6 +74,7 @@ class ResultSubmissionValidationImport implements ToCollection, WithHeadingRow
                                 ->where('assessment_plan_id', $assessmentPlan->id)
                                 ->where(function ($query) {
                                     $query->whereBetween('grade_id', [4, 6]);
+                                    $query->orWhere('grade_id', 10);
                                     
                                 })->get()->first();
                             else:
@@ -87,7 +88,7 @@ class ResultSubmissionValidationImport implements ToCollection, WithHeadingRow
                             $i++;
                         }elseif(isset($foundResult->grade_id) && !empty($foundResult->grade_id)) {
                             
-                            $this->errorMessage = "The following students already have published results [e.g., P, M, D] for this assessment. Please remove these students from the list and try again."; 
+                            $this->errorMessage = "The following students already have published results [e.g., P, M, D] for this assessment or withold [W] result. Please remove these students from the list and try again."; 
                             $this->studentErrorFound[$i] = $row['first_name'] . " " . $row['last_name']. " - ".$row['email']; 
                             $i++;
                         }

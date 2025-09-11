@@ -98,4 +98,8 @@ class DocumentInfo extends Model
     public function reminder(){
         return $this->hasOne(DocumentInfoReminder::class, 'document_info_id', 'id');
     }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
