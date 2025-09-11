@@ -13,6 +13,8 @@ use App\Models\AttendanceInformation;
 use App\Models\ComonSmtp;
 use App\Models\CourseCreationAvailability;
 use App\Models\Department;
+use App\Models\DocumentFolder;
+use App\Models\DocumentInfo;
 use App\Models\Employee;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeGroup;
@@ -106,8 +108,30 @@ class DashboardController extends Controller
             })->orderBy('name', 'ASC')->get(),
             'proxyClasses' => $this->getMyProxyClassForTheDay(),
             'myfollowups' => $myFollowups->count(),
-            'myunreadcomments' => $myUnreadNoteCount
+            'myunreadcomments' => $myUnreadNoteCount,
+            'hasDocumentReminder' => $this->getFileManagerReminderCount()
         ]);
+    }
+
+    public function getFileManagerReminderCount(){
+        $expired = date('Y-m-d', strtotime(date('Y-m-d').' + 60 days'));
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $employee_id = $employee->id;
+
+        $expiredDocuments = DocumentInfo::whereNotNull('expire_at')->where('expire_at', '<=', $expired)->orderBy('expire_at', 'ASC')->get();
+        if($expiredDocuments->count() > 0):
+            $myExpiredDocs = 0;
+            foreach($expiredDocuments as $doc):
+                $paths = explode('/', $doc->path);
+                $rootFolder = DocumentFolder::where('slug', $paths[0])->whereHas('permission', function($q) use($employee_id){
+                                $q->where('employee_id', $employee_id);
+                            })->get()->first();
+                $myExpiredDocs += (isset($rootFolder->id) && $rootFolder->id > 0 ? 1 : 0);
+            endforeach;
+            return ($myExpiredDocs > 0 ? true : false);
+        else:
+            return false;
+        endif;
     }
     
     public function getAccountDashBoard()

@@ -217,6 +217,7 @@ use App\Http\Controllers\CourseManagement\TermDeclarationController;
 use App\Http\Controllers\CourseManagement\TutorMonitorController;
 use App\Http\Controllers\Filemanager\DocumentTagController;
 use App\Http\Controllers\Filemanager\FilemanagerController;
+use App\Http\Controllers\Filemanager\ReminderController;
 use App\Http\Controllers\Forms\EmployeeFormController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
@@ -3287,6 +3288,12 @@ Route::middleware('auth')->group(function() {
 
         Route::post('file-manager/get-file-attachments', 'getFileAttachments')->name('file.manager.get.file.attachment'); 
         Route::delete('file-manager/destroy-attachment', 'destroyAttachment')->name('file.manager.destroy.attachment'); 
+    });
+
+    Route::controller(ReminderController::class)->group(function() {
+        Route::get('expired-files', 'index')->name('file.manager.reminder'); 
+        Route::get('expired-files/list', 'list')->name('file.manager.reminder.list'); 
+        //Route::post('file-manager/tags/search', 'searchTags')->name('file.manager.search.tags'); 
     });
 
     Route::controller(DocumentTagController::class)->group(function() {
