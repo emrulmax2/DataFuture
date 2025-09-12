@@ -8,7 +8,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">File Manager</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            @if(($parent_id > 0 && (isset($root_permission->role->create) && $root_permission->role->create == 1)) || auth()->user()->id == 1)
+            @if(($parent_id > 0 && (isset($root_permission->role->create) && $root_permission->role->create == 1)) || ($parent_id == 0 && isset(auth()->user()->priv()['file_manager']) && auth()->user()->priv()['file_manager'] == 1))
                 <button type="button" data-tw-toggle="modal" data-tw-target="#addFolderModal" class="add_btn btn btn-primary shadow-md mr-2">New Folder</button>
             @endif
             @if($parent_id > 0 && (isset($root_permission->role->create) && $root_permission->role->create == 1))
