@@ -378,4 +378,105 @@ import Dropzone from "dropzone";
         })
     }
 
+
+    const sendOfferForm = document.getElementById('sendOfferAcceptanceForm');
+    if(sendOfferForm){
+        const successModalEl = document.querySelector("#successModal");
+        const warningModalEl = document.querySelector("#warningModal");
+        const sendOfferAcceptanceModalEl = document.querySelector("#sendOfferAcceptanceModal");
+
+        const successModal = successModalEl ? tailwind.Modal.getOrCreateInstance(successModalEl) : null;
+        const warningModal = warningModalEl ? tailwind.Modal.getOrCreateInstance(warningModalEl) : null;
+        const sendOfferAcceptanceModal = sendOfferAcceptanceModalEl ? tailwind.Modal.getOrCreateInstance(sendOfferAcceptanceModalEl) : null;
+
+        if(sendOfferAcceptanceModalEl){
+            sendOfferAcceptanceModalEl.addEventListener('hide.tw.modal', function () {
+                const errors = sendOfferAcceptanceModalEl.querySelectorAll('.acc__input-error');
+                errors.forEach(el => el.innerHTML = '');
+                const checkboxes = sendOfferAcceptanceModalEl.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = false);
+            });
+        }
+
+        const successCloser = successModalEl ? successModalEl.querySelector('.successCloser') : null;
+        if(successCloser){
+            successCloser.addEventListener('click', function(e){
+                e.preventDefault();
+                if(successModal) successModal.hide();
+                if(this.getAttribute('data-action') === 'RELOAD') window.location.reload();
+            });
+        }
+
+        const warningCloser = warningModalEl ? warningModalEl.querySelector('.warningCloser') : null;
+        if(warningCloser){
+            warningCloser.addEventListener('click', function(e){
+                e.preventDefault();
+                if(warningModal) warningModal.hide();
+                if(this.getAttribute('data-action') === 'RELOAD') window.location.reload();
+            });
+        }
+
+        sendOfferForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            const sendOfferBtn = document.getElementById('sendOfferBtn');
+            if(sendOfferBtn){
+                sendOfferBtn.setAttribute('disabled', 'disabled');
+                const spinner = sendOfferBtn.querySelector('svg');
+                if(spinner) spinner.style.display = 'inline-block';
+            }
+
+            const formData = new FormData(sendOfferForm);
+
+            axios({
+                method: "post",
+                url: route('applicant.e.signature.send.request'),
+                data: formData,
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            }).then(response => {
+                if(sendOfferBtn){
+                    sendOfferBtn.removeAttribute('disabled');
+                    const spinner = sendOfferBtn.querySelector('svg');
+                    if(spinner) spinner.style.display = 'none';
+                }
+
+                if(sendOfferAcceptanceModal) sendOfferAcceptanceModal.hide();
+
+                    successModal.show();
+                    successModalEl.addEventListener("shown.tw.modal", function(){
+                        const title = successModalEl.querySelector('.successModalTitle');
+                        const desc = successModalEl.querySelector('.successModalDesc');
+                        if(title) title.innerHTML = "Success!";
+                        if(desc) desc.innerHTML = response.data.message || 'Offer acceptance sent successfully.';
+                        if(successCloser) successCloser.setAttribute('data-action', 'NONE');
+                    });
+                    setTimeout(() => successModal.hide(), 2000);
+                
+            }).catch(error => {
+                if(sendOfferBtn){
+                    sendOfferBtn.removeAttribute('disabled');
+                    const spinner = sendOfferBtn.querySelector('svg');
+                    if(spinner) spinner.style.display = 'none';
+                }
+
+                let errorMessage = 'An error occurred. Please try again.';
+                if(error.response){
+                    if([400, 404].includes(error.response.status)){
+                        errorMessage = error.response.data.message || errorMessage;
+                    }
+                }
+
+                if(warningModal){
+                    warningModal.show();
+                    warningModalEl.addEventListener("shown.tw.modal", function(){
+                        const title = warningModalEl.querySelector('.warningModalTitle');
+                        const desc = warningModalEl.querySelector('.warningModalDesc');
+                        if(title) title.innerHTML = "Error!";
+                        if(desc) desc.innerHTML = errorMessage;
+                        if(warningCloser) warningCloser.setAttribute('data-action', 'NONE');
+                    });
+                }
+            });
+        });
+    }
+
 })()
