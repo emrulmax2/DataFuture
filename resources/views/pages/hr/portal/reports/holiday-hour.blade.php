@@ -6,7 +6,7 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Holiday Hour Reports</u></h2>
+        <h2 class="text-lg font-medium mr-auto">Employee Hour Report</u></h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('hr.portal.employment.reports.show') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Report</a>
         </div>
