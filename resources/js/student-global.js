@@ -160,6 +160,7 @@ import Dropzone from "dropzone";
         $('#changeStudentModal #change_status_id, #changeStudentModal #term_declaration_id').on('change', function(){
             var $theStatus = $('#changeStudentModal #change_status_id');
             var $theTerm = $('#changeStudentModal #term_declaration_id');
+            let is_assigned = $('#changeStudentModal input[name="is_assigned"]').val();
 
             var theStatus = $theStatus.val();
             var theTerm = $theTerm.val();
@@ -201,9 +202,13 @@ import Dropzone from "dropzone";
                 });
             }else{
                 $('#changeStudentModal').find('dotLoader').fadeOut();
-                $('#changeStudentForm #updateStatusBtn').attr('disabled', 'disabled');
+                if(is_assigned > 0){
+                    $('#changeStudentForm #updateStatusBtn').attr('disabled', 'disabled');
+                }else{
+                    $('#changeStudentForm #updateStatusBtn').removeAttr('disabled');
+                }
             }
-        })
+        });
 
         $('#changeStudentModal #change_status_id').on('change', function(){
             let $status_id = $(this);
