@@ -24,7 +24,7 @@ import Tabulator from "tabulator-tables";
             $('#addRegistrationModal select[name="self_funded_year"]').val('');
             //$('#addRegistrationModal select[name="session_term"]').html('<option value="">Please Select</option>').attr('readonly');
             $('#addRegistrationModal select[name="session_term"]').val('');
-            $('#addRegistrationForm .regularCourseFee').removeClass('line-through opacity-50');
+            $('#addRegistrationForm .regularCourseFee').removeClass('line-through text-danger');
             $('#addRegistrationForm .instanceCourseFee').addClass('hidden').html('');
 
             $('#addRegistrationForm select[name="attendance_code_id"]').val('');
@@ -145,10 +145,10 @@ import Tabulator from "tabulator-tables";
                 $('#addRegistrationForm select[name="term_declaration_id"]').val('');
                 $('#addRegistrationForm select[name="session_term"]').val('');
                 if(fees != course_fee){
-                    $('#addRegistrationForm .regularCourseFee').addClass('line-through opacity-50');
+                    $('#addRegistrationForm .regularCourseFee').addClass('line-through text-danger');
                     $('#addRegistrationForm .instanceCourseFee').removeClass('hidden').html(fees_html);
                 }else{
-                    $('#addRegistrationForm .regularCourseFee').removeClass('line-through opacity-50');
+                    $('#addRegistrationForm .regularCourseFee').removeClass('line-through text-danger');
                     $('#addRegistrationForm .instanceCourseFee').addClass('hidden').html('');
                 }
             }).catch(error => {
