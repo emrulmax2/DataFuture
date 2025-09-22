@@ -16,6 +16,7 @@ use App\Models\SlcRegistration;
 use App\Models\TermDeclaration;
 use Illuminate\Http\Request;
 use App\Models\StudentArchive;
+use Illuminate\Support\Number;
 
 class SlcRegistrationController extends Controller
 {
@@ -27,7 +28,7 @@ class SlcRegistrationController extends Controller
         $instance = CourseCreationInstance::find($course_creation_instance_id);
         $fees = (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0);
 
-        return response()->json(['fees' => $fees], 200);
+        return response()->json(['fees' => $fees, 'fees_html' => Number::currency($fees, 'GBP')], 200);
     }
 
     public function store(AddRegistrationRequest $request){

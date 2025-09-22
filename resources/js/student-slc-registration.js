@@ -22,7 +22,10 @@ import Tabulator from "tabulator-tables";
         $('#addRegistrationModal .confirmAttendanceArea').fadeOut('fast', function(){
             $('#addRegistrationModal .confirmAttendanceArea').removeClass('opened');
             $('#addRegistrationModal select[name="self_funded_year"]').val('');
-            $('#addRegistrationModal select[name="session_term"]').html('<option value="">Please Select</option>').attr('readonly');
+            //$('#addRegistrationModal select[name="session_term"]').html('<option value="">Please Select</option>').attr('readonly');
+            $('#addRegistrationModal select[name="session_term"]').val('');
+            $('#addRegistrationForm .regularCourseFee').removeClass('line-through opacity-50');
+            $('#addRegistrationForm .instanceCourseFee').addClass('hidden').html('');
 
             $('#addRegistrationForm select[name="attendance_code_id"]').val('');
             $('#addRegistrationForm textarea').val('');
@@ -133,12 +136,21 @@ import Tabulator from "tabulator-tables";
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 var fees = response.data.fees;
+                var fees_html = response.data.fees_html;
+                var course_fee = $('#addRegistrationForm .regCourseFee').attr('data-fee') * 1;
                 var session_term_html = response.data.session_term_html;
 
                 
                 $('#addRegistrationForm input[name="instance_fees"]').val(fees);
                 $('#addRegistrationForm select[name="term_declaration_id"]').val('');
                 $('#addRegistrationForm select[name="session_term"]').val('');
+                if(fees != course_fee){
+                    $('#addRegistrationForm .regularCourseFee').addClass('line-through opacity-50');
+                    $('#addRegistrationForm .instanceCourseFee').removeClass('hidden').html(fees_html);
+                }else{
+                    $('#addRegistrationForm .regularCourseFee').removeClass('line-through opacity-50');
+                    $('#addRegistrationForm .instanceCourseFee').addClass('hidden').html('');
+                }
             }).catch(error => {
                 if (error.response.status == 422) {
                     console.log('error');
