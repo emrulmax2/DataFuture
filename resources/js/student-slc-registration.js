@@ -24,7 +24,7 @@ import Tabulator from "tabulator-tables";
             $('#addRegistrationModal select[name="self_funded_year"]').val('');
             //$('#addRegistrationModal select[name="session_term"]').html('<option value="">Please Select</option>').attr('readonly');
             $('#addRegistrationModal select[name="session_term"]').val('');
-            $('#addRegistrationForm .regularCourseFee').removeClass('line-through text-danger');
+            $('#addRegistrationForm .regularCourseFee').removeClass('line-through text-danger'); 
             $('#addRegistrationForm .instanceCourseFee').addClass('hidden').html('');
 
             $('#addRegistrationForm select[name="attendance_code_id"]').val('');

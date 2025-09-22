@@ -464,7 +464,7 @@
                                         <span class="regularCourseFee">
                                             {{ (isset($student->crel->creation->fees) && $student->crel->creation->fees > 0 ? '£'.number_format($student->crel->creation->fees, 2) : '') }}
                                         </span>
-                                        <span class="instanceCourseFee text-success ml-2 hidden"></span>
+                                        <span class="instanceCourseFee text-success ml-2 hidden"></span> 
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
