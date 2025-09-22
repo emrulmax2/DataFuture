@@ -445,7 +445,7 @@ class DashboardController extends Controller
             $end_time = date('h:i A', strtotime($end_time));
             
             
-            $assignStudentList = Assign::where("plan_id",$list->plan_id)->get();
+            $assignStudentList = Assign::whereHas('student')->where("plan_id", $list->plan_id)->get();
 
             $attendanceFeedStatus = AttendanceFeedStatus::all();
 
