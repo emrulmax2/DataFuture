@@ -460,8 +460,11 @@
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
                                     <div class="col-span-4 text-slate-500 font-medium">Course Fees</div>
-                                    <div class="col-span-8 font-medium">
-                                        {{ (isset($student->crel->creation->fees) && $student->crel->creation->fees > 0 ? '£'.number_format($student->crel->creation->fees, 2) : '') }}
+                                    <div class="col-span-8 font-medium regCourseFee" data-fee="{{ (isset($student->crel->creation->fees) && $student->crel->creation->fees > 0 ? $student->crel->creation->fees : 0) }}">
+                                        <span class="regularCourseFee">
+                                            {{ (isset($student->crel->creation->fees) && $student->crel->creation->fees > 0 ? '£'.number_format($student->crel->creation->fees, 2) : '') }}
+                                        </span>
+                                        <span class="instanceCourseFee ml-2 hidden"></span>
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-0 mb-3">
