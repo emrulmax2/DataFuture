@@ -270,11 +270,11 @@ class DataReportController extends Controller
                                 if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
 
-                                    $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->get()->first();
+                                    $employeeWorkingPattern = EmployeeWorkingPattern::where('employee_id',$employee->id)->where('active',1)->orderBy('id', 'DESC')->get()->first();
 
                                     if($employeeWorkingPattern!="") {
                                         
-                                        $patternPay = EmployeeWorkingPatternPay::where("employee_working_pattern_id",$employeeWorkingPattern->id)->where("active",1)->get()->first();
+                                        $patternPay = EmployeeWorkingPatternPay::where("employee_working_pattern_id",$employeeWorkingPattern->id)->where("active",1)->orderBy('id', 'DESC')->get()->first();
 
                                         if($fieldValue)
                                         $theCollection[$row][] = isset($patternPay) ? $patternPay->$fieldName : "";
