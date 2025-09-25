@@ -425,7 +425,7 @@
                 </div>
             </div>
 
-            {{-- <div class="grid grid-cols-12 gap-4 mt-10 payrollRow">
+            <!-- <div class="grid grid-cols-12 gap-4 mt-10 payrollRow">
                 <div class="col-span-12">
                     <h3 class="empDatasTitle font-medium">Payroll Info <a href="javascript: void(0);" data-parent="payrollRow" class="btn btn-sm btn-primary checkedAlls ml-1">All</a></h3>
                 </div>
@@ -564,7 +564,7 @@
                     </div>
                     <input type="hidden" name="labels[emergencycontact]" value="Emergency Contacts">
                 </div>
-            </div> --}}
+            </div>-->
         </div>
         <div class="intro-y box p-5 mt-5">
                 <div class="grid grid-cols-12 gap-4">
