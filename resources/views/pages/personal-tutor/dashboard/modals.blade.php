@@ -193,7 +193,7 @@
 </div>
 <!-- END: Error Modal Content -->
 <!-- BEGIN: Success Modal Content -->
-<div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+<div id="successModal" class="modal" tabindex="-1" aria-hidden="true" data-tw-backdrop="static">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body p-0">
@@ -226,7 +226,7 @@
                             <option value="">Please Select</option>
                             @if($termdeclarations->count() > 0)
                                 @foreach($termdeclarations as $trm)
-                                    <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                                    <option {{ isset($current_term->id) && $current_term->id == $trm->id ? 'Selected' : '' }} value="{{ $trm->id }}">{{ $trm->name }}</option>
                                 @endforeach
                             @endif
                         </select>
@@ -273,6 +273,7 @@
                         </svg>
                     </button>
                     <input type="hidden" name="student_id" value="0"/>
+                    <input type="hidden" name="attendance_ids" value=""/>
                 </div>
             </div>
         </form>

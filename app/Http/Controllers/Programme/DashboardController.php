@@ -596,6 +596,7 @@ class DashboardController extends Controller
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
                 $res[$tut->id]['undecidedUploads'] = $undecidedUploads;
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
+                $res[$tut->id]['outstanding_calls'] = $this->getPersonalTutorOutstandingCall($term_declaration_id, $course_id, $tut->id);
             endforeach;
         endif;
 
@@ -609,6 +610,42 @@ class DashboardController extends Controller
             'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
             'selected_course' => $course_id
         ]);
+    }
+
+    
+
+    public function getPersonalTutorOutstandingCall($term_declaration_id, $course_id = 0, $user_id){
+        $tutor_plans = PlansDateList::whereHas('plan', function($q) use($user_id){
+                        $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id)->orWhereHas('tutorial', function($sq) use($user_id){
+                            $sq->where('personal_tutor_id', $user_id);
+                        });
+                    })->whereHas('plan', function($q) use($term_declaration_id, $course_id){
+                        $q->where('term_declaration_id', $term_declaration_id);
+                        if($course_id > 0):
+                            $q->where('course_id', $course_id);
+                        endif;
+                    })->get();
+        $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
+        $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();
+
+        $assignStudents = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
+                    $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
+                })->pluck('student_id')->unique()->toArray();
+
+        $outStandingCount = 0;
+        if(!empty($assignStudents)):
+            $outStandingCount += DB::table('attendances as atn')
+                        ->select('atn.student_id', 'atn.attendance_date', DB::raw('count(atn.id) as no_of_rows'), DB::raw('GROUP_CONCAT(atn.id) as atn_ids'))
+                        ->leftJoin('plans as pln', 'pln.id', 'atn.plan_id')
+                        ->whereIn('atn.student_id', $assignStudents)
+                        ->where('atn.attendance_feed_status_id', 4)
+                        ->where('atn.tracking_status', 0)
+                        ->whereIn('pln.id', $plan_ids)
+                        ->whereIn('atn.plans_date_list_id', $date_list_ids)
+                        ->groupBy('atn.student_id', 'atn.attendance_date')->orderBy('atn.attendance_date', 'DESC')->get()->count();
+        endif;
+
+        return $outStandingCount;
     }
 
 
