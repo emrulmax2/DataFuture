@@ -131,7 +131,7 @@
                                         </div>
                                     </div>
                                 </a>
-                                @elseif($onlineWork->form_name=="Report any IT issues on campus") 
+                                {{-- @elseif($onlineWork->form_name=="Report any IT issues on campus") 
                                 <a id="doitOnline{{ $iCountTotal++; }}" href="{{ route('students.report-any-it-issues') }}" class="intro-x inline-block w-full" >
                                     <div class="box px-5 py-3 mb-3 flex items-center zoom-in w-full">
                                         <div class="mr-auto">
@@ -139,7 +139,7 @@
                                             <div class="text-slate-500 text-xs mt-0.5">{{ $onlineWork->form_description }}</div>
                                         </div>
                                     </div>
-                                </a>
+                                </a> --}}
                                 @else
                                 <a id="doitOnline{{ $iCountTotal++; }}" href="{{ $onlineWork->form_link }}" class="intro-x inline-block w-full" >
                                     <div class="box px-5 py-3 mb-3 flex items-center zoom-in w-full">
