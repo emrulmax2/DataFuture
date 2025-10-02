@@ -197,12 +197,7 @@ var table = (function () {
             filterHTMLForm();
         });
 
-        // $(".datepicker").each(function () {
-        //     var maskOptions = {
-        //         mask: '00-00-0000'
-        //     };
-        //     var mask = IMask(this, maskOptions);
-        // });
+
         const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
