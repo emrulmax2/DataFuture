@@ -240,7 +240,7 @@
                                         <div class="grid grid-cols-12 gap-5">
                                             <a href="{{ route('report.it.all') }}" target="__blank" class="block relative col-span-6 2xl:col-span-4 mb-3 active">
                                                 <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">REPORT IT FOR ALL</h6>
-                                                <img class="block w-full h-auto shadow-md zoom-in rounded" src="http://localhost:8000/build/assets/images/blan_logo.png" alt="New Student">
+                                                <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/blan_logo.png') }}" alt="New Student">
                                                 <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $reportItAll->count() }}</span>
                                             </a>
                                         </div>
