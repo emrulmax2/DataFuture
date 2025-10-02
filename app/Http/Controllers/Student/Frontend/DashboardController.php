@@ -34,6 +34,7 @@ use App\Models\PlanTask;
 use App\Models\PlanTaskUpload;
 use App\Models\ReferralCode;
 use App\Models\Religion;
+use App\Models\ReportItAll;
 use App\Models\Room;
 use App\Models\SexIdentifier;
 use App\Models\SexualOrientation;
@@ -159,7 +160,7 @@ class DashboardController extends Controller
                 });
             else
             $dateWiseClassList = [];
-
+            $reportItAll = ReportItAll::all();
             return view('pages.students.frontend.dashboard.index', [
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
@@ -187,7 +188,7 @@ class DashboardController extends Controller
                 "currenTerm" => $dataBox["currenTerm"],
                 "doItOnline" => $DoItOnline,
                 "datewiseClasses" => $dateWiseClassList,
-                
+                "reportItAll" => $reportItAll,
                 'studentDataList' => $studentDataList,
                 'selectedStudentId' => session('selected_student_id'),
                 'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
