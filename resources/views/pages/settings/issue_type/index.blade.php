@@ -1,9 +1,8 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Venues</title>
+    <title>{{ $title }}</title>
 @endsection
-
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
@@ -24,8 +23,8 @@
             <!-- BEGIN: Display Information -->
             <div class="intro-y box lg:mt-5">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Venues List</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addVenueModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Venue</button>
+                    <h2 class="font-medium text-base mr-auto">Report IT Issue Types List</h2>
+                    <button data-tw-toggle="modal" data-tw-target="#addModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New</button>
                 </div>
                 <div class="p-5">
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
@@ -61,28 +60,18 @@
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                            </a>
-                                        </li> --}}
                                         <li>
                                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
                                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
                                             </a>
                                         </li>
-                                        {{-- <li>
-                                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                            </a>
-                                        </li> --}}
                                     </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="venuesTableId" class="mt-5 table-report table-report--tabulator"></div>
+                        <div id="issueTypesTableId" class="mt-5 table-report table-report--tabulator"></div>
                     </div>
                 </div>
             </div>
@@ -91,51 +80,48 @@
     <!-- END: Settings Page Content -->
 
     <!-- BEGIN: Add Modal -->
-    <div id="addVenueModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div id="addModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="addForm" enctype="multipart/form-data">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Venue</h2>
+                        <h2 class="font-medium text-base mr-auto">Add Issue Type  </h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="name" class="form-label">Venue Name <span class="text-danger">*</span></label>
-                            <input id="name" type="text" name="name" class="form-control w-full">
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="idnumber" class="form-label">ID Number <span class="text-danger">*</span></label>
-                            <input id="idnumber" type="text" name="idnumber" class="form-control w-full">
-                            <div class="acc__input-error error-idnumber text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="ukprn" class="form-label">UKPRN <span class="text-danger">*</span></label>
-                            <input id="ukprn" type="text" name="ukprn" class="form-control w-full">
-                            <div class="acc__input-error error-ukprn text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="postcode" class="form-label">Postal Code</label>
-                            <input id="postcode" type="text" name="postcode" class="form-control w-full">
-                        </div>
-                        <div class="mt-3">
-                            <label for="address" class="form-label">Full Address</label>
-                            <textarea id="address" name="address" class="form-control w-full"></textarea>
-                        </div>
-                        <div class="mt-3">
-                            <label for="ip_addresses" class="form-label">IP Addresses</label>
-                            <textarea id="ip_addresses" rows="3" name="ip_addresses" class="form-control w-full"></textarea>
-                            <div class="form-help">Please insert multiple ip address using pipe (|) sign.</div>
+                            <div>
+                                <label for="name" class="form-label">Issue Type <span class="text-danger">*</span></label>
+                                <input id="name" type="text" name="name" class="form-control w-full">
+                                <div class="acc__input-error error-name text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="availability" class="form-label">Available To <span class="text-danger">*</span></label>
+                                <select id="availability" name="availability" class="form-select w-full">
+                                    <option value="" >Please Select</option>
+                                    <option value="Employee">Employee</option>
+                                    <option value="Student">Student</option>
+                                </select>
+                                <div class="acc__input-error error-availability text-danger mt-2"></div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="comon_smtp_id" class="form-label">SMTP User <span class="text-danger">*</span></label>
+                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-select w-full">
+                                    <option value="">Please Select</option>
+                                    @foreach($smtps as $smtp)
+                                        <option value="{{ $smtp->id }}">{{ $smtp->smtp_user }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal"
-                            class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="save" class="btn btn-primary w-auto">
-                            Save
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="save" class="btn btn-primary w-auto">     
+                            Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
@@ -156,51 +142,42 @@
     </div>
     <!-- END: Add Modal -->
     <!-- BEGIN: Edit Modal -->
-    <div id="editVenueModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div id="editModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="#" id="editForm" enctype="multipart/form-data">
+            <form method="POST" action="#" id="editForm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Venue</h2>
+                        <h2 class="font-medium text-base mr-auto flex">Edit Issue Type <i data-loading-icon="oval"  class="w-4 h-4 mt-2 ml-2 editLoading"></i></h2>
                         <a data-tw-dismiss="modal" href="javascript:;">
                             <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                         </a>
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="name" class="form-label">Venue Name <span class="text-danger">*</span></label>
+                            <label for="name" class="form-label">Issue Type <span class="text-danger">*</span></label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
-                            <label for="idnumber" class="form-label">ID Number <span class="text-danger">*</span></label>
-                            <input id="idnumber" type="text" name="idnumber" class="form-control w-full">
-                            <div class="acc__input-error error-idnumber text-danger mt-2"></div>
-                        </div>
+                            <label for="availability" class="form-label">Available To <span class="text-danger">*</span></label>
+                            <select id="availability" name="availability" class="form-select w-full">
+                                <option value="" >Please Select</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Student">Student</option>
+                            </select>
+                            <div class="acc__input-error error-availability text-danger mt-2"></div>
+                        </div> 
                         <div class="mt-3">
-                            <label for="ukprn" class="form-label">UKPRN <span class="text-danger">*</span></label>
-                            <input id="ukprn" type="text" name="ukprn" class="form-control w-full">
-                            <div class="acc__input-error error-ukprn text-danger mt-2"></div>
+                                <label for="comon_smtp_id" class="form-label">SMTP User <span class="text-danger">*</span></label>
+                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-select w-full">
+                                    <option value="">Please Select</option>
+                                    @foreach($smtps as $smtp)
+                                        <option value="{{ $smtp->id }}">{{ $smtp->smtp_user }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="postcode" class="form-label">Postal Code</label>
-                            <input id="postcode" type="text" name="postcode" class="form-control w-full">
-                        </div>
-                        <div class="mt-3">
-                            <label for="address" class="form-label">Full Address</label>
-                            <textarea id="address" name="address" class="form-control w-full"></textarea>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_ip_addresses" class="form-label">IP Addresses</label>
-                            <textarea id="edit_ip_addresses" rows="3" name="ip_addresses" class="form-control w-full"></textarea>
-                            <div class="form-help">Please insert multiple ip address using pipe (|) sign.</div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="form-check form-switch">
-                                <label class="form-check-label mr-3 ml-0" for="available_student_status">Active</label>
-                                <input id="active" class="form-check-input" name="active" value="1" type="checkbox">
-                            </div>
-                        </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal"
@@ -264,9 +241,9 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
-@endsection
+    @endsection
 
-@section('script')
-    @vite('resources/js/settings.js')
-    @vite('resources/js/venues.js')
-@endsection
+    @section('script')
+        @vite('resources/js/settings.js')
+        @vite('resources/js/issue_types.js')
+    @endsection

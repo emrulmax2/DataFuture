@@ -342,6 +342,12 @@
                     </ul>
                 </li>
             @endif
+
+                <li>
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'issue.types' ? 'active text-primary font-medium' : '' }}" href="{{ route('issue.types') }}">
+                        <i data-lucide="computer" class="w-4 h-4 mr-2"></i> Report IT Issue Type Settings
+                    </a>
+                </li>
         </ul>
     </div>
 </div>

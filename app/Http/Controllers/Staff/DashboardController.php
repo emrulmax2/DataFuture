@@ -23,6 +23,7 @@ use App\Models\Employment;
 use App\Models\InternalLink;
 use App\Models\PlansDateList;
 use App\Models\ProcessList;
+use App\Models\ReportItAll;
 use App\Models\Student;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentNoteFollowupCommentRead;
@@ -83,6 +84,7 @@ class DashboardController extends Controller
                         })->get();
         $followedNoteId = $myFollowups->pluck('student_note_id')->unique()->toArray();
         $myUnreadNoteCount = (!empty($followedNoteId) ? StudentNoteFollowupCommentRead::whereIn('student_note_id', $followedNoteId)->where('user_id', auth()->user()->id)->where('read', '!=', 1)->get()->count() : 0);
+        
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -93,6 +95,7 @@ class DashboardController extends Controller
                             })->get()->count(),
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
+            'reportItAll' => ReportItAll::where('status','Pending')->get(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
             'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
             'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
