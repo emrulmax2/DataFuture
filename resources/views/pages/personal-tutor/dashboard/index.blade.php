@@ -160,7 +160,14 @@
                     <div class="intro-y block sm:flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Students Attendance Tracking</h2>
                         <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
-                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-3">
+                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                <select name="trackingStatus" id="trackingStatus" class="w-full form-control border-0 focus:outline-none focus:shadow-none" style="max-width: 130px;">
+                                    <option value="0">Outstanding</option>
+                                    <option value="1">Close</option>
+                                </select>
+                            </div>
+                            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 ml-2">
                                 <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i>
                                 <input type="text" name="class_date" class="w-full form-control border-0 classDate" id="theAttendanceDate" value="{{ $yesterday }}" style="max-width: 110px;">
                             </div>

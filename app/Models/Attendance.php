@@ -27,6 +27,7 @@ class Attendance extends Model
         "attendence_excuse_id",	
         "class_type",	
         "prev_plan_id",	
+        "tracking_status",	
         'created_by',
         'updated_by',
         'note',

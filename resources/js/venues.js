@@ -285,7 +285,7 @@ var table = (function () {
                         $('#editVenueModal input[name="postcode"]').val(dataset.postcode ? dataset.postcode : '');
                         $('#editVenueModal [name="address"]').val(dataset.address ? dataset.address : '');
                         $('#editVenueModal textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : '');
-
+                        $('#editVenueModal [name="active"]').prop('checked',dataset.active);
                         $('#editVenueModal input[name="id"]').val(editId);
                     }
                 })

@@ -177,6 +177,7 @@ import TomSelect from "tom-select";
         $('#addNoteModal input[name="document"]').val('');
         $('#addNoteModal #addNoteDocumentName').html('');
         $('#addNoteModal input[name="student_id"]').val('0');
+        $('#addNoteModal input[name="attendance_ids"]').val('');
 
         addEditor.setData('');
         note_term_declaration_id.clear(true);
@@ -414,10 +415,16 @@ import TomSelect from "tom-select";
         generateStudentAttendanceTrackingHtml();
     })
 
+    $('#trackingStatus').on('change', function(){
+        generateStudentAttendanceTrackingHtml();
+    })
+
     function generateStudentAttendanceTrackingHtml(theDate = null){
         let $theWrap = $('#studentAttendanceTrackingWrap');
         let $theLoader = $('#studentAttendanceTrackingWrap .leaveTableLoader')
         $theLoader.addClass('active');
+        let $theStatus = $('#trackingStatus');
+        let trackingStatus = $theStatus.val();
         if(theDate == null){
             let $theCalendar = $('#theAttendanceDate');
             let theDate = $theCalendar.val();
@@ -426,7 +433,7 @@ import TomSelect from "tom-select";
         axios({
             method: "POST",
             url: route('pt.dashboard.get.student.attn.tracking'),
-            data: {theDate : theDate},
+            data: {theDate : theDate, trackingStatus : trackingStatus},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
@@ -464,8 +471,10 @@ import TomSelect from "tom-select";
         e.preventDefault();
         var $theBtn = $(this);
         var student_id = $theBtn.attr('data-student');
+        var attendance_ids = $theBtn.attr('data-attendanceids');
 
         $('#addNoteModal input[name="student_id"]').val(student_id);
+        $('#addNoteModal input[name="attendance_ids"]').val(attendance_ids);
     })
 
     $('#addNoteForm').on('submit', function(e){
@@ -500,6 +509,7 @@ import TomSelect from "tom-select";
                 
                 setTimeout(function(){
                     successModal.hide();
+                    window.location.reload();
                 }, 1000);
             }
         }).catch(error => {

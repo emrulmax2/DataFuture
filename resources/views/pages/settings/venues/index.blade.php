@@ -195,6 +195,12 @@
                             <textarea id="edit_ip_addresses" rows="3" name="ip_addresses" class="form-control w-full"></textarea>
                             <div class="form-help">Please insert multiple ip address using pipe (|) sign.</div>
                         </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <label class="form-check-label mr-3 ml-0" for="available_student_status">Active</label>
+                                <input id="active" class="form-check-input" name="active" value="1" type="checkbox">
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal"

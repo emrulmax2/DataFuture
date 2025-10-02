@@ -104,7 +104,7 @@ use Illuminate\Support\Facades\Session;
 
 use PDF;
 
-class StudentController extends Controller
+class  StudentController extends Controller
 {
     public function index(){
         $semesters = Cache::get('semesters', function () {

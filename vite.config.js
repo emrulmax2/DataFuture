@@ -404,7 +404,14 @@ export default defineConfig({
                 'resources/js/news-updates-edits.js',
                 'resources/js/student-frontend-global.js',
                 'resources/js/student-due-reports.js',
+                'resources/js/issue_types.js',
+                'resources/js/report-it-all.js',
                 'resources/js/file-manager-reminder.js',
+                'resources/js/report-any-it-employee.js',
+                'resources/js/report-any-it-student.js',
+                'resources/js/report-it-show.js',
+                
+
 
             ],
             refresh: true,

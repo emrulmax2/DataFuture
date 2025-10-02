@@ -123,6 +123,7 @@ class VenueController extends Controller
             'idnumber'=> $request->idnumber,
             'ukprn'=> $request->ukprn,
             'postcode'=> $request->postcode,
+            'active' => $request->active,
             'address'=> !empty($request->address) ? $request->address : null,
             'updated_by' => auth()->user()->id
         ]);

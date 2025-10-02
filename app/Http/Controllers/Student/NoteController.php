@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicantNoteRequest;
 use App\Http\Requests\StudentNoteRequest;
+use App\Models\Attendance;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentFlagRaiser;
@@ -70,6 +71,16 @@ class NoteController extends Controller
                 $data['created_by'] = auth()->user()->id;
                 $studentNoteDocument = StudentNotesDocument::create($data);
             endif;
+
+            /* Attendance Outstanding call from personal Tutor Dashboard */
+            $attendance_ids = (isset($request->attendance_ids) && !empty($request->attendance_ids) ? explode(',', $request->attendance_ids) : []);
+            if(!empty($attendance_ids)):
+                Attendance::whereIn('id', $attendance_ids)->where('student_id', $student_id)->update([
+                    'tracking_status' => 1
+                ]);
+            endif;
+            /* Attendance Outstanding call from personal Tutor Dashboard */
+
             return response()->json(['message' => 'Student Note successfully created'], 200);
         else:
             return response()->json(['message' => 'Something went wrong. Please try later.'], 422);

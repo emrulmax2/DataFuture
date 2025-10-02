@@ -666,6 +666,7 @@ class DashboardController extends Controller
     public function getStudentAttenTrackingHtml(Request $request){
         $user_id = auth()->user()->id;
         $theDate = (isset($request->theDate) && !empty($request->theDate) ? date('Y-m-d', strtotime($request->theDate)) : Carbon::yesterday()->format('Y-m-d'));
+        $trackingStatus = (isset($request->trackingStatus) && $request->trackingStatus > 0 ? $request->trackingStatus : 0);
         $res = [];
         
         $tutor_plans = PlansDateList::where('date', $theDate)->whereHas('plan', function($q) use($user_id){
@@ -679,12 +680,15 @@ class DashboardController extends Controller
         $assigns = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
             $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');
         })->pluck('student_id')->unique()->toArray();
-
+        $term_declarations = Plan::whereIn('id', $plan_ids)->orderBy('term_declaration_id', 'DESC')->get()->pluck('term_declaration_id')->unique()->toArray();
+        $term_declaration_id = (isset($term_declarations[0]) && $term_declarations[0] > 0 ? $term_declarations[0] : 0);
+        
         if(!empty($assigns)):
             foreach($assigns as $student_id):
                 $student = Student::find($student_id);
-                $student_modules = $this->getStudentModules($student->id, $plan_ids, $theDate);
+                $student_modules = $this->getStudentModules($student->id, $plan_ids, $theDate, $trackingStatus);
                 if($student_modules):
+                    $attendance_ids = array_column($student_modules, 'attendance_id');
                     $res[$student_id] = [
                         'student_id' => $student->id,
                         'registration_no' => $student->registration_no,
@@ -693,7 +697,8 @@ class DashboardController extends Controller
                         'name' => $student->full_name,
                         'course' => (isset($student->activeCR->creation->course->name) && !empty($student->activeCR->creation->course->name) ? $student->activeCR->creation->course->name : ''),
                         'attendance' => $this->getStudentAttendanceRate($student->id, $plan_ids),
-                        'modules' => $this->getStudentModules($student->id, $plan_ids, $theDate)
+                        'modules' => $this->getStudentModules($student->id, $plan_ids, $theDate, $trackingStatus),
+                        'attendance_ids' => !empty($attendance_ids) ? implode(',', $attendance_ids) : ''
                     ];
                 endif;
             endforeach;
@@ -737,7 +742,7 @@ class DashboardController extends Controller
                     $html .= '</td>';
                     $html .= '<td class="table-report__action w-56">';
                         $html .= '<div class="flex justify-center items-center">';
-                            $html .= '<a class="addNoteBtn flex items-center mr-3" data-tw-toggle="modal" data-tw-target="#addNoteModal" href="javascript:void(0);" data-student="'.$row['student_id'].'">';
+                            $html .= '<a class="addNoteBtn flex items-center mr-3" data-tw-toggle="modal" data-tw-target="#addNoteModal" href="javascript:void(0);" data-attendanceids="'.$row['attendance_ids'].'" data-student="'.$row['student_id'].'">';
                                 $html .= '<i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note';
                             $html .= '</a>';
                             $html .= '<a class="addSmsBtn flex items-center text-danger" href="javascript:void(0);" data-student="'.$row['student_id'].'" data-tw-toggle="modal" data-tw-target="#smsSMSModal">';
@@ -769,13 +774,14 @@ class DashboardController extends Controller
         return (isset($query->percentage_withexcuse) && $query->percentage_withexcuse > 0 ? $query->percentage_withexcuse : 0);
     }
 
-    public function getStudentModules($student_id, $plan_ids, $theDate){
+    public function getStudentModules($student_id, $plan_ids, $theDate, $trackingStatus = 0){
         $student_plans = Assign::where('student_id', $student_id)->whereIn('plan_id', $plan_ids)->pluck('plan_id')->unique()->toArray();
         $res = [];
         $absentCount = 0;
         if(!empty($student_plans)):
             foreach($student_plans as $plan_id):
-                $attendance = Attendance::where('student_id', $student_id)->where('attendance_date', $theDate)->where('plan_id', $plan_id)->get()->first();
+                $attendance = Attendance::where('student_id', $student_id)->where('attendance_date', $theDate)
+                                ->where('tracking_status', $trackingStatus)->where('plan_id', $plan_id)->get()->first();
                 if(isset($attendance->id) && $attendance->id > 0):
                     $plan = Plan::find($plan_id);
                     $res[$plan_id] = [
@@ -784,7 +790,8 @@ class DashboardController extends Controller
                         'type' => $plan->class_type,
                         'start' => (!empty($plan->start_time) ? date('H:i', strtotime($plan->start_time)) : ''),
                         'end' => (!empty($plan->end_time) ? date('H:i', strtotime($plan->end_time)) : ''),
-                        'status' => (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id != 4 ? 1 : 0)
+                        'status' => (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id != 4 ? 1 : 0),
+                        'attendance_id' => $attendance->id
                     ];
                     $absentCount = (isset($attendance->attendance_feed_status_id) && $attendance->attendance_feed_status_id == 4 ? 1 : 0);
                 endif;

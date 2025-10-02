@@ -229,6 +229,7 @@ use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\HR\Reports\OutstandingHolidayReportController;
 use App\Http\Controllers\InternalLinkController;
+use App\Http\Controllers\IssueTypeController;
 use App\Http\Controllers\LibraryLocationController;
 use App\Http\Controllers\LibraryManagement\AmazonBookInformationController;
 use App\Http\Controllers\LibraryManagement\LibraryBookController;
@@ -237,6 +238,10 @@ use App\Http\Controllers\NewsUpdates\NewsUpdateController;
 use App\Http\Controllers\PayPalCheckOutController;
 use App\Http\Controllers\PaySlipUploadSyncController;
 use App\Http\Controllers\Personal_Tutor\AttendancePercentageController;
+use App\Http\Controllers\ReportAnyItForEmployeeController;
+use App\Http\Controllers\ReportAnyItForStudentController;
+use App\Http\Controllers\ReportItAllController;
+use App\Http\Controllers\ReportItAllLogController;
 use App\Http\Controllers\Reports\Accounts\CollectionReportController;
 use App\Http\Controllers\Reports\Accounts\ConnectTransactionController;
 use App\Http\Controllers\Reports\Accounts\DueReportController;
@@ -708,6 +713,27 @@ Route::prefix('/students')->name('students.')->group(function() {
             Route::get('student-performance/{student}/front', 'frontEndIndex')->name('performance.frontend.index'); 
             //Route::get('student-performance/{student}/print', 'print')->name('student-performance.print');
         }); 
+
+
+        
+        Route::controller(ReportAnyItForStudentController::class)->group(function() {
+
+            Route::get('report-any-it-student', 'index')->name('report-any-it-issues'); 
+            Route::get('report-any-it-student/list', 'list')->name('report-any-it-issues.list');
+            Route::post('report-any-it-student/store', 'store')->name('report-any-it-issues.store');
+            Route::get('report-any-it-student/edit/{reportItAll}', 'edit')->name('report-any-it-issues.edit');
+            Route::post('report-any-it-student/update', 'update')->name('report-any-it-issues.update');
+            Route::delete('report-any-it-student/delete/{reportItAll}', 'destroy')->name('report-any-it-issues.destroy');
+            Route::post('report-any-it-student/restore/{reportItAll}', 'restore')->name('report-any-it-issues.restore');
+
+            
+            Route::post('report-any-it-student/upload', 'upload')->name('report-any-it-issues.upload');
+            
+            Route::post('report-any-it-student/remove-file-icon', 'removeFileIcon')->name('report-any-it-issues.remove.upload');
+        });
+
+
+
 
     });
     
@@ -2927,6 +2953,19 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/df-field-categories/restore', 'restore')->name('df.field.categories.restore');
     });
 
+    Route::controller(IssueTypeController::class)->group(function() {
+
+        Route::get('site-settings/issue-types', 'index')->name('issue.types');
+        Route::get('site-settings/issue-types/list', 'list')->name('issue.types.list');
+        Route::post('site-settings/issue-types/store', 'store')->name('issue.types.store');
+        Route::get('site-settings/issue-types/edit/{issueType}', 'edit')->name('issue.types.edit');
+        Route::post('site-settings/issue-types/update/{issueType}', 'update')->name('issue.types.update');
+        Route::delete('site-settings/issue-types/delete/{id}', 'destroy')->name('issue.types.destroy');
+        Route::post('site-settings/issue-types/restore', 'restore')->name('issue.types.restore');
+
+    });
+    
+
     Route::controller(DatafutureFieldController::class)->group(function() {
         Route::get('site-settings/df-fields', 'index')->name('df.fields'); 
         Route::get('site-settings/df-fields/list', 'list')->name('df.fields.list'); 
@@ -3933,6 +3972,47 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/student-due-report/list', 'list')->name('report.student.due.list'); 
         Route::post('reports/student-due-report/download', 'excelDownload')->name('report.student.due.xl.download'); 
     });
+
+    Route::controller(ReportAnyItForEmployeeController::class)->group(function() {
+
+        Route::get('report-any-it-employee', 'index')->name('report.any.it.employee'); 
+        Route::get('report-any-it-employee/list', 'list')->name('report.any.it.employee.list');
+
+
+    });
+
+    Route::controller(ReportItAllController::class)->group(function() {
+
+        Route::get('report-it-all', 'index')->name('report.it.all'); 
+        Route::get('report-it-all/list', 'list')->name('report.it.all.list');
+        Route::post('report-it-all/store', 'store')->name('report.it.all.store');
+        Route::post('report-it-all/upload', 'upload')->name('report.it.all.upload');
+        Route::get('report-it-all/edit/{reportItAll}', 'edit')->name('report.it.all.edit');
+        Route::get('report-it-all/show/{reportItAll}', 'show')->name('report.it.all.show');
+
+        Route::post('report-it-all/update/{reportItAll}', 'update')->name('report.it.all.update');
+        Route::delete('report-it-all/delete/{reportItAll}', 'destroy')->name('report.it.all.destroy');
+        Route::post('report-it-all/restore/{id}', 'restore')->name('report.it.all.restore');
+
+        Route::post('report-it-all/remove-file-icon', 'removeFileIcon')->name('report.it.all.remove.upload');
+
+        Route::post('report-it-all/close/{reportItAll}', 'close')->name('report.it.all.close');
+        Route::post('report-it-all/reopen/{reportItAll}', 'reopen')->name('report.it.all.reopen');
+
+    });
+
+    Route::controller(ReportItAllLogController::class)->group(function() {
+        Route::get('report-it-all-log', 'index')->name('report.it.all.log'); 
+        Route::get('report-it-all-log/list', 'list')->name('report.it.all.log.list');
+        Route::post('report-it-all-log/store', 'store')->name('report.it.all.log.store');
+        Route::get('report-it-all-log/edit/{reportItAllLog}', 'edit')->name('report.it.all.log.edit');
+        Route::post('report-it-all-log/update/{reportItAllLog}', 'update')->name('report.it.all.log.update');
+        Route::delete('report-it-all-log/delete/{reportItAllLog}', 'destroy')->name('report.it.all.log.destroy');
+        
+        Route::post('report-it-all-log/force-delete/{id}', 'forceDelete')->name('report.it.all.log.force.delete');
+        Route::post('report-it-all-log/restore/{id}', 'restore')->name('report.it.all.log.restore');
+    });
+
     
 });
 
@@ -3960,3 +4040,7 @@ Route::controller(StudentVisitController::class)->group(function() {
     Route::get('student-visits/modules/{term}/{student}', 'showModulesByTerm')->name('student.visits.modules');
 
 });
+
+
+
+

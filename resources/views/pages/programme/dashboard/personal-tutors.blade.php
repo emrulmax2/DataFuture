@@ -129,7 +129,7 @@
                                             endif;
                                         @endphp
                                     </td>
-                                    <td class="text-left"></td>
+                                    <td class="text-left">{{ $tut->outstanding_calls}}</td>
                                     <td class="text-center">
                                         <button type="button" data-plan="0" data-tutor="{{ $tut->id }}" data-term="{{ $termDeclaration->id }}" {{ $tut->undecidedUploads > 0 ? ' data-tw-toggle=modal data-tw-target=#viewElearnincTrackingModal ' : '' }} class="{{ $tut->undecidedUploads > 0 ? 'showUndeciededModulesBtn' : '' }} rounded-full text-lg bg-success text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">
                                             {{ $tut->undecidedUploads }}
