@@ -362,6 +362,15 @@
                             <label class="form-check-label ml-4" for="permission_dashboard_17">Expired Documents</label>
                         </div>
                     </div>
+
+
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['dashboard']['report_it_all']) && $priv['dashboard']['report_it_all'] == 1 ? 'checked' : '') }} id="permission_dashboard_77" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][report_it_all]">
+                            <label class="form-check-label ml-4" for="permission_dashboard_77">Report It All</label>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

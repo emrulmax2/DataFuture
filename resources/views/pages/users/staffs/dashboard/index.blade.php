@@ -116,10 +116,11 @@
                                     <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/expired_document_2.png') }}">
                                 </a>
                                 @endif
-
+                                @if(isset(auth()->user()->priv()['report_it_all']) && auth()->user()->priv()['report_it_all'] == 1)
                                 <a href="{{ route('report.any.it.employee') }}" class="block relative col-span-6 2xl:col-span-4 mb-3">
                                     <img class="block w-full h-auto shadow-md zoom-in rounded" src="{{ asset('build/assets/images/dash_icons/report-any-it.png') }}">
                                 </a>
+                                @endif
                             </div>
                         </div>
                         @endif
@@ -231,17 +232,20 @@
                                     </div>
                                 </div>
                             @endif
-                            @if(isset($reportItAll) || $reportItAll->count()>0)
-                                @if(!$work_history_lock)
-                                <div class="col-span-12 border-t pt-5 mt-3">
-                                    <div class="grid grid-cols-12 gap-5">
-                                        <a href="{{ route('report.it.all') }}" target="__blank" class="block relative col-span-6 2xl:col-span-4 mb-3 active">
-                                            <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">REPORT IT FOR ALL</h6>
-                                            <img class="block w-full h-auto shadow-md zoom-in rounded" src="http://localhost:8000/build/assets/images/blan_logo.png" alt="New Student">
-                                            <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $reportItAll->count() }}</span>
-                                        </a>
+                            @if(isset(auth()->user()->priv()['report_it_all']) && auth()->user()->priv()['report_it_all'] == 1)
+                                @if(isset($reportItAll) && $reportItAll->count()>0)
+                                    @if(!$work_history_lock)
+                                    
+                                    <div class="col-span-12 border-t pt-5 mt-3">
+                                        <div class="grid grid-cols-12 gap-5">
+                                            <a href="{{ route('report.it.all') }}" target="__blank" class="block relative col-span-6 2xl:col-span-4 mb-3 active">
+                                                <h6 class="absolute text-sm w-full text-center mt-3 uppercase text-white font-medium z-10 px-2">REPORT IT FOR ALL</h6>
+                                                <img class="block w-full h-auto shadow-md zoom-in rounded" src="http://localhost:8000/build/assets/images/blan_logo.png" alt="New Student">
+                                                <span style="margin-top: -38px;" class="absolute bg-warning rounded-full l-0 r-0 mr-auto ml-auto w-7 h-7 flex items-center justify-center text-sm font-medium text-white">{{ $reportItAll->count() }}</span>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
+                                    @endif
                                 @endif
                             @endif
                         </div>
