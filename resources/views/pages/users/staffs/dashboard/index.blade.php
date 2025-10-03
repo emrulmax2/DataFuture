@@ -233,8 +233,7 @@
                                 </div>
                             @endif
 
-                            @if(isset(auth()->user()->priv()['report_it_all']) && auth()->user()->priv()['report_it_all'] == 1)
-
+                            
                                 @if(isset($reportItAll) && $reportItAll->count()>0)
 
                                     @if(!$work_history_lock)
@@ -250,10 +249,9 @@
                                     </div>
 
                                     @endif
-                                    
+
                                 @endif
 
-                            @endif
                         </div>
                     </div>
                 </div>
