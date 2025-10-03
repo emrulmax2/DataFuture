@@ -85,6 +85,12 @@ class DashboardController extends Controller
         $followedNoteId = $myFollowups->pluck('student_note_id')->unique()->toArray();
         $myUnreadNoteCount = (!empty($followedNoteId) ? StudentNoteFollowupCommentRead::whereIn('student_note_id', $followedNoteId)->where('user_id', auth()->user()->id)->where('read', '!=', 1)->get()->count() : 0);
         
+        $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
+        
+        if(in_array(22, $assignedTaskIds)){
+            $reportItAlls = ReportItAll::where('status','Pending')->get();
+        }
+
         return view('pages.users.staffs.dashboard.index', [
             'title' => 'Applicant Dashboard - London Churchill College',
             'breadcrumbs' => [],
@@ -95,7 +101,7 @@ class DashboardController extends Controller
                             })->get()->count(),
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
-            'reportItAll' => ReportItAll::where('status','Pending')->get(),
+            'reportItAll' => isset($reportItAlls) ? $reportItAlls : $reportItAll = collect(),
             'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
             'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
             'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
