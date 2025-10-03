@@ -232,10 +232,12 @@
                                     </div>
                                 </div>
                             @endif
-                            @if(isset(auth()->user()->priv()['report_it_all']) && auth()->user()->priv()['report_it_all'] == 1)
+
+                            
                                 @if(isset($reportItAll) && $reportItAll->count()>0)
+
                                     @if(!$work_history_lock)
-                                    
+
                                     <div class="col-span-12 border-t pt-5 mt-3">
                                         <div class="grid grid-cols-12 gap-5">
                                             <a href="{{ route('report.it.all') }}" target="__blank" class="block relative col-span-6 2xl:col-span-4 mb-3 active">
@@ -245,9 +247,11 @@
                                             </a>
                                         </div>
                                     </div>
+
                                     @endif
+
                                 @endif
-                            @endif
+
                         </div>
                     </div>
                 </div>
