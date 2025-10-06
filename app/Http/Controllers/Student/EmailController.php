@@ -69,7 +69,7 @@ class EmailController extends Controller
 
             if($request->hasFile('documents')):
                 $documents = $request->file('documents');
-                $docCounter = 1;
+                $docCounter = 0;
                 $attachmentInfo = [];
                 foreach($documents as $document):
                     $documentName = time().'_'.$document->getClientOriginalName();
