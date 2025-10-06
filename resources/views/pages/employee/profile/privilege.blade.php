@@ -447,7 +447,7 @@
                     </div> --}}
                 </div>
             </div>
-        </div>login_as_applicant
+        </div>
         <!-- Live Student Portal Privileges -->
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
@@ -470,6 +470,12 @@
                         <div class="form-check form-switch">
                             <input {{ (isset($priv['applicant_live_portal']['create_an_applicant']) && $priv['applicant_live_portal']['create_an_applicant'] == 1 ? 'checked' : '') }} id="permission_create_applicant_portal_2" class="form-check-input" type="checkbox" value="1" name="permission[applicant_live_portal][create_an_applicant]">
                             <label class="form-check-label ml-4" for="permission_create_applicant_portal_2">Create Applicant Account</label>
+                        </div>
+                    </div>
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <input {{ (isset($priv['applicant_live_portal']['e_signature_request']) && $priv['applicant_live_portal']['e_signature_request'] == 1 ? 'checked' : '') }} id="permission_applicant_esign_1" class="form-check-input" type="checkbox" value="1" name="permission[applicant_live_portal][e_signature_request]">
+                            <label class="form-check-label ml-4" for="permission_applicant_esign_1">E-Signature Request</label>
                         </div>
                     </div>
                 </div>

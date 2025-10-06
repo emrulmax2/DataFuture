@@ -89,7 +89,9 @@ use App\Jobs\ProcessStudentInterview;
 use App\Jobs\ProcessStudentEmail;
 use App\Mail\ResetPasswordLink;
 use App\Models\AcademicYear;
+use App\Models\AdminESignature;
 use App\Models\Agent;
+use App\Models\ApplicantESignatureEvent;
 use App\Models\ApplicantInterview;
 use App\Models\ApplicantLetter;
 use App\Models\ApplicantProofOfId;
@@ -125,6 +127,8 @@ use App\Traits\GenerateApplicantLetterTrait;
 use Barryvdh\Debugbar\Facades\Debugbar as FacadesDebugbar;
 use DebugBar\DebugBar;
 use Illuminate\Auth\Events\Registered;
+use App\Enums\EsignEventType;
+use App\Models\ApplicantESignature;
 
 class AdmissionController extends Controller
 {
@@ -493,7 +497,8 @@ class AdmissionController extends Controller
             'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
-            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
         ]);
     }
 
@@ -947,7 +952,8 @@ class AdmissionController extends Controller
             'feeelegibility' => FeeEligibility::all(),
 
             'processGroup' => $processGroup,
-            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
         ]);
     }
 
@@ -1459,7 +1465,8 @@ class AdmissionController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'docSettings' => DocumentSettings::where('admission', '1')->get(),
             'feeelegibility' => FeeEligibility::all(),
-            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
         ]);
     }
 
@@ -1571,7 +1578,8 @@ class AdmissionController extends Controller
             'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
-            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
         ]);
     }
 
@@ -1824,7 +1832,8 @@ class AdmissionController extends Controller
             'smsTemplates' => SmsTemplate::where('admission', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
-            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get()
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
         ]);
     }
 
@@ -3001,5 +3010,297 @@ class AdmissionController extends Controller
 
         return response()->json(['msg' => 'Student status successfully updated!'], 200);
     }
+
+
+    public function sendApplicantESignatureRequest(Request $request)
+    {
+        $applicantId = $request->input('applicant_id');
+        $applicant = Applicant::find($applicantId);
+
+        if (!$applicant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Applicant not found'
+            ], 404);
+        }
+
+        $contactEmail = $request->input('contact_email') ? true : false;
+        $contactPhone = $request->input('contact_phone') ? true : false;
+
+        if(!$contactEmail && !$contactPhone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please select at least one contact method (Email or SMS).'
+            ], 400);
+        }
+
+        $applicant_id = urlencode(base64_encode($applicant->id));
+        $commonSmtp = ComonSmtp::where('is_default', 1)->first();
+
+        ApplicantESignatureEvent::create([
+            'applicant_id' => $applicant->id,
+            'user_type' => 'user',
+            'event_type' => EsignEventType::SIGN_REQUEST_CREATED->value,
+            'event_description' => "London Churchill College ({$commonSmtp->smtp_user}) initialized a sign request with the document",
+            'ip_address' => $request->ip(),
+            'browser' => $this->getBrowser($request->header('User-Agent')),
+            'os' => $this->getOS($request->header('User-Agent')),
+        ]);
+
+        if($contactEmail) {
+            $esignEvent = ApplicantESignatureEvent::create([
+                'applicant_id' => $applicant->id,
+                'user_type' => 'applicant',
+                'event_type' => EsignEventType::EMAIL_SENT->value,
+                'event_description' => "{$applicant->users->email} was notified by email",
+                'extra_field' => ['opened' => false],
+            ]);
+            $configuration = [
+                'smtp_host'    => $commonSmtp->smtp_host,
+                'smtp_port'    => $commonSmtp->smtp_port,
+                'smtp_username'  => $commonSmtp->smtp_user,
+                'smtp_password'  => $commonSmtp->smtp_pass,
+                'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                'from_email'    => $commonSmtp->smtp_user,
+                'from_name'    => strtok($commonSmtp->smtp_user, '@'),
+            ];
+
+           $esignUrl = route('applicant.e.signature', ['hashedId' => $applicant_id.'e']);
+           $trackingUrl = route('tracking.email.open', $esignEvent->id);
+
+           
+           
+           $MAILHTML = '<p>Dear ' . $applicant->first_name . ' ' . $applicant->last_name . ',</p>';
+           $MAILHTML .= '<p>Please click the button below to complete your e-signature:</p>';
+           $MAILHTML .= '<img src="' . $trackingUrl . '" width="1" height="1" style="display:none;" alt="" />';
+           $MAILHTML .= '<table align="center" cellspacing="0" cellpadding="0" border="0">';
+                    $MAILHTML .= '<tr>';
+                        $MAILHTML .= '<td align="center" bgcolor="#1a73e8" style="border-radius:5px;">';
+                            $MAILHTML .= '<a href="' . $esignUrl . '" target="_blank" style="display:inline-block; padding:12px 24px; color:#ffffff; text-decoration:none; font-weight:bold; background-color: #164e63;">Complete E-Signature</a>';
+                        $MAILHTML .= '</td>';
+                    $MAILHTML .= '</tr>';
+                $MAILHTML .=  '</table>';
+            $MAILHTML .= '<p style="text-align:center;">If the button above does not work, please copy and paste the following link into your browser:</p>';
+            $MAILHTML .= '<p style="text-align:center;">' . $esignUrl . '</p>';
+
+            UserMailerJob::dispatch($configuration, [$applicant->users->email], new CommunicationSendMail('E-Signature Form', $MAILHTML, []));
+        }
+
+        if($contactPhone):
+            $messages = 'Dear '.$applicant->first_name.' '.$applicant->last_name.', Please visit the following link to submit your e-signature: '.route('applicant.e.signature', ['hashedId' => $applicant_id.'s']);
+            if(in_array(env('APP_ENV'), ['development', 'local'])) {
+                \Log::info('SMS OTP: '.$messages.' sent to '.$applicant->contact->mobile);
+                Debugbar::info('SMS OTP: '.$messages.' sent to '.$applicant->contact->mobile);
+            } else {
+                $active_api = Option::where('category', 'SMS')->where('name', 'active_api')->pluck('value')->first();
+                $textlocal_api = Option::where('category', 'SMS')->where('name', 'textlocal_api')->pluck('value')->first();
+                $smseagle_api = Option::where('category', 'SMS')->where('name', 'smseagle_api')->pluck('value')->first();
+
+                if($active_api == 1 && !empty($textlocal_api)):
+                    $response = Http::timeout(-1)->post('https://api.textlocal.in/send/', [
+                        'apikey' => $textlocal_api, 
+                        'message' => $messages, 
+                        'sender' => 'London Churchill College', 
+                        'numbers' => $applicant->contact->mobile
+                    ]);
+                elseif($active_api == 2 && !empty($smseagle_api)):
+                    $response = Http::withHeaders([
+                            'access-token' => $smseagle_api,
+                            'Content-Type' => 'application/json',
+                        ])->withoutVerifying()->withOptions([
+                            "verify" => false
+                        ])->post('https://79.171.153.104/api/v2/messages/sms', [
+                            'to' => [$applicant->contact],
+                            'text' => $messages
+                        ]);
+                endif;
+            }
+        endif;
+
+        AdminESignature::create([
+            'user_id'     => Auth::user()->id,
+            'applicant_id'=> $applicant->id,
+            'smtp_email'  => $commonSmtp->smtp_user,
+            'ip_address'  => $request->ip(),
+            'device'      => $request->header('User-Agent'),
+            'browser'     => $this->getBrowser($request->header('User-Agent')),
+            'os'          => $this->getOS($request->header('User-Agent')),
+            'latitude'    => $request->input('latitude'),
+            'longitude'   => $request->input('longitude'),
+            'via_email'   => $contactEmail ? 1 : 0,
+            'via_sms'     => $contactPhone ? 1 : 0,
+        ]);
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Offer acceptance form sent successfully.'
+        ], 200);
+    }
+
+    private function getBrowser($userAgent)
+    {
+        if (strpos($userAgent, 'Firefox') !== false) return 'Firefox';
+        if (strpos($userAgent, 'Chrome') !== false) return 'Chrome';
+        if (strpos($userAgent, 'Safari') !== false) return 'Safari';
+        if (strpos($userAgent, 'MSIE') !== false || strpos($userAgent, 'Trident') !== false) return 'Internet Explorer';
+        return 'Unknown';
+    }
+
+    private function getOS($userAgent)
+    {
+        if (preg_match('/linux/i', $userAgent)) return 'Linux';
+        if (preg_match('/macintosh|mac os x/i', $userAgent)) return 'Mac';
+        if (preg_match('/windows|win32/i', $userAgent)) return 'Windows';
+        return 'Unknown';
+    }
+
+    private function convertToDMS($decimal, $isLat = true)
+    {
+        $direction = $decimal >= 0 ? ($isLat ? 'N' : 'E') : ($isLat ? 'S' : 'W');
+
+        $decimal = abs($decimal);
+        $degrees = floor($decimal);
+        $minutesDecimal = ($decimal - $degrees) * 60;
+        $minutes = floor($minutesDecimal);
+        $seconds = ($minutesDecimal - $minutes) * 60;
+
+        return sprintf("%d° %d' %.5f\" %s", $degrees, $minutes, $seconds, $direction);
+    }
+
+    private function getMapScreenshot($latitude, $longitude, $applicant_id)
+    {
+        $apiKey = env('GOOGLE_MAP_API');
+
+        $url = "https://maps.googleapis.com/maps/api/staticmap?center={$latitude},{$longitude}&zoom=15&size=3400x150&scale=2&markers=color:red%7C{$latitude},{$longitude}&key={$apiKey}";
+
+        $filename = 'location_' . time() . '.png';
+        $folder = 'applicants/' . $applicant_id;
+
+        if (!Storage::disk('public')->exists($folder)) {
+            Storage::disk('public')->makeDirectory($folder, 0775, true);
+        }
+
+        $imageData = file_get_contents($url);
+        if ($imageData === false) {
+            return false;
+        }
+
+        Storage::disk('public')->put($folder . '/' . $filename, $imageData);
+
+        $pngPath = storage_path('app/public/' . $folder . '/' . $filename);
+        $jpgFilename = str_replace('.png', '.jpg', $filename);
+        $jpgPath = storage_path('app/public/' . $folder . '/' . $jpgFilename);
+
+        if (!file_exists($pngPath)) {
+            return false;
+        }
+
+        $image = imagecreatefrompng($pngPath);
+        if (!$image) {
+            return false;
+        }
+
+        $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
+        $white = imagecolorallocate($bg, 255, 255, 255);
+        imagefill($bg, 0, 0, $white);
+        imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+
+        $success = imagejpeg($bg, $jpgPath, 90);
+
+        imagedestroy($image);
+        imagedestroy($bg);
+
+        unlink($pngPath);
+
+        return $success ? $jpgPath : false;
+    }
+
+    public function showEsignature(Request $request, $applicantId)
+    {
+        $applicant = Applicant::findOrFail($applicantId);
+        $applicantEsign = ApplicantESignature::where('applicant_id', $applicant->id)->first();
+        $adminEsign = AdminESignature::with('user')->where('applicant_id', $applicant->id)->first();
+        $applicantEsignEvents = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->orderBy('id', 'asc')->get();
+        $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
+
+        $adminMap = null;
+        $applicantMap = null;
+        $adminDMS = null;
+        $applicantDMS = null;
+
+        if ($adminEsign && $adminEsign->latitude && $adminEsign->longitude) {
+            $adminMap = $this->getMapScreenshot($adminEsign->latitude, $adminEsign->longitude, $applicant->id);
+        }
+
+        if ($applicantEsign && $applicantEsign->latitude && $applicantEsign->longitude) {
+            $applicantMap = $this->getMapScreenshot($applicantEsign->latitude, $applicantEsign->longitude, $applicant->id);
+        }
+
+
+        if($adminEsign && $adminEsign->latitude && $adminEsign->longitude){
+           $adminDMS = $this->convertToDMS($adminEsign?->latitude, true) . ' ' . $this->convertToDMS($adminEsign?->longitude, false);
+        }
+
+        if($applicantEsign && $applicantEsign->latitude && $applicantEsign->longitude){
+           $applicantDMS = $this->convertToDMS($applicantEsign?->latitude, true) . ' ' . $this->convertToDMS($applicantEsign?->longitude, false);
+        }
+
+        ApplicantESignatureEvent::firstOrCreate(
+                [
+                    'applicant_id' => $applicant->id,
+                    'user_type' => 'user',
+                    'event_type' => EsignEventType::VIEWED->value,
+                ],
+                [
+                    'event_description' => Auth::user()->email . " viewed the document",
+                    'ip_address' => $request->ip(),
+                    'browser' => $this->getBrowser($request->header('User-Agent')),
+                    'os' => $this->getOS($request->header('User-Agent')),
+                ]
+            );
+
+        return view('pages.students.admission.e-signature-view', [
+            'title' => 'E-Signature - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Students E-Signature', 'href' => 'javascript:void(0);']
+            ],
+            'applicant' => $applicant,
+            'applicantEsign' => $applicantEsign,
+            'adminEsign' => $adminEsign,
+            'applicantEsignEvents' => $applicantEsignEvents,
+            'adminMap' => $adminMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($adminMap)) : asset('build/assets/images/report_icons/google-map.jpg'),
+            'applicantMap' => $applicantMap ? asset('storage/applicants/' . $applicant->id . '/' . basename($applicantMap)) : asset('build/assets/images/report_icons/google-map.jpg'),
+            'adminDMS' => $adminDMS,
+            'applicantDMS' => $applicantDMS,
+            'finalizedEvent' => $finalizedEvent,
+            'allStatuses' => Status::where('type', 'Applicant')->where('id', '>', 1)->get(),
+            'titles' => Title::all(),
+            'country' => Country::all(),
+            'ethnicity' => Ethnicity::all(),
+            'disability' => Disability::all(),
+            'relations' => KinsRelation::all(),
+            'bodies' => AwardingBody::all(),
+            'sexid' => SexIdentifier::all(),
+            'venues' => Venue::all(),
+            'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
+            'instance' => CourseCreationInstance::all()->sortByDesc('id'),
+            'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
+                if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
+                  return $item;
+                }
+            }),
+            'tempEmail' => ApplicantTemporaryEmail::where('applicant_id', $applicantId)->orderBy('id', 'desc')->first(),
+            'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
+            'feeelegibility' => FeeEligibility::all(),
+            'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
+            'esignature' => ApplicantESignature::latest('id')->first()
+        ]);
+    }
+
+
+ 
+
 
 }
