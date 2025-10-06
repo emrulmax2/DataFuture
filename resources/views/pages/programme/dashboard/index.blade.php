@@ -10,7 +10,7 @@
             <div class="intro-y block sm:flex items-center h-10">
                 <h2 class="text-lg font-medium truncate mr-5">
                     Daily Class Information 
-                    {{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? '['.$theTerm->attenTerm->name.']' : '') }}
+                    {{ (!empty($termNames) ? '['.implode(', ', $termNames).']' : '') }}
                 </h2>
                 <div class="flex items-center sm:ml-auto mt-3 sm:mt-0">
                     <button class="ml-2 btn box flex items-center text-slate-600 dark:text-slate-300">
@@ -47,9 +47,9 @@
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-3">
-                        <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
+                        <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 filterGroup">
                             <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
-                            <select class="form-control w-full pr-3 border-0" name="module_creation_id" id="planModuleCreationId" style="max-width: 230px;">
+                            <select class="form-control w-full border-0" name="module_creation_id" id="planModuleCreationId" style="max-width: 230px;">
                                 <option value="0">All Modules</option>
                                 @if(!empty($modules))
                                     @foreach($modules as $mds)
@@ -60,9 +60,9 @@
                         </div>
                     </div>
                     <div class="col-span-12 sm:col-span-2">
-                        <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2">
+                        <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 filterGroup">
                             <i data-lucide="sliders-horizontal" class="hidden sm:block w-4 h-4 mr-2"></i>
-                            <select class="form-control w-full pr-3 border-0" name="group_id" id="planGroupId" style="max-width: 230px;">
+                            <select class="form-control w-full border-0" name="group_id" id="planGroupId" style="max-width: 230px;">
                                 <option value="0">All Groups</option>
                                 @if(!empty($groups))
                                     @foreach($groups as $gr)
@@ -114,28 +114,48 @@
                 <div class="col-span-12 sm:col-span-6">
                     <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Tutors <span class="tutorCount">{{ isset($classTutor['count']) ? ' ('.$classTutor['count'].')' : ' (0)' }}</span></h2>
-                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
-                        <a href="{{ route('programme.dashboard.tutors', $theTerm->term_declaration_id) }}" class="ml-auto text-primary truncate">Show More</a>
-                        @endif
+                        {{--@if(isset($terms) && $terms->count() > 0)
+                            <div class="flex justify-between">
+                                @foreach($terms as $term)
+                                    <a href="{{ route('programme.dashboard.tutors', $term->id) }}" class="ml-auto text-primary truncate">Show More</a>
+                                @endforeach
+                            </div>
+                        @endif--}}
                     </div>
                     <div class="mt-5 tutorWrap relative">
                         <div class="theHolder">{!! $classTutor['html'] !!}</div>
-                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
-                        <a href="{{ route('programme.dashboard.tutors', $theTerm->term_declaration_id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                        @if(isset($terms) && $terms->count() > 0)
+                            <div class="flex justify-between gap-2">
+                                @foreach($terms as $term)
+                                    <a href="{{ route('programme.dashboard.tutors', $term->id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">
+                                        View More of <strong>{{ $term->name}}</strong>
+                                    </a>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-6">
                     <div class="intro-x flex items-center h-10">
                         <h2 class="text-lg font-medium truncate mr-5">Personal Tutors <span class="personalTutorCount">{{ isset($classPTutor['count']) ? ' ('.$classPTutor['count'].')' : ' (0)' }}</span></h2>
-                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
-                        <a href="{{ route('programme.dashboard.personal.tutors', $theTerm->term_declaration_id) }}" class="ml-auto text-primary truncate">Show More</a>
-                        @endif
+                        {{--@if(isset($terms) && $terms->count() > 0)
+                            <div class="flex justify-between">
+                                @foreach($terms as $term)
+                                    <a href="{{ route('programme.dashboard.personal.tutors', $term->id) }}" class="ml-auto text-primary truncate">Show More</a>
+                                @endforeach
+                            </div>
+                        @endif--}}
                     </div>
                     <div class="mt-5 personalTutorWrap relative">
                         <div class="theHolder">{!! $classPTutor['html'] !!}</div>
-                        @if(isset($theTerm->term_declaration_id) && $theTerm->term_declaration_id > 0)
-                        <a href="{{ route('programme.dashboard.personal.tutors', $theTerm->term_declaration_id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
+                        @if(isset($terms) && $terms->count() > 0)
+                            <div class="flex justify-between gap-2">
+                                @foreach($terms as $term)
+                                    <a href="{{ route('programme.dashboard.personal.tutors', $term->id) }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">
+                                        View More of <strong>{{ $term->name}}</strong>
+                                    </a>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -156,15 +176,24 @@
                                 <div class="box p-5">
                                     <div class="mt-3">
                                         <div class="h-[196px]"> 
-                                            <canvas data-rate="{{ $termAttendanceRates }}" id="attendanceRateChart"></canvas>
+                                            @php 
+                                                $rates = !empty($termAttendanceRates) ? array_column($termAttendanceRates, 'rate') : [];
+                                                $labels = !empty($termAttendanceRates) ? array_column($termAttendanceRates, 'name') : [];
+                                                $colors = !empty($termAttendanceRates) ? array_column($termAttendanceRates, 'color') : [];
+                                            @endphp
+                                            <canvas data-colors="{{ !empty($colors) ? implode('|', $colors) : 0 }}" data-rate="{{ !empty($rates) ? implode(',', $rates) : 0 }}" data-labels="{{ (!empty($labels) ? implode(', ', $labels) : 'Current Term')}}" id="attendanceRateChart"></canvas>
                                         </div>
                                     </div>
                                     <div class="w-52 sm:w-auto mx-auto mt-8">
-                                        <div class="flex items-center">
-                                            <div class="w-2 h-2 bg-primary rounded-full mr-3"></div>
-                                            <span class="truncate">{{ (isset($theTerm->attenTerm->name) && !empty($theTerm->attenTerm->name) ? $theTerm->attenTerm->name : 'Current Term')}}</span>
-                                            <span class="font-medium ml-auto">{{$termAttendanceRates}}%</span>
-                                        </div>
+                                        @if(!empty($termAttendanceRates))
+                                            @foreach($termAttendanceRates as $tar)
+                                                <div class="flex items-center">
+                                                    <div class="w-2 h-2 bg-primary rounded-full mr-3" style="background-color: {{ !empty($tar['color']) ? str_replace('.9', '1', $tar['color']) : 'rgba(22, 78, 99, .9)'}}"></div>
+                                                    <span class="truncate">{{ (isset($tar['name']) && !empty($tar['name']) ? $tar['name'] : 'Unknown Term')}}</span>
+                                                    <span class="font-medium ml-auto">{{(isset($tar['rate']) && !empty($tar['rate']) ? number_format($tar['rate'], 2) : '0')}}%</span>
+                                                </div>
+                                            @endforeach
+                                        @endif
                                     </div>
                                 </div>
                             </div>
