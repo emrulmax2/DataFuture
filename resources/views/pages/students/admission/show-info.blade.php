@@ -317,3 +317,110 @@
         <!--End Vue Component -->
     </div>
     <!-- END: Progress bar Modal -->
+
+<!-- BEGIN: Warning Modal Content -->
+<div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                    <div class="text-3xl mt-5 warningModalTitle"></div>
+                    <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                </div>
+                <div class="px-5 pb-8 text-center">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Warning Modal Content -->
+
+
+<!-- BEGIN: Offer Acceptance Modal -->
+<div id="sendOfferAcceptanceModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="#" id="sendOfferAcceptanceForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="font-medium text-base mr-auto">Send E-Signature Request</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;">
+                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Send Email</label>
+                        <div class="flex items-center">
+                            <div class="form-check form-switch">
+                                <input id="esign_contact_email" class="form-check-input" name="contact_email" value="1" type="checkbox">
+                                <label class="form-check-label ml-5" for="esign_contact_email">{{ $applicant->users->email ?? '' }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    @if($applicant->contact->mobile)
+                    <div class="mb-3">
+                        <label class="form-label">Send SMS</label>
+                        <div class="flex items-center">
+                            <div class="form-check form-switch">
+                                <input id="esign_contact_phone" class="form-check-input" name="contact_phone" value="1" type="checkbox">
+                                <label class="form-check-label ml-5" for="esign_contact_phone">
+                                    {{ $applicant->contact->mobile }}
+                                    @if($applicant->contact->mobile_verification == 1)
+                                        <span class="btn inline-flex btn-success px-2 ml-2 py-0 text-white rounded-0">Verified</span>
+                                    @else
+                                        <span class="btn inline-flex btn-danger px-2 py-0 ml-2 text-white rounded-0">Unverified</span>
+                                    @endif
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                    <button type="submit" id="sendOfferBtn" class="btn btn-primary w-auto">
+                        Send
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    <input type="hidden" name="applicant_id" value="{{ $applicant->id }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- END: Offer Acceptance Modal -->
+
+<!-- BEGIN: Location Permission Modal Content -->
+<div id="LocationPermissionModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body p-0">
+                <div class="p-5 text-center">
+                    <i data-lucide="map-pin" class="w-16 h-16 text-warning mx-auto mt-3"></i>
+                    <div class="text-2xl mt-5 warningModalTitle">Location Permission Required</div>
+                    <div class="text-slate-500 mt-2 warningModalDesc">
+                        We need your location to proceed. Please allow access.
+                    </div>
+                </div>
+                <div class="px-5 pb-8 text-center flex justify-center gap-4">
+                    <button type="button" id="denyLocationBtn" class="btn btn-outline-secondary w-24" data-tw-dismiss="modal">Deny</button>
+                    <button type="button" id="allowLocationBtn" class="btn btn-primary w-24">Allow</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END: Location Permission Modal Content -->

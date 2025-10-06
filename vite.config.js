@@ -410,7 +410,7 @@ export default defineConfig({
                 'resources/js/report-any-it-employee.js',
                 'resources/js/report-any-it-student.js',
                 'resources/js/report-it-show.js',
-                
+                'resources/js/admission-offer-acceptance.js',
 
 
             ],

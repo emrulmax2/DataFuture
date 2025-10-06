@@ -418,6 +418,27 @@ import Dropzone from "dropzone";
 
         sendOfferForm.addEventListener('submit', function(e){
             e.preventDefault();
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    submitOfferForm(position.coords.latitude, position.coords.longitude); 
+                },
+                function (error) {
+                    if (warningModal) {
+                        warningModal.show();
+                        warningModalEl.addEventListener("shown.tw.modal", function () {
+                            const title = warningModalEl.querySelector('.warningModalTitle');
+                            const desc = warningModalEl.querySelector('.warningModalDesc');
+                            if (title) title.innerHTML = "Location Required!";
+                            if (desc) desc.innerHTML = "Please enable location permission to continue.";
+                            if (warningCloser) warningCloser.setAttribute('data-action', 'NONE');
+                        });
+                    }
+                }
+            );
+        });
+
+        function submitOfferForm(latitude, longitude) {
             const sendOfferBtn = document.getElementById('sendOfferBtn');
             if(sendOfferBtn){
                 sendOfferBtn.setAttribute('disabled', 'disabled');
@@ -426,10 +447,12 @@ import Dropzone from "dropzone";
             }
 
             const formData = new FormData(sendOfferForm);
+            formData.append('latitude', latitude);
+            formData.append('longitude', longitude);
 
             axios({
                 method: "post",
-                url: route('applicant.e.signature.send.request'),
+                url: route('admission.send.e.signature.request'),
                 data: formData,
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
             }).then(response => {
@@ -476,7 +499,55 @@ import Dropzone from "dropzone";
                     });
                 }
             });
-        });
+        }
     }
+
+
+    $(document).on('click', '#downloadEsignBtn', function(e) {
+        e.preventDefault();
+
+        const btn = $(this);
+        const id = btn.data('id');
+        const spinner = btn.find('svg');
+
+        spinner.show();
+        btn.prop('disabled', true);
+
+        axios({
+            url: route('applicant.e.signature.download', id),
+            method: 'GET',
+            responseType: 'blob'
+        })
+        .then(response => {
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let fileName = 'esignature.pdf';
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="?([^"]+)"?/);
+                if (match) fileName = match[1];
+            }
+
+            link.setAttribute('download', fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(error => {
+            console.error('Error downloading PDF:', error);
+            alert('Failed to download the PDF. Please try again.');
+        })
+        .finally(() => {
+            spinner.hide();
+            btn.prop('disabled', false);
+        });
+    });
+
 
 })()

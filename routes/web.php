@@ -18,6 +18,7 @@ use App\Http\Controllers\Settings\CourseQualificationController;
 use App\Http\Controllers\Settings\SourceTutionFeeController;
 use App\Http\Controllers\Settings\AcademicYearController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\ApplicanESignatureController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\Agent\AgentBankDetailController;
 use App\Http\Controllers\Agent\AgentController;
@@ -1349,6 +1350,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('admission/get-evening-weekend-status', 'getEveningWeekendStatus')->name('admission.get.evening.weekend.status');
         Route::post('admission/reject-student', 'rejectStudent')->name('admission.student.reject');
+
+        Route::post('admission/send-e-signature-request', 'sendApplicantESignatureRequest')->name('admission.send.e.signature.request');
+
+        Route::get('admission/e-signature/{applicantId}', 'showEsignature')->name('admission.show.e.signature');
         
     });
 
@@ -4041,6 +4046,10 @@ Route::controller(StudentVisitController::class)->group(function() {
 
 });
 
-
-
-
+Route::controller(ApplicanESignatureController::class)->group(function() {
+    Route::get('applicant/e-signature/{hashedId}', 'index')->name('applicant.e.signature');
+    Route::post('applicant/e-signature/location/{hashedId}', 'location')->name('applicant.e.signature.location');
+    Route::post('applicant/e-signature/store/{hashedId}', 'store')->name('applicant.e.signature.store');
+    Route::get('applicant/e-signature/download/{id}', 'download')->name('applicant.e.signature.download');
+    Route::get('/email/open/{eventId}', 'trackingEmailOpen')->name('tracking.email.open');
+});  
