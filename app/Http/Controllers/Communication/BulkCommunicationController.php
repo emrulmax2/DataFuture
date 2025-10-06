@@ -298,7 +298,7 @@ class BulkCommunicationController extends Controller
 
                     if($request->hasFile('documents')):
                         $documents = $request->file('documents');
-                        $docCounter = 1;
+                        $docCounter = 0;
                         $attachmentInfo = [];
                         foreach($documents as $document):
                             $documentName = time().'_'.$document->getClientOriginalName();
@@ -316,7 +316,7 @@ class BulkCommunicationController extends Controller
                             $studentEmailDocument = StudentEmailsDocument::create($data);
 
                             if($studentEmailDocument):
-                                $attachmentInfo[$docCounter++] = [
+                                $attachmentInfo[$docCounter] = [
                                     "pathinfo" => $path,
                                     "nameinfo" => $document->getClientOriginalName(),
                                     "mimeinfo" => $document->getMimeType(),
@@ -427,7 +427,7 @@ class BulkCommunicationController extends Controller
 
                     $attachments[$docCounter]['name'] = $documentName;
                     $attachments[$docCounter]['doc_type'] = $document->getClientOriginalExtension();
-                    $attachmentInfo[$docCounter++] = [
+                    $attachmentInfo[$docCounter] = [
                         "pathinfo" => $path,
                         "nameinfo" => $document->getClientOriginalName(),
                         "mimeinfo" => $document->getMimeType(),
