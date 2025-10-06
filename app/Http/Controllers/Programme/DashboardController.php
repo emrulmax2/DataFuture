@@ -41,29 +41,34 @@ class DashboardController extends Controller
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $theTerm = Plan::with('attenTerm')->whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
-        $theTermId = (isset($theTerm->attenTerm->id) && $theTerm->attenTerm->id > 0 ? $theTerm->attenTerm->id : 0);
-        $usedCourses = Plan::where('term_declaration_id', $theTermId)->pluck('course_id')->unique()->toArray();
+        $plans = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get();
+        $courseIds = $plans->pluck('course_id')->unique()->toArray();
+        $termIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+        $terms = TermDeclaration::whereIn('id', $termIds)->get();
+
+        //$theTerm = Plan::with('attenTerm')->whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
+        //$theTermId = (isset($theTerm->attenTerm->id) && $theTerm->attenTerm->id > 0 ? $theTerm->attenTerm->id : 0);
 
         return view('pages.programme.dashboard.index', [
             'title' => 'Programme Dashboard - London Churchill College',
             'breadcrumbs' => [],
 
             'theDate' => date('d-m-Y', strtotime($theDate)),
-            'theTerm' => $theTerm,
-            'courses' => Course::whereIn('id', $usedCourses)->orderBy('name')->get(),
+            'terms' => $terms,
+            'termNames' => $terms->pluck('name')->unique()->toArray(),
+            'courses' => Course::whereIn('id', $courseIds)->orderBy('name')->get(),
             'classInformation' => $this->getClassInfoHtml($theDate),
             'classTutor' => $this->getClassTutorsHtml($theDate),
             'classPTutor' => $this->getClassPersonalTutorsHtml($theDate),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
-            'termAttendanceRates' => $this->getTermAttendanceRateFull($theTermId),
+            'termAttendanceRates' => $this->getTermAttendanceRateFull($termIds),
             'tutors' => User::with('employee')->whereHas('employee', function($q){
                 $q->where('status', 1);
             })->orderBy('name', 'ASC')->get(),
-            'modules' => Plan::where('term_declaration_id', $theTermId)->with(['creations' => function($query) {
+            'modules' => Plan::whereIn('term_declaration_id', $termIds)->with(['creations' => function($query) {
                                     $query->select('id', 'module_name');
                                 }])->get()->pluck('creations')->unique('id')->values()->sortBy(function($item, $key) { return $item->module_name;}),
-            'groups' => Plan::where('term_declaration_id', $theTermId)->with(['group' => function($query) {
+            'groups' => Plan::whereIn('term_declaration_id', $termIds)->with(['group' => function($query) {
                                     $query->select('id', 'name');
                                 }])->get()->pluck('group')->unique('id')->values()->sortBy(function($item, $key) { return $item->name;})
         ]);
@@ -302,33 +307,53 @@ class DashboardController extends Controller
     public function getClassTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $termDecs = Plan::whereIn('id', $classPlanIds);
-        if($course_id > 0):
-            $termDecs->where('course_id', $course_id);
-        endif;
-        $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-        $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
-        
-        $query = Plan::where('term_declaration_id', $termDecId);
-        if($course_id > 0):
-            $query->where('course_id', $course_id);
-        endif;
+
+        $query = Plan::whereIn('id', $classPlanIds);
+        if($course_id > 0): $query->where('course_id', $course_id); endif;
         if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
         if($groupId > 0): $query->where('group_id', $groupId); endif;
+        $plans = $query->get();
+
+        $termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+        $terms = TermDeclaration::whereIn('id', $termDecIds)->get();
         $classTutors = $query->pluck('tutor_id')->unique()->toArray();
+
+        // $termDecs = Plan::whereIn('id', $classPlanIds);
+        // if($course_id > 0):
+        //     $termDecs->where('course_id', $course_id);
+        // endif;
+        // $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
+        // $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
+        
+        // $query = Plan::where('term_declaration_id', $termDecId);
+        // if($course_id > 0):
+        //     $query->where('course_id', $course_id);
+        // endif;
+        // if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
+        // if($groupId > 0): $query->where('group_id', $groupId); endif;
+        // $classTutors = $query->pluck('tutor_id')->unique()->toArray();
         
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->pluck('module_creation_id')->toArray();
+                $tutorPlans = Plan::where('tutor_id', $tut->id)->whereIn('term_declaration_id', $termDecIds)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+                $moduleCreations = $tutorPlans->pluck('module_creation_id')->toArray();
+                $tutorTerms = $tutorPlans->pluck('term_declaration_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
                             $html .= '<img alt="'.(isset($tut->employee->full_name) ? $tut->employee->full_name : '').'" src="'.(isset($tut->employee->photo_url) ? $tut->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                         $html .= '</div>';
                         $html .= '<div class="ml-4 mr-auto">';
-                            $html .= '<a href="'.route('programme.dashboard.personal.tutors.details', [$termDecId, $tut->id]).'" class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</a>';
+                            $html .= '<div class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</div>';
+                            $html .= '<div class="text-xs  font-medium mt-1">';
+                                foreach($terms as $term):
+                                    if(!empty($tutorTerms) && in_array($term->id, $tutorTerms)):
+                                        $html .= '<a class="inline-flex items-center mr-4 text-slate-400 hover:text-success" href="'.route('programme.dashboard.tutors.details', [$term->id, $tut->id]).'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle text-success w-3 h-3 mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'.$term->name.'</a>';
+                                    endif;
+                                endforeach;
+                            $html .= '</div>';
                         $html .= '</div>';
                         $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
                     $html .= '</div>';
@@ -349,31 +374,51 @@ class DashboardController extends Controller
     public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $termDecs = Plan::whereIn('id', $classPlanIds);
-        if($course_id > 0):
-            $termDecs->where('course_id', $course_id);
-        endif;
-        $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-        $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
 
-        $query = Plan::where('term_declaration_id', $termDecId);
+        $query = Plan::whereIn('id', $classPlanIds);
         if($course_id > 0): $query->where('course_id', $course_id); endif;
         if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
         if($groupId > 0): $query->where('group_id', $groupId); endif;
+        $plans = $query->get();
+
+        $termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+        $terms = TermDeclaration::whereIn('id', $termDecIds)->get();
         $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
+
+        // $termDecs = Plan::whereIn('id', $classPlanIds);
+        // if($course_id > 0):
+        //     $termDecs->where('course_id', $course_id);
+        // endif;
+        // $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
+        // $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
+
+        // $query = Plan::where('term_declaration_id', $termDecId);
+        // if($course_id > 0): $query->where('course_id', $course_id); endif;
+        // if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
+        // if($groupId > 0): $query->where('group_id', $groupId); endif;
+        // $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
 
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $moduleCreations = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $termDecId)->where('class_type', 'Tutorial')->pluck('module_creation_id')->toArray();
+                $tutorPlans = Plan::where('personal_tutor_id', $tut->id)->whereIn('term_declaration_id', $termDecIds)->where('class_type', 'Tutorial')->get();
+                $moduleCreations = $tutorPlans->pluck('module_creation_id')->toArray();
+                $tutorTerms = $tutorPlans->pluck('term_declaration_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
                     $html .= '<div class="box px-5 py-3 mb-3 flex items-center zoom-in">';
                         $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
                             $html .= '<img alt="'.(isset($tut->employee->full_name) ? $tut->employee->full_name : '').'" src="'.(isset($tut->employee->photo_url) ? $tut->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
                         $html .= '</div>';
                         $html .= '<div class="ml-4 mr-auto">';
-                            $html .= '<a href="'.route('programme.dashboard.personal.tutors.details', [$termDecId, $tut->id]).'" class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</a>';
+                            $html .= '<div class="font-medium uppercase">'.(isset($tut->employee->full_name) ? $tut->employee->full_name : 'Unknown Employee').'</div>';
+                            $html .= '<div class="text-xs  font-medium mt-1">';
+                                foreach($terms as $term):
+                                    if(!empty($tutorTerms) && in_array($term->id, $tutorTerms)):
+                                        $html .= '<a class="inline-flex items-center mr-4 text-slate-400 hover:text-success" href="'.route('programme.dashboard.personal.tutors.details', [$term->id, $tut->id]).'"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle text-success w-3 h-3 mr-1"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'.$term->name.'</a>';
+                                    endif;
+                                endforeach;
+                            $html .= '</div>';
                         $html .= '</div>';
                         $html .= '<div class="text-white rounded-full text-lg bg-warning text-white cursor-pointer font-medium w-10 h-10 inline-flex justify-center items-center">'.(!empty($moduleCreations) ? count($moduleCreations) : 0).'</div>';
                     $html .= '</div>';
@@ -875,52 +920,64 @@ class DashboardController extends Controller
         return response()->json(['message' => 'Class status updated to canceled.'], 200);
     }
 
-    public function getTermAttendanceRateFull($term_declaration_id){
-        $planDateLists = PlansDateList::whereHas('plan', function($q) use($term_declaration_id){
-            $q->where('term_declaration_id', $term_declaration_id);
-        })->get();
-        $plan_ids = $planDateLists->pluck('plan_id')->unique()->toArray();
-        $date_ids = $planDateLists->pluck('id')->unique()->toArray();
-        
-        $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
-        $query = DB::table('attendances as atn')
-                    ->select(
+    public function getTermAttendanceRateFull($term_declaration_ids){
+        $termRates = [];
+        $colors = ['rgba(22, 78, 99, .9)', 'rgba(13, 148, 136, .9)', 'rgba(6, 182, 212, .9)', 'rgba(217, 119, 6, .9)'];
+        $i = 0;
+        foreach($term_declaration_ids as $term_declaration_id):
+            $theTerm = TermDeclaration::find($term_declaration_id);
+            $planDateLists = PlansDateList::whereHas('plan', function($q) use($term_declaration_id){
+                $q->where('term_declaration_id', $term_declaration_id);
+            })->get();
+            $plan_ids = $planDateLists->pluck('plan_id')->unique()->toArray();
+            $date_ids = $planDateLists->pluck('id')->unique()->toArray();
+            
+            $student_ids = (!empty($plan_ids) ? Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray() : []);
+            $query = DB::table('attendances as atn')
+                        ->select(
 
-                        DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
-                    )
-                    ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
-                    ->leftJoin('students as std', 'atn.student_id', 'std.id')
-                    ->whereNull('atn.deleted_at')
-                    ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
-                    ->whereIn('atn.plans_date_list_id', $date_ids);
-        if(!empty($plan_ids)):
-            $query->whereIn('atn.plan_id', $plan_ids);
-        endif;
-        if(!empty($student_ids)):
-            $query->whereIn('atn.student_id', $student_ids);
-        endif;
-        $attendances = $query->get()->first();
-
-        if(isset($attendances) && !empty($attendances)):
-            $attendance = (isset($attendances->percentage_withexcuse) && $attendances->percentage_withexcuse > 0 ? $attendances->percentage_withexcuse : 0);
-            if($attendance):
-                return number_format($attendance, 2);
-            else:
-                return 0;
+                            DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
+                            DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
+                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
+                            DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                        )
+                        ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
+                        ->leftJoin('students as std', 'atn.student_id', 'std.id')
+                        ->whereNull('atn.deleted_at')
+                        ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
+                        ->whereIn('atn.plans_date_list_id', $date_ids);
+            if(!empty($plan_ids)):
+                $query->whereIn('atn.plan_id', $plan_ids);
             endif;
-        else:
-            return 0;
-        endif;
+            if(!empty($student_ids)):
+                $query->whereIn('atn.student_id', $student_ids);
+            endif;
+            $attendances = $query->get()->first();
+
+            if(isset($attendances) && !empty($attendances)):
+                $attendance = (isset($attendances->percentage_withexcuse) && $attendances->percentage_withexcuse > 0 ? $attendances->percentage_withexcuse : 0);
+                if($attendance):
+                    $termRates[$i]['rate'] = number_format($attendance, 2);
+                else:
+                    $termRates[$i]['rate'] = 0;
+                endif;
+            else:
+                $termRates[$i]['rate'] = 0;
+            endif;
+            $termRates[$i]['id'] = $theTerm->id;
+            $termRates[$i]['name'] = $theTerm->name;
+            $termRates[$i]['color'] = $colors[$i];
+            $i++;
+        endforeach;
+
+        return $termRates;
     }
 
     public function endClass(Request $request){

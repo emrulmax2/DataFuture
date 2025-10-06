@@ -23,6 +23,8 @@ import tippy, { roundArrow } from "tippy.js";
         },
     };
     var proxyTutorId = new TomSelect('#proxy_tutor_id', pgdTomOptions); 
+    var planModuleCreationId = new TomSelect('#planModuleCreationId', pgdTomOptions); 
+    var planGroupId = new TomSelect('#planGroupId', pgdTomOptions); 
 
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -188,27 +190,26 @@ import tippy, { roundArrow } from "tippy.js";
 
     /* Attendance Rate Chart Start*/
     if ($('#attendanceRateChart').length) {
-        let rates = $('#attendanceRateChart').attr('data-rate') * 1;
+        let datasets = [];
+        let rates = $('#attendanceRateChart').attr('data-rate');
+            rates = rates.split(',');
+        let labels = $('#attendanceRateChart').attr('data-labels');
+            labels = labels.split(',')
+        let colors = $('#attendanceRateChart').attr('data-colors');
+            colors = colors.split('|');
+        let hoverColors = colors.filter(item => item.includes('.9')).map(item => item.replaceAll('.9', '.3'));
+
         let outOf = (100 - rates);
         let ctx = $("#attendanceRateChart")[0].getContext("2d");
         let myDoughnutChart = new Chart(ctx, {
             type: "doughnut",
             data: {
-                labels: [
-                    "",
-                    "Term Atendance Rate",
-                ],
+                labels: labels,
                 datasets: [
                     {
-                        data: [outOf, rates],
-                        backgroundColor: [
-                            '#f1f5f9',
-                            colors.primary(0.9),
-                        ],
-                        hoverBackgroundColor: [
-                            '#f1f5f9',
-                            colors.primary(0.9),
-                        ],
+                        data: rates,
+                        backgroundColor: colors,
+                        hoverBackgroundColor: hoverColors,
                         borderWidth: 5,
                         borderColor: colors.white,
                     },

@@ -2615,3 +2615,16 @@ fieldset.modInstSet legend{
     background-color: #2563eb;
     background-size: 80%;
 }
+
+.filterGroup .ts-input{
+    padding-left: 0;
+    border-radius: 0;
+    border: none;
+}
+.filterGroup .plugin-dropdown_input .ts-input.focus{
+    border: none;
+}
+.filterGroup .ts-dropdown-content{
+    text-align: left;
+    font-weight: normal;
+}
