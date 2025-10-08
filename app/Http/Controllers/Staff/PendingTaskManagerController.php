@@ -1451,7 +1451,7 @@ class PendingTaskManagerController extends Controller
             foreach($registration_nos as $reg):
                 $reg = trim($reg);
                 if(!empty($reg)):
-                    $student = Student::where('registration_no', $reg)->get()->first();
+                    $student = Student::where('registration_no', $reg)->orderBy('id', 'DESC')->get()->first();
                     if(isset($student->id) && $student->id > 0):
                         Student::where('id', $student->id)->update(['status_id' => $status_id]);
                         $data = [];
