@@ -473,6 +473,9 @@ class EmployeeController extends Controller
         $employee->save();
 
         if($employee->wasChanged() && !empty($changes)):
+            if(isset($employee->user_id) && $employee->user_id > 0):
+                User::where('id', $employee->user_id)->update(['active' => $status]);
+            endif;
             foreach($changes as $field => $value):
                 $data = [];
                 $data['employee_id'] = $employee->id;
