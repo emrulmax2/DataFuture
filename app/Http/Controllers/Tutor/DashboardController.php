@@ -319,7 +319,8 @@ class DashboardController extends Controller
                     ->leftJoin('venues as venue', 'plan.venue_id', 'venue.id')
                     ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
                     ->leftJoin('groups as group', 'plan.group_id', 'group.id')
-                    ->leftJoin('users as user', 'plan.tutor_id', 'user.id');
+                    ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
+                    ->whereNull('datelist.deleted_at');
 
         $Query->where('plan.tutor_id', $tutorId);
         
