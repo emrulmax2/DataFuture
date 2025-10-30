@@ -40,11 +40,16 @@ class DashboardController extends Controller
 
     public function index(){
         $theDate = Date('Y-m-d'); //'2023-11-24';
+        $termDeclarationIds = TermDeclaration::whereNotNull('start_date')->whereNotNull('end_date')
+                    ->whereDate('start_date', '<=', $theDate)->whereDate('end_date', '>=', $theDate)
+                    ->pluck('id');
+
         $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
-        $plans = Plan::whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get();
-        $courseIds = $plans->pluck('course_id')->unique()->toArray();
-        $termIds = $plans->pluck('term_declaration_id')->unique()->toArray();
-        $terms = TermDeclaration::whereIn('id', $termIds)->get();
+        $plans = Plan::whereIn('id', $classPlanIds)->whereIn('term_declaration_id', $termDeclarationIds)->orderBy('term_declaration_id', 'DESC')->get();
+        $courseIds = Plan::whereIn('term_declaration_id', $termDeclarationIds)->pluck('course_id')->unique()->toArray();
+        //$termIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+
+        $terms = TermDeclaration::whereIn('id', $termDeclarationIds)->get();
 
         //$theTerm = Plan::with('attenTerm')->whereIn('id', $classPlanIds)->orderBy('term_declaration_id', 'DESC')->get()->first();
         //$theTermId = (isset($theTerm->attenTerm->id) && $theTerm->attenTerm->id > 0 ? $theTerm->attenTerm->id : 0);
@@ -61,14 +66,14 @@ class DashboardController extends Controller
             'classTutor' => $this->getClassTutorsHtml($theDate),
             'classPTutor' => $this->getClassPersonalTutorsHtml($theDate),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
-            'termAttendanceRates' => $this->getTermAttendanceRateFull($termIds),
+            'termAttendanceRates' => $this->getTermAttendanceRateFull($termDeclarationIds),
             'tutors' => User::with('employee')->whereHas('employee', function($q){
                 $q->where('status', 1);
             })->orderBy('name', 'ASC')->get(),
-            'modules' => Plan::whereIn('term_declaration_id', $termIds)->with(['creations' => function($query) {
+            'modules' => Plan::whereIn('term_declaration_id', $termDeclarationIds)->with(['creations' => function($query) {
                                     $query->select('id', 'module_name');
                                 }])->get()->pluck('creations')->unique('id')->values()->sortBy(function($item, $key) { return $item->module_name;}),
-            'groups' => Plan::whereIn('term_declaration_id', $termIds)->with(['group' => function($query) {
+            'groups' => Plan::whereIn('term_declaration_id', $termDeclarationIds)->with(['group' => function($query) {
                                     $query->select('id', 'name');
                                 }])->get()->pluck('group')->unique('id')->values()->sortBy(function($item, $key) { return $item->name;})
         ]);
@@ -306,38 +311,27 @@ class DashboardController extends Controller
 
     public function getClassTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-        $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
+        $termDeclarationIds = TermDeclaration::whereNotNull('start_date')->whereNotNull('end_date')
+                    ->whereDate('start_date', '<=', $theDate)->whereDate('end_date', '>=', $theDate)
+                    ->pluck('id');
+        //$classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
 
-        $query = Plan::whereIn('id', $classPlanIds);
+        //$query = Plan::whereIn('id', $classPlanIds);
+        $query = Plan::whereIn('term_declaration_id', $termDeclarationIds);
         if($course_id > 0): $query->where('course_id', $course_id); endif;
         if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
         if($groupId > 0): $query->where('group_id', $groupId); endif;
         $plans = $query->get();
 
-        $termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
-        $terms = TermDeclaration::whereIn('id', $termDecIds)->get();
-        $classTutors = $query->pluck('tutor_id')->unique()->toArray();
-
-        // $termDecs = Plan::whereIn('id', $classPlanIds);
-        // if($course_id > 0):
-        //     $termDecs->where('course_id', $course_id);
-        // endif;
-        // $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-        // $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
-        
-        // $query = Plan::where('term_declaration_id', $termDecId);
-        // if($course_id > 0):
-        //     $query->where('course_id', $course_id);
-        // endif;
-        // if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
-        // if($groupId > 0): $query->where('group_id', $groupId); endif;
-        // $classTutors = $query->pluck('tutor_id')->unique()->toArray();
+        //$termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+        $terms = TermDeclaration::whereIn('id', $termDeclarationIds)->get();
+        $classTutors = $query->whereNotNull('tutor_id')->pluck('tutor_id')->unique()->toArray();
         
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $tutorPlans = Plan::where('tutor_id', $tut->id)->whereIn('term_declaration_id', $termDecIds)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
+                $tutorPlans = Plan::where('tutor_id', $tut->id)->whereIn('term_declaration_id', $termDeclarationIds)->whereNotIn('class_type', ['Tutorial', 'Seminar'])->get();
                 $moduleCreations = $tutorPlans->pluck('module_creation_id')->toArray();
                 $tutorTerms = $tutorPlans->pluck('term_declaration_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
@@ -373,36 +367,27 @@ class DashboardController extends Controller
 
     public function getClassPersonalTutorsHtml($theDate = null, $course_id = 0, $moduleCreationId = 0, $groupId = 0){
         $theDate = !empty($theDate) ? $theDate : date('Y-m-d');
-        $classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
+        $termDeclarationIds = TermDeclaration::whereNotNull('start_date')->whereNotNull('end_date')
+                    ->whereDate('start_date', '<=', $theDate)->whereDate('end_date', '>=', $theDate)
+                    ->pluck('id');
+        //$classPlanIds = PlansDateList::where('date', $theDate)->pluck('plan_id')->unique()->toArray();
 
-        $query = Plan::whereIn('id', $classPlanIds);
+        //$query = Plan::whereIn('id', $classPlanIds);
+        $query = Plan::whereIn('term_declaration_id', $termDeclarationIds);
         if($course_id > 0): $query->where('course_id', $course_id); endif;
         if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
         if($groupId > 0): $query->where('group_id', $groupId); endif;
         $plans = $query->get();
 
-        $termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
-        $terms = TermDeclaration::whereIn('id', $termDecIds)->get();
-        $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
-
-        // $termDecs = Plan::whereIn('id', $classPlanIds);
-        // if($course_id > 0):
-        //     $termDecs->where('course_id', $course_id);
-        // endif;
-        // $termDecs = $termDecs->orderBy('term_declaration_id', 'DESC')->get()->first();
-        // $termDecId = (isset($termDecs->term_declaration_id) && $termDecs->term_declaration_id > 0 ? $termDecs->term_declaration_id : 0);
-
-        // $query = Plan::where('term_declaration_id', $termDecId);
-        // if($course_id > 0): $query->where('course_id', $course_id); endif;
-        // if($moduleCreationId > 0): $query->where('module_creation_id', $moduleCreationId); endif;
-        // if($groupId > 0): $query->where('group_id', $groupId); endif;
-        // $classTutors = $query->pluck('personal_tutor_id')->unique()->toArray();
-
+        //$termDecIds = $plans->pluck('term_declaration_id')->unique()->toArray();
+        $terms = TermDeclaration::whereIn('id', $termDeclarationIds)->get();
+        $classTutors = $query->whereNotNull('personal_tutor_id')->pluck('personal_tutor_id')->unique()->toArray();
+        
         $html = '';
         $uttors = User::whereIn('id', $classTutors)->skip(0)->take(5)->get();
         if(!empty($uttors) && $uttors->count() > 0):
             foreach($uttors as $tut):
-                $tutorPlans = Plan::where('personal_tutor_id', $tut->id)->whereIn('term_declaration_id', $termDecIds)->where('class_type', 'Tutorial')->get();
+                $tutorPlans = Plan::where('personal_tutor_id', $tut->id)->whereIn('term_declaration_id', $termDeclarationIds)->where('class_type', 'Tutorial')->get();
                 $moduleCreations = $tutorPlans->pluck('module_creation_id')->toArray();
                 $tutorTerms = $tutorPlans->pluck('term_declaration_id')->unique()->toArray();
                 $html .= '<div class="intro-x">';
