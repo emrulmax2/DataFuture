@@ -229,10 +229,11 @@ var requisitionTransListTable = (function () {
         document.querySelector('#markCompBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#markCompBtn svg").style.cssText ="display: inline-block;";
 
+        let is_force_complete = $theForm.find('#is_force_complete').prop('checked') ? true : false
         var transactionLength = $theTable.find('.transaction_row').length;
         var total_balance = $theForm.find('[name="total_balance"]').val();
         var total_transactions = calculationTransanctionAmount();
-        if(transactionLength == 0){
+        if(transactionLength == 0 && !is_force_complete){
             $('#markRequisitionForm .modal-content .transAlert').remove();
             $('#markRequisitionForm .modal-content').prepend('<div class="transAlert alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Please select some transactions first.</div>');
             submission_status = false;
@@ -248,7 +249,7 @@ var requisitionTransListTable = (function () {
 
             document.querySelector('#markCompBtn').removeAttribute('disabled');
             document.querySelector("#markCompBtn svg").style.cssText = "display: none;";
-        }else if(!submission_status && (total_transactions > total_balance || total_transactions < total_balance)){
+        }else if(!is_force_complete && (!submission_status && (total_transactions > total_balance || total_transactions < total_balance))){
             if(total_transactions > total_balance){
                 $('#markRequisitionForm .modal-content .transAlert').remove();
                 $('#markRequisitionForm .modal-content').prepend('<div class="transAlert alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Total transaction amount grater than requisition amount. Do you still want to continue? Then click the Save Button again.</div>')

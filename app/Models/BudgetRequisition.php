@@ -34,6 +34,9 @@ class BudgetRequisition extends Model
         'first_approver',
         'final_approver',
         'note',
+        'is_force_complete',
+        'force_completed_by',
+        'force_completed_at',
 
         'active',
         'created_by',
@@ -131,5 +134,10 @@ class BudgetRequisition extends Model
 
     public function history(){
         return $this->hasMany(BudgetRequisitionHistory::class, 'budget_requisition_id', 'id')->where('approver', '>', 0)->orderBy('id', 'ASC');
+    }
+
+
+    public function forceCompletedBy(){
+        return $this->belongsTo(User::class, 'force_completed_by');
     }
 }
