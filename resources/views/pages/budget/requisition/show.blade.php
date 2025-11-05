@@ -234,6 +234,28 @@
             </div>
         </div>
 
+        @if($requisition->active == 4 && $requisition->is_force_complete == 1)
+        <div class="pt-20 grid grid-cols-12 gap-4 gap-y-2">
+            <div class="col-span-12"><h4 class="font-medium">Forced:</h4></div>
+            <div class="col-span-12">
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="whitespace-nowrap w-56">Forced By</th>
+                            <th class="whitespace-nowrap w-44">Forced At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ (isset($requisition->forceCompletedBy->employee->full_name) ? $requisition->forceCompletedBy->employee->full_name : $requisition->forceCompletedBy->name) }}</td>
+                            <td>{{ (isset($requisition->force_completed_at) && !empty($requisition->force_completed_at) ? date('jS F, Y \a\t H:i', strtotime($requisition->force_completed_at)) : '') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
         @if($requisition->active == 4 && (isset($requisition->transactions) && $requisition->transactions->count() > 0))
         <div class="pt-20 grid grid-cols-12 gap-4 gap-y-2">
             <div class="col-span-12"><h4 class="font-medium">Transactions:</h4></div>
@@ -322,6 +344,11 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
+                            <label class="form-check-label mr-3 ml-0" for="is_default">Force Complete?</label>
+                            <input id="is_force_complete" class="form-check-input m-0" name="is_force_complete" value="1" type="checkbox">
+                        </div>
+
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="markCompBtn" class="btn btn-primary w-auto">     
                             Mark as Completed                      

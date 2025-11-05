@@ -594,17 +594,26 @@ class BudgetManagementController extends Controller
     public function markAsCompleted(Request $request){
         $budget_requisition_id = $request->budget_requisition_id;
         $transactions = (isset($request->trans) && !empty($request->trans) ? $request->trans : []);
+        $is_force_complete = (isset($request->is_force_complete) && $request->is_force_complete == 1 ? 1 : 0);
 
-        if(!empty($transactions)):
-            foreach($transactions as $transaction_id):
-                BudgetRequisitionTransaction::create([
-                    'budget_requisition_id' => $budget_requisition_id,
-                    'acc_transaction_id' => $transaction_id,
-                    'created_by' => auth()->user()->id
-                ]);
-            endforeach;
+        if(!empty($transactions) || $is_force_complete):
+            if(!empty($transactions)):
+                foreach($transactions as $transaction_id):
+                    BudgetRequisitionTransaction::create([
+                        'budget_requisition_id' => $budget_requisition_id,
+                        'acc_transaction_id' => $transaction_id,
+                        'created_by' => auth()->user()->id
+                    ]);
+                endforeach;
+            endif;
 
-            BudgetRequisition::where('id', $budget_requisition_id)->update(['active' => 4, 'updated_by' => auth()->user()->id]);
+            BudgetRequisition::where('id', $budget_requisition_id)->update([
+                'active' => 4, 
+                'is_force_complete' => $is_force_complete, 
+                'updated_by' => auth()->user()->id,
+                'force_completed_by' => $is_force_complete ? auth()->user()->id : null,
+                'force_completed_at' => $is_force_complete ? date('Y-m-d H:i:s') : null
+            ]);
             return response()->json(['msg' => 'Status successfully updated.'], 200);
         else:
             return response()->json(['msg' => 'Something went wrong. Please try again later or contact with the administrator.'], 304);

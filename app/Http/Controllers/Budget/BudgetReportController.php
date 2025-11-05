@@ -89,6 +89,14 @@ class BudgetReportController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $paid = 0;
+                if($list->active == 4):
+                    if($list->is_force_complete):
+                        $paid = (isset($list->requisition_total) && $list->requisition_total > 0 ? $list->requisition_total : 0);
+                    else:
+                        $paid = (isset($list->transanctions_total) && $list->transanctions_total > 0 ? $list->transanctions_total : 0);
+                    endif;
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -97,7 +105,7 @@ class BudgetReportController extends Controller
                     'year' => (isset($list->year->title) && !empty($list->year->title) ? $list->year->title : ''),
                     'budget' => (isset($list->budget->names->name) && !empty($list->budget->names->name) ? $list->budget->names->name.(isset($list->budget->names->code) && !empty($list->budget->names->code) ? ' ('.$list->budget->names->code.')' : '') : ''),
                     'total' => (isset($list->items) && $list->items->count() > 0 ? '£'.number_format($list->items->sum('total'), 2) : '£0.00'),
-                    'paid' => ($list->active == 4 && isset($list->transanctions_total) && $list->transanctions_total > 0 ? '£'.number_format($list->transanctions_total, 2) : ''),
+                    'paid' => ($paid > 0 ? '£'.number_format($paid, 2) : ''),
                     'requisitioners' => (isset($list->requisitioners->employee->full_name) && !empty($list->requisitioners->employee->full_name) ? $list->requisitioners->employee->full_name : $list->requisitioners->name),
                     'vendor' => (isset($list->vendor->name) && !empty($list->vendor->name) ? $list->vendor->name : ''),
                     'venue' => (isset($list->venue->name) && !empty($list->venue->name) ? $list->venue->name : ''),
@@ -142,6 +150,10 @@ class BudgetReportController extends Controller
                             $requisitions = BudgetRequisition::where('budget_year_id', $budget_year_id)->where('budget_set_id', $budget_set->id)->where('budget_set_detail_id', $budget->id)->where('active', '>', 0)->get();
                             $requisitionTotal = ($requisitions->count() > 0 ? $requisitions->sum('requisition_total') : 0);
                             $paidTotal = ($requisitions->count() > 0 ? $requisitions->sum('transanctions_total') : 0);
+                            $forceCompletedRequisitions = BudgetRequisition::where('budget_year_id', $budget_year_id)->where('budget_set_id', $budget_set->id)
+                                        ->where('budget_set_detail_id', $budget->id)->where('active', '>', 0)
+                                        ->where('is_force_complete', 1)->get();
+                            $paidTotal += $forceCompletedRequisitions->count() > 0 ? $forceCompletedRequisitions->sum('requisition_total') : 0;
                             
                             $budgetAmount = (isset($budget->amount) && $budget->amount > 0 ? $budget->amount : 0);
                             $balance = ($budgetAmount - $paidTotal);
