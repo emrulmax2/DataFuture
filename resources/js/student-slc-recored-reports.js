@@ -121,4 +121,18 @@ import tippy, { roundArrow } from "tippy.js";
             });
         }
     })
+
+    $('#slcRecoredReportWrap').on('click', '.semesterToggle', function(e){
+        e.preventDefault();
+        var semesterid = $(this).attr('data-semesterid');
+        if($(this).hasClass('active')){
+            $('.semesterTermRow_'+semesterid).fadeOut();
+            $('.semesterCourseRow_'+semesterid).fadeOut();
+            $('.semesterCourseRow_'+semesterid).find('.courseToggle').removeClass('active');
+            $(this).removeClass('active');
+        }else{
+            $('.semesterCourseRow_'+semesterid).fadeIn();
+            $(this).addClass('active');
+        }
+    });
 })()
