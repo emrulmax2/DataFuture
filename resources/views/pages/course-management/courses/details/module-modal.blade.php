@@ -59,6 +59,7 @@
                                         <option value="">Please Select</option>
                                         <option value="core">Core</option>
                                         <option value="specialist">Specialist</option>
+                                        <option value="optional">Optional</option>
                                     </select>
                                     <div class="acc__input-error error-name text-danger mt-2"></div>
                                 </div>
@@ -170,6 +171,7 @@
                                         <option value="">Please Select</option>
                                         <option value="core">Core</option>
                                         <option value="specialist">Specialist</option>
+                                        <option value="optional">Optional</option>
                                     </select>
                                     <div class="acc__input-error error-name text-danger mt-2"></div>
                                 </div>
