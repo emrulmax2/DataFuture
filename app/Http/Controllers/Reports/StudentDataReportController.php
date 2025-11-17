@@ -538,7 +538,7 @@ class StudentDataReportController extends Controller
                             if($key == "group_id"):
                                     $iGoupCount = 0;
                                     $highestTermId = 0;
-                                     $groupName = [];
+                                    $groupName = [];
                                     foreach($student->assign as $assign):
                                         if(isset($assign->plan->group->name)) {
                                             //check if $assign->plan->group->name already exists in array for same term declaration
@@ -554,10 +554,11 @@ class StudentDataReportController extends Controller
                                         } else {
                                             $theCollection[$row][$j++] = "";
                                         }
-                                     $correctGroupNames = $groupName[$highestTermId];
-                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? implode(", ", $correctGroupNames) : "";
                                         $iGoupCount++;
                                     endforeach;
+                                    
+                                    $correctGroupNames = $groupName[$highestTermId];
+                                    $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? implode(", ", $correctGroupNames) : "";
                                     
                             elseif($key == "venue_id"):
 
