@@ -415,6 +415,10 @@ class Student extends Model
         return $this->hasOne(Assign::class, 'student_id', 'id')->latestOfMany();
     }
 
+    public function assign(){
+        return $this->hasMany(Assign::class, 'student_id', 'id');
+    }
+
     public function addressUpdateRequest(){
         return $this->hasOne(StudentAddressUpdateRequest::class, 'student_id', 'id')->latestOfMany();
     }
