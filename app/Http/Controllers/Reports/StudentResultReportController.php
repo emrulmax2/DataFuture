@@ -235,7 +235,7 @@ class StudentResultReportController extends Controller
     {         
         $studentIds = explode(",",$request->studentIds);
 
-        $StudentData = Student::with('crel','crel.creation')->whereIn('id',$studentIds)->get();
+        //$StudentData = Student::with('crel','crel.creation')->whereIn('id',$studentIds)->get();
         $moduleList = [];
         $data = [];
         //$planList = Result::whereIn('student_id', $studentIds)->get()->pluck('plan_id')->unique()->toArray();
@@ -247,6 +247,7 @@ class StudentResultReportController extends Controller
             "plan.cCreation",
             "plan.cCreation.course",
             'student',
+            'student.assign',
             'student.award',
             'student.crel',
             'student.crel.abody',
@@ -255,7 +256,25 @@ class StudentResultReportController extends Controller
             $studentDetails = [];
             $data = [];
             foreach($resultList as $result):
-
+                $iGoupCount = 0;
+                $highestTermId = 0;
+                $groupName = [];
+                foreach($result->student->assign as $assign):
+                    if(isset($assign->plan->group->name)) {
+                        //check if $assign->plan->group->name already exists in array for same term declaration
+                        if(isset($groupName[$assign->plan->term_declaration_id])) {
+                            if(!in_array($assign->plan->group->name, $groupName[$assign->plan->term_declaration_id])) {
+                                $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                            }
+                        } else {
+                            $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                        }
+                        $highestTermId = ($highestTermId < $assign->plan->term_declaration_id) ? $assign->plan->term_declaration_id : $highestTermId;
+                        
+                        $iGoupCount++;
+                    }
+                endforeach;
+                $correctGroupNames = $groupName[$highestTermId];
                 $studentDetails[$result->student->id] = [
                     'registration_no' => $result->student->registration_no,
                     'student_name' => $result->student->full_name,
@@ -263,7 +282,7 @@ class StudentResultReportController extends Controller
                     'intake_semester' => isset($result->student->crel) ? $result->student->crel->creation->semester->name : '',
                     'course' => isset($result->plan->cCreation) ? $result->plan->cCreation->course->name : '',
                     'award_body_reg_no' => isset($result->student->crel->abody->reference) ? $result->student->crel->abody->reference : '',
-                    'groups' => isset($result->plan->group->name) ? $result->plan->group->name : '',
+                    'groups' => (isset($result->plan->group->name)) ? implode(", ", $correctGroupNames) : "",
                 ];
                 //$moduleName = $result->plan->creations->module->name . ' - ' . ($result->plan->creations->code) ?? $result->plan->creations->module->code; 
                 
