@@ -551,10 +551,8 @@ class StudentDataReportController extends Controller
                                             }
                                             $highestTermId = ($highestTermId < $assign->plan->term_declaration_id) ? $assign->plan->term_declaration_id : $highestTermId;
                                             
-                                        } else {
-                                            $theCollection[$row][$j++] = "";
+                                            $iGoupCount++;
                                         }
-                                        $iGoupCount++;
                                     endforeach;
                                     
                                     $correctGroupNames = $groupName[$highestTermId];
