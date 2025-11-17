@@ -554,7 +554,8 @@ class StudentDataReportController extends Controller
                                         } else {
                                             $theCollection[$row][$j++] = "";
                                         }
-                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? implode(", ", $groupName[$highestTermId]) : "";
+                                     $correctGroupNames = $groupName[$highestTermId];
+                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? implode(", ", $correctGroupNames) : "";
                                         $iGoupCount++;
                                     endforeach;
                                     
