@@ -265,7 +265,7 @@ class StudentDataReportController extends Controller
         $slcAccountData  = $request->slcAccount;
         $StudentPlanData  = $request->StudentPlan;
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -536,9 +536,20 @@ class StudentDataReportController extends Controller
                     foreach($StudentPlanData as $key =>$value):
                         $key = strtolower($key);
                             if($key == "group_id"):
-                                
-                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? $student->assignSingle->plan->group->name : "";
-
+                                    $iGoupCount = 0;
+                                    $highestTermId = 0;
+                                     $groupName = [];
+                                    foreach($student->assign as $assign):
+                                        if(isset($assign->plan->group->name)) {
+                                            $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                                            $highestTermId = ($highestTermId < $assign->plan->term_declaration_id) ? $assign->plan->term_declaration_id : $highestTermId;
+                                            
+                                        } else {
+                                            $theCollection[$row][$j++] = "";
+                                        }
+                                     $theCollection[$row][$j++] = (isset($student->assignSingle->plan->group)) ? implode(", ", $groupName[$highestTermId]) : "";
+                                        $iGoupCount++;
+                                    endforeach;
                                     
                             elseif($key == "venue_id"):
 
