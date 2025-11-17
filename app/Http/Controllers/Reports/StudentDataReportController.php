@@ -541,7 +541,14 @@ class StudentDataReportController extends Controller
                                      $groupName = [];
                                     foreach($student->assign as $assign):
                                         if(isset($assign->plan->group->name)) {
-                                            $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                                            //check if $assign->plan->group->name already exists in array for same term declaration
+                                            if(isset($groupName[$assign->plan->term_declaration_id])) {
+                                                if(!in_array($assign->plan->group->name, $groupName[$assign->plan->term_declaration_id])) {
+                                                    $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                                                }
+                                            } else {
+                                                $groupName[$assign->plan->term_declaration_id][$iGoupCount] = $assign->plan->group->name;
+                                            }
                                             $highestTermId = ($highestTermId < $assign->plan->term_declaration_id) ? $assign->plan->term_declaration_id : $highestTermId;
                                             
                                         } else {
