@@ -22,7 +22,8 @@ class VendorStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required'
+            'name' => 'required',
+            'vendor_for' => 'required'
         ];
     }
 }

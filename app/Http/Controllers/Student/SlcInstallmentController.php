@@ -54,14 +54,18 @@ class SlcInstallmentController extends Controller
 
     public function edit(Request $request){
         $installment_id = $request->installment_id;
-        $slcInstallment = SlcInstallment::with('agreement')->find($installment_id);
+        $slcInstallment = SlcInstallment::with(['agreement', 'agreement.scr', 'agreement.scr.creation'])->find($installment_id);
         $totalAmount = (isset($slcInstallment->agreement->total) && $slcInstallment->agreement->total > 0 ? $slcInstallment->agreement->total : 0);
+        $commission = (isset($slcInstallment->agreement->commission_amount) && $slcInstallment->agreement->commission_amount > 0 ? $slcInstallment->agreement->commission_amount : 0);
+
         $agreementId = $slcInstallment->agreement->id;
         $totalInstAmount = SlcInstallment::where('slc_agreement_id', $agreementId)->sum('amount');
         $remainingAmount = ($totalAmount - $totalInstAmount);
 
-        $slcInstallment['total_amount'] = $totalAmount;
+        $slcInstallment['commission'] = $commission;
+        $slcInstallment['total_amount'] = ($totalAmount - $commission);
         $slcInstallment['total_amount_html'] = '£'.number_format($totalAmount, 2);
+        $slcInstallment['total_amount_after_commission_html'] = '£'.number_format(($totalAmount - $commission), 2);
         $slcInstallment['remaining_amount'] = $remainingAmount;
         $slcInstallment['remaining_amount_html'] = '£'.number_format($remainingAmount, 2);
 
@@ -111,14 +115,18 @@ class SlcInstallmentController extends Controller
 
     public function getDetails(Request $request){
         $agreement_id = $request->agreement_id;
-        $slcAgreement = SlcAgreement::find($agreement_id);
+        $slcAgreement = SlcAgreement::with(['scr', 'scr.creation'])->find($agreement_id);
 
         $totalAmount = (isset($slcAgreement->total) && $slcAgreement->total > 0 ? $slcAgreement->total : 0);
+        $commission = (isset($slcAgreement->commission_amount) && $slcAgreement->commission_amount > 0 ? $slcAgreement->commission_amount : 0);
         $totalInstAmount = SlcInstallment::where('slc_agreement_id', $agreement_id)->sum('amount');
-        $remainingAmount = ($totalAmount - $totalInstAmount);
+        $remainingAmount = (($totalAmount - $commission) - $totalInstAmount);
 
-        $res['total_amount'] = $totalAmount;
+        $res['commission'] = $commission;
+        $res['total_amount'] = ($totalAmount - $commission);
         $res['total_amount_html'] = '£'.number_format($totalAmount, 2);
+        $res['total_amount_after_commission_html'] = '£'.number_format(($totalAmount - $commission), 2);
+        $res['university_commission_amount_html'] = '£'.number_format($commission, 2);
         $res['remaining_amount'] = $remainingAmount;
         $res['remaining_amount_html'] = '£'.number_format($remainingAmount, 2);
 

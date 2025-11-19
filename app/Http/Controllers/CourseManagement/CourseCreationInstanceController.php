@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\CourseCreationInstance;
 use App\Http\Requests\CourseCreationInstanceRequest;
 use App\Models\CourseCreation;
+use Illuminate\Support\Number;
 
 class CourseCreationInstanceController extends Controller
 {
@@ -62,6 +63,7 @@ class CourseCreationInstanceController extends Controller
                     'total_teaching_week' => $list->total_teaching_week,
                     'fees' => isset($list->fees) && !empty($list->fees) ? '£'.number_format($list->fees, 2) : '',
                     'reg_fees' => isset($list->reg_fees) && !empty($list->reg_fees) ? '£'.number_format($list->reg_fees, 2) : '',
+                    'university_commission' => isset($list->university_commission) && !empty($list->university_commission) ? Number::percentage($list->university_commission, 2) : '',
                     'deleted_at' => $list->deleted_at,
                     'has_terms' => $list->terms->count()
                 ];

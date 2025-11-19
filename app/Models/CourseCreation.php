@@ -20,6 +20,7 @@ class CourseCreation extends Model
         'unit_length',
         'fees',
         'reg_fees',
+        'university_commission',
         'is_workplacement',
         'has_evening_and_weekend',
         'created_by',

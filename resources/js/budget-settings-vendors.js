@@ -51,6 +51,14 @@ var budgetVendorListTable = (function () {
                     }
                 },
                 {
+                    title: "Budget For",
+                    field: "vendor_for",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        return '<div class="whitespace-normal">'+cell.getData().vendor_for+'</div>';
+                    }
+                },
+                {
                     title: "Status",
                     field: "active",
                     headerHozAlign: "left",
@@ -183,6 +191,7 @@ var budgetVendorListTable = (function () {
         $('#addBudgetVendorModal .acc__input-error').html('');
         $('#addBudgetVendorModal .modal-body input:not([type="checkbox"])').val('');
         $('#addBudgetVendorModal .modal-body textarea').val('');
+        $('#addBudgetVendorModal .modal-body select').val('');
         $('#addBudgetVendorModal input[name="active"]').prop('checked', true);
     });
     
@@ -192,6 +201,7 @@ var budgetVendorListTable = (function () {
         $('#editBudgetVendorModal .modal-body input:not([type="checkbox"])').val('');
         $('#editBudgetVendorModal input[name="id"]').val('0');
         $('#editBudgetVendorModal .modal-body textarea').val('');
+        $('#editBudgetVendorModal .modal-body select').val('');
         $('#editBudgetVendorModal input[name="active"]').prop('checked', false);
     });
 
@@ -259,6 +269,7 @@ var budgetVendorListTable = (function () {
                 $('#editBudgetVendorModal input[name="email"]').val(dataset.email ? dataset.email : '');
                 $('#editBudgetVendorModal input[name="phone"]').val(dataset.phone ? dataset.phone : '');
                 $('#editBudgetVendorModal [name="address"]').val(dataset.address ? dataset.address : '');
+                $('#editBudgetVendorModal [name="vendor_for"]').val(dataset.vendor_for ? dataset.vendor_for : '');
                 
                 $('#editBudgetVendorModal input[name="id"]').val(editId);
 

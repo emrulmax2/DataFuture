@@ -1,6 +1,7 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
+import IMask from 'imask';
  
 ("use strict");
 var bankListTable = (function () {
@@ -68,6 +69,24 @@ var bankListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().status+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                    }
+                },
+                {
+                    title: "Accounts",
+                    field: "ac_name",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '';
+                            if(cell.getData().ac_name != ''){
+                                html = '<div class="block">';
+                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().ac_name+'</div>';
+                                    html += '<div class="text-slate-400 font-medium inline-flex gap-2">';
+                                        html += (cell.getData().sort_code != '' ? '<span>'+cell.getData().sort_code+'</span>' : '');
+                                        html += (cell.getData().ac_number != '' ? '<span>'+cell.getData().ac_number+'</span>' : '');
+                                    html += '</div>';
+                                html += '</div>';
+                            }
+                        return html;
                     }
                 },
                 {
@@ -205,6 +224,20 @@ var bankListTable = (function () {
             showPreview('bankPhotoEdit', 'bankImageEdit');
         })
 
+        $(".theSortcode").each(function () {
+            var maskOptions = {
+                mask: '00-00-00'
+            };
+            var mask = IMask(this, maskOptions);
+        });
+
+        $(".theAcNumber").each(function () {
+            var maskOptions = {
+                mask: '00000000'
+            };
+            var mask = IMask(this, maskOptions);
+        });
+
         $('#addBankForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('addBankForm');
@@ -282,6 +315,10 @@ var bankListTable = (function () {
                     }else{
                         $('#editBankModal [name="status"]').prop('checked', false);
                     }
+
+                    $('#editBankModal input[name="ac_name"]').val(dataset.ac_name ? dataset.ac_name : '');
+                    $('#editBankModal input[name="sort_code"]').val(dataset.sort_code ? dataset.sort_code : '');
+                    $('#editBankModal input[name="ac_number"]').val(dataset.ac_number ? dataset.ac_number : '');
                     
                     $('#editBankModal input[name="id"]').val(editId);
                     $('#editBankModal #bankImageEdit').attr('src', dataset.image_url);

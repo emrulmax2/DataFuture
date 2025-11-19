@@ -45,6 +45,11 @@ class StudentCourseRelation extends Model
         return $this->hasOneThrough(Course::class, CourseCreation::class,'id','id','course_creation_id','course_id');
     }
 
+    public function semester(): HasOneThrough
+    {
+        return $this->hasOneThrough(Semester::class, CourseCreation::class,'id','id','course_creation_id','semester_id');
+    }
+
     public function propose(){
         return $this->hasOne(StudentProposedCourse::class, 'student_course_relation_id', 'id')->latestOfMany();
     }

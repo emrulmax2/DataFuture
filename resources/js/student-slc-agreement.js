@@ -81,6 +81,19 @@ import Tabulator from "tabulator-tables";
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 var fees = response.data.fees;
+                var commission = response.data.commission;
+                var percentage = response.data.percentage;
+                if(percentage > 0){
+                    $('#addAgreementForm .universityCommissionWrap').fadeIn('fast', function(){
+                        $('#addAgreementForm .percntage').html(percentage+'%')
+                        $('#addAgreementForm input[name="commission_amount"]').val(commission.toFixed(2))
+                    })
+                }else{
+                    $('#addAgreementForm .universityCommissionWrap').fadeOut('fast', function(){
+                        $('#addAgreementForm .percntage').html('')
+                        $('#addAgreementForm input[name="commission_amount"]').val('')
+                    })
+                }
 
                 $('#addAgreementForm input[name="fees"]').val(fees);
             }).catch(error => {
@@ -172,6 +185,7 @@ import Tabulator from "tabulator-tables";
             $('#editAgreementModal [name="slc_coursecode"]').val(res.slc_coursecode);
             $('#editAgreementModal [name="date"]').val(res.date);
             $('#editAgreementModal [name="year"]').val(res.year);
+            $('#editAgreementModal [name="commission_amount"]').val(res.commission_amount);
             $('#editAgreementModal [name="fees"]').val(res.fees);
             $('#editAgreementModal [name="discount"]').val(res.discount);
             if(res.is_self_funded == 1){

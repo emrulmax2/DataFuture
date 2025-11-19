@@ -112,6 +112,14 @@
                             <textarea id="edit_address" name="address" class="form-control w-full" rows="3"></textarea>
                             <div class="acc__input-error error-address text-danger mt-2"></div>
                         </div>
+                        <div class="mt-3">
+                            <label for="edit_vendor_for" class="form-label">Vendor For</label>
+                            <select id="edit_vendor_for" name="vendor_for" class="form-control w-full">
+                                <option value="1">Budget</option>
+                                <option value="2">University Commission</option>
+                            </select>
+                            <div class="acc__input-error error-vendor_for text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
@@ -173,6 +181,14 @@
                             <label for="address" class="form-label">Address</label>
                             <textarea id="address" name="address" class="form-control w-full" rows="3"></textarea>
                             <div class="acc__input-error error-address text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="vendor_for" class="form-label">Vendor For</label>
+                            <select id="vendor_for" name="vendor_for" class="form-control w-full">
+                                <option value="1">Budget</option>
+                                <option value="2">University Commission</option>
+                            </select>
+                            <div class="acc__input-error error-vendor_for text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">

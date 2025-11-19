@@ -66,6 +66,9 @@ class AccBankController extends Controller
                     'opening_date' => (isset($list->opening_date) && !empty($list->opening_date) ? date('jS F, Y', strtotime($list->opening_date)) : ''),
                     'audit_status' => ($list->audit_status > 0 ? $list->audit_status : '0'),
                     'status' => ($list->status == 1 ? $list->status : '2'),
+                    'ac_name'=> (isset($list->ac_name) && !empty($list->ac_name) ? $list->ac_name : ''),
+                    'sort_code'=> (isset($list->sort_code) && !empty($list->sort_code) ? $list->sort_code : ''),
+                    'ac_number'=> (isset($list->ac_number) && !empty($list->ac_number) ? $list->ac_number : ''),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -81,6 +84,9 @@ class AccBankController extends Controller
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : null),
             'audit_status'=> (isset($request->audit_status) && $request->audit_status > 0 ? $request->audit_status : 0),
             'status'=> (isset($request->status) && $request->status > 0 ? $request->status : 2),
+            'ac_name'=> (isset($request->ac_name) && !empty($request->ac_name) ? $request->ac_name : null),
+            'sort_code'=> (isset($request->sort_code) && !empty($request->sort_code) ? $request->sort_code : null),
+            'ac_number'=> (isset($request->ac_number) && !empty($request->ac_number) ? $request->ac_number : null),
             'created_by' => auth()->user()->id
         ]);
 
@@ -111,6 +117,9 @@ class AccBankController extends Controller
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : null),
             'audit_status'=> (isset($request->audit_status) && $request->audit_status > 0 ? $request->audit_status : '0'),
             'status'=> (isset($request->status) && $request->status > 0 ? $request->status : '2'),
+            'ac_name'=> (isset($request->ac_name) && !empty($request->ac_name) ? $request->ac_name : null),
+            'sort_code'=> (isset($request->sort_code) && !empty($request->sort_code) ? $request->sort_code : null),
+            'ac_number'=> (isset($request->ac_number) && !empty($request->ac_number) ? $request->ac_number : null),
             'updated_by' => auth()->user()->id
         ]);
 

@@ -37,6 +37,7 @@ class SlcAgreementController extends Controller
             $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
             $agreementData['date'] = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null);
             $agreementData['year'] = $agreement_year;
+            $agreementData['commission_amount'] = (isset($request->commission_amount) && $request->commission_amount > 0 ? $request->commission_amount : 0);
             $agreementData['fees'] = $fees;
             $agreementData['discount'] = 0;
             $agreementData['total'] = $fees;
@@ -70,6 +71,7 @@ class SlcAgreementController extends Controller
             'is_self_funded' => (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0),
             'date' => (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null),
             'year' => $request->year,
+            'commission_amount' => (isset($request->commission_amount) && $request->commission_amount > 0 ? $request->commission_amount : 0),
             'fees' => $fees,
             'discount' => $discount,
             'total' => ($fees - $discount),
@@ -102,9 +104,12 @@ class SlcAgreementController extends Controller
         $course_creation_instance_id = $request->course_creation_instance_id;
 
         $courseCreationInstance = CourseCreationInstance::find($course_creation_instance_id);
-        $fees = (isset($courseCreationInstance->fees) && $courseCreationInstance->fees > 0 ? $courseCreationInstance->fees : 0);
+        $commissionPercent = (isset($courseCreationInstance->creation->university_commission) && $courseCreationInstance->creation->university_commission > 0 ? $courseCreationInstance->creation->university_commission : 0);
+        $totalFees = (isset($courseCreationInstance->fees) && $courseCreationInstance->fees > 0 ? $courseCreationInstance->fees : 0);
+        $commission = ($totalFees * $commissionPercent) / 100;
+        $fees = $totalFees - $commission;
 
-        return response()->json(['fees' => $fees], 200);
+        return response()->json(['fees' => $fees, 'commission' => $commission, 'percentage' => $commissionPercent], 200);
     }
 
     public function hasData(Request $request){

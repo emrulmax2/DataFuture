@@ -69,6 +69,7 @@ class VendorController extends Controller
                     'phone' => (!empty($list->phone) ? $list->phone : ''),
                     'address' => (!empty($list->address) ? $list->address : ''),
                     'active' => ($list->active == 1 ? $list->active : '0'),
+                    'vendor_for' => ($list->vendor_for == 2 ? 'University Commission' : 'Budget'),
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -84,6 +85,7 @@ class VendorController extends Controller
             'phone'=> (isset($request->phone) && !empty($request->phone) ? $request->phone : null),
             'address'=> (isset($request->address) && !empty($request->address) ? $request->address : null),
             'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'vendor_for'=> (isset($request->vendor_for) && $request->vendor_for > 0 ? $request->vendor_for : 1),
             'created_by' => auth()->user()->id
         ]);
         $row = [];
@@ -110,6 +112,7 @@ class VendorController extends Controller
             'phone'=> (isset($request->phone) && !empty($request->phone) ? $request->phone : null),
             'address'=> (isset($request->address) && !empty($request->address) ? $request->address : null),
             'active'=> (isset($request->active) && $request->active == 1 ? $request->active : '0'),
+            'vendor_for'=> (isset($request->vendor_for) && $request->vendor_for > 0 ? $request->vendor_for : 1),
             'updated_by' => auth()->user()->id
         ]);
 

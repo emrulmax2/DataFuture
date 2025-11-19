@@ -185,6 +185,7 @@ class CoursCreationController extends Controller
             'unit_length'=> $request->unit_length,
             'fees'=> (isset($request->fees) && $request->fees > 0 ? $request->fees : null),
             'reg_fees'=> (isset($request->reg_fees) && $request->reg_fees > 0 ? $request->reg_fees : null),
+            'university_commission'=> (isset($request->university_commission) && $request->university_commission > 0 ? $request->university_commission : null),
             'has_evening_and_weekend'=> $has_evening_and_weekend,
             'is_workplacement'=> $is_workplacement,
             'required_hours'=> $required_hours,

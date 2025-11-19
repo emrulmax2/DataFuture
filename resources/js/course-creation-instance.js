@@ -255,6 +255,11 @@ var courseCreationINListTable = (function () {
                     headerHozAlign: 'left',
                 },
                 {
+                    title: 'Commission',
+                    field: 'university_commission',
+                    headerHozAlign: 'left',
+                },
+                {
                     title: 'Actions',
                     field: 'id',
                     headerSort: false,
@@ -455,6 +460,9 @@ var courseCreationINListTable = (function () {
                 let regFees = $(
                     '#addCourseCreationInstModal .modal-body input[name="reg_fees"]'
                 ).val();
+                let universityCommission = $(
+                    '#addCourseCreationInstModal .modal-body input[name="university_commission"]'
+                ).val();
 
                 $('#addCourseCreationInstModal .acc__input-error').html('');
                 $(
@@ -465,12 +473,9 @@ var courseCreationINListTable = (function () {
                 ).val('');
                 $('#addCourseCreationInstModal .modal-body  select').val('');
 
-                $(
-                    '#addCourseCreationInstModal .modal-body input[name="fees"]'
-                ).val(Fees);
-                $(
-                    '#addCourseCreationInstModal .modal-body input[name="reg_fees"]'
-                ).val(regFees);
+                $('#addCourseCreationInstModal .modal-body input[name="fees"]').val(Fees);
+                $('#addCourseCreationInstModal .modal-body input[name="reg_fees"]').val(regFees);
+                $('#addCourseCreationInstModal .modal-body input[name="university_commission"]').val(universityCommission);
             }
         );
 
@@ -676,6 +681,10 @@ var courseCreationINListTable = (function () {
                             : crf != 'undefined' && crf != ''
                             ? crf
                             : '';
+                        var cuc = $(
+                            '#editCourseCreationInstForm input[name="university_commission"]'
+                        ).attr('data-cuc');
+                        var univCommission = dataset.university_commission ? dataset.university_commission : cuc != 'undefined' && cuc != '' ? cuc : '';
                         $(
                             '#editCourseCreationInstForm select[name="academic_year_id"]'
                         ).val(
@@ -702,6 +711,9 @@ var courseCreationINListTable = (function () {
                         $(
                             '#editCourseCreationInstForm input[name="reg_fees"]'
                         ).val(reg_fees);
+                        $(
+                            '#editCourseCreationInstForm input[name="university_commission"]'
+                        ).val(univCommission);
 
                         $('#editCourseCreationInstForm input[name="id"]').val(
                             editId

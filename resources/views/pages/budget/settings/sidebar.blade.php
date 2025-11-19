@@ -14,7 +14,7 @@
                 <a class="flex items-center {{ Route::currentRouteName() == 'budget.settings.vendors' || Route::currentRouteName() == 'budget.settings.year' || Route::currentRouteName() == 'budget.settings.name' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                     <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Settings  <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
                 </a>
-                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'budget.settings.year' || Route::currentRouteName() == 'budget.settings.name' ? 'block' : 'none' }};">
+                <ul class="p-0 m-0 pl-5" style="display: {{ Route::currentRouteName() == 'budget.settings.vendors' || Route::currentRouteName() == 'budget.settings.year' || Route::currentRouteName() == 'budget.settings.name' ? 'block' : 'none' }};">
                     <li>
                         <a class="flex items-center mt-4 {{ Route::currentRouteName() == 'budget.settings.year' ? 'active text-primary' : '' }}" href="{{ route('budget.settings.year') }}">
                             <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Budget Years
