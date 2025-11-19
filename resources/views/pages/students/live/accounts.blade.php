@@ -28,6 +28,9 @@
                 $onlyReceivedAmount = (isset($agr->only_received_amount) && $agr->only_received_amount > 0 ? $agr->only_received_amount : 0);
                 $refundAmount = (isset($agr->refund_amount) && $agr->refund_amount > 0 ? $agr->refund_amount : 0);
                 $balance = $onlyReceivedAmount - ($claimAmount + $refundAmount);
+
+                $fees = (isset($agr->fees) && $agr->fees > 0 ? $agr->fees : 0);
+                $commission = (isset($agr->commission_amount) && $agr->commission_amount > 0 ? $agr->commission_amount : 0);
             @endphp
             <div class="intro-y box p-5 mt-5 {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'bg-danger-soft') }}">
                 <div class="grid grid-cols-12 gap-0 items-center">
@@ -98,10 +101,13 @@
                                 <div class="col-span-4 text-slate-500 font-medium">Fees</div>
                                 <div class="col-span-8 font-medium">
                                     @if($discount > 0)
-                                        <del class="text-slate-400 mr-2">{{ (!empty($agr->fees) ? '£'.number_format($agr->fees, 2) : '£0.00') }}</del>
-                                        {{ (!empty($agr->fees) ? '£'.number_format(($agr->fees - $discount), 2) : '£0.00') }}
+                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
+                                        {{ (!empty($fees) ? '£'.number_format(($fees - $discount), 2) : '£0.00') }}
+                                    @elseif($commission > 0)
+                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
+                                        {{ (!empty($fees) ? '£'.number_format(($fees - $commission), 2) : '£0.00') }}
                                     @else
-                                        {{ (!empty($agr->fees) ? '£'.number_format($agr->fees, 2) : '£0.00') }}
+                                        {{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}
                                     @endif
                                 </div>
                             </div>
@@ -339,6 +345,11 @@
                                 <input id="agr_add_fees" class="form-control w-full" name="fees" type="number" step="any">
                                 <div class="acc__input-error error-fees text-danger mt-2"></div>
                             </div>
+                            <div class="col-span-12 sm:col-span-3 universityCommissionWrap" style="display: none;">
+                                <label for="commission_amount" class="form-label">University Commission<span class="percntage text-danger font-medium ml-2"></span></label>
+                                <input id="commission_amount" class="form-control w-full" name="commission_amount" type="number" step="any">
+                                <div class="acc__input-error error-commission_amount text-danger mt-2"></div>
+                            </div>
                             <div class="col-span-12">
                                 <label for="agr_add_note" class="form-label">Note</label>
                                 <textarea id="agr_add_note" rows="2" class="form-control w-full" name="note"></textarea>
@@ -414,8 +425,13 @@
                                 <div class="acc__input-error error-fees text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-3">
-                                <label for="agr_edit_discount" class="form-label">Discount <span class="text-danger">*</span></label>
+                                <label for="agr_edit_discount" class="form-label">Discount</label>
                                 <input id="agr_edit_discount" class="form-control w-full" name="discount" type="number" step="any">
+                            </div>
+                            <div class="col-span-12 sm:col-span-3">
+                                <label for="edit_commission_amount" class="form-label">University Commission</label>
+                                <input id="edit_commission_amount" class="form-control w-full" name="commission_amount" type="number" step="any">
+                                <div class="acc__input-error error-commission_amount text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12">
                                 <label for="agr_edit_note" class="form-label">Note</label>

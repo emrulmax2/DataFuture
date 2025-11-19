@@ -44,6 +44,10 @@
                         <div class="mt-3">
                             <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
                             <input id="reg_fees" value="{{ $creation->reg_fees }}" type="number" step="any" name="reg_fees" class="form-control w-full">
+                        </div> 
+                        <div class="mt-3">
+                            <label for="university_commission" class="form-label">University Commission</label>
+                            <input id="university_commission" value="{{ $creation->university_commission }}" type="number" step="any" name="university_commission" class="form-control w-full">
                         </div>  
                     </div>
                     <div class="modal-footer">
@@ -117,6 +121,10 @@
                         <div class="mt-3">
                             <label for="edit_reg_fees" class="form-label">Reg. Fees(UK)</label>
                             <input id="edit_reg_fees" data-crf="{{ $creation->reg_fees }}" value="" type="number" step="any" name="reg_fees" class="form-control w-full">
+                        </div>  
+                        <div class="mt-3">
+                            <label for="edit_university_commission" class="form-label">University Commission</label>
+                            <input id="edit_university_commission" data-cuc="{{ $creation->university_commission }}" value="" type="number" step="any" name="university_commission" class="form-control w-full">
                         </div>    
                     </div>
                     <div class="modal-footer">

@@ -19,6 +19,7 @@ class SlcAgreement extends Model
         'is_self_funded',
         'date',
         'year',
+        'commission_amount',
         'fees',
         'no_of_installment',
         'discount',
@@ -39,6 +40,14 @@ class SlcAgreement extends Model
 
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function scr(){
+        return $this->belongsTo(StudentCourseRelation::class, 'student_course_relation_id');
+    }
+
+    public function instance(){
+        return $this->belongsTo(CourseCreationInstance::class, 'course_creation_instance_id');
     }
 
     public function setDateAttribute($value) {  

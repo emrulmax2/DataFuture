@@ -20,6 +20,9 @@ class AccBank extends Model
         'audit_status',
         'opening_balance',
         'opening_date',
+        'ac_name',
+        'sort_code',
+        'ac_number',
         'created_by',
         'updated_by',
     ];

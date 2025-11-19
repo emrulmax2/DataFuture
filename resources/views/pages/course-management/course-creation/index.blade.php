@@ -177,6 +177,10 @@
                                 <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
                             </div> 
                             <div class="col-span-12 sm:col-span-6">
+                                <label for="university_commission" class="form-label">University Commission</label>
+                                <input id="university_commission" type="number" step="any" name="university_commission" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
                                 <label for="has_evening_and_weekend" class="form-label">Has Evening / Weekend</label>
                                 <div class="form-check form-switch">
                                     <input id="has_evening_and_weekend" name="has_evening_and_weekend" class="form-check-input" value="1" type="checkbox">
@@ -362,6 +366,10 @@
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="reg_fees" class="form-label">Reg. Fees(UK)</label>
                                 <input id="reg_fees" type="number" step="any" name="reg_fees" class="form-control w-full">
+                            </div> 
+                            <div class="col-span-12 sm:col-span-6">
+                                <label for="edit_university_commission" class="form-label">University Commission</label>
+                                <input id="edit_university_commission" type="number" step="any" name="university_commission" class="form-control w-full">
                             </div> 
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="edit_has_evening_and_weekend" class="form-label">Has Evening / Weekend</label>

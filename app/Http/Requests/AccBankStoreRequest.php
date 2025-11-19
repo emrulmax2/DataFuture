@@ -24,7 +24,19 @@ class AccBankStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'bank_name' => 'required'
+            'bank_name' => 'required',
+            'sort_code' => 'nullable|string|min:8|max:8',
+            'ac_number' => 'nullable|digits:8',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'bank_name' => 'This field is required.',
+            'sort_code.min' => 'Min 8 characters.',
+            'sort_code.max' => 'Max 8 characters.',
+            'ac_number.digits' => 'Min 8 digits.',
         ];
     }
 }

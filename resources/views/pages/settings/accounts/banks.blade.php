@@ -122,6 +122,22 @@
                                         <input id="audit_status" class="form-check-input" name="audit_status" value="1" type="checkbox">
                                     </div>
                                 </div>
+                                <div class="mt-5 border-t pt-4 grid grid-cols-12 gap-x-3 gap-y-4">
+                                    <div class="col-span-12 sm:col-span-12">
+                                        <label for="ac_name" class="form-label">Account Name</label>
+                                        <input id="ac_name" type="text" name="ac_name" class="form-control w-full">
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="sort_code" class="form-label">Sort Code</label>
+                                        <input id="sort_code" type="text" name="sort_code" class="theSortcode form-control w-full">
+                                        <div class="acc__input-error error-sort_code text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="ac_number" class="form-label">Account Number</label>
+                                        <input id="ac_number" type="number" name="ac_number" class="theAcNumber form-control w-full">
+                                        <div class="acc__input-error error-ac_number text-danger mt-2"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -192,6 +208,22 @@
                                     <label for="edit_audit_status" class="form-label">Audit Status</label>
                                     <div class="form-check form-switch">
                                         <input id="edit_audit_status" class="form-check-input" name="audit_status" value="1" type="checkbox">
+                                    </div>
+                                </div>
+                                <div class="mt-5 border-t pt-4 grid grid-cols-12 gap-x-3 gap-y-4">
+                                    <div class="col-span-12 sm:col-span-12">
+                                        <label for="edit_ac_name" class="form-label">Account Name</label>
+                                        <input id="edit_ac_name" type="text" name="ac_name" class="form-control w-full">
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_sort_code" class="form-label">Sort Code</label>
+                                        <input id="edit_sort_code" type="text" name="sort_code" class="theSortcode form-control w-full">
+                                        <div class="acc__input-error error-sort_code text-danger mt-2"></div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="edit_ac_number" class="form-label">Account Number</label>
+                                        <input id="edit_ac_number" type="number" name="ac_number" class="theAcNumber form-control w-full">
+                                        <div class="acc__input-error error-ac_number text-danger mt-2"></div>
                                     </div>
                                 </div>
                             </div>

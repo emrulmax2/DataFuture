@@ -384,6 +384,7 @@ var courseCreationListTable = (function () {
                     $('#editCourseCreationModal select[name="venue_id"]').val(dataset.venue_id ? dataset.venue_id : '');
                     $('#editCourseCreationModal input[name="fees"]').val(dataset.fees ? dataset.fees : '');
                     $('#editCourseCreationModal input[name="reg_fees"]').val(dataset.reg_fees ? dataset.reg_fees : '');
+                    $('#editCourseCreationModal input[name="university_commission"]').val(dataset.university_commission ? dataset.university_commission : '');
                     
                     if(dataset.has_evening_and_weekend == 1){
                         $('#editCourseCreationModal input[name="has_evening_and_weekend"]').prop('checked', true);

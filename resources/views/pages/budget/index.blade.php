@@ -501,6 +501,7 @@
                             </svg>
                         </button>
                         <input type="hidden" name="modal_id" value=""/>
+                        <input type="hidden" name="vendor_for" value="1"/>
                     </div>
                 </div>
             </form>
