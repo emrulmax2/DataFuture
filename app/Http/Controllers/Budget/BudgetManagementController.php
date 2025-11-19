@@ -44,7 +44,7 @@ class BudgetManagementController extends Controller
             ],
             'years' => BudgetYear::whereHas('budget')->orderBy('start_date', 'DESC')->get(),
             'names' => BudgetName::orderBy('name', 'ASC')->get(),
-            'vendors' => Vendor::orderBy('name', 'ASC')->get(),
+            'vendors' => Vendor::where('vendor_for', 1)->orderBy('name', 'ASC')->get(),
             'budgets' => BudgetSet::with('details')->whereHas('year', function($q){
                 $q->where('start_date', '<=', date('Y-m-d'))->where('end_date', '>=', date('Y-m-d'))->where('active', 1);
             })->get()->first(),
@@ -699,5 +699,16 @@ class BudgetManagementController extends Controller
         $budget_name_ids = array_merge($requester, $holders, $approver);
 
         return $budget_name_ids;
+    }
+
+    public function destroy($id){
+        $data = BudgetRequisition::find($id)->delete();
+        return response()->json($data);
+    }
+
+    public function restore($id) {
+        $data = BudgetRequisition::where('id', $id)->withTrashed()->restore();
+
+        response()->json($data);
     }
 }

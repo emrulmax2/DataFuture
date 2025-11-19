@@ -5,6 +5,7 @@ use App\Http\Controllers\Accounts\AssetsRegisterController;
 use App\Http\Controllers\Accounts\ManagementReportController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
+//use App\Http\Controllers\Accounts\UniversityPaymentClaimController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -223,6 +224,7 @@ use App\Http\Controllers\Forms\EmployeeFormController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\EmployeeEducationalQualificationController;
+//use App\Http\Controllers\HR\EmployeePrivilegeNewController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\portal\VacancyController;
@@ -286,6 +288,7 @@ use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
+//use App\Http\Controllers\Settings\PermissionSettingController;
 use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\DisableAllowanceController;
 use App\Http\Controllers\Settings\Studentoptions\EquivalentOrLowerQualificationController;
@@ -1560,6 +1563,12 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/store-privilege', 'store')->name('employee.privilege.store');
     });
 
+    // Route::controller(EmployeePrivilegeNewController::class)->group(function(){
+    //     Route::get('employee-profile/privilege-new/{id}', 'index')->name('employee.privilege.new'); 
+    //     Route::post('employee-profile/privilege-new/template', 'getDepartmentPermissionTemplate')->name('employee.privilege.new.template');
+    //     Route::post('employee-profile/store-privilege-new', 'store')->name('employee.privilege.new.store');
+    // });
+
     Route::controller(EmployeeAttendanceController::class)->group(function(){
         Route::get('hr/attendance', 'index')->name('hr.attendance');
         Route::post('hr/attendance/list-html', 'getListHtml')->name('hr.attendance.sync.listhtml'); 
@@ -1899,6 +1908,12 @@ Route::middleware('auth')->group(function() {
         Route::delete('site-settings/department/delete/{id}', 'destroy')->name('department.destory');
         Route::post('site-settings/department/restore/{id}', 'restore')->name('department.restore');
     });
+
+    // Route::controller(PermissionSettingController::class)->group(function() {
+    //     Route::get('site-settings/permissions', 'index')->name('permissions'); 
+    //     Route::post('site-settings/permissions/store', 'store')->name('permissions.store'); 
+    // });
+
 
     Route::controller(PermissionCategoryController::class)->group(function() {
         Route::get('site-settings/permissioncategory', 'index')->name('permissioncategory'); 
@@ -4016,6 +4031,20 @@ Route::middleware('auth')->group(function() {
         
         Route::post('report-it-all-log/force-delete/{id}', 'forceDelete')->name('report.it.all.log.force.delete');
         Route::post('report-it-all-log/restore/{id}', 'restore')->name('report.it.all.log.restore');
+    });
+
+    // Route::controller(UniversityPaymentClaimController::class)->group(function() {
+    //     Route::get('accounts/university-claims', 'index')->name('university.claims'); 
+    //     Route::post('accounts/university-claims/get-courses', 'getCourses')->name('university.claims.get.courses'); 
+    //     Route::get('accounts/university-claims/student-list', 'studentList')->name('university.claims.student.list'); 
+
+    //     Route::post('accounts/university-claims/store', 'store')->name('university.claims.store'); 
+    //     Route::get('accounts/university-claims/details/{id}', 'show')->name('university.claims.show'); 
+    // });
+
+    Route::controller(BudgetManagementController::class)->group(function() {
+        Route::delete('budget-management/delete/{id}', 'destroy')->name('budget.management.destory');
+        Route::post('budget-management/restore/{id}', 'restore')->name('budget.management.restore');
     });
 
     

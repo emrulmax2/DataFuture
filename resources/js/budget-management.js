@@ -366,10 +366,11 @@ var requisitionListTable = (function () {
         $('#addBudgetVendorModal .modal-body textarea').val('');
         $('#addBudgetVendorModal input[name="active"]').prop('checked', true);
         $('#addBudgetVendorModal input[name="modal_id"]').val('');
+        $('#addBudgetVendorModal input[name="vendor_for"]').val('1');
     });
 
     const addRequisitionModalEl = document.getElementById('addRequisitionModal')
-    addBudgetVendorModalEl.addEventListener('hide.tw.modal', function(event) {
+    addRequisitionModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addRequisitionModal .acc__input-error').html('');
         $('#addRequisitionModal .modal-body input:not([type="checkbox"])').val('');
         $('#addRequisitionModal .modal-body textarea').val('');
@@ -386,7 +387,7 @@ var requisitionListTable = (function () {
     });
 
     const editRequisitionModalEl = document.getElementById('editRequisitionModal')
-    addBudgetVendorModalEl.addEventListener('hide.tw.modal', function(event) {
+    editRequisitionModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editRequisitionModal .acc__input-error').html('');
         $('#editRequisitionModal .modal-body input:not([type="checkbox"])').val('');
         $('#editRequisitionModal .modal-body textarea').val('');
@@ -1023,5 +1024,84 @@ var requisitionListTable = (function () {
             }
         });
     });
+
+
+    // Delete Course
+    $('#requisitionListTable').on('click', '.delete_btn', function(){
+        let $statusBTN = $(this);
+        let rowID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETEREQ');
+        });
+    });
+
+    // Restore Course
+    $('#requisitionListTable').on('click', '.restore_btn', function(){
+        let $statusBTN = $(this);
+        let courseID = $statusBTN.attr('data-id');
+
+        confirmModal.show();
+        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
+            $('#confirmModal .agreeWith').attr('data-id', courseID);
+            $('#confirmModal .agreeWith').attr('data-action', 'RESTOREREQ');
+        });
+    });
+
+    // Confirm Modal Action
+    $('#confirmModal .agreeWith').on('click', function(){
+        let $agreeBTN = $(this);
+        let recordID = $agreeBTN.attr('data-id');
+        let action = $agreeBTN.attr('data-action');
+
+        $('#confirmModal button').attr('disabled', 'disabled');
+        if(action == 'DELETEREQ'){
+            axios({
+                method: 'delete',
+                url: route('budget.management.destory', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    succModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('WOW!');
+                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
+                    });
+                }
+                requisitionListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        } else if(action == 'RESTOREREQ'){
+            axios({
+                method: 'post',
+                url: route('budget.management.restore', recordID),
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    succModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('WOW!');
+                        $('#successModal .successModalDesc').html('Record Successfully Restored!');
+                    });
+                }
+                requisitionListTable.init();
+            }).catch(error =>{
+                console.log(error)
+            });
+        }
+    })
 
 })();
