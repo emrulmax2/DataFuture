@@ -712,7 +712,7 @@
                         <div class="relative pt-5">
                             <label class="block text-lg font-semibold mb-2">Declaration</label>
                             <div class="form-check items-start">
-                                <input {{ (isset($apply->is_agree) && $apply->is_agree == 1 ? 'checked' : '') }} id="is_applicant_agree" class="form-check-input border-primary mr-2" style="border-color: rgb(22 78 99); position: relative; top: 4px;" type="checkbox" name="is_agree" value="1">
+                                <input id="is_applicant_agree" class="form-check-input border-primary mr-2" style="border-color: rgb(22 78 99); position: relative; top: 4px;" type="checkbox" name="is_agree" value="1">
                                 <label class="form-check-label" for="is_applicant_agree" style="font-size: 16px; line-height: 24px;">
                                     I hereby verify the accuracy and truthfulness of the information provided in this form to the best of my 
                                     knowledge. It is my responsibility to stay informed about the terms and conditions as well as the policies 
