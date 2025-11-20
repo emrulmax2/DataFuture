@@ -727,7 +727,7 @@
                         <button type="button" class="btn btn-secondary w-auto form-wizard-previous-btn">
                             Back
                         </button>
-                        <button type="button" {{ (isset($apply->is_agree) && $apply->is_agree == 1 ? '' : 'disabled') }}  class="btn btn-primary w-auto  form-wizard-next-btn">
+                        <button type="button" disabled  class="btn btn-primary w-auto  form-wizard-next-btn">
                             Review & Submit 
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2 svg_2">
