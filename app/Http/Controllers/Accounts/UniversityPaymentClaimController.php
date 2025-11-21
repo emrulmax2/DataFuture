@@ -13,6 +13,7 @@ use App\Models\CourseCreationVenue;
 use App\Models\Semester;
 use App\Models\SlcAgreement;
 use App\Models\SlcInstallment;
+use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentProposedCourse;
@@ -318,6 +319,30 @@ class UniversityPaymentClaimController extends Controller
                     UniversityPaymentClaimStudent::where('university_payment_claim_id', $university_payment_claim_id)
                         ->whereNotIn('id', $university_payment_claim_student_ids)
                         ->update(['status' => 3]);
+
+                    foreach($university_payment_claim_student_ids as $instid):
+                        $upcs = UniversityPaymentClaimStudent::with(['claim', 'student', 'installment', 'installment.agreement'])->find($instid);
+                        $mrData = [
+                            'student_id' => $upcs->student_id,
+                            'student_course_relation_id' => $upcs->installment->student_course_relation_id ?? null,
+                            'course_creation_instance_id' => $upcs->installment->course_creation_instance_id ?? null,
+                            'slc_agreement_id' => $upcs->installment->slc_agreement_id ?? null,
+                            'term_declaration_id' => $upcs->installment->term_declaration_id ?? null,
+                            'session_term' => $upcs->installment->session_term ?? null,
+                            'invoice_no' => time(),
+                            'slc_coursecode' => $upcs->installment->agreement->slc_coursecode ?? null,
+                            'slc_payment_method_id' => 2,
+                            'entry_date' => date('Y-m-d'),
+                            'payment_date' => (!empty($upcs->claim->invoiced_at) ? date('Y-m-d', strtotime($upcs->claim->invoiced_at)) : null),
+                            'amount' => $upcs->installment->amount ?? 0,
+                            'payment_type' => 'Course Fee',
+                            'remarks' => null,
+                            'received_by' => auth()->user()->id,
+                            'created_by' => auth()->user()->id,
+                        ];
+                        
+                        $moneyReceipt = SlcMoneyReceipt::create($mrData);
+                    endforeach;
                 } else {
                     UniversityPaymentClaimStudent::where('university_payment_claim_id', $university_payment_claim_id)
                         ->update(['status' => 3]);
