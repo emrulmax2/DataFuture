@@ -35,6 +35,11 @@
                 <i data-lucide="pie-chart" class="w-5 h-5 mr-4"></i> Budget Management
             </a>
         </li>
+        <li class="mb-2 pt-1">
+            <a href="{{ route('university.claims') }}" class="text-lg font-medium truncate flex justify-start items-center">
+                <i data-lucide="file" class="w-5 h-5 mr-4"></i> Invoice
+            </a>
+        </li>
     </ul>
 
 

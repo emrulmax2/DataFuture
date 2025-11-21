@@ -28,6 +28,7 @@ class SlcAgreementController extends Controller
             return response()->json(['res' => 'Existing agreement found under this sutdent active course relation for the year '.$agreement_year], 304);
         else:
             $fees = (isset($request->fees) && $request->fees > 0 ? $request->fees : 0);
+            $commission = (isset($request->commission_amount) && $request->commission_amount > 0 ? $request->commission_amount : 0);
             $agreementData = [];
             $agreementData['student_id'] = $student_id;
             $agreementData['student_course_relation_id'] = $courseRelationId;
@@ -37,7 +38,7 @@ class SlcAgreementController extends Controller
             $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
             $agreementData['date'] = (!empty($request->date) ? date('Y-m-d', strtotime($request->date)) : null);
             $agreementData['year'] = $agreement_year;
-            $agreementData['commission_amount'] = (isset($request->commission_amount) && $request->commission_amount > 0 ? $request->commission_amount : 0);
+            $agreementData['commission_amount'] = $commission;
             $agreementData['fees'] = $fees;
             $agreementData['discount'] = 0;
             $agreementData['total'] = $fees;
@@ -104,7 +105,13 @@ class SlcAgreementController extends Controller
         $course_creation_instance_id = $request->course_creation_instance_id;
 
         $courseCreationInstance = CourseCreationInstance::find($course_creation_instance_id);
-        $commissionPercent = (isset($courseCreationInstance->creation->university_commission) && $courseCreationInstance->creation->university_commission > 0 ? $courseCreationInstance->creation->university_commission : 0);
+        $commissionPercent = 0;
+        if(isset($courseCreationInstance->university_commission) && $courseCreationInstance->university_commission > 0):
+            $commissionPercent = $courseCreationInstance->university_commission;
+        elseif(isset($courseCreationInstance->creation->university_commission) && $courseCreationInstance->creation->university_commission > 0):
+            $commissionPercent = $courseCreationInstance->creation->university_commission;
+        endif;
+
         $totalFees = (isset($courseCreationInstance->fees) && $courseCreationInstance->fees > 0 ? $courseCreationInstance->fees : 0);
         $commission = ($totalFees * $commissionPercent) / 100;
         $fees = $totalFees - $commission;

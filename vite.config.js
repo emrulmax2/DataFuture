@@ -4,9 +4,6 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    server: {
-        origin: 'http://127.0.0.1',
-    },
     plugins: [
         viteStaticCopy({
             targets: [
@@ -412,6 +409,10 @@ export default defineConfig({
                 'resources/js/report-it-show.js',
                 'resources/js/admission-offer-acceptance.js',
 
+                'resources/js/accounts-university-invoice.js',
+                'resources/js/accounts-university-invoice-details.js',
+                'resources/js/accounts-university-invoice-bulk-agreement.js',
+                'resources/js/accounts-university-invoice-list.js',
 
             ],
             refresh: true,

@@ -235,7 +235,7 @@ import Tabulator from "tabulator-tables";
             var res = response.data.res;
             
             $('#addInstallmentModal [name="slc_agreement_id"]').val(agreement_id);
-                $('#addInstallmentModal [name="total_amount"]').val(res.total_amount);
+            $('#addInstallmentModal [name="total_amount"]').val(res.total_amount);
             if(res.commission > 0){
                 $('#addInstallmentModal .totalAmount').html('<del class="text-slate-400 mr-2">'+res.total_amount_html+'</del>'+' '+res.total_amount_after_commission_html);
             }else{
