@@ -31,6 +31,7 @@
 
                 $fees = (isset($agr->fees) && $agr->fees > 0 ? $agr->fees : 0);
                 $commission = (isset($agr->commission_amount) && $agr->commission_amount > 0 ? $agr->commission_amount : 0);
+                $totalFees = $fees + $commission;
             @endphp
             <div class="intro-y box p-5 mt-5 {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'bg-danger-soft') }}">
                 <div class="grid grid-cols-12 gap-0 items-center">
@@ -104,8 +105,8 @@
                                         <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
                                         {{ (!empty($fees) ? '£'.number_format(($fees - $discount), 2) : '£0.00') }}
                                     @elseif($commission > 0)
-                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
-                                        {{ (!empty($fees) ? '£'.number_format(($fees - $commission), 2) : '£0.00') }}
+                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($totalFees, 2) : '£0.00') }}</del>
+                                        {{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}
                                     @else
                                         {{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}
                                     @endif
@@ -179,7 +180,7 @@
                                                 @if(!empty($agr->installments) && $agr->installments->count() > 0)
                                                     @foreach($agr->installments as $inst)
                                                         <tr class="cursor-pointer installmentRow {{ isset($inst->slc_money_receipt_id) && $inst->slc_money_receipt_id > 0 ? 'paidInstllment' : '' }}" data-id="{{ $inst->id }}">
-                                                            <td>{{ $inst->id.'-'.$inst->slc_attendance_id }}</td>
+                                                            <td>{{ $inst->id. ( !empty($inst->slc_attendance_id) ? ' - '.$inst->slc_attendance_id : '') }}</td>
                                                             <td>{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
                                                             <td>
                                                                 {{ isset($inst->declaraton->name) && !empty($inst->declaraton->name) ? $inst->declaraton->name : '' }}

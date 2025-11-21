@@ -63,9 +63,10 @@ class SlcInstallmentController extends Controller
         $remainingAmount = ($totalAmount - $totalInstAmount);
 
         $slcInstallment['commission'] = $commission;
-        $slcInstallment['total_amount'] = ($totalAmount - $commission);
-        $slcInstallment['total_amount_html'] = '£'.number_format($totalAmount, 2);
-        $slcInstallment['total_amount_after_commission_html'] = '£'.number_format(($totalAmount - $commission), 2);
+        $slcInstallment['total_amount'] = $totalAmount;
+        $slcInstallment['total_amount_html'] = '£'.number_format($totalAmount + $commission, 2);
+        $slcInstallment['total_amount_after_commission_html'] = '£'.number_format($totalAmount, 2);
+        $slcInstallment['university_commission_amount_html'] = '£'.number_format($commission, 2);
         $slcInstallment['remaining_amount'] = $remainingAmount;
         $slcInstallment['remaining_amount_html'] = '£'.number_format($remainingAmount, 2);
 
@@ -120,12 +121,12 @@ class SlcInstallmentController extends Controller
         $totalAmount = (isset($slcAgreement->total) && $slcAgreement->total > 0 ? $slcAgreement->total : 0);
         $commission = (isset($slcAgreement->commission_amount) && $slcAgreement->commission_amount > 0 ? $slcAgreement->commission_amount : 0);
         $totalInstAmount = SlcInstallment::where('slc_agreement_id', $agreement_id)->sum('amount');
-        $remainingAmount = (($totalAmount - $commission) - $totalInstAmount);
+        $remainingAmount = ($totalAmount - $totalInstAmount);
 
         $res['commission'] = $commission;
-        $res['total_amount'] = ($totalAmount - $commission);
-        $res['total_amount_html'] = '£'.number_format($totalAmount, 2);
-        $res['total_amount_after_commission_html'] = '£'.number_format(($totalAmount - $commission), 2);
+        $res['total_amount'] = $totalAmount;
+        $res['total_amount_html'] = '£'.number_format($totalAmount + $commission, 2);
+        $res['total_amount_after_commission_html'] = '£'.number_format($totalAmount, 2);
         $res['university_commission_amount_html'] = '£'.number_format($commission, 2);
         $res['remaining_amount'] = $remainingAmount;
         $res['remaining_amount_html'] = '£'.number_format($remainingAmount, 2);

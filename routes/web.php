@@ -5,7 +5,7 @@ use App\Http\Controllers\Accounts\AssetsRegisterController;
 use App\Http\Controllers\Accounts\ManagementReportController;
 use App\Http\Controllers\Accounts\StorageController;
 use App\Http\Controllers\Accounts\SummaryController;
-//use App\Http\Controllers\Accounts\UniversityPaymentClaimController;
+use App\Http\Controllers\Accounts\UniversityPaymentClaimController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -4033,14 +4033,26 @@ Route::middleware('auth')->group(function() {
         Route::post('report-it-all-log/restore/{id}', 'restore')->name('report.it.all.log.restore');
     });
 
-    // Route::controller(UniversityPaymentClaimController::class)->group(function() {
-    //     Route::get('accounts/university-claims', 'index')->name('university.claims'); 
-    //     Route::post('accounts/university-claims/get-courses', 'getCourses')->name('university.claims.get.courses'); 
-    //     Route::get('accounts/university-claims/student-list', 'studentList')->name('university.claims.student.list'); 
+    Route::controller(UniversityPaymentClaimController::class)->group(function() {
+        Route::get('accounts/university-claims', 'index')->name('university.claims'); 
+        Route::post('accounts/university-claims/get-courses', 'getCourses')->name('university.claims.get.courses'); 
+        Route::get('accounts/university-claims/student-list', 'studentList')->name('university.claims.student.list'); 
 
-    //     Route::post('accounts/university-claims/store', 'store')->name('university.claims.store'); 
-    //     Route::get('accounts/university-claims/details/{id}', 'show')->name('university.claims.show'); 
-    // });
+        Route::post('accounts/university-claims/store', 'store')->name('university.claims.store'); 
+
+        Route::get('accounts/university-claims/invoices', 'invoices')->name('university.claims.invoices');  
+        Route::get('accounts/university-claims/invoices-list', 'invoicesList')->name('university.claims.invoices.list');  
+        Route::get('accounts/university-claims/invoices-details/{id}', 'invoiceShow')->name('university.claims.invoices.show');  
+        Route::get('accounts/university-claims/proforma-download/{id}', 'proformaDownload')->name('university.claims.proforma.download');  
+        Route::get('accounts/university-claims/invoices-download/{id}', 'invoiceDownload')->name('university.claims.invoices.download');  
+        Route::post('accounts/university-claims/invoices-store', 'invoiceStore')->name('university.claims.invoices.store');  
+
+        Route::get('accounts/university-claims/bulk-agreement', 'bulkAgreement')->name('university.claims.bulk.agreement'); 
+        Route::get('accounts/university-claims/agreement-student-list', 'agreementStudentList')->name('university.claims.agreement.student.list'); 
+        Route::post('accounts/university-claims/store-bulk-agreement', 'createBulkAgreement')->name('university.claims.store.agreement'); 
+        Route::post('accounts/university-claims/get-instances', 'getInstances')->name('university.claims.get.instances'); 
+        Route::post('accounts/university-claims/get-instance', 'getInstance')->name('university.claims.get.instance'); 
+    });
 
     Route::controller(BudgetManagementController::class)->group(function() {
         Route::delete('budget-management/delete/{id}', 'destroy')->name('budget.management.destory');
