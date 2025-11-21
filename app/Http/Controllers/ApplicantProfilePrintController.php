@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EsignEventType;
 use Illuminate\Http\Request;
 use App\Models\Applicant;
 use App\Models\User;
@@ -12,6 +13,8 @@ use App\Models\ApplicantEmployment;
 use App\Models\EmploymentReference;
 use App\Models\ApplicantTask;
 use App\Models\ApplicantEmail;
+use App\Models\ApplicantESignature;
+use App\Models\ApplicantESignatureEvent;
 use App\Models\ComonSmtp;
 use App\Models\ApplicantSms;
 use PDF;
@@ -25,6 +28,8 @@ class ApplicantProfilePrintController extends Controller
         $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
         $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
         $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms']);
+        $applicantEsign = ApplicantESignature::where('applicant_id', $applicantId)->first();
+        $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicantId)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
 
         $PDFHTML = '';
         $PDFHTML .= '<html>';
@@ -428,11 +433,17 @@ class ApplicantProfilePrintController extends Controller
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td colspan="2" style="width: 50%;">'; 
                         $PDFHTML .= '<span style="font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Student\'s Signature:</span>';
-                        $PDFHTML .= '<span style="height:40px; width:200px; border:1px solid #d2d4d6; display: inline-block;"></span>';
+                        if(isset($applicantEsign->signature) && !empty($applicantEsign->signature)):
+                            $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
+                                $PDFHTML .= '<img src="'. (isset($applicantEsign->signature) && !empty($applicantEsign->signature) ? $applicantEsign->signature : '') . '" style="width: 100%; height: auto; display:inline-block;" />';
+                            $PDFHTML .= '</span>';
+                        endif;
                     $PDFHTML .= '</td>';
                     $PDFHTML .= '<td colspan="2" style="width: 50%;" class="text-right">'; 
                         $PDFHTML .= '<span style="text-align: right; font-weight: bold; font-size: 12px; line-height: normal; margin: 0 0 5px; display: block;">Date:</span>';
-                        $PDFHTML .= '<span style="height:40px; width:200px; border:1px solid #d2d4d6; display: inline-block;"></span>';
+                        $PDFHTML .= '<span style="height:40px; width:200px; display: inline-block;">';
+                            $PDFHTML .= (isset($finalizedEvent->created_at) && !empty($finalizedEvent->created_at) ? date('d-m-Y', strtotime($finalizedEvent->created_at)) : '');
+                        $PDFHTML .= '</span>';
                     $PDFHTML .= '</td>';
                 $PDFHTML .= '</tr>';
 

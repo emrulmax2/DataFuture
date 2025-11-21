@@ -3015,7 +3015,7 @@ class AdmissionController extends Controller
     public function sendApplicantESignatureRequest(Request $request)
     {
         $applicantId = $request->input('applicant_id');
-        $applicant = Applicant::find($applicantId);
+        $applicant = Applicant::with('contact')->find($applicantId);
 
         if (!$applicant) {
             return response()->json([
@@ -3110,7 +3110,7 @@ class AdmissionController extends Controller
                         ])->withoutVerifying()->withOptions([
                             "verify" => false
                         ])->post('https://79.171.153.104/api/v2/messages/sms', [
-                            'to' => [$applicant->contact],
+                            'to' => [$applicant->contact->mobile],
                             'text' => $messages
                         ]);
                 endif;
