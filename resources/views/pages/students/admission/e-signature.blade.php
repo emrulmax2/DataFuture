@@ -762,5 +762,16 @@
 
     @routes
     @vite(['resources/js/admission-offer-acceptance.js'])
+    <script type="text/javascript">
+        (function () {
+            document.addEventListener("DOMContentLoaded", function () {
+                const isInApp = /FBAN|FBAV|Instagram|Line|Messenger|wv/.test(navigator.userAgent);
+
+                if (isInApp) {
+                    alert("To continue, please open this link in Chrome / Safari for full functionality (location and form submission).");
+                }
+            });
+        })()
+    </script>
 </body>
 </html>

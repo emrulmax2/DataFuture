@@ -271,6 +271,23 @@ import SignaturePad from "signature_pad";
                 const videoConsent = applicationForm.querySelector('input[name="video_consent"]')?.checked ? 1 : 0;
                 const declaration = applicationForm.querySelector('input[name="declaration"]')?.checked ? 1 : 0;
                 const signatureDate = applicationForm.querySelector('input[name="signature_date"]')?.value || '';
+                const signatureData = applicationForm.querySelector('input[name="signature"]')?.value || '';
+                
+                if (!videoConsent || !declaration) {
+                    alert('Consent required.');
+                    submitBtn.removeAttribute('disabled');
+                    const spinner = submitBtn.querySelector('svg');
+                    if(spinner) spinner.style.cssText = "display: none;";
+                    return;
+                }
+
+                if (!signatureData) {
+                    alert('Signature Required.');
+                    submitBtn.removeAttribute('disabled');
+                    const spinner = submitBtn.querySelector('svg');
+                    if(spinner) spinner.style.cssText = "display: none;";
+                    return;
+                }
 
                 let formData = new FormData(applicationForm);
                 formData.append('video_consent', videoConsent);
