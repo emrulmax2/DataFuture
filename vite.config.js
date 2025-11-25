@@ -413,6 +413,7 @@ export default defineConfig({
                 'resources/js/accounts-university-invoice-details.js',
                 'resources/js/accounts-university-invoice-bulk-agreement.js',
                 'resources/js/accounts-university-invoice-list.js',
+                'resources/js/account-settings.js',
 
             ],
             refresh: true,

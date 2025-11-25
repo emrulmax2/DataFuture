@@ -16,10 +16,12 @@
             .bg1{background-color: #F7F2F2;}
             .bg2{background-color: #E2CDCE;}
 
-            @page{margin: 0 0 20px; padding: 0;}
+            @page{margin: 60px 0 60px; padding: 0;}
+            @page :first {margin-top: 0;}
             /* header{position: fixed;left: 0px;right: 0px;top: -20px;height: 20px; background: #4A4A4A;} */
-            footer{position: fixed;left: 0px;right: 0px;bottom: -2px;height: 20px;}
+            footer{position: fixed;left: 0px;right: 0px;bottom: -40px; height: 20px; padding: 0 60px;}
             footer p{margin: 0 0 5px; font-size: 10px; line-height: 1; text-align: center;}
+            footer .page:after { content: counter(page, decimal); }
 
             table{margin-left: 0px; width: 100%; border-collapse: collapse; border-spacing: 0;}
             table tr td{padding: 0;}
@@ -58,12 +60,13 @@
             .mb-60{margin-bottom: 60px;}
             .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
             .table-sm th, .table-sm td{padding: 5px 10px;}
+            .w-20{width: 20%;}
             .w-25{width: 25%;}
             .w-30{width: 30%;}
             .w-50{width: 50%;}
             .w-70{width: 70%;}
+            .w-80{width: 80%;}
             .w-75{width: 75%;}
-            .w-80{width: 80px;}
             .w-100{width: 100px;}
             .w-120{width: 120px;}
             .w-130{width: 130px;}
@@ -96,7 +99,21 @@
         </style>
     </head>
     <body>
-        <div class="wrapper">
+        <footer>
+            <table>
+                <tr>
+                    <td class="w-20"></td>
+                    <td class="w-80">
+                        <p>London Churchill College | Barclay Hall, 156B Green Street, London, E7 8JQ.</p>
+                        <p>0207 377 0177  | accounts@lcc.ac.uk</p>
+                    </td>
+                    <td class="w-20">
+                        <p class="page text-right">Page </p>
+                    </td>
+                </tr>
+            </table>
+        </footer>
+        <main class="wrapper">
             <div class="invoiceInfos bg1">
                 <table>
                     <tr>
@@ -190,12 +207,14 @@
                                 </div>
                             </div>
                             @endif
-                            <div class="termsAndConditions">
-                                <h5 class="labelHeading2">Payment Terms:</h5>
-                                <div class="termsAndCondition">
-                                    Please send payment within 30 days of<br/> receiving this invoice.
+                            @if(isset($payment_term) && !empty($payment_term))
+                                <div class="termsAndConditions">
+                                    <h5 class="labelHeading2">Payment Terms:</h5>
+                                    <div class="termsAndCondition">
+                                        {!! $payment_term !!}
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         </td>
                         <td class="w-30 v-top">
                             <table>
@@ -212,11 +231,6 @@
                     </tr>
                 </table>
             </div>
-
-            <footer>
-                <p>London Churchill College | Barclay Hall, 156B Green Street, London, E7 8JQ.</p>
-                <p>0207 377 0177  | accounts@lcc.ac.uk</p>
-            </footer>
-        </div>
+        </main>
     </body>
 </html>

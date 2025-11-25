@@ -11,10 +11,11 @@ var invoiceStudentListTable = (function () {
         // Setup Tabulator
         let semester_id = $("#intakeSemester").val() != "" ? $("#intakeSemester").val() : "";
         let course_id = $("#course").val() != "" ? $("#course").val() : "";
+        let status_id = $("#studentStatus").val() != "" ? $("#studentStatus").val() : "";
 
         let tableContent = new Tabulator("#invoiceStudentListTable", {
             ajaxURL: route("university.claims.agreement.student.list"),
-            ajaxParams: { semester_id: semester_id, course_id: course_id },
+            ajaxParams: { semester_id: semester_id, course_id: course_id, status_id: status_id },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -146,8 +147,19 @@ var invoiceStudentListTable = (function () {
         },
     };
 
+    let tomOptionsMul = {
+        ...tomOptions,
+        plugins: {
+            ...tomOptions.plugins,
+            remove_button: {
+                title: 'Remove this item',
+            },
+        },
+    };
+
     let intakeSemester = new TomSelect('#intakeSemester', tomOptions);
     let course = new TomSelect('#course', tomOptions);
+    let studentStatus = new TomSelect('#studentStatus', tomOptionsMul);
 
     const addAgreementModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addAgreementModal"));
 

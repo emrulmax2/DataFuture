@@ -19,7 +19,7 @@
             <div class="intro-y box">
                 <div class="p-5">
                     <div class="grid grid-cols-12 gap-6">
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label class="form-label flex items-center">Intake Semester <i data-loading-icon="three-dots" class="w-6 h-6 ml-3 theLoaders hidden"></i></label>
                             <select id="intakeSemester" name="intakeSemester" class="w-full tom-selects">
                                 <option value="">Please Select</option>
@@ -31,14 +31,26 @@
                             </select>
                             <div class="acc__input-error error-intakeSemester text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-3">
                             <label class="form-label flex items-center">Course</label>
                             <select id="course" name="course" class="w-full tom-selects">
                                 <option value="">Please Select</option>
                             </select>
                             <div class="acc__input-error error-course text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4 text-right mt-7">
+                        <div class="col-span-12 sm:col-span-3">
+                            <label class="form-label flex items-center">Student Status</label>
+                            <select id="studentStatus" name="studentStatus[]" class="w-full tom-selects" multiple>
+                                <option value="">Please Select</option>
+                                @if(!empty($statuses))
+                                    @foreach($statuses as $sts)
+                                        <option value="{{ $sts->id }}">{{ $sts->name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-studentStatus text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-3 text-right mt-7">
                             <button id="generateInvoiceList" class="btn btn-primary w-auto text-white">
                                 <i data-lucide="search" class="w-4 h-4 mr-2"></i> Search
                                 <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

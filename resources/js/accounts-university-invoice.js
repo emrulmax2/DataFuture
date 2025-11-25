@@ -11,10 +11,11 @@ var invoiceStudentListTable = (function () {
         // Setup Tabulator
         let semester_id = $("#intakeSemester").val() != "" ? $("#intakeSemester").val() : "";
         let course_id = $("#course").val() != "" ? $("#course").val() : "";
+        let status_id = $("#studentStatus").val() != "" ? $("#studentStatus").val() : "";
 
         let tableContent = new Tabulator("#invoiceStudentListTable", {
             ajaxURL: route("university.claims.student.list"),
-            ajaxParams: { semester_id: semester_id, course_id: course_id },
+            ajaxParams: { semester_id: semester_id, course_id: course_id, status_id : status_id },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
@@ -156,6 +157,17 @@ var invoiceStudentListTable = (function () {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
     };
+
+    let tomOptionsMul = {
+        ...tomOptions,
+        plugins: {
+            ...tomOptions.plugins,
+            remove_button: {
+                title: 'Remove this item',
+            },
+        },
+    };
+    
     let vendor_id = new TomSelect('#vendor_id', tomOptions);
     let acc_bank_id = new TomSelect('#acc_bank_id', tomOptions);
     let intakeSemester = new TomSelect('#intakeSemester', tomOptions);
@@ -163,6 +175,7 @@ var invoiceStudentListTable = (function () {
     course.clear(true);
     course.clearOptions(true);
     course.disable();
+    let studentStatus = new TomSelect('#studentStatus', tomOptionsMul);
 
     const claimInvoiceAmountModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#claimInvoiceAmountModal"));
     const addBudgetVendorModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addBudgetVendorModal"));
