@@ -10,10 +10,12 @@ use App\Models\AccCategory;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseCreationVenue;
+use App\Models\Option;
 use App\Models\Semester;
 use App\Models\SlcAgreement;
 use App\Models\SlcInstallment;
 use App\Models\SlcMoneyReceipt;
+use App\Models\Status;
 use App\Models\Student;
 use App\Models\StudentCourseRelation;
 use App\Models\StudentProposedCourse;
@@ -42,12 +44,14 @@ class UniversityPaymentClaimController extends Controller
             'vendors' => Vendor::where('vendor_for', 2)->orderBy('name', 'asc')->get(),
             'banks' => AccBank::where('status', '1')->orderBy('bank_name', 'asc')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get()
         ]);
     }
 
     public function studentList(Request $request){
         $semester_id = (isset($request->semester_id) && !empty($request->semester_id) ? $request->semester_id : 0);
         $course_id = (isset($request->course_id) && !empty($request->course_id) ? $request->course_id : 0);
+        $status_id = (isset($request->status_id) && !empty($request->status_id) ? $request->status_id : []);
         $courseCreationIds = CourseCreation::where('semester_id', $semester_id)->where('course_id', $course_id)->pluck('id')->unique()->toArray();
         $studentCrelIds = StudentCourseRelation::whereIn('course_creation_id', $courseCreationIds)->where('active', 1)->pluck('id')->unique()->toArray();
         $studentIds = StudentCourseRelation::whereIn('course_creation_id', $courseCreationIds)->where('active', 1)->pluck('student_id')->unique()->toArray();
@@ -84,6 +88,9 @@ class UniversityPaymentClaimController extends Controller
                         ->whereColumn('upcs.slc_installment_id', 'inst.id')
                         ->whereIn('upcs.status', [1, 2]);  // EXCLUDE status 1 & 2
                 });
+        if(!empty($status_id)):
+            $query->whereIn('std.status_id', $status_id);
+        endif;
 
         // $query = Student::orderByRaw(implode(',', $sorts))->whereHas('activeCR', function($q) use($courseCreationIds){
         //     $q->whereIn('course_creation_id', $courseCreationIds);
@@ -263,10 +270,11 @@ class UniversityPaymentClaimController extends Controller
         $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
         $report_title = 'Proforma Invoice of '.$claim->proforma_no;
 
+        $payment_term = Option::where('category', 'ACC_SETTINGS')->where('name', 'payment_term')->pluck('value')->first();
         $VIEW = 'pages.accounts.university-claims.proforma-pdf';
         $fileName = $claim->proforma_no.'.pdf';
-        $pdf = Pdf::loadView($VIEW, compact('claim', 'logoBase64', 'report_title'))
-            ->setOption(['isRemoteEnabled' => true])
+        $pdf = Pdf::loadView($VIEW, compact('claim', 'logoBase64', 'report_title', 'payment_term'))
+            ->setOption(['isRemoteEnabled' => true, 'isPhpEnabled' => true])
             ->setPaper('a4', 'portrait') //portrait landscape
             ->setWarnings(false);
         return $pdf->download($fileName);
@@ -279,10 +287,11 @@ class UniversityPaymentClaimController extends Controller
         $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
         $report_title = 'Invoice of '.$claim->invoice_no;
 
+        $payment_term = Option::where('category', 'ACC_SETTINGS')->where('name', 'payment_term')->pluck('value')->first();
         $VIEW = 'pages.accounts.university-claims.invoices-pdf';
         $fileName = $claim->invoice_no.'.pdf';
-        $pdf = Pdf::loadView($VIEW, compact('claim', 'logoBase64', 'report_title'))
-            ->setOption(['isRemoteEnabled' => true])
+        $pdf = Pdf::loadView($VIEW, compact('claim', 'logoBase64', 'report_title', 'payment_term'))
+            ->setOption(['isRemoteEnabled' => true, 'isPhpEnabled' => true])
             ->setPaper('a4', 'portrait') //portrait landscape
             ->setWarnings(false);
         return $pdf->download($fileName);
@@ -435,12 +444,14 @@ class UniversityPaymentClaimController extends Controller
             ],
             'semesters' => Semester::orderBy('id', 'desc')->get(),
             'term_declarations' => TermDeclaration::orderBy('id', 'DESC')->get(),
+            'statuses' => Status::where('type', 'Student')->orderBy('name', 'ASC')->get()
         ]);
     }
 
     public function agreementStudentList(Request $request){
         $semester_id = (isset($request->semester_id) && !empty($request->semester_id) ? $request->semester_id : 0);
         $course_id = (isset($request->course_id) && !empty($request->course_id) ? $request->course_id : 0);
+        $status_id = (isset($request->status_id) && !empty($request->status_id) ? $request->status_id : []);
         $courseCreationIds = CourseCreation::where('semester_id', $semester_id)->where('course_id', $course_id)->pluck('id')->unique()->toArray();
 
 
@@ -451,8 +462,11 @@ class UniversityPaymentClaimController extends Controller
         endforeach;
 
         $query = Student::orderByRaw(implode(',', $sorts))->whereHas('activeCR', function($q) use($courseCreationIds){
-            $q->whereIn('course_creation_id', $courseCreationIds);
-        });
+                    $q->whereIn('course_creation_id', $courseCreationIds);
+                });
+        if(!empty($status_id)):
+            $query->whereIn('status_id', $status_id);
+        endif;
 
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);

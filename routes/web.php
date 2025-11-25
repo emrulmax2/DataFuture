@@ -286,6 +286,7 @@ use App\Http\Controllers\Settings\AccAssetTypeController;
 use App\Http\Controllers\Settings\AccBankController;
 use App\Http\Controllers\Settings\AccCategoryController;
 use App\Http\Controllers\Settings\AccMethodController;
+use App\Http\Controllers\Settings\AccSettingController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 //use App\Http\Controllers\Settings\PermissionSettingController;
@@ -4059,6 +4060,10 @@ Route::middleware('auth')->group(function() {
         Route::post('budget-management/restore/{id}', 'restore')->name('budget.management.restore');
     });
 
+    Route::controller(AccSettingController::class)->group(function() {
+        Route::get('site-settings/accounts', 'index')->name('site.settings.accounts'); 
+        Route::post('site-settings/update-account-setting', 'update')->name('site.setting.accounts.update');
+    });
     
 });
 

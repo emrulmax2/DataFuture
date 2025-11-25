@@ -48,7 +48,15 @@
                         <div class="mt-3">
                             <label for="university_commission" class="form-label">University Commission</label>
                             <input id="university_commission" value="{{ $creation->university_commission }}" type="number" step="any" name="university_commission" class="form-control w-full">
-                        </div>  
+                        </div> 
+                        <div class="mt-3 commissionAmountWrap" style="display: {{ $creation->reg_fees > 0 && $creation->university_commission ? 'block' : 'none'}};">
+                            <label for="university_commission" class="form-label mb-1">Commission Amount</label>
+                            <div class="font-medium text-danger leading-none">
+                                @if($creation->reg_fees > 0 && $creation->university_commission)
+                                    {{ Number::currency((($creation->reg_fees * $creation->university_commission) / 100), 'GBP')}}
+                                @endif
+                            </div>
+                        </div> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -126,6 +134,14 @@
                             <label for="edit_university_commission" class="form-label">University Commission</label>
                             <input id="edit_university_commission" data-cuc="{{ $creation->university_commission }}" value="" type="number" step="any" name="university_commission" class="form-control w-full">
                         </div>    
+                        <div class="mt-3 editCommissionAmountWrap" style="display: {{ $creation->reg_fees > 0 && $creation->university_commission ? 'block' : 'none'}};">
+                            <label for="university_commission" class="form-label mb-1">Commission Amount</label>
+                            <div class="font-medium text-danger leading-none">
+                                @if($creation->reg_fees > 0 && $creation->university_commission)
+                                    {{ Number::currency((($creation->reg_fees * $creation->university_commission) / 100), 'GBP')}}
+                                @endif
+                            </div>
+                        </div> 
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

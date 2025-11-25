@@ -381,11 +381,24 @@ var courseCreationListTable = (function () {
                     $('#editCourseCreationModal select[name="unit_length"]').val(dataset.unit_length ? dataset.unit_length : '');
                     $('#editCourseCreationModal input[name="slc_code"]').val(dataset.slc_code ? dataset.slc_code : '');
 
+                    let regFees = dataset.reg_fees ? dataset.reg_fees : '';
+                    let universityCommission = dataset.university_commission ? dataset.university_commission : '';
                     $('#editCourseCreationModal select[name="venue_id"]').val(dataset.venue_id ? dataset.venue_id : '');
                     $('#editCourseCreationModal input[name="fees"]').val(dataset.fees ? dataset.fees : '');
-                    $('#editCourseCreationModal input[name="reg_fees"]').val(dataset.reg_fees ? dataset.reg_fees : '');
-                    $('#editCourseCreationModal input[name="university_commission"]').val(dataset.university_commission ? dataset.university_commission : '');
+                    $('#editCourseCreationModal input[name="reg_fees"]').val(regFees);
+                    $('#editCourseCreationModal input[name="university_commission"]').val(universityCommission);
                     
+                    if(regFees != '' && universityCommission != ''){
+                        let commission = (regFees * universityCommission) / 100;
+                        $('#editCourseCreationForm .editCommissionAmountWrap').fadeIn('fast', function(){
+                            $('div', this).html('£'+commission.toFixed(2));
+                        })
+                    }else{
+                        $('#editCourseCreationForm .editCommissionAmountWrap').fadeOut('fast', function(){
+                            $('div', this).html('');
+                        })
+                    }
+
                     if(dataset.has_evening_and_weekend == 1){
                         $('#editCourseCreationModal input[name="has_evening_and_weekend"]').prop('checked', true);
                         $('#editCourseCreationModal .hew_label').text('Yes');
@@ -466,6 +479,37 @@ var courseCreationListTable = (function () {
                 $theTr.find('.evening_and_weekend').val(0)
             }
         });
+
+        $('#addCourseCreationForm').on('input', '#reg_fees, #university_commission', function(e){
+            let regFees = $('#addCourseCreationForm #reg_fees').val()
+            let universityCommission = $('#addCourseCreationForm #university_commission').val()
+
+            if(regFees != '' && universityCommission != ''){
+                let commission = (regFees * universityCommission) / 100;
+                $('#addCourseCreationForm .commissionAmountWrap').fadeIn('fast', function(){
+                    $('div', this).html('£'+commission.toFixed(2));
+                })
+            }else{
+                $('#addCourseCreationForm .commissionAmountWrap').fadeOut('fast', function(){
+                    $('div', this).html('');
+                })
+            }
+        })
+        $('#editCourseCreationForm').on('input', '#edit_reg_fees, #edit_university_commission', function(e){
+            let regFees = $('#editCourseCreationForm #edit_reg_fees').val()
+            let universityCommission = $('#editCourseCreationForm #edit_university_commission').val()
+
+            if(regFees != '' && universityCommission != ''){
+                let commission = (regFees * universityCommission) / 100;
+                $('#editCourseCreationForm .editCommissionAmountWrap').fadeIn('fast', function(){
+                    $('div', this).html('£'+commission.toFixed(2));
+                })
+            }else{
+                $('#editCourseCreationForm .editCommissionAmountWrap').fadeOut('fast', function(){
+                    $('div', this).html('');
+                })
+            }
+        })
 
         $('#editCourseCreationForm').on('submit', function(e){
             e.preventDefault();

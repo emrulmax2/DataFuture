@@ -718,12 +718,54 @@ var courseCreationINListTable = (function () {
                         $('#editCourseCreationInstForm input[name="id"]').val(
                             editId
                         );
+
+                        if(reg_fees != '' && univCommission != ''){
+                            let commission = (reg_fees * univCommission) / 100;
+                            $('#editCourseCreationInstModal .editCommissionAmountWrap').fadeIn('fast', function(){
+                                $('div', this).html('£'+commission.toFixed(2));
+                            })
+                        }else{
+                            $('#editCourseCreationInstModal .editCommissionAmountWrap').fadeOut('fast', function(){
+                                $('div', this).html('');
+                            })
+                        }
                     }
                 })
                 .catch((error) => {
                     console.log(error);
                 });
         });
+
+        $('#addCourseCreationInstModal').on('input', '#reg_fees, #university_commission', function(e){
+            let regFees = $('#addCourseCreationInstModal #reg_fees').val()
+            let universityCommission = $('#addCourseCreationInstModal #university_commission').val()
+
+            if(regFees != '' && universityCommission != ''){
+                let commission = (regFees * universityCommission) / 100;
+                $('#addCourseCreationInstModal .commissionAmountWrap').fadeIn('fast', function(){
+                    $('div', this).html('£'+commission.toFixed(2));
+                })
+            }else{
+                $('#addCourseCreationInstModal .commissionAmountWrap').fadeOut('fast', function(){
+                    $('div', this).html('');
+                })
+            }
+        })
+        $('#editCourseCreationInstForm').on('input', '#edit_reg_fees, #edit_university_commission', function(e){
+            let regFees = $('#editCourseCreationInstForm #edit_reg_fees').val()
+            let universityCommission = $('#editCourseCreationInstForm #edit_university_commission').val()
+
+            if(regFees != '' && universityCommission != ''){
+                let commission = (regFees * universityCommission) / 100;
+                $('#editCourseCreationInstForm .editCommissionAmountWrap').fadeIn('fast', function(){
+                    $('div', this).html('£'+commission.toFixed(2));
+                })
+            }else{
+                $('#editCourseCreationInstForm .editCommissionAmountWrap').fadeOut('fast', function(){
+                    $('div', this).html('');
+                })
+            }
+        })
 
         $('#editCourseCreationInstForm').on('submit', function (e) {
             e.preventDefault();
