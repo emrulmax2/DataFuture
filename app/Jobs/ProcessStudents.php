@@ -121,7 +121,7 @@ class ProcessStudents implements ShouldQueue
             $filename = basename($file);
             Debugbar::warning($filename);
             Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
-            dd($destinationDir . '/' . $filename);
+            //dd($destinationDir . '/' . $filename);
         }
         
 
