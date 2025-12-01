@@ -109,11 +109,10 @@ class ProcessStudents implements ShouldQueue
 
         $sourceDir = 'public/applicants/'.$this->applicant->id;
         $destinationDir = 'public/students/'.$student->id;
-        Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
+        Storage::disk('s3')->makeDirectory($destinationDir);
 
-        
-            Storage::disk('s3')->makeDirectory($destinationDir);
-            $files = Storage::disk('s3')->files($sourceDir);
+        Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
+        $files = Storage::disk('s3')->files($sourceDir);
 
             //Debugbar::warning($files);
             foreach ($files as $file) {
