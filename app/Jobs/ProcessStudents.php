@@ -109,17 +109,19 @@ class ProcessStudents implements ShouldQueue
 
         $sourceDir = 'public/applicants/'.$this->applicant->id;
         $destinationDir = 'public/students/'.$student->id;
-        Storage::disk('s3')->makeDirectory($destinationDir);
+
+        Debugbar::warning($destinationDir);
+        // No need to makeDirectory for S3; S3 creates folders as needed when you upload/copy files.
 
         Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
         $files = Storage::disk('s3')->files($sourceDir);
 
-            //Debugbar::warning($files);
-            foreach ($files as $file) {
-                $filename = basename($file);
-                //Debugbar::warning($filename);
-                Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
-            }
+        //Debugbar::warning($files);
+        foreach ($files as $file) {
+            $filename = basename($file);
+            //Debugbar::warning($filename);
+            Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
+        }
 
     }
 }
