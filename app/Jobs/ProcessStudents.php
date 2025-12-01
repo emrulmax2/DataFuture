@@ -115,13 +115,15 @@ class ProcessStudents implements ShouldQueue
 
         Storage::copy($sourceDir."/".$this->applicant->photo, $destinationDir."/".$this->applicant->photo);
         $files = Storage::disk('s3')->files($sourceDir);
-        dd($files);
+        
         //Debugbar::warning($files);
         foreach ($files as $file) {
             $filename = basename($file);
             Debugbar::warning($filename);
             Storage::disk('s3')->copy($file, $destinationDir . '/' . $filename);
+            dd($destinationDir . '/' . $filename);
         }
+        
 
     }
 }
