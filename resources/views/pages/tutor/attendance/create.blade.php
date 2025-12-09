@@ -135,7 +135,7 @@
 								$existAttendance = (isset($data['attendanceFeed'][$list->student->id]) && $data['attendanceFeed'][$list->student->id] > 0 ? $data['attendanceFeed'][$list->student->id] : 0);
 								$statusActive = (isset($list->student->status->active) && $list->student->status->active == 1 ? 1 : 0);
 							@endphp
-							@if($existAttendance > 0 || $statusActive == 1 || $list->student->status->id == 43)
+							@if($existAttendance > 0 || $statusActive == 1 || ($list->student->status->id == 43 || $list->student->status->id == 47))
 								<tr class="gradeA theAttendanceRow">
 									<td width="150px">{{ $serial }}</td>
 									<td width="w-2/6">
