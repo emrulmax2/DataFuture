@@ -408,7 +408,7 @@ class AttendanceRateReportController extends Controller
                                     $q->where('course_creation_id', $courseCreationId);
                                 })->pluck('student_id')->unique()->toArray();
                 $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
-                $statusChanged = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
+                $statusChanged = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45, 14, 17, 33, 36, 47, 50])
                                 ->whereNotNull('status_change_date')->where(function($q) use($sd, $ed){
                                     $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($sd)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($ed)));
                                 })->groupBy('student_id')->pluck('student_id')->unique()->toArray();

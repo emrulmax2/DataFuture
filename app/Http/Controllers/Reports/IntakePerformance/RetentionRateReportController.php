@@ -228,7 +228,7 @@ class RetentionRateReportController extends Controller
                                                     $j->on('std.id', 'sats.student_id');
                                                     $j->on('std.status_id', 'sats.status_id');
                                                  })->whereIn('std.id', $registered_std_ids)
-                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45])
+                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45, 14, 17, 33, 36, 47, 50])
                                                  ->where(function($q) use($refund_date, $courseEndDate){
                                                     $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
                                                  })->pluck('std.id')->unique()->toArray();
@@ -302,7 +302,7 @@ class RetentionRateReportController extends Controller
                                                     $j->on('std.id', 'sats.student_id');
                                                     $j->on('std.status_id', 'sats.status_id');
                                                  })->whereIn('std.id', $registered_std_ids)
-                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45])
+                                                 ->whereIn('sats.status_id', [22, 27, 30, 31, 42, 43, 45, 14, 17, 33, 36, 47, 50])
                                                  ->where(function($q) use($refund_date, $courseEndDate){
                                                     $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
                                                  })->get();
