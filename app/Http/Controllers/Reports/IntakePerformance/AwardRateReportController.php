@@ -187,7 +187,7 @@ class AwardRateReportController extends Controller
                                                 })->pluck('student_id')->unique()->toArray();
                             $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
 
-                            $awarded_std_ids = Student::whereIn('id', $registered_std_ids)->where('status_id', 21)->pluck('id')->unique()->toArray();
+                            $awarded_std_ids = Student::whereIn('id', $registered_std_ids)->whereIn('status_id', [21, 13])->pluck('id')->unique()->toArray();
                             
                             $res['result'][$semester_id]['course'][$course_id]['name'] = $course->name;
                             $res['result'][$semester_id]['course'][$course_id]['admitted_students'] = (!empty($student_ids) ? count($student_ids) : 0);

@@ -37,7 +37,7 @@ class StudentDueReportController extends Controller
     public function list(Request $request){
         $semester_ids = (isset($request->semester_ids) && !empty($request->semester_ids) ? $request->semester_ids : []);
         $course_ids = (isset($request->course_ids) && !empty($request->course_ids) ? $request->course_ids : []);
-        $status_ids = (isset($request->status_ids) && !empty($request->status_ids) ? $request->status_ids : [23,24,25,26,27,28,29,30,31,42,42,45]);
+        $status_ids = (isset($request->status_ids) && !empty($request->status_ids) ? $request->status_ids : [23,24,25,26,27,28,29,30,31,42,42,45, 13, 15, 16, 17, 18, 20, 33, 36, 48, 49, 50]);
         $due_date = date('Y-m-d');
 
         $creations = CourseCreation::orderBy('id', 'ASC');
@@ -115,7 +115,7 @@ class StudentDueReportController extends Controller
     public function excelDownload(Request $request){
         $semester_ids = (isset($request->semester_ids) && !empty($request->semester_ids) ? $request->semester_ids : []);
         $course_ids = (isset($request->course_ids) && !empty($request->course_ids) ? $request->course_ids : []);
-        $status_ids = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : [23,24,25,26,27,28,29,30,31,42,42,45]);
+        $status_ids = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : [23,24,25,26,27,28,29,30,31,42,42,45, 13, 15, 16, 17, 18, 20, 33, 36, 48, 49, 50]);
         $due_date = date('Y-m-d');
 
         $creations = CourseCreation::orderBy('id', 'ASC');

@@ -414,7 +414,7 @@ class DatafutureReportController extends Controller
                                 $RSNENGEND = '';
                                 $QUALRESULT = '';
                                 if(isset($STUDENT_CREL->active) && $STUDENT_CREL->active == 1):
-                                    $endStatuses = [21, 26, 27, 31, 42];
+                                    $endStatuses = [21, 26, 27, 31, 42, 13, 16, 17, 33];
                                     $student_status_id = (isset($STUDENT->status_id) && $STUDENT->status_id > 0 ? $STUDENT->status_id : '');
                                     $termStatusId = (isset($STUDENT->termStatus->status_id) && !empty($STUDENT->termStatus->status_id) ? $STUDENT->termStatus->status_id : '');
 

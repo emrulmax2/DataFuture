@@ -2614,7 +2614,7 @@ class  StudentController extends Controller
         $statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
         $attendance_indicator = (isset($request->attendance_indicator) && $request->attendance_indicator > 0 ? $request->attendance_indicator : 0);
 
-        $endStatuses = [21, 26, 27, 31, 42];
+        $endStatuses = [21, 26, 27, 31, 42, 13, 16, 17, 33];
         $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
         $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
         

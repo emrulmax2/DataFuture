@@ -716,7 +716,7 @@ class DashboardController extends Controller
                 ->leftJoin('students as std', 'atn.student_id', 'std.id')
                 ->where('atn.plan_id', $plan_id)
                 ->whereIn('atn.student_id', $student_ids)
-                ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
+                ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45, 13, 15, 48, 16, 17, 18, 20, 36, 33, 47, 50])
                 ->groupBy('pln.module_creation_id')->orderBy('pln.module_creation_id', 'ASC')->get()->first();
 
         //dd($row);
@@ -758,7 +758,7 @@ class DashboardController extends Controller
                             ->where('atn.plan_id', $plan_id)
                             ->whereIn('atn.student_id', $student_ids)
                             ->where('pln.module_creation_id', $mod_id)
-                            ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45])
+                            ->whereIn('std.status_id', [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 45, 13, 15, 48, 16, 17, 18, 20, 36, 33, 47, 50])
                             ->where(function($q) use($batchStart, $batchEnd){
                                 $q->whereDate('atn.attendance_date', '>=', $batchStart)->whereDate('atn.attendance_date', '<=', $batchEnd);
                             })->get()->first();

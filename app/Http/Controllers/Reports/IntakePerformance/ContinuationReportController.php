@@ -219,7 +219,7 @@ class ContinuationReportController extends Controller
                                                     })->pluck('student_id')->unique()->toArray();
                                 $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
 
-                                $droppedOutStdents = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45])
+                                $droppedOutStdents = StudentAttendanceTermStatus::whereIn('student_id', $registered_std_ids)->whereIn('status_id', [22, 27, 30, 31, 42, 43, 45, 14, 17, 33, 36, 47, 50])
                                                         ->whereNotNull('status_change_date')->where(function($q) use($refund_date, $completion_date){
                                                             $q->whereDate('status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('status_change_date', '<=', date('Y-m-d', strtotime($completion_date)));
                                                         })->groupBy('student_id')->pluck('student_id')->unique()->toArray();
