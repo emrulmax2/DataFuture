@@ -231,6 +231,7 @@ use App\Http\Controllers\HR\portal\VacancyController;
 use App\Http\Controllers\HR\Reports\AttendanceReportController;
 use App\Http\Controllers\HR\Reports\HolidayHourReportController;
 use App\Http\Controllers\HR\Reports\OutstandingHolidayReportController;
+use App\Http\Controllers\HR\Reports\SickLeaveController;
 use App\Http\Controllers\InternalLinkController;
 use App\Http\Controllers\IssueTypeController;
 use App\Http\Controllers\LibraryLocationController;
@@ -4063,6 +4064,12 @@ Route::middleware('auth')->group(function() {
     Route::controller(AccSettingController::class)->group(function() {
         Route::get('site-settings/accounts', 'index')->name('site.settings.accounts'); 
         Route::post('site-settings/update-account-setting', 'update')->name('site.setting.accounts.update');
+    });
+
+    Route::controller(SickLeaveController::class)->group(function() {
+        Route::get('hr/portal/reports/sick-leave', 'index')->name('hr.portal.reports.sick.leave');
+        Route::get('hr/portal/reports/sick-leave/list', 'list')->name('hr.portal.reports.sick.leave.list');
+        Route::post('hr/portal/reports/sick-leave/export', 'exportList')->name('hr.portal.reports.sick.leave.export');
     });
     
 });
