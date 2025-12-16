@@ -36,8 +36,8 @@ var empSickLeaveListTable = (function () {
                     width: 250,
                 },
                 {
-                    title: "Hourly Rate",
-                    field: "hourly_rate",
+                    title: "Contracted Hour",
+                    field: "contracted_hour",
                     headerHozAlign: "left",
                     width: 150,
                 },
@@ -71,7 +71,7 @@ var empSickLeaveListTable = (function () {
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
                     const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
+                    lastColumn.setWidth(currentWidth - 5);
                 }
             },
         });
