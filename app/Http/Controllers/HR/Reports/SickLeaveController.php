@@ -6,6 +6,7 @@ use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use App\Models\EmployeeLeave;
+use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternPay;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -60,7 +61,7 @@ class SickLeaveController extends Controller
             )->groupBy('employee_leaves.employee_id');
             
 
-        $total_rows = $query->count();
+        $total_rows = $query->get()->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
@@ -77,27 +78,21 @@ class SickLeaveController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $employee_id = $list->employee_id;
-                $employeePay = EmployeeWorkingPatternPay::where('active', 1)
-                                ->whereHas('pattern', function ($q) use ($employee_id) {
-                                    $q->where('employee_id', $employee_id)
-                                    ->where('active', 1)
-                                    ->orderByDesc('id')
-                                    ->limit(1);
-                                })
+                $employeePay = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                                 ->orderByDesc('id')
                                 ->first();
                 $data[] = [
                     'sl' => $i,
                     'employee_id' => $list->employee_id,
                     'employee_name' => $list->first_name.' '.$list->last_name,
-                    'hourly_rate' => (isset($employeePay->hourly_rate) && $employeePay->hourly_rate > 0 ? Number::currency($employeePay->hourly_rate, 'GBP') : Number::currency(0, 'GBP')),
+                    'contracted_hour' => (isset($employeePay->contracted_hour) && !empty($employeePay->contracted_hour) ? $employeePay->contracted_hour : '00:00'),
                     'no_of_days' => $list->total_days,
                     'dates' => $list->dates
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'rows' => $total_rows]);
     }
 
     public function exportList(Request $request){
@@ -133,7 +128,7 @@ class SickLeaveController extends Controller
 
         $theCollection = [];
         $theCollection[1][] = "Employee";
-        $theCollection[1][] = "Hourly Rate";
+        $theCollection[1][] = "Contracted Hour";
         $theCollection[1][] = "No Of Days";
         $theCollection[1][] = "Leave Days";
         
@@ -142,17 +137,11 @@ class SickLeaveController extends Controller
         if(!empty($Query)):
             foreach($Query as $list):
                 $employee_id = $list->employee_id;
-                $employeePay = EmployeeWorkingPatternPay::where('active', 1)
-                                ->whereHas('pattern', function ($q) use ($employee_id) {
-                                    $q->where('employee_id', $employee_id)
-                                    ->where('active', 1)
-                                    ->orderByDesc('id')
-                                    ->limit(1);
-                                })
+                $employeePay = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                                 ->orderByDesc('id')
                                 ->first();
                 $theCollection[$row][] = $list->first_name.' '.$list->last_name;
-                $theCollection[$row][] = (isset($employeePay->hourly_rate) && $employeePay->hourly_rate > 0 ? $employeePay->hourly_rate : 0);
+                $theCollection[$row][] = (isset($employeePay->contracted_hour) && !empty($employeePay->contracted_hour) ? $employeePay->contracted_hour : '00:00');
                 $theCollection[$row][] = $list->total_days;
                 $theCollection[$row][] = $list->dates;
 
