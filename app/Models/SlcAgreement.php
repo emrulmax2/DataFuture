@@ -121,4 +121,21 @@ class SlcAgreement extends Model
 
         return $refundAmount;
     }
+
+    public function getClaimTillTodayAttribute(){
+        $claimAmount = 0;
+        if(isset($this->installments) && $this->installments->count() > 0):
+            foreach($this->installments as $inst):
+                if(!empty($inst->installment_date) && $inst->installment_date <= date('Y-m-d')):
+                    $claimAmount += $inst->amount;
+                endif;
+            endforeach;
+        endif;
+
+        return $claimAmount;
+    }
+
+    public function getDueToDateAttribute(){
+        return ($this->received_amount - $this->claim_till_today);
+    }
 }
