@@ -85,6 +85,15 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-span-12 sm:col-span-3">
+                            <div class="grid grid-cols-12 gap-0 gap-x-3">
+                                <div class="col-span-4 text-slate-500 font-medium">Agreement Balance</div>
+                                <div class="col-span-8 font-medium">
+                                    <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
+                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
+                                </div>
+                            </div>
+                        </div>
                         @if($discount > 0)
                             <div class="col-span-12 sm:col-span-3">
                                 <div class="grid grid-cols-12 gap-0 gap-x-3">
@@ -94,8 +103,6 @@
                                     </div>
                                 </div>
                             </div>
-                        @else 
-                            <div class="col-span-12 sm:col-span-3"></div>
                         @endif
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
@@ -131,10 +138,10 @@
                         </div>
                         <div class="col-span-12 sm:col-span-3">
                             <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Balance</div>
+                                <div class="col-span-4 text-slate-500 font-medium">Due to Date</div>
                                 <div class="col-span-8 font-medium">
                                     <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
+                                    {!! ($agr->due_to_date >= 0 ? '<span class="text-success">'.Number::currency($agr->due_to_date, 'GBP').'</span>' : '<span class="text-danger">'.Number::currency($agr->due_to_date, 'GBP').'</span>') !!}
                                 </div>
                             </div>
                         </div>
