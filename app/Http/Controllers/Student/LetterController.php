@@ -178,7 +178,7 @@ class LetterController extends Controller
         endforeach;
 
         $query = DB::table('student_letters as sl')
-                        ->select('sl.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'sld.id as letter_doc_id', 'sld.current_file_name')
+                        ->select('sl.*', 'ls.letter_type', 'ls.letter_title', 'sg.signatory_name', 'sg.signatory_post', 'ur.name as created_bys', 'sld.id as letter_doc_id', 'sld.current_file_name','sld.email_sent_at')
                         ->leftJoin('letter_sets as ls', 'sl.letter_set_id', '=', 'ls.id')
                         ->leftJoin('signatories as sg', 'sl.signatory_id', '=', 'sg.id')
                         ->leftJoin('users as ur', 'sl.issued_by', '=', 'ur.id')
@@ -229,7 +229,8 @@ class LetterController extends Controller
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
                     'issued_date'=> (isset($list->issued_date) && !empty($list->issued_date) ? date('jS F, Y', strtotime($list->issued_date)) : ''),
                     'deleted_at' => $list->deleted_at,
-                    'can_delete' => (isset(auth()->user()->priv()['communication_delete_letter']) && auth()->user()->priv()['communication_delete_letter'] == 1 ? 1 : 0)
+                    'can_delete' => (isset(auth()->user()->priv()['communication_delete_letter']) && auth()->user()->priv()['communication_delete_letter'] == 1 ? 1 : 0),
+                    'email_sent_at' =>(isset($list->email_sent_at) && !empty($list->email_sent_at) ? date('jS F, Y', strtotime($list->email_sent_at)) : ''),
                 ];
                 $i++;
             endforeach;

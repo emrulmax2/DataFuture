@@ -651,10 +651,10 @@ class PendingTaskManagerController extends Controller
                     ]);
 
                     if(isset($letterSet->id) && $letterSet->id > 0 && !empty($letterSet->description)):
-                        $subject = 'Welcome to London Churchill College';
+                        //$subject = 'Welcome to London Churchill College';
                         //$MSGBODY = $letterSet->description;
-                        $MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,23);
-                        UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
+                        //$MSGBODY = $this->parseLetterContent($student->id,$letterSet->letter_title, $letterSet->description,$issued_date,23);
+                        //UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
                         
                         //save to Generate Letter communication
                         $pin = time();
@@ -686,6 +686,7 @@ class PendingTaskManagerController extends Controller
                             $data['display_file_name'] = $letter_title;
                             $data['current_file_name'] = $generatedLetter['filename'];
                             $data['created_by'] = auth()->user()->id;
+                            $data['mail_sent_status'] = 1;
                             StudentLettersDocument::create($data);
                             /* Generate PDF End */
                         endif;

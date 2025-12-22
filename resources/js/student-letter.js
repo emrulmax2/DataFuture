@@ -32,6 +32,16 @@ var studentCommLetterListTable = (function () {
                     headerHozAlign: "left",
                     width: "120",
                     minWidth: 50,
+                    formatter(cell, formatterParams) {
+                        let btns = "";
+                        if(cell.getData().email_sent_at != ''){
+                            
+                            btns = cell.getData().id + ' <i data-lucide="send" class="w-4 h-4 ml-2 text-green-600"></i>' ;
+                        } else {
+                            btns = cell.getData().id;
+                        }
+                        return btns;
+                    }
                 },
                 {
                     title: "Type",
@@ -88,7 +98,6 @@ var studentCommLetterListTable = (function () {
                         }else if(cell.getData().deleted_at != null && cell.getData().can_delete == 1) {
                             btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
                         return btns;
                     },
                 },
