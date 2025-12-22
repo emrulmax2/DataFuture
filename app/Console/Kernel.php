@@ -29,6 +29,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('coursecontentmissingtutornotification:cron')->weeklyOn(7, '23:50');
 
         $schedule->command('studentdue:cron')->dailyAt('05:00');
+
+
+        $schedule->command('studentbulkemailcreationmailsend:cron')->everyThirtyMinutes();
         
 
         

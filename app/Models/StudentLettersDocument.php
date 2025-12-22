@@ -20,7 +20,9 @@ class StudentLettersDocument extends Model
         'display_file_name',
         'current_file_name',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'mail_sent_status',
+        'email_sent_at'
     ];
 
     /**
