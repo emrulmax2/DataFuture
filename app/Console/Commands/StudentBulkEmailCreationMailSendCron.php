@@ -7,7 +7,11 @@ use Illuminate\Console\Command;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\ComonSmtp;
+use App\Models\Grade;
 use App\Models\LetterSet;
+use App\Models\ModuleCreation;
+use App\Models\Plan;
+use App\Models\Result;
 use App\Models\Signatory;
 use App\Models\Student;
 use App\Models\StudentLetter;
@@ -85,14 +89,14 @@ class StudentBulkEmailCreationMailSendCron extends Command
                 $studentLetter = StudentLetter::find($document->student_letter_id);
                 if (!$studentLetter) {
                     // Release the claim if student letter is missing
-                    $document->mail_sent_status = 3; // mark as error
+                    $document->mail_sent_status = 4; // mark as error
                     $document->save();
                     continue;
                 }
 
                 $student = Student::find($studentLetter->student_id);
                 if (!$student) {
-                    $document->mail_sent_status = 3; // mark as error
+                    $document->mail_sent_status = 5; // mark as error
                     $document->save();
                     continue;
                 }
@@ -126,7 +130,7 @@ class StudentBulkEmailCreationMailSendCron extends Command
         $student = Student::find($student_id);
         $issued_date = (!empty($issued_date) ? date('d/m/Y', strtotime($issued_date)) : date('d/m/Y'));
         $signature = Signatory::find($signatory);
-        $data_table_arr = $this->perseLetterData($letter_content);
+        $data_table_arr = $this->parseLetterData($letter_content);
         $letter_content = stripslashes($letter_content);
 
         if(!empty($data_table_arr)):
@@ -242,6 +246,130 @@ class StudentBulkEmailCreationMailSendCron extends Command
         endif;
 
         return $letter_content;
+    }
+
+    private function parseLetterData($content){
+        preg_match_all('/\[DATA=(.*?)\](.*?)\[\/DATA\]/', $content, $matches, PREG_SET_ORDER);
+
+        $lists = [];
+        $i = 0;
+        foreach ($matches as $val):
+
+            if (!isset($lists[$i])):
+                $lists[$i] = array();
+                $lists[$i] = array_merge($lists[$i], array($val[1], $val[2]));
+            else:
+                $lists[$i] = array_merge($lists[$i], array($val[1], $val[2]));
+            endif;
+            $i++;
+        endforeach;
+
+        return (!empty($lists) && count($lists) ? $lists : false);
+    }
+
+
+    private function examResultHtml($student_id, $grades){
+        $student = Student::find($student_id);
+        $grades = (!empty($grades) ? explode(',', str_replace(' ', '', $grades)) : []);
+
+        $html = '';
+        $aloverCount = [];
+        if(!empty($grades)):
+            foreach($grades as $grade):
+                $aloverCount[$grade] = 0;
+            endforeach;
+            $grade_ids = Grade::whereIn('code', $grades)->pluck('id')->unique()->toArray();
+            $studentCourseCreationId = $student->activeCR->course_creation_id;
+            $plan_ids = Result::where('student_id', $student->id)->whereIn('grade_id', $grade_ids)->whereHas('plan', function($q) use($studentCourseCreationId){
+                            $q->where('course_creation_id', '>=', $studentCourseCreationId);
+                        })->pluck('plan_id')->unique()->toArray();
+
+            if(!empty($plan_ids)):
+                $plans = Plan::with('attenTerm')->whereIn('id', $plan_ids)->where('course_creation_id', '>=', $studentCourseCreationId)
+                        ->orderBy('id','DESC')->get();
+
+                if(!empty($plans) && $plans->count() > 0):
+                    $studentResult = [];
+                    foreach($plans as $list):
+                        $moduleCreation = ModuleCreation::with('module', 'level')->where('id', $list->module_creation_id)->get()->first();
+                        $results = Result::with(["grade", "createdBy", "updatedBy", "plan", "plan.creations", "plan.course.body", "plan.creations.module"])
+                                            ->where("student_id", $student->id)->whereHas('plan', function($query) use ($list) {
+                                                $query->where('module_creation_id', $list->module_creation_id)->where('id', $list->id);
+                                            })->orderBy('id','DESC')->get();
+                        if($results->isNotEmpty()):
+                            foreach ($results as $key => $result):
+                                $studentResult[$moduleCreation->course_module_id][] = $result;
+                            endforeach;
+                        endif;
+                    endforeach;
+                    if(!empty($studentResult)):
+                        $html .= '<table border="1" class="table table-bordered studentLetterResultTable table-sm mb-5" id="studentLetterResultTable">';
+                            $html .= '<thead>';
+                                $html .= '<tr>';
+                                    $html .= '<th>S/N</th>';
+                                    $html .= '<th>Module Name</th>';
+                                    $html .= '<th>Awarding body</th>';
+                                    $html .= '<th>Module No.</th>';
+                                    $html .= '<th>No of Attempt</th>';
+                                    $html .= '<th>Exam Date</th>';
+                                    $html .= '<th>Percentage</th>';
+                                    $html .= '<th>Grade</th>';
+                                    $html .= '<th>Semester</th>';
+                                    $html .= '<th>Status</th>';
+                                $html .= '</tr>';
+                            $html .= '</thead>';
+                            $html .= '<tbody>';
+                                $serial = 1;
+                                foreach($studentResult as $module_id => $results):
+                                    $result = $results[0];
+                                    if(isset($aloverCount[$result->grade->code])):
+                                        $aloverCount[$result->grade->code] += 1;
+                                    endif;
+                                    $html .= '<tr>';
+                                        $html .= '<td>'.$serial.'</td>';
+                                        $html .= '<td>'.(isset($result->plan->creations->module_name) ? $result->plan->creations->module_name : '').' ('.(isset($result->plan->creations->course_module_id) ? $result->plan->creations->course_module_id : '').')</td>';
+                                        $html .= '<td>'.(isset($result->plan->course->body->name) ? $result->plan->course->body->name : '').'</td>';
+                                        $html .= '<td>'.(isset($result->plan->creations->code) ? $result->plan->creations->code : '').'</td>';
+                                        $html .= '<td>'.(!empty($results) ? count($results) : 0).'</td>';
+                                        $html .= '<td>'.(isset($result->published_at) && !empty($result->published_at) ? date('d-m-Y', strtotime($result->published_at)) : '').'</td>';
+                                        $html .= '<td>&nbsp;</td>';
+                                        $html .= '<td>'.(isset($result->grade->code) ? $result->grade->code : '').'</td>';
+                                        $html .= '<td>';
+                                            if($result->term_declaration_id == Null):
+                                                $html .= $result->plan->attenTerm->name;
+                                            else:
+                                                $html .= $result->term->name;
+                                            endif;
+                                        $html .= '</td>';
+                                        $html .= '<td>'.(isset($result->grade->name) ? $result->grade->name : '').'</td>';
+                                    $html .= '</tr>';
+
+                                    $serial++;
+                                endforeach;
+                            $html .= '</tbody>';
+                        $html .= '</table>';
+                    else:
+                        return '';
+                    endif;
+                endif;
+            endif;
+        endif;
+
+        $theHTML = '';
+        if(!empty($aloverCount)):
+            $theHTML .= '<div style="font-weight: bold; margin-bottom: 10px;">';
+                $totalCount = 0;
+                $theHTML .= 'RQF (';
+                foreach($aloverCount as $grade => $count):
+                    $theHTML .= $grade.' = '.$count.' | ';
+                    $totalCount += $count;
+                endforeach;
+                $theHTML .= ' Total = '.$totalCount.')';
+            $theHTML .= '</div>';
+        endif;
+        $theHTML .= $html;
+
+        return $theHTML;
     }
     
 }
