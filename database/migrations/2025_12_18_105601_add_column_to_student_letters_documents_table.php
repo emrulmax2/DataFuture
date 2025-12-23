@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('student_letters_documents', function (Blueprint $table) {
-            $table->boolean('mail_sent_status')->default(0)->after('updated_by');
-            $table->dateTime('email_sent_at')->nullable()->after('mail_sent_status');
+            
+            $table->smallInteger('mail_sent_status')->default(0)->after('updated_by');
+            $table->timestamp('email_sent_at')->nullable()->after('mail_sent_status');
         });
     }
 
@@ -24,6 +25,7 @@ return new class extends Migration
     {
         Schema::table('student_letters_documents', function (Blueprint $table) {
             $table->dropColumn('email_sent_at');
+            $table->dropColumn('mail_sent_status');
         });
     }
 };
