@@ -123,16 +123,7 @@ class SlcAgreement extends Model
     }
 
     public function getClaimTillTodayAttribute(){
-        $claimAmount = 0;
-        if(isset($this->installments) && $this->installments->count() > 0):
-            foreach($this->installments as $inst):
-                if(!empty($inst->installment_date) && $inst->installment_date <= date('Y-m-d')):
-                    $claimAmount += $inst->amount;
-                endif;
-            endforeach;
-        endif;
-
-        return $claimAmount;
+        return SlcInstallment::where('slc_agreement_id', $this->id)->whereDate('installment_date', '<=', date('Y-m-d'))->get()->sum('amount');
     }
 
     public function getDueToDateAttribute(){
