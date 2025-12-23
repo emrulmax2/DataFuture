@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
+
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\ComonSmtp;
@@ -10,8 +12,9 @@ use App\Models\Signatory;
 use App\Models\Student;
 use App\Models\StudentLetter;
 use App\Models\StudentLettersDocument;
-use Illuminate\Console\Command;
+
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class StudentBulkEmailCreationMailSendCron extends Command
 {
@@ -59,34 +62,63 @@ class StudentBulkEmailCreationMailSendCron extends Command
             
         ];
 
-        // it should be where null
-        StudentLettersDocument::where('mail_sent_status', 1)
-            ->whereNull('email_sent_at') 
-            ->chunk(10, function ($documents) use ($letterSet, $configuration) {
-                foreach ($documents as $document) {
-                    // Logic to send email for each document
-                    // ...
-                    $subject = 'Welcome to London Churchill College';
-                    $studentLetter = StudentLetter::find($document->student_letter_id);
+        // Concurrency-safe processing: claim records before processing
+        $documents = StudentLettersDocument::where('mail_sent_status', 1)
+            ->whereNull('email_sent_at')
+            ->limit(10)
+            ->get();
 
-                    $student = Student::find($studentLetter->student_id);
-                    $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
-                    $studentUserEmail = $orgEmail;
-                    $mailTo = [];
-                    $mailTo[] = $studentUserEmail;
-                    if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)):
-                        $mailTo[] = $student->contact->personal_email;
-                    endif;
+        foreach ($documents as $document) {
+            // Try to claim the document for processing (set status to 9)
+            $updated = StudentLettersDocument::where('id', $document->id)
+                ->where('mail_sent_status', 1)
+                ->whereNull('email_sent_at')
+                ->update(['mail_sent_status' => 9]);
 
-                    $MSGBODY = $this->parseLetterContent($studentLetter->student_id,$document->display_file_name, $letterSet->description,$studentLetter->issued_date,23);
-                    UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
+            if ($updated === 0) {
+                // Another process has already claimed this document
+                continue;
+            }
 
-                    // After sending email, update the mail_sent_status
-                    $document->mail_sent_status = 2;
-                    $document->email_sent_at = now();
+            try {
+                $subject = 'Welcome to London Churchill College';
+                $studentLetter = StudentLetter::find($document->student_letter_id);
+                if (!$studentLetter) {
+                    // Release the claim if student letter is missing
+                    $document->mail_sent_status = 3; // mark as error
                     $document->save();
+                    continue;
                 }
-            });  
+
+                $student = Student::find($studentLetter->student_id);
+                if (!$student) {
+                    $document->mail_sent_status = 3; // mark as error
+                    $document->save();
+                    continue;
+                }
+                $orgEmail = strtolower($student->registration_no).'@lcc.ac.uk';
+                $studentUserEmail = $orgEmail;
+                $mailTo = [];
+                $mailTo[] = $studentUserEmail;
+                if(isset($student->contact->personal_email) && !empty($student->contact->personal_email)) {
+                    $mailTo[] = $student->contact->personal_email;
+                }
+
+                $MSGBODY = $this->parseLetterContent($studentLetter->student_id, $document->display_file_name, $letterSet->description, $studentLetter->issued_date, 23);
+                UserMailerJob::dispatch($configuration, $mailTo, new CommunicationSendMail($subject, $MSGBODY, []));
+
+                // After sending email, update the mail_sent_status
+                $document->mail_sent_status = 2;
+                $document->email_sent_at = now();
+                $document->save();
+            } catch (\Exception $e) {
+                // On error, mark as failed
+                $document->mail_sent_status = 3;
+                $document->save();
+                // Optionally log the error
+                Log::error('StudentBulkEmailCreationMailSendCron error: ' . $e->getMessage());
+            }
+        }
     }
 
     
