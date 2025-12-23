@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('studentdue:cron')->dailyAt('05:00');
 
 
-        $schedule->command('studentbulkemailcreationmailsend:cron')->everyThirtyMinutes();
+        $schedule->command('studentbulkemailcreationmailsend:cron')->everyFifteenMinutes();
         
 
         
