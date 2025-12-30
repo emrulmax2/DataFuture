@@ -52,7 +52,11 @@ return [
         'agent' => [
             'driver' => 'session',
             'provider' => 'agents',
-        ]
+        ],
+        'student-api' => [
+            'driver' => 'passport',
+            'provider' => 'students',
+        ],
     ],
 
     /*
