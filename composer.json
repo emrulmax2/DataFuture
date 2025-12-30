@@ -12,7 +12,7 @@
         "lab404/laravel-impersonate": "^1.7",
         "laravel/framework": "^10.0",
         "laravel/nightwatch": "^1.10",
-        "laravel/sanctum": "^3.2",
+        "laravel/passport": "*",
         "laravel/socialite": "^5.6",
         "laravel/tinker": "^2.7",
         "league/flysystem-aws-s3-v3": "3.0",

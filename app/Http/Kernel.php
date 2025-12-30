@@ -54,7 +54,8 @@ class Kernel extends HttpKernel
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
-        
+        'auth.api' => \App\Http\Middleware\Api\Authenticate::class,
+        'redirect.by.role' => \App\Http\Middleware\RedirectIfAuthenticatedByRole::class,
         'auth.agent' => \App\Http\Middleware\AuthAgent::class,
         'agent.loggedin' => \App\Http\Middleware\AgentLoggedIn::class,
         'saved.shopping_cart' => \App\Http\Middleware\SaveShoppingCartSession::class,
