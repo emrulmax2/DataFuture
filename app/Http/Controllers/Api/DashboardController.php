@@ -14,16 +14,17 @@ class DashboardController extends Controller
     
     public function index(Request $request) 
     {
-        \Log::info('Authenticated user:', ['user' => auth()->user(), 'guard' => auth()->getDefaultDriver()]);
+
         $theUser = $request->user();
         if (!$theUser) {
             return response()->json(['success' => false, 'error' => 'No authenticated user found.'], 401);
         }
         $cacheKey = 'dashboard_data_student_user_' . $theUser->id;
         $data = Cache::remember($cacheKey, now()->addHours(1), function () use ($theUser) {
-            $student = Student::where('student_user_id', $theUser->id)->first();
+            $student = Student::with(['title','status','contact','contact.termaddress','contact.permaddress','contact.ttacom'])->where('student_user_id', $theUser->id)->first();
             return new StudentResource($student);
         });
+            
         return response()->json([
             'success' => true,
             'message' => 'Dashboard data retrieved successfully.',
