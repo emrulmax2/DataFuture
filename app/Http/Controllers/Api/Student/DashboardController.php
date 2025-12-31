@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Student;
-use App\Models\StudentUser;
 use App\Http\Resources\StudentResource;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
@@ -31,4 +30,5 @@ class DashboardController extends Controller
             'data' => $data,
         ], 200);
     }
+    
 }

@@ -40,6 +40,23 @@ class StudentResource extends JsonResource
             'permanent_state' => $student->contact->permaddress->state ?? '',
             'permanent_postcode' => $student->contact->permaddress->post_code ?? '',
             'permanent_country' => $student->contact->permaddress->country ?? '',
+            'useful_links' => [
+                    'jstor' => [
+                        'url' => 'https://www.jstor.org/',
+                        'image_url' => asset('build/assets/images/jstor_vertical.png'),
+                        'alt_text' => 'J Stor Library',
+                    ],
+                    'ebsco' => [
+                        'url' => 'https://research.ebsco.com/c/c4wm42',
+                        'image_url' => asset('build/assets/images/ebsco.png'),
+                        'alt_text' => 'EBSCO Research Database',
+                    ],
+                    'training_and_guidance' => [
+                        'url' => 'https://sites.google.com/lcc.ac.uk/training-guidance/home',
+                        'image_url' => asset('build/assets/images/training_and_guidance_vertical.png'),
+                        'alt_text' => 'Training and Guidance',
+                    ],
+                ],
         ];
     }
 }
