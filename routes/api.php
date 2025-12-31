@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
 use App\Http\Controllers\Api\Auth\LoginController;
-use App\Http\Controllers\Api\DashboardController as ApiDashboardController;
+use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
+use App\Http\Controllers\Api\Student\DoItOnlineController;
+use App\Http\Controllers\Api\Student\ModuleListController;
+use App\Http\Controllers\Api\Student\ResultController;
 
-use App\Models\StudentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stripe\Stripe;
@@ -47,12 +49,22 @@ Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::cla
 
 
     // Protected routes (require Bearer Token)
-    Route::middleware('auth.api:student-api')->group(function() {
+    Route::middleware('auth.api:student-api')->prefix('student')->group(function() {
 
         Route::controller(ApiDashboardController::class)->group(function() {
-        
             Route::get('dashboard', 'index')->name('user.dashboard');
-    
+        });
+
+        Route::controller(ResultController::class)->group(function() {
+            Route::get('results', 'index')->name('user.results');
+        });
+
+        Route::controller(DoItOnlineController::class)->group(function() {
+            Route::get('do-it-online/forms', 'formsList')->name('user.doitonline.forms');
+        });
+
+        Route::controller(ModuleListController::class)->group(function() {
+            Route::get('modules', 'index')->name('user.modules.list');
         });
 
         Route::post('/logout', [LoginController::class, 'logout']);
