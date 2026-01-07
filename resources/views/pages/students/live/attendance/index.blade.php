@@ -9,7 +9,7 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
-    {{-- <div class="intro-y box col-span-12 p-5 mt-5  ">
+    <div class="intro-y box col-span-12 p-5 mt-5  ">
 
         <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-slate-200 text-slate-100 rounded-tl rounded-tr">
                 
@@ -18,7 +18,7 @@
             <a href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 "><i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i> Print All
             </a>
         </div>
-    </div> --}}
+    </div>
     <!-- BEGIN: Daily Sales -->
         @php $termstart=0 @endphp
         @foreach($dataSet as $termId =>$dataStartPoint)
@@ -66,9 +66,9 @@
                         </ul>
                     </div>
                 </div>
-                <button class="btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
+                <a href="#" class="btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
-                </button>
+                </a>
                 @if($termstart==1 && $termAttendanceFound[$termId]===true)
                 <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
