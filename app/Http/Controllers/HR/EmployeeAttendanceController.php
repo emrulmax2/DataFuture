@@ -249,13 +249,13 @@ class EmployeeAttendanceController extends Controller
                                          ->where('effective_from', '<=', $theDate)
                                          ->where(function($query) use($theDate){
                                             $query->whereNull('end_to')->orWhere('end_to', '>=', $theDate);
-                                         })->get()->first();
+                                         })->where('active', 1)->orderBy('id', 'DESC')->get()->first();
                 $activePatternId = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
                 $patternPay = EmployeeWorkingPatternPay::where('employee_working_pattern_id', $activePatternId)
                               ->where('effective_from', '<=', $theDate)
                               ->where(function($query) use($theDate){
                                     $query->whereNull('end_to')->orWhere('end_to', '>=', $theDate);
-                              })->where('active', 1)->get()->first();
+                              })->where('active', 1)->orderBy('id', 'DESC')->get()->first();
                 $activePatternPayId = (isset($patternPay->id) && $patternPay->id > 0 ? $patternPay->id : 0);
 
                 $patternDay         = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $activePatternId)->where('day', $theDayNum)->get()->first();
