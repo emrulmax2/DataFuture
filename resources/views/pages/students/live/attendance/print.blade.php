@@ -82,7 +82,7 @@
         </div>
         <div class="print-header-bottom w-full">
             <div class="left">
-                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ asset("build/assets/images/L1_logo.svg") }}">
             </div>
             <div class="right">
                 {{-- <img src="{{ (isset($student->photo_url) && $student->photo_url) ? $student->photo_url : asset('images/default-profile.png') }}" alt="Student" class="student-photo mr-2" /> --}}
