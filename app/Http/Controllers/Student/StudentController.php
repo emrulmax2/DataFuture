@@ -1673,6 +1673,8 @@ class  StudentController extends Controller
         $totalClassFullSet = [];
         $returnSet = [];
         $attendanceIndicator = [];
+        $planIds = $request->plan_ids ?? [];
+        
         $opt = Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
 		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? public_path('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
             $attendanceFeedStatus = AttendanceFeedStatus::all();
@@ -1742,7 +1744,7 @@ class  StudentController extends Controller
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
             "attendanceIndicator" => $attendanceIndicator,
-            
+            'expandedPlanIds' => $planIds,
             "finalAverage" => $finalAverage,
             'codeDistribution' => $codeDistribution,
             'codeDistributionString' => $codeDistributionString,

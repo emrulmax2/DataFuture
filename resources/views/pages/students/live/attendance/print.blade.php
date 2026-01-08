@@ -133,7 +133,8 @@
     </div>
     <div class="print-content">
     @php $termstart=0 @endphp
-    
+        
+        @if($term_id=="")
         <div class="mb-6 flex flex-wrap items-start gap-4">
             <div class="w-full bg-slate-50 text-slate-900 px-6 py-4 border border-slate-200 rounded-lg shadow-sm print:bg-white">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -152,12 +153,13 @@
                 </div>
             </div>
         </div>
-    
+        @endif
     @foreach($dataSet as $termId =>$dataStartPoint)
         @php $termstart++; $planId=1; @endphp
         @if(isset($term_id) && $term_id>0)
         
             @if($term_id == $termId)
+                
                 @include('pages.students.live.attendance.print-partial')
                 
                 @break

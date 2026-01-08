@@ -32,12 +32,15 @@
                         }
                     @endphp
 
+                    @php
+                        $isPlanExpanded = isset($expandedPlanIds) && in_array($planId, $expandedPlanIds);
+                    @endphp
                     <div class="mt-3 grid grid-cols-12 gap-2 attendance-block px-3 py-2">
                         <div class="col-span-8">
                             <div id="tablepoint-{{ $termId }}" class ="flex tablepoint-toggle">
                                 <div  class=" image-fit table-collapsed cursor-pointer ">
-                                    <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
-                                    <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
+                                    <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 {{ $isPlanExpanded ? '' : 'hidden' }}"></i>
+                                    <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 {{ $isPlanExpanded ? 'hidden' : '' }}"></i>
                                 </div>
                                 <div class="col-span-9">
                                     <div class="text-sm font-semibold">{{ $moduleNameList[$planId] }} [{{ $planId }}]</div>
@@ -48,10 +51,10 @@
                         </div>
                         <div class="col-span-4">
                             <div class="text-sm text-gray-600">Tutor: @if($ClassType[$planId] != 'Tutorial') {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : 'N/A' }} @else {{ !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : 'N/A' }} @endif</div>
-                            <div class="text-sm text-gray-600 ">Average: <span class="badge">{{ $avarageDetails[$termId][$planId] ?? 'N/A' }}% </span></div>
+                            <div class="text-sm text-gray-600 ">Average: <span class="badge bg-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}">{{ $avarageDetails[$termId][$planId] ?? 'N/A' }}% </span></div>
                         </div>
 
-                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto py-5 pt-0 col-span-12" style="display: none;">
+                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto py-5 pt-0 col-span-12" style="{{ $isPlanExpanded ? '' : 'display: none;' }}">
                         <table class="min-w-full text-sm border-collapse table-auto">
                             <thead class="bg-gray-50">
                                 <tr>

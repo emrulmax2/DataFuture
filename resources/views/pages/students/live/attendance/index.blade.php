@@ -49,7 +49,8 @@
                 </a>
                           
             @endif
-            <a href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 "><i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i> Print All
+            <a id="print-all-btn" data-base="{{ route('student.attendance.print', $student->id) }}" href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 ">
+                <i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i>Print All
             </a>
         </div>
     </div>
@@ -79,7 +80,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="dropdown ml-auto hidden md:block no-print">
+                {{-- <div class="dropdown ml-auto hidden md:block no-print">
                     <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
                         <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-100"></i>
                     </a>
@@ -92,8 +93,8 @@
                             </li>
                         </ul>
                     </div>
-                </div>
-                <a href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="no-print btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
+                </div> --}}
+                <a data-term="{{ $termId }}" data-base="{{ route('student.attendance.print', [$student->id, $termId]) }}" href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="single-print-btn no-print btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                 </a>
                 {{-- @if($termstart==1 && $termAttendanceFound[$termId]===true)
@@ -112,7 +113,7 @@
                     <div class="p-5 ">
 
                         <div class="relative md:flex items-center mb-5">
-                            <div id="tablepoint-{{ $termId }}" data-planid="{{ $planId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
+                            <div id="tablepoint-{{ $termId }}" data-term="{{ $termId }}" data-planid="{{ $planId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
                                 <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
                                     <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                             </div>
@@ -284,9 +285,34 @@
     @vite('resources/js/student-attendance-term-status.js')
     <script type="module">
         (function () {
+            const expandedGlobal = new Set();
+            const expandedByTerm = new Map();
+            const buildUrl = (base, params) => {
+                const query = params.toString();
+                if (!query) {
+                    return base;
+                }
+                const joiner = base.includes('?') ? '&' : '?';
+                return `${base}${joiner}${query}`;
+            };
+            const updatePrintLinks = () => {
+                const globalParams = new URLSearchParams();
+                expandedGlobal.forEach(id => globalParams.append('plan_ids[]', id));
+                const $printAll = $('#print-all-btn');
+                $printAll.attr('href', buildUrl($printAll.data('base'), globalParams));
+
+                $('.single-print-btn').each(function() {
+                    const termId = $(this).data('term');
+                    const termParams = new URLSearchParams();
+                    const termSet = expandedByTerm.get(termId);
+                    termSet && termSet.forEach(id => termParams.append('plan_ids[]', id));
+                    $(this).attr('href', buildUrl($(this).data('base'), termParams));
+                });
+            };
             $(".tablepoint-toggle").on('click', function(e) {
                 e.preventDefault();
                 let tthis = $(this)
+                
                 let currentThis=tthis.children(".plusminus").eq(0);
                 console.log(currentThis);
                 let nextThis=tthis.children(".plusminus").eq(1);
@@ -298,7 +324,27 @@
                     currentThis.addClass('hidden')
                 }
 
-                tthis.parent().siblings('div.tabledataset').slideToggle();
+                const planId = tthis.data('planid');
+                const termId = tthis.data('term');
+                const $dataset = tthis.parent().siblings('div.tabledataset');
+                const isOpening = !$dataset.is(':visible');
+                if (isOpening) {
+                    expandedGlobal.add(planId);
+                    if (!expandedByTerm.has(termId)) {
+                        expandedByTerm.set(termId, new Set());
+                    }
+                    expandedByTerm.get(termId).add(planId);
+                } else {
+                    expandedGlobal.delete(planId);
+                    if (expandedByTerm.has(termId)) {
+                        expandedByTerm.get(termId).delete(planId);
+                        if (expandedByTerm.get(termId).size === 0) {
+                            expandedByTerm.delete(termId);
+                        }
+                    }
+                }
+                updatePrintLinks();
+                $dataset.slideToggle();
 
             });
             $(".toggle-heading").on('click', function(e) {
