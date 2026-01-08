@@ -517,10 +517,15 @@ class AttendanceController extends Controller
                 $attendance->save();
             }
         }
-        if(isset($attendance->id)) 
+        if(isset($attendance->id)) :
+            //remove the cache  if student id exists in the cached data
+            $cacheKey = 'plan_with_attendance_set_student_' . ($attendance->student_id ?? '0');
+            cache()->forget($cacheKey);
+
             return response()->json(["all data updated successfully"]);
-        else 
+        else :
             return response()->json(["data could not update."],422);
+        endif;
     }
     /**
      * Remove the specified resource from storage.

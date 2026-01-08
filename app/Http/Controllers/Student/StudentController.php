@@ -999,6 +999,13 @@ class  StudentController extends Controller
 
     protected function PlanWithAttendanceSet(Student $student) {
 
+            // Try to return cached result for this student (30 minutes)
+            $cacheKey = 'plan_with_attendance_set_student_' . ($student->id ?? '0');
+            $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
+            if ($cached !== null) {
+                return $cached;
+            }
+
             $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
             $theInactiveCourse = StudentCourseRelation::where('student_id', $student->id)->where('active',0)->get()->first();
             $theActiveCourse = StudentCourseRelation::where('student_id', $student->id)->where('active',1)->get()->first();
@@ -1383,7 +1390,7 @@ class  StudentController extends Controller
                     
                 endforeach;
 
-            return [ "lastAttendanceDate"=>$lastAttendanceDate,
+            $result = [ "lastAttendanceDate"=>$lastAttendanceDate,
                      "termData" => $termData,
                      "data" => $data ,
                      "planDetails" => $planDetails,
@@ -1396,6 +1403,11 @@ class  StudentController extends Controller
                      "ClassType" =>$ClassType,
                      "attendanceIndicator" =>$attendanceIndicator,
                      "moduleNameList" =>$moduleNameList];
+
+            // Cache the result for 30 minutes
+            \Illuminate\Support\Facades\Cache::put($cacheKey, $result, now()->addMinutes(30));
+
+            return $result;
 
 
 
@@ -1625,7 +1637,7 @@ class  StudentController extends Controller
         $attendanceIndicator = $returnSet["attendanceIndicator"];
         
         
-        $fileName = 'attendance_of_'.$student->registration_no.'_'.$student->first_name.'_'.$student->last_name.'.pdf';
+        //$fileName = 'attendance_of_'.$student->registration_no.'_'.$student->first_name.'_'.$student->last_name.'.pdf';
         // $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
         //     ->setPaper('a4', 'portrait')
         //     ->setWarnings(false);
