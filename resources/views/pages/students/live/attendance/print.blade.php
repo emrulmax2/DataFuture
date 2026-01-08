@@ -75,6 +75,10 @@
         <div class="print-header-top w-full text-center">
             <h1 class="text-lg font-semibold">{{ $title }}</h1>
             <div class="text-sm text-gray-600">Generated on: {{ date('jS F, Y') }}</div>
+            <div class="no-print flex w-60 items-center justify-center gap-2" style="margin-top:18px;">
+                <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">Print</button>
+                <button onclick="window.location.href='{{ route('student.attendance',$student->id) }}'" class="btn btn-outline-primary btn-sm">Back to Attendances</button>
+            </div>
         </div>
         <div class="print-header-bottom w-full">
             <div class="left">
@@ -221,9 +225,7 @@
         </div>
     @endforeach
     </div>
-    <div class="no-print" style="margin-top:18px;">
-        <button onclick="window.print()" class="btn">Print</button>
-    </div>
+    
 
 @endsection
 
