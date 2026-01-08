@@ -173,7 +173,7 @@
                         <table class="min-w-full text-sm border-collapse table-auto">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">ID</th>
+                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">S/N</th>
                                     <th class="px-3 py-1 text-left font-medium text-gray-700 border">Date</th>
                                     <th class="px-3 py-1 text-left font-medium text-gray-700 border">Time</th>
                                     <th class="px-3 py-1 text-left font-medium text-gray-700 border">Taken By</th>
@@ -183,10 +183,12 @@
                             </thead>
                             <tbody class="bg-white">
                                 @if(isset($data) && count($data)>0)
+                                    @php $serial=0; @endphp
                                     @foreach($data as $planDateList)
                                         @if(isset($planDateList["attendance"]) && $planDateList["attendance"]!=null)
+                                            @php $serial++; @endphp
                                             <tr class="even:bg-gray-50">
-                                                <td class="px-3 py-1 border">{{ $planDateList["attendance"]->id }}</td>
+                                                <td class="px-3 py-1 border">{{ $serial }}</td>
                                                 <td class="px-3 py-1 border">
                                                     @if(!empty($planDateList["attendance"]->note))
                                                         {{ date('d F, Y',strtotime($planDateList["attendance"]->attendance_date))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
