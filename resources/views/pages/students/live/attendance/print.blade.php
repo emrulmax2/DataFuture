@@ -128,7 +128,7 @@
         <div class="col-span-6">
             <div class="text-sm text-gray-700">Awarding Body: {{ (isset($student->crel->creation->course->body->name) ? $student->crel->creation->course->body->name : 'Unknown')}}</div>
             <div class="text-sm text-gray-700">Awarding Body Registration No: {{ (isset($student->crel->abody->reference) ? $student->crel->abody->reference : '') }}</div>
-            <div class="text-sm text-gray-700">Date of Award: {{ (isset($student->crel->abody->registration_date) ? $student->crel->abody->registration_date : '') }}</div>
+            <div class="text-sm text-gray-700">Date of Award: {{ (isset($student->awarded) ? $student->awarded->date_of_award : '') }}</div>
         </div>
     </div>
     <div class="print-content">
