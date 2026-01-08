@@ -935,7 +935,9 @@ class  StudentController extends Controller
         $termAttendanceFound = $returnSet["termAttendanceFound"];
         $lastAttendanceDate = $returnSet["lastAttendanceDate"];
         $attendanceIndicator = $returnSet["attendanceIndicator"];
-        
+        $finalAverage = $returnSet["finalAverage"];
+        $codeDistribution = $returnSet['codeDistribution'] ?? [];
+        $codeDistributionString = $returnSet['codeDistributionString'] ?? '';
         
         return view('pages.students.live.attendance.index', [
             'title' => 'Live Students - London Churchill College',
@@ -958,6 +960,9 @@ class  StudentController extends Controller
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
             "attendanceIndicator" => $attendanceIndicator,
+            "finalAverage" => $finalAverage,
+            'codeDistribution' => $codeDistribution,
+            'codeDistributionString' => $codeDistributionString,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'studentPlanIds' => Attendance::where('student_id', $student->id)->pluck('plan_id')->unique()->toArray(),
             'planSet' => Assign::where('student_id',$student->id)->pluck('plan_id')->unique()->toArray(),
@@ -1001,6 +1006,8 @@ class  StudentController extends Controller
 
             // Try to return cached result for this student (30 minutes)
             $cacheKey = 'plan_with_attendance_set_student_' . ($student->id ?? '0');
+            //remove cache for testing
+            //\Illuminate\Support\Facades\Cache::forget($cacheKey);
             $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
             if ($cached !== null) {
                 return $cached;
@@ -1276,7 +1283,7 @@ class  StudentController extends Controller
                             $avarageTermDetails[$list->term_id] = 0;
                         }
                     }
-                // }
+                    //}
                 endforeach;
 
                 $attendance4prev = Attendance::with(["feed","createdBy","updatedBy"])->where("student_id", $student->id)->WhereNotNull("prev_plan_id")->get();   
@@ -1390,6 +1397,56 @@ class  StudentController extends Controller
                     
                 endforeach;
 
+                // $totalFullSetFeedList
+                // array:6 [
+                // 49 => "  A : 52, P : 14, O : 7 "
+                // 48 => "  A : 31, P : 32, O : 10 "
+                // 47 => "  A : 16, P : 19, H : 7 "
+                // 46 => "  A : 23, O : 35, P : 13, LE : 1, L : 1 "
+                // 45 => "  O : 14, P : 21, A : 18 "
+                // 44 => "  O : 4, P : 15, A : 10, E : 3 "
+                // ]
+                        $overallCodeDistribution = [];
+            if(isset($totalBox) && is_array($totalBox)) {
+                foreach ($totalBox as $termCodes) {
+                    if(!is_array($termCodes)) {
+                        continue;
+                    }
+                    foreach ($termCodes as $code => $count) {
+                        if(!is_numeric($count)) {
+                            continue;
+                        }
+                        $codeKey = strtoupper(trim($code));
+                        if($codeKey === '') {
+                            continue;
+                        }
+                        if(!isset($overallCodeDistribution[$codeKey])) {
+                            $overallCodeDistribution[$codeKey] = 0;
+                        }
+                        $overallCodeDistribution[$codeKey] += (int) $count;
+                    }
+                }
+            }
+
+            $overallCodeDistributionString = '';
+            if(!empty($overallCodeDistribution)) {
+                $formatted = [];
+                foreach ($overallCodeDistribution as $code => $count) {
+                    $formatted[] = $code . ' : ' . $count;
+                }
+                $overallCodeDistributionString = implode(', ', $formatted);
+            }
+
+            // compute final average across term averages (ignore non-numeric values)
+            $totalPresentSum = array_sum($totalBoxPresentFound ?? []);
+            $totalClassSum = array_sum($totalClassFullSet ?? []);
+            $finalAverage = $totalClassSum > 0
+                ? number_format(($totalPresentSum / $totalClassSum) * 100, $precision, '.', '')
+                : 0;
+
+            // compute final average across term averages (ignore non-numeric values)
+            $finalAverage = number_format(array_sum($totalBoxPresentFound) / array_sum($totalClassFullSet) * 100, $precision, '.', '');
+
             $result = [ "lastAttendanceDate"=>$lastAttendanceDate,
                      "termData" => $termData,
                      "data" => $data ,
@@ -1402,7 +1459,10 @@ class  StudentController extends Controller
                      "totalClassFullSet" => $totalClassFullSet ,
                      "ClassType" =>$ClassType,
                      "attendanceIndicator" =>$attendanceIndicator,
-                     "moduleNameList" =>$moduleNameList];
+                     "moduleNameList" =>$moduleNameList,
+                     'finalAverage' => $finalAverage,
+                     'codeDistribution' => $overallCodeDistribution,
+                     'codeDistributionString' => $overallCodeDistributionString];
 
             // Cache the result for 30 minutes
             \Illuminate\Support\Facades\Cache::put($cacheKey, $result, now()->addMinutes(30));
@@ -1635,6 +1695,9 @@ class  StudentController extends Controller
         $termAttendanceFound = $returnSet["termAttendanceFound"];
         $lastAttendanceDate = $returnSet["lastAttendanceDate"];
         $attendanceIndicator = $returnSet["attendanceIndicator"];
+        $finalAverage = $returnSet['finalAverage'];
+        $codeDistribution = $returnSet['codeDistribution']; 
+        $codeDistributionString = $returnSet['codeDistributionString'];
         
         
         //$fileName = 'attendance_of_'.$student->registration_no.'_'.$student->first_name.'_'.$student->last_name.'.pdf';
@@ -1679,6 +1742,10 @@ class  StudentController extends Controller
             "termAttendanceFound" =>$termAttendanceFound,
             "lastAttendanceDate"=>$lastAttendanceDate,
             "attendanceIndicator" => $attendanceIndicator,
+            
+            "finalAverage" => $finalAverage,
+            'codeDistribution' => $codeDistribution,
+            'codeDistributionString' => $codeDistributionString,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
             'term_id'   => isset($request->term_id) ? $request->term_id : '',
             'opt' => Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()

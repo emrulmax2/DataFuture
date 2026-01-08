@@ -134,6 +134,25 @@
     <div class="print-content">
     @php $termstart=0 @endphp
     
+        <div class="mb-6 flex flex-wrap items-start gap-4">
+            <div class="w-full bg-slate-50 text-slate-900 px-6 py-4 border border-slate-200 rounded-lg shadow-sm print:bg-white">
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div class="flex items-baseline gap-3">
+                        <div class="text-[11px] uppercase tracking-[0.15em] text-slate-500">Overall Attendance</div>
+                        <div class="text-3xl font-semibold leading-none text-slate-900">{{ $finalAverage }}%</div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                        @if(!empty($codeDistribution))
+                            <span class="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 bg-white text-slate-700">{{ $codeDistributionString }}</span>
+                        @endif
+                        <span class="inline-flex items-center rounded-full border border-slate-200 px-3 py-1 bg-white text-slate-700">
+                            Total: {{ array_sum($totalClassFullSet) }} days class
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
     @foreach($dataSet as $termId =>$dataStartPoint)
         @php $termstart++; $planId=1; @endphp
         @if(isset($term_id) && $term_id>0)
@@ -144,6 +163,7 @@
                 @break
             @endif
         @else
+            
             @include('pages.students.live.attendance.print-partial')    
         @endif
         
@@ -155,13 +175,12 @@
 @endsection
 
 @section('script')
-    @vite('resources/js/student-global.js')
-    @vite('resources/js/student-attendance-term-status.js')
     <script type="module">
         
         (function () {
         // Auto-trigger print when opening the print view in a new tab/window.
         window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 250); });
+        
             $(".tablepoint-toggle").on('click', function(e) {
                 e.preventDefault();
                 var $t = $(this);
