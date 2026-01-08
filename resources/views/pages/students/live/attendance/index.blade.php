@@ -11,10 +11,25 @@
     <!-- END: Profile Info -->
     <div class="intro-y box col-span-12 p-5 mt-5  no-print">
 
-        <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-slate-200 text-slate-100 rounded-tl rounded-tr">
+        <div id="overall-progress" class="md:flex items-center px-5 py-5 sm:py-3 border border-slate-200 bg-white text-slate-700 rounded-lg shadow-sm">
                 
-            <h2 class="font-medium text-base mr-auto ">
-            </h2>
+            <div class="mr-auto flex items-center gap-4">
+                <div class="flex items-start gap-1 bg-white text-slate-800 px-4 py-2 flex-col border border-slate-300 rounded-md ">
+                    <div class="flex items-baseline">
+                        <div class="text-xs uppercase tracking-wide text-slate-500 mr-2 item">Overall Attendance</div>
+                        <div class="text-2xl font-semibold text-slate-900">{{ $finalAverage }}%</div>
+                    </div>
+                    <div class="text-sm text-slate-500 flex mt-2">
+                        @if(!empty($codeDistribution))
+                            <span class="mr-2">[ {{ $codeDistributionString }} ]</span>
+                        @endif
+                        <span>Total: {{ array_sum($totalClassFullSet) }} days class</span>
+                    </div>
+                </div>
+                {{-- <div class="hidden sm:block w-48 h-3 bg-slate-100 rounded overflow-hidden self-center" aria-hidden="true">
+                    <div class="h-full bg-teal-500" style="width: {{ is_numeric($finalAverage) ? $finalAverage : 0 }}%"></div>
+                </div> --}}
+            </div>
             @php
                 $hasTermAttendance = false;
                 if(isset($termAttendanceFound)) {
@@ -39,7 +54,6 @@
         </div>
     </div>
 
-    
     <!-- BEGIN: Daily Sales -->
         @php $termstart=0 @endphp
         @foreach($dataSet as $termId =>$dataStartPoint)
@@ -98,7 +112,7 @@
                     <div class="p-5 ">
 
                         <div class="relative md:flex items-center mb-5">
-                            <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
+                            <div id="tablepoint-{{ $termId }}" data-planid="{{ $planId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
                                 <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
                                     <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
                             </div>

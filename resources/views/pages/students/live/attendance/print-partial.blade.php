@@ -51,7 +51,7 @@
                             <div class="text-sm text-gray-600 ">Average: <span class="badge">{{ $avarageDetails[$termId][$planId] ?? 'N/A' }}% </span></div>
                         </div>
 
-                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto p-5 pt-0 col-span-12" style="display: none;">
+                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto py-5 pt-0 col-span-12" style="display: none;">
                         <table class="min-w-full text-sm border-collapse table-auto">
                             <thead class="bg-gray-50">
                                 <tr>
