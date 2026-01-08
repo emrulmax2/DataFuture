@@ -1601,6 +1601,8 @@ class  StudentController extends Controller
         $totalClassFullSet = [];
         $returnSet = [];
         $attendanceIndicator = [];
+        $opt = Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray(); 
+		$logoUrl = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? public_path('storage/'.$opt['site_logo']) : asset('build/assets/images/logo.svg'));
             $attendanceFeedStatus = AttendanceFeedStatus::all();
             $returnSet = $this->PlanWithAttendanceSet($student);
             
@@ -1645,27 +1647,29 @@ class  StudentController extends Controller
         $attendanceIndicator = $attendanceIndicator;
 
         $statuses = Status::where('type', 'Student')->orderBy('id', 'ASC')->get();
-        $pdf = PDF::loadView('pages.students.live.attendance.print',compact('student','dataSet','term','planDetails','avarageDetails','totalFeedList','totalFullSetFeedList','avarageTotalPercentage','totalClassFullSet','attendanceIndicator','moduleNameList','ClassType','termAttendanceFound','lastAttendanceDate','attendanceIndicator','statuses'));
-        return $pdf->download($fileName);
-
-        // return view('pages.students.live.attendance.print', [
-        //     'student' => $student,
-        //     'dataSet' => $data,
-        //     "term" =>$termData,
-        //     "planDetails" => $planDetails,
-        //     'avarageDetails' => $avarageDetails,
-        //     "totalFeedList" => $totalFeedListSet,
-        //     "totalFullSetFeedList"=>$totalFullSetFeedList,
-        //     "avarageTotalPercentage"=>$avarageTermDetails,
-        //     "totalClassFullSet" =>$totalClassFullSet,
-        //     "attendanceFeedStatus" =>$attendanceFeedStatus,
-        //     "moduleNameList" =>$moduleNameList,
-        //     "ClassType" => $ClassType,
-        //     "termAttendanceFound" =>$termAttendanceFound,
-        //     "lastAttendanceDate"=>$lastAttendanceDate,
-        //     "attendanceIndicator" => $attendanceIndicator,
-        //     'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get()
-        // ]);
+        //$pdf = PDF::loadView('pages.students.live.attendance.print',compact('student','dataSet','term','planDetails','avarageDetails','totalFeedList','totalFullSetFeedList','avarageTotalPercentage','totalClassFullSet','attendanceIndicator','moduleNameList','ClassType','termAttendanceFound','lastAttendanceDate','attendanceIndicator','statuses'));
+        //return $pdf->download($fileName);
+        
+        return view('pages.students.live.attendance.print', [
+            'title' => 'Student Attendance Details',
+            'student' => $student,
+            'dataSet' => $data,
+            "term" =>$termData,
+            "planDetails" => $planDetails,
+            'avarageDetails' => $avarageDetails,
+            "totalFeedList" => $totalFeedListSet,
+            "totalFullSetFeedList"=>$totalFullSetFeedList,
+            "avarageTotalPercentage"=>$avarageTermDetails,
+            "totalClassFullSet" =>$totalClassFullSet,
+            "attendanceFeedStatus" =>$attendanceFeedStatus,
+            "moduleNameList" =>$moduleNameList,
+            "ClassType" => $ClassType,
+            "termAttendanceFound" =>$termAttendanceFound,
+            "lastAttendanceDate"=>$lastAttendanceDate,
+            "attendanceIndicator" => $attendanceIndicator,
+            'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'opt' => Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
+        ]);
     }
     public function getAllTerms(Request $request) {
         $academicYearList = $request->academic_years;
