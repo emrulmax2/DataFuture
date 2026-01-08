@@ -1,4 +1,4 @@
-<div class="intro-y flex flex-col md:flex-row items-center mt-1 md:mt-8">
+<div class="intro-y flex flex-col md:flex-row items-center mt-1 md:mt-8 no-print">
     <div class="flex flex-row justify-center md:justify-normal items-center gap-2 flex-wrap mb-4 md:mb-0 w-full">
         <h2 class="text-lg font-medium text-center md:text-left">Profile of</h2>
         <u><strong class="text-lg">{{ $student->title->name.' '.$student->first_name.' '.$student->last_name }}</strong></u>

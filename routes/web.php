@@ -979,7 +979,8 @@ Route::middleware('auth')->group(function() {
         Route::get('student/course-details/{id}', 'courseDetails')->name('student.course');
         Route::get('student/attendance/{student}', 'AttendanceDetails')->name('student.attendance');
         Route::get('student/visits/{student}', 'VisitsDetails')->name('student.visits');
-        Route::get('student/attendance/{student}/print', 'printAllAttendanceDetails')->name('student.attendance.print');
+        Route::get('student/attendance/{student}/print/{term_id?}', 'printAllAttendanceDetails')->name('student.attendance.print');
+        
         Route::get('student/result/{student}', 'ResultDetails')->name('student.result');
         Route::get('student/attendance/{student}/edit', 'AttendanceEditDetail')->name('student.attendance.edit');
         

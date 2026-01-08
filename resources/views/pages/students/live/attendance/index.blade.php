@@ -9,7 +9,7 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
-    <div class="intro-y box col-span-12 p-5 mt-5  ">
+    <div class="intro-y box col-span-12 p-5 mt-5  no-print">
 
         <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-slate-200 text-slate-100 rounded-tl rounded-tr">
                 
@@ -38,6 +38,8 @@
             </a>
         </div>
     </div>
+
+    
     <!-- BEGIN: Daily Sales -->
         @php $termstart=0 @endphp
         @foreach($dataSet as $termId =>$dataStartPoint)
@@ -63,7 +65,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="dropdown ml-auto hidden md:block">
+                <div class="dropdown ml-auto hidden md:block no-print">
                     <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
                         <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-100"></i>
                     </a>
@@ -77,7 +79,7 @@
                         </ul>
                     </div>
                 </div>
-                <a href="#" class="btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
+                <a href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="no-print btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                 </a>
                 {{-- @if($termstart==1 && $termAttendanceFound[$termId]===true)
@@ -85,7 +87,7 @@
                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
                 </a>
                 @endif --}}
-                <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center md:ml-2">
+                <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center md:ml-2 no-print">
                     <i data-lucide="info" class="w-5 h-5"></i>
                 </button>
             </div>
