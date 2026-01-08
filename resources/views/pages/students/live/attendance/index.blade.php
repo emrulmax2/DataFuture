@@ -15,6 +15,25 @@
                 
             <h2 class="font-medium text-base mr-auto ">
             </h2>
+            @php
+                $hasTermAttendance = false;
+                if(isset($termAttendanceFound)) {
+                    if(is_array($termAttendanceFound)) {
+                        foreach($termAttendanceFound as $v) {
+                            if($v === true || $v === 1 || $v === '1') { $hasTermAttendance = true; break; }
+                        }
+                    } else {
+                        $hasTermAttendance = (bool) $termAttendanceFound;
+                    }
+                }
+            @endphp
+
+            @if(isset($dataSet) && count($dataSet)>0 && $hasTermAttendance)
+                <a href="{{ route('student.attendance.edit',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-slate-100 dark:border-primary mb-2 mr-2 w-38 ">
+                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
+                </a>
+                          
+            @endif
             <a href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 "><i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i> Print All
             </a>
         </div>
@@ -55,25 +74,17 @@
                                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                                 </a>
                             </li>
-                            @if($termstart==1 && $termAttendanceFound[$termId]===true)
-                            
-                            <li>
-                                <a href="{{ route('student.attendance.edit',$student->id) }}" class="dropdown-item">
-                                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                                </a>
-                            </li>
-                            @endif
                         </ul>
                     </div>
                 </div>
                 <a href="#" class="btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
                     <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
                 </a>
-                @if($termstart==1 && $termAttendanceFound[$termId]===true)
+                {{-- @if($termstart==1 && $termAttendanceFound[$termId]===true)
                 <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
                     <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
                 </a>
-                @endif
+                @endif --}}
                 <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center md:ml-2">
                     <i data-lucide="info" class="w-5 h-5"></i>
                 </button>
