@@ -1602,7 +1602,7 @@ class  StudentController extends Controller
         ]);
     }
 
-    public function printAllAttendanceDetails(Student $student) {
+    public function printAllAttendanceDetails(Student $student, Request $request) {
         $termData = [];
         $data = [];
         $planDetails = [];
@@ -1680,6 +1680,7 @@ class  StudentController extends Controller
             "lastAttendanceDate"=>$lastAttendanceDate,
             "attendanceIndicator" => $attendanceIndicator,
             'statuses' => Status::where('type', 'Student')->orderBy('id', 'ASC')->get(),
+            'term_id'   => isset($request->term_id) ? $request->term_id : '',
             'opt' => Option::where('category', 'SITE_SETTINGS')->where('name','site_logo')->pluck('value', 'name')->toArray()
         ]);
     }

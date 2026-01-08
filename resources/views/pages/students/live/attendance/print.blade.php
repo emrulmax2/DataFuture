@@ -28,7 +28,7 @@
             }
             .print-header { page-break-inside: avoid; }
             /* keep attendance-block from being split across pages */
-            .attendance-block { page-break-inside: avoid; }
+            /* .attendance-block { page-break-inside: avoid; } */
             /* ensure body has no extra margins when printing */
             body { margin: 0; }
         }
@@ -95,7 +95,7 @@
             </div>
         </div>
     </div>
-    <div class="grid grid-cols-12 gap-3 my-2">
+    <div class="secondary-printheader grid grid-cols-12 gap-3 my-2">
         <div class="col-span-6">
             <div class="text-sm text-gray-700">Date of birth: {{ !empty($student->date_of_birth) ? date("jS F, Y",strtotime($student->date_of_birth)) : 'N/A' }} </div>
             <div class="text-sm text-gray-700">Address: 
@@ -133,96 +133,21 @@
     </div>
     <div class="print-content">
     @php $termstart=0 @endphp
+    
     @foreach($dataSet as $termId =>$dataStartPoint)
         @php $termstart++; $planId=1; @endphp
-        <div class="term-block border border-gray-300 px-3 py-2 mb-4">
-            <div class="term-summary ">
-                <h2 class="font-medium text-lg">{{ $term[$termId]["name"] }}
-                    <span class="badge">{{ isset($avarageTotalPercentage[$termId]) ? $avarageTotalPercentage[$termId]."%" : '' }}</span>
-                </h2>
-                <div class="term-summary-body">
-                    <div class="meta-inline text-sm text-gray-600">
-                        <div>Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }}</div>
-                        <div>Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId] && $lastAttendanceDate[$termId]!="N/A") ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
-                        <div>{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ". $totalClassFullSet[$termId]. " days class" : "No class found" }}</div>
-                    </div>
-                </div>
-            </div>
-            @foreach($dataStartPoint as $planId => $data)
-                @if(isset($planDetails[$termId][$planId]) && !empty($planDetails[$termId][$planId]))
-                    @php
-                        if(isset($planDetails[$termId][$planId]->start_time) && isset($planDetails[$termId][$planId]->end_time)){
-                            $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
-                            $start_time = date('h:i A', strtotime($start_time));
-                            $end_time = date("Y-m-d ".$planDetails[$termId][$planId]->end_time);
-                            $end_time = date('h:i A', strtotime($end_time));  
-                        } else {
-                            $start_time = "N/A";
-                            $end_time = "N/A";
-                        }
-                    @endphp
-
-                    <div class="mt-3 grid grid-cols-12 gap-2 attendance-block py-5">
-                        <div class="col-span-8">
-                        <div class="text-sm font-semibold">{{ $moduleNameList[$planId] }} [{{ $planId }}]</div>
-                        <div class="text-sm text-gray-600">Group: {{ $planDetails[$termId][$planId]->group->name ?? 'N/A' }} | Room: {{ $planDetails[$termId][$planId]->room->name ?? 'N/A' }}</div>
-                        <div class="text-sm text-gray-600">Time: {{ $start_time }} - {{ $end_time }}</div>
-                        </div>
-                        <div class="col-span-4">
-                        <div class="text-sm text-gray-600">Tutor: @if($ClassType[$planId] != 'Tutorial') {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : 'N/A' }} @else {{ !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : 'N/A' }} @endif</div>
-                        <div class="text-sm text-gray-600 ">Average: <span class="badge">{{ $avarageDetails[$termId][$planId] ?? 'N/A' }}% </span></div>
-                        </div>
-
-                        <div class="overflow-x-auto mt-2 col-span-12">
-                        <table class="min-w-full text-sm border-collapse table-auto">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">S/N</th>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">Date</th>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">Time</th>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">Taken By</th>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">Code</th>
-                                    <th class="px-3 py-1 text-left font-medium text-gray-700 border">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white">
-                                @if(isset($data) && count($data)>0)
-                                    @php $serial=0; @endphp
-                                    @foreach($data as $planDateList)
-                                        @if(isset($planDateList["attendance"]) && $planDateList["attendance"]!=null)
-                                            @php $serial++; @endphp
-                                            <tr class="even:bg-gray-50">
-                                                <td class="px-3 py-1 border">{{ $serial }}</td>
-                                                <td class="px-3 py-1 border">
-                                                    @if(!empty($planDateList["attendance"]->note))
-                                                        {{ date('d F, Y',strtotime($planDateList["attendance"]->attendance_date))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
-                                                    @else
-                                                        {{ date('d F, Y',strtotime($planDateList["date"]))  }}
-                                                    @endif
-                                                </td>
-                                                <td class="px-3 py-1 border">{{ $start_time }} - {{ $end_time }}</td>
-                                                <td class="px-3 py-1 border">{{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : (!empty($planDateList["attendance"]->note) ? "N/A" : "Tutor Not Found") }}</td>
-                                                <td class="px-3 py-1 border">{{ $planDateList["attendance"]->feed->code }}</td>
-                                                <td class="px-3 py-1 border">{{ $planDateList["attendance"]->feed->name }}</td>
-                                            </tr>
-                                        @endif
-                                    @endforeach
-                                @else
-                                    <tr><td colspan="6" class="px-3 py-1 border">No attendance records</td></tr>
-                                @endif
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <th colspan="3" class="px-3 py-1 text-left font-medium border">Total</th>
-                                    <th colspan="3" class="px-3 py-1 text-left font-medium border">{{ $totalFeedList[$termId][$planId] ?? '0' }}</th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                        </div>
-                    </div>
-                @endif
-            @endforeach
-        </div>
+        @if(isset($term_id) && $term_id>0)
+        
+            @if($term_id == $termId)
+                @include('pages.students.live.attendance.print-partial')
+                
+                @break
+            @endif
+        @else
+            @include('pages.students.live.attendance.print-partial')    
+        @endif
+        
+        
     @endforeach
     </div>
     
@@ -230,8 +155,50 @@
 @endsection
 
 @section('script')
-    <script>
+    @vite('resources/js/student-global.js')
+    @vite('resources/js/student-attendance-term-status.js')
+    <script type="module">
+        
+        (function () {
         // Auto-trigger print when opening the print view in a new tab/window.
         window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 250); });
+            $(".tablepoint-toggle").on('click', function(e) {
+                e.preventDefault();
+                var $t = $(this);
+                // Try to find plus/minus icon elements; support both original <i> and replaced SVG from Lucide
+                var $icons = $t.find('.plusminus');
+                if ($icons.length === 0) {
+                    // fallback: any element with data-lucide (lucide replaced svg or original i)
+                    $icons = $t.find('[data-lucide]');
+                }
+
+                if ($icons.length >= 2) {
+                    // toggle visibility between the two icons
+                    $icons.eq(0).toggleClass('hidden');
+                    $icons.eq(1).toggleClass('hidden');
+                } else if ($icons.length === 1) {
+                    $icons.eq(0).toggleClass('hidden');
+                }
+
+                // Toggle the related dataset; prefer nearest matching .tabledataset
+                var $dataset = $t.closest('.relative').find('div.tabledataset').first();
+                if ($dataset.length === 0) {
+                    $dataset = $t.parent().siblings('div.tabledataset');
+                }
+                if ($dataset.length) {
+                    $dataset.slideToggle();
+                }
+            });
+
+            $(".toggle-heading").on('click', function(e) {
+                e.preventDefault();
+                var $t = $(this);
+                var $toggle = $t.siblings('div.tablepoint-toggle');
+                if ($toggle.length === 0) {
+                    $toggle = $t.closest('.relative').find('div.tablepoint-toggle').first();
+                }
+                if ($toggle.length) $toggle.trigger('click');
+            });
+        })()
     </script>
 @endsection

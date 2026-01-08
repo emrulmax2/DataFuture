@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @yield('subhead')
-    {{-- Include compiled Tailwind CSS for print styling --}}
-    @vite(['resources/css/app.css'])
+    {{-- Include compiled Tailwind CSS and JS for print styling and behavior --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         /* Basic print-friendly defaults */
         html,body{height:100%;background:#fff;color:#000;font-family: Arial, Helvetica, sans-serif;margin:0;padding:12px}
