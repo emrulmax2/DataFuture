@@ -1445,7 +1445,9 @@ class  StudentController extends Controller
                 : 0;
 
             // compute final average across term averages (ignore non-numeric values)
-            $finalAverage = number_format(array_sum($totalBoxPresentFound) / array_sum($totalClassFullSet) * 100, $precision, '.', '');
+            //Divided By Zero Issue Fix it please   
+            
+            //$finalAverage = number_format(array_sum($totalBoxPresentFound) / array_sum($totalClassFullSet) * 100, $precision, '.', '');
 
             $result = [ "lastAttendanceDate"=>$lastAttendanceDate,
                      "termData" => $termData,
