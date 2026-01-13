@@ -70,25 +70,29 @@ class ProcessExtractedFiles implements ShouldQueue
                     foreach($employeeList as $employee) {
                         // find employee first_name and last_name from $fileName string
                         // Extract first_name and last_name from the filename
-
-                        $fileNameArray = explode(' ', strtoupper($originalNameWithoutExtension));
+                        // we change it now it will be ni_number based matching
+                        // remove string space or hipen from originalNameWithoutExtension
+                        $fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
+                        $employeeNINumber = preg_replace('/[\s-]+/', '', strtoupper(trim($employee->ni_number)));
                         
-                        if(in_array(strtoupper(trim($employee->first_name)), $fileNameArray) && in_array(strtoupper(trim($employee->last_name)), $fileNameArray)){
+                        if($employeeNINumber == $fileNameWithoutAnyHipen){
 
                             $employeeFound = $employee->id;
                             break;
 
                         } else {
-                                $employeeFound = 0;
-                                $paySync=PaySlipUploadSync::all();
-                                foreach($paySync as $pay) {
-                
-                                    if($pay->file_name == $fileName && $pay->employe_id != null) {
-                
-                                        $employeeFound = $pay->employe_id;
-                                        break;
-                                    }
+
+                            $employeeFound = 0;
+                            $paySync=PaySlipUploadSync::all();
+                            foreach($paySync as $pay) {
+            
+                                if($pay->file_name == $fileName && $pay->employee_id != null) {
+            
+                                    $employeeFound = $pay->employee_id;
+                                    break;
                                 }
+                            }
+                            
                         }   
                     
                         
