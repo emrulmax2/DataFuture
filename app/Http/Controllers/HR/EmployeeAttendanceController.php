@@ -65,9 +65,12 @@ class EmployeeAttendanceController extends Controller
             $extractPath = storage_path('app/temp/extracted');
             $zip->extractTo($extractPath);
             $zip->close();
-
             // Dispatch the job to process the extracted files
             ProcessExtractedFiles::dispatch($extractPath, $dirName, $type,$holiday_year_Id);
+            //clear the temp directory
+            File::deleteDirectory($extractPath);
+            File::delete(storage_path('app/' . $tempPath));
+
             return response()->json(['success' => 'File Process Started. Please wait few min for the process to complete.'], 200);
         }
         
