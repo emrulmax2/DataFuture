@@ -174,7 +174,7 @@ class Employee extends Model
 
     public function payslipWithTransfered(){
         $payslips = $this->hasMany(PaySlipUploadSync::class, 'employee_id', 'id');
-        $payslips->getQuery()->where('file_transferred_at', '!=', null);
+        $payslips->getQuery()->where('file_transffered_at', '!=', null);
         return $payslips;
     }
 }
