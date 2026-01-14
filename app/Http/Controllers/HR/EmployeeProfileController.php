@@ -22,6 +22,7 @@ use App\Models\Ethnicity;
 use App\Models\HighestQualificationOnEntry;
 use App\Models\KinsRelation;
 use App\Models\Option;
+use App\Models\PaySlipUploadSync;
 use App\Models\SexIdentifier;
 use App\Models\Title;
 use App\Models\User;
@@ -118,6 +119,26 @@ class EmployeeProfileController extends Controller
         else:
             return response()->json(['msg' => 'Something went wrong. Please try later or contact with the administrator.'], 422);
         endif;
+    }
+
+
+    public function payrollSyncShow($id){
+        //$paySlipUploadSync = PaySlipUploadSync::with('holidayYear')->where('employee_id', $id)->orderBy('holiday_year_id', 'desc')->orderBy('created_at', 'desc')->get();
+        $holidayYearIds = PaySlipUploadSync::with('holidayYear')->where('employee_id', $id)->orderBy('holiday_year_id', 'desc')->pluck('holiday_year_id')->unique()->toArray();
+        
+        // if(!$paySlipUploadSync){
+        //     $paySlipUploadSync = [];
+        // }
+        return view('pages.employee.profile.payslip', [
+            'title' => 'HR Portal - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
+                ['label' => 'Payroll Sync', 'href' => 'javascript:void(0);']
+            ],
+            'employee'=> Employee::find($id),
+            //'paySlipUploadSync' => $paySlipUploadSync,
+            'holidayYearIds' => $holidayYearIds ?? [],
+        ]);
     }
     
 }

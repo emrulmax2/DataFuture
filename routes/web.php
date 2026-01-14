@@ -1424,7 +1424,9 @@ Route::middleware('auth')->group(function() {
     Route::controller(EmployeeProfileController::class)->group(function(){
         
         Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
+        Route::get('employee-profile/payslip/{id}', 'payrollSyncShow')->name('profile.employee.payslip.show'); 
         Route::post('employee-profile/store-settings', 'storeProfileSetting')->name('profile.employee.store.settings'); 
+        
     });
 
     Route::controller(EmployeeAddressController::class)->group(function() {

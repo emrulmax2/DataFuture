@@ -31,4 +31,9 @@ class PaySlipUploadSync extends Model
         return $this->belongsTo(Employee::class);
     }
 
+    public function holidayYear()
+    {
+        return $this->belongsTo(HrHolidayYear::class, 'holiday_year_id');
+    }
+
 }
