@@ -43,7 +43,7 @@
                                             <div class="accordion-body">
                                                 <div class="overflow-x-auto">
                                                     @php
-                                                        $uploadRecords = $paySlipUploadSync->where('holiday_year_id', $holidayYearData->id)->where('employee_id', $employee->id)->sortByDesc('created_at');
+                                                        $uploadRecords = $paySlipUploadSync->where('holiday_year_id', $holidayYearData->id)->where('employee_id', $employee->id)->whereNotNull('file_transferred_at')->sortByDesc('created_at');
                                                     @endphp
                                                     @if($uploadRecords && count($uploadRecords) > 0)
                                                         <table class="table table-bordered table-hover table-striped">
