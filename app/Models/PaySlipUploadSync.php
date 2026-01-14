@@ -24,6 +24,8 @@ class PaySlipUploadSync extends Model
         'is_file_uploaded',
         'created_at',
         'updated_at',
+        'created_by',
+        'updated_by',
     ];
 
     public function employee()
@@ -34,6 +36,11 @@ class PaySlipUploadSync extends Model
     public function holidayYear()
     {
         return $this->belongsTo(HrHolidayYear::class, 'holiday_year_id');
+    }
+
+    public function uploadedBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
 }
