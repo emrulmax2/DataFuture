@@ -18,6 +18,13 @@
     </li>
     @endif
 
+    @if(isset($employee->payslips) && $employee->payslips->count() > 0)
+    <li class="nav-item" role="presentation">
+        <a href="{{ route('profile.employee.payslip.show', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'profile.employee.payslip.show' ? 'active' : '' }}">
+            Payslips
+        </a>
+    </li>
+    @endif
     <li class="nav-item" role="presentation">
         <a href="{{ route('employee.documents', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'employee.documents' ? 'active' : '' }}">
             Documents

@@ -110,7 +110,7 @@
                                         <div class="acc__input-error error-employee_id-{{ $serial }} text-danger mt-2"></div>
                             </td>
                             <td class="px-5 py-3 {{ isset($paySlip->employee) ? 'text-green-800 ' : 'text-dange' }} dark:border-darkmode-300 border-slate-300 border-r border-b">
-                                <span data-tw-target="#confirmModal" data-tw-toggle="modal"  class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
+                                <span data-id="{{ $paySlip->id }}" data-tw-target="#confirmModal" data-tw-toggle="modal"  class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
                             </td>
                         </tr>
                         @php $serial++; @endphp

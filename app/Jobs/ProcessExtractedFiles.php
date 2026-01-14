@@ -17,6 +17,7 @@ class ProcessExtractedFiles implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $extractPath;
+    protected $tempPath;
     protected $dirName;
     protected $type;
     protected $holiday_year_Id;
@@ -26,9 +27,9 @@ class ProcessExtractedFiles implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($extractPath,$dirName,$type,$holiday_year_Id)
+    public function __construct($tempPath, $dirName, $type, $holiday_year_Id)
     {
-        $this->extractPath = $extractPath;
+        $this->tempPath = $tempPath; // path relative to storage/app
         $this->dirName = $dirName;
         $this->type = $type;
         $this->holiday_year_Id = $holiday_year_Id;
@@ -41,14 +42,33 @@ class ProcessExtractedFiles implements ShouldQueue
      */
     public function handle()
     {
+        // Extract the uploaded ZIP (stored under storage/app/...) into a unique temp folder
+        $zipPath = storage_path('app/' . $this->tempPath);
+        $extractPath = storage_path('app/temp/extracted/' . uniqid());
+
+        if (!File::exists($extractPath)) {
+            File::makeDirectory($extractPath, 0755, true);
+        }
+
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath) !== TRUE) {
+            // can't open zip, cleanup and exit
+            if (File::exists($zipPath)) {
+                File::delete($zipPath);
+            }
+            return;
+        }
+
+        $zip->extractTo($extractPath);
+        $zip->close();
+
         // Get the list of directories in the extracted path, excluding __MACOSX
-        $directories = $this->getDirectories($this->extractPath);
+        $directories = $this->getDirectories($extractPath);
 
         // Get all extracted files
         foreach ($directories as $path) {
-                
             $directoryName = basename($path);
-            $files = File::files($this->extractPath.DIRECTORY_SEPARATOR.$directoryName);
+            $files = File::files($extractPath . DIRECTORY_SEPARATOR . $directoryName);
             
             // Loop through the files and store them in the desired location
             foreach ($files as $file) {
@@ -125,6 +145,18 @@ class ProcessExtractedFiles implements ShouldQueue
                 }
             }
             break;
+        }
+
+        // cleanup extracted files and uploaded zip
+        try {
+            if (File::exists($extractPath)) {
+                File::deleteDirectory($extractPath);
+            }
+            if (File::exists($zipPath)) {
+                File::delete($zipPath);
+            }
+        } catch (\Exception $e) {
+            // ignore cleanup errors
         }
     }
 

@@ -167,4 +167,8 @@ class Employee extends Model
     public function terms(){
         return $this->hasOne(EmployeeTerm::class, 'employee_id', 'id')->latestOfMany();
     }
+
+    public function payslips(){
+        return $this->hasMany(PaySlipUploadSync::class, 'employee_id', 'id');
+    }
 }
