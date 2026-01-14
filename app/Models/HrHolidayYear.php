@@ -20,6 +20,8 @@ class HrHolidayYear extends Model
         'updated_by',
     ];
 
+
+    
     /**
      * The attributes that should be mutated to dates.
      *
@@ -49,5 +51,9 @@ class HrHolidayYear extends Model
 
     public function leaveOption(){
         return $this->hasMany(HrHolidayYearLeaveOption::class, 'hr_holiday_year_id', 'id');
+    }
+
+    public function getHolidayYearAttribute() {
+        return date('Y', strtotime($this->start_date)) . ' - ' . date('Y', strtotime($this->end_date));
     }
 }

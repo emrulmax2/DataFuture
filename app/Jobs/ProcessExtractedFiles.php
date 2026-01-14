@@ -42,19 +42,29 @@ class ProcessExtractedFiles implements ShouldQueue
      */
     public function handle()
     {
-        // Extract the uploaded ZIP (stored under storage/app/...) into a unique temp folder
-        $zipPath = storage_path('app/' . $this->tempPath);
-        $extractPath = storage_path('app/temp/extracted/' . uniqid());
 
+        // The controller stored the uploaded ZIP locally (storage/app/<tempPath>).
+        // Transfer the local ZIP to S3, then extract locally for processing.
+        $localZipPath = storage_path('app/' . $this->tempPath);
+
+        if (!File::exists($localZipPath)) {
+            // nothing to do
+            return;
+        }
+
+        // (no longer uploading the original ZIP to S3 — we'll extract locally
+        // and transfer extracted files to S3 directly)
+
+        $extractPath = storage_path('app/temp/extracted/' . uniqid());
         if (!File::exists($extractPath)) {
             File::makeDirectory($extractPath, 0755, true);
         }
 
         $zip = new \ZipArchive();
-        if ($zip->open($zipPath) !== TRUE) {
-            // can't open zip, cleanup and exit
-            if (File::exists($zipPath)) {
-                File::delete($zipPath);
+        if ($zip->open($localZipPath) !== TRUE) {
+            // can't open zip, cleanup local zip and exit
+            if (File::exists($localZipPath)) {
+                File::delete($localZipPath);
             }
             return;
         }
@@ -73,16 +83,33 @@ class ProcessExtractedFiles implements ShouldQueue
             // Loop through the files and store them in the desired location
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
-                    // Store the file in the 'public' disk with its original name
+                    // Store the file in the 'public' disk with the month suffix appended to its name
                     $fileName = $file->getFilename();
-                    // Get the original name without extension
-                    $originalNameWithoutExtension = pathinfo($fileName, PATHINFO_FILENAME);
-                    $destinationPath = 'employee_payslips/'.$this->dirName ;// Define the destination path
-                    
-                    Storage::disk('public')->put($destinationPath . '/' . $fileName, File::get($file));
-                    
-                    // Get the file path after storage
-                    $filePath = Storage::disk('public')->url($destinationPath . '/' . $fileName);
+                    $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+                    $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+                    // keep original name without extension for NI matching
+                    $originalNameWithoutExtension = $baseName;
+
+                    // build suffixed filename (e.g., payslip-2024-08.pdf)
+                    $fileNameWithSuffix = $baseName . '-' . $this->dirName . ($extension ? '.' . $extension : '');
+
+                    $destinationPath = 'public/employee_payslips/'.$this->dirName; // Define the destination path on S3
+
+                    // Stream upload to S3 to avoid loading whole file into memory
+                    $localRealPath = $file->getRealPath();
+                    if ($localRealPath && File::exists($localRealPath)) {
+                        $stream = fopen($localRealPath, 'r');
+                        Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
+                        if (is_resource($stream)) {
+                            fclose($stream);
+                        }
+                    } else {
+                        // fallback to reading file contents
+                        Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
+                    }
+
+                    // Get the file path (S3 URL) after storage
+                    $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
                     
                     $paySlipUploadSync = [];
                     $employeeList =Employee::all();
@@ -94,7 +121,7 @@ class ProcessExtractedFiles implements ShouldQueue
                         // remove string space or hipen from originalNameWithoutExtension
                         $fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
                         $employeeNINumber = preg_replace('/[\s-]+/', '', strtoupper(trim($employee->ni_number)));
-                        
+
                         if($employeeNINumber == $fileNameWithoutAnyHipen){
 
                             $employeeFound = $employee->id;
@@ -105,9 +132,10 @@ class ProcessExtractedFiles implements ShouldQueue
                             $employeeFound = 0;
                             $paySync=PaySlipUploadSync::all();
                             foreach($paySync as $pay) {
-            
-                                if($pay->file_name == $fileName && $pay->employee_id != null) {
-            
+
+                                // check both original and suffixed filenames for existing mapping
+                                if((isset($pay->file_name) && ($pay->file_name == $fileName || (isset($fileNameWithSuffix) && $pay->file_name == $fileNameWithSuffix))) && $pay->employee_id != null) {
+
                                     $employeeFound = $pay->employee_id;
                                     break;
                                 }
@@ -121,21 +149,21 @@ class ProcessExtractedFiles implements ShouldQueue
                     // payslipuploadSync table data insert if file_name and month_year not exist
                     $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                         [
-                            
-                            'file_name' => $fileName,
+                            'file_name' => $fileNameWithSuffix,
                             'month_year' => $this->dirName,
 
                         ],[
                         'employee_id' => ($employeeFound) ? $employeeFound : NULL,
-                        'file_name' => $fileName,
+                        'file_name' => $fileNameWithSuffix,
                         'file_path' => $filePath,
                         'holiday_year_id' => $this->holiday_year_Id,
                         'month_year' => $this->dirName,
-                        'type' => isset($type) ? $type : 'Payslips',
+                        'type' => isset($this->type) && !empty($this->type) ? $this->type : 'Payslips',
                         'is_file_exist' => ($employeeFound) ? 1 : 0,
                         'file_transffered' => 0,
                         'file_transffered_at' => null,
                         'is_file_uploaded' => 1,
+                        'created_by' => auth()->id(),
 
                     ]);
                     if($paySlipUploadSync){
@@ -147,14 +175,15 @@ class ProcessExtractedFiles implements ShouldQueue
             break;
         }
 
-        // cleanup extracted files and uploaded zip
+        // cleanup extracted files, local zip and remove original zip from S3
         try {
             if (File::exists($extractPath)) {
                 File::deleteDirectory($extractPath);
             }
-            if (File::exists($zipPath)) {
-                File::delete($zipPath);
+            if (File::exists($localZipPath)) {
+                File::delete($localZipPath);
             }
+            // finished — local extracted files and local zip cleaned up
         } catch (\Exception $e) {
             // ignore cleanup errors
         }

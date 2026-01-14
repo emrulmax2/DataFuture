@@ -59,8 +59,9 @@ class EmployeeAttendanceController extends Controller
         // Define a temporary location to store the uploaded zip file
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
         
-        // Dispatch a queued job to extract and process the uploaded ZIP.
-        // Extraction is moved into the job so the upload request returns faster.
+        // Store the uploaded ZIP locally on server, then dispatch a job which will transfer it to S3 and process it
+        $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
+
         ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id);
 
         return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
