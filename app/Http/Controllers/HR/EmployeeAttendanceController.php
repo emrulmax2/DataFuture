@@ -59,20 +59,11 @@ class EmployeeAttendanceController extends Controller
         // Define a temporary location to store the uploaded zip file
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
         
-        $zip = new ZipArchive();
-        $updated = false;
-        if ($zip->open(storage_path('app/' . $tempPath)) === TRUE) {
-            $extractPath = storage_path('app/temp/extracted');
-            $zip->extractTo($extractPath);
-            $zip->close();
-            // Dispatch the job to process the extracted files
-            ProcessExtractedFiles::dispatch($extractPath, $dirName, $type,$holiday_year_Id);
-            //clear the temp directory
-            File::deleteDirectory($extractPath);
-            File::delete(storage_path('app/' . $tempPath));
+        // Dispatch a queued job to extract and process the uploaded ZIP.
+        // Extraction is moved into the job so the upload request returns faster.
+        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id);
 
-            return response()->json(['success' => 'File Process Started. Please wait few min for the process to complete.'], 200);
-        }
+        return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
         
     }
 
