@@ -60,7 +60,7 @@
                                                                     <table class="table table-bordered table-hover">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th class="whitespace-nowrap uppercase">Payment month</th>
+                                                                                <th class="whitespace-nowrap uppercase">Month</th>
                                                                                 <th class="whitespace-nowrap uppercase">Action</th>
                                                                             </tr>
                                                                         </thead>
@@ -78,9 +78,9 @@
                                                                                 @endif
                                                                             </td>
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td> --}}
-                                                                            <td class="whitespace-nowrap">{{ $record->file_name }}</td>
+                                                                            {{-- <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="eye" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -119,7 +119,7 @@
                                                                     <table class="table table-bordered table-hover">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th class="whitespace-nowrap uppercase">Payment month</th>
+                                                                                <th class="whitespace-nowrap uppercase">Month</th>
                                                                                 <th class="whitespace-nowrap uppercase">Action</th>
                                                                             </tr>
                                                                         </thead>
@@ -137,7 +137,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="eye" class="w-4 h-4 mr-2"></i>View</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -177,7 +177,7 @@
                                                                         <thead>
                                                                             <tr>
                                                                                 {{-- <th class="whitespace-nowrap uppercase">S/N</th> --}}
-                                                                                <th class="whitespace-nowrap uppercase">Payment Month</th>
+                                                                                <th class="whitespace-nowrap uppercase">Month</th>
                                                                                 {{-- <th class="whitespace-nowrap uppercase">Uploaded By</th>
                                                                                 <th class="whitespace-nowrap uppercase">Upload Date</th>
                                                                                 <th class="whitespace-nowrap uppercase">File Name</th> --}}
@@ -200,7 +200,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="eye" class="w-4 h-4 mr-2"></i>View</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
