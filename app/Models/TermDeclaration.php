@@ -51,6 +51,10 @@ class TermDeclaration extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
+    public function plans() {
+        return $this->hasMany(Plan::class, 'term_declaration_id');
+    }
+
     public function installments() {
         return $this->hasMany(SlcInstallment::class, 'term_declaration_id', 'id');
     }
