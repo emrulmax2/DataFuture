@@ -112,7 +112,7 @@ class ProcessExtractedFiles implements ShouldQueue
                     $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
                     
                     $paySlipUploadSync = [];
-                    $employeeList =Employee::all();
+                    $employeeList =Employee::where('status', '1')->get();
 
                     foreach($employeeList as $employee) {
                         // find employee first_name and last_name from $fileName string
