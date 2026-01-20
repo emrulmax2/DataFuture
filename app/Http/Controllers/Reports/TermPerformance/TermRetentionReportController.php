@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Reports\TermPerformance;
 
 use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
+use App\Models\Assign;
 use App\Models\CourseCreation;
 use App\Models\CourseCreationInstance;
 use App\Models\InstanceTerm;
@@ -221,6 +222,9 @@ class TermRetentionReportController extends Controller
         if(!empty($term_declaration_ids)):
             foreach($term_declaration_ids as $term_declaration_id):
                 $term = TermDeclaration::find($term_declaration_id);
+                $planIds = $term->plans->pluck('id')->toArray();
+                $studentIdsFromAssignTable = Assign::whereIn('plan_id', $planIds)->pluck('student_id')->unique()->toArray();
+
                 $creationInstancesIds = InstanceTerm::where('term_declaration_id', $term_declaration_id)->pluck('course_creation_instance_id')->unique()->toArray();
                 $creationIds = CourseCreationInstance::whereIn('id', $creationInstancesIds)->orderBy('course_creation_id', 'DESC')->pluck('course_creation_id')->unique()->toArray();
                 $semester_ids = CourseCreation::whereIn('id', $creationIds)->orderBy('semester_id', 'DESC')->pluck('semester_id')->unique()->toArray();
@@ -243,6 +247,30 @@ class TermRetentionReportController extends Controller
                             $completion_date = (!empty($courseStartDate) ? date('Y-m-d', strtotime($courseStartDate.' + 380 days')) : '');
 
                             $student_ids = StudentCourseRelation::where('course_creation_id', $courseCreationId)->where('active', 1)->pluck('student_id')->unique()->toArray();
+                            // intersect with
+                            $student_ids = array_intersect($student_ids, $studentIdsFromAssignTable);
+                            // check is there any duplicate registration_no found. if found take the latest id only
+                            if(!empty($student_ids)){
+                                $rows = DB::table('students')->whereIn('id', $student_ids)->orderBy('id', 'DESC')->select('id', 'registration_no')->get();
+                                $seenReg = [];
+                                $filtered = [];
+                                foreach($rows as $r){
+                                    $reg = trim((string)$r->registration_no);
+                                    if(!empty($reg)){
+                                        if(!isset($seenReg[$reg])){
+                                            $seenReg[$reg] = $r->id;
+                                            $filtered[] = $r->id;
+                                        }
+                                        // else duplicate registration_no found, skip (we keep the first which is latest id because of orderBy id DESC)
+                                    }else{
+                                        // no registration_no, keep the record
+                                        $filtered[] = $r->id;
+                                    }
+                                }
+                                $student_ids = array_values(array_unique($filtered));
+                            }
+
+
                             if(!empty($student_ids) && count($student_ids) > 0):
                                 $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
                                                         $q->where('course_creation_id', $courseCreationId);
