@@ -69,8 +69,8 @@ class EmployeeAttendanceController extends Controller
     }
 
     public function payrollSyncShow($month_year){
-        $paySlipUploadSync = PaySlipUploadSync::where('month_year', $month_year)->get();
-            $checkEmploye =  PaySlipUploadSync::where('month_year', $month_year)->pluck('employee_id')->unique()->toArray();
+        $paySlipUploadSync = PaySlipUploadSync::where('month_year', $month_year)->whereNull('file_transffered_at')->get();
+        $checkEmploye =  PaySlipUploadSync::where('month_year', $month_year)->whereNull('file_transffered_at')->pluck('employee_id')->unique()->toArray();
         return view('pages.hr.attendance.payroll_sync', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
