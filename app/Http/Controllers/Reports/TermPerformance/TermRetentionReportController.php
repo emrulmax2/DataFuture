@@ -275,7 +275,7 @@ class TermRetentionReportController extends Controller
                                 $registered_std_ids = StudentAwardingBodyDetails::whereIn('student_id', $student_ids)->whereNotNull('reference')->whereHas('studentcrel', function($q) use($courseCreationId){
                                                         $q->where('course_creation_id', $courseCreationId);
                                                     })->pluck('student_id')->unique()->toArray();
-                                $terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
+                                //$terminated_std_ids = (!empty($terminatedStudents) ? array_diff($student_ids, $terminatedStudents) : $student_ids);
 
                                 $droppedOutStdents = DB::table('students as std')
                                                     ->leftJoin('student_attendance_term_statuses as sats', function($j){
@@ -292,6 +292,9 @@ class TermRetentionReportController extends Controller
                                 $registered_ids = array_merge($registered_ids, $registered_std_ids);
                                 $droppedout += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
                                 $droppedout_ids = array_merge($droppedout_ids, $droppedOutStdents);
+
+                                // remove dropped out ids from registered ids
+                                $registered_ids = !empty($droppedOutStdents) ? array_diff($registered_ids, $droppedOutStdents) : $registered_ids;
                             endif;
                         endforeach;
                     endif;
