@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\DB;
 
 class ProcessExtractedFiles implements ShouldQueue
 {
@@ -112,7 +113,10 @@ class ProcessExtractedFiles implements ShouldQueue
                     $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
                     
                     $paySlipUploadSync = [];
-                    $employeeList =Employee::where('status', '1')->get();
+                    // fetch ni_number, id and duplicate count (number of active employees with same ni_number)
+                    $employeeList = DB::table('employees as emp')
+                        ->select('emp.id', 'emp.ni_number', DB::raw("(select count(*) from employees e2 where e2.ni_number = emp.ni_number) as duplicate_count"))
+                        ->get();
 
                     foreach($employeeList as $employee) {
                         // find employee first_name and last_name from $fileName string
@@ -123,12 +127,16 @@ class ProcessExtractedFiles implements ShouldQueue
                         $employeeNINumber = preg_replace('/[\s-]+/', '', strtoupper(trim($employee->ni_number)));
 
                         if($employeeNINumber == $fileNameWithoutAnyHipen){
+                            // if this ni_number exists multiple times among active employees treat as ambiguous (no match)
+                            if(isset($employee->duplicate_count) && $employee->duplicate_count > 1){
+                                $employeeFound = 0;
+                                break;
+                            }
 
                             $employeeFound = $employee->id;
                             break;
 
                         } else {
-
                             $employeeFound = 0;
                             $paySync=PaySlipUploadSync::all();
                             foreach($paySync as $pay) {
