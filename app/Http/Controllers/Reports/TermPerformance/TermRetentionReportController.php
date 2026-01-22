@@ -286,18 +286,24 @@ class TermRetentionReportController extends Controller
                                                     ->where(function($q) use($refund_date, $courseEndDate){
                                                         $q->whereDate('sats.status_change_date', '>=', date('Y-m-d', strtotime($refund_date)))->whereDate('sats.status_change_date', '<=', date('Y-m-d', strtotime($courseEndDate)));
                                                     })->pluck('std.id')->unique()->toArray();
+
                                 $admissions += (!empty($student_ids) ? count($student_ids) : 0);
                                 $admissions_ids = array_merge($admissions_ids, $student_ids);
-                                $registered += (!empty($registered_std_ids) ? count($registered_std_ids) : 0);
-                                $registered_ids = array_merge($registered_ids, $registered_std_ids);
+
                                 $droppedout += (!empty($droppedOutStdents) ? count($droppedOutStdents) : 0);
                                 $droppedout_ids = array_merge($droppedout_ids, $droppedOutStdents);
+                                
+                                $registered_ids = !empty($droppedOutStdents) ? array_diff($registered_std_ids, $droppedOutStdents) : $registered_ids;
 
+                                
+                                $registered += (!empty($registered_ids) ? count($registered_ids) : 0);
+                                
                                 // remove dropped out ids from registered ids
-                                $registered_ids = !empty($droppedOutStdents) ? array_diff($registered_ids, $droppedOutStdents) : $registered_ids;
+                                
                             endif;
                         endforeach;
                     endif;
+                    
                     $res['result'][$term->id]['semester'][$semester_id]['admissions'] = $admissions;
                     $res['result'][$term->id]['semester'][$semester_id]['admissions_ids'] = $admissions_ids;
                     $res['result'][$term->id]['semester'][$semester_id]['registered'] = $registered;
