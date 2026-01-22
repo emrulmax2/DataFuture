@@ -1,5 +1,4 @@
 import { createIcons, icons } from "lucide";
-import INTAddressLookUps from "./address_lookup";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
@@ -7,9 +6,9 @@ import INTAddressLookUps from "./address_lookup";
     const addressUpdateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addressUpdateModal"));
 
     // INIT Address Lookup
-    if($('.theAddressWrap').length > 0){
-        INTAddressLookUps();
-    }
+    // if($('.theAddressWrap').length > 0){
+    //     INTAddressLookUps();
+    // }
 
     $('#addressUpdateModal #addrProofDocument').on('change', function(){
         var inputs = document.getElementById('addrProofDocument');

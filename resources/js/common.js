@@ -1,7 +1,14 @@
 import IMask from 'imask';
 import Toastify from "toastify-js";
+import { initGetAddressAutocomplete } from './getAddressAutocomplete';
 
 (function(){
+    // INIT Address Lookup
+    document.addEventListener('DOMContentLoaded', () => {
+        initGetAddressAutocomplete({
+            token: import.meta.env.VITE_GETADDRESS_API_KEY
+        });
+    });
 
     // Turn Off Autocomplete for Datepicker Fields.
     if($('.datepicker').length > 0){

@@ -638,33 +638,36 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div class="grid grid-cols-12 gap-4">
+                        <div id="addressStart" class="grid grid-cols-12 gap-4 theAddressWrap" >
+                            <div class="col-span-12">
+                                <label for="address_lookup" class="form-label">Address Lookup</label>
+                                <input type="text" placeholder="Search address here..." id="address_lookup" class="form-control w-full theAddressLookup" name="address_lookup">
+                            </div>
+
                             <div class="col-span-12">
                                 <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full" name="address_line_1">
+                                <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full address_line_1" name="address_line_1">
                                 <div class="acc__input-error error-student_address_address_line_1 text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12">
                                 <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                                <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full" name="address_line_2">
+                                <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="form-control w-full address_line_2" name="address_line_2">
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_city" class="form-label">Town/City <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full" name="city">
+                                <input type="text" placeholder="City / Town" id="student_address_city" class="form-control w-full city" name="city">
                                 <div class="acc__input-error error-city text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_postal_zip_code" class="form-label">Postcode <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full" name="post_code">
+                                <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="form-control w-full postal_code" name="post_code">
                                 <div class="acc__input-error error-post_code text-danger mt-2"></div>
                             </div>
                             <div class="col-span-12 sm:col-span-6">
                                 <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                                <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full" name="country">
+                                <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full country" name="country">
                                 <div class="acc__input-error error-country text-danger mt-2"></div>
                             </div>
-                            <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key={{$postcode_api}}" />
-                            <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key={{$postcode_api}}"></script>
                         </div>
                     </div>
                     <div class="modal-footer">
