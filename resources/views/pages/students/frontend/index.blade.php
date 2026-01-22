@@ -296,24 +296,28 @@
                             </div>
                             <!-- END: Custom Tooltip Content -->
                         </div>
-                        <div id="permanentAddress__no" class="hidden">
+                        <div id="permanentAddress__no" class="theAddressWrap hidden">
                                 <div class="col-span-12">
                                     <div class="grid grid-cols-12 gap-x-4">
+                                        <div class="intro-y col-span-12 sm:col-span-12 py-1">
+                                            <label for="address_lookup" class="form-label">Address Lookup</label>
+                                            <input type="text" placeholder="Search address here..." id="address_lookup" class="form-control w-full theAddressLookup" name="address_lookup">
+                                        </div>
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_address_line_1" class="form-label inline-flex">Address Line 1</label>
-                                            <input id="permanent_address_line_1" type="text" name="permanent_address_line_1" class="w-full text-sm" />
+                                            <input id="permanent_address_line_1" type="text" name="permanent_address_line_1" class="w-full text-sm address_line_1" />
                                             <div class="acc__input-error error-permanent_address_line_1 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_address_line_2" class="form-label inline-flex">Address Line 2</label>
-                                            <input id="permanent_address_line_2" type="text" name="permanent_address_line_2" class="w-full text-sm" />
+                                            <input id="permanent_address_line_2" type="text" name="permanent_address_line_2" class="w-full text-sm address_line_2" />
                                             <div class="acc__input-error error-permanent_address_line_2 text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label  for="permanent_post_code" class="form-label inline-flex">Post Code</label>
-                                            <input id="permanent_post_code" type="text" name="permanent_post_code" class="w-full text-sm" />
+                                            <input id="permanent_post_code" type="text" name="permanent_post_code" class="w-full text-sm postal_code" />
                                             <div class="acc__input-error error-permanent_post_code text-danger mt-2"></div>
                                         </div>
                                     </div>
@@ -321,19 +325,19 @@
                                 <div class="col-span-12">
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label  for="permanent_city" class="form-label inline-flex">City</label>
-                                            <input id="permanent_city" type="text" name="permanent_city" class="w-full text-sm"  />
+                                            <input id="permanent_city" type="text" name="permanent_city" class="w-full text-sm city"  />
                                             <div class="acc__input-error error-permanent_city text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_state" class="form-label inline-flex">State</label>
-                                            <input id="permanent_state" type="text" name="permanent_state" class="w-full text-sm" />
+                                            <input id="permanent_state" type="text" name="permanent_state" class="w-full text-sm state" />
                                             <div class="acc__input-error error-permanent_state text-danger mt-2"></div>
                                         </div>
 
                                         <div class="intro-y col-span-12 sm:col-span-4 py-1">
                                             <label for="permanent_country" class="form-label inline-flex">Country</label>
-                                            <input id="permanent_country" type="text" name="permanent_country" class="w-full text-sm" />
+                                            <input id="permanent_country" type="text" name="permanent_country" class="w-full text-sm country" />
                                             <div class="acc__input-error error-permanent_country text-danger mt-2"></div>
                                         </div>
                                 </div>
@@ -478,9 +482,6 @@
   
     <!-- End: HTML Table Data --> 
     
-    <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-    <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
-
     @include('pages.students.frontend.modals.first-login.index')
 @endsection
 

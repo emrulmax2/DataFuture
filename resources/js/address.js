@@ -5,7 +5,7 @@ import INTAddressLookUps from './address_lookup.js';
     "use strict";
 
     // INIT Address Lookup
-    if($('.theAddressWrap').length > 0){
-        INTAddressLookUps();
-    }
+    // if($('.theAddressWrap').length > 0){
+    //     INTAddressLookUps();
+    // }
 })();

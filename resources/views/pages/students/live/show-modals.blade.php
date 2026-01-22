@@ -658,10 +658,14 @@
                 </div>
                 <div class="modal-body">
                     <div id="addressStart" class="grid grid-cols-12 gap-4 theAddressWrap" >
-    
+                        <div class="col-span-12">
+                            <label for="address_lookup" class="form-label">Address Lookup</label>
+                            <input type="text" placeholder="Search address here..." id="address_lookup" class="form-control w-full theAddressLookup" name="address_lookup">
+                        </div>
+
                         <div class="col-span-12">
                             <label for="student_address_address_line_1" class="form-label">Address Line 1</label>
-                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_1" class="form-control w-full address_line_1" name="student_address_address_line_1">
+                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="form-control w-full address_line_1" name="student_address_address_line_1">
                         </div>
                         
                         <div class="col-span-12">
@@ -689,8 +693,6 @@
                             <input type="text" placeholder="Country" id="student_address_country" class="form-control w-full country" name="student_address_country">
                             <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
                         </div>
-                        <link rel="stylesheet" type="text/css" href="https://services.postcodeanywhere.co.uk/css/captureplus-2.30.min.css?key=gy26-rh34-cf82-wd85" />
-                        <script type="text/javascript" src="https://services.postcodeanywhere.co.uk/js/captureplus-2.30.min.js?key=gy26-rh34-cf82-wd85"></script>
                     </div>
                 </div>
                 <div class="modal-footer">
