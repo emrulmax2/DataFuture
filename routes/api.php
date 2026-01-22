@@ -50,7 +50,7 @@ Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::cla
 
     // Protected routes (require Bearer Token)
     Route::middleware('auth.api:student-api')->prefix('student')->group(function() {
-
+        //dashboard works
         Route::controller(ApiDashboardController::class)->group(function() {
             Route::get('dashboard', 'index')->name('user.dashboard');
         });
