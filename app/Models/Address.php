@@ -19,6 +19,7 @@ class Address extends Model
         'post_code',
         'city',
         'country',
+        'polar_4_quantile',
         'active',
         'created_by',
         'updated_by',
