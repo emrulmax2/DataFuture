@@ -498,7 +498,7 @@ class AdmissionController extends Controller
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
@@ -953,7 +953,7 @@ class AdmissionController extends Controller
 
             'processGroup' => $processGroup,
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
@@ -1466,7 +1466,7 @@ class AdmissionController extends Controller
             'docSettings' => DocumentSettings::where('admission', '1')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
@@ -1579,7 +1579,7 @@ class AdmissionController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
@@ -1833,7 +1833,7 @@ class AdmissionController extends Controller
             'emailTemplates' => EmailTemplate::where('admission', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
@@ -3295,7 +3295,7 @@ class AdmissionController extends Controller
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
         ]);
     }
 
