@@ -302,13 +302,15 @@
                                 @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
                                     <span class="font-medium">{{ $student->contact->termaddress->country }}</span><br/>
                                 @endif
-                                @if(isset($student->contact->termaddress->polar_4_quantile) && !empty($student->contact->termaddress->polar_4_quantile))
-                                    <span class="font-medium">Polar 4 quantile: {{ $student->contact->termaddress->polar_4_quantile }}</span><br/>
-                                @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
                             @endif
                         </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Polar4 quantile</div>
+                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->termaddress->polar_4_quantile) && !empty($student->contact->termaddress->polar_4_quantile) ? $student->contact->termaddress->polar_4_quantile : '---') }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
@@ -343,13 +345,15 @@
                                     <span class="font-medium">{{ $student->contact->permaddress->country }}</span><br/>
                                 @endif
                                 
-                                @if(isset($student->contact->permaddress->polar_4_quantile) && !empty($student->contact->permaddress->polar_4_quantile))
-                                    <span class="font-medium">Polar 4 quantile: {{ $student->contact->permaddress->polar_4_quantile }}</span><br/>
-                                @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
                             @endif
                         </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-12 gap-0 mb-3">
+                        <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Permanent Polar4 quantile</div>
+                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->permaddress->polar_4_quantile) && !empty($student->contact->permaddress->polar_4_quantile) ? $student->contact->permaddress->polar_4_quantile : '---') }}</div>
                     </div>
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Permanent Country code</div>
