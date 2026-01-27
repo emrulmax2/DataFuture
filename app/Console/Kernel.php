@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\ProcessAddressLosa21;
 
 class Kernel extends ConsoleKernel
 {
@@ -32,6 +33,9 @@ class Kernel extends ConsoleKernel
 
 
         $schedule->command('studentbulkemailcreationmailsend:cron')->everyFifteenMinutes();
+
+        // Schedule postcode -> losa_21 updater job daily at 02:00
+        $schedule->job(new ProcessAddressLosa21())->dailyAt('02:00')->withoutOverlapping()->onOneServer();
         
 
         

@@ -20,6 +20,7 @@ class Address extends Model
         'city',
         'country',
         'polar_4_quantile',
+        'losa_21',
         'active',
         'created_by',
         'updated_by',
