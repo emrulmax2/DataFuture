@@ -302,6 +302,9 @@
                                 @if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country))
                                     <span class="font-medium">{{ $student->contact->termaddress->country }}</span><br/>
                                 @endif
+                                @if(isset($student->contact->termaddress->polar_4_quantile) && !empty($student->contact->termaddress->polar_4_quantile))
+                                    <span class="font-medium">Polar 4 quantile: {{ $student->contact->termaddress->polar_4_quantile }}</span><br/>
+                                @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
                             @endif
@@ -338,6 +341,10 @@
                                 @endif
                                 @if(isset($student->contact->permaddress->country) && !empty($student->contact->permaddress->country))
                                     <span class="font-medium">{{ $student->contact->permaddress->country }}</span><br/>
+                                @endif
+                                
+                                @if(isset($student->contact->permaddress->polar_4_quantile) && !empty($student->contact->permaddress->polar_4_quantile))
+                                    <span class="font-medium">Polar 4 quantile: {{ $student->contact->permaddress->polar_4_quantile }}</span><br/>
                                 @endif
                             @else 
                                 <span class="font-medium text-warning">Not Set Yet!</span><br/>
