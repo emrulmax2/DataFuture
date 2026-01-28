@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
 
         // Schedule postcode -> lsoa_21 updater job daily at 02:00
         $schedule->command('address:process-lsoa21')
-             ->dailyAt('10:56')
+             ->dailyAt('03:50')
              ->withoutOverlapping()
              ->onOneServer();
         
