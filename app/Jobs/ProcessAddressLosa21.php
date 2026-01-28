@@ -52,7 +52,12 @@ class ProcessAddressLosa21 implements ShouldQueue
             ->chunkById(100, function($addresses){
                 foreach($addresses as $a){
                     // dispatch a job for each address to be processed by the queue
-                    self::dispatch($a->id);
+                    try {
+                        self::dispatch($a->id);
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to dispatch per-address job', ['address_id' => $a->id, 'error' => $e->getMessage()]);
+                        // continue with next address
+                    }
                 }
             });
     }
@@ -92,9 +97,10 @@ class ProcessAddressLosa21 implements ShouldQueue
             } else {
                 Log::warning('Postcode lookup failed', ['address_id' => $addressId, 'postcode' => $postcode, 'status' => $response->status()]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error processing address losa_21', ['address_id' => $addressId, 'error' => $e->getMessage()]);
-            throw $e;
+            // don't rethrow; ensure single-address failures don't interrupt other work
+            return;
         }
     }
 }
