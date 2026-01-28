@@ -35,7 +35,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('studentbulkemailcreationmailsend:cron')->everyFifteenMinutes();
 
         // Schedule postcode -> losa_21 updater job daily at 02:00
-        $schedule->job(new ProcessAddressLosa21())->dailyAt('19:15')->withoutOverlapping()->onOneServer();
+        $schedule->job(new ProcessAddressLosa21())->dailyAt('09:33')->withoutOverlapping()->onOneServer();
         
 
         
