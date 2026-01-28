@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Address;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\RequestException;
 
 class ProcessAddressLosa21 implements ShouldQueue
 {
@@ -51,7 +52,12 @@ class ProcessAddressLosa21 implements ShouldQueue
             ->chunkById(100, function($addresses){
                 foreach($addresses as $a){
                     // dispatch a job for each address to be processed by the queue
-                    self::dispatch($a->id);
+                    try {
+                        self::dispatch($a->id);
+                    } catch (\Throwable $e) {
+                        Log::warning('Failed to dispatch per-address job', ['address_id' => $a->id, 'error' => $e->getMessage()]);
+                        // continue with next address
+                    }
                 }
             });
     }
@@ -71,7 +77,13 @@ class ProcessAddressLosa21 implements ShouldQueue
             $postcode = preg_replace('/\s+/', '', (string)$address->post_code);
             $url = "https://api.postcodes.io/postcodes/".urlencode($postcode);
 
-            $response = Http::timeout(5)->retry(3, 100)->get($url);
+            try {
+                $response = Http::timeout(5)->retry(3, 100)->get($url);
+            } catch (RequestException $e) {
+                $status = $e->response?->status() ?? null;
+                Log::warning('Postcode lookup failed (exception)', ['address_id' => $addressId, 'postcode' => $postcode, 'status' => $status, 'message' => $e->getMessage()]);
+                return;
+            }
 
             if ($response->successful() && $response->json('status') === 200) {
                 $result = $response->json('result');
@@ -85,9 +97,10 @@ class ProcessAddressLosa21 implements ShouldQueue
             } else {
                 Log::warning('Postcode lookup failed', ['address_id' => $addressId, 'postcode' => $postcode, 'status' => $response->status()]);
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error('Error processing address losa_21', ['address_id' => $addressId, 'error' => $e->getMessage()]);
-            throw $e;
+            // don't rethrow; ensure single-address failures don't interrupt other work
+            return;
         }
     }
 }
