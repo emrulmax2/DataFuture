@@ -3,31 +3,31 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Jobs\ProcessAddressLosa21;
+use App\Jobs\ProcessAddressLsoa21;
 
-class ProcessAddressLosa21Command extends Command
+class ProcessAddressLsoa21Command extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'address:process-losa21';
+    protected $signature = 'address:process-lsoa21';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Dispatch ProcessAddressLosa21 job to update losa_21 for addresses';
+    protected $description = 'Dispatch ProcessAddressLsoa21 job to update lsoa_21 for addresses';
 
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        ProcessAddressLosa21::dispatch();
-        $this->info('ProcessAddressLosa21 dispatched.');
+        ProcessAddressLsoa21::dispatch();
+        $this->info('ProcessAddressLsoa21 dispatched.');
         return 0;
     }
 }
