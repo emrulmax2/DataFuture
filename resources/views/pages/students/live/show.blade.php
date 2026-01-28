@@ -312,10 +312,10 @@
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Polar4 quantile</div>
                         <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->termaddress->polar_4_quantile) && !empty($student->contact->termaddress->polar_4_quantile) ? $student->contact->termaddress->polar_4_quantile : '---') }}</div>
                     </div>
-                    <div class="grid grid-cols-12 gap-0 mb-3">
+                    {{-- <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Term lsoa 21</div>
-                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->termaddress->losa_21) && !empty($student->contact->termaddress->losa_21) ? $student->contact->termaddress->losa_21 : '---') }}</div>
-                    </div>
+                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->termaddress->lsoa_21) && !empty($student->contact->termaddress->lsoa_21) ? $student->contact->termaddress->lsoa_21 : '---') }}</div>
+                    </div> --}}
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Term Time Acco. Type</div>
                         <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->ttacom->name) && !empty($student->contact->ttacom->name) ? $student->contact->ttacom->name : '---') }}</div>
@@ -359,10 +359,10 @@
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Permanent Polar4 quantile</div>
                         <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->permaddress->polar_4_quantile) && !empty($student->contact->permaddress->polar_4_quantile) ? $student->contact->permaddress->polar_4_quantile : '---') }}</div>
                     </div>
-                    <div class="grid grid-cols-12 gap-0 mb-3">
+                    {{-- <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Permanent lsoa 21</div>
-                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->permaddress->losa_21) && !empty($student->contact->permaddress->losa_21) ? $student->contact->permaddress->losa_21 : '---') }}</div>
-                    </div>
+                        <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->permaddress->lsoa_21) && !empty($student->contact->permaddress->lsoa_21) ? $student->contact->permaddress->lsoa_21 : '---') }}</div>
+                    </div> --}}
                     <div class="grid grid-cols-12 gap-0 mb-3">
                         <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Permanent Country code</div>
                         <div class="col-span-6 md:col-span-8 font-medium">{{ (isset($student->contact->pcountry->name) && !empty($student->contact->pcountry->name) ? $student->contact->pcountry->name : '---') }}</div>
