@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use App\Models\Address;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Client\RequestException;
 
 class ProcessAddressLosa21 implements ShouldQueue
 {
@@ -71,7 +72,13 @@ class ProcessAddressLosa21 implements ShouldQueue
             $postcode = preg_replace('/\s+/', '', (string)$address->post_code);
             $url = "https://api.postcodes.io/postcodes/".urlencode($postcode);
 
-            $response = Http::timeout(5)->retry(3, 100)->get($url);
+            try {
+                $response = Http::timeout(5)->retry(3, 100)->get($url);
+            } catch (RequestException $e) {
+                $status = $e->response?->status() ?? null;
+                Log::warning('Postcode lookup failed (exception)', ['address_id' => $addressId, 'postcode' => $postcode, 'status' => $status, 'message' => $e->getMessage()]);
+                return;
+            }
 
             if ($response->successful() && $response->json('status') === 200) {
                 $result = $response->json('result');
