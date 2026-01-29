@@ -130,7 +130,14 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-source_tuition_fee_id text-danger mt-2"></div>
-                        </div>       
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <input id="franchise_course" class="form-check-input m-0" name="franchise_course" value="Yes" type="checkbox">
+                                <label class="form-check-label ml-2" for="franchise_course">Franchise Course</label>
+                            </div>
+                            <div class="acc__input-error error-franchise_course text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
@@ -210,6 +217,13 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-source_tuition_fee_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <input id="edit_franchise_course" class="form-check-input m-0" name="franchise_course" value="Yes" type="checkbox">
+                                <label class="form-check-label ml-2" for="edit_franchise_course">Franchise Course</label>
+                            </div>
+                            <div class="acc__input-error error-franchise_course text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -193,7 +193,8 @@ var table = (function () {
             $('#addModal .acc__input-error').html('');
             $('#addModal input:not([type="checkbox"])').val('');
             $('#addModal select').val('');
-            $('#addModal input[type="checkbox"]').prop('checked', true);
+            $('#addModal input[name="active"]').prop('checked', true);
+            $('#addModal input[name="franchise_course"]').prop('checked', false);
         });
         
         const editModalEl = document.getElementById('editModal')
@@ -269,6 +270,12 @@ var table = (function () {
                     $('#editModal input[name="pre_qualification"]').val(dataset.pre_qualification ? dataset.pre_qualification : '');
                     $('#editModal select[name="awarding_body_id"]').val(dataset.awarding_body_id ? dataset.awarding_body_id : '');
                     $('#editModal select[name="source_tuition_fee_id"]').val(dataset.source_tuition_fee_id ? dataset.source_tuition_fee_id : '');
+
+                    if(dataset.franchise_course == 'Yes'){
+                        $('#editModal input[name="franchise_course"]').prop('checked', true);
+                    }else{
+                        $('#editModal input[name="franchise_course"]').prop('checked', false);
+                    }
 
                     $('#editModal input[name="id"]').val(editId);
                     if(dataset.active == 1){

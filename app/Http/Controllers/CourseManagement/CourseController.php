@@ -88,8 +88,14 @@ class CourseController extends Controller
 
     public function store(CourseRequests $request){
         $active = (isset($request->active) && $request->active > 0 ? $request->active : 0);
+        $franchiseCourse = ($request->has('franchise_course') ? 'Yes' : 'No');
         $request->request->remove('active');
-        $request->request->add(['created_by' => auth()->user()->id, 'active' => $active]);
+        $request->request->remove('franchise_course');
+        $request->request->add([
+            'created_by' => auth()->user()->id,
+            'active' => $active,
+            'franchise_course' => $franchiseCourse,
+        ]);
         $course = Course::create($request->all());
 
         $courseAll = Course::all()->sortByAsc("name");
@@ -116,6 +122,7 @@ class CourseController extends Controller
             'pre_qualification'=> $request->pre_qualification,
             'awarding_body_id'=> $request->awarding_body_id,
             'source_tuition_fee_id'=> $request->source_tuition_fee_id,
+            'franchise_course'=> ($request->has('franchise_course') ? 'Yes' : 'No'),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id
         ]);
