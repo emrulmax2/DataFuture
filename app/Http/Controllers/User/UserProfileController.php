@@ -58,7 +58,7 @@ class UserProfileController extends Controller
                 ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
                 ['label' => 'Payroll Sync', 'href' => 'javascript:void(0);']
             ],
-            'employee'=> Employee::find($id),
+            'employee'=> $employee,
             'paySlipUploadSync' => $paySlipUploadSync,
             'holidayYearIds' => $holidayYearIds ?? [],
         ]);
