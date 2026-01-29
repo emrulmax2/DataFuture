@@ -21,6 +21,7 @@ class PaySlipUploadSync extends Model
         'is_file_exist',
         'file_transffered',
         'file_transffered_at',
+        'email_transferred_at',
         'is_file_uploaded',
         'created_at',
         'updated_at',

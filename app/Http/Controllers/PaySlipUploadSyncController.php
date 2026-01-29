@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PayslipSyncUploadUpdateRequest;
+use App\Jobs\ProcessSendPaySlipEmail;
 use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -34,18 +35,22 @@ class PaySlipUploadSyncController extends Controller
         $employee_ids = $request->employee_id;
 
         foreach ($ids as $index => $id) {
-            PaySlipUploadSync::updateOrCreate(
+            $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                 [
                     'id' => $id
                 ],
                 [
-                    'employee_id' => $employee_ids[$index],
+                    'employee_id' => $employee_ids[$index] ?? null,
                     'file_transffered_at' => now(),
                     'file_transffered' => 1,
                     'updated_at' => now(),
                     'updated_by' => auth()->id(),
                 ]
             );
+
+            if ($paySlipUploadSync && !empty($paySlipUploadSync->employee_id)) {
+                ProcessSendPaySlipEmail::dispatch($paySlipUploadSync->id);
+            }
         }       
 
         return response()->json([
