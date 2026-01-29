@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PayslipSyncUploadUpdateRequest;
+use App\Jobs\ProcessSendPaySlipEmail;
 use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -30,28 +31,63 @@ class PaySlipUploadSyncController extends Controller
      */
     public function store(PayslipSyncUploadUpdateRequest $request)
     {
-        $ids = $request->id;
-        $employee_ids = $request->employee_id;
+        $ids = $request->id ?? [];
+        $employee_ids = $request->employee_id ?? [];
 
         foreach ($ids as $index => $id) {
-            PaySlipUploadSync::updateOrCreate(
+            $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                 [
                     'id' => $id
                 ],
                 [
-                    'employee_id' => $employee_ids[$index],
+                    'employee_id' => $employee_ids[$index] ?? null,
                     'file_transffered_at' => now(),
                     'file_transffered' => 1,
                     'updated_at' => now(),
                     'updated_by' => auth()->id(),
                 ]
             );
+
+            if ($paySlipUploadSync && !empty($paySlipUploadSync->employee_id)) {
+                ProcessSendPaySlipEmail::dispatch($paySlipUploadSync->id);
+            }
         }       
 
         return response()->json([
             'message' => 'Pay slip sync updated successfully',
+            'ids' => array_values(array_filter($ids)),
+            'total' => count(array_filter($ids)),
         ]);
         
+    }
+
+    public function emailProgress(Request $request)
+    {
+        $ids = array_values(array_filter($request->input('ids', [])));
+
+        if (empty($ids)) {
+            return response()->json([
+                'total' => 0,
+                'completed' => 0,
+                'percentage' => 0,
+            ]);
+        }
+
+        $baseQuery = PaySlipUploadSync::whereIn('id', $ids)
+            ->whereNotNull('employee_id')
+            ->whereHas('employee', function ($query) {
+                $query->whereNotNull('email')->where('email', '!=', '');
+            });
+
+        $total = (clone $baseQuery)->count();
+        $completed = (clone $baseQuery)->whereNotNull('email_transferred_at')->count();
+        $percentage = $total > 0 ? (int) round(($completed / $total) * 100) : 0;
+
+        return response()->json([
+            'total' => $total,
+            'completed' => $completed,
+            'percentage' => $percentage,
+        ]);
     }
 
     /**

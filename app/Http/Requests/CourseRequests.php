@@ -28,7 +28,8 @@ class CourseRequests extends FormRequest
             'degree_offered' => 'required',
             'pre_qualification' => 'required',           
             'awarding_body_id' => 'required',           
-            'source_tuition_fee_id' => 'required',           
+            'source_tuition_fee_id' => 'required',
+            'franchise_course' => 'nullable|in:Yes,No',
         ];
     }
 }

@@ -211,6 +211,21 @@ var hrPayslipListTable = (function () {
         let url = tthis.attr('action');
         const form = document.getElementById('hrPayslipSyncForm');
         let form_data = new FormData(form);
+
+        const selectedIds = [];
+        $('.fill-box:checked').each(function () {
+            selectedIds.push($(this).val());
+        });
+
+        if (selectedIds.length === 0) {
+            return;
+        }
+
+        $('#payslipEmailProgressWrapper').removeClass('hidden');
+        $('#payslipEmailProgressBar').css('width', '0%');
+        $('#payslipEmailProgressText').text('0%');
+        $('#payslipEmailProgressMeta').text('0 of 0 sent');
+
         axios({
             url: url,
             method: "post",
@@ -221,19 +236,60 @@ var hrPayslipListTable = (function () {
             $(".loading").removeClass('hidden');
             
             if (response.status == 200) {
+                const progressIds = (response.data && response.data.ids && response.data.ids.length)
+                    ? response.data.ids
+                    : selectedIds;
 
-              
-                succModal.show();
+                const pollProgress = () => {
+                    axios({
+                        url: route('payslip-upload.email-progress'),
+                        method: "post",
+                        data: { ids: progressIds },
+                        headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    }).then(progressResponse => {
+                        const data = progressResponse.data || {};
+                        const total = data.total || 0;
+                        const completed = data.completed || 0;
+                        const percentage = data.percentage || 0;
 
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Employee Name successfully syncronized.');
-                }); 
-                
-                setTimeout(() => {
-                    succModal.hide();
-                    location.href = route('hr.attendance');
-                }, 2000);
+                        $('#payslipEmailProgressBar').css('width', percentage + '%');
+                        $('#payslipEmailProgressText').text(percentage + '%');
+                        $('#payslipEmailProgressMeta').text(completed + ' of ' + total + ' sent');
+
+                        if (total === 0) {
+                            clearInterval(progressInterval);
+                            $(".loading").addClass('hidden');
+                            succModal.show();
+                            document.getElementById("successModal").addEventListener("shown.tw.modal", function () {
+                                $("#successModal .successModalTitle").html("Notice");
+                                $("#successModal .successModalDesc").html('No valid email recipients found for the selected payslips.');
+                            });
+                            setTimeout(() => {
+                                succModal.hide();
+                            }, 2000);
+                            return;
+                        }
+
+                        if (total > 0 && completed >= total) {
+                            clearInterval(progressInterval);
+                            $(".loading").addClass('hidden');
+                            succModal.show();
+                            document.getElementById("successModal").addEventListener("shown.tw.modal", function () {
+                                $("#successModal .successModalTitle").html("Congratulations!");
+                                $("#successModal .successModalDesc").html('Payslip emails sent successfully.');
+                            });
+                            setTimeout(() => {
+                                succModal.hide();
+                                window.history.back();
+                            }, 2000);
+                        }
+                    }).catch(() => {
+                        clearInterval(progressInterval);
+                    });
+                };
+
+                const progressInterval = setInterval(pollProgress, 2000);
+                pollProgress();
             }
         }).catch(error => {
             $(".loading").addClass('hidden');

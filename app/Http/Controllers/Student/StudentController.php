@@ -2338,7 +2338,7 @@ class  StudentController extends Controller
             'workplacement_settings' => WorkplacementSetting::all(),
             'assign_modules' => $assign_modules,
             'total_hours_calculations' => $total_hours_calculations ?? [],
-            'confirmed_hours' => $confirmed_hours,
+            'confirmed_hours' => $confirmed_hours ?? [],
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
