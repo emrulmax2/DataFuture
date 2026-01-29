@@ -752,7 +752,7 @@ class DashboardController extends Controller
 
             'workplacement_details' => $workPlacementDetails,
             'total_hours_calculations' => $total_hours_calculations ?? [],
-            'confirmed_hours' => $confirmed_hours,
+            'confirmed_hours' => $confirmed_hours ?? [],
             'newsEvents' => NewsAndEvent::where('active', 1)->where('fol_all', 1)->orWhereHas('students', function($q) use($student){
                                 $q->where('student_id', $student->id);
                             })->orderBy('created_at', 'DESC')->get(),
