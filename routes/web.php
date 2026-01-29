@@ -1395,7 +1395,9 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(UserProfileController::class)->group(function() {
+        
         Route::get('my-account', 'index')->name('user.account'); 
+        Route::get('my-account/payslip', 'payrollSyncShow')->name('user.account.payslip'); 
         Route::get('my-account/extra-benefit', 'extraBenefit')->name('user.account.extrabenefit'); 
     });
 
