@@ -38,6 +38,16 @@
             
         </div>
     </div>
+    <div id="payslipEmailProgressWrapper" class="intro-y hidden mt-4">
+        <div class="flex items-center justify-between mb-2">
+            <div class="font-medium">Email sending progress</div>
+            <div id="payslipEmailProgressText">0%</div>
+        </div>
+        <div class="w-full h-2 bg-slate-200 rounded">
+            <div id="payslipEmailProgressBar" class="h-2 bg-success rounded" style="width: 0%;"></div>
+        </div>
+        <div id="payslipEmailProgressMeta" class="text-slate-500 text-xs mt-2">0 of 0 sent</div>
+    </div>
     @php
        $danger ="relative border-none rounded-md bg-danger border-danger bg-opacity-20 border-opacity-5 text-danger dark:border-danger dark:border-opacity-20 ";
        $success ="relative border-none bg-success border-success bg-opacity-20 border-opacity-5 text-success dark:border-success dark:border-opacity-20"
