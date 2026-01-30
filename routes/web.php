@@ -276,6 +276,7 @@ use App\Http\Controllers\Reports\TermPerformance\TermAttendancePerformanceReport
 use App\Http\Controllers\Reports\TermPerformance\TermProgressionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermRetentionReportController;
 use App\Http\Controllers\Reports\TermPerformance\TermSubmissionPerformanceReportController;
+use App\Http\Controllers\ResidencyStatusController;
 use App\Http\Controllers\ResultComparisonController;
 use App\Http\Controllers\Settings\Studentoptions\CompanyController;
 use App\Http\Controllers\Settings\Studentoptions\CompanySupervisorController;
@@ -2992,6 +2993,20 @@ Route::middleware('auth')->group(function() {
         Route::delete('site-settings/issue-types/delete/{id}', 'destroy')->name('issue.types.destroy');
         Route::post('site-settings/issue-types/restore', 'restore')->name('issue.types.restore');
 
+    });
+
+
+    Route::controller(ResidencyStatusController::class)->group(function() {
+        Route::get('site-settings/residency-status', 'index')->name('residency.status'); 
+        Route::get('site-settings/residency-status/list', 'list')->name('residency.status.list'); 
+        Route::post('site-settings/residency-status/store', 'store')->name('residency.status.store'); 
+        Route::get('site-settings/residency-status/edit/{residencyStatus}', 'edit')->name('residency.status.edit');
+        Route::post('site-settings/residency-status/update/{residencyStatus}', 'update')->name('residency.status.update');
+        Route::delete('site-settings/residency-status/delete/{id}', 'destroy')->name('residency.status.destroy');
+        Route::post('site-settings/residency-status/restore/{id}', 'restore')->name('residency.status.restore');
+    
+        //Route::get('site-settings/residency-status/export', 'export')->name('residency.status.export');
+        //Route::post('site-settings/residency-status/import', 'import')->name('residency.status.import');
     });
     
 
