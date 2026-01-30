@@ -358,6 +358,13 @@
                         <i data-lucide="computer" class="w-4 h-4 mr-2"></i> Report IT Issue Type Settings
                     </a>
                 </li>
+
+                
+                <li>
+                    <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'residency.status' ? 'active text-primary font-medium' : '' }}" href="{{ route('residency.status') }}">
+                        <i data-lucide="home" class="w-4 h-4 mr-2"></i> Residency Status Settings
+                    </a>
+                </li>
         </ul>
     </div>
 </div>
