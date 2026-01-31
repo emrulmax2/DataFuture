@@ -102,6 +102,9 @@ class EmployeeTimeKeepingController extends Controller
         $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
         $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                          ->orderBy('id', 'DESC')->get()->first();
+        $effective_from = (isset($activePattern->effective_from) && !empty($activePattern->effective_from) ? date('Y-m-d', strtotime($activePattern->effective_from)) : '');
+        $workStart = (!empty($effective_from) ? ($effective_from > $monthStart ? $effective_from : $monthStart) : $monthStart);
+
         $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
         //$payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
 
@@ -112,6 +115,7 @@ class EmployeeTimeKeepingController extends Controller
             $D = date('D', strtotime($today));
             $N = date('N', strtotime($today));
             $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $today);
+            $isWorkStarted = $today >= $workStart ? true : false;
             
             $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
             $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
@@ -125,7 +129,7 @@ class EmployeeTimeKeepingController extends Controller
             
             $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
             $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
-            $isBankHoliday = (isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
+            $isBankHoliday = ($today >= $workStart && isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
 
             $note = [];
             $clockin_punch = (isset($todayAttendance->clockin_punch) && !empty($todayAttendance->clockin_punch) && $todayAttendance->clockin_punch != '00:00' ? $todayAttendance->clockin_punch.':00' : '');
@@ -195,7 +199,7 @@ class EmployeeTimeKeepingController extends Controller
             $dayHour = 0;
             $holidayHour = 0;
             $dayStatus = '';
-            if(!$isWorkingDay && !$isClockedIn):
+            if((!$isWorkingDay && !$isClockedIn) || !$isWorkStarted):
                 $dayClass .= ' nwRow ';
                 $dayStatus = 'Not in Schedule';
                 $dayHour += 0;
@@ -250,11 +254,11 @@ class EmployeeTimeKeepingController extends Controller
                 $html .= '<td class="font-medium whitespace-nowrap">';
                     $html .= date('l, jS F', strtotime($today));
                     if($isWorkingDay && !$isLeaveDay && !$isBankHoliday && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
-                        $html .= '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')';
+                        $html .= $isWorkStarted ? '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')' : '';
                     endif;
                 $html .= '</td>';
                 $html .= '<td>';
-                    $html .= ($isWorkingDay ? $todayPattern->total : '&nbsp;');
+                    $html .= ($isWorkingDay && $isWorkStarted ? $todayPattern->total : '&nbsp;');
                 $html .= '</td>';
                 $html .= '<td>'.$dayStatus.'</td>';
                 $html .= '<td>';
