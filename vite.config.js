@@ -415,7 +415,6 @@ export default defineConfig({
                 'resources/js/accounts-university-invoice-list.js',
                 'resources/js/account-settings.js',
 
-
                 'resources/js/hr-employee-sick-leave-report.js',
 
                 'resources/js/student-residency-criminal.js',
