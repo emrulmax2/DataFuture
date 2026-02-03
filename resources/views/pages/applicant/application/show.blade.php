@@ -116,7 +116,39 @@
                     </div>
                 </div>
             </div>
-
+            <div class="accordion-item mb-1">
+                <div id="applicantReviewAccordion-c-residency" class="accordion-header">
+                    <button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-residency" aria-expanded="false" aria-controls="applicantReviewAccordion-col-residency">
+                        Residency Status & Criminal Convictions
+                        <span class="accordionCollaps"></span>
+                    </button>
+                </div>
+                <div id="applicantReviewAccordion-col-residency" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-residency" data-tw-parent="#applicantReviewAccordion">
+                    <div class="accordion-body px-5 pt-6">
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 sm:col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Residency Status</div>
+                                    <div class="col-span-7 font-medium">{{ isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 sm:col-span-6">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Criminal Conviction</div>
+                                    <div class="col-span-7 font-medium">
+                                        {!! (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-12 gap-0 mt-2">
+                                    <div class="col-span-5 text-slate-500 font-medium">Conviction Details</div>
+                                    <div class="col-span-7 font-medium">{{ (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : '---') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="accordion-item mb-1">
                 <div id="applicantReviewAccordion-c-2" class="accordion-header">
                     <button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-2" aria-expanded="false" aria-controls="applicantReviewAccordion-col-2">
