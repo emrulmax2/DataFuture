@@ -139,6 +139,14 @@ class Student extends Model
         return $this->hasMany(StudentEmployment::class, 'student_id', 'id');
     }
 
+    public function residency(){
+        return $this->hasOne(StudentResidency::class, 'student_id', 'id');
+    }
+
+    public function criminalConviction(){
+        return $this->hasOne(StudentCriminalConviction::class, 'student_id', 'id');
+    }
+
     public function title(){
         return $this->belongsTo(Title::class, 'title_id');
     }

@@ -418,6 +418,8 @@ export default defineConfig({
 
                 'resources/js/hr-employee-sick-leave-report.js',
 
+                'resources/js/student-residency-criminal.js',
+
             ],
             refresh: true,
         }),

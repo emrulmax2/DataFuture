@@ -1715,6 +1715,86 @@ var employmentHistoryTable = (function () {
     }
     /* Edit Contact Details*/
 
+    /* Edit Residency Status & Criminal Convictions */
+    if($('#editAdmissionResidencyCriminalForm').length > 0){
+        const editAdmissionResidencyCriminalModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editAdmissionResidencyCriminalModal"));
+        const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+
+        const toggleConvictionDetails = () => {
+            const selected = $('#editAdmissionResidencyCriminalForm input[name="have_you_been_convicted"]:checked').val();
+            if (selected === "1") {
+                $('#editAdmissionResidencyCriminalForm .criminalConvictionDetailsWrap').fadeIn('fast');
+            } else {
+                $('#editAdmissionResidencyCriminalForm .criminalConvictionDetailsWrap').fadeOut('fast', function(){
+                    $('#editAdmissionResidencyCriminalForm #criminal_conviction_details').val('');
+                });
+            }
+        };
+
+        toggleConvictionDetails();
+        $(document).on('change', '#editAdmissionResidencyCriminalForm input[name="have_you_been_convicted"]', toggleConvictionDetails);
+
+        $('#editAdmissionResidencyCriminalForm').on('submit', function(e){
+            e.preventDefault();
+            var $form = $(this);
+            const form = document.getElementById('editAdmissionResidencyCriminalForm');
+
+            document.querySelector('#saveResidencyCriminal').setAttribute('disabled', 'disabled');
+            document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: inline-block;";
+
+            let form_data = new FormData(form);
+            axios({
+                method: "post",
+                url: route('admission.update.residency.criminal'),
+                data: form_data,
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    document.querySelector('#saveResidencyCriminal').removeAttribute('disabled');
+                    document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: none;";
+
+                    editAdmissionResidencyCriminalModal.hide();
+
+                    successModal.show();
+                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                        $("#successModal .successModalTitle").html("Congratulation!" );
+                        $("#successModal .successModalDesc").html('Residency and Criminal Conviction details successfully updated.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });
+                    
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error => {
+                document.querySelector('#saveResidencyCriminal').removeAttribute('disabled');
+                document.querySelector('#saveResidencyCriminal svg').style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#editAdmissionResidencyCriminalForm .${key}`).addClass('border-danger');
+                            $(`#editAdmissionResidencyCriminalForm  .error-${key}`).html(val);
+                        }
+                    } else {
+                        console.log('error');
+                    }
+                }
+            });
+        });
+
+        $('#successModal .successCloser').on('click', function(e){
+            e.preventDefault();
+            if($(this).attr('data-action') == 'RELOAD'){
+                successModal.hide();
+                window.location.reload();
+            }else{
+                successModal.hide();
+            }
+        })
+    }
+    /* Edit Residency Status & Criminal Convictions */
+
     /* Edit Kin Details */
     if($('#editAdmissionKinDetailsForm').length > 0) {
         

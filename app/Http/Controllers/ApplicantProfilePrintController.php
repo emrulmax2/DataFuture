@@ -27,7 +27,7 @@ class ApplicantProfilePrintController extends Controller
         $applicant = Applicant::find($applicantId);
         $applicantPendingTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Pending')->get();
         $applicantCompletedTask = ApplicantTask::where('applicant_id', $applicantId)->where('status', 'Completed')->get();
-        $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms']);
+        $applicant->load(['title', 'notes', 'quals', 'employment', 'emails', 'sms', 'residency.residencyStatus', 'criminalConviction']);
         $applicantEsign = ApplicantESignature::where('applicant_id', $applicantId)->first();
         $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicantId)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
 
@@ -392,6 +392,28 @@ class ApplicantProfilePrintController extends Controller
                         $PDFHTML .= '</td>';
                     $PDFHTML .= '</tr>';
                 endif;
+                /* Residency Status and Criminal Conviction */
+                $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
+                $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
+                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
+                $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : 'N/A');
+
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Residency Status and Criminal Convictions</td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel">Residency Status</td>';
+                    $PDFHTML .= '<td class="theValue">'.$residencyStatusName.'</td>';
+                    $PDFHTML .= '<td class="theLabel"></td>';
+                    $PDFHTML .= '<td class="theValue"></td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel">Have you been convicted?</td>';
+                    $PDFHTML .= '<td class="theValue">'.$criminalConvictionHtml.'</td>';
+                    $PDFHTML .= '<td class="theLabel">Conviction Details</td>';
+                    $PDFHTML .= '<td class="theValue">'.$criminalConvictionDetails.'</td>';
+                $PDFHTML .= '</tr>';
 
 
                 $PDFHTML .= '<tr>';

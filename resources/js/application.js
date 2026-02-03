@@ -479,6 +479,8 @@ var employmentHistoryTable = (function () {
         if(parentFieldset.index() == 2){
             url = route('applicant.application.store.course');
         }else if(parentFieldset.index() == 3){
+            url = route('applicant.application.store.residency_and_criminal_conviction');
+        }else if(parentFieldset.index() == 4){
             url = route('applicant.application.store.submission');
             redURL = $('input[name="url"]', parentForm).val();
         }else{
@@ -506,8 +508,10 @@ var employmentHistoryTable = (function () {
                         $('#educationQualTable, #employmentHistoryTable').attr('data-applicant', res.applicant_id);
                         $('#varifiedReferral').attr('data-applicant-id', res.applicant_id);
                     } else if(parentFieldset.index() == 2){
-                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id);
+                        $(document.body).find('input[name="applicant_id"]').val(res.applicant_id);
                     } else if(parentFieldset.index() == 3){
+                        $('.reviewContentWrap').attr('data-review-id', res.applicant_id);
+                    } else if(parentFieldset.index() == 4){
                         window.location.href = redURL;
                     }
                 }
@@ -619,16 +623,7 @@ var employmentHistoryTable = (function () {
     });
 
     $('#course_creation_id').on('change', function(e){
-        /*var has_ew = $('option:selected', this).attr('data-ew');
-        if(has_ew == 1){
-            $('.eveningWeekendWrap').fadeIn('fast', function(){
-                $('[name="full_time"]', this).prop('checked', false);
-            })
-        }else{
-            $('.eveningWeekendWrap').fadeOut('fast', function(){
-                $('[name="full_time"]', this).prop('checked', false);
-            })
-        }*/
+
         $('.courseLoading').show();
         let SelectedValue = $(this).val();
         //woorking all here get the venues
@@ -743,6 +738,21 @@ var employmentHistoryTable = (function () {
         }
     });
 
+    const toggleCriminalConvictionDetails = () => {
+        console.log('toggleCriminalConvictionDetails called');
+        const selected = $('input[name="have_you_been_convicted"]:checked').val();
+        if (selected === "1") {
+            $('.criminalConvictionDetailsWrap').fadeIn('fast');
+        } else {
+            $('.criminalConvictionDetailsWrap').fadeOut('fast', function(){
+                $('#criminal_conviction_details').val('');
+            });
+        }
+    };
+
+    toggleCriminalConvictionDetails();
+    $(document).on('change', 'input[name="have_you_been_convicted"]', toggleCriminalConvictionDetails);
+    
     $('.disabilityItems input[type="checkbox"]').on('change', function(){
         if($('.disabilityItems input[type="checkbox"]:checked').length > 0){
             $('.disabilityAllowance').fadeIn('fast', function(){

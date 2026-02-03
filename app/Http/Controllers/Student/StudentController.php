@@ -55,6 +55,7 @@ use App\Models\QualificationTypeIdentifier;
 use App\Models\ReasonForEngagementEnding;
 use App\Models\ReferralCode;
 use App\Models\Religion;
+use App\Models\ResidencyStatus;
 use App\Models\Result;
 use App\Models\Semester;
 use App\Models\SexIdentifier;
@@ -330,6 +331,7 @@ class  StudentController extends Controller
             'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'residencyStatuses' => ResidencyStatus::all(),
         ]);
     }
 
