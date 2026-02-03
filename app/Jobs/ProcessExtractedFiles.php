@@ -114,8 +114,9 @@ class ProcessExtractedFiles implements ShouldQueue
                     
                     $paySlipUploadSync = [];
                     // fetch ni_number, id and duplicate count (number of active employees with same ni_number)
+                
                     $employeeList = DB::table('employees as emp')
-                        ->select('emp.id', 'emp.ni_number', DB::raw("(select count(*) from employees e2 where e2.ni_number = emp.ni_number) as duplicate_count"))
+                        ->select('emp.id', 'emp.ni_number','emp.active', DB::raw("(select count(*) from employees e2 where e2.ni_number = emp.ni_number) as duplicate_count"))
                         ->get();
 
                     foreach($employeeList as $employee) {
@@ -128,12 +129,14 @@ class ProcessExtractedFiles implements ShouldQueue
 
                         if($employeeNINumber == $fileNameWithoutAnyHipen){
                             // if this ni_number exists multiple times among active employees treat as ambiguous (no match)
-                            if(isset($employee->duplicate_count) && $employee->duplicate_count > 1){
+                            // check duplicate and only get the active employee
+                            if(isset($employee->duplicate_count) && $employee->duplicate_count > 1 && $employee->active==1){
+                                $employeeFound =  $employee->id;
+                            } else if($employee->active==1){ 
+                                $employeeFound = $employee->id;
+                            } else {
                                 $employeeFound = 0;
-                                break;
                             }
-
-                            $employeeFound = $employee->id;
                             break;
 
                         } else {

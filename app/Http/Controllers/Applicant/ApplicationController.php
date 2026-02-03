@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Applicant;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicantCourseDetailsRequest;
+use App\Http\Requests\ApplicantResidencyAndCriminalConvictionRequest;
 use App\Models\AwardingBody;
 use Illuminate\Http\Request;
 use App\Models\Title;
@@ -22,6 +23,7 @@ use App\Models\Agent;
 use App\Models\AgentApplicationCheck;
 use App\Models\Applicant;
 use App\Models\ApplicantContact;
+use App\Models\ApplicantCriminalConviction;
 use App\Models\ApplicantDisability;
 use App\Models\ApplicantEmployment;
 use App\Models\ApplicantFeeEligibility;
@@ -30,6 +32,7 @@ use App\Models\ApplicantOtherDetail;
 use App\Models\ApplicantProofOfId;
 use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantQualification;
+use App\Models\ApplicantResidency;
 use App\Models\ApplicantUser;
 use App\Models\ComonSmtp;
 use App\Models\CourseCreationAvailability;
@@ -303,201 +306,6 @@ class ApplicationController extends Controller
         
     }
 
-    // private function createAnewApplicationFromPreviousStudent(Applicant $prevApplicant, ApplicantUser $applicantUser ,$agentUser=Null) {
-        
-    //     $student = Student::with('other','employment', 'employment.referenceSingle')->where('applicant_id', $prevApplicant->id)->orderBy('id','DESC')->get()->first();
-    //     $confirmApplicant = Applicant::find($prevApplicant->id);
-
-    //     if(isset($confirmApplicant) && 
-    //     ($confirmApplicant->last_name == $prevApplicant->last_name) && 
-    //     ($confirmApplicant->first_name == $prevApplicant->first_name) && 
-    //     ($confirmApplicant->date_of_birth == $prevApplicant->date_of_birth)) {
-    //         // Student Data Matched and student found correctly
-            
-    //         if(isset($student)) {
-    //             // Do something with $student
-    //             $applicant = new Applicant();
-    //             $applicant->applicant_user_id = $applicantUser->id;
-    //             $applicant->previous_student_id = $student->id;
-
-    //             $applicant->first_name = $student->first_name;
-    //             $applicant->last_name = $student->last_name;
-    //             $applicant->date_of_birth = $student->date_of_birth;
-    //             $applicant->title_id = $student->title_id;
-    //             $applicant->nationality_id = $student->nationality_id;
-    //             $applicant->country_id = $student->country_id;
-    //             $applicant->sex_identifier_id = $student->sex_identifier_id;
-    //             $applicant->referral_code = $student->referral_code ?? NULL;
-    //             if(isset($student->referral_code)) {
-    //                 $referral = ReferralCode::where('code',$student->referral_code)->get()->first();
-    //                 if(isset($referral)) {
-    //                     if($referral->type=="Agent") {
-    //                      $applicant->agent_user_id = $referral->agent_user_id;
-    //                      $applicant->is_referral_varified = 1;
-    //                     }
-    //                     $applicant->referral_code = $student->referral_code ?? NULL;
-    //                 }
-                    
-    //             }
-    //             $applicant->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
-    //             $applicant->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
-    //             $applicant->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
-    //             $applicant->status_id = 1;
-    //             $applicant->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicant->save();
-    //             //check file exists in local storage
-    //             if(Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo)) {
-    //                 //put this photo in applicant photo folder
-    //                 $applicantPhotoPath = 'public/applicants/'.$applicant->id.'/';
-                    
-    //                 Storage::makeDirectory($applicantPhotoPath);
-
-    //                 $applicantPhotoName = $student->photo;
-
-    //                 Storage::copy('public/students/'.$student->id.'/'.$student->photo, $applicantPhotoPath.$applicantPhotoName);
-                    
-    //                 $applicant->photo = $applicantPhotoName;
-
-    //                 $applicant->save();
-    //             }
-    //             $applicantOther = new ApplicantOtherDetail();
-    //             $applicantOther->applicant_id = $applicant->id;
-    //             $applicantOther->ethnicity_id = $student->other->ethnicity_id;
-    //             $applicantOther->disability_status = $student->other->disability_status;
-    //             $applicantOther->disabilty_allowance = $student->other->disabilty_allowance;
-    //             $applicantOther->is_edication_qualification = $student->other->is_education_qualification;
-    //             $applicantOther->employment_status = $student->other->employment_status;
-    //             $applicantOther->college_introduction = $student->other->college_introduction;
-    //             $applicantOther->hesa_gender_id  = $student->other->hesa_gender_id;
-    //             $applicantOther->sexual_orientation_id = $student->other->sexual_orientation_id;
-    //             $applicantOther->religion_id = $student->other->religion_id;
-    //             $applicantOther->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicantOther->save();
-
-    //             // I want to map the disability information
-
-    //             $disabilityIds = isset($student->disabilitiy) ? $student->disabilitiy->pluck('disabilitiy_id')->toArray() : [];
-
-    //             if(!empty($disabilityIds)) {
-    //                 foreach($disabilityIds as $disabilityId) {
-    //                     $disability = new ApplicantDisability();
-    //                     $disability->applicant_id = $applicant->id;
-    //                     $disability->disabilitiy_id = $disabilityId;
-
-    //                     $disability->created_by = $applicantUser->id;
-    //                     $disability->save();
-    //                 }
-    //             }
-
-
-    //             $applicantContact = new ApplicantContact();
-    //             $applicantContact->applicant_id = $applicant->id;
-    //             $applicantContact->home = $student->contact->home;
-    //             $applicantContact->mobile = $student->contact->mobile;
-    //             $applicantContact->mobile_verification = $student->contact->mobile_verification;
-    //             $applicantContact->country_id = $student->contact->country_id;
-    //             $applicantContact->permanent_country_id = $student->contact->permanent_country_id;
-    //             $applicantContact->address_line_1 = $student->contact->termaddress->address_line_1;
-    //             $applicantContact->address_line_2 = $student->contact->termaddress->address_line_2;
-    //             $applicantContact->state = $student->contact->termaddress->state;
-    //             $applicantContact->post_code = $student->contact->termaddress->post_code;
-    //             $applicantContact->permanent_post_code = $student->contact->permanent_post_code;
-    //             $applicantContact->city = $student->contact->termaddress->city;
-    //             $applicantContact->country = $student->contact->termaddress->country;
-    //             $applicantContact->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicantContact->save();
-
-    //             $applicantKin = new ApplicantKin();
-    //             $applicantKin->applicant_id = $applicant->id;
-    //             $applicantKin->name = $student->kin->name;
-    //             $applicantKin->kins_relation_id = $student->kin->kins_relation_id;
-    //             $applicantKin->mobile = $student->kin->mobile;
-    //             $applicantKin->email = $student->kin->email;
-    //             $applicantKin->address_line_1 = $student->kin->address->address_line_1;
-    //             $applicantKin->address_line_2 = $student->kin->address->address_line_2;
-    //             $applicantKin->state = $student->kin->address->state;
-    //             $applicantKin->post_code = $student->kin->address->post_code;
-    //             $applicantKin->city = $student->kin->address->city;
-    //             $applicantKin->country = $student->kin->address->country;
-    //             $applicantKin->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicantKin->save();
-
-    //             $applicantProofofId = new ApplicantProofOfId();
-    //             $applicantProofofId->applicant_id = $applicant->id;
-    //             $applicantProofofId->proof_type = isset($student->ProofOfIdLatest->proof_type) ? $student->ProofOfIdLatest->proof_type : null;
-    //             $applicantProofofId->proof_id = isset($student->ProofOfIdLatest->proof_id) ? $student->ProofOfIdLatest->proof_id : null;
-    //             $applicantProofofId->proof_expiredate = isset($student->ProofOfIdLatest->proof_expiredate) ? date('Y-m-d', strtotime($student->ProofOfIdLatest->proof_expiredate)) : null;
-    //             $applicantProofofId->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicantProofofId->save();
-
-    //             $applicantFeeEligibility = new ApplicantFeeEligibility();
-    //             $applicantFeeEligibility->applicant_id = $applicant->id;
-    //             $applicantFeeEligibility->fee_eligibility_id = isset($student->crel->feeeligibility->fee_eligibility_id) ? $student->crel->feeeligibility->fee_eligibility_id : null;
-    //             $applicantFeeEligibility->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //             $applicantFeeEligibility->save();
-
-    //             if(isset($student->qualHighest) && $applicantOther->is_edication_qualification ==1){
-    //                 $qual = $student->qualHighest;
-    //                 $applicantQualification = new ApplicantQualification();
-    //                 $applicantQualification->applicant_id = $applicant->id;
-    //                 $applicantQualification->awarding_body = isset($qual->awarding_body) ? $qual->awarding_body : (isset($prevApplicant->HighestQualification) ? $prevApplicant->HighestQualification->awarding_body : null);
-    //                 $applicantQualification->highest_academic = isset($qual->highest_academic) ? $qual->highest_academic : (isset($prevApplicant->HighestQualification) ? $prevApplicant->HighestQualification->highest_academic : null);
-    //                 $applicantQualification->subjects = isset($qual->subjects) ? $qual->subjects : (isset($prevApplicant->HighestQualification) ? $prevApplicant->HighestQualification->subjects : null);
-    //                 $applicantQualification->result = isset($qual->result) ? $qual->result : (isset($prevApplicant->HighestQualification) ? $prevApplicant->HighestQualification->result : null);
-    //                 $applicantQualification->degree_award_date = isset($qual->degree_award_date) ? $qual->degree_award_date : (isset($prevApplicant->HighestQualification) ? $prevApplicant->HighestQualification->degree_award_date : null);
-    //                 $applicantQualification->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-
-    //                 if(isset($applicantQualification->awarding_body)) {
-    //                     $applicantQualification->save();
-    //                 }else {
-    //                     $applicantQualification=null;
-    //                 } 
-                    
-    //             }
-    //             $applicantEmp = [];
-    //             if(isset($student->employment))
-    //             foreach($student->employment as $emp):
-                    
-    //                 $applicantEmployment = new ApplicantEmployment();
-    //                 $applicantEmployment->applicant_id = $applicant->id;
-    //                 $applicantEmployment->position = $emp->position;
-    //                 $applicantEmployment->company_name = $emp->company_name;
-    //                 $applicantEmployment->company_phone = $emp->company_phone;
-    //                 $applicantEmployment->start_date = $emp->start_date;
-    //                 $applicantEmployment->end_date = $emp->end_date;
-    //                 $applicantEmployment->continuing = $emp->continuing;
-    //                 $applicantEmployment->address_line_1 = $emp->address->address_line_1;
-    //                 $applicantEmployment->address_line_2 = $emp->address->address_line_2;
-    //                 $applicantEmployment->state = $emp->address->state;
-    //                 $applicantEmployment->post_code = $emp->address->post_code;
-    //                 $applicantEmployment->city = $emp->address->city;
-    //                 $applicantEmployment->country = $emp->address->country;
-    //                 $applicantEmployment->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //                 $applicantEmployment->save();
-    //                 $emp->referenceSingle;
-    //                 $applicantEmp[$applicantEmployment->id] = $emp;
-    //             endforeach;
-
-    //             if(!empty($applicantEmp)):
-    //                 foreach($applicantEmp as $applicantEmploymentSingleId => $ref):
-    //                     $employmentReference = new EmploymentReference();
-    //                     $employmentReference->applicant_employment_id = $applicantEmploymentSingleId;
-    //                     $employmentReference->name = $ref->referenceSingle->name;
-    //                     $employmentReference->email = $ref->referenceSingle->email;
-    //                     $employmentReference->phone = $ref->referenceSingle->phone;
-    //                     $employmentReference->position = $ref->referenceSingle->position;
-    //                     $employmentReference->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
-    //                     $employmentReference->save();
-    //                 endforeach;
-    //             endif;
-                    
-    //             return $applicant;
-    //         }
-            
-    //     }
-    //     return false;
-    // }
-
     private function createAnewApplicationFromPreviousApplication(Applicant $prevApplicant, ApplicantUser $applicantUser, $agentUser=Null) {
         $newApplication = $prevApplicant->replicate();
         $newApplication->id = null;
@@ -636,6 +444,25 @@ class ApplicationController extends Controller
                     }
                     endforeach;
             endif;
+
+            if(isset($prevApplicant->residency)) { 
+                $newApplicantResidency = $prevApplicant->residency->replicate();
+                $newApplicantResidency->id = null;
+                $newApplicantResidency->applicant_id = $newApplication->id;
+                $newApplicantResidency->created_at = now();
+                $newApplicantResidency->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+                $newApplicantResidency->save();
+            }
+
+            if(isset($prevApplicant->criminalConviction)) { 
+                $newApplicantCriminalConviction = $prevApplicant->criminalConviction->replicate();
+                $newApplicantCriminalConviction->id = null;
+                $newApplicantCriminalConviction->applicant_id = $newApplication->id;
+                $newApplicantCriminalConviction->created_at = now();
+                $newApplicantCriminalConviction->created_by = isset($agentUser) ? $agentUser->id : $applicantUser->id;
+                $newApplicantCriminalConviction->save();
+            }
+
         }
 
         return $newApplication;
@@ -795,6 +622,28 @@ class ApplicationController extends Controller
         endif;
     }
 
+
+    public function storeResidencyAndCriminalConvictionDetails(ApplicantResidencyAndCriminalConvictionRequest $request){
+        $applicant_id = $request->applicant_id;
+        $residency = ApplicantResidency::updateOrCreate(['applicant_id' => $applicant_id], [
+            'residency_status_id' => $request->residency_status_id,
+            'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+            'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+        ]);
+        if($residency){
+            $criminalConviction = ApplicantCriminalConviction::updateOrCreate(['applicant_id' => $applicant_id], [
+                'have_you_been_convicted' => $request->have_you_been_convicted,
+                'criminal_conviction_details' => (isset($request->criminal_conviction_details) && !empty($request->criminal_conviction_details) ? $request->criminal_conviction_details : null),
+                'criminal_declaration' => ($request->has('criminal_declaration') && $request->criminal_declaration > 0 ? 1 : 0),
+                'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+                'updated_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
+            ]);
+            return response()->json(['message' => 'Residency and Criminal Conviction details successfully inserted or updated', 'applicant_id' => $applicant_id], 200);
+        }else{
+            return response()->json(['message' => 'Something went wrong. Please try later.'], 422);
+        }
+    }
+
     public function storeApplicantSubmission(Request $request){
 
         $siteName = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_name')->value('value');
@@ -868,8 +717,8 @@ class ApplicationController extends Controller
             $sms = 'Thank you for applying at '. $siteName.'. Please find your application reference number '.$theApplicant->application_no.' for all future correspondence.';
             if(in_array(env('APP_ENV'), ['development', 'local'])) {
 
-                    \Log::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
-                    FacadesDebugbar::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
+                    //\Log::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
+                    //FacadesDebugbar::info('SMS OTP: '.$sms.' sent to '.$theApplicant->contact->mobile);
 
             } else {
                 if($active_api == 1 && !empty($textlocal_api)):
@@ -1338,29 +1187,77 @@ class ApplicationController extends Controller
                     $html .= '</div>';
                 $html .= '</div>';
             $html .= '</div>';
+            //implement residency status and criminal conviction sections below here
+                $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
+                $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
+                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
+                $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : '---');
 
-            $html .= '<div class="accordion-item mb-1">';
-                $html .= '<div id="applicantReviewAccordion-c-7" class="accordion-header">';
-                    $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-7" aria-expanded="false" aria-controls="applicantReviewAccordion-col-7">';
-                        $html .= 'Others';
-                        $html .= '<span class="accordionCollaps"></span>';
-                    $html .= '</button>';
-                $html .= '</div>';
-                $html .= '<div id="applicantReviewAccordion-col-7" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-7" data-tw-parent="#applicantReviewAccordion">';
-                    $html .= '<div class="accordion-body px-5 pt-6">';
-                        $html .= '<div class="grid grid-cols-12 gap-4">'; 
-
-                            $html .= '<div class="col-span-12 sm:col-span-12">';
-                                $html .= '<div class="grid grid-cols-12 gap-0">';
-                                    $html .= '<div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>';
-                                    $html .= '<div class="col-span-8 font-medium">'.($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
+                $html .= '<div class="accordion-item mb-1">';
+                    $html .= '<div id="applicantReviewAccordion-c-7" class="accordion-header">';
+                        $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-7" aria-expanded="false" aria-controls="applicantReviewAccordion-col-7">';
+                            $html .= 'Residency Status & Criminal Convictions';
+                            $html .= '<span class="accordionCollaps"></span>';
+                        $html .= '</button>';
+                    $html .= '</div>';
+                    $html .= '<div id="applicantReviewAccordion-col-7" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-7" data-tw-parent="#applicantReviewAccordion">';
+                        $html .= '<div class="accordion-body px-5 pt-6">';
+                            $html .= '<div class="grid grid-cols-12 gap-4">';
+                                $html .= '<div class="col-span-6">';
+                                    $html .= '<div class="col-span-12">';
+                                        $html .= '<div class="grid grid-cols-12 gap-0">';
+                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Residency Status</div>';
+                                            $html .= '<div class="col-span-7 font-medium">'.$residencyStatusName.'</div>';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
+                                    // $html .= '<div class="col-span-12">';
+                                    //     $html .= '<div class="grid grid-cols-12 gap-0">';
+                                    //         $html .= '<div class="col-span-5 text-slate-500 font-medium">Declaration Accepted</div>';
+                                    //         $html .= '<div class="col-span-7 font-medium">'.$criminalDeclarationHtml.'</div>';
+                                    //     $html .= '</div>';
+                                    // $html .= '</div>';
+                                $html .= '</div>';
+                                $html .= '<div class="col-span-6">';
+                                    $html .= '<div class="col-span-12">';
+                                        $html .= '<div class="grid grid-cols-12 gap-0">';
+                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Criminal Conviction</div>';
+                                            $html .= '<div class="col-span-7 font-medium">'.$criminalConvictionHtml.'</div>';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
+                                    $html .= '<div class="col-span-12">';
+                                        $html .= '<div class="grid grid-cols-12 gap-0">';
+                                            $html .= '<div class="col-span-5 text-slate-500 font-medium">Conviction Details</div>';
+                                            $html .= '<div class="col-span-7 font-medium">'.$criminalConvictionDetails.'</div>';
+                                        $html .= '</div>';
+                                    $html .= '</div>';
                                 $html .= '</div>';
                             $html .= '</div>';
-
                         $html .= '</div>';
                     $html .= '</div>';
                 $html .= '</div>';
-            $html .= '</div>';
+
+                $html .= '<div class="accordion-item mb-1">';
+                    $html .= '<div id="applicantReviewAccordion-c-8" class="accordion-header">';
+                        $html .= '<button class="accordion-button collapsed px-5 relative w-full btn-primary-soft text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#applicantReviewAccordion-col-8" aria-expanded="false" aria-controls="applicantReviewAccordion-col-8">';
+                            $html .= 'Others';
+                            $html .= '<span class="accordionCollaps"></span>';
+                        $html .= '</button>';
+                    $html .= '</div>';
+                    $html .= '<div id="applicantReviewAccordion-col-8" class="accordion-collapse collapse" aria-labelledby="applicantReviewAccordion-c-8" data-tw-parent="#applicantReviewAccordion">';
+                        $html .= '<div class="accordion-body px-5 pt-6">';
+                            $html .= '<div class="grid grid-cols-12 gap-4">';
+
+                                $html .= '<div class="col-span-12 sm:col-span-12">';
+                                    $html .= '<div class="grid grid-cols-12 gap-0">';
+                                        $html .= '<div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>';
+                                        $html .= '<div class="col-span-8 font-medium">'.($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>').'</div>';
+                                    $html .= '</div>';
+                                $html .= '</div>';
+
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
 
         $html .= '</div>';
 

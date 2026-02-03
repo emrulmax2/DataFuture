@@ -31,6 +31,7 @@ use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
 use App\Models\EmploymentReference;
 use App\Models\ReferralCode;
+use App\Models\ResidencyStatus;
 use App\Models\SexIdentifier;
 use App\Models\Student;
 use Illuminate\Support\Carbon;
@@ -110,7 +111,8 @@ class ApplicationController extends Controller
                 if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
                   return $item;
                 }
-            })
+            }),
+            'residencyStatuses' => ResidencyStatus::all(),
         ]);
     }
     private function createFromOnlyStudent($studentId, ApplicantUser $applicantUser) {

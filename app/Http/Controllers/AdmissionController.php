@@ -9,6 +9,7 @@ use App\Http\Requests\AdmissionContactDetailsRequest;
 use App\Http\Requests\AdmissionCourseDetailsRequest;
 use App\Http\Requests\AdmissionKinDetailsRequest;
 use App\Http\Requests\AdmissionPersonalDetailsRequest;
+use App\Http\Requests\ApplicantResidencyAndCriminalConvictionRequest;
 use App\Http\Requests\ApplicantNoteRequest;
 use App\Http\Requests\SendEmailRequest;
 use App\Http\Requests\SendLetterRequest;
@@ -27,6 +28,8 @@ use App\Models\ApplicantQualification;
 use App\Models\ApplicantEmployment;
 use App\Models\ApplicantKin;
 use App\Models\ApplicantOtherDetail;
+use App\Models\ApplicantCriminalConviction;
+use App\Models\ApplicantResidency;
 use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantTemporaryEmail;
 use App\Models\AwardingBody;
@@ -83,6 +86,7 @@ use App\Jobs\ProcessStudentProposedCourse;
 use App\Jobs\ProcessStudentOtherDetails;
 use App\Jobs\ProcessStudentProofOfId;
 use App\Jobs\ProcessStudentFeeEligibility;
+use App\Jobs\ProcessStudentResidencyAndCriminalConviction;
 use App\Jobs\ProcessStudentSms;
 use App\Jobs\ProcessStudentLetter;
 use App\Jobs\ProcessStudentInterview;
@@ -129,6 +133,7 @@ use DebugBar\DebugBar;
 use Illuminate\Auth\Events\Registered;
 use App\Enums\EsignEventType;
 use App\Models\ApplicantESignature;
+use App\Models\ResidencyStatus;
 
 class AdmissionController extends Controller
 {
@@ -498,7 +503,8 @@ class AdmissionController extends Controller
             'documents' => DocumentSettings::where('admission', '1')->orderBy('id', 'ASC')->get(),
             'feeelegibility' => FeeEligibility::all(),
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
-            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first()
+            'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first(),
+            'residencyStatuses' => ResidencyStatus::all(),
         ]);
     }
 
@@ -842,6 +848,30 @@ class AdmissionController extends Controller
         endif;
 
         return response()->json(['msg' => 'Course & Programme Details Successfully Updated.'], 200);
+    }
+
+    public function updateResidencyAndCriminalConvictionDetails(ApplicantResidencyAndCriminalConvictionRequest $request){
+        $applicant_id = $request->applicant_id;
+
+        $residency = ApplicantResidency::updateOrCreate(['applicant_id' => $applicant_id], [
+            'residency_status_id' => $request->residency_status_id,
+            'created_by' => auth()->user()->id,
+            'updated_by' => auth()->user()->id,
+        ]);
+
+        if($residency){
+            $criminalConviction = ApplicantCriminalConviction::updateOrCreate(['applicant_id' => $applicant_id], [
+                'have_you_been_convicted' => $request->have_you_been_convicted,
+                'criminal_conviction_details' => ($request->have_you_been_convicted == 1 ? $request->criminal_conviction_details : null),
+                'criminal_declaration' => ($request->has('criminal_declaration') && $request->criminal_declaration > 0 ? 1 : 0),
+                'created_by' => auth()->user()->id,
+                'updated_by' => auth()->user()->id,
+            ]);
+
+            return response()->json(['msg' => 'Residency and Criminal Conviction details successfully updated.'], 200);
+        }
+
+        return response()->json(['msg' => 'Something went wrong. Please try later.'], 422);
     }
 
     public function updateQualificationStatus(Request $request){
@@ -2488,6 +2518,7 @@ class AdmissionController extends Controller
                     new ProcessStudentProposedCourse($applicant),
                     new ProcessStudentKinDetail($applicant),
                     new ProcessStudentOtherDetails($applicant),
+                    new ProcessStudentResidencyAndCriminalConviction($applicant),
                     new ProcessStudentProofOfId($applicant),
                     new ProcessStudentFeeEligibility($applicant),
                     new ProcessStudentSms($applicant),

@@ -193,6 +193,14 @@ class Applicant extends Model
         return $this->belongsTo(ApplicationRejectedReason::class, 'application_rejected_reason_id');
     }
 
+    public function residency() {
+        return $this->hasOne(ApplicantResidency::class, 'applicant_id', 'id');
+    }
+
+    public function criminalConviction() {
+        return $this->hasOne(ApplicantCriminalConviction::class, 'applicant_id', 'id');
+    }
+
     public function getPhotoUrlAttribute()
     {
         if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->id.'/'.$this->photo)) {

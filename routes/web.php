@@ -191,6 +191,7 @@ use App\Http\Controllers\Student\NoteController;
 use App\Http\Controllers\Student\OtherPersonalInformationController;
 use App\Http\Controllers\Student\ProcessController;
 use App\Http\Controllers\Student\ProofIdCheckController;
+use App\Http\Controllers\Student\ResidencyCriminalController;
 use App\Http\Controllers\Student\SmsController;
 use App\Http\Controllers\Settings\Studentoptions\SexIdentifierController;
 use App\Http\Controllers\Settings\Studentoptions\TermTimeAccommodationTypeController;
@@ -438,6 +439,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
             Route::post('application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
             Route::post('application/store-course-details', 'storeCourseDetails')->name('application.store.course');
             Route::post('application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::post('application/store-residency-and-criminal-conviction', 'storeResidencyAndCriminalConvictionDetails')->name('application.store.residency_and_criminal_conviction');
             Route::get('application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('application/review', 'review')->name('application.review');
             Route::get('application/show/{id}', 'show')->name('application.show');
@@ -534,6 +536,7 @@ Route::prefix('/agent')->name('agent.')->group(function() {
             Route::post('agent-application/store-personal-details', 'storePersonalDetails')->name('application.store.personal');
             Route::post('agent-application/store-course-details', 'storeCourseDetails')->name('application.store.course');
             Route::post('agent-application/store-applicant-submission', 'storeApplicantSubmission')->name('application.store.submission');
+            Route::post('agent-application/store-residency-and-criminal-conviction', 'storeResidencyAndCriminalConvictionDetails')->name('application.store.residency_and_criminal_conviction');
             Route::get('agent-application/course-creation-edit/{id}', 'CourseCreationList')->name('application.course.creation.edit');
             Route::post('agent-application/review', 'review')->name('application.review');
             Route::post('agent-application/verify-referral-code', 'verifyReferralCode')->name('application.verify.referral.code');
@@ -1089,6 +1092,10 @@ Route::middleware('auth')->group(function() {
         Route::post('student/update-consent', 'update')->name('student.update.consent');
     });
 
+    Route::controller(ResidencyCriminalController::class)->group(function() {
+        Route::post('student/update-residency-criminal', 'update')->name('student.update.residency.criminal');
+    });
+
     Route::controller(EducationQualificationController::class)->group(function() {
         Route::post('student/update-qualification-status', 'updateStudentQualificationStatus')->name('student.qualification.status.update');
 
@@ -1287,6 +1294,7 @@ Route::middleware('auth')->group(function() {
         Route::post('admission/update-contact-details', 'updateContactDetails')->name('admission.update.contact.details');
         Route::post('admission/update-kin-details', 'updateKinDetails')->name('admission.update.kin.details');
         Route::post('admission/update-course-details', 'updateCourseAndProgrammeDetails')->name('admission.update.course.details');
+        Route::post('admission/update-residency-criminal', 'updateResidencyAndCriminalConvictionDetails')->name('admission.update.residency.criminal');
         Route::post('admission/update-qualification-status', 'updateQualificationStatus')->name('admission.update.qualification.status');
         Route::post('admission/update-employment-status', 'updateEmploymentStatus')->name('admission.update.employment.status');
 
