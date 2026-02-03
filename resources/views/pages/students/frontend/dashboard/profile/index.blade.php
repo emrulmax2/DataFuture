@@ -124,6 +124,51 @@
                     </div>
                 </div>
 
+                <div id="residency-status" class="intro-y box p-5 mt-5">
+                    <div class="grid grid-cols-12 gap-0 items-center">
+                        <div class="col-span-6">
+                            <div class="font-medium text-base">Residency Status and Criminal Convictions</div>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Residency Status</div>
+                                    <div class="col-span-7 font-medium">{{ optional(optional($student->residency)->residencyStatus)->name ?? '---' }}</div>
+                                </div>
+                            </div>
+                            {{-- <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Declaration Accepted</div>
+                                    <div class="col-span-7 font-medium">
+                                        {!! (isset($student->criminalConviction->criminal_declaration) && (int) $student->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
+                                    </div>
+                                </div>
+                            </div> --}}
+                        </div>
+                        <div class="col-span-6">
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Criminal Conviction</div>
+                                    <div class="col-span-7 font-medium">
+                                        {!! (isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
+                                    </div>
+                                </div>
+                            </div>
+                            @if(isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 1)
+                            <div class="col-span-12">
+                                <div class="grid grid-cols-12 gap-0">
+                                    <div class="col-span-5 text-slate-500 font-medium">Conviction Details</div>
+                                    <div class="col-span-7 font-medium">{{ isset($student->criminalConviction->criminal_conviction_details) && $student->criminalConviction->criminal_conviction_details != '' ? $student->criminalConviction->criminal_conviction_details : '---' }}</div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
                 <div class="intro-y box p-5 mt-5">
                     <div class="grid grid-cols-12 gap-0 items-center">
                         <div class="col-span-6">
