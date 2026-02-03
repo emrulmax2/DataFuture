@@ -575,7 +575,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="intro-y box shadow-none rounded-none p-0">
                 <div class="box-header">
                     <button class="relative w-full text-lg font-semibold bg-slate-200 p-5 text-left eSignCollapse" type="button">
