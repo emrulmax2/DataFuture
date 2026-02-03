@@ -544,25 +544,6 @@
             </div>
         </div>
 
-        <div class="intro-y box p-5 mt-5">
-            <div class="font-medium text-base">Others</div>
-            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-12">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>
-                        <div class="col-span-8 font-medium">{!! ($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
-                    </div>
-                </div>
-
-                @if($applicant->status_id >= 6)
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div> 
-
-                @endif
-
-            </div>
-        </div>
-
         <div id="residency-status" class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -610,6 +591,25 @@
                 </div>
             </div>
         </div>
+        <div class="intro-y box p-5 mt-5">
+            <div class="font-medium text-base">Others</div>
+            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+            <div class="grid grid-cols-12 gap-4"> 
+                <div class="col-span-12 sm:col-span-12">
+                    <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">If you referred by Somone/ Agent, Please enter the Referral Code.</div>
+                        <div class="col-span-8 font-medium">{!! ($applicant->referral_code != '' ? $applicant->referral_code : '<span class="btn btn-danger px-2 py-0 text-white">No</span>') !!}</div>
+                    </div>
+                </div>
+
+                @if($applicant->status_id >= 6)
+                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div> 
+
+                @endif
+
+            </div>
+        </div>
+
     </div>
 
     @include('pages.students.admission.show-modals')
