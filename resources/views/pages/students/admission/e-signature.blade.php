@@ -127,6 +127,44 @@
                     </div>
                 </div>
             </div>
+            <!-- Residency status and criminal conviction details with proper ui as like as current design -->
+            <div class="intro-y box shadow-none rounded-none p-0">
+                <div class="box-header">
+                    <button class="relative w-full text-lg font-semibold bg-slate-200 p-5 text-left eSignCollapse" type="button">
+                        Residency Status & Criminal Convictions
+                        <span class="accordionCollaps"></span>
+                    </button>
+                </div>
+                <div class="p-5 pb-10">
+                    <div class="grid grid-cols-12 gap-x-5 gap-y-7">
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="leading-none font-medium text-slate-500 mb-2">Residency Status</div>
+                            <div class="inputGroup border border-slate-200 relative rounded-md flex justify-start items-center px-3 py-2">
+                                <i data-lucide="home" class="w-4 h-4 mr-3 text-slate-500"></i>
+                                <span class="font-medium text-slate-800">{{ isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <div class="leading-none font-medium text-slate-500 mb-2">Have you been convicted of any criminal offence in the UK or any other Country?</div>
+                            @if(isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1)
+                                <span class="btn btn-success-soft py-1 px-2 inline-flex rounded-md justify-start items-center w-auto text-success font-medium"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Yes</span>
+                            @else
+                                <span class="btn btn-danger-soft py-1 px-2 inline-flex rounded-md justify-start items-center w-auto text-danger font-medium"><i data-lucide="x-circle" class="w-4 h-4 mr-2"></i>No</span>
+                            @endif
+                        </div>
+                        <div class="col-span-12 sm:col-span-8">
+                            <div class="leading-none font-medium text-slate-500 mb-2">Conviction Details</div>
+                            <div class="inputGroup border border-slate-200 relative rounded-md flex justify-start items-start px-3 py-2">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-3 text-slate-500 relative" style="flex: 0 0 16px; top: 3px;"></i>
+                                <span class="font-medium text-slate-800">
+                                    {{ (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : 'N/A') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="intro-y box shadow-none rounded-none p-0">
                 <div class="box-header">
                     <button class="relative w-full text-lg font-semibold bg-slate-200 p-5 text-left eSignCollapse" type="button">
