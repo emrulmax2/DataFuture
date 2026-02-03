@@ -474,10 +474,12 @@
                                         {!! (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
                                     </div>
                                 </div>
+                                @if(isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1)
                                 <div class="grid grid-cols-12 gap-0 mt-2">
                                     <div class="col-span-5 text-slate-500 font-medium">Conviction Details</div>
                                     <div class="col-span-7 font-medium">{{ (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : '---') }}</div>
                                 </div>
+                                @endif
                             </div>
                         </div>
                     </div>
