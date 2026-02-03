@@ -244,6 +244,8 @@ class AttendanceReportController extends Controller
                          ->get()->first();
         $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                          ->orderBy('id', 'DESC')->get()->first();
+        $effective_from = (isset($activePattern->effective_from) && !empty($activePattern->effective_from) ? date('Y-m-d', strtotime($activePattern->effective_from)) : '');
+        $monthStart = (!empty($effective_from) ? ($effective_from > $monthStart ? $effective_from : $monthStart) : $monthStart);
 
         if(isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' && (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0) && (isset($activePattern->id) && $activePattern->id > 0)):
             $bankHoliday = HrBankHoliday::where('hr_holiday_year_id', $hrHolidayYear->id)->where('start_date', '>=', $monthStart)
@@ -342,6 +344,9 @@ class AttendanceReportController extends Controller
         $yearID = (isset($hrHolidayYear->id) && $hrHolidayYear->id > 0 ? $hrHolidayYear->id : 0);
         $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
                          ->orderBy('id', 'DESC')->get()->first();
+        $effective_from = (isset($activePattern->effective_from) && !empty($activePattern->effective_from) ? date('Y-m-d', strtotime($activePattern->effective_from)) : '');
+        $workStart = (!empty($effective_from) ? ($effective_from > $monthStart ? $effective_from : $monthStart) : $monthStart);
+        
         $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
         $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id);
 
@@ -352,6 +357,8 @@ class AttendanceReportController extends Controller
             $today = date('Y-m', $date).($i < 10 ? '-0'.$i : '-'.$i);
             $D = date('D', strtotime($today));
             $N = date('N', strtotime($today));
+            $isWorkStarted = $today >= $workStart ? true : false;
+
             $todayPattern = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $patternID)->where('day_name', $D)->orderBy('id', 'desc')->get()->first();
             $isWorkingDay = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? true : false);
             $todayContractedHour = (isset($todayPattern->id) && !empty($todayPattern->total) && $todayPattern->total != '00:00' ? $this->convertStringToMinute($todayPattern->total) : 0);
@@ -364,13 +371,13 @@ class AttendanceReportController extends Controller
             
             $todayWorkingHour = (isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 ? $todayAttendance->total_work_hour : 0);
             $todayBankHoliday = HrBankHoliday::where('hr_holiday_year_id', $yearID)->where('start_date', $today)->get()->first();
-            $isBankHoliday = (isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
+            $isBankHoliday = ($today >= $workStart && isset($todayBankHoliday->id) && $todayBankHoliday->id > 0 ? true : false);
 
             $dayClass = '';
             $dayHour = 0;
             $holidayHour = 0;
             $dayStatus = '';
-            if(!$isWorkingDay && !$isClockedIn):
+            if((!$isWorkingDay && !$isClockedIn) || !$isWorkStarted):
                 $dayClass .= ' nwRow ';
                 $dayStatus = 'Not in Schedule';
                 $dayHour += 0;
@@ -441,7 +448,7 @@ class AttendanceReportController extends Controller
             $html .= '<tr class="'.$dayClass.'" data-expandid="#attenTR_'.$i.'">';
                 $html .= '<td class="font-medium whitespace-nowrap">'.date('l, jS F', strtotime($today)).'</td>';
                 $html .= '<td>';
-                    $html .= ($isWorkingDay ? $todayPattern->total : '&nbsp;');
+                    $html .= ($isWorkStarted && $isWorkingDay ? $todayPattern->total : '&nbsp;');
                 $html .= '</td>';
                 $html .= '<td>'.$dayStatus.'</td>';
                 $html .= '<td>';
