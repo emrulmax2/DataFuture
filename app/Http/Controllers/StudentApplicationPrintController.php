@@ -159,6 +159,33 @@ class StudentApplicationPrintController extends Controller
                     $PDFHTML .= '</tr>';
                 endif;
 
+                /* Residency Status and Criminal Conviction */
+                $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
+                $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
+                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success">Yes</span>' : (isset($applicant->criminalConviction->have_you_been_convicted) ? '<span class="btn btn-danger">No</span>' : '---'));
+                $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : 'N/A');
+
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td colspan="4" class="barTitle text-left">Residency Status and Criminal Convictions</td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr><td class="spacer" colspan="4"></td></tr>';
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel">Residency Status</td>';
+                    $PDFHTML .= '<td class="theValue">'.$residencyStatusName.'</td>';
+                    $PDFHTML .= '<td class="theLabel"></td>';
+                    $PDFHTML .= '<td class="theValue"></td>';
+                $PDFHTML .= '</tr>';
+                $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel">Have you been convicted?</td>';
+                    $PDFHTML .= '<td class="theValue">'.$criminalConvictionHtml.'</td>';
+                    if(isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1):
+                        $PDFHTML .= '<td class="theLabel">Criminal Declaration</td>';
+                        $PDFHTML .= '<td class="theValue">'.$criminalDeclarationHtml.'</td>';
+                    else:
+                        $PDFHTML .= '<td class="theLabel"></td>';
+                        $PDFHTML .= '<td class="theValue"></td>';
+                    endif;
+                $PDFHTML .= '</tr>';
                 /* Contact Details */
                 $PDFHTML .= '<tr>';
                     $PDFHTML .= '<td colspan="4" class="barTitle text-left">Contact Details</td>';
