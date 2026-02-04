@@ -33,7 +33,7 @@ class PaySlipUploadSyncController extends Controller
     {
         $ids = $request->id ?? [];
         $employee_ids = $request->employee_id ?? [];
-
+        
         foreach ($ids as $index => $id) {
             $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                 [
