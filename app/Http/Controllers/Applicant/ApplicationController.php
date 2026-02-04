@@ -42,6 +42,7 @@ use App\Models\EmploymentReference;
 use App\Models\FeeEligibility;
 use App\Models\Option;
 use App\Models\ReferralCode;
+use App\Models\ResidencyStatus;
 use App\Models\SexIdentifier;
 use App\Models\Student;
 use App\Models\Venue;
@@ -106,6 +107,7 @@ class ApplicationController extends Controller
             'sexid' => SexIdentifier::where('active', 1)->get(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => $appliedApplication,
+            'residencyStatuses' => ResidencyStatus::all(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
                 if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
                   return $item;
@@ -1190,7 +1192,7 @@ class ApplicationController extends Controller
             //implement residency status and criminal conviction sections below here
                 $residencyStatusName = (isset($applicant->residency->residencyStatus->name) ? $applicant->residency->residencyStatus->name : '---');
                 $criminalDeclarationHtml = (isset($applicant->criminalConviction->criminal_declaration) && (int) $applicant->criminalConviction->criminal_declaration === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
-                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>');
+                $criminalConvictionHtml = (isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '---');
                 $criminalConvictionDetails = (isset($applicant->criminalConviction->criminal_conviction_details) && $applicant->criminalConviction->criminal_conviction_details != '' ? $applicant->criminalConviction->criminal_conviction_details : '---');
 
                 $html .= '<div class="accordion-item mb-1">';
