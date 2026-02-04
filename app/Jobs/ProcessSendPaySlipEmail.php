@@ -53,24 +53,25 @@ class ProcessSendPaySlipEmail implements ShouldQueue
 
     protected function resolveAttachment(PaySlipUploadSync $paySlip): array
     {
-        $s3Base = Storage::disk('s3')->url('');
-        $localBase = Storage::disk('local')->url('');
+        $filePath = $paySlip->file_path;
+        $s3Base = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
+        $publicBase = rtrim((string) config('filesystems.disks.public.url', ''), '/');
 
         $disk = null;
         $path = null;
 
-        if (!empty($paySlip->file_path) && Str::startsWith($paySlip->file_path, $s3Base)) {
+        if (!empty($filePath) && $s3Base !== '' && Str::startsWith($filePath, $s3Base)) {
             $disk = 's3';
-            $path = ltrim(Str::after($paySlip->file_path, $s3Base), '/');
-        } elseif (!empty($paySlip->file_path) && Str::startsWith($paySlip->file_path, $localBase)) {
+            $path = ltrim(Str::after($filePath, $s3Base), '/');
+        } elseif (!empty($filePath) && $publicBase !== '' && Str::startsWith($filePath, $publicBase)) {
             $disk = 'local';
-            $path = ltrim(Str::after($paySlip->file_path, $localBase), '/');
+            $path = ltrim(Str::after($filePath, $publicBase), '/');
         } elseif (!empty($paySlip->month_year) && !empty($paySlip->file_name)) {
             $disk = 's3';
             $path = 'public/employee_payslips/' . $paySlip->month_year . '/' . $paySlip->file_name;
-        } elseif (!empty($paySlip->file_path)) {
+        } elseif (!empty($filePath) && !Str::startsWith($filePath, ['http://', 'https://'])) {
             $disk = 'local';
-            $path = $paySlip->file_path;
+            $path = $filePath;
         }
 
         if (empty($disk) || empty($path) || !Storage::disk($disk)->exists($path)) {

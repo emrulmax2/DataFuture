@@ -7,6 +7,7 @@ use App\Jobs\ProcessSendPaySlipEmail;
 use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PaySlipUploadSyncController extends Controller
 {
@@ -121,14 +122,11 @@ class PaySlipUploadSyncController extends Controller
     {
 
         // Assuming the file path is stored in a column named 'file_path'
-        $filePath = $payslip_upload->file_path;
+            $location = $this->resolveStorageLocation($payslip_upload);
 
-        // Delete the file from storage
-        if (Storage::exists($filePath)) {
-
-            Storage::delete($filePath);
-
-        }
+            if (!empty($location)) {
+                Storage::disk($location['disk'])->delete($location['path']);
+            }
 
         // Delete the record from the database
         $payslip_upload->forceDelete();
@@ -151,11 +149,12 @@ class PaySlipUploadSyncController extends Controller
         
         $resultIds = array_filter(array_unique($request->input('ids')));
         
-        PaySlipUploadSync::whereIn('id', $resultIds)->get()->each(function($result){
-            if (Storage::exists($result->file_path)) {
-                Storage::delete($result->file_path);
-            }
-        });
+            PaySlipUploadSync::whereIn('id', $resultIds)->get()->each(function($result){
+                $location = $this->resolveStorageLocation($result);
+                if (!empty($location)) {
+                    Storage::disk($location['disk'])->delete($location['path']);
+                }
+            });
         
         
         $baseResultDelete = PaySlipUploadSync::whereIn('id', $resultIds)->delete();
@@ -172,11 +171,42 @@ class PaySlipUploadSyncController extends Controller
     {
         $paySlip = PaySlipUploadSync::find($id);
 
-        if (Storage::exists($paySlip->file_path)) {
-            return Storage::download($paySlip->file_path);
+        $location = $this->resolveStorageLocation($paySlip);
+        if (!empty($location)) {
+            $fileName = $paySlip->file_name ?: basename($location['path']);
+            return response()->streamDownload(function () use ($location) {
+                echo Storage::disk($location['disk'])->get($location['path']);
+            }, $fileName);
         }
 
         return response()->json(['message' => 'File not found.'], 404);
+    }
+
+    protected function resolveStorageLocation(?PaySlipUploadSync $paySlip): array
+    {
+        if (!$paySlip || empty($paySlip->file_path)) {
+            return [];
+        }
+
+        $filePath = $paySlip->file_path;
+        $s3Base = rtrim((string) config('filesystems.disks.s3.url', ''), '/');
+        $publicBase = rtrim((string) config('filesystems.disks.public.url', ''), '/');
+
+        if ($s3Base !== '' && Str::startsWith($filePath, $s3Base)) {
+            $path = ltrim(Str::after($filePath, $s3Base), '/');
+            return $path !== '' ? ['disk' => 's3', 'path' => $path] : [];
+        }
+
+        if ($publicBase !== '' && Str::startsWith($filePath, $publicBase)) {
+            $path = ltrim(Str::after($filePath, $publicBase), '/');
+            return $path !== '' ? ['disk' => 'local', 'path' => $path] : [];
+        }
+
+        if (Str::startsWith($filePath, ['http://', 'https://'])) {
+            return [];
+        }
+
+        return $filePath !== '' ? ['disk' => 'local', 'path' => $filePath] : [];
     }
    
     
