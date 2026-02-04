@@ -17,7 +17,7 @@
 
         <div class="grid grid-cols-12 gap-x-4 mt-5">
             <div class="col-span-12">
-                <div class="font-medium text-base">Declaration of Criminal Convictions</div>
+                <div class="font-medium text-base">Declaration of Criminal Convictions <span class="text-danger">*</span> </div>
                 <p class="mt-2 text-slate-600">
                     As part of the admissions process, applicants are required to declare any relevant criminal convictions.
                     This declaration helps the College to meet its safeguarding responsibilities while ensuring that admissions decisions are fair,
@@ -25,7 +25,7 @@
                 </p>
 
                 <div class="mt-4">
-                    <div class="font-medium">Have you been convicted of any criminal offence in the UK or any other Country?</div>
+                    <div class="font-medium">Have you been convicted of any criminal offence in the UK or any other Country? </div>
                     <div class="mt-2 flex flex-wrap gap-6">
                         <div class="form-check">
                             <input id="criminal_conviction_yes" class="form-check-input" type="radio" name="have_you_been_convicted" value="1" {{ isset($apply->criminalConviction->have_you_been_convicted) && (int) $apply->criminalConviction->have_you_been_convicted === 1 ? 'checked' : '' }}>
@@ -49,7 +49,7 @@
 
         <div class="grid grid-cols-12 gap-x-4 mt-6">
             <div class="col-span-12">
-                <div class="font-medium text-base">Declaration</div>
+                <div class="font-medium text-base">Declaration <span class="text-danger">*</span></div>
                 <p class="mt-2 text-slate-600">
                     Please ensure that all information provided is complete and accurate. Failure to disclose relevant information,
                     or the provision of false or misleading information, may result in:
