@@ -10,6 +10,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,17 @@ class ProcessSendPaySlipEmail implements ShouldQueue
      */
     public function handle(): void
     {
+        $rateLimitKey = 'payslip-email-sends';
+        $maxPerSecond = (int) config('mail.rate_limit_per_second', 1);
+        $decaySeconds = 1;
+
+        if (RateLimiter::tooManyAttempts($rateLimitKey, $maxPerSecond)) {
+            $this->release($decaySeconds);
+            return;
+        }
+
+        RateLimiter::hit($rateLimitKey, $decaySeconds);
+
         $paySlip = PaySlipUploadSync::with('employee')->find($this->paySlipId);
 
         if (!$paySlip || !$paySlip->employee || empty($paySlip->employee->email)) {
