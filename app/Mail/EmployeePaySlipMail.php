@@ -7,6 +7,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Queue\SerializesModels;
 
@@ -31,10 +32,13 @@ class EmployeePaySlipMail extends Mailable
      */
     public function envelope()
     {
-        $subjectMonth = $this->paySlip->month_year ?? 'Payslip';
+        $subjectMonth = date('F Y', strtotime($this->paySlip->month_year.'-01')) ?? 'Payslip';
 
         return new Envelope(
-            subject: 'LCC: Your Payslip - ' . $subjectMonth,
+            subject: $subjectMonth .' Payslip Available',
+            replyTo: [
+                new Address('hr@lcc.ac.uk', 'HR Department'),
+            ],
         );
     }
 
@@ -47,7 +51,7 @@ class EmployeePaySlipMail extends Mailable
             view: 'emails.employee-payslip',
             with: [
                 'employeeName' => optional($this->paySlip->employee)->full_name,
-                'monthYear' => $this->paySlip->month_year,
+                'monthYear' => date('F Y', strtotime($this->paySlip->month_year.'-01')),
             ]
         );
     }

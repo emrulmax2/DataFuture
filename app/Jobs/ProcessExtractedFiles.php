@@ -22,18 +22,20 @@ class ProcessExtractedFiles implements ShouldQueue
     protected $dirName;
     protected $type;
     protected $holiday_year_Id;
+    protected $employeeMap;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($tempPath, $dirName, $type, $holiday_year_Id)
+    public function __construct($tempPath, $dirName, $type, $holiday_year_Id,$employeeMap)
     {
         $this->tempPath = $tempPath; // path relative to storage/app
         $this->dirName = $dirName;
         $this->type = $type;
         $this->holiday_year_Id = $holiday_year_Id;
+        $this->employeeMap = $employeeMap;
     }
 
     /**
@@ -76,6 +78,17 @@ class ProcessExtractedFiles implements ShouldQueue
         // Get the list of directories in the extracted path, excluding __MACOSX
         $directories = $this->getDirectories($extractPath);
 
+
+
+        // $paySyncMap = [];
+        // $paySyncItems = PaySlipUploadSync::whereNotNull('employee_id')
+        //     ->get(['file_name', 'employee_id']);
+        // foreach ($paySyncItems as $pay) {
+        //     if (!empty($pay->file_name)) {
+        //         $paySyncMap[$pay->file_name] = $pay->employee_id;
+        //     }
+        // }
+
         // Get all extracted files
         foreach ($directories as $path) {
             $directoryName = basename($path);
@@ -113,49 +126,18 @@ class ProcessExtractedFiles implements ShouldQueue
                     $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
                     
                     $paySlipUploadSync = [];
-                    // fetch ni_number, id and duplicate count (number of active employees with same ni_number)
-                
-                    $employeeList = DB::table('employees as emp')
-                        ->select('emp.id', 'emp.ni_number','emp.active', DB::raw("(select count(*) from employees e2 where e2.ni_number = emp.ni_number) as duplicate_count"))
-                        ->get();
+                    // normalize NI number from filename and resolve employee
+                    $fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
+                    $employeeFound = $this->employeeMap[$fileNameWithoutAnyHipen] ?? 0;
 
-                    foreach($employeeList as $employee) {
-                        // find employee first_name and last_name from $fileName string
-                        // Extract first_name and last_name from the filename
-                        // we change it now it will be ni_number based matching
-                        // remove string space or hipen from originalNameWithoutExtension
-                        $fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
-                        $employeeNINumber = preg_replace('/[\s-]+/', '', strtoupper(trim($employee->ni_number)));
-
-                        if($employeeNINumber == $fileNameWithoutAnyHipen){
-                            // if this ni_number exists multiple times among active employees treat as ambiguous (no match)
-                            // check duplicate and only get the active employee
-                            if(isset($employee->duplicate_count) && $employee->duplicate_count > 1 && $employee->active==1){
-                                $employeeFound =  $employee->id;
-                            } else if($employee->active==1){ 
-                                $employeeFound = $employee->id;
-                            } else {
-                                $employeeFound = 0;
-                            }
-                            break;
-
-                        } else {
-                            $employeeFound = 0;
-                            $paySync=PaySlipUploadSync::all();
-                            foreach($paySync as $pay) {
-
-                                // check both original and suffixed filenames for existing mapping
-                                if((isset($pay->file_name) && ($pay->file_name == $fileName || (isset($fileNameWithSuffix) && $pay->file_name == $fileNameWithSuffix))) && $pay->employee_id != null) {
-
-                                    $employeeFound = $pay->employee_id;
-                                    break;
-                                }
-                            }
-                            
-                        }   
-                    
-                        
-                    }
+                    // fallback to previously mapped filename if NI is ambiguous or not found
+                    // if (!$employeeFound) {
+                    //     if (isset($paySyncMap[$fileName])) {
+                    //         $employeeFound = $paySyncMap[$fileName];
+                    //     } elseif (isset($paySyncMap[$fileNameWithSuffix])) {
+                    //         $employeeFound = $paySyncMap[$fileNameWithSuffix];
+                    //     }
+                    // }
 
                     // payslipuploadSync table data insert if file_name and month_year not exist
                     $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
