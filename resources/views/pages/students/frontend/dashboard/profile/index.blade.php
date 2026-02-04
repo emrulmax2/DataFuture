@@ -153,7 +153,7 @@
                                 <div class="grid grid-cols-12 gap-0">
                                     <div class="col-span-5 text-slate-500 font-medium">Criminal Conviction</div>
                                     <div class="col-span-7 font-medium">
-                                        {!! (isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
+                                        {!! (isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' :  (isset($student->criminalConviction->have_you_been_convicted)) ? '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>' : '---') !!}
                                     </div>
                                 </div>
                             </div>
