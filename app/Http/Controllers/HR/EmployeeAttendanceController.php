@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ProcessExtractedFiles;
 use App\Models\Employee;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeAttendanceDayBreak;
@@ -17,6 +16,7 @@ use App\Models\HrCondition;
 use App\Models\HrHolidayYear;
 use App\Models\PaySlipUploadSync;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Polyfill\Intl\Idn\Resources\unidata\Regex;
@@ -56,15 +56,141 @@ class EmployeeAttendanceController extends Controller
         $file = $request->file('file');
         $fileOriginalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $dirName = $request->dir_name;
-        // Define a temporary location to store the uploaded zip file
-        $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
-        
-        // Store the uploaded ZIP locally on server, then dispatch a job which will transfer it to S3 and process it
+        // Store the uploaded ZIP locally on server, then process immediately
         $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
 
-        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id);
+        // Transfer the local ZIP to S3 (extracted files only), then extract locally for processing.
+        $localZipPath = storage_path('app/' . $tempPath);
 
-        return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
+        if (File::exists($localZipPath)) {
+            $extractPath = storage_path('app/temp/extracted/' . uniqid());
+            if (!File::exists($extractPath)) {
+                File::makeDirectory($extractPath, 0755, true);
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($localZipPath) === TRUE) {
+                $zip->extractTo($extractPath);
+                $zip->close();
+
+                // Get the list of directories in the extracted path, excluding __MACOSX
+                $directories = $this->getDirectories($extractPath);
+
+                // Get all extracted files
+                foreach ($directories as $path) {
+                    $directoryName = basename($path);
+                    $files = File::files($extractPath . DIRECTORY_SEPARATOR . $directoryName);
+                    
+                    // Loop through the files and store them in the desired location
+                    foreach ($files as $file) {
+                        if ($file !== '.' && $file !== '..') {
+                            // Store the file in the 'public' disk with the month suffix appended to its name
+                            $fileName = $file->getFilename();
+                            $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+                            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+                            // keep original name without extension for NI matching
+                            $originalNameWithoutExtension = $baseName;
+
+                            // build suffixed filename (e.g., payslip-2024-08.pdf)
+                            $fileNameWithSuffix = $baseName . '-' . $dirName . ($extension ? '.' . $extension : '');
+
+                            $destinationPath = 'public/employee_payslips/' . $dirName; // Define the destination path on S3
+
+                            // Stream upload to S3 to avoid loading whole file into memory
+                            $localRealPath = $file->getRealPath();
+                            if ($localRealPath && File::exists($localRealPath)) {
+                                $stream = fopen($localRealPath, 'r');
+                                Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
+                                if (is_resource($stream)) {
+                                    fclose($stream);
+                                }
+                            } else {
+                                // fallback to reading file contents
+                                Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
+                            }
+
+                            // Get the file path (S3 URL) after storage
+                            $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
+                            
+                            // fetch ni_number, id and duplicate count (number of active employees with same ni_number)
+                            $employeeList = DB::table('employees as emp')
+                                ->select('emp.id', 'emp.ni_number','emp.active', DB::raw("(select count(*) from employees e2 where e2.ni_number = emp.ni_number) as duplicate_count"))
+                                ->get();
+
+                            foreach($employeeList as $employee) {
+                                // we change it now it will be ni_number based matching
+                                // remove string space or hipen from originalNameWithoutExtension
+                                $fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
+                                $employeeNINumber = preg_replace('/[\s-]+/', '', strtoupper(trim($employee->ni_number)));
+
+                                if($employeeNINumber == $fileNameWithoutAnyHipen){
+                                    // if this ni_number exists multiple times among active employees treat as ambiguous (no match)
+                                    // check duplicate and only get the active employee
+                                    if(isset($employee->duplicate_count) && $employee->duplicate_count > 1 && $employee->active==1){
+                                        $employeeFound =  $employee->id;
+                                    } else if($employee->active==1){ 
+                                        $employeeFound = $employee->id;
+                                    } else {
+                                        $employeeFound = 0;
+                                    }
+                                    break;
+
+                                } else {
+                                    $employeeFound = 0;
+                                    $paySync=PaySlipUploadSync::all();
+                                    foreach($paySync as $pay) {
+
+                                        // check both original and suffixed filenames for existing mapping
+                                        if((isset($pay->file_name) && ($pay->file_name == $fileName || (isset($fileNameWithSuffix) && $pay->file_name == $fileNameWithSuffix))) && $pay->employee_id != null) {
+
+                                            $employeeFound = $pay->employee_id;
+                                            break;
+                                        }
+                                    }
+                                    
+                                }   
+                            }
+
+                            // payslipuploadSync table data insert if file_name and month_year not exist
+                            $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
+                                [
+                                    'file_name' => $fileNameWithSuffix,
+                                    'month_year' => $dirName,
+
+                                ],[
+                                'employee_id' => ($employeeFound) ? $employeeFound : NULL,
+                                'file_name' => $fileNameWithSuffix,
+                                'file_path' => $filePath,
+                                'holiday_year_id' => $holiday_year_Id,
+                                'month_year' => $dirName,
+                                'type' => isset($type) && !empty($type) ? $type : 'Payslips',
+                                'is_file_exist' => ($employeeFound) ? 1 : 0,
+                                'file_transffered' => 0,
+                                'file_transffered_at' => null,
+                                'is_file_uploaded' => 1,
+                                'created_by' => auth()->id(),
+
+                            ]);
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // cleanup extracted files and local zip
+            try {
+                if (File::exists($extractPath)) {
+                    File::deleteDirectory($extractPath);
+                }
+                if (File::exists($localZipPath)) {
+                    File::delete($localZipPath);
+                }
+            } catch (\Exception $e) {
+                // ignore cleanup errors
+            }
+        }
+
+        return response()->json(['success' => 'File processed successfully.'], 200);
         
     }
 
