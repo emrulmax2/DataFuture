@@ -55,7 +55,6 @@ class UserProfileController extends Controller
         return view('pages.users.my-account.payslip', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
                 ['label' => 'Payroll Sync', 'href' => 'javascript:void(0);']
             ],
             'employee'=> $employee,
