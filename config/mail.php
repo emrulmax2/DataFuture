@@ -115,4 +115,16 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mail Rate Limiting
+    |--------------------------------------------------------------------------
+    |
+    | Configure how many emails can be sent per second by queued jobs.
+    | This is useful for providers like Mailtrap that enforce strict limits.
+    |
+    */
+
+    'rate_limit_per_second' => env('MAIL_RATE_LIMIT_PER_SECOND', 1),
+
 ];
