@@ -111,7 +111,97 @@ class SlcRecordReportController extends Controller
     }
 
     public function getHtml($semester_ids){
-        $res = $this->refineResult($semester_ids);
+
+        $res = $this->refineResult($semester_ids, false);
+        
+        $theLoader = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(22,78,99)" class="w-3 h-3 ml-2 theLoader"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
+        $nitialTotal = $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
+        $html = '';
+        $html .= '<table class="table table-bordered slcRecordReportTable  table-sm my-10" id="slcRecordReportTable">';
+            $html .= '<thead>';
+                $html .= '<tr>';
+                    $html .= '<th>Intake</th>';
+                    $html .= '<th>Initial LCC SMS Registration (excluding discarded)</th>';
+                    $html .= '<th>Student Registered with Awarding Body</th>';
+                    $html .= '<th>SLC Registered</th>';
+                    $html .= '<th>SLC Attendance Confirmed</th>';
+                    $html .= '<th>SLC Withdrawn</th>';
+                    $html .= '<th>Student Withdrawn or Intermittent</th>';
+                    $html .= '<th>Self funded students</th>';
+                    $html .= '<th class="exportAction text-right">&nbsp;</th>';
+                $html .= '</tr>';
+            $html .= '</thead>';
+            $html .= '<tbody>';
+                if(!empty($res)):
+                    foreach($res as $semester_id => $row):
+                        $nitialTotal += $row['slc_sms_registered'];
+                        $awbTotal += $row['slc_awb_registered'];
+                        $year1Total += $row['year_1_registered'];
+                        $year2Total += $row['year_1_attendance'];
+                        $withdrawnTotal += $row['slc_withdrawn'];
+                        $interminateTotal += $row['slc_interminate'];
+                        $selfFunedTotal += $row['slc_self_funded'];
+                        $html .= '<tr class="semesterRow semesterRow_'.$semester_id.'" data-semesterid="'.$semester_id.'">';
+                            $html .= '<td class="w-1/6"><a href="javascript:void(0);" class="semesterToggle" data-semesterid="'.$semester_id.'">+ '.$row['name'].'</a></td>';
+                            //$html .= '<td>'.$row['slc_sms_registered'].'</td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_sms_registered_std'].'">'.$row['slc_sms_registered'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_awb_registered_std'].'">'.$row['slc_awb_registered'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_registered_std'].'">'.$row['year_1_registered'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['year_1_attendance_std'].'">'.$row['year_1_attendance'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_withdrawn_std'].'">'.$row['slc_withdrawn'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_interminate_std'].'">'.$row['slc_interminate'].$theLoader.'</a></td>';
+                            $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_self_funded_std'].'">'.$row['slc_self_funded'].$theLoader.'</a></td>';
+                            $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', $semester_id).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
+                        $html .= '</tr>';
+
+                        //course creation rows
+                        if(!empty($row["courses"])):
+                            foreach($row["courses"] as $courseId => $courseRow):
+                                if(is_array($courseRow)):
+                                    
+                                    $html .= '<tr class="courseRow courseRow_'.$courseId.' semesterCourseRow_'.$semester_id.'" data-semesterid="'.$semester_id.'" data-courseid="'.$courseId.'" style="display: none;">';
+                                        $html .= '<td class="w-1/6 pl-5"><a href="javascript:void(0);"> - '.$courseRow['name'].'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['slc_sms_registered_std'].'">'.$courseRow['slc_sms_registered'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['slc_awb_registered_std'].'">'.$courseRow['slc_awb_registered'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['year_1_registered_std'].'">'.$courseRow['year_1_registered'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['year_1_attendance_std'].'">'.$courseRow['year_1_attendance'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['slc_withdrawn_std'].'">'.$courseRow['slc_withdrawn'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['slc_interminate_std'].'">'.$courseRow['slc_interminate'].$theLoader.'</a></td>';
+                                        $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$courseRow['slc_self_funded_std'].'">'.$courseRow['slc_self_funded'].$theLoader.'</a></td>';
+                                        $html .= '<td class="text-right exportAction">&nbsp;</td>';
+                                    $html .= '</tr>';
+                                endif;
+                            endforeach;
+                        endif;
+                    endforeach;
+                else:
+                    $html .= '<tr><td colspan="8" class="text-center font-medium">Data not available</td></tr>';
+                endif;
+            $html .= '</tbody>';
+            if(!empty($res)):
+                $html .= '<tfoot>';
+                    $html .= '<tr>';
+                        $html .= '<th>Overall</th>';
+                        $html .= '<th>'.$nitialTotal.'</th>';
+                        $html .= '<th>'.$awbTotal.'</th>';
+                        $html .= '<th>'.$year1Total.'</th>';
+                        $html .= '<th>'.$year2Total.'</th>';
+                        $html .= '<th>'.$withdrawnTotal.'</th>';
+                        $html .= '<th>'.$interminateTotal.'</th>';
+                        $html .= '<th>'.$selfFunedTotal.'</th>';
+                        $html .= '<th class="exportAction"></th>';
+                    $html .= '</tr>';
+                $html .= '</tfoot>';
+            endif;
+        $html .= '</table>';
+
+        $html .= $this->getFranciseCourseHtml($semester_ids); //franchise course creation report
+
+        return $html;
+    }
+    private function getFranciseCourseHtml($semester_ids) {
+
+        $res = $this->refineResult($semester_ids,true);
         
         $theLoader = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(22,78,99)" class="w-3 h-3 ml-2 theLoader"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
         $nitialTotal = $awbTotal = $year1Total = $year2Total = $withdrawnTotal = $interminateTotal = $selfFunedTotal = 0;
@@ -198,6 +288,7 @@ class SlcRecordReportController extends Controller
     }
 
     public function printGetHtml($semester_ids){
+
         $res = $this->refineResult($semester_ids);
         
         $theLoader = '<svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(22,78,99)" class="w-3 h-3 ml-2 theLoader"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
@@ -354,7 +445,7 @@ class SlcRecordReportController extends Controller
         return Excel::download(new ArrayCollectionExport($theCollection), 'slc_Record_report.xlsx');
     }
 
-    public function refineResult($semester_ids){
+    public function refineResult($semester_ids, $francise=false){
         $res = [];
         
         if(!empty($semester_ids)):
@@ -364,8 +455,17 @@ class SlcRecordReportController extends Controller
             $slc_self_funded_satuses = [15];
             foreach($semester_ids as $semester_id):
                 $semester = Semester::find($semester_id);
-                $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
+                $creations = $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
+                    ->whereHas('course', function($q){
+                        $q->where('franchise_course', 'No');
+                    })->pluck('id')->unique()->toArray();
 
+                if ($francise) {
+                    $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
+                    ->whereHas('course', function($q){
+                        $q->where('franchise_course', 'Yes');
+                    })->pluck('id')->unique()->toArray();
+                }
                 
                 $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();//->where('active', 1)
 
@@ -410,6 +510,7 @@ class SlcRecordReportController extends Controller
                     //process if needed per course creation
                     $courseCreationData = CourseCreation::find($creation_id);
                     $courseName = $courseCreationData->course->name;
+                    $franchiseCourse = $courseCreationData->franchise_course;
                     $creationSingleArray = [$creation_id];
                     $studentIdOfSingleCourse = StudentCourseRelation::whereIn('course_creation_id', $creationSingleArray)->where('active', 1)->pluck('student_id')->unique()->toArray();//->where('active', 1)
 
@@ -432,6 +533,7 @@ class SlcRecordReportController extends Controller
                     $slc_interminateForSingle = Student::whereIn('id', $studentIdOfSingleCourse)->whereIn('status_id', $slc_interminate_satuses)->pluck('id')->unique()->toArray();
                     $slc_self_fundedForSingle = Student::whereIn('id', $studentIdOfSingleCourse)->whereIn('status_id', $slc_self_funded_satuses)->pluck('id')->unique()->toArray();
                     $res[$semester_id]['courses'][$creation_id]['name'] = $courseName;
+                    $res[$semester_id]['courses'][$creation_id]['franchise_course'] = $franchiseCourse;
                     $res[$semester_id]['courses'][$creation_id]['slc_sms_registered'] = (!empty($slc_sms_registeredForSingle) ? count($slc_sms_registeredForSingle) : 0);
                     $res[$semester_id]['courses'][$creation_id]['slc_sms_registered_std'] = (!empty($slc_sms_registeredForSingle) ? implode(',', $slc_sms_registeredForSingle) : 0);
                     $res[$semester_id]['courses'][$creation_id]['slc_awb_registered'] = (!empty($slc_awb_registeredForSingle) ? count($slc_awb_registeredForSingle) : 0);
