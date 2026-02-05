@@ -124,15 +124,18 @@ import tippy, { roundArrow } from "tippy.js";
 
     $('#slcRecoredReportWrap').on('click', '.semesterToggle', function(e){
         e.preventDefault();
-        var semesterid = $(this).attr('data-semesterid');
-        if($(this).hasClass('active')){
-            $('.semesterTermRow_'+semesterid).fadeOut();
-            $('.semesterCourseRow_'+semesterid).fadeOut();
-            $('.semesterCourseRow_'+semesterid).find('.courseToggle').removeClass('active');
-            $(this).removeClass('active');
+        var $toggle = $(this);
+        var $tableScope = $toggle.closest('table');
+        var semesterid = $toggle.attr('data-semesterid');
+
+        if($toggle.hasClass('active')){
+            $tableScope.find('.semesterTermRow_'+semesterid).fadeOut();
+            $tableScope.find('.semesterCourseRow_'+semesterid).fadeOut();
+            $tableScope.find('.semesterCourseRow_'+semesterid).find('.courseToggle').removeClass('active');
+            $toggle.removeClass('active');
         }else{
-            $('.semesterCourseRow_'+semesterid).fadeIn();
-            $(this).addClass('active');
+            $tableScope.find('.semesterCourseRow_'+semesterid).fadeIn();
+            $toggle.addClass('active');
         }
     });
 })()
