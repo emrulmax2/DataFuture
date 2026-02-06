@@ -3623,7 +3623,7 @@ Route::middleware('auth')->group(function() {
         Route::post('reports/slc-report/generate-slc-record', 'generateReport')->name('reports.slc.record.generate.report'); 
         Route::get('reports/slc-report/print-slc-record/{semesters?}', 'printReport')->name('reports.slc.record.print.report'); 
         Route::get('reports/slc-report/export-slc-record/{semesters?}', 'exportReport')->name('reports.slc.record.export.report'); 
-        Route::get('reports/slc-report/export-slc-record-details/{semester?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
+        Route::get('reports/slc-report/export-slc-record-details/{semester?}/{francise?}', 'exportDetailsReport')->name('reports.slc.record.export.details.report'); 
 
         Route::post('reports/slc-report/export-student-list', 'exportStudentList')->name('reports.slc.record.export.student.list'); 
     });
