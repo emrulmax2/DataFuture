@@ -240,7 +240,7 @@ class SlcRecordReportController extends Controller
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_withdrawn_std'].'">'.$row['slc_withdrawn'].$theLoader.'</a></td>';
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_interminate_std'].'">'.$row['slc_interminate'].$theLoader.'</a></td>';
                             $html .= '<td><a href="javascript:void(0);" class="exportStdList text-primary font-medium underline inline-flex justify-center items-center" data-ids="'.$row['slc_self_funded_std'].'">'.$row['slc_self_funded'].$theLoader.'</a></td>';
-                            $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', $semester_id).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
+                            $html .= '<td class="text-right exportAction"><a href="'.route('reports.slc.record.export.details.report', [$semester_id ,true ]).'" class="btn btn-sm btn-success text-white"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export</a></td>';
                         $html .= '</tr>';
 
                         //course creation rows
@@ -455,7 +455,7 @@ class SlcRecordReportController extends Controller
             $slc_self_funded_satuses = [15];
             foreach($semester_ids as $semester_id):
                 $semester = Semester::find($semester_id);
-                $creations = $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
+                $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
                     ->whereHas('course', function($q){
                         $q->where('franchise_course', 'No');
                     })->pluck('id')->unique()->toArray();
@@ -557,7 +557,7 @@ class SlcRecordReportController extends Controller
         return $res;
     }
 
-    public function exportDetailsReport($semester_id){
+    public function exportDetailsReport($semester_id,$francise=false){
         $slc_statuses = [21, 23, 24, 26, 27, 28, 29, 30, 31, 42, 43, 15];
         $slc_withdrawn_satuses = [30, 31, 43];
         $slc_interminate_satuses = [27, 42];
@@ -574,8 +574,21 @@ class SlcRecordReportController extends Controller
         $row += 1; 
         
         $semester = Semester::find($semester_id);
-        $creations = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
+        
+        $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
+                    ->whereHas('course', function($q){
+                        $q->where('franchise_course', 'No');
+                    })->pluck('id')->unique()->toArray();
+
+                if ($francise) {
+                    $creations = CourseCreation::with('course')->where('semester_id', $semester_id)
+                    ->whereHas('course', function($q){
+                        $q->where('franchise_course', 'Yes');
+                    })->pluck('id')->unique()->toArray();
+                }
+        
         $student_ids = StudentCourseRelation::whereIn('course_creation_id', $creations)->where('active', 1)->pluck('student_id')->unique()->toArray();
+        
         $slc_sms_registered = Student::whereIn('id', $student_ids)->whereIn('status_id', $slc_statuses)->orderBy('first_name', 'ASC')->get();
         $theCollection[$row][] = "Initial LCC SMS Registration (excluding discarded)";
         $row += 1; 
