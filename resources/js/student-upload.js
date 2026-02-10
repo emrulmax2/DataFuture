@@ -2,6 +2,8 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import Dropzone from "dropzone";
+import html2canvas from "html2canvas";
+import { saveAs } from 'file-saver';
 
 ("use strict");
 var studentUploadListTable = (function () {
@@ -176,6 +178,7 @@ var studentUploadListTable = (function () {
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const uploadsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadsDropdown"));
     const uploadDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadDocumentModal"));
+    const downloadIDCard = tailwind.Modal.getOrCreateInstance(document.querySelector("#downloadIDCard"));
 
     const uploadDocumentModalEl = document.getElementById('uploadDocumentModal')
     uploadDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -224,6 +227,12 @@ var studentUploadListTable = (function () {
         }else{
             warningModal.hide();
         }
+    });
+
+    const downloadIDCardEl = document.getElementById('downloadIDCard')
+    downloadIDCardEl.addEventListener('hide.tw.modal', function(event) {
+        $('#downloadIDCard .idContent').html('').fadeOut('fast');
+        $('#downloadIDCard .idLoader').fadeIn('fast');
     });
 
     /* Start Dropzone */
@@ -524,6 +533,50 @@ var studentUploadListTable = (function () {
                 $theLink.css({'opacity' : '1', 'cursor' : 'pointer'});
                 console.log('error');
             }
+        });
+    });
+
+
+    $(document).on('click', '#downloadIDCardBtn', function(e){
+        e.preventDefault();
+        var $btn = $(this);
+        var student_id = $btn.attr('data-studentid');
+
+        axios({
+            method: "post",
+            url: route('student.download.id.card'),
+            data: {student_id : student_id},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                
+                downloadIDCard.show();
+                document.getElementById('downloadIDCard').addEventListener('shown.tw.modal', function(event){
+                    $('#downloadIDCard .idLoader').fadeOut('fast');
+                    $('#downloadIDCard .idContent').fadeIn('fast').html(response.data.res);
+                });
+            }
+        }).catch(error => {
+            if(error.response){
+                console.log('error');
+            }
+        });
+    })
+
+    $('#downloadIDCard').on('click', '.thePrintBtn', function(){
+        var $currentBtn = $(this);
+        var currentIdAttr = $currentBtn.attr('data-id');
+        var currentId = '#theIDCard_'+currentIdAttr;
+        var $currentIDCard = $('#theIDCard_'+currentIdAttr);
+
+        html2canvas(document.querySelector(currentId), { useCORS: true, allowTaint : true }).then(canvas => {
+            canvas.toBlob(function(blob) {
+                window.saveAs(blob, currentIdAttr+'.jpg');
+
+                setTimeout(function(){
+                    downloadIDCard.hide();
+                }, 2000);
+            });
         });
     });
 

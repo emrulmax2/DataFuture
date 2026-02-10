@@ -1168,6 +1168,7 @@ Route::middleware('auth')->group(function() {
         Route::get('student/uploads-list', 'list')->name('student.uploads.list');
         Route::delete('student/uploads-destroy', 'destroy')->name('student.destory.uploads');
         Route::post('student/uploads-restore', 'restore')->name('student.resotore.uploads');
+        Route::post('student/download-id-cards', 'downloadIdCard')->name('student.download.id.card'); 
     });
 
     Route::controller(ProcessController::class)->group(function() {

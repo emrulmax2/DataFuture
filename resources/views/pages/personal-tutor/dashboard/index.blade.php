@@ -302,6 +302,10 @@
                                                     <div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">
                                                         <img src="{{ (isset($mod->tutor->employee->photo_url) && !empty($mod->tutor->employee->photo_url) ? $mod->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}" title="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}" class="tooltip rounded-full" alt="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}"/>
                                                     </div>
+                                                    @elseif(isset($mod->personal_tutor_id) && $mod->personal_tutor_id > 0)
+                                                    <div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">
+                                                        <img src="{{ (isset($mod->personalTutor->employee->photo_url) && !empty($mod->personalTutor->employee->photo_url) ? $mod->personalTutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}" title="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}" class="tooltip rounded-full" alt="{{ (isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '') }}"/>
+                                                    </div>
                                                     @endif
                                                     <div class="flex justify-start items-center mb-2 pl-4">
                                                         <div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">{{ $mod->group->name }}</div>
