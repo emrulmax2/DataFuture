@@ -16,8 +16,12 @@
                 <div class="font-medium text-base">Documents</div>
             </div>
             <div class="col-span-8 md:col-span-6 text-right relative">
+                <button data-studentid="{{ $student->id }}" class="btn btn-success text-white mr-2" id="downloadIDCardBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 lucide lucide-id-card-lanyard-icon lucide-id-card-lanyard"><path d="M13.5 8h-3"/><path d="m15 2-1 2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3"/><path d="M16.899 22A5 5 0 0 0 7.1 22"/><path d="m9 2 3 6"/><circle cx="12" cy="15" r="3"/></svg>
+                    Print ID Card
+                </button>
                 @if(isset(auth()->user()->priv()['document_add']) && auth()->user()->priv()['document_add'] == 1)
-                <div class="dropdown" id="uploadsDropdown">
+                <div class="dropdown inline-flex" id="uploadsDropdown">
                     <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
                         <ul class="dropdown-content">
@@ -240,6 +244,18 @@
         </div>
     </div>
     <!-- END: Delete Confirm Modal Content -->
+
+    <div id="downloadIDCard" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">
+        <a data-tw-dismiss="modal" class="hideIDCardModalBtn btn btn-linkedin text-white btn-rounded m-0 p-0 w-9 h-9" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-white"></i></a>
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="idLoader flex justify-center items-center p-10"><i data-loading-icon="rings" class="w-20 h-20"></i></div>
+                    <div class="idContent" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')

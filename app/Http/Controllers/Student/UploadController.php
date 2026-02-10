@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\StudentDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class UploadController extends Controller
 {
@@ -114,5 +115,41 @@ class UploadController extends Controller
         $data = StudentDocument::where('id', $recordid)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    public function downloadIdCard(Request $request){
+        $student_id = $request->student_id;
+
+        $student = Student::find($student_id);
+        if ($student->photo !== null && Storage::disk('local')->exists('public/students/'.$student->id.'/'.$student->photo)) {
+            $photoURL = url('storage/students/'.$student->id.'/'.$student->photo);
+        } else {
+            $photoURL = asset('build/assets/images/user_avatar.png');
+        }
+
+        $PDFHTML = '';
+        $PDFHTML .= '<div class="printBtns">';
+            $PDFHTML .= '<button data-id="'.$student->registration_no.'" id="thePrintBtn_'.$student->registration_no.'" class="btn btn-success text-white thePrintBtn"><i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> Download '.$student->registration_no.'</button>';
+        $PDFHTML .= '</div>';
+        $PDFHTML .= '<div class="theIDCard" id="theIDCard_'.$student->registration_no.'" style="background-image: url('.asset('build/assets/images/id_card_bg_new.jpg').');">';
+            $PDFHTML .= '<div class="profilePicWrap">';
+                $PDFHTML .= '<span class="course_'.$student->activeCR->creation->course_id.'" style="background-image: url(\''.$photoURL.'\')">';
+                    //$PDFHTML .= '<img src="'.$student->photo_url.'" alt=""/>';
+                $PDFHTML .= '</span>';
+            $PDFHTML .= '</div>';
+            $PDFHTML .= '<div class="profileInfWrap">';
+                $PDFHTML .= '<h2 class="uppercase firstName">'.$student->first_name.'</h2>';
+                $PDFHTML .= '<h2 class="uppercase firstName">'.$student->last_name.'</h2>';
+            $PDFHTML .= '</div>';
+            $PDFHTML .= '<div class="profileIdentificationWrap">';
+                $PDFHTML .= '<p class="registrationNo">'.$student->registration_no.'</p>';
+                $PDFHTML .= '<p class="expireDate">Exp Date: '.(isset($student->crel->creation->availability[0]->course_end_date) && !empty($student->crel->creation->availability[0]->course_end_date) ? date('F Y', strtotime($student->crel->creation->availability[0]->course_end_date)) : '').'</p>';
+            $PDFHTML .= '</div>';
+            $PDFHTML .= '<div class="qrcodeCol">';
+                $PDFHTML .= QrCode::format('svg')->size(106)->generate($student->registration_no);
+            $PDFHTML .= '</div>';
+        $PDFHTML .= '</div>';
+
+        return response()->json(['id' => $student->registration_no, 'res' => $PDFHTML], 200);
     }
 }

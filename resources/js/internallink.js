@@ -445,8 +445,8 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModal [name="parent_id"]').val($('#uploadEmployeeDocumentModal [name="parent_category"]').val());
                 
 
-                    $('#uploadEmployeeDocumentModal [name="available_staff"]').val($('#uploadEmployeeDocumentModal [name="available_staff_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="available_student"]').val($('#uploadEmployeeDocumentModal [name="available_student_status"]').val());
+                    $('#uploadEmployeeDocumentModal [name="available_staff"]').val($('#uploadEmployeeDocumentModal [name="available_staff_status"]').prop('checked') ? 1 : '');
+                    $('#uploadEmployeeDocumentModal [name="available_student"]').val($('#uploadEmployeeDocumentModal [name="available_student_status"]').prop('checked') ? 1 : '');
                     $('#uploadEmployeeDocumentModal [name="description"]').val($('#uploadEmployeeDocumentModal [name="description_status"]').val());
                     $('#uploadEmployeeDocumentModal [name="start_date"]').val($('#uploadEmployeeDocumentModal [name="start_date_status"]').val());
                     $('#uploadEmployeeDocumentModal [name="end_date"]').val($('#uploadEmployeeDocumentModal [name="end_date_status"]').val());
@@ -564,8 +564,8 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModalEdit [name="link"]').val($('#uploadEmployeeDocumentModalEdit [name="link_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val());
                     
-                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').val());
+                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked') ? 1 : '');
+                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked') ? 1 : '');
                     $('#uploadEmployeeDocumentModalEdit [name="description"]').val($('#uploadEmployeeDocumentModalEdit [name="description_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val());
                     $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val());
@@ -596,7 +596,7 @@ var table = (function () {
                                 });      
                                 setTimeout(function(){
                                     succModal.hide();
-                                    window.location.reload();
+                                    //window.location.reload();
                                 }, 2000);
                             }
                         }).catch(error => {
@@ -666,11 +666,11 @@ var table = (function () {
                     $('#uploadEmployeeDocumentModalEdit [name="description_status"]').val(dataset.description);
                     $('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val(dataset.start_date);
                     $('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val(dataset.end_date);
-                    if(dataset.available_staff)
+                    if(dataset.available_staff == 1)
                         $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',true);
                     else
                         $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',false);
-                    if(dataset.available_student)
+                    if(dataset.available_student == 1)
                         $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',true);
                     else
                         $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',false);
