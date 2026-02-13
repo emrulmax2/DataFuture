@@ -1,12 +1,12 @@
 @extends('../layout/' . $layout)
 
 @section('subhead')
-    <title>Document / ID Card Replacement request</title>
+    <title>Document / ID Card Replacement request / Printer Balance Top up</title>
 @endsection
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg flex font-medium mr-auto">Document / ID Card Replacement request</h2>
+        <h2 class="text-lg flex font-medium mr-auto">Document / ID Card Replacement request / Printer Balance Top up</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('students.document-request-form.index') }}" class=" btn btn-primary text-white shadow-md ml-1 relative"><i data-lucide="file-box" class="w-4 h-4 mr-2"></i> My Orders 
                 @if ($countPendingOrders > 0)

@@ -75,7 +75,7 @@ class StudentDocumentRequestFormController extends Controller
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
                     ['label' => 'Profile View', 'href' => route('students.dashboard')],
-                    ['label' => 'Document / ID Card Replacement request', 'href' => 'javascript:void(0);'],
+                    ['label' => 'Document / ID Card Replacement request / Printer Balance Top up', 'href' => 'javascript:void(0);'],
                 ],
                 'student' => $student,
                 "termList" =>$dataBox["termList"],
@@ -313,7 +313,7 @@ class StudentDocumentRequestFormController extends Controller
                 'title' => 'Live Students - London Churchill College',
                 'breadcrumbs' => [
                     ['label' => 'Profile View', 'href' => route('students.dashboard')],
-                    ['label' => 'Document / ID Card Replacement request', 'href' => 'javascript:void(0);'],
+                    ['label' => 'Document / ID Card Replacement request / Printer Balance Top up', 'href' => 'javascript:void(0);'],
                 ],
                 'student' => $student,
                 "letter_sets" => $letter_sets,

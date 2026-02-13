@@ -20,7 +20,7 @@ class DoItOnlineController extends Controller
             $currentDate = strtotime(date("Y-m-d"));
         
             if( $endDate > $currentDate || $onlineWork->end_to=="0000-00-00" || $onlineWork->end_to==null):
-                if($onlineWork->form_name=="Document / ID Card Replacement request"):
+                if($onlineWork->form_name=="Document / ID Card Replacement request / Printer Balance Top up"):
                     $forms[] = [
                         'id' => $iCountTotal++,
                         'name' => $onlineWork->form_name,
