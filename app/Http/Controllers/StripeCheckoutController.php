@@ -16,6 +16,7 @@ class StripeCheckoutController extends Controller
 {
     public function createCheckoutSession(Request $request)
     {
+        
         Stripe::setApiKey(config('services.stripe.secret'));
 
         $session = CheckoutSession::create([
@@ -26,9 +27,9 @@ class StripeCheckoutController extends Controller
                     'product_data' => [
                         'name' => $request->invoice_number,
                     ],
-                    'unit_amount' => 1000, // $10.00
+                    'unit_amount' => (int)($request->amount), // Convert to cents
                 ],
-                'quantity' => $request->quantity,
+                'quantity' => 1,
             ]],
             'mode' => 'payment',
             'success_url' => route('students.checkout.stripe.success') . '?session_id={CHECKOUT_SESSION_ID}',
@@ -89,7 +90,11 @@ class StripeCheckoutController extends Controller
                         $studentDocumentRequestForm->save();
                         $data = [];
                         $data['student_id'] = $studentOrder->student_id;
-                        $data['task_list_id'] = 20; // Document Request Task
+                        if($cartItem->letter_set_id==165) {
+                            $data['task_list_id'] = 26; // Printer Top Up Task
+                        }else {
+                            $data['task_list_id'] = 20; // Document Request Task
+                        }
                         $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
                         $data['status'] = "Pending";
                         $data['created_by'] = 1;
@@ -124,7 +129,11 @@ class StripeCheckoutController extends Controller
                         $studentDocumentRequestFormPaid->save();
                         $data = [];
                         $data['student_id'] = $studentOrder->student_id;
-                        $data['task_list_id'] = 20; // Document Request Task
+                        if($cartItem->letter_set_id==165) {
+                            $data['task_list_id'] = 26; // Printer Top Up Task
+                        }else {
+                            $data['task_list_id'] = 20; // Document Request Task
+                        }
                         $data['student_document_request_form_id'] = $studentDocumentRequestFormPaid->id;
                         $data['status'] = "Pending";
                         $data['created_by'] = 1;

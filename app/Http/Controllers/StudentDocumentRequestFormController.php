@@ -205,7 +205,11 @@ class StudentDocumentRequestFormController extends Controller
         if ($studentDocumentRequestForm->save()) {
             
             $data['student_id'] = $request->student_id;
-            $data['task_list_id'] = 20; // Document Request Task
+            if($request->letter_set_id==165) {
+                $data['task_list_id'] = 26; // Printer Top Up Task
+            }else {
+                $data['task_list_id'] = 20; // Document Request Task
+            }
             $data['student_document_request_form_id'] = $studentDocumentRequestForm->id;
             $data['status'] = "Pending";
             $data['created_by'] = 1;

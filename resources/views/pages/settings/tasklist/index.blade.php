@@ -14,18 +14,23 @@
 
     <!-- BEGIN: Settings Page Content -->
     <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
+        <div id="settings-sidebar" class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
             <!-- BEGIN: Profile Info -->
             @include('pages.settings.sidebar')
             <!-- END: Profile Info -->
         </div>
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
+        <div id="task-content" class="col-span-12 lg:col-span-8 2xl:col-span-9">
             <!-- BEGIN: Display Information -->
             <div class="intro-y box lg:mt-5">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">Tasks List</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addTaskModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Task</button>
+                    <div class="flex items-center ml-auto">
+                        <button id="toggleSidebarBtn" type="button" class="btn btn-outline-secondary mr-2" title="Toggle sidebar">
+                            <i data-lucide="chevrons-left" class="w-4 h-4"></i>
+                        </button>
+                        <button data-tw-toggle="modal" data-tw-target="#addTaskModal" type="button" class="add_btn btn btn-primary shadow-md">Add New Task</button>
+                    </div>
                 </div>
                 <div class="p-5">
                     <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">

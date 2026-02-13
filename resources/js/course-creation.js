@@ -34,6 +34,7 @@ var courseCreationListTable = (function () {
                     title: "Course",
                     field: "course",
                     headerHozAlign: "left",
+                    width: "350",
                 },
                 {
                     title: "Qualification",
@@ -146,6 +147,45 @@ var courseCreationListTable = (function () {
         // Print
         $("#tabulator-print").on("click", function (event) {
             tableContent.print();
+        });
+
+        // Sidebar toggle: collapse/expand the left settings sidebar and expand #courseCreation-content
+        const SIDEBAR_KEY = 'coursecreation_sidebar_collapsed';
+        function applySidebarState(collapsed) {
+            if (collapsed) {
+                $('#settings-sidebar').hide();
+                $('#courseCreation-content').removeClass('lg:col-span-8 2xl:col-span-9').addClass('lg:col-span-12 2xl:col-span-12');
+                $('#toggleSidebarBtn').attr('title', 'Restore sidebar');
+                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-right');
+            } else {
+                $('#settings-sidebar').show();
+                $('#courseCreation-content').removeClass('lg:col-span-12 2xl:col-span-12').addClass('lg:col-span-8 2xl:col-span-9');
+                $('#toggleSidebarBtn').attr('title', 'Collapse sidebar');
+                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-left');
+            }
+            createIcons({ icons, 'stroke-width': 1.5, nameAttr: 'data-lucide' });
+        }
+
+        // Toggle button
+        $('#toggleSidebarBtn').on('click', function () {
+            try {
+                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
+                collapsed = !collapsed;
+                localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+                applySidebarState(collapsed);
+            } catch (e) {
+                console.error('Sidebar toggle error', e);
+            }
+        });
+
+        // Apply persisted state on load
+        $(document).ready(function () {
+            try {
+                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
+                applySidebarState(collapsed);
+            } catch (e) {
+                // ignore
+            }
         });
     };
     return {
