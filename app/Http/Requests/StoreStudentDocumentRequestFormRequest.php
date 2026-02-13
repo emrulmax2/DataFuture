@@ -26,7 +26,7 @@ class StoreStudentDocumentRequestFormRequest extends FormRequest
             "term_declaration_id" => "required|exists:term_declarations,id",
             "letter_set_id" => "required|exists:letter_sets,id",
             "description" => "required|string|max:255",
-            "service_type" => "required|in:Same Day (cost £10.00),3 Working Days (Free),3 Working Days (cost £10.00)",
+            "service_type" => "required|in:Same Day (cost £10.00),3 Working Days (Free),3 Working Days (cost £10.00),Printer Top Up (cost £5.00)",
             "status" => "nullable|in:Pending,In Progress,Approved,Rejected",
             "student_consent" => "required",
         ];

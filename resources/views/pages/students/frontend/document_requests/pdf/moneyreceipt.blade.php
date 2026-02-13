@@ -123,18 +123,31 @@
                 @if(isset($studentOrders) && $studentOrders!=null)
                     @if(isset($studentOrders->studentOrderItems) && $studentOrders->studentOrderItems->count() > 0)
                         @foreach($studentOrders->studentOrderItems as $item)
+                                @php
+                                    
+                                @endphp
                             <tr>
                                 <td style=" border-bottom: 1px solid #969494;">{{ isset($item->letterSet->letter_title) && !empty($item->letterSet->letter_title) ? $item->letterSet->letter_title : '' }}
                                     @if($item->number_of_free > 0) 
                                         @if(($item->quantity - $item->number_of_free)>0)
                                         <br>
-                                            <span style="padding-top:2px; font-size: 12px "> {{ $item->letterSet->id == 159 ? '3 Working Days (cost £10.00)' : 'Same Day (£10.00)' }} [ {{ $item->quantity - $item->number_of_free }} ] </span>
+                                            <span style="padding-top:2px; font-size: 12px "> 
+                                                {{ $item->letterSet->id == 165
+                                                    ? 'Printer Top Up (cost £5.00)'
+                                                    : ($item->letterSet->id == 159 ? '3 Working Days (cost £10.00)' : 'Same Day (£10.00)') }}
+                                                [ {{ $item->quantity - $item->number_of_free }} ]
+                                            </span>
                                         @endif
                                         <br>
                                         <span style="padding-top:2px; font-size: 12px "> 3 Working Days (free) [ {{ $item->number_of_free }} ] </span>
                                     @else
                                         <br>
-                                        <span style="padding-top:2px; font-size: 12px "> {{ $item->letterSet->id == 159 ? '3 Working Days (cost £10.00)' : 'Same Day (£10.00)' }} [ {{ $item->quantity - $item->number_of_free }} ] </span>
+                                        <span style="padding-top:2px; font-size: 12px "> 
+                                            {{ $item->letterSet->id == 165
+                                                    ? 'Printer Top Up (cost £5.00)'
+                                                    : ($item->letterSet->id == 159 ? '3 Working Days (cost £10.00)' : 'Same Day (£10.00)') }}
+                                                [ {{ $item->quantity - $item->number_of_free }} ]
+                                        </span>
                                     @endif
                                 </td>
                                 <td style=" border-bottom: 1px solid #969494;">{{ isset($item->quantity) && !empty($item->quantity) ? ($item->quantity) : '' }}
