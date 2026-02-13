@@ -27,7 +27,7 @@
                 <input type="hidden" name="student_consent" value="1" />
                 <input type="hidden" name="term_declaration_id" value="{{ $current_term_id->id }}">
                 <input type="hidden" name="status" value="Pending">
-                @if($letter_set->id != 164)
+                @if($letter_set->id != 165)
                 <input type="hidden" name="sub_amount" value="10.00">
                 <input type="hidden" name="tax_amount" value="0.00">
                 <input type="hidden" name="total_amount" value="10.00">
@@ -53,20 +53,20 @@
                             </div>
                         </div>
                         <div class="flex flex-col justify-between items-center p-5 border-t border-slate-200/60 dark:border-darkmode-400 w-full">
-                            @if($letter_set->id != 159) 
+                            @if($letter_set->id != 159 && $letter_set->id != 165) 
                             <button type="button" data-letterid="{{ $letter_set->id }}" data-service_type="3 Working Days (Free)" data-studentid={{ $student->id }} class="add-tofree-cart ml-auto flex items-center btn btn-secondary text-slate-500 mr-auto shadow-md w-full  justify-center mb-5" href="javascript:; ">
                                 <i data-lucide="shopping-basket" class="w-5 h-5 mr-2"></i>
                                  3 working days (Free)
                                 <i data-loading-icon="puff" class="w-5 h-5 ml-2 hidden" ></i>
                             </button>
                             @endif
-                            @if($letter_set->id != 159 && $letter_set->id != 164) 
+                            @if($letter_set->id != 159 && $letter_set->id != 165) 
                             <button type="button" data-letterid="{{ $letter_set->id }}" data-service_type="Same Day (cost £10.00)" data-studentid={{ $student->id }} class="add-topaid-cart ml-auto flex items-center btn btn-success text-white mr-auto shadow-md w-full  justify-center" href="javascript:; ">
                                 <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
                                  Same Day  (£10.00)
                                 <i data-loading-icon="puff" class="w-5 h-5 ml-2 hidden"></i>
                             </button>
-                            @elseif($letter_set->id == 164)
+                            @elseif($letter_set->id == 165)
                             <button type="button" data-letterid="{{ $letter_set->id }}" data-service_type="Printer Top Up (cost £5.00)" data-studentid={{ $student->id }} class="add-topaid-cart ml-auto flex items-center btn btn-success text-white mr-auto shadow-md w-full  justify-center" href="javascript:; ">
                                 <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i>
                                  Printer Top Up (cost £5.00)
