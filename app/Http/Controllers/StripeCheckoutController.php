@@ -100,13 +100,21 @@ class StripeCheckoutController extends Controller
                 }
                 if($quantity > 0) {
                     for($iCount=0; $iCount < $quantity; $iCount++) {
+                        $serviceType = "";
+                        if($cartItem->letter_set_id!=159 && $cartItem->letter_set_id!=165)  
+                            $serviceType = 'Same Day (cost £10.00)'; 
+                        elseif($cartItem->letter_set_id==165) 
+                            $serviceType = 'Printer Top Up (cost £5.00)';
+                        else 
+                            $serviceType = '3 Working Days (cost £10.00)';
+
                         $studentDocumentRequestFormPaid = new StudentDocumentRequestForm();
                         $studentDocumentRequestFormPaid->student_id = $cartItem->student_id;
                         $studentDocumentRequestFormPaid->term_declaration_id = isset($cartItem->term_declaration_id) ? $cartItem->term_declaration_id : $student->current_term->id;
                         $studentDocumentRequestFormPaid->letter_set_id = $cartItem->letter_set_id;
                         $studentDocumentRequestFormPaid->name = !isset($cartItem->name) ? LetterSet::where('id',$cartItem->letter_set_id)->get()->first()->letter_title : $cartItem->name;
                         $studentDocumentRequestFormPaid->description = $cartItem->description;
-                        $studentDocumentRequestFormPaid->service_type = ($cartItem->letter_set_id!=159) ? 'Same Day (cost £10.00)' : '3 Working Days (cost £10.00)';
+                        $studentDocumentRequestFormPaid->service_type = $serviceType;
                         $studentDocumentRequestFormPaid->status = 'Pending';
                         $studentDocumentRequestFormPaid->email_status = 'Pending';
                         $studentDocumentRequestFormPaid->student_consent = 1;
