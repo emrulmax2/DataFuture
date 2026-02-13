@@ -35,11 +35,13 @@ var taskListTable = (function () {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    
+                    width: "350",
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
-                                html += '</div>';
+                                // html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
+                                //     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
+                                // html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -5px;">';
                                     html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
                                     html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().processlist+'</div>';
@@ -675,5 +677,44 @@ var taskListTable = (function () {
             }
             fr.readAsDataURL(src.files[0]);
         };
+
+        // Sidebar toggle: collapse/expand the left settings sidebar and expand #task-content
+        const SIDEBAR_KEY = 'tasklist_sidebar_collapsed';
+        function applySidebarState(collapsed) {
+            if (collapsed) {
+                $('#settings-sidebar').hide();
+                $('#task-content').removeClass('lg:col-span-8 2xl:col-span-9').addClass('lg:col-span-12 2xl:col-span-12');
+                $('#toggleSidebarBtn').attr('title', 'Restore sidebar');
+                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-right');
+            } else {
+                $('#settings-sidebar').show();
+                $('#task-content').removeClass('lg:col-span-12 2xl:col-span-12').addClass('lg:col-span-8 2xl:col-span-9');
+                $('#toggleSidebarBtn').attr('title', 'Collapse sidebar');
+                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-left');
+            }
+            createIcons({ icons, 'stroke-width': 1.5, nameAttr: 'data-lucide' });
+        }
+
+        // Toggle button
+        $('#toggleSidebarBtn').on('click', function () {
+            try {
+                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
+                collapsed = !collapsed;
+                localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
+                applySidebarState(collapsed);
+            } catch (e) {
+                console.error('Sidebar toggle error', e);
+            }
+        });
+
+        // Apply persisted state on load
+        $(document).ready(function () {
+            try {
+                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
+                applySidebarState(collapsed);
+            } catch (e) {
+                // ignore
+            }
+        });
     }
 })();
