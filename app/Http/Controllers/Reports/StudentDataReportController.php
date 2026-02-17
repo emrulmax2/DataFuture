@@ -265,7 +265,14 @@ class StudentDataReportController extends Controller
         $slcAccountData  = $request->slcAccount;
         $StudentPlanData  = $request->StudentPlan;
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu')->whereIn('id',$studentIds)->get();
+        //StudentResidency[residency_status][residency]
+        //StudentCriminalConviction[criminal_conviction][criminalConviction]
+        $studentResidencyData  = $request->StudentResidency;
+        $studentCriminalConvictionData  = $request->StudentCriminalConviction;
+
+        
+
+        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
@@ -298,11 +305,22 @@ class StudentDataReportController extends Controller
             $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
 
-        
+        if(!empty($studentResidencyData))
+        foreach($studentResidencyData as $key =>$value):
+            $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+        endforeach; 
+
+        if(!empty($studentCriminalConvictionData))
+        foreach($studentCriminalConvictionData as $key =>$value):
+            $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+        endforeach;
+
 
         if(!empty($StudentCourseRelationData))
         foreach($StudentCourseRelationData as $key =>$value):
-            $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+            if($key=="full_time"){
+                $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
+            }
         endforeach; 
 
         if(!empty($StudentProposedCourseData))
@@ -455,6 +473,36 @@ class StudentDataReportController extends Controller
                         }
 
                     endforeach; 
+
+                    if(!empty($studentResidencyData))
+                    foreach($studentResidencyData as $key =>$value):
+                        if(strpos( $key, '_id') !== false) {
+                            $rel = key($value);
+                            $theCollection[$row][$j++] = (isset($student->residency->$rel)) ?$student->residency->$rel->name : "";
+                        }else {
+                            //replace residency_status to residencyStatus
+                            if($key=="residency_status") {
+                                $theCollection[$row][$j++] = (isset($student->residency->residencyStatus)) ? $student->residency->residencyStatus->name : "";
+                            } else {
+                                $theCollection[$row][$j++] = (isset($student->residency)) ? $student->residency->$key : "";
+                            }
+                        }
+                    endforeach;
+
+                    if(!empty($studentCriminalConvictionData))
+                    foreach($studentCriminalConvictionData as $key =>$value):
+                        if(strpos( $key, '_id') !== false) {
+                            $rel = key($value);
+                            $theCollection[$row][$j++] = (isset($student->criminalConviction->$rel)) ?$student->criminalConviction->$rel->name : "";
+                        } else {
+                            //replace criminal_conviction to criminalConviction
+                            if($key=="criminal_conviction") {
+                                $theCollection[$row][$j++] = (isset($student->criminalConviction)) ? $student->criminalConviction->criminal_conviction_details : "";
+                            } else {
+                                $theCollection[$row][$j++] = (isset($student->criminalConviction)) ? $student->criminalConviction->$key : "";
+                            }
+                        } 
+                    endforeach;  
             
                     if(!empty($StudentCourseRelationData))
                     foreach($StudentCourseRelationData as $key =>$value):
