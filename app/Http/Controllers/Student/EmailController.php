@@ -39,6 +39,7 @@ class EmailController extends Controller
             $sendTo[] = $student->contact->personal_email;
         endif;
         $sendTo = (!empty($sendTo) ? $sendTo : [$student->users->email]);
+        $bcc_emails = (isset($request->bcc_emails) && !empty($request->bcc_emails) ? explode(',', $request->bcc_emails) : []);
 
 
         $studentEmail = StudentEmail::create([
@@ -96,9 +97,9 @@ class EmailController extends Controller
                         $docCounter++;
                     endif;
                 endforeach;
-                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo));
+                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, $attachmentInfo), $bcc_emails);
             else:
-                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, []));
+                UserMailerJob::dispatch($configuration, $sendTo, new CommunicationSendMail($request->subject, $MAILHTML, []), $bcc_emails);
             endif;
             return response()->json(['message' => 'Email successfully sent to Student'], 200);
         else:
