@@ -297,6 +297,11 @@ var studentCommEmailListTable = (function () {
                     }else{
                         mailEditor.setData('');
                     }
+                    if(response.data.row.email_title){
+                        $('#sendEmailForm [name="subject"]').val(response.data.row.email_title);
+                    }else{
+                        $('#sendEmailForm [name="subject"]').val('');
+                    }
                 }
             }).catch(error => {
                 if (error.response) {
