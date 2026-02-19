@@ -66,17 +66,20 @@
             </div>
         </div>
 
+        @if(isset($can_view_other_personal_info) && $can_view_other_personal_info == true)
         <div class="intro-y box p-5  mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
                     <div class="font-medium text-base">Student Other Personal Information</div>
                 </div>
-                
+
+                @if(isset($can_edit_other_personal_info) && $can_edit_other_personal_info == true)
                 <div class="col-span-6 text-right">
                     <button data-applicant="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editOtherPersonalInfoModal" type="button" class="editOtherInfo btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Other Info
                     </button>
                 </div>
+                @endif
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4">
@@ -133,17 +136,21 @@
                 @endif
             </div>
         </div>
+        @endif
 
+        @if(isset($can_view_residency_status) && $can_view_residency_status == true)
         <div id="residency-status" class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
                     <div class="font-medium text-base">Residency Status and Criminal Convictions</div>
                 </div>
+                @if(isset($can_edit_residency_status) && $can_edit_residency_status == true)
                 <div class="col-span-6 text-right">
                     <button data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#editStudentResidencyCriminalModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                         <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Residency Status
                     </button>
                 </div>
+                @endif
             </div>
             <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
             <div class="grid grid-cols-12 gap-4">
@@ -181,6 +188,7 @@
                 </div>
             </div>
         </div>
+        @endif
         
         <div class="intro-y box p-5  mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">

@@ -365,6 +365,11 @@
                             <input id="subject" type="text" name="subject" class="form-control w-full">
                             <div class="acc__input-error error-subject text-danger mt-2"></div>
                         </div>
+                        <div class="mt-3">
+                            <label for="bcc_email" class="form-label">BCC</label>
+                            <input id="bcc_emails" type="text" name="bcc_emails" class="form-control w-full" placeholder="exmp@domain.com,exmp@domain.com....">
+                            <div class="text-xs text-slate-500 mt-1">Please use comma (,) seperator for multiple emails.</div>
+                        </div>
                         <div class="mt-3 mb-4">
                             <label for="email_template_id" class="form-label">Template</label>
                             <select id="email_template_id" name="email_template_id" class="w-full tom-selects">

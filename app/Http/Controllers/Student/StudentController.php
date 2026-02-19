@@ -332,6 +332,10 @@ class  StudentController extends Controller
             'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
             'residencyStatuses' => ResidencyStatus::all(),
+            'can_view_other_personal_info' => (isset(auth()->user()->priv()['student_other_personal_view']) && auth()->user()->priv()['student_other_personal_view'] == 1 ? true : false),
+            'can_edit_other_personal_info' => (isset(auth()->user()->priv()['student_other_personal_edit']) && auth()->user()->priv()['student_other_personal_edit'] == 1 ? true : false),
+            'can_view_residency_status' => (isset(auth()->user()->priv()['student_residency_status_view']) && auth()->user()->priv()['student_residency_status_view'] == 1 ? true : false),
+            'can_edit_residency_status' => (isset(auth()->user()->priv()['student_residency_status_edit']) && auth()->user()->priv()['student_residency_status_edit'] == 1 ? true : false),
         ]);
     }
 
