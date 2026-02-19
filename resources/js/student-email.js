@@ -205,10 +205,10 @@ var studentCommEmailListTable = (function () {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
-        //persist: false,
+        persist: false,
         create: false,
-        allowEmptyOption: false,
-        maxItems: null,
+        allowEmptyOption: true,
+        maxOptions: null,
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },
