@@ -95,6 +95,12 @@ var assetsRegisterListTable = (function () {
                     field: "life",
                     headerHozAlign: "left",
                 },
+                {
+                    title: "Life End",
+                    field: "life_end",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                },
                 /*{
                     title: "Status",
                     field: "active",
