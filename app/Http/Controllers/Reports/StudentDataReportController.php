@@ -318,9 +318,10 @@ class StudentDataReportController extends Controller
 
         if(!empty($StudentCourseRelationData))
         foreach($StudentCourseRelationData as $key =>$value):
-            if($key=="full_time"){
-                $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
-            }
+            if($key=="course_relation_id"){
+                $theCollection[$i][$j++] = "Course Name";
+            }else
+            $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
 
         if(!empty($StudentProposedCourseData))
