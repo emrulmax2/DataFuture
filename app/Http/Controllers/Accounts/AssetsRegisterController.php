@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Support\Number;
 
 class AssetsRegisterController extends Controller
@@ -83,6 +84,11 @@ class AssetsRegisterController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
+                $lifeEnd = '';
+                $life = isset($list->life) && !empty($list->life) ? $list->life : '';
+                if(isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) && $life > 0):
+                    $lifeEnd = Carbon::parse($list->trans->transaction_date_2)->addYears($life)->format('jS M, Y');
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -98,6 +104,7 @@ class AssetsRegisterController extends Controller
                     'serial' => (isset($list->serial) && !empty($list->serial) ? $list->serial : ''),
                     'barcode' => (isset($list->barcode) && !empty($list->barcode) ? $list->barcode : ''),
                     'life' => (isset($list->life) && !empty($list->life) ? ($list->life == 1 ? $list->life.' Year' : $list->life.' Years') : ''),
+                    'life_end' => (!empty($lifeEnd) ? $lifeEnd : ''),
                     'active' => ($list->active == 1 ? $list->active : '0'),
                     'deleted_at' => $list->deleted_at
                 ];
@@ -230,11 +237,17 @@ class AssetsRegisterController extends Controller
         $theCollection[1][] = "Serial";
         $theCollection[1][] = "Barcode";
         $theCollection[1][] = "Life Span";
+        $theCollection[1][] = "Life End";
 
         $row = 2;
         $assets = $query->get();
         if($assets->count() > 0):
             foreach($assets as $list):
+                $lifeEnd = '';
+                $life = isset($list->life) && !empty($list->life) ? $list->life : '';
+                if(isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) && $life > 0) {
+                    $lifeEnd = Carbon::parse($list->trans->transaction_date_2)->addYears($life)->format('jS M, Y');
+                }
                 $theCollection[$row][] = (isset($list->trans->transaction_code) && !empty($list->trans->transaction_code) ? $list->trans->transaction_code : '');
                 $theCollection[$row][] = (isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : '');
                 $theCollection[$row][] = (isset($list->trans->detail) && !empty($list->trans->detail) ? $list->trans->detail : '');
@@ -244,7 +257,8 @@ class AssetsRegisterController extends Controller
                 $theCollection[$row][] = (isset($list->location) && !empty($list->location) ? $list->location : '');
                 $theCollection[$row][] = (isset($list->serial) && !empty($list->serial) ? $list->serial : '');
                 $theCollection[$row][] = (isset($list->barcode) && !empty($list->barcode) ? $list->barcode : '');
-                $theCollection[$row][] = (isset($list->life) && !empty($list->life) ? ($list->life == 1 ? $list->life.' Year' : $list->life.' Years') : '');
+                $theCollection[$row][] = (!empty($life) ? ($life == 1 ? $life.' Year' : $life.' Years') : '');
+                $theCollection[$row][] = (!empty($lifeEnd) ? $lifeEnd : '');
 
                 $row += 1;
             endforeach;
@@ -358,6 +372,7 @@ class AssetsRegisterController extends Controller
                             $PDFHTML .= '<th>Serial</th>';
                             $PDFHTML .= '<th>Barcode</th>';
                             $PDFHTML .= '<th>Life Span</th>';
+                            $PDFHTML .= '<th>Life End</th>';
                         $PDFHTML .= '</tr>';
                     $PDFHTML .= '</thead>';
                     $PDFHTML .= '<tbody>';
@@ -365,6 +380,11 @@ class AssetsRegisterController extends Controller
                         $total = 0;
                         if($assets->count() > 0):
                             foreach($assets as $list):
+                                $lifeEnd = '';
+                                $life = isset($list->life) && !empty($list->life) ? $list->life : '';
+                                if(isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) && $life > 0):
+                                    $lifeEnd = Carbon::parse($list->trans->transaction_date_2)->addYears($life)->format('jS M, Y');
+                                endif;
                                 $total += (isset($list->trans->transaction_amount) && $list->trans->transaction_amount > 0 ? $list->trans->transaction_amount : 0);
                                 $PDFHTML .= '<tr>';
                                     $PDFHTML .= '<td>';
@@ -379,6 +399,7 @@ class AssetsRegisterController extends Controller
                                     $PDFHTML .= '<td>'.(isset($list->serial) && !empty($list->serial) ? $list->serial : '').'</td>';
                                     $PDFHTML .= '<td>'.(isset($list->barcode) && !empty($list->barcode) ? $list->barcode : '').'</td>';
                                     $PDFHTML .= '<td>'.(isset($list->life) && !empty($list->life) ? ($list->life == 1 ? $list->life.' Year' : $list->life.' Years') : '').'</td>';
+                                    $PDFHTML .= '<td>'.(!empty($lifeEnd) ? $lifeEnd : '').'</td>';
                                 $PDFHTML .= '</tr>';
                             endforeach;
                         endif;
