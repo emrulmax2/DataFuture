@@ -99,9 +99,9 @@
             <tbody>
                 @if(isset($payment) && $payment!=null)
                         <tr>
-                            <td style=" border-bottom: 1px solid #969494;">1.</td>
-                            <td style=" border-bottom: 1px solid #969494;">{{ isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '' }}</td>
-                            <td style=" border-bottom: 1px solid #969494;">{{ isset($payment->method->name) && $payment->slc_payment_method_id > 0 ? $payment->method->name : '' }}</td>
+                            <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">1.</td>
+                            <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '' }}</td>
+                            <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ isset($payment->method->name) && $payment->slc_payment_method_id > 0 ? $payment->method->name : '' }}</td>
                             <td style="text-align:right; border-bottom: 1px solid #969494;">{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
                         </tr>
                 @else
@@ -112,34 +112,54 @@
             </tbody>
         </table>
 
-        <table style="border-top:1px solid #969494;  border-left:1px solid #969494; border-right:1px solid #969494; margin-top:20%;">
+        <table style="font-size: 13px; width: 40%; border-top:1px solid #969494;  border-left:1px solid #969494; border-right:1px solid #969494; margin-top:20%;">
             <thead>
+                <tr style="background-color:#fff;">
+                    <th class="whitespace-nowrap" colspan="2" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">INSTALLMENTS</th>
+                </tr>
                 <tr style="background-color:#ddd;">
-                    <th class="whitespace-nowrap" colspan="4" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">UNPAID INSTALLMENTS</th>
+                    <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">DATE</th>
+                    <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494;  margin:2px; text-align:right;">AMOUNT</th>
                 </tr>
             </thead>
             <tbody>
-                @if(isset($payment) && $payment!=null)
-                    @if(isset($payment->installments) && $payment->installments->count() > 0)
-                        @foreach($payment->installments as $installment)
-                            @if($installment->status == 0)
-                                <tr>
-                                    <td colspan="4" style="border-bottom: 1px solid #969494;">{{ isset($installment->due_date) && !empty($installment->due_date) ? date('jS M, Y', strtotime($installment->due_date)) : '' }}</td>
-                                </tr>
-                            @endif
-                        @endforeach
-                    @else
+                @if(isset($installments) && $installments->count() > 0)
+                    @foreach($installments as $inst)
                         <tr>
-                            <td colspan="4" style="text-align:center; border-bottom: 1px solid #969494;" class="text-center">No unpaid installments found for this agreement.</td>
+                            <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
+                            <td style="border-right: 1px solid #969494; text-align:right; border-bottom: 1px solid #969494;">{{ ($inst->amount > 0 ? Number::currency($inst->amount, 'GBP') : Number::currency($inst->amount, 'GBP')) }}</td>
                         </tr>
-                    @endif
+                    @endforeach
                 @else
                     <tr>
-                        <td colspan="4" style="text-align:center; border-bottom: 1px solid #969494;" class="text-center">Payments not found for this agreement.</td>
+                        <td colspan="100%" class="text-center">Installments not found!</td>
                     </tr>
                 @endif
             </tbody>
+            @if(isset($installments) && $installments->count() > 0)
+                @php 
+                    $totalInstallment = (isset($installments) && $installments->count() > 0 ? $installments->sum('amount') : 0);
+                    $totalReceipt = (isset($receipts) && $receipts->count() > 0 ? $receipts->sum('amount') : 0);
+                    $totalDue = $totalInstallment - $totalReceipt;
+                @endphp
+                <tfoot>
+                    <tr style="background-color:#fff;">
+                        <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Total Paid until today</th>
+                        <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
+                            {{ Number::currency($totalInstallment, 'GBP')}}
+                        </th>
+                    </tr>
+                    <tr style="background-color:#fff;">
+                        <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Due until today</th>
+                        <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
+                            {{ Number::currency($totalDue, 'GBP')}}
+                        </th>
+                    </tr>
+                </tfoot>
+            @endif
         </table>
+
+        
       </div>
 
       <div class="footer" style="position: absolute; bottom: 0; width: 100%;">
