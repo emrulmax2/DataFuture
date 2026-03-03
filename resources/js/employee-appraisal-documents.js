@@ -422,8 +422,6 @@ var employeeAppraisalDocListTable = (function () {
             }).catch(error =>{
                 console.log(error)
             });
-        }else{
-            confirmModal.hide();
         }
     });
 

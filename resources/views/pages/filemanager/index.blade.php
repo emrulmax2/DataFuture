@@ -27,8 +27,11 @@
         <div class="folderGridWrap activeGrid">
             <div class="activeListHeader">
                 <div class="font-medium uppercase fileNameCol">Name</div>
+                <div class="font-medium uppercase fileExpCol">Expiry Date</div>
+                <div class="font-medium uppercase filePubCol">Website Pub. Date</div>
                 <div class="font-medium uppercase fileUpdateCol">Last Modified</div>
                 <div class="font-medium uppercase fileOwnedCol">Owned By</div>
+                <div class="font-medium uppercase fileActCol">&nbsp;</div>
             </div>
             @if(!empty($folders) && $folders->count() > 0)
                 @foreach($folders as $folder)
@@ -48,11 +51,15 @@
                         data-parent="{{ $parent_id }}" 
                         >
                         <div class="folderItem gridItems filesFoldersBox text-center">
-                            <div class="fileFolderImg">
-                                <img src="{{ asset('build/assets/images/file_icons/folder.png') }}" alt="{{ $folder->name }}"/>
+                            <div class="fileNameBodyCol">
+                                <div class="fileFolderImg">
+                                    <img src="{{ asset('build/assets/images/file_icons/folder.png') }}" alt="{{ $folder->name }}"/>
+                                </div>
+                                <h5>{{ $folder->name }}</h5>
                             </div>
-                            <h5>{{ $folder->name }}</h5>
-                            <span class="fileFolderUpdated">{{ (!empty($folder->updated_at) ? date('jS F, Y', strtotime($folder->updated_at)) : date('jS F, Y', strtotime($folder->created_at))) }}</span>
+                            <div class="fileFolderExpire text-slate-400">--</div>
+                            <div class="fileFolderPub text-slate-400">--</div>
+                            <div class="fileFolderUpdated">{{ (!empty($folder->updated_at) ? date('jS F, Y', strtotime($folder->updated_at)) : date('jS F, Y', strtotime($folder->created_at))) }}</div>
                             @if(isset($root->folder_admins) && !empty($root->folder_admins))
                                 <div class="ownedBy">
                                     <div class="flex">
@@ -68,6 +75,7 @@
                             @else
                                 <div class="ownedBy"></div>
                             @endif
+                            <div class="fileActData justify-end"></div>
                         </div>
                     </div>
                 @endforeach
@@ -92,11 +100,25 @@
                         class="fileFolderWrap cursor-pointer fileWrap relative"
                         >
                         <div class="fileItem gridItems filesFoldersBox text-center">
-                            <div class="fileFolderImg">
-                                <img src="{{ asset('build/assets/images/file_icons/'.strtolower($fileExtension).'.png') }}" alt="{{ $theFile->display_file_name }}"/>
+                            <div class="fileNameBodyCol">
+                                <div class="fileFolderImg">
+                                    <img src="{{ asset('build/assets/images/file_icons/'.strtolower($fileExtension).'.png') }}" alt="{{ $theFile->display_file_name }}"/>
+                                </div>
+                                <h5>
+                                    {!! $theFile->type == 2 ? '<span class="fileType text-danger text-xs mb-0.5 font-bold">Private</span>' : '<span class="fileType text-success text-xs mb-0.5 font-bold">Public</span>' !!}
+                                    {{ $theFile->display_file_name }}
+                                    @if(isset($theFile->tags) && $theFile->tags->count() > 0)
+                                        <div class="fileTags flex justify-start items-start mt-0.5">
+                                            @foreach($theFile->tags as $tag)
+                                                <span class="bg-slate-200 text-primary px-1 py-0.5 text-xs font-bold mr-0.5 mb-0.5 rounded-sm">#{{ $tag->tag->name }}</span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </h5>
                             </div>
-                            <h5>{{ $theFile->display_file_name }}</h5>
-                            <span class="fileFolderUpdated">{{ (!empty($theFile->updated_at) ? date('jS F, Y', strtotime($theFile->updated_at)) : date('jS F, Y', strtotime($theFile->created_at))) }}</span>
+                            <div class="fileFolderExpire">{{ (!empty($theFile->expire_at) ? date('jS F, Y', strtotime($theFile->expire_at)) : date('jS F, Y', strtotime($theFile->expire_at))) }}</div>
+                            <div class="fileFolderPub">{{ (!empty($theFile->publish_date) ? date('jS F, Y', strtotime($theFile->publish_date)) : date('jS F, Y', strtotime($theFile->publish_date))) }}</div>
+                            <div class="fileFolderUpdated">{{ (!empty($theFile->updated_at) ? date('jS F, Y', strtotime($theFile->updated_at)) : date('jS F, Y', strtotime($theFile->created_at))) }}</div>
                             @if(isset($root->folder_admins) && !empty($root->folder_admins))
                                 <div class="ownedBy">
                                     <div class="flex">
@@ -112,6 +134,24 @@
                             @else
                                 <div class="ownedBy"></div>
                             @endif
+                            <div class="fileActData justify-end">
+                                @if(!empty($theFile->description))
+                                    <a href="javascript:;" data-theme="light" data-tooltip-content="#fileDescription_{{ $theFile->id }}" data-trigger="click" class="tooltip bg-slate-200 text-primary w-[30px] h-[30px] rounded-full inline-flex items-center justify-center" title="{{ $theFile->description }}">
+                                        <i data-lucide="file-text" class="w-4 h-4 text-primary"></i>
+                                    </a>
+
+                                    <!-- BEGIN: Custom Tooltip Content -->
+                                    <div class="tooltip-content">
+                                        <div id="fileDescription_{{ $theFile->id }}" class="relative w-72 flex items-center py-1">
+                                            <div class="mr-auto">
+                                                <div class="font-medium dark:text-slate-200 leading-relaxed">Description</div>
+                                                <div class="text-slate-500 dark:text-slate-400">{!! $theFile->description !!}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- END: Custom Tooltip Content -->    
+                                @endif
+                            </div>
                         </div>
                         @if(isset($theFile->latestVersion->attachments) && $theFile->latestVersion->attachments->count() > 0)
                         <button type="button" data-tw-toggle="modal" data-tw-target="#fileAttachmentModal" data-id="{{ $theFile->latestVersion->id }}" class="attachmentToggleBtn btn btn-facebook p-0 w-[30px] h-[30px] text-white rounded-full rounded-tr-none absolute top-0 right-0">
@@ -170,6 +210,11 @@
                     <i data-lucide="upload-cloud" class="text-success w-4 h-4 mr-2"></i> Upload New Version
                 </a>
             </li> -->
+            <li class="fileRenameLink">
+                <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileRenameModal" href="javascript:void(0);" class="fileRename dropdown-item">
+                    <i data-lucide="pencil" class="text-success w-4 h-4 mr-2"></i> Rename
+                </a>
+            </li>
             <li class="versionHistoryLink">
                 <a data-id="0" data-name="" data-tw-toggle="modal" data-tw-target="#fileHistoryModal" href="javascript:void(0);" class="versionHistory dropdown-item">
                     <i data-lucide="file-clock" class="text-success w-4 h-4 mr-2"></i> Version History
@@ -193,6 +238,51 @@
         </ul>
     </div>
     <!-- BEGIN: File Dropdown End -->
+
+
+
+    <!-- BEGIN: Rename File Modal -->
+    <div id="fileRenameModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xs">
+            <form method="POST" action="#" id="fileRenameForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Rename File</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="w-full">
+                            <label for="re_name" class="form-label">Document Name <span class="text-danger">*</span></label>
+                            <input id="re_name" type="text" name="name" class="form-control w-full">
+                            <div class="acc__input-error error-name text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="renameFileBtn" class="btn btn-primary w-auto">     
+                            Rename                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                        <input type="hidden" name="document_info_id" value="0"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Rename File Modal -->
 
 
     <!-- BEGIN: File Attachment Modal -->

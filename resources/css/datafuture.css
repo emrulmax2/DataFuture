@@ -1887,6 +1887,12 @@ input[type=number] {
     justify-content: flex-start;
     align-items: center;
 }
+.folderGridWrap.activeList .fileNameBodyCol{
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 30%;
+}
 .folderGridWrap.activeList .fileFolderImg{
     min-width: 62px;
     text-align: left;
@@ -1919,23 +1925,64 @@ input[type=number] {
 }
 .folderGridWrap.activeList .filesFoldersBox h5{
     font-weight: 500;
-    width: calc(50% - 87px);
     text-align: left;
+}
+.folderGridWrap .filesFoldersBox h5 .fileType{
+    display: none;
+}
+.folderGridWrap.activeList .filesFoldersBox h5 .fileType{
+    display: block;
+}
+.folderGridWrap .filesFoldersBox h5 .fileTags{
+    display: none;
+}
+.folderGridWrap.activeList .filesFoldersBox h5 .fileTags{
+    display: flex;
+}
+.folderGridWrap.activeList .filesFoldersBox > div:not(:first-of-type){
+    width: 15%;
+}
+.folderGridWrap.activeList .filesFoldersBox > div:last-of-type{
+    width: 10%;
+}
+.filesFoldersBox .fileFolderExpire{
+    display: none;
+    /* width: 20%;
+    margin-left: auto; */
+}
+.folderGridWrap.activeList .filesFoldersBox .fileFolderExpire{
+    display: inline-flex;
+}
+.filesFoldersBox .fileFolderPub{
+    display: none;
+    /* width: 20%;
+    margin-left: auto; */
+}
+.folderGridWrap.activeList .filesFoldersBox .fileFolderPub{
+    display: inline-flex;
 }
 .filesFoldersBox .fileFolderUpdated{
     display: none;
-    width: 20%;
-    margin-left: auto;
+    /* width: 20%;
+    margin-left: auto; */
 }
 .folderGridWrap.activeList .filesFoldersBox .fileFolderUpdated{
     display: inline-flex;
 }
 .filesFoldersBox .ownedBy{
     display: none;
-    margin-left: auto;
-    width: calc(30% - 20px);
+    /* margin-left: auto;
+    width: calc(30% - 20px); */
 }
 .folderGridWrap.activeList .filesFoldersBox .ownedBy{
+    display: inline-flex;
+}
+.filesFoldersBox .fileActData{
+    display: none;
+    /* margin-left: auto;
+    width: calc(30% - 20px); */
+}
+.folderGridWrap.activeList .filesFoldersBox .fileActData{
     display: inline-flex;
 }
 .filesFoldersBox .dropdown{
@@ -1975,20 +2022,26 @@ input[type=number] {
     justify-content: flex-start;
     align-items: center;
     border-bottom: 2px solid #e5e7eb;
-    padding: 0 0 10px;
+    padding: 0 10px 10px;
 }
 .folderGridWrap.activeList .activeListHeader{
     display: flex;
+    justify-content: flex-start;
 }
 .activeListHeader .fileNameCol{
-    width: calc(50% - 92px);
-    margin-left: 72px;
+    width: 30%;
 }
 .activeListHeader .fileUpdateCol{
-    width: 20%;
+    /* width: 20%; */
 }
 .activeListHeader .fileOwnedCol{
-    width: calc(30% - 20px);
+    /* width: calc(30% - 20px); */
+}
+.activeListHeader > div:not(:first-of-type){
+    width: 15%;
+}
+.activeListHeader > div:last-of-type{
+    width: 10%;
 }
 
 .dropdown-menu.folderDropdown,

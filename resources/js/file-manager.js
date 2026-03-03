@@ -662,6 +662,7 @@ var fileVersionHistoryListTable = (function () {
     const fileHistoryModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileHistoryModal"));
     const editFilePermissionModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editFilePermissionModal"));
     const addTagModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTagModal"));
+    const fileRenameModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#fileRenameModal"));
 
     const addFileModalEl = document.getElementById('addFileModal')
     addFileModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -719,6 +720,13 @@ var fileVersionHistoryListTable = (function () {
     addTagModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addTagModal .acc__input-error').html('');
         $('#addTagModal input').val('');
+    });
+
+    const fileRenameModalEl = document.getElementById('fileRenameModal')
+    fileRenameModalEl.addEventListener('hide.tw.modal', function(event) {
+        $('#addTagModal .acc__input-error').html('');
+        $('#addTagModal input').val('');
+        $('#addTagModal input[name="document_info_id"]').val('0');
     });
     
     $('#addFileModal').on('change', '#addDocument', function(){
@@ -1735,6 +1743,67 @@ var fileVersionHistoryListTable = (function () {
             $("#confirmModal .agreeWith").attr('data-action', 'DELETEATM');
         });
     });
+
+    $(document).on('click', '.fileRenameLink', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var document_info_id = $theBtn.find('a').attr('data-id');
+        var document_name = $theBtn.find('a').attr('data-name');
+
+        //document.getElementById("fileRenameModal").addEventListener("shown.tw.modal", function (event) {
+            $("#fileRenameModal input[name='name']").val(document_name);
+            $("#fileRenameModal input[name='document_info_id']").val(document_info_id);
+        //}); 
+    });
+
+    $('#fileRenameForm').on('submit', function(e){
+        e.preventDefault();
+        var $form = $(this);
+        const form = document.getElementById('fileRenameForm');
+    
+        document.querySelector('#renameFileBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#renameFileBtn svg").style.cssText ="display: inline-block;";
+
+        let form_data = new FormData(form);
+        axios({
+            method: "post",
+            url: route('file.manager.rename.file'),
+            data: form_data,
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            document.querySelector('#renameFileBtn').removeAttribute('disabled');
+            document.querySelector("#renameFileBtn svg").style.cssText = "display: none;";
+            
+            if (response.status == 200) {
+                fileRenameModal.hide();
+
+                successModal.show();
+                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#successModal .successModalTitle").html( "Congratulations!" );
+                    $("#successModal .successModalDesc").html('File successfully renamed.');
+                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                }); 
+                
+                setTimeout(function(){
+                    successModal.hide();
+                    window.location.reload();
+                }, 2000);
+            }
+        }).catch(error => {
+            document.querySelector('#renameFileBtn').removeAttribute('disabled');
+            document.querySelector("#renameFileBtn svg").style.cssText = "display: none;";
+            if (error.response) {
+                if (error.response.status == 422) {
+                    for (const [key, val] of Object.entries(error.response.data.errors)) {
+                        $(`#fileRenameForm .${key}`).addClass('border-danger');
+                        $(`#fileRenameForm  .error-${key}`).html(val);
+                    }
+                } else {
+                    console.log('error');
+                }
+            }
+        });
+    });
     /* File Upload Code END */
 
     /* Common Scripts START */
@@ -1830,6 +1899,15 @@ var fileVersionHistoryListTable = (function () {
             }else{
                 $('.fileDropdown').find('li.uploadVersionLink').hide('fast', function(){
                     $('.fileDropdown').find('li.uploadVersionLink a').attr('data-id', '0').attr('data-name', '');
+                })
+            }
+            if(create == 1 && update == 1){
+                $('.fileDropdown').find('li.fileRenameLink').show('fast', function(){
+                    $('.fileDropdown').find('li.fileRenameLink a').attr('data-id', id).attr('data-name', name);
+                })
+            }else{
+                $('.fileDropdown').find('li.fileRenameLink').hide('fast', function(){
+                    $('.fileDropdown').find('li.fileRenameLink a').attr('data-id', '0').attr('data-name', '');
                 })
             }
             if(create == 1 && update == 1){

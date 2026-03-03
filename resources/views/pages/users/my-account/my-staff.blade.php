@@ -17,7 +17,7 @@
     <div class="grid grid-cols-12 gap-6 mt-5">
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
-                <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request</h2>
+                <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request {!! ($pendingLeaves->count() > 0 ? '<span class="text-success ml-2">('.$pendingLeaves->count().')</span>' : '') !!}</h2>
                 {{--<a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>
                 <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
                 <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Staff Holidays</a>--}}
@@ -42,7 +42,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-5">
+            <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                 @if($pendingLeaves->count() > 0)
                     @foreach($pendingLeaves as $leave)
                         @php 
@@ -89,10 +89,10 @@
         </div>
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
-                <h2 class="text-lg font-medium truncate mr-5">Absent Today</h2>
+                <h2 class="text-lg font-medium truncate mr-5">Absent Today {!! (!empty($absentToday) ? '<span class="text-success ml-2">('.count($absentToday).')</span>' : '') !!}</h2>
                 {{--<a href="{{ route('hr.attendance') }}" class="ml-auto text-primary truncate">Manage Attendance</a>--}}
             </div>
-            <div class="mt-5">
+            <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                 @if(!empty($absentToday))
                     @foreach($absentToday as $employee_id => $absent)
                         <div class="intro-x">
@@ -124,10 +124,10 @@
         </div>
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
-                <h2 class="text-lg font-medium truncate mr-5">Holiday Today</h2>
+                <h2 class="text-lg font-medium truncate mr-5">Holiday Today {!! ($holidays->count() > 0 ? '<span class="text-success ml-2">('.$holidays->count().')</span>' : '') !!}</h2>
                 
             </div>
-            <div class="mt-5">
+            <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                 @if($holidays->count() > 0)
                     @foreach($holidays as $hol)
                         @php 
@@ -164,10 +164,10 @@
         </div>
         <div class="col-span-12 sm:col-span-6 2xl:col-span-3">
             <div class="intro-x flex items-center h-10">
-                <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days</h2>
+                <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days {!! ($appraisal->count() > 0 ? '<span class="text-success ml-2">('.$appraisal->count().')</span>' : '') !!}</h2>
                 {{-- <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a> --}}
             </div>
-            <div class="mt-5">
+            <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                 @if($appraisal->count() > 0)
                     @foreach($appraisal as $apr)
                         @php 
@@ -181,7 +181,7 @@
                                     <img src="{{ $apr->employee->photo_url }}" alt="{{ $apr->employee->first_name.' '.$apr->employee->last_name }}">
                                 </div>
                             </div>
-                            <a href="javascript:void(0);" class="box px-5 py-3 ml-4 flex-1 zoom-in">
+                            <a href="{{ route('employee.appraisal.documents', [$apr->employee_id, $apr->id]) }}" class="box px-5 py-3 ml-4 flex-1 zoom-in">
                                 <div class="flex items-center">
                                     <div class="font-medium uppercase">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
                                     <div class="text-xs text-slate-500 ml-auto">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>

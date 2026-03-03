@@ -16,6 +16,7 @@ class EmployeeNotes extends Model
         'opening_date',
         'note',
         'phase',
+        'employee_appraisal_id',
         'created_by',
         'updated_by',
     ];
