@@ -4,6 +4,11 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+    // server: {
+    //     headers: {
+    //         'Access-Control-Allow-Origin': 'https://lcc_datafuture.test'
+    //     }
+    // },
     plugins: [
         viteStaticCopy({
             targets: [
@@ -408,6 +413,8 @@ export default defineConfig({
                 'resources/js/report-any-it-student.js',
                 'resources/js/report-it-show.js',
                 'resources/js/admission-offer-acceptance.js',
+                // 'resources/js/department-permissions.js',
+                // 'resources/js/employee-privilege-new.js',
 
                 'resources/js/accounts-university-invoice.js',
                 'resources/js/accounts-university-invoice-details.js',
@@ -419,6 +426,8 @@ export default defineConfig({
 
                 'resources/js/student-residency-criminal.js',
                 'resources/js/residency_status.js',
+
+                'resources/js/employee-appraisal-note.js',
 
             ],
             refresh: true,

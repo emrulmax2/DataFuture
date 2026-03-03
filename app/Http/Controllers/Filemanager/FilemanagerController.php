@@ -506,6 +506,24 @@ class FilemanagerController extends Controller
         endif;
     }
 
+    public function renameFile(Request $request){
+        $request->validate([
+            'name' => ['required', 'max:255'],
+        ]);
+
+        $name = $request->name;
+        $document_info_id = $request->document_info_id;
+
+        $documentInfo = DocumentInfo::where('id', $document_info_id)->update(['display_file_name' => $name]);
+        $document = Document::where('document_info_id', $document_info_id)->orderByDesc('id')->firstOrFail();
+
+        $document->update([
+            'display_file_name' => $name,
+        ]);
+
+        return response()->json(['msg' => 'File successfully renamed.'], 200);
+    }
+
     public function getFileData(Request $request){
         $row_id = $request->row_id;
         $documentInfo = DocumentInfo::with('reminder', 'reminder.employee')->find($row_id);

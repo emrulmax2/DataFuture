@@ -42,15 +42,15 @@ class MyStaffController extends Controller
             'user' => $userData,
             'employee' => $employee,
             'employment' => $employment,
-            'pendingLeaves' => EmployeeLeave::whereIn('employee_id', $auth_emp_ids)->where('status', 'Pending')->orderBy('id', 'ASC')->skip(0)->take(5)->get(),
+            'pendingLeaves' => EmployeeLeave::whereIn('employee_id', $auth_emp_ids)->where('status', 'Pending')->orderBy('id', 'ASC')->get(),
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d'), $auth_emp_ids),
             'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query) use($auth_emp_ids){
                               $query->whereIn('employee_id', $auth_emp_ids)->where('status', 'Approved')->where('leave_type', 1);
-                          })->skip(0)->limit(5)->get(),
+                          })->get(),
             'appraisal' => EmployeeAppraisal::whereIn('employee_id', $auth_emp_ids)->where('due_on', '<=', $expireDate)->whereNull('completed_on')
                           ->whereHas('employee', function($q){
                                $q->where('status', 1);
-                          })->orderBy('due_on', 'ASC')->skip(0)->limit(5)->get(),
+                          })->orderBy('due_on', 'ASC')->get(),
             'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
     }
