@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <div class="intro-y mt-5">
+    <div class="intro-y mt-5 {{ (isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1) ? '' : 'hidden' }}">
         <div class="intro-y box p-5 pb-7">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">

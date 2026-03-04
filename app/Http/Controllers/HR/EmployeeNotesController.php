@@ -43,6 +43,7 @@ class EmployeeNotesController extends Controller
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Live',
+            'employee_appraisal_id'=> (isset($request->employee_appraisal_id) && $request->employee_appraisal_id > 0 ? $request->employee_appraisal_id : null),
             'created_by' => auth()->user()->id
         ]);
         if($note):
@@ -79,6 +80,7 @@ class EmployeeNotesController extends Controller
     public function list(Request $request){
 
         $employee_id = (isset($request->employeeId) && !empty($request->employeeId) ? $request->employeeId : 0);
+        $appraisal_id = (isset($request->appraisalId) && !empty($request->appraisalId) ? $request->appraisalId : 0);
         
         $queryStr = (isset($request->queryStr) && $request->queryStr != '' ? $request->queryStr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
@@ -92,6 +94,9 @@ class EmployeeNotesController extends Controller
         $query = EmployeeNotes::orderByRaw(implode(',', $sorts))->where('employee_id', $employee_id);
         if(!empty($queryStr)):
             $query->where('note','LIKE','%'.$queryStr.'%');
+        endif;
+        if($appraisal_id > 0):
+            $query->where('employee_appraisal_id', $appraisal_id);
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -181,9 +186,6 @@ class EmployeeNotesController extends Controller
         if(isset($theNote->employee_document_id) && isset($theNote->document) && Storage::disk('s3')->exists('public/employees/notes/'.$theNote->document->current_file_name)):
             $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? Storage::disk('s3')->url('public/employees/notes/'.$theNote->document->current_file_name) : '');
         endif;
-        // if(isset($theNote->employee_document_id) && isset($theNote->document) && asset('/storage/employees/notes/'.$theNote->document->current_file_name)):
-        //     $docURL = (isset($theNote->document->current_file_name) && !empty($theNote->document->current_file_name) ? asset('/storage/employees/notes/'.$theNote->document->current_file_name) : '');
-        // endif;
         $theNote['docURL'] = $docURL;
 
         return response()->json(['res' => $theNote], 200);
@@ -206,7 +208,8 @@ class EmployeeNotesController extends Controller
             'employee_id'=> $employee_id,
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
-            'phase'=> 'Admission',
+            'phase'=> 'Live',
+            'employee_appraisal_id'=> (isset($request->employee_appraisal_id) && $request->employee_appraisal_id > 0 ? $request->employee_appraisal_id : null),
             'updated_by' => auth()->user()->id
         ]);
         if($request->hasFile('document')):
@@ -214,9 +217,6 @@ class EmployeeNotesController extends Controller
                 if (Storage::disk('s3')->exists('public/employees/notes/'.$oleNote->document->current_file_name)):
                     Storage::disk('s3')->delete('public/employees/notes/'.$oleNote->document->current_file_name);
                 endif;
-                // if (asset('storage/employees/notes/'.$oleNote->document->current_file_name)):
-                //     Storage::delete(asset('storage/employees/notes/'.$oleNote->document->current_file_name));
-                // endif;
 
                 $ad = EmployeeDocuments::where('id', $employeeDocumentId)->forceDelete();
             endif;

@@ -4,11 +4,6 @@ import { viteStaticCopy } from 'vite-plugin-static-copy';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
-    server: {
-        headers: {
-            'Access-Control-Allow-Origin': 'https://lcc_datafuture.test'
-        }
-    },
     plugins: [
         viteStaticCopy({
             targets: [
