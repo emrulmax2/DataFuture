@@ -246,10 +246,10 @@ class AssetsRegisterController extends Controller
                 $lifeEnd = '';
                 $life = isset($list->life) && !empty($list->life) ? $list->life : '';
                 if(isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) && $life > 0) {
-                    $lifeEnd = Carbon::parse($list->trans->transaction_date_2)->addYears($life)->format('jS M, Y');
+                    $lifeEnd = Carbon::parse($list->trans->transaction_date_2)->addYears($life)->format('d-m-Y');
                 }
                 $theCollection[$row][] = (isset($list->trans->transaction_code) && !empty($list->trans->transaction_code) ? $list->trans->transaction_code : '');
-                $theCollection[$row][] = (isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('jS M, Y', strtotime($list->trans->transaction_date_2)) : '');
+                $theCollection[$row][] = (isset($list->trans->transaction_date_2) && !empty($list->trans->transaction_date_2) ? date('d-m-Y', strtotime($list->trans->transaction_date_2)) : '');
                 $theCollection[$row][] = (isset($list->trans->detail) && !empty($list->trans->detail) ? $list->trans->detail : '');
                 $theCollection[$row][] = (isset($list->trans->transaction_amount) && $list->trans->transaction_amount > 0 ? $list->trans->transaction_amount : '0.00');
                 $theCollection[$row][] = (isset($list->type->name) && !empty($list->type->name) ? $list->type->name : '');
