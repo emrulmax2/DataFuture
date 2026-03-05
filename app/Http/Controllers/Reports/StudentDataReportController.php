@@ -662,8 +662,6 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->post_code : "";
                                     $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->city : "";
                                     $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->country : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->polar_4_quantile : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->imd_quantile_2025 : "";
                                     
                                   break;
 
@@ -675,19 +673,19 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->post_code : "";
                                     $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->city : "";
                                     $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->country : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->polar_4_quantile : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->imd_quantile_2025 : "";
                                     
                                   break;
 
                                 case "term_polar4_imd_25":
-                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->term_polar4_quantile : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->term_imd_25_quantile : "";
+                                    
+                                    $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->polar_4_quantile : "";
+                                    $theCollection[$row][$j++] = (isset($student->contact->termaddress)) ? $student->contact->termaddress->imd_quantile_2025 : "";
                                   break;
-                                  
+
                                 case "perm_polar4_imd_25":
-                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->perm_polar4_quantile : "";
-                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->perm_imd_25_quantile : "";
+                                    
+                                    $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->polar_4_quantile : "";
+                                    $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->imd_quantile_2025 : "";
                                   break;
                                 
                                 default:
