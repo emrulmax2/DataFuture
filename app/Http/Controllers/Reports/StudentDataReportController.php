@@ -369,8 +369,6 @@ class StudentDataReportController extends Controller
                 $theCollection[$i][$j++] = "Term Post Code";
                 $theCollection[$i][$j++] = "Term City";
                 $theCollection[$i][$j++] = "Term Country";
-                $theCollection[$i][$j++] = "Polar 4 quantile";
-                $theCollection[$i][$j++] = "IMD 25";
             }elseif($key=="permanent_address_id"){
                 $theCollection[$i][$j++] = "Permanent Address Line 1";
                 $theCollection[$i][$j++] = "Permanent Address Line 2";
@@ -378,9 +376,14 @@ class StudentDataReportController extends Controller
                 $theCollection[$i][$j++] = "Permanent Post Code";
                 $theCollection[$i][$j++] = "Permanent City";
                 $theCollection[$i][$j++] = "Permanent Country";
-                $theCollection[$i][$j++] = "Polar 4 quantile";
-                $theCollection[$i][$j++] = "IMD 25";
-            }else
+            }else if($key=="term_polar4_imd_25") {
+                $theCollection[$i][$j++] = "Term Polar 4 quantile";
+                $theCollection[$i][$j++] = "Term IMD 25";
+            }else if($key=="perm_polar4_imd_25") {
+                $theCollection[$i][$j++] = "Permanent Polar 4 quantile";
+                $theCollection[$i][$j++] = "Permanent IMD 25";
+            }
+            else
                 $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
         endforeach; 
 
@@ -675,6 +678,16 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->polar_4_quantile : "";
                                     $theCollection[$row][$j++] = (isset($student->contact->permaddress)) ? $student->contact->permaddress->imd_quantile_2025 : "";
                                     
+                                  break;
+
+                                case "term_polar4_imd_25":
+                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->term_polar4_quantile : "";
+                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->term_imd_25_quantile : "";
+                                  break;
+                                  
+                                case "perm_polar4_imd_25":
+                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->perm_polar4_quantile : "";
+                                    $theCollection[$row][$j++] = (isset($student->contact)) ? $student->contact->perm_imd_25_quantile : "";
                                   break;
                                 
                                 default:
