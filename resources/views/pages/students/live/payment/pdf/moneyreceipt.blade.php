@@ -112,52 +112,100 @@
             </tbody>
         </table>
 
-        <table style="font-size: 13px; width: 40%; border-top:1px solid #969494;  border-left:1px solid #969494; border-right:1px solid #969494; margin-top:20%;">
-            <thead>
-                <tr style="background-color:#fff;">
-                    <th class="whitespace-nowrap" colspan="2" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">INSTALLMENTS</th>
-                </tr>
-                <tr style="background-color:#ddd;">
-                    <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">DATE</th>
-                    <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494;  margin:2px; text-align:right;">AMOUNT</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if(isset($installments) && $installments->count() > 0)
-                    @foreach($installments as $inst)
-                        <tr>
-                            <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
-                            <td style="border-right: 1px solid #969494; text-align:right; border-bottom: 1px solid #969494;">{{ ($inst->amount > 0 ? Number::currency($inst->amount, 'GBP') : Number::currency($inst->amount, 'GBP')) }}</td>
-                        </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="100%" class="text-center">Installments not found!</td>
-                    </tr>
-                @endif
-            </tbody>
-            @if(isset($installments) && $installments->count() > 0)
-                @php 
-                    $totalInstallment = (isset($installments) && $installments->count() > 0 ? $installments->sum('amount') : 0);
-                    $totalReceipt = (isset($receipts) && $receipts->count() > 0 ? $receipts->sum('amount') : 0);
-                    $totalDue = $totalInstallment - $totalReceipt;
-                @endphp
-                <tfoot>
-                    <tr style="background-color:#fff;">
-                        <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Total Paid until today</th>
-                        <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
-                            {{ Number::currency($totalInstallment, 'GBP')}}
-                        </th>
-                    </tr>
-                    <tr style="background-color:#fff;">
-                        <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Due until today</th>
-                        <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
-                            {{ Number::currency($totalDue, 'GBP')}}
-                        </th>
-                    </tr>
-                </tfoot>
-            @endif
+        <table style="width: 100%; vertical-align: top; border-collapse: collapse;">
+            <tr>
+                <td style="width: 40%; vertical-align: top; padding: 0;">
+                    <table style="font-size: 13px; width: 100%; border-top:1px solid #969494;  border-left:1px solid #969494; border-right:1px solid #969494; margin-top:20%;">
+                        <thead>
+                            <tr style="background-color:#fff;">
+                                <th class="whitespace-nowrap" colspan="2" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">INSTALLMENTS</th>
+                            </tr>
+                            <tr style="background-color:#ddd;">
+                                <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">DATE</th>
+                                <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494;  margin:2px; text-align:right;">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(isset($installments) && $installments->count() > 0)
+                                @foreach($installments as $inst)
+                                    <tr>
+                                        <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
+                                        <td style="border-right: 1px solid #969494; text-align:right; border-bottom: 1px solid #969494;">{{ ($inst->amount > 0 ? Number::currency($inst->amount, 'GBP') : Number::currency($inst->amount, 'GBP')) }}</td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="100%" class="text-center">Installments not found!</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                        @if(isset($installments) && $installments->count() > 0)
+                            @php 
+                                $totalInstallment = (isset($installments) && $installments->count() > 0 ? $installments->sum('amount') : 0);
+                                $totalReceipt = (isset($receipts) && $receipts->count() > 0 ? $receipts->sum('amount') : 0);
+                                $totalDue = $totalInstallment - $totalReceipt;
+                            @endphp
+                            <tfoot>
+                                <tr style="background-color:#fff;">
+                                    <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Total Paid until today</th>
+                                    <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
+                                        {{ Number::currency($totalInstallment, 'GBP')}}
+                                    </th>
+                                </tr>
+                                <tr style="background-color:#fff;">
+                                    <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Due until today</th>
+                                    <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
+                                        {{ Number::currency($totalDue, 'GBP')}}
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        @endif
+                    </table>
+                </td>
+                <td style="width: 20%; vertical-align: top; padding: 0;">&nbsp;</td>
+                <td style="width: 40%; vertical-align: top; padding: 0;">
+                    <table style="font-size: 13px; width: 100%; border-top:1px solid #969494;  border-left:1px solid #969494; border-right:1px solid #969494; margin-top:20%;">
+                        <thead>
+                            <tr style="background-color:#fff;">
+                                <th class="whitespace-nowrap" colspan="2" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">UPCOMING INSTALLMENTS</th>
+                            </tr>
+                            <tr style="background-color:#ddd;">
+                                <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">DATE</th>
+                                <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494;  margin:2px; text-align:right;">AMOUNT</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(isset($upcominInstallments) && $upcominInstallments->count() > 0)
+                                @foreach($upcominInstallments as $inst)
+                                    <tr>
+                                        <td style=" border-right: 1px solid #969494; border-bottom: 1px solid #969494;">{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
+                                        <td style="border-right: 1px solid #969494; text-align:right; border-bottom: 1px solid #969494;">{{ ($inst->amount > 0 ? Number::currency($inst->amount, 'GBP') : Number::currency($inst->amount, 'GBP')) }}</td>
+                                    </tr>
+                                @endforeach
+                            @else
+                                <tr>
+                                    <td colspan="100%" class="text-center">Installments not found!</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                        @if(isset($upcominInstallments) && $upcominInstallments->count() > 0)
+                            @php 
+                                $totalInstallment = (isset($upcominInstallments) && $upcominInstallments->count() > 0 ? $upcominInstallments->sum('amount') : 0);
+                            @endphp
+                            <tfoot>
+                                <tr style="background-color:#fff;">
+                                    <th class="whitespace-nowrap" style="border-right: 1px solid #969494; border-bottom: 1px solid #969494; margin:2px;">Total Due</th>
+                                    <th class="whitespace-nowrap" style="border-bottom: 1px solid #969494; margin:2px; text-align:right;">
+                                        {{ Number::currency($totalInstallment, 'GBP')}}
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        @endif
+                    </table>
+                </td>
+            </tr>
         </table>
+        
 
         
       </div>

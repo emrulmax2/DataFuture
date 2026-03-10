@@ -678,6 +678,7 @@ class  StudentController extends Controller
         $payment = SlcMoneyReceipt::find($payment_id);
         $statuses = Status::where('type', 'Student')->orderBy('id', 'ASC')->get();
         $installments = SlcInstallment::where('installment_date', '<=', date('Y-m-d'))->where('student_id', $student_id)->where('slc_agreement_id', $payment->slc_agreement_id)->orderBy('id', 'ASC')->get();
+        $upcominInstallments = SlcInstallment::where('installment_date', '>', date('Y-m-d'))->where('student_id', $student_id)->where('slc_agreement_id', $payment->slc_agreement_id)->orderBy('id', 'ASC')->get();
         $receipts = SlcMoneyReceipt::where('payment_date', '<=', date('Y-m-d'))->where('student_id', $student_id)->where('slc_agreement_id', $payment->slc_agreement_id)->orderBy('id', 'ASC')->get();
 
         // return view('pages.students.live.payment.pdf.moneyreceipt', [
@@ -689,7 +690,7 @@ class  StudentController extends Controller
         // ]);
 
         
-        $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl','student','address','payment','statuses', 'installments', 'receipts'));
+        $pdf = PDF::loadView('pages.students.live.payment.pdf.moneyreceipt',compact('logoUrl','student','address','payment','statuses', 'installments', 'receipts', 'upcominInstallments'));
         return $pdf->download('student_payment.pdf');
     }
     private function createInvoicePrintToStorage($student_id, $payment_id) {
