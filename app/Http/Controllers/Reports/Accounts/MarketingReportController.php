@@ -21,10 +21,16 @@ class MarketingReportController extends Controller
         $courseCreationIds = CourseCreation::where('semester_id', $semester_id)->pluck('id')->unique()->toArray();
         $sutdentIds = StudentCourseRelation::whereIn('course_creation_id', $courseCreationIds)->where('active', 1)->pluck('student_id')->unique()->toArray();
 
-        $monyReceipts = SlcMoneyReceipt::whereNot('payment_type', 'Refund')->whereIn('student_id', $sutdentIds)->orderBy('id', 'DESC')->get();
+        $monyReceipts = SlcMoneyReceipt::whereNot('payment_type', 'Refund')->whereIn('student_id', $sutdentIds)
+                        ->whereHas('agreement', function($q){
+                            $q->where('year', 1);
+                        })->orderBy('id', 'DESC')->get();
         $totalReceived = ($monyReceipts->count() > 0 ? $monyReceipts->sum('amount') : 0);
 
-        $refundReceipts = SlcMoneyReceipt::where('payment_type', 'Refund')->whereIn('student_id', $sutdentIds)->orderBy('id', 'DESC')->get();
+        $refundReceipts = SlcMoneyReceipt::where('payment_type', 'Refund')->whereIn('student_id', $sutdentIds)
+                        ->whereHas('agreement', function($q){
+                            $q->where('year', 1);
+                        })->orderBy('id', 'DESC')->get();
         $totaRefund = ($refundReceipts->count() > 0 ? $refundReceipts->sum('amount') : 0);
 
         $comissionPaid = AgentComission::with('comissions', 'payment')->where('semester_id', $semester_id)->whereHas('payment', function($q){
