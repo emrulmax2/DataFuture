@@ -80,10 +80,10 @@
             <div class="grid grid-cols-12 gap-6 mt-5 pt-5">
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
                     <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request</h2>
+                        <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request {!! ($pendingLeaves->count() > 0 ? '<span class="text-success ml-2">('.$pendingLeaves->count().')</span>' : '') !!}</h2>
                         <a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>
                     </div>
-                    <div class="mt-5">
+                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                         @if($pendingLeaves->count() > 0)
                             @foreach($pendingLeaves as $leave)
                                 @php 
@@ -141,10 +141,10 @@
                 </div>
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
                     <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Absent Today</h2>
+                        <h2 class="text-lg font-medium truncate mr-5">Absent Today  {!! (!empty($absentToday) ? '<span class="text-success ml-2">('.count($absentToday).')</span>' : '') !!}</h2>
                         <a href="{{ route('hr.attendance') }}" class="ml-auto text-primary truncate">Manage Attendance</a>
                     </div>
-                    <div class="mt-5">
+                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                         @if(!empty($absentToday))
                             @foreach($absentToday as $employee_id => $absent)
                                 <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday" data-emloyee="{{ $employee_id }}" data-date="{{ $absent['the_date'] }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
@@ -176,10 +176,10 @@
                 </div>
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
                     <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Holiday Today</h2>
+                        <h2 class="text-lg font-medium truncate mr-5">Holiday Today {!! ($holidays->count() > 0 ? '<span class="text-success ml-2">('.$holidays->count().')</span>' : '') !!}</h2>
                         <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
                     </div>
-                    <div class="mt-5">
+                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
                         @if($holidays->count() > 0)
                             @foreach($holidays as $hol)
                                 @php 
@@ -221,10 +221,10 @@
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6 relative">
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Passport Expiry</h2>
+                            <h2 class="text-lg font-medium truncate mr-5">Passport Expiry {!! ($passExpiry->count() > 0 ? '<span class="text-success ml-2">('.$passExpiry->count().')</span>' : '') !!}</h2>
                             <a href="{{ route('hr.portal.passport.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
-                        <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                             @if($passExpiry->count() > 0)
                                 @foreach($passExpiry as $pass)
                                     <div class="intro-x relative flex items-center mb-3">
@@ -266,10 +266,10 @@
                     </div>
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Visa Expiry</h2>
+                            <h2 class="text-lg font-medium truncate mr-5">Visa Expiry {!! ($visaExpiry->count() > 0 ? '<span class="text-success ml-2">('.$visaExpiry->count().')</span>' : '') !!}</h2>
                             <a href="{{ route('hr.portal.visa.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
-                        <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                             @if($visaExpiry->count() > 0)
                                 @foreach($visaExpiry as $pass)
                                     <div class="intro-x relative flex items-center mb-3">
@@ -311,10 +311,10 @@
                     </div>
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days</h2>
+                            <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days {!! ($appraisal->count() > 0 ? '<span class="text-success ml-2">('.$appraisal->count().')</span>' : '') !!}</h2>
                             <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
-                        <div class="mt-5 relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
                             @if($appraisal->count() > 0)
                                 @foreach($appraisal as $apr)
                                     @php 

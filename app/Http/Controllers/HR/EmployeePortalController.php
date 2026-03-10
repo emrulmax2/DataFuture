@@ -39,24 +39,24 @@ class EmployeePortalController extends Controller
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => 'javascript:void(0);']
             ],
-            'pendingLeaves' => EmployeeLeave::where('status', 'Pending')->orderBy('id', 'DESC')->skip(0)->take(5)->get(),
+            'pendingLeaves' => EmployeeLeave::where('status', 'Pending')->orderBy('id', 'DESC')->get(),//->skip(0)->take(5)
             'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
             'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query){
                               $query->where('status', 'Approved')->where('leave_type', 1);
-                          })->skip(0)->limit(5)->get(),
+                          })->get(),//->skip(0)->limit(5)
             'passExpiry' => EmployeeEligibilites::where('document_type', 1)->where('doc_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                            })->orderBy('doc_expire', 'ASC')->skip(0)->limit(5)->get(),
+                            })->orderBy('doc_expire', 'ASC')->get(),//->skip(0)->limit(5)
             'visaExpiry' => EmployeeEligibilites::where('eligible_to_work', 'Yes')->where('employee_work_permit_type_id', 3)
                             ->whereDate('workpermit_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                            })->orderBy('workpermit_expire', 'ASC')->skip(0)->limit(5)->get(),
+                            })->orderBy('workpermit_expire', 'ASC')->get(),//->skip(0)->limit(5)
             'appraisal' => EmployeeAppraisal::where('due_on', '<=', $expireDate)->whereNull('completed_on')
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
-                           })->orderBy('due_on', 'ASC')->skip(0)->limit(5)->get()
+                           })->orderBy('due_on', 'ASC')->get()//->skip(0)->limit(5)
         ]);
     }
 
@@ -70,9 +70,9 @@ class EmployeePortalController extends Controller
         $row = 0;
         $res = [];
         foreach($employees as $employee):
-            if($row > 5): 
-                break; 
-            endif;
+            // if($row > 5): 
+            //     break; 
+            // endif;
 
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
                 $employee_id = $employee->id;
