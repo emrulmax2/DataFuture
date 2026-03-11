@@ -169,17 +169,17 @@ class ProcessExtractedFilesForP45 implements ShouldQueue
         $localRealPath = $file->getRealPath();
         if ($localRealPath && File::exists($localRealPath)) {
             $stream = fopen($localRealPath, 'r');
-            Storage::disk('local')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
+            Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
         } else {
             // fallback to reading file contents
-            Storage::disk('local')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
+            Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
         }
 
         // Get the file path (S3 URL) after storage
-        $filePath = Storage::disk('local')->url($destinationPath . '/' . $fileNameWithSuffix);
+        $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
 
         // normalize NI number from filename and resolve employee
         //$fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
