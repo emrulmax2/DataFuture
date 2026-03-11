@@ -1602,6 +1602,7 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/attendance/resyncronise', 'reSyncronise')->name('hr.attendance.re.sync');
 
         Route::post('hr/attendance/upload', 'upload')->name('hr.attendance.payslip.upload');
+        Route::post('hr/attendance/upload_eid', 'uploadEid')->name('hr.attendance.payslip.upload.eid');
         Route::get('hr/attendance/payroll-sync/{month_year}', 'payrollSyncShow')->name('hr.attendance.payroll.sync');
         
     });
