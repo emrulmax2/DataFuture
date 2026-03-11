@@ -185,7 +185,7 @@
                             </button>
                         </a>
                     </div>
-                    <div class="flex items-center justify-center mt-4 intro-x  xl:mt-6 ">
+                    {{-- <div class="flex items-center justify-center mt-4 intro-x  xl:mt-6 ">
                         <a href="{{ route('students.redirect.microsoft') }}">
                             <button class="gsi-material-button" style="width:400px">
                             <div class="gsi-material-button-state"></div>
@@ -203,7 +203,7 @@
                             </div>
                             </button>
                         </a>
-                    </div>
+                    </div> --}}
                     {{-- @if($env != "production") 
                         <div class="intro-x mt-8 xl:mt-16 text-slate-600 dark:text-slate-500 text-center xl:text-left">
                             By signin up, you agree to our <a class="text-primary dark:text-slate-200" href="">Terms and Conditions</a> & <a class="text-primary dark:text-slate-200" href="">Privacy Policy</a>
