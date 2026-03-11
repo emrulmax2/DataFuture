@@ -537,6 +537,24 @@
                                 </select>
                                 <div class="acc__input-error error-slc_registration_status_id text-danger mt-2"></div>
                             </div>
+                            <div class="col-span-12 linkedRegistrationWrap bg-warning-soft rounded pb-2" style="display: none;">
+                                <div class="alert alert-warning-soft show flex items-center mb-2 text-dark" role="alert">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2 text-warning"></i>
+                                    There are a Agreement found for the selected year. Do you want to linked with this registration?
+                                </div>
+                                <div class="flex flex-col sm:flex-row mt-2 px-5">
+                                    <div class="form-check mr-4">
+                                        <input id="linked_agreement_y" class="form-check-input" type="radio" name="linked_agreement" value="1">
+                                        <label class="form-check-label" for="linked_agreement_y">Yes</label>
+                                    </div>
+                                    <div class="form-check mr-4">
+                                        <input id="linked_agreement_n" class="form-check-input" type="radio" name="linked_agreement" value="0">
+                                        <label class="form-check-label" for="linked_agreement_n">No</label>
+                                    </div>
+                                </div>
+                                <div class="acc__input-error error-linked_agreement text-danger mt-2 px-5"></div>
+                                <input type="hidden" name="linked_agreement_id" value="0"/>
+                            </div>
                             <div class="col-span-12">
                                 <label for="note" class="form-label">Note</label>
                                 <textarea id="note" rows="2" class="form-control w-full" name="note"></textarea>
@@ -611,7 +629,7 @@
                                 $disable = ' disabled ';
                             endif;
                         @endphp
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1 ml-auto">Cancel</button>
                         <button {{ $disable }} type="submit" id="saveReg" class="btn btn-primary w-auto">     
                             Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"

@@ -1213,6 +1213,7 @@ Route::middleware('auth')->group(function() {
 
     Route::controller(SlcRegistrationController::class)->group(function() {
         Route::post('student/get-reg-confirmation-details', 'getRegistrationConfirmationDetails')->name('student.get.registration.confirmation.details');
+        Route::post('student/validate-slc-registration', 'validateRebistration')->name('student.validate.registration');
         Route::post('student/store-slc-registration', 'store')->name('student.store.registration');
         Route::post('student/edit-slc-registration', 'edit')->name('student.edit.registration');
         Route::post('student/update-slc-registration', 'update')->name('student.update.registration');

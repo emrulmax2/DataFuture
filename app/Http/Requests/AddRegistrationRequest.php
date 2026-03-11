@@ -37,6 +37,9 @@ class AddRegistrationRequest extends FormRequest
 
             'attendance_code_id' => 'required_if:confirm_attendance,1',
             'installment_amount' => 'required_if:attendance_code_id,1',
+
+            'linked_agreement_id' => 'sometimes',
+            'linked_agreement' => 'required_unless:linked_agreement_id,0|in:0,1'
         ];
     }
 
@@ -55,6 +58,8 @@ class AddRegistrationRequest extends FormRequest
 
             'attendance_code_id.required' => 'This field is required.',
             'installment_amount.required_if' => 'This field is required.',
+            
+            'linked_agreement.required_unless' => 'This field is required.',
         ];
     }
 }

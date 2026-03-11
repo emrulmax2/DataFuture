@@ -35,6 +35,11 @@ import Tabulator from "tabulator-tables";
                 $('#addRegistrationForm [name="installment_amount"]').val('');
             });
         });
+
+        $('#addRegistrationForm .linkedRegistrationWrap').fadeOut(function(){
+            $('#addRegistrationForm [name="linked_agreement_id"]').val('0');
+            $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
+        });
     });
 
     const editRegistrationModalEl = document.getElementById('editRegistrationModal')
@@ -234,16 +239,43 @@ import Tabulator from "tabulator-tables";
         }
     });
 
+    let regagreementCheck = false;
+
+    $('#addRegistrationForm input, #addRegistrationForm select').on('change', function(){
+        regagreementCheck = false;
+    });
 
     $('#addRegistrationForm').on('submit', function(e){
         e.preventDefault();
         let $form = $(this);
         const form = document.getElementById('addRegistrationForm');
+
+        let form_data = new FormData(form);
     
         document.querySelector('#saveReg').setAttribute('disabled', 'disabled');
         document.querySelector("#saveReg svg").style.cssText ="display: inline-block;";
+        if(!regagreementCheck){
+            axios.post(route('student.validate.registration'), form_data).then(res => {
+                document.querySelector('#saveReg').removeAttribute('disabled');
+                document.querySelector("#saveReg svg").style.cssText = "display: none;";
+                if(res.data.success){
+                    regagreementCheck = true;
+                    $('#addRegistrationForm .linkedRegistrationWrap').fadeOut(function(){
+                        $('#addRegistrationForm [name="linked_agreement_id"]').val('0');
+                        $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
+                    });
+                    $('#addRegistrationForm').trigger('submit');
+                }else{
+                    regagreementCheck = true;
+                    $('#addRegistrationForm .linkedRegistrationWrap').fadeIn(function(){
+                        $('#addRegistrationForm [name="linked_agreement_id"]').val(res.data.slc_agreement_id);
+                        $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
+                    });
+                }
+            });
+            return;
+        }
 
-        let form_data = new FormData(form);
         axios({
             method: "post",
             url: route('student.store.registration'),
@@ -279,8 +311,8 @@ import Tabulator from "tabulator-tables";
                     }
                 } else if (error.response.status == 304){
                     $('#addRegistrationModal').animate({ scrollTop: 0 });
-                    $form.find('.alert').remove();
-                    $('.modal-content', $form).prepend('<div class="alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Selected registration year already exist.</div>')
+                    $form.find('.alert.errorAlert').remove();
+                    $('.modal-content', $form).prepend('<div class="alert errorAlert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Selected registration year already exist.</div>')
                 
                     createIcons({
                         icons,
@@ -289,7 +321,7 @@ import Tabulator from "tabulator-tables";
                     });
 
                     setTimeout(function(){
-                        $form.find('.alert').remove();
+                        $form.find('.alert.errorAlert').remove();
                     }, 3000)
                 } else {
                     console.log('error');
