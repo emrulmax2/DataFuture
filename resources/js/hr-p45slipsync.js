@@ -203,22 +203,7 @@ import Toastify from 'toastify-js';
                 var holiday_year = $(
                     '#synPaySlipModal [name="holiday_year_id"]'
                 ).val();
-                if(payslips != 'Payslips' && holiday_year != '') {
-                    
-                    $('#synPaySlipModal [name="dir_name"]').val(
-                        payslips+'_'+holiday_year
-                    );
-                    $('#synPaySlipModal [name="type"]').val(
-                        payslips
-                    );
-                    $(
-                        '#synPaySlipModal [name="holiday_year_info"]'
-                    ).val(
-                        holiday_year
-                    );
-
-                    drzn1.processQueue();
-                }else if (monthYear != '') {
+                if (monthYear != '') {
                     $('#synPaySlipModal [name="dir_name"]').val(
                         monthYear
                     );

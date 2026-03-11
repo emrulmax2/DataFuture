@@ -80,7 +80,10 @@ class ProcessSendPaySlipEmail implements ShouldQueue
             $path = ltrim(Str::after($filePath, $publicBase), '/');
         } elseif (!empty($paySlip->month_year) && !empty($paySlip->file_name)) {
             $disk = 's3';
-            $path = 'public/employee_payslips/' . $paySlip->month_year . '/' . $paySlip->file_name;
+            $typeSegment = strtolower($paySlip->type ?: 'payslips');
+            $typeSegment = preg_replace('/\s+/', '', $typeSegment);
+            $useTypeSegment = in_array($typeSegment, ['p45', 'p60'], true);
+            $path = 'public/employee_payslips/' . $paySlip->month_year . ($useTypeSegment ? '/' . $typeSegment : '') . '/' . $paySlip->file_name;
         } elseif (!empty($filePath) && !Str::startsWith($filePath, ['http://', 'https://'])) {
             $disk = 'local';
             $path = $filePath;

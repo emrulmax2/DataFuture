@@ -83,7 +83,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td> --}}
                                                                             {{-- <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -142,7 +142,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -207,7 +207,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach

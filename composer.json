@@ -14,6 +14,7 @@
         "laravel/nightwatch": "^1.10",
         "laravel/passport": "*",
         "laravel/socialite": "^5.6",
+        "socialiteproviders/microsoft": "^4.1",
         "laravel/tinker": "^2.7",
         "league/flysystem-aws-s3-v3": "3.0",
         "maatwebsite/excel": "^3.1.0",

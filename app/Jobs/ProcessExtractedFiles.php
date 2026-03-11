@@ -107,7 +107,10 @@ class ProcessExtractedFiles implements ShouldQueue
                     // build suffixed filename (e.g., payslip-2024-08.pdf)
                     $fileNameWithSuffix = $baseName . '-' . $this->dirName . ($extension ? '.' . $extension : '');
 
-                    $destinationPath = 'public/employee_payslips/'.$this->dirName; // Define the destination path on S3
+                    $typeSegment = strtolower($this->type ?: 'payslips');
+                    $typeSegment = preg_replace('/\s+/', '', $typeSegment);
+                    $useTypeSegment = in_array($typeSegment, ['p45', 'p60'], true);
+                    $destinationPath = 'public/employee_payslips/' . $this->dirName . ($useTypeSegment ? '/' . $typeSegment : ''); // Define the destination path on S3
 
                     // Stream upload to S3 to avoid loading whole file into memory
                     $localRealPath = $file->getRealPath();

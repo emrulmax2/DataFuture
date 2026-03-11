@@ -46,12 +46,24 @@ class ProcessExtractedFilesForP45 implements ShouldQueue
     public function handle()
     {
 
-        // The controller stored the uploaded ZIP locally (storage/app/<tempPath>).
-        // Transfer the local ZIP to S3, then extract locally for processing.
+        // The controller stored the uploaded file locally (storage/app/<tempPath>).
         $localZipPath = storage_path('app/' . $this->tempPath);
 
         if (!File::exists($localZipPath)) {
             // nothing to do
+            return;
+        }
+
+        $extension = strtolower(pathinfo($localZipPath, PATHINFO_EXTENSION));
+        $isZip = $extension === 'zip';
+
+        if (!$isZip) {
+            // Handle single PDF (or non-zip) uploads without extraction.
+            $this->processFile(new \SplFileInfo($localZipPath));
+
+            if (File::exists($localZipPath)) {
+                File::delete($localZipPath);
+            }
             return;
         }
 
@@ -97,72 +109,7 @@ class ProcessExtractedFilesForP45 implements ShouldQueue
             // Loop through the files and store them in the desired location
             foreach ($files as $file) {
                 if ($file !== '.' && $file !== '..') {
-                    // Store the file in the 'public' disk with the month suffix appended to its name
-                    $fileName = $file->getFilename();
-                    $baseName = pathinfo($fileName, PATHINFO_FILENAME);
-                    $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-                    // keep original name without extension for NI matching
-                    $originalNameWithoutExtension = $baseName;
-
-                    // build suffixed filename (e.g., payslip-2024-08.pdf)
-                    $fileNameWithSuffix = $baseName . '-' . $this->dirName . ($extension ? '.' . $extension : '');
-
-                    $destinationPath = 'public/employee_payslips/'.$this->dirName; // Define the destination path on S3
-
-                    // Stream upload to S3 to avoid loading whole file into memory
-                    $localRealPath = $file->getRealPath();
-                    if ($localRealPath && File::exists($localRealPath)) {
-                        $stream = fopen($localRealPath, 'r');
-                        Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
-                        if (is_resource($stream)) {
-                            fclose($stream);
-                        }
-                    } else {
-                        // fallback to reading file contents
-                        Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
-                    }
-
-                    // Get the file path (S3 URL) after storage
-                    $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
-                    
-                    $paySlipUploadSync = [];
-                    // normalize NI number from filename and resolve employee
-                    //$fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
-                    $employeeFound = $this->employeeMap[0];
-
-                    // fallback to previously mapped filename if NI is ambiguous or not found
-                    // if (!$employeeFound) {
-                    //     if (isset($paySyncMap[$fileName])) {
-                    //         $employeeFound = $paySyncMap[$fileName];
-                    //     } elseif (isset($paySyncMap[$fileNameWithSuffix])) {
-                    //         $employeeFound = $paySyncMap[$fileNameWithSuffix];
-                    //     }
-                    // }
-
-                    // payslipuploadSync table data insert if file_name and month_year not exist
-                    $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
-                        [
-                            'file_name' => $fileNameWithSuffix,
-                            'month_year' => $this->dirName,
-
-                        ],[
-                        'employee_id' => ($employeeFound) ? $employeeFound : NULL,
-                        'file_name' => $fileNameWithSuffix,
-                        'file_path' => $filePath,
-                        'holiday_year_id' => $this->holiday_year_Id,
-                        'month_year' => $this->dirName,
-                        'type' => isset($this->type) && !empty($this->type) ? $this->type : 'Payslips',
-                        'is_file_exist' => ($employeeFound) ? 1 : 0,
-                        'file_transffered' => 1,
-                        'file_transffered_at' => now(),
-                        'is_file_uploaded' => 1,
-                        'created_by' => auth()->id(),
-
-                    ]);
-                    if($paySlipUploadSync){
-                        $updated = true;
-                    }
-                
+                    $this->processFile($file);
                 }
             }
             break;
@@ -199,5 +146,67 @@ class ProcessExtractedFilesForP45 implements ShouldQueue
         return array_filter($directories, function ($dir) {
             return basename($dir) !== '__MACOSX';
         });
+    }
+
+    protected function processFile(\SplFileInfo $file)
+    {
+        // Store the file in the 'public' disk with the month suffix appended to its name
+        $fileName = $file->getFilename();
+        $baseName = pathinfo($fileName, PATHINFO_FILENAME);
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+        // keep original name without extension for NI matching
+        $originalNameWithoutExtension = $baseName;
+
+        // build suffixed filename (e.g., payslip-2024-08.pdf)
+        $fileNameWithSuffix = $baseName . '-' . $this->dirName . ($extension ? '.' . $extension : '');
+
+        $typeSegment = strtolower($this->type ?: 'payslips');
+        $typeSegment = preg_replace('/\s+/', '', $typeSegment);
+        $useTypeSegment = in_array($typeSegment, ['p45', 'p60'], true);
+        $destinationPath = 'public/employee_payslips/' . $this->dirName . ($useTypeSegment ? '/' . $typeSegment : ''); // Define the destination path on S3
+
+        // Stream upload to S3 to avoid loading whole file into memory
+        $localRealPath = $file->getRealPath();
+        if ($localRealPath && File::exists($localRealPath)) {
+            $stream = fopen($localRealPath, 'r');
+            Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        } else {
+            // fallback to reading file contents
+            Storage::disk('s3')->put($destinationPath . '/' . $fileNameWithSuffix, File::get($file));
+        }
+
+        // Get the file path (S3 URL) after storage
+        $filePath = Storage::disk('s3')->url($destinationPath . '/' . $fileNameWithSuffix);
+
+        // normalize NI number from filename and resolve employee
+        //$fileNameWithoutAnyHipen = preg_replace('/[\s-]+/', '', strtoupper(trim($originalNameWithoutExtension)));
+        $employeeFound = $this->employeeMap[0];
+
+        // payslipuploadSync table data insert if file_name and month_year not exist
+        $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
+            [
+                'file_name' => $fileNameWithSuffix,
+                'month_year' => $this->dirName,
+
+            ],[
+            'employee_id' => ($employeeFound) ? $employeeFound : NULL,
+            'file_name' => $fileNameWithSuffix,
+            'file_path' => $filePath,
+            'holiday_year_id' => $this->holiday_year_Id,
+            'month_year' => $this->dirName,
+            'type' => isset($this->type) && !empty($this->type) ? $this->type : 'Payslips',
+            'is_file_exist' => ($employeeFound) ? 1 : 0,
+            'file_transffered' => 1,
+            'file_transffered_at' => now(),
+            'is_file_uploaded' => 1,
+            'created_by' => auth()->id(),
+
+        ]);
+        if ($paySlipUploadSync) {
+            $updated = true;
+        }
     }
 }
