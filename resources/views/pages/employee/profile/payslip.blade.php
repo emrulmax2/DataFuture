@@ -20,7 +20,9 @@
                             <div class="font-medium text-base">Employee Payslip List</div>
                         </div>
                         <div class="col-span-6 text-right">
-                            <div class="dropdown" id="uploadsDropdown">
+                            <button id="uploadSync" data-tw-toggle="modal" data-tw-target="#synPaySlipModal" type="button" class="w-auto px-5 py-2 btn btn-primary text-white mr-auto"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Upload P45</button>
+                                                
+                            <div class="dropdown hidden" id="uploadsDropdown">
                                 <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
                                     <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Upload P45 <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
                                 </button>
@@ -78,7 +80,7 @@
                                                 <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
                                                     <div class="accordion-item bg-white">
                                                         @php
-                                                            $uploadRecords = $paySlipUploadSync->where('type', 'Payslips');
+                                                            $uploadRecords = $paySlipUploadSync->where('type', 'Payslips')->where('holiday_year_id', $holidayYearData->id);
                                                         @endphp
                                                         <div id="employeePatternAccordion-payslips" class="accordion-header">
                                                             <button class="accordion-button relative w-full text-lg font-semibold flex" type="button" data-tw-toggle="collapse" data-tw-target="#employeePatternAccordion-collapse-payslips" aria-expanded="false" aria-controls="employeePatternAccordion-collapse-payslips">
@@ -112,7 +114,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td> --}}
                                                                             {{-- <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -132,7 +134,7 @@
                                             </div>
                                         </div>
                                         @php
-                                            $uploadRecords = $paySlipUploadSync->where('type', 'P45');
+                                            $uploadRecords = $paySlipUploadSync->where('type', 'P45')->where('holiday_year_id', $holidayYearData->id);
                                         @endphp
                                         @if($uploadRecords && count($uploadRecords) > 0)
                                         <div id="employeeP45Collapse-{{ $holidayYearData->id }}" class="accordion-collapse collapse {{ $holidayYearData->active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayHeading-{{ $holidayYearData->id }}" data-tw-parent="#employeeHolidayAccordion">
@@ -171,7 +173,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
@@ -236,7 +238,7 @@
                                                                             <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
                                                                             <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
                                                                             <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach

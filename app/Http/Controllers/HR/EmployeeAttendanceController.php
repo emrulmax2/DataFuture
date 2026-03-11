@@ -100,9 +100,11 @@ class EmployeeAttendanceController extends Controller
     public function uploadEid(Request $request)
     {
 
+        
         $request->validate([
-            'file' => 'required|file|mimes:zip|max:200480',
+            'file' => 'required|file|mimetypes:application/pdf,application/x-pdf,application/octet-stream|max:200480',
         ]);
+        
         $type = $request->type;
         $holiday_year_Id = $request->holiday_year_info;
         $employee = Employee::find($request->employee_id);
@@ -110,6 +112,10 @@ class EmployeeAttendanceController extends Controller
             return response()->json(['error' => 'Invalid employee or user.'], 400);
         }
         $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if ($extension !== 'pdf') {
+            return response()->json(['error' => 'Only PDF files are allowed.'], 422);
+        }
         $fileOriginalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $dirName = $request->dir_name;
         // Store the uploaded ZIP locally on server, then dispatch a job to process it
