@@ -31,10 +31,31 @@ class SlcRegistrationController extends Controller
         return response()->json(['fees' => $fees, 'fees_html' => Number::currency($fees, 'GBP')], 200);
     }
 
+    public function validateRebistration(Request $request){
+        $studen_id = $request->studen_id;
+        $student_course_relation_id = $request->student_course_relation_id;
+        $registration_year = $request->registration_year;
+        $slc_course_code = $request->slc_course_code;
+
+        $slcAgreement = SlcAgreement::where('student_id', $studen_id)->where('student_course_relation_id', $student_course_relation_id)
+                        ->where('year', $registration_year)->whereNull('slc_registration_id')->get();
+        //dd($request->all());
+        
+        return response()->json([
+            'success' => $slcAgreement->count() > 0 ? false : true,
+            'count' => $slcAgreement->count(),
+            'slc_agreement_id' => optional($slcAgreement->first())->id
+        ], 200);
+
+
+    }
+
     public function store(AddRegistrationRequest $request){
         $studen_id = $request->studen_id;
         $student_course_relation_id = $request->student_course_relation_id;
         $course_creation_id = $request->course_creation_id;
+        $linked_agreement_id = (isset($request->linked_agreement_id) && $request->linked_agreement_id > 0 ? $request->linked_agreement_id : 0);
+        $linked_agreement = (isset($request->linked_agreement) && $request->linked_agreement > 0 ? $request->linked_agreement : 0);
 
         $existRegistration = SlcRegistration::where('student_id', $studen_id)->where('student_course_relation_id', $student_course_relation_id)
                              ->where('registration_year', $request->registration_year)->get()->first();
@@ -57,20 +78,30 @@ class SlcRegistrationController extends Controller
         $slcRegistration = SlcRegistration::create($regData);
 
         if($slcRegistration):
-            $agreementData = [];
-            $agreementData['student_id'] = $studen_id;
-            $agreementData['student_course_relation_id'] = $student_course_relation_id;
-            $agreementData['course_creation_instance_id'] = $request->course_creation_instance_id;
-            $agreementData['slc_registration_id'] = $slcRegistration->id;
-            $agreementData['slc_coursecode'] = $request->slc_course_code;
-            $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
-            $agreementData['date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
-            $agreementData['year'] = $request->registration_year;
-            $agreementData['fees'] = $request->instance_fees;
-            $agreementData['total'] = $request->instance_fees;
-            $agreementData['created_by'] = auth()->user()->id;
+            if($linked_agreement_id > 0 && $linked_agreement == 1):
+                $slcAgreement = SlcAgreement::findOrFail($linked_agreement_id);
 
-            $slcAgreement = SlcAgreement::create($agreementData);
+                $slcAgreement->slc_registration_id = $slcRegistration->id;
+                $slcAgreement->course_creation_instance_id = $slcRegistration->course_creation_instance_id;
+                $slcAgreement->slc_coursecode = $slcRegistration->slc_coursecode;
+                $slcAgreement->save();
+                $slcAgreement->refresh();
+            else:
+                $agreementData = [];
+                $agreementData['student_id'] = $studen_id;
+                $agreementData['student_course_relation_id'] = $student_course_relation_id;
+                $agreementData['course_creation_instance_id'] = $request->course_creation_instance_id;
+                $agreementData['slc_registration_id'] = $slcRegistration->id;
+                $agreementData['slc_coursecode'] = $request->slc_course_code;
+                $agreementData['is_self_funded'] = (isset($request->is_self_funded) && $request->is_self_funded > 0 ? $request->is_self_funded : 0);
+                $agreementData['date'] = (!empty($request->confirmation_date) ? date('Y-m-d', strtotime($request->confirmation_date)) : null);
+                $agreementData['year'] = $request->registration_year;
+                $agreementData['fees'] = $request->instance_fees;
+                $agreementData['total'] = $request->instance_fees;
+                $agreementData['created_by'] = auth()->user()->id;
+
+                $slcAgreement = SlcAgreement::create($agreementData);
+            endif;
 
             $confirm_attendance = (isset($request->confirm_attendance) && $request->confirm_attendance > 0 ? true : false);
             if($confirm_attendance):
