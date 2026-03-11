@@ -110,6 +110,7 @@
         opacity: 8%;
         }
         
+        
     </style>
     
     <div class="container sm:px-10">
