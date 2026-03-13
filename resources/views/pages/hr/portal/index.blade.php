@@ -333,8 +333,24 @@
                                                 <div class="font-medium uppercase">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
                                                 <div class="text-xs text-slate-500 ml-auto">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>
                                             </div>
-                                            <div class="text-slate-500 mt-1">
-                                                <span class="{{ ($dueOn < $today ? 'text-danger' : 'text-warning') }}">{{ $label }}</span>
+                                            <div class="text-slate-500 mt-1 flex justify-between items-center">
+                                                <!-- <span class="{{ ($dueOn < $today ? 'text-danger' : 'text-warning') }}">{{ $label }}</span> -->
+                                                @php 
+                                                    $dueDate = date('Y-m-d', strtotime($apr->due_on));
+                                                    if(date('Y-m-d') > $dueDate){
+                                                        $date = \Carbon\Carbon::parse($dueDate);
+                                                        $now = \Carbon\Carbon::now();
+
+                                                        echo '<span class="text-danger">Overdue</span>';
+                                                        echo '<span class="text-danger ml-auto">by '.$date->diffInDays($now).' days</span>';
+                                                    }else{
+                                                        $date = \Carbon\Carbon::parse($dueDate);
+                                                        $now = \Carbon\Carbon::now();
+
+                                                        echo '<span class="text-warning">Due to Complete</span>';
+                                                        echo '<span class="text-warning ml-auto">in '.$date->diffInDays($now).' days</span>';
+                                                    }
+                                                @endphp
                                             </div>
                                         </a>
                                     </div>

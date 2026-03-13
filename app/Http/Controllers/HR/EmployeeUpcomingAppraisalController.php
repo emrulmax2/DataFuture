@@ -60,6 +60,18 @@ class EmployeeUpcomingAppraisalController extends Controller
             foreach($Query as $list):
                 $dueOn = date('Y-m-d', strtotime($list->due_on));
                 $completed_on = (isset($list->completed_on) && !empty($list->completed_on) ? date('Y-m-d', strtotime($list->completed_on)) : '');
+                $status = (!empty($completed_on) && $completed_on <=  date('Y-m-d') ? 3 : ($dueOn < date('Y-m-d') ? 2 : 1));
+                $dueDays = '';
+                if($status == 2):
+                    $date = Carbon::parse($list->due_on);
+                    $now = Carbon::now();
+                    $dueDays = $date->diffInDays($now).' days';
+                elseif($status == 1):
+                    $date = Carbon::parse($list->due_on);
+                    $now = Carbon::now();
+
+                    $dueDays = $date->diffInDays($now).' days';
+                endif;
                 $data[] = [
                     'id' => $list->id,
                     'employee_id' => $list->employee_id,
@@ -76,7 +88,8 @@ class EmployeeUpcomingAppraisalController extends Controller
                     'total_score' => $list->total_score,
                     'promotion_consideration' => $list->promotion_consideration,
                     'notes' => $list->notes,
-                    'status' => (!empty($completed_on) && $completed_on <=  date('Y-m-d') ? 3 : ($dueOn < date('Y-m-d') ? 2 : 1)),
+                    'status' => $status,
+                    'due_days' => $dueDays,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
