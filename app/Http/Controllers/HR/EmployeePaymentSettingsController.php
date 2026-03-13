@@ -11,6 +11,7 @@ use App\Models\EmployeeBankDetail;
 use App\Models\EmployeeHolidayAuthorisedBy;
 use App\Models\EmployeeHourAuthorisedBy;
 use App\Models\EmployeeInfoPenssionScheme;
+use App\Models\EmployeeLineManager;
 use App\Models\EmployeePaymentSetting;
 use App\Models\EmployeePenssionScheme;
 use App\Models\EmployeeWorkingPattern;
@@ -35,7 +36,8 @@ class EmployeePaymentSettingsController extends Controller
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'hourAuthIds' => EmployeeHourAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
             'holidayAuthIds' => EmployeeHolidayAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
-            'numOfActivePattern' => EmployeeWorkingPattern::where('employee_id', $id)->whereNull('end_to')->get()->count()
+            'numOfActivePattern' => EmployeeWorkingPattern::where('employee_id', $id)->whereNull('end_to')->get()->count(),
+            'lineManagerIds' => EmployeeLineManager::where('employee_id', $id)->pluck('user_id')->toArray()
         ]);
     }
 
@@ -125,6 +127,17 @@ class EmployeePaymentSettingsController extends Controller
             $data['pension_enrolled'] = 'No';
         endif;
 
+        $line_manager_id = (isset($request->line_manager_id) && !empty($request->line_manager_id) ? $request->line_manager_id : []);
+        if(!empty($line_manager_id)):
+            foreach ($line_manager_id as $id) {
+                EmployeeLineManager::create([
+                    'employee_id' => $employee_id,
+                    'user_id' => $id,
+                    'created_by' => auth()->user()->id
+                ]);
+            }
+        endif;
+
         $paymentSetting = EmployeePaymentSetting::updateOrCreate([ 'employee_id' => $employee_id, 'id' => $employee_payment_setting_id ], $data);
 
         return response()->json(['msg' => 'Payment Settings Successfully updated.'], 200);
@@ -203,6 +216,19 @@ class EmployeePaymentSettingsController extends Controller
         else:
             EmployeePenssionScheme::where('employee_id', $employee_id)->delete();
             $data['pension_enrolled'] = 'No';
+        endif;
+
+        $line_manager_id = (isset($request->line_manager_id) && !empty($request->line_manager_id) ? $request->line_manager_id : []);
+        if(!empty($line_manager_id)):
+            foreach ($line_manager_id as $id) {
+                EmployeeLineManager::create([
+                    'employee_id' => $employee_id,
+                    'user_id' => $id,
+                    'created_by' => auth()->user()->id
+                ]);
+            }
+        else:
+            EmployeeLineManager::where('employee_id', $employee_id)->delete();
         endif;
 
         $employeePaymentSettings = EmployeePaymentSetting::find($employee_payment_setting_id);
