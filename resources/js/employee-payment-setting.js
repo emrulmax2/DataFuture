@@ -29,9 +29,11 @@ import IMask from 'imask';
     };
     var hour_authorised_by = new TomSelect('#hour_authorised_by', tomOptionsMul);
     var holiday_authorised_by = new TomSelect('#holiday_authorised_by', tomOptionsMul);
+    var line_manager_id = new TomSelect('#line_manager_id', tomOptionsMul);
 
     var edit_hour_authorised_by = new TomSelect('#edit_hour_authorised_by', tomOptionsMul);
     var edit_holiday_authorised_by = new TomSelect('#edit_holiday_authorised_by', tomOptionsMul);
+    var edit_line_manager_id = new TomSelect('#edit_line_manager_id', tomOptionsMul);
 
     
     const addEmployeePaymentSettingModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmployeePaymentSettingModal"));

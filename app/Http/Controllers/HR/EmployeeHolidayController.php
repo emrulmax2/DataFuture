@@ -1069,9 +1069,9 @@ class EmployeeHolidayController extends Controller
                         if(!empty($approverEmail)):
                             $message = '';
                             $message .= 'Dear '.$approverName.',<br/>';
-                            $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has designated you as the approver.<br/>';
-                            $message .= 'Please log in <a href="'.url('/').'">here</a> to review and approve the leave.<br/>';
-                            $message .= 'Leave details are provided below for your reference.<br/><br/>';
+                            $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has identified you as the approver.<br/>';
+                            $message .= 'Please log in using the <a href="'.url('/').'">link</a> below to review and approve the request. Kindly note that a decision is required within 5 working days of this notification.<br/>';
+                            $message .= 'For your reference, the leave details are as follows:<br/><br/>';
 
                             $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
                                 $message .= '<tr>';
@@ -1089,7 +1089,7 @@ class EmployeeHolidayController extends Controller
                                     $message .= '</tr>';
                                 endif;
                                 $message .= '<tr>';
-                                    $message .= '<th>Hours</th>';
+                                    $message .= '<th>Total Hours</th>';
                                     $message .= '<td>'.$this->calculateHourMinute($totalHours).'</td>';
                                 $message .= '</tr>';
                                 if(!empty($note)):
@@ -1103,10 +1103,10 @@ class EmployeeHolidayController extends Controller
                                     $message .= '<td>'.$employeeName.' on '.date('jS F, Y H:i').'</td>';
                                 $message .= '</tr>';
                             $message .= '</table><br/>';
-                            $message .= 'Thank you for your attention to this matter.<br/><br/>';
+                            $message .= 'Thank you for your prompt attention to this matter.<br/><br/>';
                             $message .= 'Sincerely,<br/>'.$siteName;
 
-                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request', $message, []));
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Approval Needed', $message, []));
                         endif;
                     endforeach;
                 endif;
