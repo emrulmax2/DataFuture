@@ -67,7 +67,7 @@ class LineManagerPendingLeaveCron extends Command
         
                     $leaves = EmployeeLeave::with('employee', 'leaveDays', 'employee.holidayAuth', 'year')->whereIn('employee_id', $employees)->where('created_at', '<', $submissionDate)
                               ->whereHas('leaveDays', function($q){
-                                    $q->where('status', 'Active');
+                                    $q->where('status', 'Active')->where('supervision_status', '!=', 1);
                               })->where('status', 'Pending')->where('leave_type', 1)->orderBy('employee_id', 'ASC')->get();
                     if($leaves->count() > 0):
                         foreach($leaves as $leave):
