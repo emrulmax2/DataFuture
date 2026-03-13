@@ -177,4 +177,8 @@ class Employee extends Model
         $payslips->getQuery()->where('file_transffered_at', '!=', null);
         return $payslips;
     }
+
+    public function lineManagers(){
+        return $this->hasMany(EmployeeLineManager::class);
+    }
 }

@@ -116,6 +116,19 @@
                         {{-- Holiday Entitled --}}
 
                         <div class="col-span-12">
+                            <label for="line_manager_id" class="form-label">Line Manager</label>
+                            <select id="line_manager_id" name="line_manager_id[]" multiple class=" tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($users) && $users->count() > 0)
+                                    @foreach($users as $usr)
+                                        <option value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-holiday_authorised_by text-danger mt-2"></div>
+                        </div>
+
+                        <div class="col-span-12">
                             <label for="pension_enrolled" class="form-label">Pension Enrolled</label>
                             <div class="form-check form-switch">
                                 <input id="pension_enrolled" name="pension_enrolled" value="1" class="form-check-input" type="checkbox">
@@ -273,7 +286,20 @@
                         </div>
                         {{-- Holiday Entitled --}}
 
-                        <div class="col-span-12">
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="edit_line_manager_id" class="form-label">Line Manager</label>
+                            <select id="edit_line_manager_id" name="line_manager_id[]" multiple class=" tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($users) && $users->count() > 0)
+                                    @foreach($users as $usr)
+                                        <option {{ (in_array($usr->id, $lineManagerIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                    @endforeach. 
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-holiday_authorised_by text-danger mt-2"></div>
+                        </div>
+
+                        <div class="col-span-12 sm:col-span-4">
                             <label for="edit_pension_enrolled" class="form-label">Pension Enrolled</label>
                             <div class="form-check form-switch">
                                 <input {{ (isset($employee->payment->pension_enrolled) && $employee->payment->pension_enrolled == 'Yes' ? 'checked' : '') }} id="edit_pension_enrolled" name="pension_enrolled" value="1" class="form-check-input" type="checkbox">

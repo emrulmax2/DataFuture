@@ -38,6 +38,9 @@ class Kernel extends ConsoleKernel
              ->dailyAt('03:50')
              ->withoutOverlapping()
              ->onOneServer();
+
+        $schedule->command('linemanagerappraisal:cron')->weeklyOn(1, '08:00');
+        $schedule->command('linemanagerpendingleave:cron')->dailyAt('08:00');
         
 
         
@@ -50,6 +53,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('employeeappraisal:cron')->everyMinute();
         //$schedule->command('employeestatusupdater:cron')->everyMinute();
         //$schedule->command('studentdue:cron')->everyMinute();
+        //$schedule->command('linemanagerappraisal:cron')->everyMinute();
+        //$schedule->command('linemanagerpendingleave:cron')->everyMinute();
     }
 
     /**
