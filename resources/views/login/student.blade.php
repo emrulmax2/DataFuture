@@ -185,6 +185,25 @@
                             </button>
                         </a>
                     </div>
+                    {{-- <div class="flex items-center justify-center mt-4 intro-x  xl:mt-6 ">
+                        <a href="{{ route('students.redirect.microsoft') }}">
+                            <button class="gsi-material-button" style="width:400px">
+                            <div class="gsi-material-button-state"></div>
+                            <div class="gsi-material-button-content-wrapper">
+                                <div class="gsi-material-button-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display: block;">
+                                    <path fill="#F25022" d="M1 1h10v10H1z" />
+                                    <path fill="#7FBA00" d="M13 1h10v10H13z" />
+                                    <path fill="#00A4EF" d="M1 13h10v10H1z" />
+                                    <path fill="#FFB900" d="M13 13h10v10H13z" />
+                                </svg>
+                                </div>
+                                <span class="gsi-material-button-contents">Continue with Microsoft</span>
+                                <span style="display: none;">Continue with Microsoft</span>
+                            </div>
+                            </button>
+                        </a>
+                    </div> --}}
                     {{-- @if($env != "production") 
                         <div class="intro-x mt-8 xl:mt-16 text-slate-600 dark:text-slate-500 text-center xl:text-left">
                             By signin up, you agree to our <a class="text-primary dark:text-slate-200" href="">Terms and Conditions</a> & <a class="text-primary dark:text-slate-200" href="">Privacy Policy</a>
@@ -241,6 +260,21 @@
     <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
     <!-- END: Notification Toggle -->
     @endif
+
+    @if (session('microsoft'))
+    <!-- BEGIN: Notification Content -->
+    <div id="microsoft-notification-content" class="toastify-content hidden ">
+        <i class="text-danger" data-lucide="x-octagon"></i>
+        <div class="ml-4 mr-4">
+            <div class="font-medium">No Linked Account Found!</div>
+            <div class="text-slate-500 mt-1">{{ session('microsoft') }}</div>
+        </div>
+    </div>
+    <!-- END: Notification Content -->
+    <!-- BEGIN: Notification Toggle -->
+    <button id="microsoft-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
+    <!-- END: Notification Toggle -->
+    @endif
 @endsection
 
 @section('script')
@@ -248,6 +282,9 @@
         (function () {
             if($('#success-notification-toggle').length>0) {
                 $("#success-notification-toggle").trigger('click')
+            }
+            if($('#microsoft-notification-toggle').length>0) {
+                $("#microsoft-notification-toggle").trigger('click')
             }
             
             async function login() {

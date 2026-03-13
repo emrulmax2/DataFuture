@@ -4,6 +4,7 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessExtractedFiles;
+use App\Jobs\ProcessExtractedFilesForP45;
 use App\Models\Employee;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeAttendanceDayBreak;
@@ -96,6 +97,67 @@ class EmployeeAttendanceController extends Controller
         
     }
 
+    public function uploadEid(Request $request)
+    {
+
+        
+        $request->validate([
+            'file' => 'required|file|mimetypes:application/pdf,application/x-pdf,application/octet-stream|max:200480',
+        ]);
+        
+        $type = $request->type;
+        $holiday_year_Id = $request->holiday_year_info;
+        $employee = Employee::find($request->employee_id);
+        if(!$employee || $employee->user_id != $request->user_id){
+            return response()->json(['error' => 'Invalid employee or user.'], 400);
+        }
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        if ($extension !== 'pdf') {
+            return response()->json(['error' => 'Only PDF files are allowed.'], 422);
+        }
+        $fileOriginalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $dirName = $request->dir_name;
+        // Store the uploaded ZIP locally on server, then dispatch a job to process it
+        $tempPath = $file->storeAs('temp', $file->getClientOriginalName());
+
+        $employeeMap[] = $employee->id;
+
+        // preload employee and payslip mappings to avoid per-file DB queries
+        // $activeListofDuplicateNiNumber = DB::table('employees')
+        //     ->where('status', 1)
+        //     ->whereNotNull('ni_number')
+        //     ->where('ni_number', '<>', '')
+        //     ->whereIn('ni_number', function ($q) {
+        //         $q->from('employees')
+        //         ->select('ni_number')
+        //         ->groupBy('ni_number')
+        //         ->havingRaw('COUNT(*) > 1');
+        //     })
+        //     ->orderBy('ni_number')
+        //     ->pluck('id', 'ni_number');
+
+        // $allEmployees = DB::table('employees')
+        //     ->select('id', 'ni_number')
+        //     ->get();
+
+        // $employeeMap = [];
+        // foreach ($allEmployees as $emp) {
+        //     $normalizedNi = preg_replace('/[\s-]+/', '', strtoupper(trim($emp->ni_number)));
+        //     $duplicatedCurrentEmployeeId = $activeListofDuplicateNiNumber[$emp->ni_number] ?? 0;
+        //     // if duplicate among active employees, mark ambiguous
+        //     if ($duplicatedCurrentEmployeeId > 0) {
+        //         $employeeMap[$normalizedNi] = $duplicatedCurrentEmployeeId;
+        //     } elseif (!isset($employeeMap[$normalizedNi])) {
+        //         $employeeMap[$normalizedNi] = $emp->id;
+        //     }
+        // }
+
+        ProcessExtractedFilesForP45::dispatch($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap);
+
+        return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
+        
+    }
     public function payrollSyncShow($month_year){
         $paySlipUploadSync = PaySlipUploadSync::where('month_year', $month_year)->whereNull('file_transffered_at')->get();
         $checkEmploye =  PaySlipUploadSync::where('month_year', $month_year)->whereNull('file_transffered_at')->pluck('employee_id')->unique()->toArray();

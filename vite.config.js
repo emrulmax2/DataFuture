@@ -423,6 +423,7 @@ export default defineConfig({
                 'resources/js/residency_status.js',
 
                 'resources/js/employee-appraisal-note.js',
+                'resources/js/hr-p45slipsync.js',
 
             ],
             refresh: true,

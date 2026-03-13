@@ -79,8 +79,10 @@ use App\Http\Controllers\Applicant\Auth\RegisterController;
 
 
 use App\Http\Controllers\Auth\GoogleSocialiteController;
+use App\Http\Controllers\Auth\MicrosoftSocialiteController;
 
 use App\Http\Controllers\Auth\GoogleSocialiteStudentController;
+use App\Http\Controllers\Auth\MicrosoftSocialiteStudentController;
 use App\Http\Controllers\Student\Frontend\Auth\LoginController as StudentLoginController;
 use App\Http\Controllers\Student\Frontend\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\Frontend\PersonalDetailController as StudentPersonalDetailController;
@@ -604,6 +606,13 @@ Route::prefix('/students')->name('students.')->group(function() {
         
     });
 
+    Route::controller(MicrosoftSocialiteStudentController::class)->middleware('students.loggedin')->group(function() {
+
+        Route::get('/auth/microsoft/redirect','redirectToMicrosoft')->name('redirect.microsoft');
+        Route::get('/auth/microsoft/callback', 'handleCallback')->name('callback.microsoft');
+
+    });
+
 
 
     Route::middleware(['auth.students','saved.shopping_cart'])->group(function() {
@@ -774,6 +783,11 @@ Route::prefix('/students')->name('students.')->group(function() {
     Route::controller(GoogleSocialiteController::class)->middleware('loggedin')->group(function() {
         Route::get('/auth/google/redirect','redirectToGoogle')->name('redirect.google');
         Route::get('/auth/google/callback', 'handleCallback')->name('callback.google');
+    });
+
+    Route::controller(MicrosoftSocialiteController::class)->middleware('loggedin')->group(function() {
+        Route::get('/auth/microsoft/redirect','redirectToMicrosoft')->name('redirect.microsoft');
+        Route::get('/auth/microsoft/callback', 'handleCallback')->name('callback.microsoft');
     });
 
 Route::middleware('auth')->group(function() {
@@ -1602,6 +1616,7 @@ Route::middleware('auth')->group(function() {
         Route::post('hr/attendance/resyncronise', 'reSyncronise')->name('hr.attendance.re.sync');
 
         Route::post('hr/attendance/upload', 'upload')->name('hr.attendance.payslip.upload');
+        Route::post('hr/attendance/upload_eid', 'uploadEid')->name('hr.attendance.payslip.upload.eid');
         Route::get('hr/attendance/payroll-sync/{month_year}', 'payrollSyncShow')->name('hr.attendance.payroll.sync');
         
     });

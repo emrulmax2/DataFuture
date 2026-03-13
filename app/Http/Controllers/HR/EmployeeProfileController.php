@@ -20,6 +20,7 @@ use App\Models\EmploymentPeriod;
 use App\Models\EmploymentSspTerm;
 use App\Models\Ethnicity;
 use App\Models\HighestQualificationOnEntry;
+use App\Models\HrHolidayYear;
 use App\Models\KinsRelation;
 use App\Models\Option;
 use App\Models\PaySlipUploadSync;
@@ -129,14 +130,16 @@ class EmployeeProfileController extends Controller
         if(!$paySlipUploadSync){
             $paySlipUploadSync = [];
         }
+        $holidayList = HrHolidayYear::orderBy('start_date','desc')->get();
 
         return view('pages.employee.profile.payslip', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
+                ['label' => 'HR Dashboard', 'href' => route('hr.portal')],
                 ['label' => 'Payroll Sync', 'href' => 'javascript:void(0);']
             ],
             'employee'=> Employee::find($id),
+            'holiday_years' => $holidayList,
             'paySlipUploadSync' => $paySlipUploadSync,
             'holidayYearIds' => $holidayYearIds ?? [],
         ]);
