@@ -67,26 +67,25 @@ class LineManagerPendingLeaveCron extends Command
             foreach($leaves as $leave):
                 $employee_id = $leave->employee_id;
                 $employee_line_managers = EmployeeLineManager::where('employee_id', $employee_id)->get()->pluck('user_id')->unique()->toArray();
+                $approvers = [];
+                if(isset($leave->employee->holidayAuth) && $leave->employee->holidayAuth->count() > 0):
+                    foreach($leave->employee->holidayAuth as $supervisor):
+                        $approver = User::find($supervisor->user_id);
+                        $approvers[] = (isset($approver->employee->full_name) && !empty($approver->employee->full_name) ? $approver->employee->full_name : $approver->name);
+                    endforeach;
+                endif;
                 if(!empty($employee_line_managers)):
                     foreach($employee_line_managers as $manager):
                         $managerUser = User::with('employee')->find($manager);
                         $manager_employee_id = $managerUser->employee->id;
                         if($manager_employee_id == 41 || $manager_employee_id == 34):
-                        $empName = (isset($managerUser->employee->title->name) ? $managerUser->employee->title->name.' ' : '').$managerUser->employee->full_name;
-                        $approvers = [];
-                        if(isset($managerUser->employee->holidayAuth) && $managerUser->employee->holidayAuth->count() > 0):
-                            foreach($managerUser->employee->holidayAuth as $supervisor):
-                                $approver = User::find($supervisor->user_id);
-                                $approvers[] = (isset($approver->employee->full_name) && !empty($approver->employee->full_name) ? $approver->employee->full_name : $approver->name);
-                            endforeach;
-                        endif;
-
+                        
                         $managerLineManagers = EmployeeLineManager::where('employee_id', $manager_employee_id)->get()->pluck('user_id')->unique()->toArray();
                         foreach($managerLineManagers as $mlm):
                             $requestedBy = (isset($leave->employee->title->name) ? $leave->employee->title->name.' ' : '').$leave->employee->full_name;
-                            $theUser = User::find($mlm);
+                            $theUser = User::with('employee')->find($mlm);
                             $content = '';
-                            $content .= '<p>Dear '.(isset($leave->employee->full_name) ? $leave->employee->full_name : $leave->name).',</p>';
+                            $content .= '<p>Dear '.(isset($theUser->employee->full_name) ? $theUser->employee->full_name : $theUser->name).',</p>';
                             $content .= '<p>This is to inform you that the leave request submitted by <strong>'.$requestedBy.'</strong> remains pending and has 
                                         not been completed within the required 5 working days by the assigned approver(s), 
                                         <strong>'.(!empty($approvers) ? implode(', ', $approvers) : '').'</strong>.</p>';
