@@ -166,10 +166,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-12">
-                    <div class="pt-2 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div>
-                </div>
-                @endif
 
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
@@ -183,6 +179,10 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-span-12">
+                    <div class="pt-2 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div>
+                </div>
+                @endif
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Line Manager</div>

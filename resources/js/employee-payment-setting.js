@@ -115,6 +115,7 @@ import IMask from 'imask';
                 $('input[type="checkbox"]', this).prop('checked', false);
 
                 holiday_authorised_by.clear(true);
+                employee_approver_id.clear(true);
             });
         }else{
 
@@ -122,6 +123,7 @@ import IMask from 'imask';
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
                 holiday_authorised_by.clear(true);
+                employee_approver_id.clear(true);
             });
         }
     });
@@ -134,12 +136,14 @@ import IMask from 'imask';
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
                 edit_holiday_authorised_by.clear(true);
+                edit_employee_approver_id.clear(true);
             });
         }else{
             $('#editEmployeePaymentSettingForm .holidayEntitlementArea').fadeOut('fast', function(){
                 $('input:not([type="checkbox"])', this).val('');
                 $('input[type="checkbox"]', this).prop('checked', false);
                 edit_holiday_authorised_by.clear(true);
+                edit_employee_approver_id.clear(true);
             });
         }
     });
