@@ -104,8 +104,8 @@
                                     $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
 
                                     $authUsers = false;
-                                    if(isset($leave->employee->holidayAuth) && $leave->employee->holidayAuth->count() > 0):
-                                        foreach($leave->employee->holidayAuth as $hau):
+                                    if(isset($leave->employee->approvers) && $leave->employee->approvers->count() > 0):
+                                        foreach($leave->employee->approvers as $hau):
                                             if($hau->user_id == auth()->user()->id):
                                                 $authUsers = true;
                                             endif;

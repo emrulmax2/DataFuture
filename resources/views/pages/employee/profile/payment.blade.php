@@ -173,6 +173,18 @@
 
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
+                        <div class="col-span-4 text-slate-500 font-medium">HR Approver</div>
+                        <div class="col-span-8 font-medium">
+                            @if(isset($employee->approvers) && $employee->approvers->count() > 0)
+                                @foreach($employee->approvers as $lm)
+                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ (isset($lm->user->employee->full_name) && !empty($lm->user->employee->full_name) ? $lm->user->employee->full_name : (isset($lm->user->name) && !empty($lm->user->name) ? $lm->user->name : 'Unknown')) }}</span>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-6 sm:col-span-4">
+                    <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Line Manager</div>
                         <div class="col-span-8 font-medium">
                             @if(isset($employee->lineManagers) && $employee->lineManagers->count() > 0)
@@ -183,7 +195,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-span-6 sm:col-span-8"></div>
+                <div class="col-span-6 sm:col-span-4"></div>
 
                 <div class="col-span-6 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">

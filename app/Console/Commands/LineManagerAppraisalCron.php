@@ -71,108 +71,109 @@ class LineManagerAppraisalCron extends Command
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
                             })->orderBy('due_on', 'ASC')->get();
-                    
-                    $content = '';
-                    $content .= '<p>Dear '.(isset($user->employee->full_name) ? $user->employee->full_name : $user->name).',</p>';
-                    $content .= '<p>I am writing to bring to your urgent attention the employee appraisals that require immediate action. Please review the details below and coordinate with HR to ensure all appraisals are completed within the required timeframe.</p>';
-                    $content .= '<hr>';
-                    if(!empty($overDues) && $overDues->count() > 0):
-                        $content .= '<h3 style="color: red;"><u>Overdue Appraisal</u></h3>';
-                        $content .= '<ul>';
-                            foreach($overDues as $ovd):
-                                $date = Carbon::parse($ovd->due_on);
-                                $now = Carbon::now();
-                                $diif = $date->diffInDays($now).' days';
+                    if((!empty($overDues) && $overDues->count() > 0) || (!empty($upcommings) && $upcommings->count() > 0) ):
+                        $content = '';
+                        $content .= '<p>Dear '.(isset($user->employee->full_name) ? $user->employee->full_name : $user->name).',</p>';
+                        $content .= '<p>I am writing to bring to your urgent attention the employee appraisals that require immediate action. Please review the details below and coordinate with HR to ensure all appraisals are completed within the required timeframe.</p>';
+                        $content .= '<hr>';
+                        if(!empty($overDues) && $overDues->count() > 0):
+                            $content .= '<h3 style="color: red;"><u>Overdue Appraisal</u></h3>';
+                            $content .= '<ul>';
+                                foreach($overDues as $ovd):
+                                    $date = Carbon::parse($ovd->due_on);
+                                    $now = Carbon::now();
+                                    $diif = $date->diffInDays($now).' days';
 
+                                    $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
+                                    $content .= '<li><strong>'.$empName.'</strong> - Due date <strong>'.date('d F, Y', strtotime($ovd->due_on)).'</strong> - <strong>'.$diif.' Overdue</strong></li>';
+                                endforeach;
+                            $content .= '</ul>';
+
+                            // $content .= '<table style="width: 100%; border: 1px solid #DDD;">';
+                            //     $content .= '<thead>';
+                            //         $content .= '<tr>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Name</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Department</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Date</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Due By</th>';
+                            //         $content .= '</tr>';
+                            //     $content .= '</thead>';
+                            //     $content .= '<tbody>';
+                            //         foreach($overDues as $ovd):
+                            //             $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
+                            //             $content .= '<tr>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
+                            //                     $content .= '<strong style="text-transform: uppercase; font-size: 12px; line-height: normal;">'.$empName.'</strong><br/>';
+                            //                     if(isset($ovd->employee->employment->employeeJobTitle->name) && !empty($ovd->employee->employment->employeeJobTitle->name)):
+                            //                         $content .= '<small style="color: #555; line-height: normal;">'.$ovd->employee->employment->employeeJobTitle->name.'</small>';
+                            //                     endif;
+                            //                 $content .= '</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.(isset($ovd->employee->employment->department->name) ? $ovd->employee->employment->department->name : '').'</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.date('jS M, Y', strtotime($ovd->due_on)).'</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
+                            //                     $date = Carbon::parse($ovd->due_on);
+                            //                     $now = Carbon::now();
+
+                            //                     $content .= $date->diffInDays($now).' Days';
+                            //                 $content .= '</td>';
+                            //             $content .= '</tr>';
+                            //         endforeach;
+                            //     $content .= '</tbody>';
+                            // $content .= '</table>';
+                        endif;
+
+                        if(!empty($upcommings) && $upcommings->count() > 0):
+                            $content .= '<h3><u>Due Soon Appraisals</u></h3>';
+
+                            $content .= '<ul>';
+                            foreach($upcommings as $ovd):
                                 $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
-                                $content .= '<li><strong>'.$empName.'</strong> - Due date <strong>'.date('d F, Y', strtotime($ovd->due_on)).'</strong> - <strong>'.$diif.' Overdue</strong></li>';
+                                $content .= '<li><strong>'.$empName.'</strong> - Due date <strong>'.date('d F, Y', strtotime($ovd->due_on)).'</strong></li>';
                             endforeach;
-                        $content .= '</ul>';
+                            $content .= '</ul>';
 
-                        // $content .= '<table style="width: 100%; border: 1px solid #DDD;">';
-                        //     $content .= '<thead>';
-                        //         $content .= '<tr>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Name</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Department</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Date</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Due By</th>';
-                        //         $content .= '</tr>';
-                        //     $content .= '</thead>';
-                        //     $content .= '<tbody>';
-                        //         foreach($overDues as $ovd):
-                        //             $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
-                        //             $content .= '<tr>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
-                        //                     $content .= '<strong style="text-transform: uppercase; font-size: 12px; line-height: normal;">'.$empName.'</strong><br/>';
-                        //                     if(isset($ovd->employee->employment->employeeJobTitle->name) && !empty($ovd->employee->employment->employeeJobTitle->name)):
-                        //                         $content .= '<small style="color: #555; line-height: normal;">'.$ovd->employee->employment->employeeJobTitle->name.'</small>';
-                        //                     endif;
-                        //                 $content .= '</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.(isset($ovd->employee->employment->department->name) ? $ovd->employee->employment->department->name : '').'</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.date('jS M, Y', strtotime($ovd->due_on)).'</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
-                        //                     $date = Carbon::parse($ovd->due_on);
-                        //                     $now = Carbon::now();
 
-                        //                     $content .= $date->diffInDays($now).' Days';
-                        //                 $content .= '</td>';
-                        //             $content .= '</tr>';
-                        //         endforeach;
-                        //     $content .= '</tbody>';
-                        // $content .= '</table>';
+                            // $content .= '<table style="width: 100%; border: 1px solid #DDD;">';
+                            //     $content .= '<thead>';
+                            //         $content .= '<tr>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Name</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Department</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Date</th>';
+                            //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Due In</th>';
+                            //         $content .= '</tr>';
+                            //     $content .= '</thead>';
+                            //     $content .= '<tbody>';
+                            //         foreach($upcommings as $ovd):
+                            //             $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
+                            //             $content .= '<tr>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
+                            //                     $content .= '<strong style="text-transform: uppercase; font-size: 12px; line-height: normal;">'.$empName.'</strong><br/>';
+                            //                     if(isset($ovd->employee->employment->employeeJobTitle->name) && !empty($ovd->employee->employment->employeeJobTitle->name)):
+                            //                         $content .= '<small style="color: #555; line-height: normal;">'.$ovd->employee->employment->employeeJobTitle->name.'</small>';
+                            //                     endif;
+                            //                 $content .= '</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.(isset($ovd->employee->employment->department->name) ? $ovd->employee->employment->department->name : '').'</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.date('jS M, Y', strtotime($ovd->due_on)).'</td>';
+                            //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
+                            //                     $date = Carbon::parse($ovd->due_on);
+                            //                     $now = Carbon::now();
+
+                            //                     $content .= $date->diffInDays($now).' Days';
+                            //                 $content .= '</td>';
+                            //             $content .= '</tr>';
+                            //         endforeach;
+                            //     $content .= '</tbody>';
+                            // $content .= '</table>';
+                        endif;
+                        if(!empty($overDues) && $overDues->count() > 0):
+                            $content .= '<p>As '.$overDues->count().' appraisal is already overdue and the remaining appraisals are due soon, I would appreciate your urgent attention to this matter. Please communicate with HR and ensure all pending reviews are completed on time. Thank you for your prompt cooperation.</p>';
+                        else:
+                            $content .= '<p>Please coordinate with HR and make sure all upcoming appraisals are completed on time.  Thank you for your prompt cooperation.</p>';
+                        endif;
+                        $content .= '<p>Kind regards,<br/>HR Department<br/>London Churchill College</p>';
+
+                        UserMailerJob::dispatch($configuration, [$user->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
                     endif;
-
-                    if(!empty($upcommings) && $upcommings->count() > 0):
-                        $content .= '<h3><u>Due Soon Appraisals</u></h3>';
-
-                        $content .= '<ul>';
-                        foreach($upcommings as $ovd):
-                            $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
-                            $content .= '<li><strong>'.$empName.'</strong> - Due date <strong>'.date('d F, Y', strtotime($ovd->due_on)).'</strong></li>';
-                        endforeach;
-                        $content .= '</ul>';
-
-
-                        // $content .= '<table style="width: 100%; border: 1px solid #DDD;">';
-                        //     $content .= '<thead>';
-                        //         $content .= '<tr>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Name</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Department</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Date</th>';
-                        //             $content .= '<th style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Due In</th>';
-                        //         $content .= '</tr>';
-                        //     $content .= '</thead>';
-                        //     $content .= '<tbody>';
-                        //         foreach($upcommings as $ovd):
-                        //             $empName = (isset($ovd->employee->title->name) ? $ovd->employee->title->name.' ' : '').$ovd->employee->full_name;
-                        //             $content .= '<tr>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
-                        //                     $content .= '<strong style="text-transform: uppercase; font-size: 12px; line-height: normal;">'.$empName.'</strong><br/>';
-                        //                     if(isset($ovd->employee->employment->employeeJobTitle->name) && !empty($ovd->employee->employment->employeeJobTitle->name)):
-                        //                         $content .= '<small style="color: #555; line-height: normal;">'.$ovd->employee->employment->employeeJobTitle->name.'</small>';
-                        //                     endif;
-                        //                 $content .= '</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.(isset($ovd->employee->employment->department->name) ? $ovd->employee->employment->department->name : '').'</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">'.date('jS M, Y', strtotime($ovd->due_on)).'</td>';
-                        //                 $content .= '<td style="text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">';
-                        //                     $date = Carbon::parse($ovd->due_on);
-                        //                     $now = Carbon::now();
-
-                        //                     $content .= $date->diffInDays($now).' Days';
-                        //                 $content .= '</td>';
-                        //             $content .= '</tr>';
-                        //         endforeach;
-                        //     $content .= '</tbody>';
-                        // $content .= '</table>';
-                    endif;
-                    if(!empty($overDues) && $overDues->count() > 0):
-                        $content .= '<p>As '.$overDues->count().' appraisal is already overdue and the remaining appraisals are due soon, I would appreciate your urgent attention to this matter. Please communicate with HR and ensure all pending reviews are completed on time. Thank you for your prompt cooperation.</p>';
-                    else:
-                        $content .= '<p>Please coordinate with HR and make sure all upcoming appraisals are completed on time.  Thank you for your prompt cooperation.</p>';
-                    endif;
-                    $content .= '<p>Kind regards,<br/>HR Department<br/>London Churchill College</p>';
-
-                    UserMailerJob::dispatch($configuration, [$user->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
                 endif;
             endforeach;
         endif;

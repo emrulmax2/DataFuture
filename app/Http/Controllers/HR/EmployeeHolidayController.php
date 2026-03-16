@@ -42,8 +42,8 @@ class EmployeeHolidayController extends Controller
         $empLeaveDisableDays = (!empty($empLeaveDisableDays) ? implode(',', $empLeaveDisableDays) : '');
 
         $can_auth = false;
-        if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
-            foreach($employee->holidayAuth as $empAuth):
+        if(isset($employee->approvers) && $employee->approvers->count() > 0):
+            foreach($employee->approvers as $empAuth):
                 if($empAuth->user_id == auth()->user()->id):
                     $can_auth = true;
                 endif;
@@ -1272,8 +1272,8 @@ class EmployeeHolidayController extends Controller
         EmployeeLeave::where('id', $employee_leave_id)->update($data);
         
         $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
-        if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
-            foreach($employee->holidayAuth as $authUsers):
+        if(isset($employee->approvers) && $employee->approvers->count() > 0):
+            foreach($employee->approvers as $authUsers):
                 if($authUsers->user_id != auth()->user()->id):
                     $approver = User::find($authUsers->user_id);
                     $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');
@@ -1385,8 +1385,8 @@ class EmployeeHolidayController extends Controller
             EmployeeLeave::where('id', $empLeaveId)->update($data);
 
             $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
-            if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
-                foreach($employee->holidayAuth as $authUsers):
+            if(isset($employee->approvers) && $employee->approvers->count() > 0):
+                foreach($employee->approvers as $authUsers):
                     if($authUsers->user_id != auth()->user()->id):
                         $approver = User::find($authUsers->user_id);
                         $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');
@@ -1507,8 +1507,8 @@ class EmployeeHolidayController extends Controller
             EmployeeLeave::where('id', $empLeaveId)->update($data);
 
             $currentUserName = (isset(Auth::user()->load('employee')->employee->full_name) ? Auth::user()->load('employee')->employee->full_name.' ' : ''); 
-            if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0):
-                foreach($employee->holidayAuth as $authUsers):
+            if(isset($employee->approvers) && $employee->approvers->count() > 0):
+                foreach($employee->approvers as $authUsers):
                     if($authUsers->user_id != auth()->user()->id):
                         $approver = User::find($authUsers->user_id);
                         $approverName = (isset($approver->employee->titlle->name) ? $approver->employee->titlle->name.' ' : '');

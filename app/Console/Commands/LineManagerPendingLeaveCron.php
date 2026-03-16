@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\UserMailerJob;
 use App\Mail\CommunicationSendMail;
 use App\Models\ComonSmtp;
+use App\Models\Employee;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLineManager;
 use App\Models\User;
@@ -58,31 +59,35 @@ class LineManagerPendingLeaveCron extends Command
         $subject = 'Reminder: Staff Leave Requests Pending Approval';
 
         $submissionDate = Carbon::now()->subWeekdays(5)->format('Y-m-d');
-        $lineManagers = EmployeeLineManager::orderBy('id', 'ASC')->get()->pluck('user_id')->unique()->toArray();
-        if(!empty($lineManagers)):
-            foreach($lineManagers as $manager_id):
-                $user = User::find($manager_id);
-                $employees = EmployeeLineManager::where('user_id', $manager_id)->get()->pluck('employee_id')->unique()->toArray();
-                if(!empty($employees)):
-        
-                    $leaves = EmployeeLeave::with('employee', 'leaveDays', 'employee.holidayAuth', 'year')->whereIn('employee_id', $employees)->where('created_at', '<', $submissionDate)
-                              ->whereHas('leaveDays', function($q){
-                                    $q->where('status', 'Active')->where('supervision_status', '!=', 1);
-                              })->where('status', 'Pending')->where('leave_type', 1)->orderBy('employee_id', 'ASC')->get();
-                    if($leaves->count() > 0):
-                        foreach($leaves as $leave):
-                            $empName = (isset($leave->employee->title->name) ? $leave->employee->title->name.' ' : '').$leave->employee->full_name;
-                            $approvers = [];
-                            if(isset($leave->employee->holidayAuth) && $leave->employee->holidayAuth->count() > 0):
-                                foreach($leave->employee->holidayAuth as $supervisor):
-                                    $approver = User::find($supervisor->user_id);
-                                    $approvers[] = (isset($approver->employee->full_name) && !empty($approver->employee->full_name) ? $approver->employee->full_name : $approver->name);
-                                endforeach;
-                            endif;
-                            $leaveDates = isset($leave->leaveDays) && $leave->leaveDays->count() > 0 ? $leave->leaveDays->pluck('leave_date')->unique()->toArray() : '';
+        $leaves = EmployeeLeave::with('employee', 'leaveDays', 'employee.holidayAuth', 'year')
+                    ->where('created_at', '<', $submissionDate)->whereHas('leaveDays', function($q){
+                        $q->where('status', 'Active')->where('supervision_status', '!=', 1);
+                    })->where('status', 'Pending')->where('leave_type', 1)->orderBy('employee_id', 'ASC')->get();
+        if(!empty($leaves)):
+            foreach($leaves as $leave):
+                $employee_id = $leave->employee_id;
+                $employee_line_managers = EmployeeLineManager::where('employee_id', $employee_id)->get()->pluck('user_id')->unique()->toArray();
+                if(!empty($employee_line_managers)):
+                    foreach($employee_line_managers as $manager):
+                        $managerUser = User::with('employee')->find($manager);
+                        $manager_employee_id = $managerUser->employee->id;
+                        if($manager_employee_id == 41 || $manager_employee_id == 34):
+                        $empName = (isset($managerUser->employee->title->name) ? $managerUser->employee->title->name.' ' : '').$managerUser->employee->full_name;
+                        $approvers = [];
+                        if(isset($managerUser->employee->holidayAuth) && $managerUser->employee->holidayAuth->count() > 0):
+                            foreach($managerUser->employee->holidayAuth as $supervisor):
+                                $approver = User::find($supervisor->user_id);
+                                $approvers[] = (isset($approver->employee->full_name) && !empty($approver->employee->full_name) ? $approver->employee->full_name : $approver->name);
+                            endforeach;
+                        endif;
+
+                        $managerLineManagers = EmployeeLineManager::where('employee_id', $manager_employee_id)->get()->pluck('user_id')->unique()->toArray();
+                        foreach($managerLineManagers as $mlm):
+                            $requestedBy = (isset($leave->employee->title->name) ? $leave->employee->title->name.' ' : '').$leave->employee->full_name;
+                            $theUser = User::find($mlm);
                             $content = '';
-                            $content .= '<p>Dear '.(isset($user->employee->full_name) ? $user->employee->full_name : $user->name).',</p>';
-                            $content .= '<p>This is to inform you that the leave request submitted by <strong>'.$empName.'</strong> remains pending and has 
+                            $content .= '<p>Dear '.(isset($leave->employee->full_name) ? $leave->employee->full_name : $leave->name).',</p>';
+                            $content .= '<p>This is to inform you that the leave request submitted by <strong>'.$requestedBy.'</strong> remains pending and has 
                                         not been completed within the required 5 working days by the assigned approver(s), 
                                         <strong>'.(!empty($approvers) ? implode(', ', $approvers) : '').'</strong>.</p>';
                             $content .= '<p>Please find the leave request details below for your reference:</p>';
@@ -90,7 +95,7 @@ class LineManagerPendingLeaveCron extends Command
                                 $content .= '<strong>Holiday Year:</strong> '.(isset($leave->year) && !empty($leave->year) ? date('Y', strtotime($leave->year->start_date )).'-'.date('Y', strtotime($leave->year->end_date )): '').'<br/>';
                                 $content .= '<strong>Number of Days:</strong> '.(isset($leave->leaveDays) && $leave->leaveDays->count() > 0 ? $leave->leaveDays->count().' days' : '0 days').'<br/>';
                                 $content .= '<strong>Leave Dates:</strong> '.(!empty($leaveDates) ? implode(', ', $leaveDates) : '').'<br/>';
-                                $content .= '<strong>Requested By:</strong> '.$empName.' on '.date('jS F, Y', strtotime($leave->created_at)).' at '.date('H:i', strtotime($leave->created_at)).'<br/>';
+                                $content .= '<strong>Requested By:</strong> '.$requestedBy.' on '.date('jS F, Y', strtotime($leave->created_at)).' at '.date('H:i', strtotime($leave->created_at)).'<br/>';
                                 $content .= '<strong>Assigned Approver(s):</strong> '.(!empty($approvers) ? implode(', ', $approvers) : '');
                             $content .= '</p>';
 
@@ -98,12 +103,61 @@ class LineManagerPendingLeaveCron extends Command
                             $content .= '<p>Thank you for your prompt attention to this matter.</p>';
                             $content .= '<p>Sincerely,<br/>HR Department<br/>London Churchill College</p>';
 
-                            UserMailerJob::dispatch($configuration, [$user->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
+                            UserMailerJob::dispatch($configuration, [$theUser->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
                         endforeach;
-                    endif;
+                        endif;
+                    endforeach;
                 endif;
             endforeach;
         endif;
+
+
+        // $lineManagers = EmployeeLineManager::orderBy('id', 'ASC')->get()->pluck('user_id')->unique()->toArray();
+        // if(!empty($lineManagers)):
+        //     foreach($lineManagers as $manager_id):
+        //         $user = User::find($manager_id);
+        //         $employees = EmployeeLineManager::where('user_id', $manager_id)->get()->pluck('employee_id')->unique()->toArray();
+        //         if(!empty($employees)):
+        
+        //             $leaves = EmployeeLeave::with('employee', 'leaveDays', 'employee.holidayAuth', 'year')->whereIn('employee_id', $employees)->where('created_at', '<', $submissionDate)
+        //                       ->whereHas('leaveDays', function($q){
+        //                             $q->where('status', 'Active')->where('supervision_status', '!=', 1);
+        //                       })->where('status', 'Pending')->where('leave_type', 1)->orderBy('employee_id', 'ASC')->get();
+        //             if($leaves->count() > 0):
+        //                 foreach($leaves as $leave):
+        //                     $empName = (isset($leave->employee->title->name) ? $leave->employee->title->name.' ' : '').$leave->employee->full_name;
+        //                     $approvers = [];
+        //                     if(isset($leave->employee->holidayAuth) && $leave->employee->holidayAuth->count() > 0):
+        //                         foreach($leave->employee->holidayAuth as $supervisor):
+        //                             $approver = User::find($supervisor->user_id);
+        //                             $approvers[] = (isset($approver->employee->full_name) && !empty($approver->employee->full_name) ? $approver->employee->full_name : $approver->name);
+        //                         endforeach;
+        //                     endif;
+        //                     $leaveDates = isset($leave->leaveDays) && $leave->leaveDays->count() > 0 ? $leave->leaveDays->pluck('leave_date')->unique()->toArray() : '';
+        //                     $content = '';
+        //                     $content .= '<p>Dear '.(isset($user->employee->full_name) ? $user->employee->full_name : $user->name).',</p>';
+        //                     $content .= '<p>This is to inform you that the leave request submitted by <strong>'.$empName.'</strong> remains pending and has 
+        //                                 not been completed within the required 5 working days by the assigned approver(s), 
+        //                                 <strong>'.(!empty($approvers) ? implode(', ', $approvers) : '').'</strong>.</p>';
+        //                     $content .= '<p>Please find the leave request details below for your reference:</p>';
+        //                     $content .= '<p>';
+        //                         $content .= '<strong>Holiday Year:</strong> '.(isset($leave->year) && !empty($leave->year) ? date('Y', strtotime($leave->year->start_date )).'-'.date('Y', strtotime($leave->year->end_date )): '').'<br/>';
+        //                         $content .= '<strong>Number of Days:</strong> '.(isset($leave->leaveDays) && $leave->leaveDays->count() > 0 ? $leave->leaveDays->count().' days' : '0 days').'<br/>';
+        //                         $content .= '<strong>Leave Dates:</strong> '.(!empty($leaveDates) ? implode(', ', $leaveDates) : '').'<br/>';
+        //                         $content .= '<strong>Requested By:</strong> '.$empName.' on '.date('jS F, Y', strtotime($leave->created_at)).' at '.date('H:i', strtotime($leave->created_at)).'<br/>';
+        //                         $content .= '<strong>Assigned Approver(s):</strong> '.(!empty($approvers) ? implode(', ', $approvers) : '');
+        //                     $content .= '</p>';
+
+        //                     $content .= '<p>As the approval deadline has now passed, this matter has been escalated for your attention. We would be grateful if you could kindly speak with the approver and ask them to process the request as soon as possible.</p>';
+        //                     $content .= '<p>Thank you for your prompt attention to this matter.</p>';
+        //                     $content .= '<p>Sincerely,<br/>HR Department<br/>London Churchill College</p>';
+
+        //                     UserMailerJob::dispatch($configuration, [$user->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
+        //                 endforeach;
+        //             endif;
+        //         endif;
+        //     endforeach;
+        // endif;
 
         return 0;
     }

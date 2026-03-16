@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeePaymentSettingsRequest;
 use App\Http\Requests\EmployeePaymentSettingsUpdateRequest;
 use App\Models\Employee;
+use App\Models\EmployeeApprover;
 use App\Models\EmployeeArchive;
 use App\Models\EmployeeBankDetail;
 use App\Models\EmployeeHolidayAuthorisedBy;
@@ -37,7 +38,8 @@ class EmployeePaymentSettingsController extends Controller
             'hourAuthIds' => EmployeeHourAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
             'holidayAuthIds' => EmployeeHolidayAuthorisedBy::where('employee_id', $id)->pluck('user_id')->toArray(),
             'numOfActivePattern' => EmployeeWorkingPattern::where('employee_id', $id)->whereNull('end_to')->get()->count(),
-            'lineManagerIds' => EmployeeLineManager::where('employee_id', $id)->pluck('user_id')->toArray()
+            'lineManagerIds' => EmployeeLineManager::where('employee_id', $id)->pluck('user_id')->toArray(),
+            'approverIds' => EmployeeApprover::where('employee_id', $id)->pluck('user_id')->toArray()
         ]);
     }
 
@@ -137,6 +139,16 @@ class EmployeePaymentSettingsController extends Controller
                 ]);
             }
         endif;
+        $employee_approver_id = (isset($request->employee_approver_id) && !empty($request->employee_approver_id) ? $request->employee_approver_id : []);
+        if(!empty($employee_approver_id)):
+            foreach ($employee_approver_id as $id) {
+                EmployeeApprover::create([
+                    'employee_id' => $employee_id,
+                    'user_id' => $id,
+                    'created_by' => auth()->user()->id
+                ]);
+            }
+        endif;
 
         $paymentSetting = EmployeePaymentSetting::updateOrCreate([ 'employee_id' => $employee_id, 'id' => $employee_payment_setting_id ], $data);
 
@@ -218,6 +230,7 @@ class EmployeePaymentSettingsController extends Controller
             $data['pension_enrolled'] = 'No';
         endif;
 
+        EmployeeLineManager::where('employee_id', $employee_id)->delete();
         $line_manager_id = (isset($request->line_manager_id) && !empty($request->line_manager_id) ? $request->line_manager_id : []);
         if(!empty($line_manager_id)):
             foreach ($line_manager_id as $id) {
@@ -227,8 +240,18 @@ class EmployeePaymentSettingsController extends Controller
                     'created_by' => auth()->user()->id
                 ]);
             }
-        else:
-            EmployeeLineManager::where('employee_id', $employee_id)->delete();
+        endif;
+
+        EmployeeApprover::where('employee_id', $employee_id)->delete();
+        $employee_approver_id = (isset($request->employee_approver_id) && !empty($request->employee_approver_id) ? $request->employee_approver_id : []);
+        if(!empty($employee_approver_id)):
+            foreach ($employee_approver_id as $id) {
+                EmployeeApprover::create([
+                    'employee_id' => $employee_id,
+                    'user_id' => $id,
+                    'created_by' => auth()->user()->id
+                ]);
+            }
         endif;
 
         $employeePaymentSettings = EmployeePaymentSetting::find($employee_payment_setting_id);

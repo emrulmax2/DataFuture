@@ -181,4 +181,8 @@ class Employee extends Model
     public function lineManagers(){
         return $this->hasMany(EmployeeLineManager::class);
     }
+
+    public function approvers(){
+        return $this->hasMany(EmployeeApprover::class);
+    }
 }
