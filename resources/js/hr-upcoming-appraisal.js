@@ -93,7 +93,7 @@ var upcomingAppraisalListTable = (function () {
                         if(cell.getData().status == 3){
                             return '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Completed</span>';
                         }else{
-                            return (cell.getData().status == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due</span>');
+                            return (cell.getData().status == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue By: '+cell.getData().due_days+'</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due in: '+cell.getData().due_days+'</span>');
                         }
                     }
                 },
@@ -103,7 +103,7 @@ var upcomingAppraisalListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "220",
+                    width: "180",
                     download:false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";

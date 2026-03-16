@@ -11,6 +11,7 @@ use App\Models\ComonSmtp;
 use App\Models\Department;
 use App\Models\Employee;
 use App\Models\EmployeeAppraisal;
+use App\Models\EmployeeApprover;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeAttendanceLive;
 use App\Models\EmployeeEligibilites;
@@ -162,7 +163,7 @@ class EmployeePortalController extends Controller
         if(!empty($Query) && $type == 'approved'):
             $i = 1;
             foreach($Query as $list):
-                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
+                $employeeApprover = EmployeeApprover::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
                 $status = 'Approved ';
                 if(isset($list->leave->leave_type) && $list->leave->leave_type > 0):
                     switch($list->leave->leave_type):
@@ -209,7 +210,7 @@ class EmployeePortalController extends Controller
         elseif(!empty($Query) && $type == 'rejected'):
             $i = 1;
             foreach($Query as $list):
-                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
+                $employeeApprover = EmployeeApprover::where('employee_id', $list->leave->employee_id)->pluck('user_id')->unique()->toArray();
                 $status = 'Rejected ';
                 if(isset($list->leave->leave_type) && $list->leave->leave_type > 0):
                     switch($list->leave->leave_type):
@@ -257,7 +258,7 @@ class EmployeePortalController extends Controller
             $i = 1;
             foreach($Query as $list):
                 $leave_status = (isset($list->status) && !empty($list->status) ? $list->status : 'Pending');
-                $employeeApprover = EmployeeHolidayAuthorisedBy::where('employee_id', $list->employee_id)->pluck('user_id')->unique()->toArray();
+                $employeeApprover = EmployeeApprover::where('employee_id', $list->employee_id)->pluck('user_id')->unique()->toArray();
                 $leaveHours = 0;
                 $leaveDays = 0;
                 if(isset($list->leaveDays)):

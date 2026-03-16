@@ -115,6 +115,19 @@
                         </div>
                         {{-- Holiday Entitled --}}
 
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="employee_approver_id" class="form-label">HR Approver</label>
+                            <select id="employee_approver_id" name="employee_approver_id[]" multiple class=" tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($users) && $users->count() > 0)
+                                    @foreach($users as $usr)
+                                        <option {{ (in_array($usr->id, $approverIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                    @endforeach. 
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employee_approver_id text-danger mt-2"></div>
+                        </div>
+
                         <div class="col-span-12">
                             <label for="line_manager_id" class="form-label">Line Manager</label>
                             <select id="line_manager_id" name="line_manager_id[]" multiple class=" tom-selects w-full">
@@ -286,6 +299,18 @@
                         </div>
                         {{-- Holiday Entitled --}}
 
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="edit_employee_approver_id" class="form-label">HR Approver</label>
+                            <select id="edit_employee_approver_id" name="employee_approver_id[]" multiple class=" tom-selects w-full">
+                                <option value="">Please Select</option>
+                                @if(!empty($users) && $users->count() > 0)
+                                    @foreach($users as $usr)
+                                        <option {{ (in_array($usr->id, $approverIds) ? 'Selected' : '') }} value="{{ $usr->id }}">{{ $usr->full_name }}</option>
+                                    @endforeach. 
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-employee_approver_id text-danger mt-2"></div>
+                        </div>
                         <div class="col-span-12 sm:col-span-4">
                             <label for="edit_line_manager_id" class="form-label">Line Manager</label>
                             <select id="edit_line_manager_id" name="line_manager_id[]" multiple class=" tom-selects w-full">
