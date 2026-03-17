@@ -28,6 +28,18 @@
                         <option value="Canceled">Canceled</option>
                     </select>
                 </div>
+                
+                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
+                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Venue</label>
+                    <select name="venue" id="venue" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0">
+                        <option value="">All Venues</option>
+                        @if($venues->count() > 0)
+                            @foreach($venues as $vnu)
+                                <option value="{{ $vnu->id }}">{{ $vnu->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </div>
                 <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
                     <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Courses</label>
                     <select name="courses" id="courses" class="form-control sm:w-40 2xl:w-60 mt-2 sm:mt-0">
