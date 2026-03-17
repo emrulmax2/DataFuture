@@ -427,8 +427,8 @@ import IMask from 'imask';
                 }, 2000);
             }else{
                 var htmls = '';
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_1', $form).val()+'</span><br/>';
-                htmls += '<input type="hidden" name="'+prfix+'address_line_1" value="'+$('#student_address_address_line_1', $form).val()+'"/>';
+                htmls += '<span class="text-slate-600 font-medium">'+$('#address_address_line_1', $form).val()+'</span><br/>';
+                htmls += '<input type="hidden" name="'+prfix+'address_line_1" value="'+$('#address_address_line_1', $form).val()+'"/>';
                 if($('#student_address_address_line_2', $form).val() != ''){
                     htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_2', $form).val()+'</span><br/>';
                     htmls += '<input type="hidden" name="'+prfix+'address_line_2" value="'+$('#student_address_address_line_2', $form).val()+'"/>';

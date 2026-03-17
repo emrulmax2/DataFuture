@@ -25,7 +25,9 @@ class EmployeeNoteRequest extends FormRequest
     {
         return [
             'opening_date' => 'required|date',
-            'content' => 'required'
+            'content' => 'required',
+            'reminder' => 'sometimes',
+            'reminder_date' => 'required_if:reminder,1',
         ];
     }
 
@@ -33,7 +35,8 @@ class EmployeeNoteRequest extends FormRequest
     {
         return [
             'opening_date.required' => 'The Opening Date field can not be empty.',
-            'content.required' => 'The Note field can not be empty.'
+            'content.required' => 'The Note field can not be empty.',
+            'reminder_date.required_if' => 'This field is required.',
         ];
     }
 }

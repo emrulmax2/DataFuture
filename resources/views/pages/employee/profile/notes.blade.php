@@ -141,6 +141,17 @@
                                 <span id="editEmpNoteDocumentName" class="documentNoteName ml-5"></span>
                             </div>
                         </div>
+                        <div class="mt-4 flex justify-start items-start relative">
+                            <div class="form-check form-switch mt-0 w-[50%]">
+                                <label class="form-check-label ml-0 mr-3" for="edit_reminder">Reminder: </label>
+                                <input id="edit_reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
+                            </div>
+                            <div class="w-[50%] ml-auto reminderDateWrap" style="display: none;">
+                                <label for="reminder_end" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
@@ -201,6 +212,17 @@
                             </label>
                             <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addEmpNoteDocument"/>
                             <span id="addEmpNoteDocumentName" class="documentNoteName ml-5"></span>
+                        </div>
+                        <div class="mt-4 flex justify-start items-start relative">
+                            <div class="form-check form-switch mt-0 w-[50%]">
+                                <label class="form-check-label ml-0 mr-3" for="reminder">Reminder: </label>
+                                <input id="reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
+                            </div>
+                            <div class="w-[50%] ml-auto reminderDateWrap" style="display: none;">
+                                <label for="reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">

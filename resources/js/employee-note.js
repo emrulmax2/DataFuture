@@ -51,6 +51,22 @@ var employeeNotesListTable = (function () {
                     }
                 },
                 {
+                    title: "Reminder",
+                    field: "reminder",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams){
+                        var html = '';
+                        if(cell.getData().reminder == 1){
+                            html += '<div>';
+                                //html += '<span class="btn btn-success-soft px-1 py-0 rounded-0">Yes</span><br/>';
+                                html += '<span class="font-medium">'+cell.getData().reminder_date+'</span>';
+                            html += '</div>';
+                        }
+
+                        return html;
+                    }
+                },
+                {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
@@ -190,6 +206,18 @@ var employeeNotesListTable = (function () {
         });
     }
 
+    $('#reminder').on('change', function(e){
+        if($(this).prop('checked')){
+            $('#addEmpNoteModal .reminderDateWrap').fadeIn('fast', function(){
+                $('input', this).val('')
+            })
+        }else{
+            $('#addEmpNoteModal .reminderDateWrap').fadeOut('fast', function(){
+                $('input', this).val('')
+            })
+        }
+    })
+
     let editEmpNoteEditor;
     if($("#editEmpNoteEditor").length > 0){
         const el = document.getElementById('editEmpNoteEditor');
@@ -201,12 +229,27 @@ var employeeNotesListTable = (function () {
         });
     }
 
+    $('#edit_reminder').on('change', function(e){
+        if($(this).prop('checked')){
+            $('#editEmpNoteModal .reminderDateWrap').fadeIn('fast', function(){
+                $('input', this).val('')
+            })
+        }else{
+            $('#editEmpNoteModal .reminderDateWrap').fadeOut('fast', function(){
+                $('input', this).val('')
+            })
+        }
+    })
+
     const addNoteModalEl = document.getElementById('addEmpNoteModal')
     addNoteModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addEmpNoteModal .acc__input-error').html('');
         $('#addEmpNoteModal input[name="document"]').val('');
         $('#addEmpNoteModal #addEmpNoteDocument').html('');
         addEmpNoteEditor.setData('');
+        $('#addEmpNoteModal .reminderDateWrap').fadeOut('fast', function(){
+            $('input', this).val('')
+        })
     });
 
     const editNoteModalEl = document.getElementById('editEmpNoteModal')
@@ -362,6 +405,17 @@ var employeeNotesListTable = (function () {
                 $('#editEmpNoteModal .downloadExistAttachment').attr('href', dataset.docURL).fadeIn();
             }else{
                 $('#editEmpNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
+            }
+            if(dataset.reminder == 1){
+                $('#edit_reminder').prop('checked', true);
+                $('#editEmpNoteModal .reminderDateWrap').fadeIn('fast', function(){
+                    $('input[name="reminder_date"]', this).val(dataset.reminder_date ? dataset.reminder_date : '')
+                })
+            }else{
+                $('#edit_reminder').prop('checked', false);
+                $('#editEmpNoteModal .reminderDateWrap').fadeOut('fast', function(){
+                    $('input[name="reminder_date"]', this).val('')
+                })
             }
         }).catch(error => {
             console.log('error');

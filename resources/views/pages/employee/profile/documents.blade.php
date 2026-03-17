@@ -165,7 +165,7 @@
     @php
         use Carbon\Carbon;
     @endphp
-    <div class="intro-y box p-5 mt-5">
+    <!-- <div class="intro-y box p-5 mt-5">
         <div class="grid grid-cols-12 gap-0 items-center">
             <div class="col-span-6">
                 <div class="font-medium text-base">Payslips</div>
@@ -226,7 +226,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- BEGIN: Send Email Modal -->
     <div id="addCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">

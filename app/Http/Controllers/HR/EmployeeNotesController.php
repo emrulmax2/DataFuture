@@ -38,12 +38,16 @@ class EmployeeNotesController extends Controller
      */
     public function store(EmployeeNoteRequest $request){
         $employee_id = $request->employee_id;
+        $reminder = (isset($request->reminder) && $request->reminder > 0 ? $request->reminder : 0);
+        $reminderDate = ($reminder > 0 && isset($request->reminder_date) && !empty($request->reminder_date) ? $request->reminder_date : null);
         $note = EmployeeNotes::create([
             'employee_id'=> $employee_id,
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Live',
             'employee_appraisal_id'=> (isset($request->employee_appraisal_id) && $request->employee_appraisal_id > 0 ? $request->employee_appraisal_id : null),
+            'reminder' => $reminder,
+            'reminder_date' => $reminderDate,
             'created_by' => auth()->user()->id
         ]);
         if($note):
@@ -133,7 +137,9 @@ class EmployeeNotesController extends Controller
                     //'url' => isset($list->document) ? asset('storage/employees/notes/'.$list->document->current_file_name) : null,
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'reminder' => $list->reminder,
+                    'reminder_date' => !empty($list->reminder_date) ? date('jS F, Y', strtotime($list->reminder_date)) : '',
                 ];
                 $i++;
             endforeach;
@@ -204,12 +210,16 @@ class EmployeeNotesController extends Controller
         $oleNote = EmployeeNotes::find($noteId);
         $employeeDocumentId = (isset($oleNote->employee_document_id) && $oleNote->employee_document_id > 0 ? $oleNote->employee_document_id : 0);
 
+        $reminder = (isset($request->reminder) && $request->reminder > 0 ? $request->reminder : 0);
+        $reminderDate = ($reminder > 0 && isset($request->reminder_date) && !empty($request->reminder_date) ? $request->reminder_date : null);
         $note = EmployeeNotes::where('id', $noteId)->where('employee_id', $employee_id)->Update([
             'employee_id'=> $employee_id,
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
             'note'=> $request->content,
             'phase'=> 'Live',
             'employee_appraisal_id'=> (isset($request->employee_appraisal_id) && $request->employee_appraisal_id > 0 ? $request->employee_appraisal_id : null),
+            'reminder' => $reminder,
+            'reminder_date' => $reminderDate,
             'updated_by' => auth()->user()->id
         ]);
         if($request->hasFile('document')):
