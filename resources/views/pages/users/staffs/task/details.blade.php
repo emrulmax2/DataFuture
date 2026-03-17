@@ -818,7 +818,7 @@
                                         </path>
                                     </g>
                                 </g>
-                            </svg>              
+    0                        </svg>              
                         </div>
                     </div>
                     <div class="modal-footer">
