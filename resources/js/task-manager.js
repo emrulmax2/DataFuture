@@ -15,6 +15,7 @@ var taskAssignedStudentTable = (function () {
         let reg_or_ref = $("#reg_or_ref").val() != "" ? $("#reg_or_ref").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let courses = $("#courses").val() != "" ? $("#courses").val() : "";
+        let venue = $("#venue").val() != "" ? $("#venue").val() : 0;
         let task_id = $("#taskAssignedStudentTable").attr('data-taskid');
         let phase = $("#taskAssignedStudentTable").attr('data-phase');
         
@@ -25,10 +26,9 @@ var taskAssignedStudentTable = (function () {
         let pearsonreg = ($("#taskAssignedStudentTable").attr('data-pearsonreg') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-pearsonreg') : 'No');
         let addressrequest = ($("#taskAssignedStudentTable").attr('data-addressrequest') != 'undefined' ? $("#taskAssignedStudentTable").attr('data-addressrequest') : 'No');
         
-        
         let tableContent = new Tabulator("#taskAssignedStudentTable", {
             ajaxURL: route("task.manager.list"),
-            ajaxParams: { status : status, task_id : task_id, phase : phase, courses : courses, reg_or_ref : reg_or_ref},
+            ajaxParams: { status : status, task_id : task_id, phase : phase, courses : courses, reg_or_ref : reg_or_ref, venue : venue },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
