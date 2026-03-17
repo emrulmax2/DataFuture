@@ -50,6 +50,7 @@ use App\Models\TaskList;
 use App\Models\TaskListUser;
 use App\Models\TaskStatus;
 use App\Models\TermDeclaration;
+use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -119,6 +120,7 @@ class PendingTaskManagerController extends Controller
             'signatory' => Signatory::orderBy('signatory_name', 'ASC')->get(),
             'letterSet' => LetterSet::where('status', 1)->where('document_request',1)->orderBy('letter_title', 'ASC')->get(),
             'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
+            'venues' => Venue::where('active', 1)->orderBy('name', 'ASC')->get(),
         ]);
     }
 
@@ -128,6 +130,7 @@ class PendingTaskManagerController extends Controller
         $task_id = isset($request->task_id) && $request->task_id > 0 ? $request->task_id : 0;
         $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : 'Live');
         $courses = (isset($request->courses) && $request->courses > 0 ? $request->courses : 0);
+        $venue = (isset($request->venue) && $request->venue > 0 ? $request->venue : 0);
 
         $task = TaskList::find($task_id);
 
@@ -253,12 +256,21 @@ class PendingTaskManagerController extends Controller
                 if(!empty($courseCreations)):
                     $Query->whereHas('activeCR', function($q) use($courseCreations){
                         $q->whereIn('course_creation_id', $courseCreations)->where('active', 1);
+                        //proposed course venue filter
+
+
                     });
                 endif;
             endif;
             if(!empty($reg_or_ref)):
                 $Query->where(function($q) use($reg_or_ref){
                     $q->where('application_no', 'LIKE', '%'.$reg_or_ref.'%')->orWhere('registration_no', 'LIKE', '%'.$reg_or_ref.'%');
+                });
+            endif;
+
+            if($venue > 0):
+                $Query->whereHas('propose', function($q) use($venue){
+                    $q->where('venue_id', $venue);
                 });
             endif;
 
@@ -286,7 +298,7 @@ class PendingTaskManagerController extends Controller
                 $i = 1;
                 foreach($Query as $list):
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
-                    
+                    $venueName = (isset($list->propose->venue->name) && !empty($list->propose->venue->name) ? $list->propose->venue->name : '');
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
@@ -359,6 +371,8 @@ class PendingTaskManagerController extends Controller
                                 'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
+                                'venue_name' => $venueName 
+                                
                                 
                             ];
                             
