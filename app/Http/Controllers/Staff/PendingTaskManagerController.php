@@ -133,6 +133,7 @@ class PendingTaskManagerController extends Controller
         $venue = (isset($request->venue) && !empty($request->venue) && $request->venue > 0 ? $request->venue : 0);
 
         $task = TaskList::find($task_id);
+        
 
         if($phase == 'Applicant'):
             $applicant_ids = ApplicantTask::where('task_list_id', $task_id)->where('status', $status)->pluck('applicant_id')->unique()->toArray();
