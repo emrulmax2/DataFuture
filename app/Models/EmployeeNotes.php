@@ -17,11 +17,17 @@ class EmployeeNotes extends Model
         'note',
         'phase',
         'employee_appraisal_id',
+        'reminder',
+        'reminder_date',
         'created_by',
         'updated_by',
     ];
 
     protected $dates = ['deleted_at'];
+
+    public function employee() {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 
     public function document() {
         return $this->belongsTo(EmployeeDocuments::class, 'employee_document_id')->withTrashed();
@@ -36,6 +42,14 @@ class EmployeeNotes extends Model
     }
 
     public function getOpeningDateAttribute($value) {
+        return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
+    }
+
+    public function setReminderDateAttribute($value) {  
+        $this->attributes['reminder_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+    }
+
+    public function getReminderDateAttribute($value) {
         return (!empty($value) ? date('d-m-Y', strtotime($value)) : '');
     }
 }
