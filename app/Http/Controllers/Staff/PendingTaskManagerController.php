@@ -130,7 +130,7 @@ class PendingTaskManagerController extends Controller
         $task_id = isset($request->task_id) && $request->task_id > 0 ? $request->task_id : 0;
         $phase = (isset($request->phase) && !empty($request->phase) ? $request->phase : 'Live');
         $courses = (isset($request->courses) && $request->courses > 0 ? $request->courses : 0);
-        $venue = (isset($request->venue) && $request->venue > 0 ? $request->venue : 0);
+        $venue = (isset($request->venue) && !empty($request->venue) && $request->venue > 0 ? $request->venue : 0);
 
         $task = TaskList::find($task_id);
 
@@ -268,7 +268,7 @@ class PendingTaskManagerController extends Controller
                 });
             endif;
 
-            if($venue > 0):
+            if(!empty($venue) && $venue > 0):
                 $Query->whereHas('propose', function($q) use($venue){
                     $q->where('venue_id', $venue);
                 });
@@ -297,8 +297,11 @@ class PendingTaskManagerController extends Controller
             if(!empty($Query)):
                 $i = 1;
                 foreach($Query as $list):
+
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
-                    $venueName = (isset($list->propose->venue->name) && !empty($list->propose->venue->name) ? $list->propose->venue->name : '');
+                    
+                    //$venueName = (isset($list->propose->venue->name) && !empty($list->propose->venue->name) ? $list->propose->venue->name : '');
+                    
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theStudentTask->status) && !empty($theStudentTask->status) ? $theStudentTask->status : '');
@@ -371,8 +374,6 @@ class PendingTaskManagerController extends Controller
                                 'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
-                                'venue_name' => $venueName 
-                                
                                 
                             ];
                             
