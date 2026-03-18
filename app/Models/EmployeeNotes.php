@@ -46,7 +46,7 @@ class EmployeeNotes extends Model
     }
 
     public function setReminderDateAttribute($value) {  
-        $this->attributes['reminder_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : '');
+        $this->attributes['reminder_date'] =  (!empty($value) ? date('Y-m-d', strtotime($value)) : null);
     }
 
     public function getReminderDateAttribute($value) {

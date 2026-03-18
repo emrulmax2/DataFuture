@@ -453,11 +453,16 @@
                         <div class="col-span-4 text-slate-500 font-medium">Employement Period: </div>
                         <div class="col-span-8 font-medium">
                             {{ (isset($employeeTerms->period->name) && !empty($employeeTerms->period->name) ? 'This employment is '.$employeeTerms->period->name : '') }}
-                            @if(isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == 3)
-                                {!! (isset($employeeTerms->provision_end) && !empty($employeeTerms->provision_end) ? '<br/> Ends: '.date('jS F, Y', strtotime($employeeTerms->provision_end)) : '') !!}
-                            @endif
                         </div>
                     </div>
+                    @if(isset($employeeTerms->employment_period_id) && $employeeTerms->employment_period_id == 3 && isset($employeeTerms->provision_end) && !empty($employeeTerms->provision_end))
+                    <div class="grid grid-cols-12 gap-0 mt-2">
+                        <div class="col-span-4 text-slate-500 font-medium">Probation End: </div>
+                        <div class="col-span-8 font-medium">
+                            {!! (isset($employeeTerms->provision_end) && !empty($employeeTerms->provision_end) ? date('jS F, Y', strtotime($employeeTerms->provision_end)) : '') !!}
+                        </div>
+                    </div>
+                    @endif
                 </div>
                 <div class="col-span-12 sm:col-span-4">
                     <div class="grid grid-cols-12 gap-0">
