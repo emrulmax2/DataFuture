@@ -111,6 +111,12 @@ var taskAssignedStudentTable = (function () {
                     }
                 },
                 {
+                    title: "Venue",
+                    field: "venue_name",
+                    headerHozAlign: "left",
+
+                },
+                {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
