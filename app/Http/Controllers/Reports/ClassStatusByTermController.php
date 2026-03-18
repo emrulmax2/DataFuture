@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Reports;
 
+use App\Exports\ArrayCollectionExport;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\EmployeeAttendanceLive;
@@ -14,6 +15,7 @@ use Barryvdh\Debugbar\Facades\Debugbar;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClassStatusByTermController extends Controller
 {
@@ -486,5 +488,55 @@ class ClassStatusByTermController extends Controller
         endif;
 
         return $html;
+    }
+
+    public function exportList(Request $request){
+        $attendance_semester = (isset($request->attendance_semester) && !empty($request->attendance_semester) ? $request->attendance_semester : []);
+        $response = $this->list($request);
+        $list = $response->getData(true);
+
+        $theCollection = [];
+        $theCollection[1][] = 'Courses';
+        $theCollection[1][] = 'Schedule';
+        $theCollection[1][] = 'Future Schedule';
+        $theCollection[1][] = 'Held';
+        $theCollection[1][] = 'Unheld';
+        $theCollection[1][] = 'Cancel';
+        $theCollection[1][] = 'Unknown';
+        $theCollection[1][] = 'Proxy';
+
+        $row = 2;
+        if(!empty($list)):
+            foreach($list as $course):
+                $theCollection[$row][] = $course['course_name'];
+                $theCollection[$row][] = $course['schedule'];
+                $theCollection[$row][] = $course['future_schedule'];
+                $theCollection[$row][] = $course['held'];
+                $theCollection[$row][] = $course['unheld'];
+                $theCollection[$row][] = $course['cancelled'];
+                $theCollection[$row][] = $course['unknown'];
+                $theCollection[$row][] = $course['proxy'];
+
+                if(isset($course['_children']) && !empty($course['_children'])):
+                    $row += 1;
+                    foreach($course['_children'] as $group):
+                        $theCollection[$row][] = $group['course_name'];
+                        $theCollection[$row][] = $group['schedule'];
+                        $theCollection[$row][] = $group['future_schedule'];
+                        $theCollection[$row][] = $group['held'];
+                        $theCollection[$row][] = $group['unheld'];
+                        $theCollection[$row][] = $group['cancelled'];
+                        $theCollection[$row][] = $group['unknown'];
+                        $theCollection[$row][] = $group['proxy'];
+
+                        $row += 1;
+                    endforeach;
+                endif;
+
+                $theCollection[$row][] = '';
+                $row += 1;
+            endforeach;
+        endif;
+        return Excel::download(new ArrayCollectionExport($theCollection), 'Class_Status_Reports.xlsx');
     }
 }
