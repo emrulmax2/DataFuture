@@ -39,7 +39,7 @@ class EmployeeNotesController extends Controller
     public function store(EmployeeNoteRequest $request){
         $employee_id = $request->employee_id;
         $reminder = (isset($request->reminder) && $request->reminder > 0 ? $request->reminder : 0);
-        $reminderDate = ($reminder > 0 && isset($request->reminder_date) && !empty($request->reminder_date) ? $request->reminder_date : null);
+        $reminderDate = ($reminder == 1 && isset($request->reminder_date) && !empty($request->reminder_date) ? date('Y-m-d', strtotime($request->reminder_date)) : null);
         $note = EmployeeNotes::create([
             'employee_id'=> $employee_id,
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
@@ -211,7 +211,8 @@ class EmployeeNotesController extends Controller
         $employeeDocumentId = (isset($oleNote->employee_document_id) && $oleNote->employee_document_id > 0 ? $oleNote->employee_document_id : 0);
 
         $reminder = (isset($request->reminder) && $request->reminder > 0 ? $request->reminder : 0);
-        $reminderDate = ($reminder > 0 && isset($request->reminder_date) && !empty($request->reminder_date) ? $request->reminder_date : null);
+        $reminderDate = ($reminder == 1 && isset($request->reminder_date) && !empty($request->reminder_date) ? date('Y-m-d', strtotime($request->reminder_date)) : null);
+        //dd($reminderDate);
         $note = EmployeeNotes::where('id', $noteId)->where('employee_id', $employee_id)->Update([
             'employee_id'=> $employee_id,
             'opening_date'=> (isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : ''),
