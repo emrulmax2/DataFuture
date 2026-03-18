@@ -78,7 +78,7 @@ class LineManagerPendingLeaveCron extends Command
                     foreach($employee_line_managers as $manager):
                         $managerUser = User::with('employee')->find($manager);
                         $manager_employee_id = $managerUser->employee->id;
-                        if($manager_employee_id == 41 || $manager_employee_id == 34):
+                        //if($manager_employee_id == 41 || $manager_employee_id == 34):
                         
                         $managerLineManagers = EmployeeLineManager::where('employee_id', $manager_employee_id)->get()->pluck('user_id')->unique()->toArray();
                         foreach($managerLineManagers as $mlm):
@@ -104,7 +104,7 @@ class LineManagerPendingLeaveCron extends Command
 
                             UserMailerJob::dispatch($configuration, [$theUser->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
                         endforeach;
-                        endif;
+                        //endif;
                     endforeach;
                 endif;
             endforeach;
