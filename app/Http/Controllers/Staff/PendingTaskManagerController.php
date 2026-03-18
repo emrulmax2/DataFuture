@@ -257,21 +257,17 @@ class PendingTaskManagerController extends Controller
                 if(!empty($courseCreations)):
                     $Query->whereHas('activeCR', function($q) use($courseCreations){
                         $q->whereIn('course_creation_id', $courseCreations)->where('active', 1);
-                        //proposed course venue filter
-
-
                     });
                 endif;
+            endif;
+            if(!empty($venue) && $venue > 0):
+                $Query->whereHas('activeCR.propose', function($q) use($venue){
+                    $q->where('venue_id', $venue);
+                });
             endif;
             if(!empty($reg_or_ref)):
                 $Query->where(function($q) use($reg_or_ref){
                     $q->where('application_no', 'LIKE', '%'.$reg_or_ref.'%')->orWhere('registration_no', 'LIKE', '%'.$reg_or_ref.'%');
-                });
-            endif;
-
-            if(!empty($venue) && $venue > 0):
-                $Query->whereHas('propose', function($q) use($venue){
-                    $q->where('venue_id', $venue);
                 });
             endif;
 
