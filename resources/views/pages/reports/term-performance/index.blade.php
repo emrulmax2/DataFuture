@@ -55,6 +55,7 @@
                                                 </g>
                                             </svg>
                                         </button>
+                                        <a href="javascript:void(0);" style="display: none;" id="downloadJSPDFBTN" class="btn btn-facebook text-white ml-2"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
                                         <a href="javascript:void(0);" style="display: none;" id="viewTermAttendanceTrendBtn" class="btn btn-linkedin text-white ml-2"><i data-lucide="eye-off" class="w-4 h-4 mr-2"></i> View Trend</a>
                                     </div>
                                 </div>
@@ -92,6 +93,7 @@
                                     </div>
                                     <div class="col-span-12 sm:col-span-9 ml-auto mt-auto text-right">
                                         <button type="button" id="classStatusFormBtn" class="btn btn-success text-white ml-auto w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i><i data-loading-icon="oval" data-color="white" class="w-4 h-4 mr-2 hidden loadingClass"></i> Search</button>
+                                        <button style="display: none;" type="button" id="classStatusFormExportBtn" class="btn btn-facebook text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="file-spreadsheet"></i><i data-loading-icon="oval" data-color="white" class="w-4 h-4 mr-2 hidden loadingClass"></i> Export XL</button>
                                     </div>
                                 </div>
                             </form>

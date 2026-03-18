@@ -199,6 +199,8 @@ var statusListTable = (function () {
 
                 $('#classStatusFormBtn svg').removeClass('hidden');
                 $('#classStatusFormBtn svg.loadingClass').addClass('hidden');
+
+                $('#classStatusFormExportBtn').fadeIn();
             },
             rowClick: function (e, row) {
                 // Check if the row has _children
@@ -263,6 +265,12 @@ var statusListTable = (function () {
     let attendance_semester = new TomSelect('#attendance_semester', tomOptions);
     attendance_semester.setValue('');
 
+    $('#attendance_semester').on('change', function(){
+        $('#classStatusFormExportBtn').fadeOut();
+        $('#statusListTableWrap').fadeOut();
+        $('#statusListTableWrap #statusListTable').html('').removeClass('tabulator').removeAttr('tabulator-layout').removeAttr('role');
+    })
+
     $('#classStatusFormBtn').on('click', function (e) {
         let tthis = $(this);
         e.preventDefault();
@@ -292,6 +300,45 @@ var statusListTable = (function () {
             }, 3000);
         }
     });
+
+    $('#classStatusFormExportBtn').on('click', function(e){
+        e.preventDefault();
+        var $theBtn = $(this);
+        var $theLoader = $theBtn.find('.loadingClass');
+
+        let attendance_semester = $("#attendance_semester").val() || [];
+
+        if(attendance_semester.length > 0){
+            $theBtn.addClass('disabled');
+            $theLoader.removeClass('hidden');
+
+            axios({
+                method: "post",
+                url: route("reports.class-status.list.export"),
+                params:{ attendance_semester: attendance_semester },
+                headers: {
+                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+                },
+                responseType: 'blob',
+            }).then((response) => {
+                // console.log(response.data);
+                // return false;
+
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'Class_Status_Reports.xlsx'); 
+                document.body.appendChild(link);
+                link.click();
+            }).catch((error) => {
+                $theBtn.removeClass('disabled');
+                $theLoader.addClass('hidden');
+                console.log(error);
+            });
+        }
+    })
 
     // const successModal = tailwind.Modal.getOrCreateInstance(
     //     document.querySelector('#successModal')

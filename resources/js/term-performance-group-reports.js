@@ -7,6 +7,9 @@ import helper from "./helper";
 import Chart from "chart.js/auto";
 import { bottom } from "@popperjs/core";
 
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+
 (function(){
     let attendanceRateBarChart = null;
     $(window).on('load', function(){
@@ -114,5 +117,48 @@ import { bottom } from "@popperjs/core";
         attendanceRateBarChart.data.labels = labels;
 
         attendanceRateBarChart.update();
+    });
+
+
+    $('#downloadJSPDFBTN').on('click', function () {
+        const element = document.getElementById('prindJSPDFWrap');
+        html2canvas(element, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+
+            const imgData = canvas.toDataURL('image/png');
+
+            // A4 Portrait
+            const pdf = new jsPDF('p', 'mm', 'a4');
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            // 60px margin → convert to mm (1px ≈ 0.264583 mm)
+            const margin = 60 * 0.264583; // ≈ 15.87 mm
+
+            const usableWidth = pageWidth - (margin * 2);
+            const usableHeight = pageHeight - (margin * 2);
+
+            // Maintain aspect ratio
+            let imgWidth = usableWidth;
+            let imgHeight = canvas.height * imgWidth / canvas.width;
+
+            // If too tall → scale down
+            if (imgHeight > usableHeight) {
+                const ratio = usableHeight / imgHeight;
+                imgHeight = usableHeight;
+                imgWidth = imgWidth * ratio;
+            }
+
+            // Top aligned (NOT centered)
+            const x = margin;
+            const y = margin;
+
+            pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+            pdf.save('Attendance_Rates_Reports.pdf');
+        });
     });
 })();

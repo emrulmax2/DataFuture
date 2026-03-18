@@ -47,43 +47,45 @@ class TermAttendancePerformanceReportController extends Controller
             $bgs = ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 99, 132, 0.2)', 'rgba(255, 159, 64, 0.2)'];
             $bds = ['rgb(75, 192, 192)', 'rgb(54, 162, 235)', 'rgb(153, 102, 255)', 'rgb(255, 99, 132)', 'rgb(255, 159, 64)'];
            
-            $html .= '<div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap">';
-                $html .= '<div class="grid grid-cols-12 gap-0">';
-                    $html .= '<div class="col-span-12">';
-                        $html .= '<div class="chartWrap mb-7" style="max-width: 70%;">';
-                            $html .= '<canvas height="300" id="attendanceRateBarChart"></canvas>';
+            $html .= '<div id="prindJSPDFWrap">';
+                $html .= '<div class="overflow-x-auto scrollbar-hidden mt-5" id="attendanceRateWrap">';
+                    $html .= '<div class="grid grid-cols-12 gap-0">';
+                        $html .= '<div class="col-span-12">';
+                            $html .= '<div class="chartWrap mb-7" style="max-width: 70%;">';
+                                $html .= '<canvas height="300" id="attendanceRateBarChart"></canvas>';
+                            $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<table class="table table-bordered table-sm" id="attendanceRateOvTable" data-title="'.(isset($theTerm->name) && !empty($theTerm->name) ? $theTerm->name : 'Undefined').'">';
-                    $html .= '<tbody>';
-                        if($result && !empty($result)):
-                            $html .= '<tr class="rateRow" data-label="Overall" data-rate="'.($overAll > 0 ? $overAll : 0).'" data-bg="'.$bgs[0].'" data-bd="'.$bds[0].'">';
-                                $html .= '<td class="w-20">';
-                                    $html .= '<div class="form-check m-0 justify-center">';
-                                        $html .= '<input checked id="rateRowCheck_0" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
-                                    $html .= '</div>';
-                                $html .= '</td>';
-                                $html .= '<th>Overall</th>';
-                                $html .= '<th>';
-                                    $html .= $overAll > 0 ? $overAll.'%' : '0.00%';
-                                $html .= '</th>';
-                            $html .= '</tr>';
-                            foreach($result as $res):
-                                $html .= '<tr class="rateRow" data-label="'.$res->course_name.'" data-rate="'.($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2) : 0).'" data-bg="'.$bgs[$row].'" data-bd="'.$bds[$row].'">';
+                    $html .= '<table class="table table-bordered table-sm" id="attendanceRateOvTable" data-title="'.(isset($theTerm->name) && !empty($theTerm->name) ? $theTerm->name : 'Undefined').'">';
+                        $html .= '<tbody>';
+                            if($result && !empty($result)):
+                                $html .= '<tr class="rateRow" data-label="Overall" data-rate="'.($overAll > 0 ? $overAll : 0).'" data-bg="'.$bgs[0].'" data-bd="'.$bds[0].'">';
                                     $html .= '<td class="w-20">';
                                         $html .= '<div class="form-check m-0 justify-center">';
-                                            $html .= '<input checked id="rateRowCheck_'.$row.'" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
+                                            $html .= '<input checked id="rateRowCheck_0" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
                                         $html .= '</div>';
-                                    $html .= '</td>';    
-                                    $html .= '<th><a href="'.route('reports.term.performance.course.view', [$term_declaration_id, $res->course_id]).'">'.$res->course_name.'</a></th>';
-                                    $html .= '<th>'.($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%').'</th>';
+                                    $html .= '</td>';
+                                    $html .= '<th>Overall</th>';
+                                    $html .= '<th>';
+                                        $html .= $overAll > 0 ? $overAll.'%' : '0.00%';
+                                    $html .= '</th>';
                                 $html .= '</tr>';
-                                $row++;
-                            endforeach;
-                        endif;
-                    $html .= '</tbody>';
-                $html .= '</table>';
+                                foreach($result as $res):
+                                    $html .= '<tr class="rateRow" data-label="'.$res->course_name.'" data-rate="'.($res->percentage_withexcuse > 0 ? round($res->percentage_withexcuse, 2) : 0).'" data-bg="'.$bgs[$row].'" data-bd="'.$bds[$row].'">';
+                                        $html .= '<td class="w-20">';
+                                            $html .= '<div class="form-check m-0 justify-center">';
+                                                $html .= '<input checked id="rateRowCheck_'.$row.'" class="form-check-input rateRowCheck" type="checkbox" name="rateRowCheck[]" value="1">';
+                                            $html .= '</div>';
+                                        $html .= '</td>';    
+                                        $html .= '<th><a href="'.route('reports.term.performance.course.view', [$term_declaration_id, $res->course_id]).'">'.$res->course_name.'</a></th>';
+                                        $html .= '<th>'.($res->percentage_withexcuse > 0 ? number_format(round($res->percentage_withexcuse, 2), 2).'%' : '0.00%').'</th>';
+                                    $html .= '</tr>';
+                                    $row++;
+                                endforeach;
+                            endif;
+                        $html .= '</tbody>';
+                    $html .= '</table>';
+                $html .= '</div>';
             $html .= '</div>';
         else:
             $html .= '<div class="alert alert-danger-soft show flex items-center mt-5" role="alert">';
