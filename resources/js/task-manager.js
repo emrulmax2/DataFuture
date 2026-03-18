@@ -111,6 +111,12 @@ var taskAssignedStudentTable = (function () {
                     }
                 },
                 {
+                    title: "Venue",
+                    field: "venue_name",
+                    headerHozAlign: "left",
+                    width: "180",
+                },
+                {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
@@ -164,7 +170,7 @@ var taskAssignedStudentTable = (function () {
                     field: "task_status",
                     headerSort: false,
                     headerHozAlign: "left",
-                    width: 120,
+                    width: 150,
                     formatter(cell, formatterParams) {  
                         var html = '<div class="flex justify-start items-center">';
                                 html += '<div>';
