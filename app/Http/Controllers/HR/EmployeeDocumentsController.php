@@ -94,7 +94,8 @@ class EmployeeDocumentsController extends Controller
                     'url' => (isset($list->current_file_name) && !empty($list->current_file_name) ? $list->current_file_name : ''),
                     'created_by'=> (isset($list->user->name) ? $list->user->name : 'Unknown'),
                     'created_at'=> (isset($list->created_at) && !empty($list->created_at) ? date('jS F, Y', strtotime($list->created_at)) : ''),
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at,
+                    'hasNote' => (isset($list->note->id) && $list->note->id > 0 ? 1 : 0)
                 ];
                 $i++;
             endforeach;
@@ -213,9 +214,14 @@ class EmployeeDocumentsController extends Controller
 
     public function downloadUrl(Request $request){
         $row_id = $request->row_id;
+        $has_note = (isset($request->has_note) && $request->has_note > 0 ? $request->has_note : 0);
 
         $empDoc = EmployeeDocuments::find($row_id);
-        $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
+        if($has_note):
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/notes/'.$empDoc->current_file_name, now()->addMinutes(5));
+        else:
+            $tmpURL = Storage::disk('s3')->temporaryUrl('public/employees/'.$empDoc->employee_id.'/documents/'.$empDoc->current_file_name, now()->addMinutes(5));
+        endif;
         return response()->json(['res' => $tmpURL], 200);
     }
 
