@@ -146,6 +146,12 @@ class PendingTaskManagerController extends Controller
                     });
                 endif;
             endif;
+            if(!empty($venue) && $venue > 0):
+                $Query->whereHas('course.propose', function($q) use($venue){
+                    $q->where('venue_id', $venue);
+                });
+            endif;
+
             if(!empty($reg_or_ref)):
                 $Query->where('application_no', 'LIKE', '%'.$reg_or_ref.'%');
             endif;
@@ -177,6 +183,7 @@ class PendingTaskManagerController extends Controller
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
                     $status = (isset($theApplicantTask->status) && !empty($theApplicantTask->status) ? $theApplicantTask->status : '');
+                    $venueName = (isset($list->course->venue->name) && !empty($list->course->venue->name) ? $list->course->venue->name : '');
                     if($status != 'Pending'):
                         $createOrUpdateBy = (isset($theApplicantTask->updatedBy->employee->full_name) && !empty($theApplicantTask->updatedBy->employee->full_name) ? $theApplicantTask->updatedBy->employee->full_name : '');
                         $createOrUpdate = (isset($theApplicantTask->updated_at) && !empty($theApplicantTask->updated_at) ? date('jS M, Y', strtotime($theApplicantTask->updated_at)) : '');
@@ -243,7 +250,8 @@ class PendingTaskManagerController extends Controller
                         'downloads' => $taskDownloads,
                         'task_excuse' => 'No',
                         'task_address_request' => 'No',
-                        'student_task_id' => (isset($theApplicantTask->id) && $theApplicantTask->id > 0 ? $theApplicantTask->id : 0)
+                        'student_task_id' => (isset($theApplicantTask->id) && $theApplicantTask->id > 0 ? $theApplicantTask->id : 0),
+                        'venue_name' => $venueName
                     ];
                     $i++;
                 endforeach;
@@ -257,21 +265,17 @@ class PendingTaskManagerController extends Controller
                 if(!empty($courseCreations)):
                     $Query->whereHas('activeCR', function($q) use($courseCreations){
                         $q->whereIn('course_creation_id', $courseCreations)->where('active', 1);
-                        //proposed course venue filter
-
-
                     });
                 endif;
+            endif;
+            if(!empty($venue) && $venue > 0):
+                $Query->whereHas('activeCR.propose', function($q) use($venue){
+                    $q->where('venue_id', $venue);
+                });
             endif;
             if(!empty($reg_or_ref)):
                 $Query->where(function($q) use($reg_or_ref){
                     $q->where('application_no', 'LIKE', '%'.$reg_or_ref.'%')->orWhere('registration_no', 'LIKE', '%'.$reg_or_ref.'%');
-                });
-            endif;
-
-            if(!empty($venue) && $venue > 0):
-                $Query->whereHas('propose', function($q) use($venue){
-                    $q->where('venue_id', $venue);
                 });
             endif;
 
@@ -301,7 +305,7 @@ class PendingTaskManagerController extends Controller
 
                     $theStudentTask = StudentTask::where('task_list_id', $task_id)->where('student_id', $list->id)->where('status', $status)->orderBy('id', 'DESC')->get()->first();
                     
-                    //$venueName = (isset($list->propose->venue->name) && !empty($list->propose->venue->name) ? $list->propose->venue->name : '');
+                    $venueName = (isset($list->activeCR->propose->venue->name) && !empty($list->activeCR->propose->venue->name) ? $list->activeCR->propose->venue->name : '');
                     
                     $createOrUpdate = '';
                     $createOrUpdateBy = '';
@@ -375,7 +379,7 @@ class PendingTaskManagerController extends Controller
                                 'task_address_request' => 'No',
                                 'student_task_id' => (isset($theStudentTaskId) && $theStudentTaskId > 0 ? $theStudentTaskId : 0),
                                 'student_document_request_form_id' => $documentRequest,
-                                
+                                'venue_name' => $venueName          
                             ];
                             
                         $i++;
@@ -410,6 +414,7 @@ class PendingTaskManagerController extends Controller
                             'task_address_request' => (isset($task->address_request) && $task->address_request == 'Yes' ? 'Yes' : 'No'),
                             'student_task_id' => (isset($theStudentTask->id) && $theStudentTask->id > 0 ? $theStudentTask->id : 0),
                             'student_document_request_form_id' => null,
+                            'venue_name' => $venueName    
                         ];
                         $i++;
                     }
