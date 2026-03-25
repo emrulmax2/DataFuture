@@ -40,8 +40,8 @@ var table = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "SMTP User",
-                    field: "smtp_user",
+                    title: "Reporting Email",
+                    field: "reporting_email",
                     headerHozAlign: "left",
                 },
                 {

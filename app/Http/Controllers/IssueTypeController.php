@@ -69,6 +69,7 @@ class IssueTypeController extends Controller
                     'name' => $list->name,
                     'availability' => $list->availability,
                     'smtp_user' => isset($list->smtp) ? $list->smtp->smtp_user : '',
+                    'reporting_email' => $list->reporting_email,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
