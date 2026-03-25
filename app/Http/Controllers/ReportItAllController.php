@@ -156,29 +156,29 @@ class ReportItAllController extends Controller
             
             //$issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
-            $configuration = [
-                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
-                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
-                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
-                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+            // $configuration = [
+            //     'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+            //     'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+            //     'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+            //     'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+            //     'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
                 
-                'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-                'from_name'    =>  'London Churchill College',
-            ];
+            //     'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+            //     'from_name'    =>  'London Churchill College',
+            // ];
 
         
 
-            // $configuration = [
-            //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
-            //     'smtp_port' => '2525',
-            //     'smtp_username' => 'e8ae09cfefd325',
-            //     'smtp_password' => 'ce7fa44b28281d',
-            //     'smtp_encryption' => 'tls',
+            $configuration = [
+                'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                'smtp_port' => '2525',
+                'smtp_username' => '5d8db87355cb3a',
+                'smtp_password' => '4570a85ce49382',
+                'smtp_encryption' => 'tls',
                 
-            //     'from_email'    => 'no-reply@lcc.ac.uk',
-            //     'from_name'    =>  'London Churchill College',
-            // ];
+                'from_email'    => 'no-reply@lcc.ac.uk',
+                'from_name'    =>  'London Churchill College',
+            ];
 
 
             $statusClasses = [

@@ -18,7 +18,7 @@ class ReportAnyItForEmployeeController extends Controller
      */
     public function index(){
 
-        $issueList = IssueType::where('availability','Employee')->get();
+        $issueList = IssueType::where('availability','Employee')->orWhere('availability','Both')->get();
         $venues = Venue::where('active',1)->get();
         $employee = Employee::where('user_id', auth()->user()->id)->first();
         return view('pages.students.report-it.employee.index', [
