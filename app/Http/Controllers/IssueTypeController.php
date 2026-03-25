@@ -83,7 +83,8 @@ class IssueTypeController extends Controller
         $data = IssueType::create([
             'name'=> $request->name,
             'availability' => $request->availability,
-            'comon_smtp_id' => $request->comon_smtp_id,
+            'reporting_email' => $request->reporting_email,
+            'comon_smtp_id' => isset($request->comon_smtp_id) ? $request->comon_smtp_id : null,
             'created_by' => auth()->user()->id
         ]);
         return response()->json($data);
@@ -103,7 +104,8 @@ class IssueTypeController extends Controller
         $data = $issueType->update([
             'name'=> $request->name,
             'availability' => $request->availability,
-            'comon_smtp_id' => $request->comon_smtp_id,
+            'reporting_email' => $request->reporting_email,
+            'comon_smtp_id' => isset($request->comon_smtp_id) ? $request->comon_smtp_id : null,
             'updated_by' => auth()->user()->id
         ]);
         return response()->json($data);

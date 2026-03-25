@@ -26,6 +26,7 @@ class UpdateIssueTypeRequest extends FormRequest
             'name' => 'required',
             'availability' => 'required|in:Employee,Student',
             'comon_smtp_id' => 'nullable',
+            'reporting_email' => 'required|email',
         ];
     }
 }

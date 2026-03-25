@@ -153,7 +153,8 @@ class ReportItAllController extends Controller
         //after successful store we need to send a email to the staff
         if(isset($reportItAll->issue_type_id)) {
             $newInsertedReportIt = ReportItAll::find($reportItAll->id);
-            $issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
+            
+            //$issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
             $configuration = [
                 'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
@@ -225,7 +226,7 @@ class ReportItAllController extends Controller
             Best regards,<br/>
             London Churchill College";
 
-            UserMailerJob::dispatch($configuration, [$issueTypeMailInfo->smtp_user], new CommunicationSendMail('A new Report IT issue arised', $MAILBODY, []));
+            UserMailerJob::dispatch($configuration, [$newInsertedReportIt->issueType->reporting_email], new CommunicationSendMail('A new Report IT issue arised', $MAILBODY, []));
 
         }
 

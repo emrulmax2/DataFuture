@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ReportItAll;
 use App\Http\Requests\StorereportItAllRequest;
 use App\Http\Requests\UpdatereportItAllRequest;
+use App\Models\ComonSmtp;
 use App\Models\Employee;
 use App\Models\IssueType;
 use App\Models\Venue;

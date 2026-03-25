@@ -275,7 +275,7 @@ var table = (function () {
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                         $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Academic years data successfully inserted.');
+                        $("#successModal .successModalDesc").html('Data successfully inserted.');
                     });         
                 }
                 table.init();
@@ -358,7 +358,7 @@ var table = (function () {
                     succModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                         $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Academic years data successfully updated.');
+                        $("#successModal .successModalDesc").html('Data successfully updated.');
                     });
                 }
                 table.init();

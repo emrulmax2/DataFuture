@@ -106,7 +106,7 @@
                                 </select>
                                 <div class="acc__input-error error-availability text-danger mt-2"></div>
                             </div>
-                            <div class="mt-3">
+                            {{-- <div class="mt-3">
                                 <label for="comon_smtp_id" class="form-label">SMTP User <span class="text-danger">*</span></label>
                                 <select id="comon_smtp_id" name="comon_smtp_id" class="form-select w-full">
                                     <option value="">Please Select</option>
@@ -115,7 +115,14 @@
                                     @endforeach
                                 </select>
                                 <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                            </div> --}}
+
+                            <div>
+                                <label for="reporting_email" class="form-label">Reporting Email <span class="text-danger">*</span></label>
+                                <input id="reporting_email" type="text" name="reporting_email" class="form-control w-full">
+                                <div class="acc__input-error error-reporting_email text-danger mt-2"></div>
                             </div>
+
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -167,7 +174,7 @@
                             </select>
                             <div class="acc__input-error error-availability text-danger mt-2"></div>
                         </div> 
-                        <div class="mt-3">
+                        {{-- <div class="mt-3">
                                 <label for="comon_smtp_id" class="form-label">SMTP User <span class="text-danger">*</span></label>
                                 <select id="comon_smtp_id" name="comon_smtp_id" class="form-select w-full">
                                     <option value="">Please Select</option>
@@ -176,6 +183,11 @@
                                     @endforeach
                                 </select>
                                 <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                        </div> --}}
+                        <div>
+                            <label for="reporting_email" class="form-label">Reporting Email <span class="text-danger">*</span></label>
+                            <input id="reporting_email" type="text" name="reporting_email" class="form-control w-full">
+                            <div class="acc__input-error error-reporting_email text-danger mt-2"></div>
                         </div>
                         
                     </div>
