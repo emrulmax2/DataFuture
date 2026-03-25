@@ -103,6 +103,7 @@
                                     <option value="" >Please Select</option>
                                     <option value="Employee">Employee</option>
                                     <option value="Student">Student</option>
+                                    <option value="Both">Both</option>
                                 </select>
                                 <div class="acc__input-error error-availability text-danger mt-2"></div>
                             </div>
@@ -171,6 +172,7 @@
                                 <option value="" >Please Select</option>
                                 <option value="Employee">Employee</option>
                                 <option value="Student">Student</option>
+                                <option value="Both">Both</option>
                             </select>
                             <div class="acc__input-error error-availability text-danger mt-2"></div>
                         </div> 

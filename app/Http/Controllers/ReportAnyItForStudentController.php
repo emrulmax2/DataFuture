@@ -23,7 +23,7 @@ class ReportAnyItForStudentController extends Controller
 {
     public function index(){
 
-        $issueList = IssueType::where('availability','Student')->get();
+        $issueList = IssueType::where('availability','Student')->orWhere('availability','Both')->get();
         $venues = Venue::where('active',1)->get();
         $student = Student::where('student_user_id', auth('student')->user()->id)->first();
         return view('pages.students.report-it.student.index', [
