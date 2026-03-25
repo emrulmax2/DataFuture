@@ -235,14 +235,12 @@ class EmployeeNotesController extends Controller
             $document = $request->file('document');
             $documentName = time().'_'.$document->getClientOriginalName();
             $path = $document->storeAs('public/employees/notes/', $documentName, 's3');
-            //$path = $document->storeAs('public/employees/notes/', $documentName);
 
             $data = [];
             $data['employee_id'] = $employee_id;
             $data['hard_copy_check'] = 0;
             $data['doc_type'] = $document->getClientOriginalExtension();
-            $data['path'] = null; //Storage::disk('public')->url($path);
-            //$data['path'] = asset('public/employees/notes/'.$documentName);
+            $data['path'] = null; //Storage::disk('public')->url($documentPath);
             $data['display_file_name'] = $documentName;
             $data['current_file_name'] = $documentName;
             $data['created_by'] = auth()->user()->id;

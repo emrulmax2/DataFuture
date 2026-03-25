@@ -10,7 +10,6 @@
                 <div class="modal-body grid grid-cols-12 gap-4 gap-y-3">
                     <div class="col-span-12">
                         <label for="add_issue_type_id" class="form-label">What Type of Issue you are facing? <span class="text-danger">*</span></label>
-                        
                         @foreach($issueList as $issue)
                         <div class="flex flex-col sm:flex-row mt-2 {{ $issue->availability }}_class">
                             <div class="form-check mr-3">

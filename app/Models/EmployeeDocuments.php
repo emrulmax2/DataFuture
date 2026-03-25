@@ -35,6 +35,10 @@ class EmployeeDocuments extends Model
         return $this->belongsTo(DocumentSettings::class, 'document_setting_id');
     }
 
+    public function note(){
+        return $this->hasOne(EmployeeNotes::class, 'employee_document_id')->latestOfMany();
+    }
+
     public function user(){
         return $this->belongsTo(User::class, 'created_by');
     }
