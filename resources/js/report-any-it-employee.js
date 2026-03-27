@@ -27,7 +27,7 @@ var table = (function () {
             columns: [
                 {
                     title: "#ID",
-                    field: "id",
+                    field: "report_number",
                     width: "180",
                 },
                 {

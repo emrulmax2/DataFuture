@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\Mail\CommunicationSendMail;
 use App\Models\TaskList;
+use App\Models\TaskListUser;
 
 class ReportItAllController extends Controller
 {
@@ -42,12 +43,21 @@ class ReportItAllController extends Controller
     }
 
     public function list(Request $request){
+
+        $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
+        $taskListId = [];
+        if(in_array(22, $assignedTaskIds)){
+                $taskListId[] = 22;
+        }
+        if(in_array(27, $assignedTaskIds)){
+                $taskListId[] = 27;
+        }
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $reportFrom = (isset($request->reportFrom) && !empty($request->reportFrom) ? $request->reportFrom : '');
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : '');
 
-        $total_rows = $count = ReportItAll::count();
+        $total_rows = $count = ReportItAll::whereIn('task_list_id', $taskListId)->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
         $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
@@ -61,9 +71,9 @@ class ReportItAllController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
         if($statuses=="")
-            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',["Pending","In Progress"])->orderByRaw(implode(',', $sorts));
+            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',["Pending","In Progress"])->whereIn('task_list_id', $taskListId)->orderByRaw(implode(',', $sorts));
         else
-            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',$statuses)->orderByRaw(implode(',', $sorts));
+            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',$statuses)->whereIn('task_list_id', $taskListId)->orderByRaw(implode(',', $sorts));
 
         if(!empty($queryStr)):
             // search in employee name and student name
@@ -98,6 +108,7 @@ class ReportItAllController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'report_number' => isset($list->report_number) ? $list->report_number : '',
                     'issue_type' => (isset($list->issueType->name) ? $list->issueType->name : ''),
                     'report_form' => (isset($list->student->first_name) ? 'Student' : (isset($list->employee->first_name) ? 'Employee' : '')),
                     'status' => $list->status,
@@ -136,12 +147,28 @@ class ReportItAllController extends Controller
 
         $reportItAll = new ReportItAll();
         // Example: merge a value for 'task_list_id' if needed
-        $taskList = TaskList::where('name','Report IT')->get()->first();
+        //if issue_type_id has a name data which mention Facility then the task list id should be 27 otherwise it should be 22
+        $issueType = IssueType::find($request->issue_type_id);
+        if($issueType && strpos($issueType->name, 'Facility') !== false) {
+            $taskList = TaskList::find(27);
+        } else {
+            $taskList = TaskList::find(22);
+        }
         $request->merge(['task_list_id' => $taskList->id]);
+        
         $reportItAll->fill($request->all());
+        //after save then update new report number should be 6 digit with RIT- prefix and current date Ymd format like RIT-20260327-0001
+        // this will be reset on every year when the year changes the report number will start from RIT-2027-000001
+        $currentYear = date('Y');
+        $reportCount = ReportItAll::whereYear('created_at', $currentYear)->count() + 1;
+        if($taskList->id =="22")
+            $reportNumber = 'RIT-' . $currentYear . '-' . str_pad($reportCount, 6, '0', STR_PAD_LEFT);
+        else
+            $reportNumber = 'FAC-' . $currentYear . '-' . str_pad($reportCount, 6, '0', STR_PAD_LEFT);
 
-        $reportItAll->save();
+        $reportItAll->report_number = $reportNumber;  
 
+        $reportItAll->save(); 
         if(isset($documents) && !empty($documents)){
             
             foreach($documents as $document_id):
@@ -156,29 +183,29 @@ class ReportItAllController extends Controller
             
             //$issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
-            // $configuration = [
-            //     'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
-            //     'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
-            //     'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-            //     'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
-            //     'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+            $configuration = [
+                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
                 
-            //     'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-            //     'from_name'    =>  'London Churchill College',
-            // ];
+                'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+                'from_name'    =>  'London Churchill College',
+            ];
 
         
 
-            $configuration = [
-                'smtp_host' => 'sandbox.smtp.mailtrap.io',
-                'smtp_port' => '2525',
-                'smtp_username' => '5d8db87355cb3a',
-                'smtp_password' => '4570a85ce49382',
-                'smtp_encryption' => 'tls',
+            // $configuration = [
+            //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
+            //     'smtp_port' => '2525',
+            //     'smtp_username' => '5d8db87355cb3a',
+            //     'smtp_password' => '4570a85ce49382',
+            //     'smtp_encryption' => 'tls',
                 
-                'from_email'    => 'no-reply@lcc.ac.uk',
-                'from_name'    =>  'London Churchill College',
-            ];
+            //     'from_email'    => 'no-reply@lcc.ac.uk',
+            //     'from_name'    =>  'London Churchill College',
+            // ];
 
 
             $statusClasses = [
@@ -190,6 +217,7 @@ class ReportItAllController extends Controller
 
             $MAILBODY = "<p style=\"margin:0 0 12px;color:#263238;font-size:14px;line-height:1.5;\">
                 Dear <strong>LCC STAFF</strong>,<br>
+                Reference Number: <strong>" . $newInsertedReportIt->report_number . "</strong><br><br>
                 An issue has been submitted By " . $newInsertedReportIt->Issue_raised_by . " that may require your attention. See the key details below.
             </p>
             <!-- Issue Info Table -->

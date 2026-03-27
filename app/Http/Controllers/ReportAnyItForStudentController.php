@@ -26,6 +26,7 @@ class ReportAnyItForStudentController extends Controller
         $issueList = IssueType::where('availability','Student')->orWhere('availability','Both')->get();
         $venues = Venue::where('active',1)->get();
         $student = Student::where('student_user_id', auth('student')->user()->id)->first();
+        
         return view('pages.students.report-it.student.index', [
             'title' => 'Report IT - London Churchill College',
             'breadcrumbs' => [
@@ -88,6 +89,7 @@ class ReportAnyItForStudentController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'report_number' => $list->report_number,
                     'issue_type' => (isset($list->issueType->name) ? $list->issueType->name : ''),
                     'report_form' => (isset($list->student->first_name) ? 'Student' : (isset($list->employee->first_name) ? 'Employee' : '')),
                     'status' => ucfirst($list->status),
@@ -117,10 +119,27 @@ class ReportAnyItForStudentController extends Controller
 
         $reportItAll = new ReportItAll();
         // Example: merge a value for 'task_list_id' if needed
-        $taskList = TaskList::where('name','Report IT')->get()->first();
+        //if issue_type_id has a name data which mention Facility then the task list id should be 27 otherwise it should be 22
+        $issueType = IssueType::find($request->issue_type_id);
+        if($issueType && strpos($issueType->name, 'Facility') !== false) {
+            $taskList = TaskList::find(27);
+        } else {
+            $taskList = TaskList::find(22);
+        }
         $request->merge(['task_list_id' => $taskList->id]);
-        $reportItAll->fill($request->all());
         
+        $reportItAll->fill($request->all());
+        //after save then update new report number should be 6 digit with RIT- prefix and current date Ymd format like RIT-20260327-0001
+        // this will be reset on every year when the year changes the report number will start from RIT-2027-000001
+        $currentYear = date('Y');
+        $reportCount = ReportItAll::whereYear('created_at', $currentYear)->count() + 1;
+        if($taskList->id =="22")
+            $reportNumber = 'RIT-' . $currentYear . '-' . str_pad($reportCount, 6, '0', STR_PAD_LEFT);
+        else
+            $reportNumber = 'FAC-' . $currentYear . '-' . str_pad($reportCount, 6, '0', STR_PAD_LEFT);
+
+        $reportItAll->report_number = $reportNumber;  
+
         $reportItAll->save();
 
         if(isset($documents) && !empty($documents)){
@@ -135,7 +154,7 @@ class ReportAnyItForStudentController extends Controller
         //after successful store we need to send a email to the staff
         if(isset($reportItAll->issue_type_id)) {
             $newInsertedReportIt = ReportItAll::find($reportItAll->id);
-            $issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
+            //$issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
             $configuration = [
                 'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
@@ -171,6 +190,7 @@ class ReportAnyItForStudentController extends Controller
 
             $MAILBODY = "<p style=\"margin:0 0 12px;color:#263238;font-size:14px;line-height:1.5;\">
                 Dear <strong>LCC STAFF</strong>,<br>
+                Reference Number: <strong>" . $newInsertedReportIt->report_number . "</strong><br><br>
                 An issue has been submitted By " . $newInsertedReportIt->Issue_raised_by . " that may require your attention. See the key details below.
             </p>
             <!-- Issue Info Table -->
@@ -207,7 +227,7 @@ class ReportAnyItForStudentController extends Controller
             Best regards,<br/>
             London Churchill College";
 
-            UserMailerJob::dispatch($configuration, [$issueTypeMailInfo->smtp_user], new CommunicationSendMail('Report IT issue arised', $MAILBODY, []));
+            UserMailerJob::dispatch($configuration, [$newInsertedReportIt->issueType->reporting_email], new CommunicationSendMail('Report IT issue arised', $MAILBODY, []));
 
         }
         return response()->json(['status' => 'success', 'message' => 'Report IT entry created successfully.']);

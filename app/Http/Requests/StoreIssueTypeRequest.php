@@ -24,7 +24,7 @@ class StoreIssueTypeRequest extends FormRequest
         return [
             
             'name' => 'required',
-            'availability' => 'required|in:Employee,Student',
+            'availability' => 'required|in:Employee,Student,Both',
             'comon_smtp_id' => 'nullable',
             'reporting_email' => 'required|email',
         ];
