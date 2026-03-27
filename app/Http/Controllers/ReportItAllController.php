@@ -71,7 +71,7 @@ class ReportItAllController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
         if($statuses=="")
-            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',["Pending","In Progress"])->whereIn('task_list_id', $taskListId)->orderByRaw(implode(',', $sorts));
+            $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('task_list_id', $taskListId)->orderByRaw(implode(',', $sorts));
         else
             $query = ReportItAll::with('employee', 'issueType', 'student')->whereIn('status',$statuses)->whereIn('task_list_id', $taskListId)->orderByRaw(implode(',', $sorts));
 
