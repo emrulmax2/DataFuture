@@ -29,6 +29,7 @@ class ReportAnyItForEmployeeController extends Controller
             'issueList' => $issueList,
             'employee' => $employee,
             'venues' => $venues,
+            
         ]);
     }
 

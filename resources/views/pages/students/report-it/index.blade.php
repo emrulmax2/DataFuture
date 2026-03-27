@@ -6,7 +6,7 @@
 
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Report any IT Issue For Both Employee and Students</h2>
+        <h2 class="text-lg font-medium mr-auto">All reported Issue For Both Employee and Students</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
         </div>
@@ -26,7 +26,7 @@
                         <input type="text" id="report_number" name="report_number" placeholder="Reference Number" value="" class="w-full"/>
                     </div>
                 </div>
-                
+
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Name.</div>
