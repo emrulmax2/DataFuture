@@ -189,26 +189,39 @@ class ReportAnyItForStudentController extends Controller
             ];
 
             $MAILBODY = "<p style=\"margin:0 0 12px;color:#263238;font-size:14px;line-height:1.5;\">
-                Dear <strong>LCC STAFF</strong>,<br>
-                Reference Number: <strong>" . $newInsertedReportIt->report_number . "</strong><br><br>
-                An issue has been submitted By " . $newInsertedReportIt->Issue_raised_by . " that may require your attention. See the key details below.
+                Dear <strong>Team</strong>,<br>
+                Please be informed that an issue ticket has been created in the system.Ticket details are as follows:
             </p>
             <!-- Issue Info Table -->
             <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:14px;margin:0 auto;max-width:600px;\">
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Type of Issue</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Ticket ID: </td>
+                <td style=\"padding:8px;color:#475569;\"><strong>" . $newInsertedReportIt->report_number . "</strong></td>
+            </tr>
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Type of Issue: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->issueType->name . "</td>
             </tr>
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Description</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Issue Summary: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->description . "</td>
             </tr>
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Date/Time Created: </td>
+                <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->created_at . "</td>
+            </tr>
+            
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Reported By: </td>
+                <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->Issue_raised_by . "</td>
+            </tr>
+
             <tr style=\"background:#f9fafb;\">
-                <td style=\"padding:8px;font-weight:600;color:#374151;\">Venue</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;\">Venue: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->venue->name . "</td>
             </tr>
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;\">Location</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;\">Location: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->location . "</td>
             </tr>
             <tr style=\"background:#f9fafb;\">
