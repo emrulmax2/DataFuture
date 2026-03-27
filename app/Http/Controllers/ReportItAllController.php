@@ -183,29 +183,29 @@ class ReportItAllController extends Controller
             
             //$issueTypeMailInfo = ComonSmtp::find($newInsertedReportIt->issueType->comon_smtp_id);
             $commonSmtp = ComonSmtp::where('is_default', 1)->get()->first();
-            $configuration = [
-                'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
-                'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
-                'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-                'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
-                'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
+            // $configuration = [
+            //     'smtp_host' => (isset($commonSmtp->smtp_host) && !empty($commonSmtp->smtp_host) ? $commonSmtp->smtp_host : 'smtp.gmail.com'),
+            //     'smtp_port' => (isset($commonSmtp->smtp_port) && !empty($commonSmtp->smtp_port) ? $commonSmtp->smtp_port : '587'),
+            //     'smtp_username' => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+            //     'smtp_password' => (isset($commonSmtp->smtp_pass) && !empty($commonSmtp->smtp_pass) ? $commonSmtp->smtp_pass : 'churchill1'),
+            //     'smtp_encryption' => (isset($commonSmtp->smtp_encryption) && !empty($commonSmtp->smtp_encryption) ? $commonSmtp->smtp_encryption : 'tls'),
                 
-                'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
-                'from_name'    =>  'London Churchill College',
-            ];
+            //     'from_email'    => (isset($commonSmtp->smtp_user) && !empty($commonSmtp->smtp_user) ? $commonSmtp->smtp_user : 'no-reply@lcc.ac.uk'),
+            //     'from_name'    =>  'London Churchill College',
+            // ];
 
         
 
-            // $configuration = [
-            //     'smtp_host' => 'sandbox.smtp.mailtrap.io',
-            //     'smtp_port' => '2525',
-            //     'smtp_username' => '5d8db87355cb3a',
-            //     'smtp_password' => '4570a85ce49382',
-            //     'smtp_encryption' => 'tls',
+            $configuration = [
+                'smtp_host' => 'sandbox.smtp.mailtrap.io',
+                'smtp_port' => '2525',
+                'smtp_username' => '5d8db87355cb3a',
+                'smtp_password' => '4570a85ce49382',
+                'smtp_encryption' => 'tls',
                 
-            //     'from_email'    => 'no-reply@lcc.ac.uk',
-            //     'from_name'    =>  'London Churchill College',
-            // ];
+                'from_email'    => 'no-reply@lcc.ac.uk',
+                'from_name'    =>  'London Churchill College',
+            ];
 
 
             $statusClasses = [
@@ -216,26 +216,39 @@ class ReportItAllController extends Controller
             ];
 
             $MAILBODY = "<p style=\"margin:0 0 12px;color:#263238;font-size:14px;line-height:1.5;\">
-                Dear <strong>LCC STAFF</strong>,<br>
-                Reference Number: <strong>" . $newInsertedReportIt->report_number . "</strong><br><br>
-                An issue has been submitted By " . $newInsertedReportIt->Issue_raised_by . " that may require your attention. See the key details below.
+                Dear <strong>Team</strong>,<br>
+                Please be informed that an issue ticket has been created in the system.Ticket details are as follows:
             </p>
             <!-- Issue Info Table -->
             <table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;font-size:14px;margin:0 auto;max-width:600px;\">
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Type of Issue</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Ticket ID: </td>
+                <td style=\"padding:8px;color:#475569;\"><strong>" . $newInsertedReportIt->report_number . "</strong></td>
+            </tr>
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Type of Issue: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->issueType->name . "</td>
             </tr>
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Description</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Issue Summary: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->description . "</td>
             </tr>
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Date/Time Created: </td>
+                <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->created_at . "</td>
+            </tr>
+            
+            <tr>
+                <td style=\"padding:8px;font-weight:600;color:#374151;width:30%;\">Reported By: </td>
+                <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->Issue_raised_by . "</td>
+            </tr>
+
             <tr style=\"background:#f9fafb;\">
-                <td style=\"padding:8px;font-weight:600;color:#374151;\">Venue</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;\">Venue: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->venue->name . "</td>
             </tr>
             <tr>
-                <td style=\"padding:8px;font-weight:600;color:#374151;\">Location</td>
+                <td style=\"padding:8px;font-weight:600;color:#374151;\">Location: </td>
                 <td style=\"padding:8px;color:#475569;\">" . $newInsertedReportIt->location . "</td>
             </tr>
             <tr style=\"background:#f9fafb;\">
