@@ -234,7 +234,7 @@ class ReportAnyItForStudentController extends Controller
             <!-- CTA Button -->
             <div style=\"text-align:center;margin:20px 0;\">
                 <a href=\"" . route('report.it.all.show', $newInsertedReportIt->id) . "\" style=\"display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:600;font-size:14px;\">
-                    View Issue
+                    View Ticket Details
                 </a>
             </div>
             Best regards,<br/>
