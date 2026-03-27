@@ -24,7 +24,7 @@ class UpdateIssueTypeRequest extends FormRequest
         //remove unique rule for name field
         return [
             'name' => 'required',
-            'availability' => 'required|in:Employee,Student',
+            'availability' => 'required|in:Employee,Student,Both',
             'comon_smtp_id' => 'nullable',
             'reporting_email' => 'required|email',
         ];

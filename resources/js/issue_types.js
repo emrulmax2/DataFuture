@@ -317,6 +317,7 @@ var table = (function () {
                     $('.editLoading').hide();
                     let dataset = response.data;
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
+                    $('#editModal input[name="reporting_email"]').val(dataset.reporting_email ? dataset.reporting_email : '');
                     $('#editModal select[name="availability"]').prop('value', dataset.availability ? dataset.availability : '');
 
                     $('#editModal input[name="id"]').val(editId);

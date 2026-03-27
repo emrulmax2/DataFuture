@@ -18,6 +18,15 @@
     <div class="intro-y box p-5 mt-5">
         <form id="tabulatorFilterForm">
             <div class="grid grid-cols-12 gap-4">
+                <!--Add Reference number/report number filter-->
+                
+                <div class="col-span-3">
+                    <div class="flex">
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Ref. No</div>
+                        <input type="text" id="report_number" name="report_number" placeholder="Reference Number" value="" class="w-full"/>
+                    </div>
+                </div>
+                
                 <div class="col-span-3">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Name.</div>

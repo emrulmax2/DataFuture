@@ -87,8 +87,14 @@ class DashboardController extends Controller
         
         $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
         
+        //check if current user has any Pending of In Progress task in Report IT process with task list id 22 or 27 then only show the Report IT issue in dashboard
+        $reportItAlls = collect();
         if(in_array(22, $assignedTaskIds)){
-            $reportItAlls = ReportItAll::where('status','Pending')->get();
+            $reportItAlls = ReportItAll::whereIn('status',['Pending','In Progress'])->where('task_list_id', 22)->get();
+        }
+        
+        if(in_array(27, $assignedTaskIds)){
+            $reportItAlls = $reportItAlls->merge(ReportItAll::whereIn('status',['Pending','In Progress'])->where('task_list_id', 27)->get());
         }
 
         return view('pages.users.staffs.dashboard.index', [

@@ -83,6 +83,7 @@ class ReportAnyItForEmployeeController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
+                    'report_number' => $list->report_number,
                     'issue_type' => (isset($list->issueType->name) ? $list->issueType->name : ''),
                     'report_form' => (isset($list->student->first_name) ? 'Student' : (isset($list->employee->first_name) ? 'Employee' : '')),
                     'status' => ucfirst($list->status),
