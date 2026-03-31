@@ -369,9 +369,12 @@
                             <input {{ (isset($priv['dashboard']['report_it_all']) && $priv['dashboard']['report_it_all'] == 1 ? 'checked' : '') }} id="permission_dashboard_77" class="form-check-input parentPermissionItem" type="checkbox" value="1" name="permission[dashboard][report_it_all]">
                             <label class="form-check-label ml-4" for="permission_dashboard_77">Report Issue</label>
                         </div>
+                        @php
+                         $childAttribute = (isset($priv['dashboard']['report_it_all']) && $priv['dashboard']['report_it_all'] == 1 ? '' : 'disabled');   
+                        @endphp
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['dashboard']['show_all_issue']) && $priv['dashboard']['show_all_issue'] == 1 ? 'checked' : '') }} id="permission_dashboard_78" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][show_all_issue]">
+                                <input {{ (isset($priv['dashboard']['show_all_issue']) && $priv['dashboard']['show_all_issue'] == 1 ? 'checked' : '') }} id="permission_dashboard_78" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][show_all_issue]" {{ $childAttribute }}>
                                 <label class="form-check-label ml-4" for="permission_dashboard_78">Show All Issue</label>
                             </div>
                         </div>
