@@ -371,8 +371,8 @@
                         </div>
                         <div class="childrenPermissionWrap pt-4 pl-12">
                             <div class="form-check form-switch">
-                                <input {{ (isset($priv['dashboard']['show_all_report']) && $priv['dashboard']['show_all_report'] == 1 ? 'checked' : '') }} id="permission_dashboard_78" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][show_all_report]">
-                                <label class="form-check-label ml-4" for="permission_dashboard_78">Export</label>
+                                <input {{ (isset($priv['dashboard']['show_all_issue']) && $priv['dashboard']['show_all_issue'] == 1 ? 'checked' : '') }} id="permission_dashboard_78" class="form-check-input" type="checkbox" value="1" name="permission[dashboard][show_all_issue]">
+                                <label class="form-check-label ml-4" for="permission_dashboard_78">Show All Issue</label>
                             </div>
                         </div>
                     </div>
