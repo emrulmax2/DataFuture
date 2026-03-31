@@ -652,21 +652,21 @@
                                 <label for="edit_message" class="form-label">Message <span class="text-danger">*</span></label>
                                 <textarea rows="4" name="message" class="form-control w-full" id="edit_message"></textarea>
                             </div>
-                            <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
-                                <div class="col-span-3">
+                            <div class="grid grid-cols-12 gap-x-4 gap-y-3 mt-3">
+                                <div class="col-span-6">
                                     <div class="form-check" style="padding-top: 38px;">
                                         <input id="edit_is_repeat_reminder" name="is_repeat_reminder" class="form-check-input" type="checkbox" value="1">
                                         <label class="form-check-label" for="edit_is_repeat_reminder">Repeat Reminder</label>
                                     </div>
                                 </div>
-                                <div class="col-span-3">
+                                <div class="col-span-6">
                                     <div class="form-check" style="padding-top: 38px;">
                                         <input id="edit_is_send_email" name="is_send_email" class="form-check-input" type="checkbox" value="1">
                                         <label class="form-check-label" for="edit_is_send_email">Send Email</label>
                                     </div>
                                 </div>
                                 <div class="col-span-6">
-                                    <label for="edit_reminder_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                    <label for="edit_reminder_employee_ids" class="form-label">Employees</label>
                                     <select name="employee_ids[]" id="edit_reminder_employee_ids" class="w-full tom-selects" multiple>
                                         @if(!empty($employee))
                                             @foreach($employee as $emp)
@@ -675,6 +675,17 @@
                                         @endif
                                     </select>
                                     <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-6">
+                                    <label for="edit_employee_group_ids" class="form-label">Group <span class="text-danger">*</span></label>
+                                    <select name="employee_group_ids[]" id="edit_employee_group_ids" class="w-full tom-selects" multiple>
+                                        @if(!empty($groups))
+                                            @foreach($groups as $gr)
+                                                <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-employee_group_ids text-danger mt-2"></div>
                                 </div>
                             </div>
                             <div class="reminderSingleWrap">
@@ -868,21 +879,21 @@
                                 <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
                                 <textarea rows="4" name="message" class="form-control w-full" id="message"></textarea>
                             </div>
-                            <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-3">
-                                <div class="col-span-3">
+                            <div class="grid grid-cols-12 gap-x-4 gap-y-3 mt-3">
+                                <div class="col-span-6">
                                     <div class="form-check" style="padding-top: 38px;">
                                         <input id="is_repeat_reminder" name="is_repeat_reminder" class="form-check-input" type="checkbox" value="1">
                                         <label class="form-check-label" for="is_repeat_reminder">Repeat Reminder</label>
                                     </div>
                                 </div>
-                                <div class="col-span-3">
+                                <div class="col-span-6">
                                     <div class="form-check" style="padding-top: 38px;">
                                         <input id="is_send_email" name="is_send_email" class="form-check-input" type="checkbox" value="1">
                                         <label class="form-check-label" for="is_send_email">Send Email</label>
                                     </div>
                                 </div>
                                 <div class="col-span-6">
-                                    <label for="reminder_employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                    <label for="reminder_employee_ids" class="form-label">Employees </label>
                                     <select name="employee_ids[]" id="reminder_employee_ids" class="w-full tom-selects" multiple>
                                         @if(!empty($employee))
                                             @foreach($employee as $emp)
@@ -891,6 +902,17 @@
                                         @endif
                                     </select>
                                     <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
+                                </div>
+                                <div class="col-span-6">
+                                    <label for="employee_group_ids" class="form-label">Group <span class="text-danger">*</span></label>
+                                    <select name="employee_group_ids[]" id="employee_group_ids" class="w-full tom-selects" multiple>
+                                        @if(!empty($groups))
+                                            @foreach($groups as $gr)
+                                                <option value="{{ $gr->id }}">{{ $gr->name }}</option>
+                                            @endforeach
+                                        @endif
+                                    </select>
+                                    <div class="acc__input-error error-employee_group_ids text-danger mt-2"></div>
                                 </div>
                             </div>
                             <div class="reminderSingleWrap">

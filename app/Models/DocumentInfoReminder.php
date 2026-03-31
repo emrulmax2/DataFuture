@@ -10,7 +10,7 @@ class DocumentInfoReminder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $appends = ['employee_ids'];
+    protected $appends = ['employee_ids', 'group_ids'];
 
     protected $fillable = [
         'document_info_id',
@@ -62,11 +62,19 @@ class DocumentInfoReminder extends Model
         return DocumentInfoReminderEmployee::where('document_info_reminder_id', $this->id)->pluck('employee_id')->unique()->toArray();
     }
 
+    public function getGroupIdsAttribute(){
+        return DocumentInfoReminderGroup::where('document_info_reminder_id', $this->id)->pluck('employee_group_id')->unique()->toArray();
+    }
+
     public function info(){
         return $this->belongsTo(DocumentInfo::class, 'document_info_id');
     }
 
     public function employee(){
         return $this->hasMany(DocumentInfoReminderEmployee::class, 'document_info_reminder_id', 'id');
+    }
+
+    public function groups(){
+        return $this->hasMany(DocumentInfoReminderGroup::class, 'document_info_reminder_id', 'id');
     }
 }

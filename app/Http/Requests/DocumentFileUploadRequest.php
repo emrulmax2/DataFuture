@@ -27,7 +27,9 @@ class DocumentFileUploadRequest extends FormRequest
             'email_reminder' => 'sometimes',
             'subject' => 'required_if:email_reminder,1',
             'message' => 'required_if:email_reminder,1',
-            'employee_ids' => 'required_if:email_reminder,1',
+
+            //'employee_ids' => 'required_if:email_reminder,1',
+            'employee_group_ids' => 'required_if:email_reminder,1',
 
             'is_repeat_reminder' => 'sometimes',
             'single_reminder_date' => 'required_if:is_repeat_reminder,0',
@@ -42,7 +44,8 @@ class DocumentFileUploadRequest extends FormRequest
             'name.required' => 'This field is required.',
             'subject.required_if' => 'This field is required.',
             'message.required_if' => 'This field is required.',
-            'employee_ids.required_if' => 'This field is required.',
+            //'employee_ids.required_if' => 'This field is required.',
+            'employee_group_ids.required_if' => 'This field is required.',
 
             'single_reminder_date.required_if' => 'This field is required.',
             'frequency.required_if' => 'This field is required.',
