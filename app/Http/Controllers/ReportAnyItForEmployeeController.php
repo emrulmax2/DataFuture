@@ -21,6 +21,7 @@ class ReportAnyItForEmployeeController extends Controller
         $issueList = IssueType::where('availability','Employee')->orWhere('availability','Both')->get();
         $venues = Venue::where('active',1)->get();
         $employee = Employee::where('user_id', auth()->user()->id)->first();
+        $priv = auth()->user()->priv();
         return view('pages.students.report-it.employee.index', [
             'title' => 'Report IT - London Churchill College',
             'breadcrumbs' => [
@@ -29,6 +30,7 @@ class ReportAnyItForEmployeeController extends Controller
             'issueList' => $issueList,
             'employee' => $employee,
             'venues' => $venues,
+            'priv' => $priv
             
         ]);
     }

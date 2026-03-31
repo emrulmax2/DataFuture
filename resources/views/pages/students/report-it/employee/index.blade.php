@@ -11,10 +11,12 @@
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
             <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Dashboard</a>
         </div>
+        @if(isset($priv['dashboard']['show_all_issue']) && $priv['dashboard']['show_all_issue'] == 1)
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
                 <button data-tw-toggle="modal" data-tw-target="#addModal" class="add_btn btn btn-primary shadow-md mr-2"><i data-lucide="plus" class="w-4 h-4 mr-2"></i>Add New</button>
                 <a href="{{ route('report.it.all') }}"  class="add_btn btn btn-warning shadow-md mr-2"><i data-lucide="search" class="w-4 h-4 mr-2"></i>Show All</a>
         </div>
+        @endif
     </div>
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
