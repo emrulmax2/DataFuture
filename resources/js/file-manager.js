@@ -33,6 +33,17 @@ var fileVersionHistoryListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Description",
+                    field: "description",
+                    headerHozAlign: "left",
+                    formatter(cell, formatterParams) { 
+                        var html = '<div class="whitespace-normal">';
+                                html += '<div class="text-slate-500 text-sm whitespace-normal">'+cell.getData().description+'</div>';
+                            html += '</div>';
+                        return html;
+                    }
+                },
+                {
                     title: "Created",
                     field: "created_at",
                     headerHozAlign: "left",
@@ -131,6 +142,8 @@ var fileVersionHistoryListTable = (function () {
     let editFileEmployeeIds = ($('#edit_file_employee_ids').length > 0 ? new TomSelect('#edit_file_employee_ids', tomOptions) : null);
     let reminderEmployeeIds = ($('#reminder_employee_ids').length > 0 ? new TomSelect('#reminder_employee_ids', tomOptions) : null);
     let editReminderEmployeeIds = ($('#edit_reminder_employee_ids').length > 0 ? new TomSelect('#edit_reminder_employee_ids', tomOptions) : null);
+    let employeeGroupIds = ($('#employee_group_ids').length > 0 ? new TomSelect('#employee_group_ids', tomOptions) : null);
+    let editEmployeeGroupIds = ($('#edit_employee_group_ids').length > 0 ? new TomSelect('#edit_employee_group_ids', tomOptions) : null);
 
 
     const addFolderModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addFolderModal"));
@@ -385,7 +398,7 @@ var fileVersionHistoryListTable = (function () {
             }).then(response => {
                 document.querySelector('#createFolder').removeAttribute('disabled');
                 document.querySelector("#createFolder svg").style.cssText = "display: none;";
-                
+
                 if (response.status == 200) {
                     addFolderModal.hide();
 
@@ -1003,6 +1016,7 @@ var fileVersionHistoryListTable = (function () {
         $wrap.find('select').val('');
 
         reminderEmployeeIds.clear(true);
+        employeeGroupIds.clear(true);
     });
 
     $('#addFileForm [name="is_repeat_reminder"]').on('change', function(e){
@@ -1164,6 +1178,14 @@ var fileVersionHistoryListTable = (function () {
                         }else{
                             editReminderEmployeeIds.clear(true);
                         }
+                        let egroup_ids = reminder.groups;
+                        if(typeof egroup_ids === 'object' || egroup_ids !== null){
+                            $.each(egroup_ids, function(index, row) {
+                                editEmployeeGroupIds.addItem(row.employee_group_id);
+                            });
+                        }else{
+                            editEmployeeGroupIds.clear(true);
+                        }
                     })
                 }else{
                     $('#editFileForm #edit_email_reminder').prop('checked', false).trigger('change');
@@ -1217,6 +1239,7 @@ var fileVersionHistoryListTable = (function () {
         $wrap.find('select').val('');
 
         editReminderEmployeeIds.clear(true);
+        editEmployeeGroupIds.clear(true);
     });
 
     $('#editFileForm [name="is_repeat_reminder"]').on('change', function(e){

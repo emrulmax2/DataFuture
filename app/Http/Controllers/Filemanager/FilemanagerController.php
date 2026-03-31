@@ -19,11 +19,13 @@ use App\Models\DocumentAttachment;
 use App\Models\DocumentInfoHasEmployees;
 use App\Models\DocumentInfoReminder;
 use App\Models\DocumentInfoReminderEmployee;
+use App\Models\DocumentInfoReminderGroup;
 use App\Models\DocumentInfoTag;
 use App\Models\DocumentRevision;
 use App\Models\DocumentRoleAndPermission;
 use App\Models\DocumentTag;
 use App\Models\Employee;
+use App\Models\EmployeeGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -81,7 +83,10 @@ class FilemanagerController extends Controller
             'parent_id' => $parent_id,
             'permission' => $this->checkPermission($parent_id),
             'root' => (!empty($root) ? DocumentFolder::where('slug', $root)->get()->first() : []),
-            'root_permission' => $root_permission
+            'root_permission' => $root_permission,
+            'groups' => EmployeeGroup::where('type', 2)->orWhere(function($q) use($employee_id){
+                $q->where('employee_id', $employee_id)->whereIn('type', [1, 2]);
+            })->orderBy('name', 'ASC')->get(),
         ]);
     }
 
@@ -144,6 +149,7 @@ class FilemanagerController extends Controller
         $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
         $employee_ids[] = $myEmployment->id;
         $permission = (isset($request->permission) && !empty($request->permission) ? $request->permission : []);
+        $permission[$myEmployment->id] = "1";
         $params = (isset($request->params) && !empty($request->params) ? $request->params : '');
 
         $data = [];
@@ -161,6 +167,7 @@ class FilemanagerController extends Controller
         endif;
         if($parent_id == 0 && $folder->id && !empty($employee_ids)):
             foreach($employee_ids as $employee_id):
+                    $id[] = $permission[$employee_id];
                 if(isset($permission[$employee_id]) && $permission[$employee_id] > 0):
                     $data = [];
                     $data['document_role_and_permission_id'] = $permission[$employee_id];
@@ -449,6 +456,7 @@ class FilemanagerController extends Controller
 
                         if($email_reminder == 1):
                             $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+                            $employee_group_ids = (isset($request->employee_group_ids) && !empty($request->employee_group_ids) ? $request->employee_group_ids : []);
                             $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
                             $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
 
@@ -464,14 +472,25 @@ class FilemanagerController extends Controller
                             $data['repeat_reminder_end'] = ($is_repeat_reminder == 1 && !empty($request->repeat_reminder_end) ? date('Y-m-d', strtotime($request->repeat_reminder_end)) : null);
                             $data['created_by'] = auth()->user()->id;
                             $reminder = DocumentInfoReminder::create($data);
-                            if($reminder->id && !empty($employee_ids)):
-                                foreach($employee_ids as $employee_id):
-                                    $data = [];
-                                    $data['document_info_reminder_id'] = $reminder->id;
-                                    $data['employee_id'] = $employee_id;
+                            if($reminder->id):
+                                if(!empty($employee_ids)):
+                                    foreach($employee_ids as $employee_id):
+                                        $data = [];
+                                        $data['document_info_reminder_id'] = $reminder->id;
+                                        $data['employee_id'] = $employee_id;
 
-                                    DocumentInfoReminderEmployee::create($data);
-                                endforeach;
+                                        DocumentInfoReminderEmployee::create($data);
+                                    endforeach;
+                                endif;
+                                if(!empty($employee_group_ids)):
+                                    foreach($employee_group_ids as $employee_group_id):
+                                        $data = [];
+                                        $data['document_info_reminder_id'] = $reminder->id;
+                                        $data['employee_group_id'] = $employee_group_id;
+
+                                        DocumentInfoReminderGroup::create($data);
+                                    endforeach;
+                                endif;
                             endif;
                         endif;
                     endif;
@@ -526,7 +545,7 @@ class FilemanagerController extends Controller
 
     public function getFileData(Request $request){
         $row_id = $request->row_id;
-        $documentInfo = DocumentInfo::with('reminder', 'reminder.employee')->find($row_id);
+        $documentInfo = DocumentInfo::with('reminder', 'reminder.employee', 'reminder.groups')->find($row_id);
         return response()->json(['res' => $documentInfo], 200);
     }
 
@@ -658,6 +677,7 @@ class FilemanagerController extends Controller
 
         if($email_reminder == 1):
             $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
+            $employee_group_ids = (isset($request->employee_group_ids) && !empty($request->employee_group_ids) ? $request->employee_group_ids : []);
             $is_repeat_reminder = (isset($request->is_repeat_reminder) && $request->is_repeat_reminder > 0 ? $request->is_repeat_reminder : 0);
             $is_send_email = (isset($request->is_send_email) && $request->is_send_email > 0 ? $request->is_send_email : 0);
 
@@ -692,6 +712,11 @@ class FilemanagerController extends Controller
                 if(!empty($removedEmpIds)):
                     DocumentInfoReminderEmployee::where('document_info_reminder_id', $reminder_id)->whereIn('employee_id', $removedEmpIds)->forceDelete();
                 endif;
+                $existEmployeeGroupIds = (isset($existReminder->group_ids) && !empty($existReminder->group_ids) ? $existReminder->group_ids : []);
+                $removedEmpGrIds = array_diff($existEmployeeGroupIds, $employee_group_ids);
+                if(!empty($removedEmpGrIds)):
+                    DocumentInfoReminderGroup::where('document_info_reminder_id', $reminder_id)->whereIn('employee_group_id', $removedEmpGrIds)->forceDelete();
+                endif;
             endif;
 
             if(!empty($employee_ids)):
@@ -706,10 +731,24 @@ class FilemanagerController extends Controller
                     endif;
                 endforeach;
             endif;
+
+            if(!empty($employee_group_ids)):
+                foreach($employee_group_ids as $group_id):
+                    $empExist = DocumentInfoReminderGroup::where('document_info_reminder_id', $reminder_id)->where('employee_group_id', $group_id)->get()->count();
+                    if($empExist == 0):
+                        $data = [];
+                        $data['document_info_reminder_id'] = $reminder_id;
+                        $data['employee_group_id'] = $group_id;
+
+                        DocumentInfoReminderGroup::create($data);
+                    endif;
+                endforeach;
+            endif;
         else:
             $existReminder = DocumentInfoReminder::where('document_info_id', $id)->get()->first();
             if(isset($existReminder->id) && $existReminder->id > 0):
                 DocumentInfoReminderEmployee::where('document_info_reminder_id', $existReminder->id)->forceDelete();
+                DocumentInfoReminderGroup::where('document_info_reminder_id', $existReminder->id)->forceDelete();
             endif;
             DocumentInfoReminder::where('document_info_id', $id)->forceDelete();
         endif;
@@ -805,6 +844,7 @@ class FilemanagerController extends Controller
                     'created_at' => date('jS F, Y h:i A', strtotime($list->created_at)),
                     'created_by' => (isset($list->user->employee->full_name) && !empty($list->user->employee->full_name) ? $list->user->employee->full_name : ''),
                     'download_url' => $list->download_url,
+                    'description' => $list->description ?? '',
                     'deleted_at' => $list->deleted_at,
                     'attachments' => $attachments
                 ];
