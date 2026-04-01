@@ -23,8 +23,8 @@ class CreateFolderRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'parent_id' => 'sometimes',
-            'employee_ids' => 'required_if:parent_id,0',
+            // 'parent_id' => 'sometimes',
+            // 'employee_ids' => 'required_if:parent_id,0',
         ];
     }
 }

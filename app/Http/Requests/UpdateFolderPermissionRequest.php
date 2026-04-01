@@ -22,7 +22,7 @@ class UpdateFolderPermissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'employee_ids' => 'required'
+            //'employee_ids' => 'required'
         ];
     }
 }

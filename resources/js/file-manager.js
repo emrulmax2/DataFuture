@@ -376,19 +376,19 @@ var fileVersionHistoryListTable = (function () {
 
         var userLengt = $('#addFolderModal .folderPermissionTable').find('.permissionEmployeeRow').length;
 
-        if(userLengt == 0 && parent_id == 0){
-            $form.find('.modError').remove();
-            $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
+        // if(userLengt == 0 && parent_id == 0){
+        //     $form.find('.modError').remove();
+        //     $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
             
-            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+        //     createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
             
-            setTimeout(function(){
-                $form.find('.modError').remove();
-            }, 2000);
+        //     setTimeout(function(){
+        //         $form.find('.modError').remove();
+        //     }, 2000);
 
-            document.querySelector('#createFolder').removeAttribute('disabled');
-            document.querySelector("#createFolder svg").style.cssText = "display: none;";
-        }else{
+        //     document.querySelector('#createFolder').removeAttribute('disabled');
+        //     document.querySelector("#createFolder svg").style.cssText = "display: none;";
+        // }else{
             let form_data = new FormData(form);
             axios({
                 method: "post",
@@ -427,7 +427,7 @@ var fileVersionHistoryListTable = (function () {
                     }
                 }
             });
-        }
+        //}
     });
 
     $('.folderWrap').on('dblclick', function(){
@@ -559,19 +559,19 @@ var fileVersionHistoryListTable = (function () {
 
         var userLengt = $('#editFolderPermissionModal .folderPermissionTable').find('.permissionEmployeeRow').length;
 
-        if(userLengt == 0 && !$('#editFolderPermissionForm #permission_inheritence').prop('checked')){
-            $form.find('.modError').remove();
-            $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
+        // if(userLengt > 0 && !$('#editFolderPermissionForm #permission_inheritence').prop('checked')){
+        //     $form.find('.modError').remove();
+        //     $('.modal-content', $form).prepend('<div class="modError alert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Please add some user and set permissions.</div>');
             
-            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
+        //     createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide",});
             
-            setTimeout(function(){
-                $form.find('.modError').remove();
-            }, 2000);
+        //     setTimeout(function(){
+        //         $form.find('.modError').remove();
+        //     }, 2000);
 
-            document.querySelector('#updateFolderPermission').removeAttribute('disabled');
-            document.querySelector("#updateFolderPermission svg").style.cssText = "display: none;";
-        }else{
+        //     document.querySelector('#updateFolderPermission').removeAttribute('disabled');
+        //     document.querySelector("#updateFolderPermission svg").style.cssText = "display: none;";
+        // }else{
             let form_data = new FormData(form);
             axios({
                 method: "post",
@@ -610,7 +610,7 @@ var fileVersionHistoryListTable = (function () {
                     }
                 }
             });
-        }
+        // }
     });
 
     $('.deleteFolder').on('click', function(e){
