@@ -47,6 +47,10 @@ class StudentAttendanceTermStatus extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function updatedBy(){
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
     public function reason(){
         return $this->belongsTo(ReasonForEngagementEnding::class, 'reason_for_engagement_ending_id');
     }

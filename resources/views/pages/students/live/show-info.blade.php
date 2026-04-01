@@ -26,11 +26,11 @@
         </button>
 
         <div id="student-status-tooltip">
-            <div class="text-sm font-medium">{{ $student->termStatus->term->name ?? '--' }}</div>
-            <div class="text-xs text-slate-500">{{ $student->termStatus->status_change_reason ?? '--' }}</div>
+            <div class="text-sm font-medium">{{ $student->termStatusLatest->term->name ?? '--' }}</div>
+            <div class="text-xs text-slate-500">{{ $student->termStatusLatest->status_change_reason ?? '--' }}</div>
             <div class="text-xs font-medium">Changed By</div>
-            <div class="text-xs text-slate-500">{{ $student->termStatus->user->employee->full_name ?? '--' }}</div>
-            <div class="text-xs text-slate-500">{{ $student->termStatus->status_change_date ?? '--' }}</div>
+            <div class="text-xs text-slate-500">{{ isset($student->termStatusLatest->updatedBy->employee) ? $student->termStatusLatest->updatedBy->employee->full_name : $student->termStatusLatest->user->employee->full_name }}</div>
+            <div class="text-xs text-slate-500">{{ $student->termStatusLatest->status_change_date ?? '--' }}</div>
             
         </div>
 
