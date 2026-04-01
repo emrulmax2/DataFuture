@@ -220,7 +220,9 @@ var table = (function () {
 
         let statuses = new TomSelect('#statuses', accTomOptionsMul);
         let reportFrom = new TomSelect('#reportFrom', accTomOptionsMul);
+        let issueType = new TomSelect('#issue_type_id', accTomOptions);
         let status = new TomSelect('#status', accTomOptions);
+        
 
         //let EditVenue = new TomSelect('#edit_venue_id', accTomOptions);
         // Init Table
