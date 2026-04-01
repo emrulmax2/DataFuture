@@ -73,7 +73,17 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="ownedBy"></div>
+                                <div class="ownedBy">
+                                    <div class="flex">
+                                        @foreach($folder->permission as $permission)
+                                            @if(isset($permission->employee->photo_url) && !empty($permission->employee->photo_url))
+                                            <div class="w-8 h-8 image-fit zoom-in {{ (!$loop->first ? '-ml-5' : '') }}">
+                                                <img title="{{ $permission->employee->full_name }}" alt="{{ $permission->employee->full_name }}" class="tooltip rounded-full" src="{{ $permission->employee->photo_url }}">
+                                            </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
                             @endif
                             <div class="fileActData justify-end"></div>
                         </div>
@@ -132,7 +142,7 @@
                                     </div>
                                 </div>
                             @else
-                                <div class="ownedBy"></div>
+                                <div class="ownedBy">---</div>
                             @endif
                             <div class="fileActData justify-end">
                                 @if(!empty($theFile->description))
@@ -989,7 +999,7 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                            <label for="employee_ids" class="form-label">Employees</label>
                             <select name="employee_ids[]" id="edit_employee_ids" class="w-full tom-selects" multiple>
                                 @if(!empty($employee))
                                     @foreach($employee as $emp)
@@ -997,7 +1007,7 @@
                                     @endforeach
                                 @endif
                             </select>
-                            <div class="acc__input-error error-employees text-danger mt-2"></div>
+                            <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <table class="table table-bordered table-sm folderPermissionTable">
@@ -1110,7 +1120,7 @@
                         @if($parent_id == 0)
                         <div class="permissionWrap">
                             <div class="mt-3">
-                                <label for="employee_ids" class="form-label">Employees <span class="text-danger">*</span></label>
+                                <label for="employee_ids" class="form-label">Employees</label>
                                 <select name="employee_ids[]" id="employee_ids" class="w-full tom-selects" multiple>
                                     @if(!empty($employee))
                                         @foreach($employee as $emp)

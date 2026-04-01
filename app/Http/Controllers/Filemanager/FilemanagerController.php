@@ -75,7 +75,7 @@ class FilemanagerController extends Controller
             'breadcrumbs' => [
                 ['label' => 'File Manager', 'href' => 'javascript:void(0);']
             ],
-            'employee' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
+            'employee' => Employee::where('status', 1)->whereNot('id', $employee_id)->orderBy('first_name', 'ASC')->get(),
             'theFolder' => ($parent_id > 0 ? DocumentFolder::find($parent_id) : []),
             'folders' => $folders,
             'files' => $documentInfos,
@@ -295,6 +295,9 @@ class FilemanagerController extends Controller
 
     public function editFolderPermission(Request $request){
         $row_id = $request->row_id;
+        $documentFolder = DocumentFolder::find($row_id);
+        $creator = Employee::where('user_id', $documentFolder->created_by)->get()->first();
+        $creator_id = (isset($creator->id) && $creator->id > 0 ? $creator->id : 0);
 
         $employee_ids = [];
         $html = '';
@@ -303,41 +306,43 @@ class FilemanagerController extends Controller
         $folderPermission = DocumentFolderPermission::where('document_folder_id', $row_id)->orderBy('id', 'ASC')->get();
         if($folderPermission->count()):
             foreach($folderPermission as $perm):
-                $employee_ids[] = $perm->employee_id;
-                $html .= '<tr class="permissionEmployeeRow" id="employeeFolderPermission_'.$perm->employee_id.'" data-employee="'.$perm->employee_id.'">';
-                    $html .= '<td><strong>'.(isset($perm->employee->full_name) ? $perm->employee->full_name : '').'</strong></td>';
-                    $html .= '<td>';
-                        $html .= '<select name="permission['.$perm->employee_id.']" class="w-full form-control documentRoleAndPermission">';
-                            if($allPermission->count() > 0):
-                                foreach($allPermission as $pms):
-                                    $html .= '<option '.($pms->id == $perm->document_role_and_permission_id ? 'Selected' : '').' value="'.$pms->id.'">'.$pms->display_name.'</option>';
-                                endforeach;
-                            else:
-                                $html .= '<option value="">Select Permission</option>';
-                            endif;
-                        $html .= '</select>';
-                    $html .= '</td>';
-                    $html .= '<td class="text-center permissionCols">';
-                        $html .= '<div class="form-check m-0 inline-flex">';
-                            $html .= '<input disabled '.($perm->role->create == 1 ? 'checked' : '').' id="create_'.$perm->employee_id.'" name="create_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
-                        $html .= '</div>';
-                    $html .= '</td>';
-                    $html .= '<td class="text-center permissionCols">';
-                        $html .= '<div class="form-check m-0 inline-flex">';
-                            $html .= '<input disabled '.($perm->role->read == 1 ? 'checked' : '').' id="read_'.$perm->employee_id.'" name="read_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
-                        $html .= '</div>';
-                    $html .= '</td>';
-                    $html .= '<td class="text-center permissionCols">';
-                        $html .= '<div class="form-check m-0 inline-flex">';
-                            $html .= '<input disabled '.($perm->role->update == 1 ? 'checked' : '').' id="update_'.$perm->employee_id.'" name="update_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
-                        $html .= '</div>';
-                    $html .= '</td>';
-                    $html .= '<td class="text-center permissionCols">';
-                        $html .= '<div class="form-check m-0 inline-flex">';
-                            $html .= '<input disabled '.($perm->role->delete == 1 ? 'checked' : '').' id="delete_'.$perm->employee_id.'" name="delete_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
-                        $html .= '</div>';
-                    $html .= '</td>';
-                $html .= '</tr>';
+                if($creator_id != $perm->employee_id):
+                    $employee_ids[] = $perm->employee_id;
+                    $html .= '<tr class="permissionEmployeeRow" id="employeeFolderPermission_'.$perm->employee_id.'" data-employee="'.$perm->employee_id.'">';
+                        $html .= '<td><strong>'.(isset($perm->employee->full_name) ? $perm->employee->full_name : '').'</strong></td>';
+                        $html .= '<td>';
+                            $html .= '<select name="permission['.$perm->employee_id.']" class="w-full form-control documentRoleAndPermission">';
+                                if($allPermission->count() > 0):
+                                    foreach($allPermission as $pms):
+                                        $html .= '<option '.($pms->id == $perm->document_role_and_permission_id ? 'Selected' : '').' value="'.$pms->id.'">'.$pms->display_name.'</option>';
+                                    endforeach;
+                                else:
+                                    $html .= '<option value="">Select Permission</option>';
+                                endif;
+                            $html .= '</select>';
+                        $html .= '</td>';
+                        $html .= '<td class="text-center permissionCols">';
+                            $html .= '<div class="form-check m-0 inline-flex">';
+                                $html .= '<input disabled '.($perm->role->create == 1 ? 'checked' : '').' id="create_'.$perm->employee_id.'" name="create_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
+                            $html .= '</div>';
+                        $html .= '</td>';
+                        $html .= '<td class="text-center permissionCols">';
+                            $html .= '<div class="form-check m-0 inline-flex">';
+                                $html .= '<input disabled '.($perm->role->read == 1 ? 'checked' : '').' id="read_'.$perm->employee_id.'" name="read_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
+                            $html .= '</div>';
+                        $html .= '</td>';
+                        $html .= '<td class="text-center permissionCols">';
+                            $html .= '<div class="form-check m-0 inline-flex">';
+                                $html .= '<input disabled '.($perm->role->update == 1 ? 'checked' : '').' id="update_'.$perm->employee_id.'" name="update_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
+                            $html .= '</div>';
+                        $html .= '</td>';
+                        $html .= '<td class="text-center permissionCols">';
+                            $html .= '<div class="form-check m-0 inline-flex">';
+                                $html .= '<input disabled '.($perm->role->delete == 1 ? 'checked' : '').' id="delete_'.$perm->employee_id.'" name="delete_'.$perm->employee_id.'" class="form-check-input" type="checkbox" value="1">';
+                            $html .= '</div>';
+                        $html .= '</td>';
+                    $html .= '</tr>';
+                endif;
             endforeach;
         endif;
 
@@ -345,10 +350,13 @@ class FilemanagerController extends Controller
     }
 
     public function updateFolderPermission(UpdateFolderPermissionRequest $request){
-        $employee_ids = $request->employee_ids;
+        $employee_ids = (isset($request->employee_ids) && !empty($request->employee_ids) ? $request->employee_ids : []);
         $folder_id = $request->folder_id;
+        $folder = DocumentFolder::find($folder_id);
+        $creator = Employee::where('user_id', $folder->created_by)->get()->first();
+        $creator_id = (isset($creator->id) && $creator->id > 0 ? $creator->id : 0);
 
-        $existingEmployeeIds = DocumentFolderPermission::where('document_folder_id', $folder_id)->pluck('employee_id')->unique()->toArray();
+        $existingEmployeeIds = DocumentFolderPermission::where('document_folder_id', $folder_id)->whereNot('employee_id', $creator_id)->pluck('employee_id')->unique()->toArray();
         $removedEmpIds = array_diff($existingEmployeeIds, $employee_ids);
         if(!empty($removedEmpIds)):
             DocumentFolderPermission::where('document_folder_id', $folder_id)->whereIn('employee_id', $removedEmpIds)->forceDelete();
