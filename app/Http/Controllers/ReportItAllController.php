@@ -43,14 +43,22 @@ class ReportItAllController extends Controller
     }
 
     public function list(Request $request){
+        $priv = auth()->user()->priv();
+        $adminShow = (isset($priv['show_all_issue']) && $priv['show_all_issue']==1) ? 1 : 0;
+        
+        if(!$adminShow) {
+            $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
+            $taskListId = [];
+            if(in_array(22, $assignedTaskIds)){
+                    $taskListId[] = 22;
+            }
+            if(in_array(27, $assignedTaskIds)){
+                    $taskListId[] = 27;
+            }
+        } else {
 
-        $assignedTaskIds = TaskListUser::where('user_id', auth()->user()->id)->pluck('task_list_id')->unique()->toArray();
-        $taskListId = [];
-        if(in_array(22, $assignedTaskIds)){
-                $taskListId[] = 22;
-        }
-        if(in_array(27, $assignedTaskIds)){
-                $taskListId[] = 27;
+            $taskListId = [22, 27];
+
         }
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
