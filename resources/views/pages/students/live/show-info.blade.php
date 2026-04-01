@@ -18,9 +18,21 @@
             </a>
         @endif
 
-        <button type="button" class="btn btn-success text-white flex-1 sm:flex-none md:w-auto min-w-max">
+        <button
+            type="button"
+            class="btn btn-success text-white flex-1 sm:flex-none md:w-auto min-w-max tooltip"
+            data-tooltip-content="#student-status-tooltip" data-theme="light" data-placement="top">
             {{ $student->status->name }}
         </button>
+
+        <div id="student-status-tooltip">
+            <div class="text-sm font-medium">{{ $student->termStatus->term->name ?? '--' }}</div>
+            <div class="text-xs text-slate-500">{{ $student->termStatus->status_change_reason ?? '--' }}</div>
+            <div class="text-xs font-medium">Changed By</div>
+            <div class="text-xs text-slate-500">{{ $student->termStatus->user->employee->full_name ?? '--' }}</div>
+            <div class="text-xs text-slate-500">{{ $student->termStatus->status_change_date ?? '--' }}</div>
+            
+        </div>
 
         @if(isset(auth()->user()->priv()['edit_student_status']) && auth()->user()->priv()['edit_student_status'] == 1)
             <button data-tw-toggle="modal" data-tw-target="#changeStudentModal" type="button" class="btn btn-primary text-white tooltip" title="Change Status">

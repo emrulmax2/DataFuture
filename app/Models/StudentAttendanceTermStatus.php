@@ -50,4 +50,9 @@ class StudentAttendanceTermStatus extends Model
     public function reason(){
         return $this->belongsTo(ReasonForEngagementEnding::class, 'reason_for_engagement_ending_id');
     }
+
+    public function getStatusChangeDateAttribute($value)
+    {
+        return $value ? \Carbon\Carbon::parse($value)->format('jS F Y, g:i A') : '--';
+    }
 }
