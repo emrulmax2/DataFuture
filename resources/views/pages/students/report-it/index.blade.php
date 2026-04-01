@@ -45,6 +45,17 @@
                 </div>
                 <div class="col-span-3">
                     <div class="flex">
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Issue Type</div>
+                        <select id="issue_type_id" name="issue_type_id[]" class="w-full tom-selects">
+                            <option value="">Please Select</option>
+                            @foreach($issueList as $issue)
+                                <option value="{{ $issue->id }}">{{ $issue->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="col-span-3">
+                    <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Conditions</div>
                         <select id="statuses" name="statuses[]" class="w-full tom-selects" multiple>
                             <option value="Pending">Pending</option>

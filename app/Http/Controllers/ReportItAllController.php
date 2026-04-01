@@ -64,7 +64,7 @@ class ReportItAllController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $reportFrom = (isset($request->reportFrom) && !empty($request->reportFrom) ? $request->reportFrom : '');
         $statuses = (isset($request->statuses) && !empty($request->statuses) ? $request->statuses : '');
-
+        $issueTypeIds = (isset($request->issue_type_id) && !empty($request->issue_type_id) ? $request->issue_type_id : '');
         $total_rows = $count = ReportItAll::whereIn('task_list_id', $taskListId)->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
@@ -98,6 +98,10 @@ class ReportItAllController extends Controller
         endif;
         if(!empty($reportFrom)):
             $query->where('report_form', $reportFrom);
+        endif;
+
+        if(!empty($issueTypeIds)):
+            $query->whereIn('issue_type_id', $issueTypeIds);
         endif;
         if($status == 2):
             $query->onlyTrashed();
