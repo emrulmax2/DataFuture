@@ -12,9 +12,10 @@ var table = (function () {
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let reportFrom = $("#reportFrom").val() != "" ? $("#reportFrom").val() : "";
         let statuses = $("#statuses").val() != "" ? $("#statuses").val() : "";
+        let issueTypeId = $("#issue_type_id").val() != "" ? $("#issue_type_id").val() : "";
         let tableContent = new Tabulator("#reportItAllTableId", {
             ajaxURL: route("report.it.all.list"),
-            ajaxParams: { querystr: querystr, status: status, reportFrom: reportFrom, statuses: statuses },
+            ajaxParams: { querystr: querystr, status: status, reportFrom: reportFrom, statuses: statuses, issue_type_id: issueTypeId },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
