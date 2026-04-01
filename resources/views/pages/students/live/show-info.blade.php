@@ -267,7 +267,7 @@
                                 <option value="">Please Select</option>
                                 @if(isset($statuses))
                                     @foreach($statuses as $stst)
-                                        <option {{ ($stst->id == $student->status_id ? 'Selected' : '') }} value="{{ $stst->id }}">{{ $stst->name }}</option>
+                                        <option value="{{ $stst->id }}">{{ $stst->name }}</option>
                                     @endforeach
                                 @endif
                             </select>
@@ -283,7 +283,7 @@
                                 <option value="">Please Select</option>
                                 @if($student->assigned_terms && !empty($student->assigned_terms) && $student->assigned_terms->count() > 0)
                                     @foreach($student->assigned_terms as $term)
-                                        <option {{ (isset($student->termStatus->term_declaration_id) && $student->termStatus->term_declaration_id == $term->id ? 'Selected' : '') }} value="{{ $term->id }}">{{ $term->name }}</option>
+                                        <option value="{{ $term->id }}">{{ $term->name }}</option>
                                     @endforeach
                                 @endif
                             </select>
