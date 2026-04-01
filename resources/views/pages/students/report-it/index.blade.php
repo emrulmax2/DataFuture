@@ -19,21 +19,20 @@
         <form id="tabulatorFilterForm">
             <div class="grid grid-cols-12 gap-4">
                 <!--Add Reference number/report number filter-->
-                
                 <div class="col-span-3">
                     <div class="flex">
-                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Ref. No</div>
+                        <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Ref.</div>
                         <input type="text" id="report_number" name="report_number" placeholder="Reference Number" value="" class="w-full"/>
                     </div>
                 </div>
 
-                <div class="col-span-3">
+                <div class="col-span-2">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1 whitespace-nowrap">Name.</div>
                         <input type="text" id="query" name="querystr" placeholder="Full name" value="" class="w-full"/>
                     </div>
                 </div>
-                <div class="col-span-3">
+                <div class="col-span-2">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">From</div>
                         <select id="reportFrom" name="reportFrom[]" class="w-full tom-selects" multiple>
@@ -54,7 +53,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-span-3">
+                <div class="col-span-2">
                     <div class="flex">
                         <div class="z-30 px-2 rounded-l w-auto flex items-center justify-center bg-slate-100 border text-slate-500 dark:bg-darkmode-700 dark:border-darkmode-800 dark:text-slate-400 -mr-1">Conditions</div>
                         <select id="statuses" name="statuses[]" class="w-full tom-selects" multiple>
@@ -73,11 +72,11 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-span-6">
+                <div class="col-span-4">
                     <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
                     <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
                 </div>
-                <div class="col-span-6 text-right">
+                <div class="col-span-5 text-right">
                     <div class="flex mt-5 sm:mt-0 justify-end">
                         <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
                             <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
