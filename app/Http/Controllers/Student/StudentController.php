@@ -289,6 +289,7 @@ class  StudentController extends Controller
 
     public function show($studentId){
         $student = Student::find($studentId);
+        
         $referral = [];
         if(isset($student->referral_code) && !empty($student->referral_code) && isset($student->is_referral_varified) && $student->is_referral_varified == 1):
             $referralCode = $student->referral_code;
