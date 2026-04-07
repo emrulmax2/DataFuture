@@ -56,7 +56,7 @@ var studentArchiveListTable = (function () {
                     field: "created_by",
                     headerHozAlign: "left",
                     minWidth: 100,
-                    width: 100,
+                    width: 250,
                     formatter(cell, formatterParams){
                         var html = '';
                         html += '<div>';
