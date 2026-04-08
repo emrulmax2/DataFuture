@@ -783,4 +783,11 @@ class DatafutureController extends Controller
 
         return response()->json(['message' => 'Status successfully updated'], 200);
     }
+
+    public function updateHesaStatus(Student $student, Request $request){
+        $student->hesa_status = $request->hesa_status;
+        $student->save();
+
+        return response()->json(['message' => 'Student\'s Hesa Status successfully updated'], 200);
+    }
 }

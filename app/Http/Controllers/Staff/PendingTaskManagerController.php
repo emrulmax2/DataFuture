@@ -9,6 +9,7 @@ use App\Http\Requests\BulkStatusUpdateReqest;
 use App\Http\Requests\InterviewerUnlockDirectRequest;
 use App\Http\Requests\PearsonRegistrationConfirmationRequest;
 use App\Http\Requests\PearsonRegistrationTaskRequest;
+use App\Http\Requests\StudentAddToHesaRequest;
 use App\Http\Requests\TaskCanceledReasonRequest;
 use App\Imports\CollectionsImport;
 use App\Jobs\UserMailerJob;
@@ -1513,6 +1514,67 @@ class PendingTaskManagerController extends Controller
             endif;
         else:
             return response()->json(['msg' => 'Student registration no can not be empty. Please insert at least one registration no.'], 322);
+        endif;
+    }
+
+    public function addStudentsToHesa(StudentAddToHesaRequest $request){
+        $registration_nos = (isset($request->student_ids) && !empty($request->student_ids) ? explode(',', str_replace(' ', '', $request->student_ids)) : []);
+        $hesa_status = (isset($request->hesa_status) && $request->hesa_status > 0 ? $request->hesa_status : 0);
+
+        $theTask = TaskList::where('hesa_status', 'Yes')->get()->first();
+        $completeRegNo = [];
+        $missingRegNo = [];
+        if(isset($theTask->id) && $theTask->id > 0):
+            if(!empty($registration_nos)):
+                foreach($registration_nos as $reg):
+                    $reg = trim($reg);
+                    $student = Student::where('registration_no', $reg)->get()->first();
+                    if((isset($student->id) && $student->id > 0) && (!isset($student->hesa_status) || $student->hesa_status != $hesa_status)):
+                        $student->hesa_status = $hesa_status;
+                        $student->save();
+                        
+
+                        $data = [];
+                        $data['student_id'] = $student->id;
+                        $data['task_list_id'] = $theTask->id;
+                        $data['status'] = 'Completed';
+                        $data['created_by'] = auth()->user()->id;
+                        $data['updated_by'] = auth()->user()->id;
+
+                        $studentTask = StudentTask::create($data);
+                        if($studentTask->id):
+                            StudentTaskLog::create([
+                                'student_tasks_id' => $studentTask->id,
+                                'actions' => 'Status Changed',
+                                'field_name' => 'status',
+                                'prev_field_value' => 'Pending',
+                                'current_field_value' => 'Completed',
+                                'created_by' => auth()->user()->id,
+                            ]);
+                        endif;
+                        $completeRegNo[] = $reg;
+                    else:
+                        $missingRegNo[] = $reg;
+                    endif;
+                endforeach;
+                $messages = '';
+                if(!empty($completeRegNo)):
+                    $messages .= 'Hesa Status task created and mark as completed for &nbsp;<strong>'.implode(', ', $completeRegNo).'</strong> students. ';
+                endif;
+                if(!empty($missingRegNo)):
+                    $messages .= '&nbsp; <strong>'.implode(', ', $missingRegNo).'</strong>&nbsp; student\'s profile already has the status <strong>'.$hesa_status.'</strong>.';
+                endif;
+
+                if(empty($completeRegNo)):
+                    return response()->json(['msg' => 'All student\'s already has the selected Hesa Status. &nbsp; <strong>'.implode(', ', $missingRegNo).'</strong>'], 206);
+                else:
+                    return response()->json(['msg' => $messages], 200);
+                endif;
+            else:
+                return response()->json(['msg' => 'Student registration no can not be empty. Please insert at least one registration no.'], 322);
+            endif;
+        else:
+            return response()->json(['msg' => 'Hesa Status task not found under Task List.'], 322);
         endif;
     }
 }

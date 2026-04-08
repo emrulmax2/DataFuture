@@ -13,8 +13,12 @@
     <form method="POST" action="#" id="studentDFForm">
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Datafuture Report</div>
+                <div class="col-span-6 inline-flex items-center">
+                    <div class="form-check form-switch mb-0">
+                        <input data-id="{{ $student->id }}" {{ (isset($student->hesa_status) && $student->hesa_status == 1 ? 'Checked' : '') }} id="hesa_status" class="form-check-input" type="checkbox" name="hesa_status" value="1">
+                        <label class="form-check-label ml-3 font-medium text-base mb-0" for="hesa_status">Datafuture Report</label>
+                    </div>
+                    <!-- <div class="font-medium text-base">Datafuture Report</div> -->
                 </div>
                 <div class="col-span-6 text-right relative">
                     <input type="hidden" name="student_id" value="{{ $student->id }}" />
