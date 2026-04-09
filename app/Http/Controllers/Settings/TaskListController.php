@@ -90,7 +90,7 @@ class TaskListController extends Controller
                     foreach($list->users as $usr):
                         if($u > 3): break; endif;
                         $photo_url = (isset($usr->user->employee->photo_url) && !empty($usr->user->employee->photo_url) ? $usr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg'));
-                        $users .= '<div class="w-10 h-10 image-fit zoom-in '.($u > 1 ? ' -ml-5' : '').'">';
+                        $users .= '<div class="w-8 h-8 image-fit zoom-in '.($u > 1 ? ' -ml-4' : '').'">';
                             $users .= '<img alt="'.(isset($usr->user->employee->full_name) ? $usr->user->employee->full_name : 'Unknown Employee').'" class="rounded-full" src="'.$photo_url.'">';
                         $users .= '</div>';
                         $u++;
@@ -115,6 +115,7 @@ class TaskListController extends Controller
                     'pearson_reg' => $list->pearson_reg,
                     'address_request' => $list->address_request,
                     'image_url' => $list->image_url,
+                    'hesa_status' => $list->hesa_status ?? 'No',
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -230,6 +231,7 @@ class TaskListController extends Controller
             'pearson_reg'=> (isset($request->pearson_reg) && !empty($request->pearson_reg) ? $request->pearson_reg : 'No'),
             'external_link' => (isset($request->external_link) ? $request->external_link : '0'),
             'external_link_ref' => (isset($request->external_link) && $request->external_link == 1 && !empty($request->external_link_ref) ? $request->external_link_ref : ''),
+            'hesa_status'=> (isset($request->hesa_status) && !empty($request->hesa_status) ? $request->hesa_status : 'No'),
             'updated_by' => auth()->user()->id
         ]);
 

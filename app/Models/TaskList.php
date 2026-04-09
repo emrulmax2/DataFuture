@@ -30,6 +30,7 @@ class TaskList extends Model
         'attendance_excuses',
         'pearson_reg',
         'address_request',
+        'hesa_status',
         'created_by',
         'updated_by',
     ];

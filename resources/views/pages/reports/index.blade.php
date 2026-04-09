@@ -81,6 +81,11 @@
                     <img class="block w-full h-auto shadow-md zoom-in rounded" alt="HESA All Students Report" src="{{ asset('build/assets/images/report_icons/hesa_all_students_report.png') }}">
                 </a>
             </div>
+            <div class="col-span-12 sm:col-span-3 xl:col-span-2 2xl:col-span-1">
+                <a href="{{ route('reports.active.students.by.date'); }}" data-tw-toggle="modal" data-tw-target="#xmlExportModal" class="box introy-y zoom-in bg-primary flex justify-center items-center">
+                    <img class="block w-full h-auto shadow-md zoom-in rounded" alt="HESA All Students Report" src="{{ asset('build/assets/images/report_icons/active_student_by_date.png') }}">
+                </a>
+            </div>
         </div>
     </div>
 

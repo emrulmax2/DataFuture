@@ -145,6 +145,11 @@
                         @endif
                     </div>
                     <div class="text-slate-500">{{ isset($student->crel->creation->available->type) ? $student->crel->creation->available->type : '' }}</div>
+                    @if(isset($student->hesa_status) && $student->hesa_status == 1)
+                        <div class="text-success pt-2 tooltip cursor-pointer inline-flex" title="Added To Hesa">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        </div>
+                    @endif
                 </div>
             </div>
             

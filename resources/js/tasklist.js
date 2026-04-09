@@ -29,22 +29,19 @@ var taskListTable = (function () {
                     title: "#ID",
                     headerSort: false,
                     field: "id",
-                    width: "70",
+                    width: "50",
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
                     
-                    width: "350",
+                    width: "250",
                     formatter(cell, formatterParams) { 
                         var html = '<div class="block">';
-                                // html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                //     html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
-                                // html += '</div>';
                                 html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().processlist+'</div>';
+                                    html += '<div class="font-medium whitespace-normal uppercase">'+cell.getData().name+'</div>';
+                                    html += '<div class="text-slate-500 text-xs whitespace-normal">'+cell.getData().processlist+'</div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -96,6 +93,11 @@ var taskListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
+                    title: "Hesa Status",
+                    field: "hesa_status",
+                    headerHozAlign: "left",
+                },
+                {
                     title: "Assigned User",
                     field: "user",
                     headerHozAlign: "left",
@@ -110,18 +112,18 @@ var taskListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "120",
+                    width: "85",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
                             if(cell.getData().external_link_ref != '' && cell.getData().external_link_ref != null){
-                                btns += '<a target="_blank" href="'+cell.getData().external_link_ref+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="link" class="w-4 h-4"></i></a>';
+                                btns += '<a target="_blank" href="'+cell.getData().external_link_ref+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="link" class="w-3 h-3"></i></a>';
                             }
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editTaskModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editTaskModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-7 h-7 ml-1"><i data-lucide="Pencil" class="w-3 h-3"></i></a>';
+                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="Trash2" class="w-3 h-3"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="rotate-cw" class="w-3 h-3"></i></button>';
                         }
                         
                         return btns;
@@ -442,6 +444,11 @@ var taskListTable = (function () {
                             $('#editTaskModal input[name="address_request"][value="Yes"]').prop('checked', true);
                         }else{
                             $('#editTaskModal input[name="address_request"][value="No"]').prop('checked', true);
+                        }
+                        if(dataset.hesa_status == 'Yes'){
+                            $('#editTaskModal input[name="hesa_status"][value="Yes"]').prop('checked', true);
+                        }else{
+                            $('#editTaskModal input[name="hesa_status"][value="No"]').prop('checked', true);
                         }
                         
                         if(dataset.external_link == 1){

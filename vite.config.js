@@ -425,6 +425,9 @@ export default defineConfig({
                 'resources/js/employee-appraisal-note.js',
                 'resources/js/hr-p45slipsync.js',
 
+                'resources/js/grades.js',
+                'resources/js/active_students_by_date.js',
+
             ],
             refresh: true,
         }),

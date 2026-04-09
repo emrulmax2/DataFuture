@@ -253,6 +253,19 @@
                                         </div>
                                     </div>
                                     <div class="col-span-12 sm:col-span-6">
+                                        <label for="hesa_status" class="form-label">Student Hesa Status</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="hesa_status-yes" class="form-check-input" type="radio" name="hesa_status" value="Yes">
+                                                <label class="form-check-label" for="hesa_status-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="hesa_status-no" class="form-check-input" type="radio" name="hesa_status" value="No">
+                                                <label class="form-check-label" for="hesa_status-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
                                         <div>
                                             <div class="form-check form-switch">
                                                 <label class="form-check-label mr-3 ml-0" for="is_df">External Link</label>
@@ -478,6 +491,19 @@
                                             <div class="form-check mr-2">
                                                 <input checked id="edit_address_request-no" class="form-check-input" type="radio" name="address_request" value="No">
                                                 <label class="form-check-label" for="edit_address_request-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-span-12 sm:col-span-6">
+                                        <label for="hesa_status" class="form-label">Student Hesa Status</label>
+                                        <div class="flex flex-col sm:flex-row">
+                                            <div class="form-check mr-3">
+                                                <input id="edit_hesa_status-yes" class="form-check-input" type="radio" name="hesa_status" value="Yes">
+                                                <label class="form-check-label" for="edit_hesa_status-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check mr-2">
+                                                <input checked id="edit_hesa_status-no" class="form-check-input" type="radio" name="hesa_status" value="No">
+                                                <label class="form-check-label" for="edit_hesa_status-no">No</label>
                                             </div>
                                         </div>
                                     </div>

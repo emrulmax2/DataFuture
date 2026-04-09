@@ -436,6 +436,20 @@ import { saveAs } from 'file-saver';
         });
     });
 
+    $('#hesa_status').on('change', function(){
+        let $checkbox = $(this);
+        let student_id = $checkbox.attr('data-id');
+        let hesa_status = $checkbox.prop('checked') ? 1 : 0
+
+        confirmModal.show();
+        document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
+            $("#confirmModal .confModTitle").html("Are you sure?" );
+            $("#confirmModal .confModDesc").html('Do you really want to change hesa status? Please click on agree to continue.');
+            $("#confirmModal .agreeWith").attr('data-recordid', hesa_status);
+            $("#confirmModal .agreeWith").attr('data-status', 'ALTERHESASTS');
+        });
+    })
+
     $('#confirmModal .agreeWith').on('click', function(e){
         e.preventDefault();
         let $agreeBTN = $(this);
@@ -449,7 +463,7 @@ import { saveAs } from 'file-saver';
             axios({
                 method: 'delete',
                 url: route('student.datafuture.destory.student.stuload', student),
-                data: {student : student, recordid : recordid},
+                data: {student : student, hesa_status : recordid},
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
@@ -471,8 +485,32 @@ import { saveAs } from 'file-saver';
             }).catch(error =>{
                 console.log(error)
             });
-        }else{
-            confirmModal.hide();
+        }else if(action == 'ALTERHESASTS'){
+            axios({
+                method: 'post',
+                url: route('student.datafuture.alter.hesa.status', student),
+                data: {student : student, hesa_status : recordid},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                if (response.status == 200) {
+                    $('#confirmModal button').removeAttr('disabled');
+                    confirmModal.hide();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Done!');
+                        $('#successModal .successModalDesc').html('Student course session successfully deleted.');
+                        $("#successModal .successCloser").attr('data-action', 'RELOAD');
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        window.location.reload();
+                    }, 2000);
+                }
+            }).catch(error =>{
+                console.log(error)
+            });
         }
     });
 

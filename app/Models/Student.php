@@ -40,6 +40,7 @@ class Student extends Model
         'referral_code',
         'is_referral_varified',
         'has_due',
+        'hesa_status',
         'created_by',
         'updated_by', 
     ];

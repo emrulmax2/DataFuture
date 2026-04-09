@@ -20,6 +20,11 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a href="javascript:void(0);" class="dropdown-item" data-tw-toggle="modal" data-tw-target="#addStudentToHesaModal">
+                                        <i data-lucide="plus-circle" class="w-4 h-4 mr-2 text-success"></i> Student Added to Hesa
+                                    </a>
+                                </li>
+                                <li>
                                     <a href="javascript:void(0);" class="dropdown-item" data-tw-toggle="modal" data-tw-target="#updateBulkStatusModal">
                                         <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Change Bulk Status
                                     </a>
@@ -192,6 +197,63 @@
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="PearsonRegBtn" class="btn btn-primary w-auto">     
                             Create Task                      
+                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                                stroke="white" class="w-4 h-4 ml-2">
+                                <g fill="none" fill-rule="evenodd">
+                                    <g transform="translate(1 1)" stroke-width="4">
+                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                        <path d="M36 18c0-9.94-8.06-18-18-18">
+                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        </path>
+                                    </g>
+                                </g>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- END: Add Modal -->
+
+    <!-- BEGIN: Add Modal -->
+    <div id="addStudentToHesaModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" action="#" id="addStudentToHesaForm" enctype="multipart/form-data">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="font-medium text-base mr-auto">Student Added to Hesa</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <div class="flex justify-start items-center">
+                                <label for="name" class="form-label">Registration No <span class="text-danger">*</span></label>
+                                <span class="studentCount ml-auto font-medium text-primary">No of Student: 0</span>
+                            </div>
+                            <textarea id="hesa_student_ids" name="student_ids" class="form-control w-full" rows="4"></textarea>
+                            <div class="acc__input-error error-student_ids text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label>Hesa Status <span class="text-danger">*</span></label>
+                            <div class="flex flex-col sm:flex-row mt-2">
+                                <div class="form-check mr-2">
+                                    <input checked id="hesa_status-yes" class="form-check-input" type="radio" name="hesa_status" value="1">
+                                    <label class="form-check-label" for="hesa_status-yes">Yes</label>
+                                </div>
+                                <div class="form-check mr-2 mt-2 sm:mt-0">
+                                    <input id="hesa_status-no" class="form-check-input" type="radio" name="hesa_status" value="0">
+                                    <label class="form-check-label" for="hesa_status-no">No</label>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-hesa_status text-danger mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
+                        <button type="submit" id="addHesaBtn" class="btn btn-primary w-auto">     
+                            Add To Hesa                     
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
