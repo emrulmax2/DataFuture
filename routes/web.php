@@ -255,6 +255,7 @@ use App\Http\Controllers\Reports\Accounts\DueReportController;
 use App\Http\Controllers\Reports\Accounts\MarketingReportController;
 use App\Http\Controllers\Reports\Accounts\PaymentUploadManagementController;
 use App\Http\Controllers\Reports\Accounts\SemesterComissionRateController;
+use App\Http\Controllers\Reports\ActiveStudentByDateController;
 use App\Http\Controllers\Reports\ApplicantAnalysisReportController;
 use App\Http\Controllers\Reports\ApplicationAnalysisController;
 use App\Http\Controllers\Reports\AttendanceReportController as ReportsAttendanceReportController;
@@ -313,6 +314,7 @@ use App\Http\Controllers\Settings\Studentoptions\OtherAcademicQualificationContr
 use App\Http\Controllers\Settings\Studentoptions\QualAwardResultController;
 use App\Http\Controllers\Settings\Studentoptions\QualificationGradeController;
 use App\Http\Controllers\Settings\Studentoptions\ReasonForEndingCourseSessionController;
+use App\Http\Controllers\Settings\Studentoptions\ResultGradeController;
 use App\Http\Controllers\Settings\Studentoptions\SessionStatusController;
 use App\Http\Controllers\Settings\Studentoptions\StudentSupportEligibilityController;
 use App\Http\Controllers\Settings\Studentoptions\StudyModeController;
@@ -3123,6 +3125,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('task-manager/student-document-request-status', 'updateStudentDocumentRequst')->name('task.manager.document_request.update');
         Route::post('task-manager/student-document-request-letter-status', 'updateStudentDocumentRequstLetterStatus')->name('task.manager.document_request.letter.update');
+
+        Route::post('task-manager/add-students-to-hesa', 'addStudentsToHesa')->name('task.manager.add.students.to.hesa');
     
     });
 
@@ -3915,6 +3919,8 @@ Route::middleware('auth')->group(function() {
 
         Route::post('student/datafuture/{student}/reset-course-sessions', 'resetCourseSessions')->name('student.datafuture.reset.course.sessions');
         Route::post('student/datafuture/{student}/update-visibility', 'updateVisibility')->name('student.datafuture.update.visibility');
+
+        Route::post('student/datafuture/{student}/update-status', 'updateHesaStatus')->name('student.datafuture.alter.hesa.status');
     });
 
     Route::controller(QualificationGradeController::class)->group(function() {
@@ -4119,6 +4125,26 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/reports/sick-leave', 'index')->name('hr.portal.reports.sick.leave');
         Route::get('hr/portal/reports/sick-leave/list', 'list')->name('hr.portal.reports.sick.leave.list');
         Route::post('hr/portal/reports/sick-leave/export', 'exportList')->name('hr.portal.reports.sick.leave.export');
+    });
+
+    Route::controller(ResultGradeController::class)->group(function() {
+        Route::get('result-grades', 'index')->name('result.grade'); 
+        Route::get('result-grades/list', 'list')->name('result.grade.list'); 
+        Route::post('result-grades/store', 'store')->name('result.grade.store'); 
+        Route::get('result-grades/edit/{id}', 'edit')->name('result.grade.edit');
+        Route::post('result-grades/update', 'update')->name('result.grade.update');
+        Route::delete('result-grades/delete/{id}', 'destroy')->name('result.grade.destory');
+        Route::post('result-grades/restore/{id}', 'restore')->name('result.grade.restore');
+        Route::post('result-grades/update-status/{id}', 'updateStatus')->name('result.grade.update.status');
+    
+        Route::get('result-grades/export', 'export')->name('result.grade.export');
+        Route::post('result-grades/import', 'import')->name('result.grade.import');
+    });
+
+    Route::controller(ActiveStudentByDateController::class)->group(function() {
+        Route::get('reports/active-students-by-date', 'index')->name('reports.active.students.by.date'); 
+        Route::get('reports/active-students-by-date/list', 'list')->name('reports.active.students.by.datee.list');
+        Route::post('reports/active-students-by-date/export', 'exportList')->name('reports.active.students.by.datee.export');
     });
     
 });

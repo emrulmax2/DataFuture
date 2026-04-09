@@ -502,6 +502,8 @@ class DatafutureReportController extends Controller
 
                                             $REFPERIOD_INC = '01'; //($S < 10 ? '0'.$S : $S);
                                             $STULOAD = ($STU->student_load && $STU->student_load > 0 ? ($STU->student_load == 99 ? '100' : $STU->student_load) : '');
+                                            $TERMLOAD = (isset($STU->terms) && $STU->terms->count() > 0 ? $STU->terms->sum('student_load') : 0);
+                                            $FINALTERMLOAD = ($TERMLOAD > 100 || $TERMLOAD == 99 ? '100' : $TERMLOAD);
 
                                             $COURSE_SESS_XML = '';
                                             $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SCSESSIONID>'.$STU->course_creation_instance_id.'</SCSESSIONID>' : '');
@@ -514,7 +516,7 @@ class DatafutureReportController extends Controller
                                             $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
-                                            $COURSE_SESS_XML .= '<STULOAD> </STULOAD>';
+                                            $COURSE_SESS_XML .= ($FINALTERMLOAD > 0 ? '<STULOAD>'.$FINALTERMLOAD.'</STULOAD>' : '<STULOAD> </STULOAD>');
                                             $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
                                             $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
 

@@ -27,4 +27,8 @@ class StudentStuloadInformation extends Model
     public function df(){
         return $this->hasOne(StudentCourseSessionDatafuture::class, 'student_stuload_information_id', 'id');
     }
+
+    public function terms(){
+        return $this->hasMany(StudentTermStuload::class, 'student_stuload_information_id', 'id');
+    }
 }
