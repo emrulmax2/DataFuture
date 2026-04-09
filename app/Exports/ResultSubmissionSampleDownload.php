@@ -37,6 +37,9 @@ class ResultSubmissionSampleDownload implements FromCollection,WithHeadings,With
                             $query->whereNull('attendance')
                                   ->orWhere('attendance', 1);
                         })
+                        ->whereHas('student', function ($query) {
+                            $query->whereNull('deleted_at');
+                        })
                         ->get();
         //dd($studentList->count());
         if($studentList->count() == 0){
