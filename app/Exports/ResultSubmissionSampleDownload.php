@@ -44,7 +44,7 @@ class ResultSubmissionSampleDownload implements FromCollection,WithHeadings,With
         }
         foreach ($studentList as $assignInfo) {
             $data[] = [
-                'last_name' => isset($assignInfo->student->last_name) ? $assignInfo->student->last_name : '',
+                'last_name' => isset($assignInfo->student->last_name) ? $assignInfo->student->last_name : (isset($assignInfo->student_id) ? $assignInfo->student_id : ''),
                 'first_name' => isset($assignInfo->student->first_name) ? $assignInfo->student->first_name : '',
                 'email' => isset($assignInfo->student->users->email) ? $assignInfo->student->users->email : '',
                 'paper_id' => '',
