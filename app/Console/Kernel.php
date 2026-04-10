@@ -40,7 +40,7 @@ class Kernel extends ConsoleKernel
              ->onOneServer();
 
         $schedule->command('linemanagerappraisal:cron')->weeklyOn(1, '08:00');
-        $schedule->command('linemanagerpendingleave:cron')->dailyAt('08:00');
+        $schedule->command('linemanagerpendingleave:cron')->dailyAt('08:15');
         $schedule->command('employeenotereminder:cron')->dailyAt('08:30');
         
 
