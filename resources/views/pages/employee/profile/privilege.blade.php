@@ -846,6 +846,24 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-span-12 sm:col-span-3">
+                        <div class="form-check form-switch">
+                            <label class="form-check-label ml-4" for="">Datafuture</label>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['datafuture_view']) && $priv['student_live_portal']['datafuture_view'] == 1 ? 'checked' : '') }} id="permission_student_portal_300" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][datafuture_view]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_300">View</label>
+                            </div>
+                        </div>
+                        <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
+                            <div class="form-check form-switch">
+                                <input {{ (isset($priv['student_live_portal']['datafuture_edit']) && $priv['student_live_portal']['datafuture_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_301" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][datafuture_edit]">
+                                <label class="form-check-label ml-4" for="permission_student_portal_301">Edit</label>
+                            </div>
+                        </div>
+                    </div>
                     
                 </div>
             </div>
