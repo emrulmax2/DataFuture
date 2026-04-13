@@ -126,11 +126,13 @@
             Task & Process
         </a>
     </li>
+    @if((isset(auth()->user()->priv()['datafuture_view']) && auth()->user()->priv()['datafuture_view']) || (isset($priv['student_live_portal']['datafuture_edit']) && $priv['student_live_portal']['datafuture_edit'] == 1))
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.datafuture', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.datafuture' ? 'active' : '' }}">
             Datafuture
         </a>
     </li>
+    @endif
     @if(isset(auth()->user()->priv()['view_student_archives']) && auth()->user()->priv()['view_student_archives'])
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.archives', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.archives' ? 'active' : '' }}">
