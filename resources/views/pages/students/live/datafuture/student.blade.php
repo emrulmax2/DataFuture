@@ -480,6 +480,7 @@
                                         Student Course Session {{ (isset($stu->periodstart) && !empty($stu->periodstart) ? date('d-m-Y', strtotime($stu->periodstart)) : '')}} - {{ (isset($stu->periodend) && !empty($stu->periodend) ? date('d-m-Y', strtotime($stu->periodend)) : '')}}
                                         <span class="accordionCollaps"></span>
                                     </button>
+                                    @if((isset($priv['student_live_portal']['datafuture_edit']) && $priv['student_live_portal']['datafuture_edit'] == 1))
                                     <div class="absolute l-0 t-0 b-0 m-auto ml-4 inline-flex justify-start items-center">
                                         <button type="button" data-tw-toggle="modal" data-tw-target="#editStudentStuloadModal" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" class="editStudentLoadBtn btn btn-success w-[30px] h-[30px] p-0 items-center justify-center rounded-full text-white">
                                             <i data-lucide="pencil" class="w-4 h-4"></i>
@@ -488,6 +489,7 @@
                                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                                         </button>
                                     </div>
+                                    @endif
                                     <div class="absolute right-[50px] top-0 bottom-0 mt-auto mb-auto">
                                         <div class="form-check form-switch m-0">
                                             <input {{ isset($stu->report_visibility) && $stu->report_visibility == 1 ? 'Checked' : '' }} id="report_visibility_{{$stu->id}}" class="form-check-input report_visibility" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" type="checkbox" value="{{ $stu->report_visibility }}" name="report_visibility">
