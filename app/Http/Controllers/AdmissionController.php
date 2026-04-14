@@ -133,6 +133,7 @@ use DebugBar\DebugBar;
 use Illuminate\Auth\Events\Registered;
 use App\Enums\EsignEventType;
 use App\Models\ApplicantESignature;
+use App\Models\CareLeaver;
 use App\Models\ResidencyStatus;
 
 class AdmissionController extends Controller
@@ -505,6 +506,7 @@ class AdmissionController extends Controller
             'reasons' => ApplicationRejectedReason::orderBy('name', 'asc')->get(),
             'esignature' => ApplicantESignature::where('applicant_id', $applicantId)->latest('id')->first(),
             'residencyStatuses' => ResidencyStatus::all(),
+            'careleaver' => CareLeaver::all(),
         ]);
     }
 
@@ -576,6 +578,7 @@ class AdmissionController extends Controller
         $otherDetailsOldRow = ApplicantOtherDetail::where('applicant_id', $applicant_id)->first();
 
         $ethnicity_id = $request->ethnicity_id;
+        $care_leaver_id = $request->care_leaver_id ?? null;
         $disability_status = (isset($request->disability_status) && $request->disability_status > 0 ? $request->disability_status : 0);
         $disability_id = ($disability_status == 1 && isset($request->disability_id) && !empty($request->disability_id) ? $request->disability_id : []);
         $disabilty_allowance = ($disability_status == 1 && !empty($disability_id) && (isset($request->disabilty_allowance) && $request->disabilty_allowance > 0) ? $request->disabilty_allowance : 0);
@@ -634,6 +637,7 @@ class AdmissionController extends Controller
         $otherDetails = ApplicantOtherDetail::where('applicant_id', $applicant_id)->first();
         $otherDetails->fill([
             'ethnicity_id' => $ethnicity_id,
+            'care_leaver_id' => $care_leaver_id,
             'disability_status' => $disability_status,
             'disability_status' => $disability_status,
             'disabilty_allowance' => $disabilty_allowance,

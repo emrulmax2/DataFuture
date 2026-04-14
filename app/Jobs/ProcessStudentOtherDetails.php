@@ -52,6 +52,7 @@ class ProcessStudentOtherDetails implements ShouldQueue
             $dataArray = [
                 'student_id' => $student->id,
                 'ethnicity_id'=> $applicantSet->ethnicity_id,
+                'care_leaver_id'=> $applicantSet->care_leaver_id ?? null,
                 'disability_status'=> ($applicantSet->disability_status) ?? 0,
                 'disabilty_allowance'=> ($applicantSet->disabilty_allowance) ?? 0,
                 'is_education_qualification'=> ($applicantSet->is_edication_qualification) ?? 0,

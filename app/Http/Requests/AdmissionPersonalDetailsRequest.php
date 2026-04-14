@@ -34,6 +34,7 @@ class AdmissionPersonalDetailsRequest extends FormRequest
             'ethnicity_id' => 'required',
             'disability_status' => 'sometimes',
             'disability_id' => 'required_if:disability_status,1',
+            'care_leaver_id' => 'required',
         ];
     }
 
@@ -48,6 +49,7 @@ class AdmissionPersonalDetailsRequest extends FormRequest
             'nationality_id.required' => 'The Nationality field is required.',
             'country_id.required' => 'The Country of Birth field is required.',
             'ethnicity_id.required' => 'The Ethnicity field is required.',
+            'care_leaver_id.required' => 'This field is required.',
             
             'disability_id.required_if' => 'You have to select at least one Disability while Disability Status is turned on.',
         ];

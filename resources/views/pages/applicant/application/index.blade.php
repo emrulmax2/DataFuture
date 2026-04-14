@@ -134,6 +134,18 @@
                             <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-3">
+                            <label for="care_leaver_id" class="form-label">Care Leaver</label>
+                            <select id="care_leaver_id" class="applicationLccTom lcc-tom-select w-full" name="care_leaver_id">
+                                <option value="" selected>Please Select</option>
+                                @if(!empty($careleaver))
+                                    @foreach($careleaver as $n)
+                                        <option {{ isset($apply->other->care_leaver_id) && $apply->other->care_leaver_id == $n->id ? 'Selected' : ($n->df_code == '09' ? 'Selected' : '') }} value="{{ $n->id }}">{{ $n->name }}</option>
+                                    @endforeach 
+                                @endif 
+                            </select>
+                            <div class="acc__input-error error-care_leaver_id text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-3">
                             <label for="disability_status" class="form-label">Do you have any disabilities?</label>
                             <div class="form-check form-switch">
                                 <input {{ isset($apply->other->disability_status) && $apply->other->disability_status == 1 ? 'checked' : '' }} id="disability_status" class="form-check-input" name="disability_status" value="1" type="checkbox">

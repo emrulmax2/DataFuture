@@ -34,6 +34,7 @@ use App\Models\ApplicantProposedCourse;
 use App\Models\ApplicantQualification;
 use App\Models\ApplicantResidency;
 use App\Models\ApplicantUser;
+use App\Models\CareLeaver;
 use App\Models\ComonSmtp;
 use App\Models\CourseCreationAvailability;
 use App\Models\CourseCreationInstance;
@@ -112,7 +113,8 @@ class ApplicationController extends Controller
                 if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
                   return $item;
                 }
-            })
+            }),
+            'careleaver' => CareLeaver::where('active', 1)->get(),
         ]);
     }
 
@@ -509,6 +511,7 @@ class ApplicationController extends Controller
             $disabilityStatus = (isset($request->disability_status) && $request->disability_status > 0 ? $request->disability_status : 0);
             $otherDetails = ApplicantOtherDetail::updateOrCreate(['applicant_id' => $applicant->id], [
                     'ethnicity_id' => $request->ethnicity_id,
+                    'care_leaver_id' => $request->care_leaver_id ?? null,
                     'disability_status' => $disabilityStatus,
                     'disabilty_allowance' => ($disabilityStatus == 1 && (isset($request->disabilty_allowance) && $request->disabilty_allowance > 0) ? $request->disabilty_allowance : 0),
                     'created_by' => isset(Auth::guard('agent')->user()->id) ? Auth::guard('agent')->user()->id : Auth::guard('applicant')->user()->id,
