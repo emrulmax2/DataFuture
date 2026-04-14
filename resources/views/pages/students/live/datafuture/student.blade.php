@@ -180,7 +180,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 gap-y-2">
                                     <div class="grid-column">
                                         <div class="col-span-4 text-slate-500 uppercase">CARELEAVER</div>
-                                        <div class="col-span-8 font-medium">{{ (isset($student->df->CARELEAVER) && !empty($student->df->CARELEAVER) ? $student->df->CARELEAVER : '---') }}</div>
+                                        <div class="col-span-8 font-medium">{{ (isset($student->other->leaver->name) && !empty($student->other->leaver->name) ? $student->other->leaver->name : '---') }}</div>
                                     </div>
                                     <div class="grid-column">
                                         <div class="col-span-4 text-slate-500 uppercase">PERMADDCOUNTRY</div>

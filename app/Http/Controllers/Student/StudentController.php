@@ -15,6 +15,7 @@ use App\Models\AttendanceCode;
 use App\Models\AttendanceFeedStatus;
 use App\Models\AttendanceInformation;
 use App\Models\AwardingBody;
+use App\Models\CareLeaver;
 use App\Models\ComonSmtp;
 use App\Models\Company;
 use App\Models\ConsentPolicy;
@@ -338,6 +339,7 @@ class  StudentController extends Controller
             'can_edit_other_personal_info' => (isset(auth()->user()->priv()['student_other_personal_edit']) && auth()->user()->priv()['student_other_personal_edit'] == 1 ? true : false),
             'can_view_residency_status' => (isset(auth()->user()->priv()['student_residency_status_view']) && auth()->user()->priv()['student_residency_status_view'] == 1 ? true : false),
             'can_edit_residency_status' => (isset(auth()->user()->priv()['student_residency_status_edit']) && auth()->user()->priv()['student_residency_status_edit'] == 1 ? true : false),
+            'careleaver' => CareLeaver::where('active', 1)->get(),
         ]);
     }
 

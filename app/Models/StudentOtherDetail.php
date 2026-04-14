@@ -22,6 +22,7 @@ class StudentOtherDetail extends Model
         'sexual_orientation_id',
         'religion_id',
         'study_mode_id',
+        'care_leaver_id',
         'created_by',
         'updated_by',
     ];
@@ -55,5 +56,9 @@ class StudentOtherDetail extends Model
 
     public function mode(){
         return $this->belongsTo(StudyMode::class, 'study_mode_id');
+    }
+
+    public function leaver(){
+        return $this->belongsTo(CareLeaver::class, 'care_leaver_id');
     }
 }

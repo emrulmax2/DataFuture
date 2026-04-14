@@ -24,8 +24,10 @@ class PersonalDetailController extends Controller
         $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();
 
         $ethnicity_id = $request->ethnicity_id;
+        $care_leaver_id = $request->care_leaver_id;
 
         $request->request->remove('ethnicity_id');
+        $request->request->remove('care_leaver_id');
 
         $student = Student::find($student_id);
         $student->fill($request->input());
@@ -49,7 +51,8 @@ class PersonalDetailController extends Controller
 
         $otherDetails = StudentOtherDetail::where('student_id', $student_id)->first();
         $otherDetails->fill([
-            'ethnicity_id' => $ethnicity_id
+            'ethnicity_id' => $ethnicity_id,
+            'care_leaver_id' => $care_leaver_id,
         ]);
         $changes = $otherDetails->getDirty();
         $otherDetails->save();

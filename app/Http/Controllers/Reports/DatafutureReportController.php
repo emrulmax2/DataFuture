@@ -377,7 +377,7 @@ class DatafutureReportController extends Controller
                             $EngagementRoot_XML .= (isset($STUDENT_CREL->feeeligibility->elegibility->df_code) && !empty($STUDENT_CREL->feeeligibility->elegibility->df_code) ? '<FEEELIG>'.$STUDENT_CREL->feeeligibility->elegibility->df_code.'</FEEELIG>' : '');
                             
                                 /* ENTRY PROFILE XML START */
-                                $EntryProfileRoot_XML .= (isset($STUDENT->df->CARELEAVER) && !empty($STUDENT->df->CARELEAVER) ? '<CARELEAVER>'.$STUDENT->df->CARELEAVER.'</CARELEAVER>' : '');
+                                $EntryProfileRoot_XML .= (isset($STUDENT->other->leaver->df_code) && !empty($STUDENT->other->leaver->df_code) ? '<CARELEAVER>'.$STUDENT->other->leaver->df_code.'</CARELEAVER>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->contact->pcountry->df_code) && !empty($STUDENT->contact->pcountry->df_code) ? '<PERMADDCOUNTRY>'.$STUDENT->contact->pcountry->df_code.'</PERMADDCOUNTRY>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->contact->permanent_post_code) && !empty($STUDENT->contact->permanent_post_code) ? '<PERMADDPOSTCODE>'.$STUDENT->contact->permanent_post_code.'</PERMADDPOSTCODE>' : '');
                                 $EntryProfileRoot_XML .= (isset($STUDENT->other->is_education_qualification) && $STUDENT->other->is_education_qualification == 1 && isset($STUDENT->qualHigest->previous_providers->df_code) && !empty($STUDENT->qualHigest->previous_providers->df_code) ? '<PREVIOUSPROVIDER>'.$STUDENT->qualHigest->previous_providers->df_code.'</PREVIOUSPROVIDER>' : '');

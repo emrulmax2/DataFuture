@@ -88,6 +88,20 @@
                             </select>
                             <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
                         </div>
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="care_leaver_id" class="form-label">Care Leaver <span class="text-danger">*</span></label>
+                            <select id="care_leaver_id" class="lccTom lcc-tom-select w-full" name="care_leaver_id">
+                                <option value="" selected>Please Select</option>
+                                @if(!empty($careleaver))
+                                    @foreach($careleaver as $n).
+                                        @if($n->active == 1)
+                                            <option {{ isset($student->other->care_leaver_id) && $student->other->care_leaver_id == $n->id ? 'Selected' : '' }} value="{{ $n->id }}">{{ $n->name }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="acc__input-error error-ethnicity_id text-danger mt-2"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

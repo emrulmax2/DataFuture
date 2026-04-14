@@ -21,6 +21,7 @@ class ApplicantOtherDetail extends Model
         'gender_identity',
         'sexual_orientation_id',
         'religion_id',
+        'care_leaver_id',
         'created_by',
         'updated_by',
     ];
@@ -38,5 +39,9 @@ class ApplicantOtherDetail extends Model
 
     public function ethnicity(){
         return $this->belongsTo(Ethnicity::class, 'ethnicity_id');
+    }
+
+    public function leaver(){
+        return $this->belongsTo(CareLeaver::class, 'care_leaver_id');
     }
 }
