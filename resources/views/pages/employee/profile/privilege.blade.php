@@ -860,7 +860,7 @@
                         <div class="childrenPermissionWrap pt-4 pl-12 inline-flex">
                             <div class="form-check form-switch">
                                 <input {{ (isset($priv['student_live_portal']['datafuture_edit']) && $priv['student_live_portal']['datafuture_edit'] == 1 ? 'checked' : '') }} id="permission_student_portal_301" class="form-check-input" type="checkbox" value="1" name="permission[student_live_portal][datafuture_edit]">
-                                <label class="form-check-label ml-4" for="permission_student_portal_301">Edit</label>
+                                <label class="form-check-label ml-4" for="permission_student_portal_301">Add/Edit</label>
                             </div>
                         </div>
                     </div>
