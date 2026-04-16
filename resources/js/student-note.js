@@ -142,10 +142,10 @@ var studentNotesListTable = (function () {
                         //if(cell.getData().note_document_id > 0){
                             //btns +='<a data-id="'+cell.getData().note_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
                         //}
-                        if(cell.getData().followed_up == 'yes' && cell.getData().am_i_followed){
+                        if(cell.getData().followed_up == 'yes'){
                             var countHtml = cell.getData().unread_comment > 0 ? '<span class="bg-danger absolute r-0 t-0" style="    width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 1; padding: 3px 0 0; margin: -5px -5px 0 0;">'+cell.getData().unread_comment+'</span>' : '';
                             btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#followUpCommentModal"  class="viewCommentBtn relative btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i>'+countHtml+'</button>';
-                            if(cell.getData().followed_up_status == 'Pending'){
+                            if(cell.getData().am_i_followed && cell.getData().followed_up_status == 'Pending'){
                                 btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
                             }
                         }
@@ -936,7 +936,7 @@ var studentNotesListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn').removeAttr('disabled');
                 $('#postCommentBtn svg.theIcon').fadeIn();
                 $('#postCommentBtn svg.theLoader').fadeOut();
 
@@ -960,7 +960,7 @@ var studentNotesListTable = (function () {
                     }, 10);
                 }
             }).catch(error => {
-                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn').removeAttr('disabled');
                 $('#postCommentBtn svg.theIcon').fadeIn();
                 $('#postCommentBtn svg.theLoader').fadeOut();
                 if (error.response) {
@@ -968,7 +968,7 @@ var studentNotesListTable = (function () {
                 }
             });
         }else{
-            $('#postCommentBtn').attr('disabled', 'disabled');
+            $('#postCommentBtn').removeAttr('disabled');
             $('#postCommentBtn svg.theIcon').fadeIn();
             $('#postCommentBtn svg.theLoader').fadeOut();
         }

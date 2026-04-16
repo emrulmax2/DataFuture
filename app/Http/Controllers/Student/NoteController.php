@@ -5,19 +5,25 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ApplicantNoteRequest;
 use App\Http\Requests\StudentNoteRequest;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
 use App\Models\Attendance;
+use App\Models\ComonSmtp;
 use App\Models\Student;
 use App\Models\StudentDocument;
 use App\Models\StudentFlagRaiser;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentNotesDocument;
+use App\Models\TermDeclaration;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class NoteController extends Controller
 {
     public function store(StudentNoteRequest $request){
+        $currentUser = User::find(auth()->user()->id);
         $student_id = $request->student_id;
         $student = Student::find($student_id);
         $studentApplicantId = $student->applicant_id;
@@ -46,7 +52,6 @@ class NoteController extends Controller
         ]);
         if($note):
             if($followed_up == 'yes' && !empty($follow_up_by)):
-                //$follow_up_by[] = auth()->user()->id;
                 foreach($follow_up_by as $fub):
                     StudentNoteFollowedBy::create([
                         'student_note_id' => $note->id,
@@ -54,6 +59,47 @@ class NoteController extends Controller
                         'created_by' => auth()->user()->id,
                     ]);
                 endforeach;
+
+
+                $followedByFiltered = array_filter($follow_up_by, function($val) {
+                    return $val !== auth()->user()->id;
+                });
+                if(!empty($followedByFiltered)):
+                    $termDeclaration = TermDeclaration::find($request->term_declaration_id);
+                    $commonSmtp = ComonSmtp::where('is_default', 1)->first();
+                    $configuration = [
+                        'smtp_host'    => $commonSmtp->smtp_host,
+                        'smtp_port'    => $commonSmtp->smtp_port,
+                        'smtp_username'  => $commonSmtp->smtp_user,
+                        'smtp_password'  => $commonSmtp->smtp_pass,
+                        'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                        
+                        'from_email'    => $commonSmtp->smtp_user,
+                        'from_name'    =>  'Followups Notification',
+                    ];
+
+                    $subject = "Follow-Up Ticket Raised for Student ".$student->registration_no;
+                    $MAILHTML = '<p>This is to inform you that a flag has been raised against a student and assigned to you for further action.</p>';
+                    $MAILHTML .= '<p>';
+                        $MAILHTML .= '<strong>Details:</strong><br/>';
+                        $MAILHTML .= '<ul>';
+                            $MAILHTML .= '<li><strong>Note ID:</strong> #'.$note->id.'</li>';
+                            $MAILHTML .= '<li><strong>Student Name:</strong> '.$student->full_name.'</li>';
+                            $MAILHTML .= '<li><strong>Student ID:</strong> '.$student->registration_no.'</li>';
+                            $MAILHTML .= '<li><strong>Term Name:</strong> '.$termDeclaration->name ?? 'N/A'.'</li>';
+                            $MAILHTML .= '<li><strong>Date:</strong> '.(isset($request->opening_date) && !empty($request->opening_date) ? date('Y-m-d', strtotime($request->opening_date)) : '').'</li>';
+                            $MAILHTML .= '<li><strong>Note:</strong> '.$request->content.'</li>';
+                            $MAILHTML .= '<li><strong>Raised By:</strong> '.(isset($currentUser->employee->full_name) ? $currentUser->employee->full_name : $currentUser->name).'</li>';
+                        $MAILHTML .= '</ul>';
+                    $MAILHTML .= '</p>';
+                    $MAILHTML .= '<p>Kindly ensure the appropriate follow-up is completed in a timely manner.</p>';
+
+                    foreach($followedByFiltered as $the_user_id):
+                        $the_user = User::find($the_user_id);
+
+                        UserMailerJob::dispatch($configuration, [$the_user->email], new CommunicationSendMail($subject, $MAILHTML, []));
+                    endforeach;
+                endif;
             endif;
             if($request->hasFile('document')):
                 $document = $request->file('document');

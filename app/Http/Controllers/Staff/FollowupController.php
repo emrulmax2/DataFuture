@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\UserMailerJob;
+use App\Mail\CommunicationSendMail;
+use App\Models\ComonSmtp;
+use App\Models\Student;
 use App\Models\StudentNote;
 use App\Models\StudentNoteFollowedBy;
 use App\Models\StudentNoteFollowupComment;
 use App\Models\StudentNoteFollowupCommentRead;
 use App\Models\TermDeclaration;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class FollowupController extends Controller
@@ -187,6 +192,10 @@ class FollowupController extends Controller
         $user_id = auth()->user()->id;
         $note_id = $request->student_note_id;
         $comment = $request->comment;
+        $note = StudentNote::find($note_id);
+        $student = Student::find($note->student_id);
+        $currentUser = User::find($user_id);
+        $termDeclaration = TermDeclaration::find($note->term_declaration_id);
 
         $noteComment = StudentNoteFollowupComment::create([
             'student_note_id' => $note_id,
@@ -194,15 +203,50 @@ class FollowupController extends Controller
             'created_by' => $user_id
         ]);
         if($noteComment){
-            $followUpBies = StudentNoteFollowedBy::where('student_note_id', $note_id)->whereNot('user_id', $user_id)->pluck('user_id')->unique()->toArray();
+            $followUpBies = StudentNoteFollowedBy::where('student_note_id', $note_id)->pluck('user_id')->unique()->toArray();
             if(!empty($followUpBies)):
+                $commonSmtp = ComonSmtp::where('is_default', 1)->first();
+                $configuration = [
+                    'smtp_host'    => $commonSmtp->smtp_host,
+                    'smtp_port'    => $commonSmtp->smtp_port,
+                    'smtp_username'  => $commonSmtp->smtp_user,
+                    'smtp_password'  => $commonSmtp->smtp_pass,
+                    'smtp_encryption'  => $commonSmtp->smtp_encryption,
+                    
+                    'from_email'    => $commonSmtp->smtp_user,
+                    'from_name'    =>  '#'.$note->id,
+                ];
+                $subject = "Update Added to Follow-Up Ticket";
+                $MAILHTML = '<p>This is to inform you that a staff member has added a note to the follow-up ticket you created for the student below.</p>';
+                $MAILHTML .= '<p>';
+                    $MAILHTML .= '<strong>Details:</strong><br/>';
+                    $MAILHTML .= '<ul>';
+                        $MAILHTML .= '<li><strong>Note ID:</strong> #'.$note->id.'</li>';
+                        $MAILHTML .= '<li><strong>Student Name:</strong> '.$student->full_name.'</li>';
+                        $MAILHTML .= '<li><strong>Student ID:</strong> '.$student->registration_no.'</li>';
+                        $MAILHTML .= '<li><strong>Term Name:</strong> '.$termDeclaration->name ?? 'N/A'.'</li>';
+                        $MAILHTML .= '<li><strong>Date:</strong> '.(isset($note->opening_date) && !empty($note->opening_date) ? date('Y-m-d', strtotime($note->opening_date)) : '').'</li>';
+                        //$MAILHTML .= '<li><strong>Note:</strong> '.$note->content.'</li>';
+                        $MAILHTML .= '<li><strong>Raised By:</strong> '.(isset($note->user->employee->full_name) ? $note->user->employee->full_name : $note->user->name).'</li>';
+                        $MAILHTML .= '<li><strong>Staff Update / Note:</strong> '.$comment.'</li>';
+                        $MAILHTML .= '<li><strong>Posted By:</strong> ';
+                            $MAILHTML .= (isset($currentUser->employee->full_name) ? $currentUser->employee->full_name : $currentUser->name);
+                            $MAILHTML .= ' at '.date('d-m-Y - h:i A');
+                        $MAILHTML .= '</li>';
+                    $MAILHTML .= '</ul>';
+                $MAILHTML .= '</p>';
+                $MAILHTML .= '<p>Please review the update and take any further action if required.</p>';
+
                 foreach($followUpBies as $user):
+                    $the_user = User::find($user);
                     StudentNoteFollowupCommentRead::create([
                         'student_note_id' => $note_id,
                         'student_note_followup_comment_id' => $noteComment->id,
                         'user_id' => $user,
                         'read' => 0,
                     ]);
+
+                    UserMailerJob::dispatch($configuration, [$the_user->id], new CommunicationSendMail($subject, $MAILHTML, []));
                 endforeach;
             endif;
         }

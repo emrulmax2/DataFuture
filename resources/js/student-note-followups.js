@@ -383,7 +383,7 @@ var pendingFollowupsListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn').removeAttr('disabled');
                 $('#postCommentBtn svg.theIcon').fadeIn();
                 $('#postCommentBtn svg.theLoader').fadeOut();
 
@@ -407,7 +407,7 @@ var pendingFollowupsListTable = (function () {
                     }, 10);
                 }
             }).catch(error => {
-                $('#postCommentBtn').attr('disabled', 'disabled');
+                $('#postCommentBtn').removeAttr('disabled');
                 $('#postCommentBtn svg.theIcon').fadeIn();
                 $('#postCommentBtn svg.theLoader').fadeOut();
                 if (error.response) {
@@ -415,7 +415,7 @@ var pendingFollowupsListTable = (function () {
                 }
             });
         }else{
-            $('#postCommentBtn').attr('disabled', 'disabled');
+            $('#postCommentBtn').removeAttr('disabled');
             $('#postCommentBtn svg.theIcon').fadeIn();
             $('#postCommentBtn svg.theLoader').fadeOut();
         }
