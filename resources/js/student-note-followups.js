@@ -109,9 +109,9 @@ var pendingFollowupsListTable = (function () {
                     width: "150",
                     download: false,
                     formatter(cell, formatterParams) {                        
-                        var btns = "";
+                        var btns = "";//data-tw-toggle="modal" data-tw-target="#followUpCommentModal"
                         var countHtml = cell.getData().unread_comment > 0 ? '<span class="bg-danger absolute r-0 t-0" style="    width: 18px; height: 18px; border-radius: 50%; font-size: 11px; line-height: 1; padding: 3px 0 0; margin: -5px -5px 0 0;">'+cell.getData().unread_comment+'</span>' : '';
-                        btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#followUpCommentModal"  class="viewCommentBtn relative btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i>'+countHtml+'</button>';
+                        btns += '<button data-id="' + cell.getData().id + '"   class="viewCommentBtn relative btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="message-square-plus" class="w-4 h-4"></i>'+countHtml+'</button>';
                         btns += '<button data-id="' + cell.getData().id + '" type="button" class="completedBtn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="check-circle" class="w-4 h-4"></i></a>';
                             
                         
@@ -184,6 +184,7 @@ var pendingFollowupsListTable = (function () {
         $('#followUpCommentModal textarea').val('');
         $('#followUpCommentModal [name="student_note_id"]').val('0');
         $('#followUpCommentModal #followUpCommentWrap').html('Loading...');
+        $('#followUpCommentModal .modHeaderContent').html('');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -339,23 +340,29 @@ var pendingFollowupsListTable = (function () {
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             if (response.status == 200) {
-                $('#followUpCommentWrap').html(response.data.htm);
-                $('#followUpCommentModal [name="student_note_id"]').val(note_id);
+                followUpCommentModal.show();
+                document.getElementById("followUpCommentModal").addEventListener("shown.tw.modal", function (event) {
+                    $('#followUpCommentModal .modHeaderContent').html(response.data.headhtml);
+                    $('#followUpCommentWrap').html(response.data.htm);
+                    $('#followUpCommentModal [name="student_note_id"]').val(note_id);
+
+                    
+                    setTimeout(() => {
+                        $('#followUpCommentModal').find('.tooltip').each(function () {
+                            let tippyOption = {
+                                content: $(this).attr("alt"),
+                            };
+                            tippy(this, {
+                                arrow: roundArrow,
+                                animation: "shift-away",
+                                zIndex: '9999999999',
+                                ...tippyOption,
+                            });
+                        });
+                    }, 10);
+                });
 
                 
-                setTimeout(() => {
-                    $('#followUpCommentModal').find('.tooltip').each(function () {
-                        let tippyOption = {
-                            content: $(this).attr("alt"),
-                        };
-                        tippy(this, {
-                            arrow: roundArrow,
-                            animation: "shift-away",
-                            zIndex: '9999999999',
-                            ...tippyOption,
-                        });
-                    });
-                }, 10);
             }
         }).catch(error => {
             if (error.response) {
