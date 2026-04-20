@@ -180,6 +180,7 @@ class FollowupController extends Controller
         $note = StudentNote::with('student')->find($note_id);
         $user_id = auth()->user()->id;
 
+
         $HEADHTML = '<div class="image-fit relative h-10 w-10 flex-none sm:h-12 sm:w-12">';
             $HEADHTML .= '<img class="rounded-full" src="'. (isset($note->student->photo_url) && !empty($note->student->photo_url) ? $note->student->photo_url : asset('build/assets/images/avater.png')) .'" alt="'.$note->student->full_name.'">';
         $HEADHTML .= '</div>';
@@ -196,7 +197,7 @@ class FollowupController extends Controller
         ]);
         $HTML = $this->getCommentHtml($user_id, $note_id);
 
-        return response()->json(['headhtml' => $HEADHTML, 'htm' => $HTML], 200);
+        return response()->json(['url' => route('student.show', $note->student_id), 'headhtml' => $HEADHTML, 'htm' => $HTML], 200);
     }
 
     public function storeComment(Request $request){

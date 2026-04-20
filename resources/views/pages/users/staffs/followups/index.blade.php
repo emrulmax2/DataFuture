@@ -56,7 +56,7 @@
             <form method="post" action="#" id="followUpCommentForm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="flex items-center modHeaderContent">
+                        <a href="#" class="flex items-center modHeaderContent">
                             <div class="image-fit relative h-10 w-10 flex-none sm:h-12 sm:w-12">
                                 <img class="rounded-full" src="{{ (isset($user->employee->photo_url) && !empty($user->employee->photo_url) ? $user->employee->photo_url : asset('build/assets/images/avater.png')) }}" alt="{{ (isset($user->employee->full_name) && !empty($user->employee->full_name) ? $user->employee->full_name : $user->name) }}">
                             </div>
@@ -68,7 +68,7 @@
                                     Online
                                 </div>
                             </div>
-                        </div>
+                        </a>
                         <a class="ml-auto" data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
                     </div>
                     <div class="modal-body">
