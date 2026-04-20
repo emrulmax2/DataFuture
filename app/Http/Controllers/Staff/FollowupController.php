@@ -177,7 +177,18 @@ class FollowupController extends Controller
 
     public function getCommentList(Request $request){
         $note_id = $request->note_id;
+        $note = StudentNote::with('student')->find($note_id);
         $user_id = auth()->user()->id;
+
+        $HEADHTML = '<div class="image-fit relative h-10 w-10 flex-none sm:h-12 sm:w-12">';
+            $HEADHTML .= '<img class="rounded-full" src="'. (isset($note->student->photo_url) && !empty($note->student->photo_url) ? $note->student->photo_url : asset('build/assets/images/avater.png')) .'" alt="'.$note->student->full_name.'">';
+        $HEADHTML .= '</div>';
+        $HEADHTML .= '<div class="ml-3 mr-auto">';
+            $HEADHTML .= '<div class="text-base font-medium">';
+                $HEADHTML .= $note->student->full_name;
+            $HEADHTML .= '</div>';
+            $HEADHTML .= '<div class="text-xs text-slate-500 sm:text-sm">'.$note->student->registration_no.'</div>';
+        $HEADHTML .= '</div>';
 
         $updateRead = StudentNoteFollowupCommentRead::where('student_note_id', $note_id)->where('user_id', $user_id)->where('read', 0)->update([
             'read' => 1,
@@ -185,7 +196,7 @@ class FollowupController extends Controller
         ]);
         $HTML = $this->getCommentHtml($user_id, $note_id);
 
-        return response()->json(['htm' => $HTML], 200);
+        return response()->json(['headhtml' => $HEADHTML, 'htm' => $HTML], 200);
     }
 
     public function storeComment(Request $request){
