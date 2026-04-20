@@ -184,7 +184,7 @@ var pendingFollowupsListTable = (function () {
         $('#followUpCommentModal textarea').val('');
         $('#followUpCommentModal [name="student_note_id"]').val('0');
         $('#followUpCommentModal #followUpCommentWrap').html('Loading...');
-        $('#followUpCommentModal .modHeaderContent').html('');
+        $('#followUpCommentModal .modHeaderContent').html('').href('javascript:void(0);').removeAttr('target');
     });
 
     $('#successModal .successCloser').on('click', function(e){
@@ -342,7 +342,7 @@ var pendingFollowupsListTable = (function () {
             if (response.status == 200) {
                 followUpCommentModal.show();
                 document.getElementById("followUpCommentModal").addEventListener("shown.tw.modal", function (event) {
-                    $('#followUpCommentModal .modHeaderContent').html(response.data.headhtml);
+                    $('#followUpCommentModal .modHeaderContent').html(response.data.headhtml).attr('href', response.data.url).attr('target', '_blank');
                     $('#followUpCommentWrap').html(response.data.htm);
                     $('#followUpCommentModal [name="student_note_id"]').val(note_id);
 
