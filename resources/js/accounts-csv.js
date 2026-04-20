@@ -44,6 +44,7 @@ import TomSelect from "tom-select";
     })*/
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
 
 
     const successModalEl = document.getElementById('successModal')
@@ -251,5 +252,128 @@ import TomSelect from "tom-select";
                 console.log('error');
             }
         });
+    })
+
+    $('#saveAllCsvTransaction').on('click', function(e){
+        e.preventDefault()
+        let $theBtn = $(this);
+        let $theTable = $('#csvTransTable');
+
+        if($theTable.find('.transaction_row').length > 0){
+            $theBtn.attr('disabled', 'disabled');
+            $theBtn.find('.theLoader').fadeIn();
+
+            let formData = new FormData();
+            let validRowCount = 0;
+            $('#csvTransTable tr.transaction_row').each(function (index) {
+
+                let $theTr = $(this);
+                let id = $theTr.data('transid');
+                let file_id = $theTr.data('fileid');
+
+                let transaction_type = $theTr.find('.transaction_type').val();
+                let details_col = $theTr.find('.details_col').val();
+                let inc_category = $theTr.find('.inc_category').val();
+                let exp_category = $theTr.find('.exp_category').val();
+
+                if((transaction_type == 1 || transaction_type == 0) && details_col != '' && (inc_category > 0 || exp_category > 0)){
+                    validRowCount += 1;
+
+                    // inputs
+                    $theTr.find('input:not([type="file"]):not([type="checkbox"]):not(.dropdown-input)').each(function () {
+                        let name = $(this).attr('name').split('_').pop();
+                        formData.append(`rows[${index}][${name}]`, $(this).val());
+                    });
+
+                    // textarea
+                    $theTr.find('textarea').each(function () {
+                        let name = $(this).attr('name').split('_').pop();
+                        formData.append(`rows[${index}][${name}]`, $(this).val());
+                    });
+
+                    // select
+                    $theTr.find('select').each(function () {
+                        let name = $(this).attr('name').split('_').pop();
+                        formData.append(`rows[${index}][${name}]`, $(this).val());
+                    });
+
+                    // checkbox
+                    $theTr.find('input[type="checkbox"]').each(function () {
+                        let name = $(this).attr('name').split('_').pop();
+                        formData.append(`rows[${index}][${name}]`, $(this).prop('checked') ? 1 : 0);
+                    });
+
+                    // file
+                    let fileInput = $('#trans_up_' + id)[0];
+                    if (fileInput && fileInput.files.length > 0) {
+                        formData.append(`rows[${index}][document]`, fileInput.files[0]);
+                    }
+
+                    // ids
+                    formData.append(`rows[${index}][acc_csv_transaction_id]`, id);
+                    formData.append(`rows[${index}][acc_csv_file_id]`, file_id);
+                }
+            });
+
+            if(validRowCount > 0){
+                axios({
+                    method: "post",
+                    url: route('accounts.csv.update.bulk'), 
+                    data: formData,
+                    headers: {
+                        'content-type': 'multipart/form-data',
+                        'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')
+                    },
+                }).then(response => {
+                    $theBtn.removeAttr('disabled');
+                    $theBtn.find('.theLoader').fadeOut();
+
+                    successModal.show();
+                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
+                        $('#successModal .successModalTitle').html('Congratulations!');
+                        $('#successModal .successModalDesc').html(response.data.message);
+                        $('#successModal .successCloser').attr('data-action', 'RELOAD').attr('data-redirect', response.data.redirect);
+                    });
+
+                    setTimeout(function(){
+                        successModal.hide();
+                        if(response.data.redirect != ''){
+                            window.location.reload();
+                        }else{
+                            window.location.href = response.data.redirect;
+                        }
+                    }, 2000);
+                }).catch(error => {
+                    $theBtn.removeAttr('disabled');
+                    $theBtn.find('.theLoader').fadeOut();
+                    if(error.response){
+                        console.log('error');
+                    }
+                });
+            }else{
+                $theBtn.removeAttr('disabled');
+                $theBtn.find('.theLoader').fadeOut();
+
+                warningModal.show();
+                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                    $("#warningModal .warningModalTitle").html( "Validation Error!" );
+                    $("#warningModal .warningModalDesc").html('No valid row found. Please fill out at least one row to continue.');
+                }); 
+
+                setTimeout(() => {
+                    warningModal.hide();
+                }, 2000);
+            }
+        }else{
+            warningModal.show();
+            document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
+                $("#warningModal .warningModalTitle").html( "Oops!" );
+                $("#warningModal .warningModalDesc").html('Rows not found.');
+            }); 
+
+            setTimeout(() => {
+                warningModal.hide();
+            }, 1000);
+        }
     })
 })()

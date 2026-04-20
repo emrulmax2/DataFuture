@@ -15,7 +15,7 @@
             <div class="intro-y box mt-3">
                 <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
                     <h2 class="font-medium text-base mr-auto">CSV Upload {!! (isset($bank->bank_name) && !empty($bank->bank_name) ? '<u>('.$bank->bank_name.')</u>' : '') !!}</h2>
-                    <div class="dropdown" id="processDropdown">
+                    <div class="dropdown ml-auto" id="processDropdown">
                         <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="file-text" class="w-4 h-4 mr-2"></i>  {{ isset($csv_file->name) && !empty($csv_file->name) ? $csv_file->name : 'Select CSV File' }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                         <div class="dropdown-menu w-72">
                             <ul class="dropdown-content">
@@ -39,6 +39,24 @@
                             </ul>
                         </div>
                     </div>
+                    @if($bank->id > 0 && $file->id > 0)
+                    <button type="button" id="saveAllCsvTransaction" class="btn btn-success w-auto ml-2 text-white">  
+                        <i data-lucide="save" class="w-4 h-4 mr-2"></i>   
+                        Save All                      
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="white" class="w-4 h-4 ml-2 theLoader">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
+                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </button>
+                    @endif
                 </div>
                 <div class="p-5">
                     @if($csv_file_id > 0)
@@ -49,13 +67,13 @@
                                     <th colspan="10" class="text-right">{{ (!empty($csv_transactions) && $csv_transactions->count() > 0) ? $csv_transactions->count().' Rows Found' : '0 Rows Found' }}</th>
                                 </tr>
                                 <tr>
-                                    <th>Type</th>
-                                    <th>Date</th>
+                                    <th>Type <span class="text-danger">*</span></th>
+                                    <th>Date <span class="text-danger">*</span></th>
                                     <th>Invoice</th>
                                     <th>Inv. Date</th>
-                                    <th>Details</th>
+                                    <th>Details <span class="text-danger">*</span></th>
                                     <th>Description</th>
-                                    <th>Category</th>
+                                    <th>Category <span class="text-danger">*</span></th>
                                     <th class="text-right">Withdrawl</th>
                                     <th class="text-right">Deposit</th>
                                     <th class="text-right">Action</th>
@@ -75,7 +93,7 @@
                                             <td><input type="text" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_transdate" class="form-control w-24 datepicker" value="{{ (!empty($trns->trans_date) ? date('d-m-Y', strtotime($trns->trans_date)) : '') }}" data-date-format="DD-MM-YYYY" data-single-mode="true"/></td>
                                             <td><input type="text" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_invoiceno" class="form-control w-24" value=""/></td>
                                             <td><input type="text" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_invoicedate" class="form-control w-24 datepicker" value=""  data-date-format="DD-MM-YYYY" data-single-mode="true"/></td>
-                                            <td><textarea name="trans_{{ $csv_file_id }}_{{ $trns->id }}_detail" class="form-control w-full" rows="1">{{ $trns->description }}</textarea></td>
+                                            <td><textarea name="trans_{{ $csv_file_id }}_{{ $trns->id }}_detail" class="form-control w-full details_col" rows="1">{{ $trns->description }}</textarea></td>
                                             <td><textarea name="trans_{{ $csv_file_id }}_{{ $trns->id }}_description" class="form-control w-full" rows="1"></textarea></td>
                                             <td>
                                                 <select name="trans_{{ $csv_file_id }}_{{ $trns->id }}_inccategory" class="w-48 form-control inc_category" style="display: {{ $trns->transaction_type == 0 ? 'block' : 'none' }};">
@@ -107,19 +125,35 @@
                                             <td class="text-right"><input type="number" step="any" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_income" class="w-24 form-control rowIncome text-right" value="{{ ($trns->flow == 0 ? $trns->amount : '') }}"/></td>
                                             <td>
                                                 <div class="flex justify-end items-center relative">
-                                                    <div class="form-check inline-flex mr-2">
+                                                    <div class="form-check inline-flex mr-1">
                                                         <input checked class="form-check-input audit_status" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_auditstatus" type="checkbox" value="1">
                                                     </div>
-                                                    <div class="inline-flex mr-2 relative">
+                                                    <div class="inline-flex mr-1 relative">
                                                         <input type="checkbox" id="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" value="1" class="absolute l-0 t-0 w-0 h-0 opacity-0 invisible is_assets" />
-                                                        <label for="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" class="assetsChecker cursor-pointer btn btn-twitter h-[30px] w-[30px] p-0 text-white">
+                                                        <label for="trans_{{ $csv_file_id }}_{{ $trns->id }}_isassets" class="assetsChecker cursor-pointer btn btn-twitter h-[30px] w-[30px] p-0 text-white rounded-full">
                                                             <i data-lucide="package-plus" class="w-4 h-4 unCheckedIcon"></i>
                                                             <i data-lucide="package-check" class="w-4 h-4 checkedIcon"></i>
                                                         </label>
                                                     </div>
-                                                    <label for="trans_up_{{$trns->id}}" class="btn btn-linkedin btn-sm"><i data-lucide="hard-drive-upload" class="w-4 h-4"></i></label>
+                                                    @php 
+                                                        $classes = 'btn-linkedin';
+                                                        if(isset($trns->files->has_cto_receipts) && $trns->files->has_cto_receipts == 1):
+                                                            if($trns->cto_receipt_error && $trns->cto_receipt_error == 1):
+                                                                $classes = 'btn-danger';
+                                                            elseif($trns->has_receipts == 1 && !empty($trns->cto_receipt_name)):
+                                                                $classes = 'btn-success';
+                                                            elseif($trns->has_receipts == 1 && empty($trns->cto_receipt_name)):
+                                                                $classes = 'btn-warning';
+                                                            endif;
+                                                        endif;
+                                                    @endphp
+                                                    <label for="trans_up_{{$trns->id}}" class="btn {{ $classes }} text-white btn-sm rounded-full w-[30px] h-[30px]"><i data-lucide="hard-drive-upload" class="w-4 h-4"></i></label>
                                                     <input type="file" id="trans_up_{{$trns->id}}" name="trans_{{ $csv_file_id }}_{{ $trns->id }}_doument" style="opacity: 0; visibility: hidden; width: 0; height: 0; position: absolute;"/>
-                                                    <button data-file-id="{{ $trns->acc_csv_file_id }}" data-id="{{ $trns->id }}" style="display: none;" type="button" class="btn btn-success saveCsvTransRow text-white btn-sm ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
+
+                                                    @if(isset($trns->files->has_cto_receipts) && $trns->files->has_cto_receipts == 1 && $trns->has_receipts == 1 && !empty($trns->cto_receipt_name) && isset($trns->receipt_url) && !empty($trns->receipt_url))
+                                                        <a href="{{ $trns->receipt_url }}" title="{{ $trns->cto_receipt_name }}" data-theme="light" target="_blank" class="tooltip btn btn-facebook text-white btn-sm rounded-full w-[30px] h-[30px] ml-1"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>
+                                                    @endif
+                                                    <button data-file-id="{{ $trns->acc_csv_file_id }}" data-id="{{ $trns->id }}" style="display: none;" type="button" class="btn btn-success saveCsvTransRow text-white btn-sm rounded-full w-[30px] h-[30px] ml-1"><i data-lucide="save" class="w-4 h-4"></i></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -156,6 +190,25 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    <!-- BEGIN: Warning Modal Content -->
+    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body p-0">
+                    <div class="p-5 text-center">
+                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                        <div class="text-3xl mt-5 warningModalTitle">Oops!</div>
+                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    </div>
+                    <div class="px-5 pb-8 text-center">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">OK, Got it</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Warning Modal Content -->
 
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" data-tw-backdrop="static" class="modal" tabindex="-1" aria-hidden="true">

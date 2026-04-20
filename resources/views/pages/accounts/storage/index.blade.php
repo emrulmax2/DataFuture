@@ -211,6 +211,17 @@
                             <input type="file" id="csv_doc" name="csv_doc" id="csv_doc" value="" accept=".csv">
                             <div class="acc__input-error error-csv_doc text-danger mt-2"></div>
                         </div>
+                        <div class="mt-3">
+                            <div class="form-check form-switch">
+                                <input id="has_cto_receipts" name="has_cto_receipts" class="form-check-input" type="checkbox" value="1">
+                                <label class="form-check-label" for="has_cto_receipts">CTO Receipts Upload</label>
+                            </div>
+                        </div>
+                        <div class="mt-3 relative cto_receipts_wrap" style="display: none;">
+                            <label for="cto_receipts" class="form-label block">Receipts</label>
+                            <input type="file" id="cto_receipts" name="cto_receipts[]" multiple value="" accept=".pdf">
+                            <div class="acc__input-error error-cto_receipts text-danger mt-2"></div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>

@@ -13,6 +13,7 @@ class AccCsvFile extends Model
     protected $fillable = [
         'acc_bank_id',
         'name',
+        'has_cto_receipts',
         'created_by',
         'updated_by',
     ];
