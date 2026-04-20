@@ -615,4 +615,20 @@ var storageTransList = (function () {
         });
     });
 
+
+    $('#has_cto_receipts').on('change', function(){
+        let $theCheckbox = $(this);
+        let $theInputFile = $('#cto_receipts');
+
+        if($theCheckbox.prop('checked')){
+            $('.cto_receipts_wrap').fadeIn('fast', function(){
+                $theInputFile.val('')
+            })
+        }else{
+            $('.cto_receipts_wrap').fadeOut('fast', function(){
+                $theInputFile.val('')
+            })
+        }
+    })
+
 })()

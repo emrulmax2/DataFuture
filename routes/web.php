@@ -297,6 +297,7 @@ use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
 //use App\Http\Controllers\Settings\PermissionSettingController;
 use App\Http\Controllers\Settings\StudentFlagController;
+use App\Http\Controllers\Settings\Studentoptions\CareleaverController;
 use App\Http\Controllers\Settings\Studentoptions\DisableAllowanceController;
 use App\Http\Controllers\Settings\Studentoptions\EquivalentOrLowerQualificationController;
 use App\Http\Controllers\Settings\Studentoptions\ExchangeProgrammeController;
@@ -3363,6 +3364,7 @@ Route::middleware('auth')->group(function() {
         Route::get('accounts/csv/transactions/{bank}/{csv?}', 'index')->name('accounts.csv.transactions'); 
         Route::post('accounts/csv/store', 'csvStore')->name('accounts.csv.store'); 
         Route::post('accounts/csv/update', 'csvUpdate')->name('accounts.csv.update'); 
+        Route::post('accounts/csv/update-bulk', 'csvUpdateBulk')->name('accounts.csv.update.bulk'); 
     });
 
     Route::controller(DocumentRoleAndPermissionController::class)->group(function() {
@@ -4145,6 +4147,20 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/active-students-by-date', 'index')->name('reports.active.students.by.date'); 
         Route::get('reports/active-students-by-date/list', 'list')->name('reports.active.students.by.datee.list');
         Route::post('reports/active-students-by-date/export', 'exportList')->name('reports.active.students.by.datee.export');
+    });
+
+    Route::controller(CareleaverController::class)->group(function() {
+        Route::get('care-leaver', 'index')->name('care.leaver'); 
+        Route::get('care-leaver/list', 'list')->name('care.leaver.list'); 
+        Route::post('care-leaver/store', 'store')->name('care.leaver.store'); 
+        Route::get('care-leaver/edit/{id}', 'edit')->name('care.leaver.edit');
+        Route::post('care-leaver/update', 'update')->name('care.leaver.update');
+        Route::delete('care-leaver/delete/{id}', 'destroy')->name('care.leaver.destory');
+        Route::post('care-leaver/restore/{id}', 'restore')->name('care.leaver.restore');
+        Route::post('care-leaver/update-status/{id}', 'updateStatus')->name('care.leaver.update.status');
+    
+        Route::get('care-leaver/export', 'export')->name('care.leaver.export');
+        Route::post('care-leaver/import', 'import')->name('care.leaver.import');
     });
     
 });
