@@ -267,9 +267,14 @@
                             <div class="acc__input-error error-uhn_no text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
-                            <label for="registration_no" class="form-label">DF SID Number <span class="text-danger">*</span></label>
+                            <label for="registration_no" class="form-label">LCC Reg. Number <span class="text-danger">*</span></label>
                             <input type="text" id="registration_no" class="form-control w-full" name="registration_no" value="{{ $student->registration_no }}" placeholder="DF SID Number">
                             <div class="acc__input-error error-registration_no text-danger mt-2"></div>
+                        </div>
+                        <div class="col-span-12 sm:col-span-6">
+                            <label for="df_sid_number" class="form-label">DF SID Number </label>
+                            <input type="text" id="df_sid_number" class="form-control w-full" name="df_sid_number" value="{{ $student->df_sid_number ?? '' }}" placeholder="DF SID Number">
+                            <div class="acc__input-error error-df_sid_number text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-6">
                             <label for="study_mode_id" class="form-label">Study Mode</label>
