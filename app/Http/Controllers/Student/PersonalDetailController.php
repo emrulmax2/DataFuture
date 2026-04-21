@@ -15,6 +15,7 @@ use App\Models\Student;
 use App\Models\StudentArchive;
 use App\Models\StudentDisability;
 use App\Models\StudentOtherDetail;
+use App\Models\StudentStuloadInformation;
 
 class PersonalDetailController extends Controller
 {
@@ -78,6 +79,7 @@ class PersonalDetailController extends Controller
         $student_id = $request->student_id;
         $studentOldRow = Student::find($student_id);
         $otherDetailsOldRow = StudentOtherDetail::where('student_id', $student_id)->first();
+        $df_sid_number = $request->df_sid_number;
 
         $study_mode_id = (isset($request->study_mode_id) && $request->study_mode_id > 0 ? $request->study_mode_id : 1);
         $request->request->remove('ethnicity_id');
@@ -99,6 +101,10 @@ class PersonalDetailController extends Controller
 
                 StudentArchive::create($data);
             endforeach;
+        endif;
+
+        if(!empty($df_sid_number)):
+            StudentStuloadInformation::where('student_id', $student_id)->update(['sid_number' => $df_sid_number]);
         endif;
 
         $otherDetails = StudentOtherDetail::where('student_id', $student_id)->first();

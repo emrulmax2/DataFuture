@@ -257,15 +257,16 @@ class DatafutureController extends Controller
         $course_id = (isset($studentCrel->creation->course_id) && $studentCrel->creation->course_id > 0 ? $studentCrel->creation->course_id : null);
         $course_creation_id = $studentCrel->course_creation_id;
 
-        $counts = 0;
+        $counts = 0; //26100303910002618
         $instances = CourseCreationInstance::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get();
+        
         if($instances->count() > 0):
             foreach($instances as $instance):
                 $existInstance = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $instance->id)->withTrashed()->get();
                 if($existInstance->count() == 0):
                     $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
                     $lastRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
-
+                    
                     $priprov_id = null;
                     $qual_type = null;
                     $qual_sub = null;
@@ -343,8 +344,31 @@ class DatafutureController extends Controller
                     if($stuload->id):
                         $counts += 1;
                     endif;
+                else:
+                    $df_sid_number = (isset($student->df_sid_number) && !empty($student->df_sid_number) ? $student->df_sid_number : null);
+                    $sid_number = (isset($existInstance[0]->sid_number) && !empty($existInstance[0]->sid_number) ? $existInstance[0]->sid_number : null);
+                    if($sid_number == ''):
+                        if(!empty($df_sid_number)):
+                            StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $df_sid_number]);
+                        else:
+                            $sidRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->whereNotNull('sid_number')->first();
+                            if(isset($sidRow->sid_number) && !empty($sidRow->sid_number)):
+                                StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $sidRow->sid_number]);
+                            else:
+                                $the_sid_number = $this->calculateSidNumber($student->registration_no);
+                                StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $the_sid_number]);
+                            endif;
+                        endif;
+                    endif;
                 endif;
             endforeach;
+        endif;
+
+        if(!isset($student->df_sid_number) || empty($student->df_sid_number)):
+            $sidRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->whereNotNull('sid_number')->first();
+            Student::where('id', $student->id)->update([
+                'df_sid_number' => (isset($sidRow->sid_number) && !empty($sidRow->sid_number) ? $sidRow->sid_number : null)
+            ]);
         endif;
 
         return $counts;
