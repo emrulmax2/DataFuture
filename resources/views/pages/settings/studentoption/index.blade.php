@@ -32,7 +32,7 @@
                             </div>
                         </div>
                         <div class="optionBoxBody p-5" data-tableid="careLeaverListTable">
-                            @include('pages.settings.studentoption.careleaver.index')
+                            @include('pages.settings.studentoption.careLeaver.index')
                         </div>
                     </div>
                 </div>
