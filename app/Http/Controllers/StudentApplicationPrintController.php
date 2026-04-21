@@ -136,16 +136,28 @@ class StudentApplicationPrintController extends Controller
                     $PDFHTML .= '<td class="theLabel">Ethnicity</td>';
                     $PDFHTML .= '<td class="theValue">'.$student->other->ethnicity->name.'</td>';
                 $PDFHTML .= '</tr>';
+
                 $PDFHTML .= '<tr>';
+                    $PDFHTML .= '<td class="theLabel">Care Leaver</td>';
+                    $PDFHTML .= '<td class="theValue">'.optional($student->other->leaver)->name ?? '---'.'</td>';
                     $PDFHTML .= '<td class="theLabel">Disability Status</td>';
                     $PDFHTML .= '<td class="theValue">'.(isset($student->other->disability_status) && $student->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                    if(isset($student->other->disability_status) && $student->other->disability_status == 1):
-                        $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
-                        $PDFHTML .= '<td class="theValue">'.(isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
-                    endif;
                 $PDFHTML .= '</tr>';
+
+                // $PDFHTML .= '<tr>';
+                //     $PDFHTML .= '<td class="theLabel">Disability Status</td>';
+                //     $PDFHTML .= '<td class="theValue">'.(isset($student->other->disability_status) && $student->other->disability_status == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                //     if(isset($student->other->disability_status) && $student->other->disability_status == 1):
+                //         $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
+                //         $PDFHTML .= '<td class="theValue">'.(isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                //     endif;
+                // $PDFHTML .= '</tr>';
                 if(isset($student->other->disability_status) && $student->other->disability_status == 1):
                     $PDFHTML .= '<tr>';
+                        if(isset($student->other->disability_status) && $student->other->disability_status == 1):
+                            $PDFHTML .= '<td class="theLabel">Allowance Claimed?</td>';
+                            $PDFHTML .= '<td class="theValue">'.(isset($student->other->disabilty_allowance) && $student->other->disabilty_allowance == 1 ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>').'</td>';
+                        endif;
                         $PDFHTML .= '<td class="theLabel">Disabilities</td>';
                         $PDFHTML .= '<td class="theValue tv-large" colspan="3">';
                             if(isset($student->disability) && !empty($student->disability)):

@@ -82,7 +82,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Care Leaver</div>
-                        <div class="col-span-8 font-medium">{{ optional($applicant->other->leaver)->name }}</div>
+                        <div class="col-span-8 font-medium">{{ optional($applicant->other->leaver)->name ?? '---' }}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">
