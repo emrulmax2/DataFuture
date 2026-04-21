@@ -219,7 +219,7 @@ import Dropzone from "dropzone";
             let $qualIdQrap = $('#changeStudentModal .qualIdQrap');
             let $qualAwardTypeWrap = $('#changeStudentModal .qualAwardTypeWrap');
 
-            if(status_id == 21 || status_id == 26 || status_id == 27 || status_id == 31 || status_id == 42){
+            if(status_id == 21 || status_id == 26 || status_id == 27 || status_id == 31 || status_id == 42 || status_id == 22 || status_id == 45){
                 $studyEndDateWrap.fadeIn('fast', function(){
                     $studyEndDateWrap.find('input').val('');
                 });
