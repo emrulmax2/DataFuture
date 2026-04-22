@@ -26,6 +26,9 @@ class BulkStatusUpdateReqest extends FormRequest
             'status_id' => 'required',
             'term_declaration_id' => 'required',
             'status_change_date' => 'required',
+
+            'status_end_date' => 'required_if:status_id,21,26,27,31,42,22,45',
+            'reason_for_engagement_ending_id' => 'required_if:status_id,21,26,27,31,42,22,45',
         ];
     }
 
@@ -36,6 +39,8 @@ class BulkStatusUpdateReqest extends FormRequest
             'status_id.required' => 'This field is required.',
             'term_declaration_id.required' => 'This field is required.',
             'status_change_date.required' => 'This field is required.',
+            'status_end_date.required_if' => 'This field is required.',
+            'reason_for_engagement_ending_id.required_if' => 'This field is required.',
         ];
     }
 }
