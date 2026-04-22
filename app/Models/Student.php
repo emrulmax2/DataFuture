@@ -438,9 +438,8 @@ class Student extends Model
         $df_sid_number = $value;
 
         if (empty($df_sid_number)):
-            $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
             $stuloadInfo = StudentStuloadInformation::where('student_id', $this->id)
-                ->where('student_course_relation_id', $activeCRel)
+                
                 ->orderByDesc('id')
                 ->first();
 

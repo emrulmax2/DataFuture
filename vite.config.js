@@ -427,6 +427,7 @@ export default defineConfig({
 
                 'resources/js/grades.js',
                 'resources/js/active_students_by_date.js',
+                'resources/js/care-leaver.js',
 
             ],
             refresh: true,
