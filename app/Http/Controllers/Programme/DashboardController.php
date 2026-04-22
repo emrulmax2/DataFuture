@@ -593,38 +593,33 @@ class DashboardController extends Controller
         endif;
         $tutorIds = $query->pluck('personal_tutor_id')->unique()->toArray();
         
-        $theDate = Date('Y-m-d'); //'2023-11-24';
-
+        //$theDate = Date('Y-m-d'); //'2023-11-24';
+        //$dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
         
         $res = [];
         $tutors = User::whereIn('id', $tutorIds)->orderBy('id', 'ASC')->get();
+        
         if(!empty($tutors)):
             foreach($tutors as $tut):
-
-                $dateTerm = PlansDateList::with('plan')->where('date',$theDate)->get()->first();
-                $planDates = PlansDateList::with('plan', 'attendanceInformation', 'attendances')->where('class_file_upload_found', "Undecided")->where('status','Completed')->whereHas('plan', function($q) use($dateTerm, $tut){
-                    
-                    
-                        $q->where('personal_tutor_id', $tut->id);
-                        $q->where('class_type', "Theory");
-                        $q->where('term_declaration_id',$dateTerm->plan->term_declaration_id);
-
-
-                })->get();
-
-                $undecidedUploads =  $planDates->count();
                 $employee = Employee::with('workingPattern')->where('user_id', $tut->id)->get()->first();
-                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->where('class_type', 'Tutorial')->get();
+                $activePlans = Plan::where('personal_tutor_id', $tut->id)->where('term_declaration_id', $term_declaration_id)->where('class_type','Tutorial')->get();
                 $plan_ids = $activePlans->pluck('id')->unique()->toArray();
                 $assigns = Assign::whereIn('plan_id', $plan_ids)->pluck('student_id')->unique()->toArray();
                 $moduleCreations = $activePlans->pluck('module_creation_id')->toArray();
                 $groups = $activePlans->pluck('group_id')->unique()->toArray();
+
+                $planDates = PlansDateList::where('class_file_upload_found', "Undecided")
+                    ->where('status','Completed')
+                    ->whereIn('plan_id', $plan_ids)
+                    ->count();
+
+                $undecidedUploads =  isset($planDates) && $planDates>0 ? $planDates : 0;
                 $tut['no_of_module'] = (!empty($moduleCreations) ? count($moduleCreations) : 0);
                 $tut['no_of_assigned'] = (!empty($assigns) ? count($assigns) : 0);
                 $tut['no_of_group'] = (!empty($groups) ? count($groups) : 0);
                 $res[$tut->id] = $tut;
                 $res[$tut->id]['attendances'] = $this->getTermAttendanceRate($term_declaration_id, $tut->id, 2);
-                $res[$tut->id]['undecidedUploads'] = $undecidedUploads;
+                $res[$tut->id]['undecidedUploads'] = 0; //$undecidedUploads;
                 $res[$tut->id]['contracted_hour'] = (isset($employee->workingPattern->contracted_hour) && !empty($employee->workingPattern->contracted_hour) ? $employee->workingPattern->contracted_hour : '00:00');
                 $res[$tut->id]['outstanding_calls'] = $this->getPersonalTutorOutstandingCall($term_declaration_id, $course_id, $tut->id);
             endforeach;
@@ -645,15 +640,17 @@ class DashboardController extends Controller
     
 
     public function getPersonalTutorOutstandingCall($term_declaration_id, $course_id = 0, $user_id){
-        $tutor_plans = PlansDateList::whereHas('plan', function($q) use($user_id){
-                        $q->where('tutor_id', $user_id)->orWhere('personal_tutor_id', $user_id)->orWhereHas('tutorial', function($sq) use($user_id){
-                            $sq->where('personal_tutor_id', $user_id);
-                        });
-                    })->whereHas('plan', function($q) use($term_declaration_id, $course_id){
-                        $q->where('term_declaration_id', $term_declaration_id);
+
+        $tutor_plans = PlansDateList::whereHas('plan', function($q) use($term_declaration_id, $course_id,$user_id){
+
+                        $q->where('term_declaration_id', $term_declaration_id)
+                            ->where('class_type', 'Tutorial')
+                            ->where('tutor_id', $user_id)
+                            ->orWhere('personal_tutor_id', $user_id);
                         if($course_id > 0):
                             $q->where('course_id', $course_id);
                         endif;
+
                     })->get();
         $date_list_ids = $tutor_plans->pluck('id')->unique()->toArray();
         $plan_ids = $tutor_plans->pluck('plan_id')->unique()->toArray();

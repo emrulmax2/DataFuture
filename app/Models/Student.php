@@ -14,7 +14,7 @@ class Student extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $appends = ['full_name', 'photo', 'photo_url','referral_info'];
+    protected $appends = ['full_name', 'photo', 'photo_url','referral_info','custom_df_sid_number'];
 
     protected $fillable = [
         'applicant_user_id',
@@ -431,6 +431,27 @@ class Student extends Model
 
     public function addressUpdateRequest(){
         return $this->hasOne(StudentAddressUpdateRequest::class, 'student_id', 'id')->latestOfMany();
+    }
+
+    public function getCustomDfSidNumberAttribute($value) {
+        // first check in student table then student stuload information table
+        $df_sid_number = $value;
+
+        if (empty($df_sid_number)):
+            $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+            $stuloadInfo = StudentStuloadInformation::where('student_id', $this->id)
+                ->where('student_course_relation_id', $activeCRel)
+                ->orderByDesc('id')
+                ->first();
+
+            if (isset($stuloadInfo->sid_number)):
+                return $stuloadInfo->sid_number;
+            else:
+                return '';
+            endif;
+        else:
+            return $df_sid_number;
+        endif;
     }
 
 }

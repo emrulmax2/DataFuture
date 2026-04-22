@@ -277,7 +277,7 @@ class StudentDataReportController extends Controller
         $theCollection = [];
         $i=1;
         $j=0;
-
+        $dfSidColumnIndex = null;
         $theCollection[$i][$j++] = "Regestration No";
         $theCollection[$i][$j++] = "Student Data ID";
         $theCollection[$i][$j++] = "Status";
@@ -294,6 +294,9 @@ class StudentDataReportController extends Controller
             }elseif($key=="uhn_no"){
 
                 $theCollection[$i][$j++] = "UHN No ";
+            }elseif($key=="DF_SID_Number"){
+                $dfSidColumnIndex = $j + 1; // 1-based index for Excel column
+                $theCollection[$i][$j++] = "DF SID Number";
             }else    
                 $theCollection[$i][$j++] = str_replace('Id','',ucwords(str_replace('_',' ', $key)));
             
@@ -461,7 +464,7 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = $student->last_name;  
                                     break;
                                 case 'DF_SID_Number':
-                                    $theCollection[$row][$j++] = $student->df_sid_number;  
+                                    $theCollection[$row][$j++] =  (string) $student->custom_df_sid_number;  
                                     break;
                                 case 'hesa_status':
                                     $theCollection[$row][$j++] = $student->hesa_status ? "Yes" : "No";  
@@ -795,7 +798,7 @@ class StudentDataReportController extends Controller
 
         //dd($theCollection);
 
-        return Excel::download(new ArrayCollectionExport($theCollection), 'student_data_report.xlsx');
+        return Excel::download(new ArrayCollectionExport($theCollection,"Student Data Sheet 01",$dfSidColumnIndex), 'student_data_report.xlsx');
                 
         //return Excel::download(new StudentDataReportBySelectionExport($returnData), 'student_data_report.xlsx');
     }
