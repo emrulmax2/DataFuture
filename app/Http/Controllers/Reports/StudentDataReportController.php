@@ -461,7 +461,7 @@ class StudentDataReportController extends Controller
                                     $theCollection[$row][$j++] = $student->last_name;  
                                     break;
                                 case 'DF_SID_Number':
-                                    $theCollection[$row][$j++] = $student->custom_df_sid_number;  
+                                    $theCollection[$row][$j++] =  (string)  $student->custom_df_sid_number;  
                                     break;
                                 case 'hesa_status':
                                     $theCollection[$row][$j++] = $student->hesa_status ? "Yes" : "No";  
