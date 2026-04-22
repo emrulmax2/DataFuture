@@ -180,6 +180,63 @@ import TomSelect from "tom-select";
         $('#updateBulkStatusModal .studentCount').html('No of Student: '+idsLength);
     });
 
+    $('#updateBulkStatusModal #reason_for_ending_id').on('change', function(){
+        let $ending_id = $(this);
+        let ending_id = $ending_id.val();
+
+        let $qualIdQrap = $('#updateBulkStatusModal .qualIdQrap');
+        let $qualAwardTypeWrap = $('#updateBulkStatusModal .qualAwardTypeWrap');
+
+        if(ending_id == 1){
+            $qualIdQrap.fadeIn('fast', function(){
+                $qualIdQrap.find('select').val('');
+            });
+            $qualAwardTypeWrap.fadeIn('fast', function(){
+                $qualAwardTypeWrap.find('select').val('');
+            });
+        }else{
+            $qualIdQrap.fadeOut('fast', function(){
+                $qualIdQrap.find('select').val('');
+            });
+            $qualAwardTypeWrap.fadeOut('fast', function(){
+                $qualAwardTypeWrap.find('select').val('');
+            });
+        }
+    });
+
+    $('#updateBulkStatusModal #change_status_id').on('change', function(){
+        let $status_id = $(this);
+        let status_id = $status_id.val();
+        console.log(status_id)
+
+        let $studyEndDateWrap = $('#updateBulkStatusModal .studyEndDateWrap');
+        let $reasonIdWrap = $('#updateBulkStatusModal .reasonIdWrap');
+        let $qualIdQrap = $('#updateBulkStatusModal .qualIdQrap');
+        let $qualAwardTypeWrap = $('#updateBulkStatusModal .qualAwardTypeWrap');
+
+        if(status_id == 21 || status_id == 26 || status_id == 27 || status_id == 31 || status_id == 42 || status_id == 22 || status_id == 45){
+            $studyEndDateWrap.fadeIn('fast', function(){
+                $studyEndDateWrap.find('input').val('');
+            });
+            $reasonIdWrap.fadeIn('fast', function(){
+                $reasonIdWrap.find('select').val('');
+            });
+        }else{
+            $studyEndDateWrap.fadeOut('fast', function(){
+                $studyEndDateWrap.find('input').val('');
+            });
+            $reasonIdWrap.fadeOut('fast', function(){
+                $reasonIdWrap.find('select').val('');
+            });
+        }
+        $qualIdQrap.fadeOut('fast', function(){
+            $qualIdQrap.find('select').val('');
+        });
+        $qualAwardTypeWrap.fadeOut('fast', function(){
+            $qualAwardTypeWrap.find('select').val('');
+        });
+    });
+
     $('#updateBulkStatusForm').on('submit', function(e){
         e.preventDefault();
         const form = document.getElementById('updateBulkStatusForm');

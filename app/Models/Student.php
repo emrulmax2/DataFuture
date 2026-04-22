@@ -25,6 +25,7 @@ class Student extends Model
         'registration_no',
         'ssn_no',
         'uhn_no',
+        'df_sid_number',
         'title_id',
         'first_name',
         'last_name',

@@ -29,8 +29,8 @@ class StudentUpdateStatusRequest extends FormRequest
             'term_declaration_id' => 'required_if:is_assigned,1',
             //'term_declaration_id' => 'required',
 
-            'status_end_date' => 'required_if:status_id,21,26,27,31,42',
-            'reason_for_engagement_ending_id' => 'required_if:status_id,21,26,27,31,42',
+            'status_end_date' => 'required_if:status_id,21,26,27,31,42,22,45',
+            'reason_for_engagement_ending_id' => 'required_if:status_id,21,26,27,31,42,22,45',
         ];
     }
 

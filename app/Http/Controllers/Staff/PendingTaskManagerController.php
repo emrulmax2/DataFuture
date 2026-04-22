@@ -29,6 +29,8 @@ use App\Models\CourseCreation;
 use App\Models\LetterSet;
 use App\Models\Plan;
 use App\Models\ProcessList;
+use App\Models\QualAwardResult;
+use App\Models\ReasonForEngagementEnding;
 use App\Models\Signatory;
 use App\Models\Status;
 use App\Models\Student;
@@ -428,6 +430,19 @@ class PendingTaskManagerController extends Controller
     }
 
     public function allTasks(){
+        $courses = Course::with('dfQual')->where('active', 1)->get();
+        $qualType = [];
+        if($courses->count() > 0):
+            foreach($courses as $course):
+                if(isset($course->dfQual) && $course->dfQual->count() > 0):
+                    foreach($course->dfQual as $dfqual):
+                        if(isset($dfqual->field->name) && $dfqual->field->name == 'QUALAWARDID' && !empty($dfqual->field_value)):
+                            $qualType[$dfqual->field_value] = $dfqual->field_value.' - '.$course->name;
+                        endif;
+                    endforeach;
+                endif;
+            endforeach;
+        endif;
         return view('pages.users.staffs.task.all-task', [
             'title' => 'User Task Manager - London Churchill College',
             'breadcrumbs' => [
@@ -439,6 +454,9 @@ class PendingTaskManagerController extends Controller
             'terms' => TermDeclaration::orderBy('id', 'DESC')->get(),
             'followups' => StudentNote::where('followed_up', 'yes')->where('followed_up_status', 'Pending')->get()->count(),
             'flags' => StudentNote::where('is_flaged', 'Yes')->where('flaged_status', 'Active')->get()->count(),
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+            'qualType' => $qualType
         ]);
     }
 
@@ -1468,6 +1486,11 @@ class PendingTaskManagerController extends Controller
 
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
 
+        $endStatuses = [21, 26, 27, 31, 42, 13, 16, 17, 33, 22, 45];
+        $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
+        $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
+        
+
         if(!empty($registration_nos)):
             $notExistRegNo = [];
             $existsRegNo = [];
@@ -1476,13 +1499,37 @@ class PendingTaskManagerController extends Controller
                 if(!empty($reg)):
                     $student = Student::where('registration_no', $reg)->orderBy('id', 'DESC')->get()->first();
                     if(isset($student->id) && $student->id > 0):
-                        Student::where('id', $student->id)->update(['status_id' => $status_id]);
+                        $old_status_id = $student->status_id;
+
+                        $student->fill([
+                            'status_id' => $status_id
+                        ]);
+                        $changes = $student->getDirty();
+                        $student->save();
+
+                        if($student->wasChanged() && !empty($changes)):
+                            $data = [];
+                            $data['student_id'] = $student->id;
+                            $data['table'] = 'students';
+                            $data['field_name'] = 'status_id';
+                            $data['field_value'] = $old_status_id;
+                            $data['field_new_value'] = $status_id;
+                            $data['created_by'] = auth()->user()->id;
+
+                            StudentArchive::create($data);
+                        endif;
+                        
                         $data = [];
                         $data['student_id'] = $student->id;
                         $data['term_declaration_id'] = $term_declaration_id;
                         $data['status_id'] = $status_id;
                         $data['status_change_reason'] = $status_change_reason;
                         $data['status_change_date'] = $status_change_date;
+
+                        $data['status_end_date'] = (in_array($status_id, $endStatuses) && !empty($request->status_end_date) ? date('Y-m-d', strtotime($request->status_end_date)) : null);
+                        $data['reason_for_engagement_ending_id'] = (in_array($status_id, $endStatuses) && !empty($request->reason_for_engagement_ending_id) ? $request->reason_for_engagement_ending_id : null);
+                        $data['qual_award_type'] = $qual_award_type;
+                        $data['qual_award_result_id'] = $qual_award_result_id;
                         $data['created_by'] = auth()->user()->id;
 
                         StudentAttendanceTermStatus::create($data);
@@ -1499,6 +1546,8 @@ class PendingTaskManagerController extends Controller
                     endif;
                 endif;
             endforeach;
+
+
             $messages = '';
             if(!empty($existsRegNo)):
                 $messages .= 'Successfully status changed for &nbsp;<span class="font-medium underline">'.implode(', ', $existsRegNo).'</span> students. ';
