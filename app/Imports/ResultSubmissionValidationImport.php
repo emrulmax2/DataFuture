@@ -32,43 +32,50 @@ class ResultSubmissionValidationImport implements ToCollection, WithHeadingRow
     {
         $i =0;
         $studentErrorFound = [];
-        
+        $studentAssigns = Assign::with('student')
+                                            ->where('plan_id', $this->plan->id)
+                                            ->get()
+                                            ->pluck('student_id')
+                                            ->toArray();
+          //print_r( $studentAssigns);                                  
         foreach ($rows as $row) {
             // Assuming the row is an array with keys matching your database columns
             $studentUserId = StudentUser::where('email', $row['email'])->first();
            
             if($row['email']!=null) {
                 if(isset($studentUserId) && !empty($studentUserId)) {
-                    $student = Student::where('student_user_id', $studentUserId->id)->first();
-
-                    
-                    $grade = Grade::where('code', $row['grade'])
-                                ->orWhere('name', $row['grade'])
-                                ->orWhere('turnitin_grade', $row['grade'])
-                                ->first();
-                                          
-                    $studentAssigns = Assign::with('student')
-                                            ->where('plan_id', $this->plan->id)
-                                            ->get()
-                                            ->pluck('student.id')
+                    $studentArray = Student::where('student_user_id', $studentUserId->id)->get()
+                                            ->pluck('id')
                                             ->toArray();
-
-                    $studentMatched = in_array($student->id, $studentAssigns);
+                    
+                    // check if any of the student ids from the student array match with the student ids from the assigns for the given plan
+                    $matchedStudentIds = array_values(array_intersect($studentArray, $studentAssigns));
+                    $studentMatched = !empty($matchedStudentIds);
+                    $matchedStudentId = $studentMatched ? $matchedStudentIds[0] : null;
                     
                     // Process the row data as needed
-                    
+                    $grade = Grade::where('code',$row['grade'])->orWhere('turnitin_grade',$row['grade'])->orWhere('name',$row['grade'])->get()->first();
+                    if($grade == null && $row['grade'] != null) {
+                        $this->errorMessage = "The following students have invalid grade. Please correct the grade and try again.";
+                        $this->studentErrorFound[$i] = $row['first_name'] . " " . $row['last_name']. " - ".$row['email']." - Invalid Grade: ".$row['grade']; 
+                        $i++;
+                    }
                     if ($studentMatched) {
+
+
+                        $student = Student::find($matchedStudentId);
                         $assignData = Assign::where('student_id', $student->id)
                             ->where('plan_id', $this->plan->id)->get()->first();
-                            
+
+                          
                         $assessmentPlan = AssessmentPlan::where('course_module_base_assesment_id', $this->course_moudule_based_assessment)
                             ->where('plan_id', $this->plan->id)
                             ->where('upload_user_type','staff')
-                            ->orderBy('id', 'desc')
-                            ->get()->first();
-
+                            ->orderByDesc('id')
+                            ->first();
                             
-                        if(isset($assessmentPlan->id)):
+                        if(isset($assessmentPlan) && !empty($assessmentPlan)):
+                            
                             $foundResult = Result::where('student_id', $student->id)
                                 ->where('plan_id', $this->plan->id)
                                 ->where('assessment_plan_id', $assessmentPlan->id)
@@ -76,13 +83,13 @@ class ResultSubmissionValidationImport implements ToCollection, WithHeadingRow
                                     $query->whereBetween('grade_id', [4, 6]);
                                     $query->orWhere('grade_id', 10);
                                     
-                                })->get()->first();
+                                })->first();
                             else:
                             $foundResult = null;
                         endif;
                         
                         // Your logic here
-                        if($assignData->attendance === 0) {
+                        if(isset($assignData) && $assignData->attendance === 0) {
                             $this->errorMessage = "The following students are inactive in this term, Please remove the students from the list and try again.";
                             $this->studentErrorFound[$i] = $row['first_name'] . " " . $row['last_name']. " - ".$row['email']; 
                             $i++;
