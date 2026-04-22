@@ -309,7 +309,7 @@
                             <div class="acc__input-error error-status_id text-danger mt-2"></div>
                         </div>
                         @php 
-                            $endStatuses = [21, 26, 27, 31, 42];
+                            $endStatuses = [21, 26, 27, 31, 42, 22, 45];
                             $studentStatusId = (isset($student->termStatus->status_id) && !empty($student->termStatus->status_id) ? $student->termStatus->status_id : '');
                         @endphp
                         <div class="mt-3 studyEndDateWrap" style="display: {{ in_array($studentStatusId, $endStatuses) ? 'block' : 'none' }};">
