@@ -272,7 +272,7 @@ class StudentDataReportController extends Controller
 
         
 
-        $StudentData = Student::with('other','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
+        $StudentData = Student::with('other','other.leaver','termStatus','termStatusLatest','course','award','nation','contact','kin','disability','quals','status','ProofOfIdLatest','qualHigest','qualHigest.previous_providers','qualHigest.qualification_type_identifiers','slcAgreement','assign','assignSingle','assignSingle.plan','assignSingle.plan.group','assignSingle.plan.venu','residency','criminalConviction','residency.residencyStatus')->whereIn('id',$studentIds)->get();
 
         $theCollection = [];
         $i=1;
