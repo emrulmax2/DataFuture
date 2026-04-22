@@ -433,20 +433,25 @@ class Student extends Model
         return $this->hasOne(StudentAddressUpdateRequest::class, 'student_id', 'id')->latestOfMany();
     }
 
-    // public function getDfSidNumberAttribute() {
-    //     //first check in student table then student stuload information table
-    //     $df_sid_number = $this->df_sid_number;
-    //     if(empty($df_sid_number)):
-    //         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
-    //         $stuloadInfo = StudentStuloadInformation::where('student_id', $this->id)->where('student_course_relation_id', $activeCRel)->latestOfMany()->first();
-    //         if(isset($stuloadInfo->sid_number)):
-    //             return $stuloadInfo->sid_number;
-    //         else:
-    //             return '';
-    //         endif;
-    //     else:
-    //         return $df_sid_number;
-    //     endif;
-    // }
+    public function getDfSidNumberAttribute($value) {
+        // first check in student table then student stuload information table
+        $df_sid_number = $value;
+
+        if (empty($df_sid_number)):
+            $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
+            $stuloadInfo = StudentStuloadInformation::where('student_id', $this->id)
+                ->where('student_course_relation_id', $activeCRel)
+                ->orderByDesc('id')
+                ->first();
+
+            if (isset($stuloadInfo->sid_number)):
+                return $stuloadInfo->sid_number;
+            else:
+                return '';
+            endif;
+        else:
+            return $df_sid_number;
+        endif;
+    }
 
 }
