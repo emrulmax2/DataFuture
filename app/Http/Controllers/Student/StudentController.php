@@ -2690,11 +2690,11 @@ class  StudentController extends Controller
         $term_status = StudentAttendanceTermStatus::where('student_id', $student_id)->where('term_declaration_id', $term_id)->orderBy('id', 'DESC')->get()->first();
         $term_indicator = (isset($term_status->id) && $term_status->id > 0 && isset($term_status->status->active) ? ($term_status->status->active == 0 ? 0 : 1) : $status_indicator);
 
-        if($status_indicator != $term_indicator):
+        //if($status_indicator != $term_indicator):
             $res['notice'] = 1;
             $res['term_indicator'] = $term_indicator;
-            $res['msg'] = $term->name.' attendance indicator was <span class="font-medium underline">'.($term_indicator == 1 ? 'Enabled' : 'Disabled').'</span>. But the selected status indicator is <span class="font-medium underline">'.($status_indicator == 1 ? 'Enabled' : 'Disabled').'</span>. Please, make sure you want to continue with that or Change the indicator as per your requirements.';
-        endif;
+            $res['msg'] = $term->name.' attendance indicator was <span class="font-medium underline">'.($term_indicator == 1 ? 'Enabled' : 'Disabled').'</span>. Now the current selected status indicator is <span class="font-medium underline">'.($status_indicator == 1 ? 'Enabled' : 'Disabled').'</span> '.($term_indicator == 1 && $status_indicator == 1 ? 'too' : '').'. Please, make sure you want to continue with that or Change the indicator as per your requirements.';
+        //endif;
 
         return response()->json(['res' => $res], 200);
     }
@@ -2717,7 +2717,7 @@ class  StudentController extends Controller
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
         //$statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
         $attendance_indicator = (isset($request->attendance_indicator) && $request->attendance_indicator > 0 ? $request->attendance_indicator : 0);
-
+        
         $endStatuses = [21, 26, 27, 31, 42, 13, 16, 17, 33, 22, 45];
         $qual_award_type = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_type) ? $request->qual_award_type : null);
         $qual_award_result_id = (in_array($status_id, $endStatuses) && $request->reason_for_engagement_ending_id == 1 && !empty($request->qual_award_result_id) ? $request->qual_award_result_id : null);
@@ -2727,9 +2727,10 @@ class  StudentController extends Controller
         $student->fill([
             'status_id' => $status_id
         ]);
-        $changes = $student->getDirty();
+        $changes = ['status_id' => $status_id];//$student->getDirty();
         $student->save();
-        if(isset($statusDetails->id) && $statusDetails->id > 0):
+        if(isset($statusDetails->id) && $statusDetails->id > 0): //if($student->wasChanged() && !empty($changes)):
+            
             foreach($changes as $field => $value):
                 $data = [];
                 $data['student_id'] = $student_id;
@@ -2785,7 +2786,12 @@ class  StudentController extends Controller
 
             if(!empty($plan_ids)):
                 //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
-                Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
+                Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator , 'updated_by' => auth()->user()->id]);
+
+                $cacheKey = 'plan_with_attendance_set_student_' . ($student->id ?? '0');
+                //remove cache for attendance indicator update
+                \Illuminate\Support\Facades\Cache::forget($cacheKey);
+                
             endif;
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
