@@ -2742,20 +2742,21 @@ class  StudentController extends Controller
 
                 StudentArchive::create($data);
             endforeach;
+            if($student->wasChanged() && !empty($changes)):
+                if(isset($statusDetails->process_list_id) && $statusDetails->process_list_id > 0):
+                    $processTask = TaskList::where('process_list_id', $statusDetails->process_list_id)->orderBy('id', 'ASC')->get();
+                    if(!empty($processTask) && $processTask->count() > 0 ):
+                        foreach($processTask as $task):
+                            $data = [];
+                            $data['student_id'] = $student_id;
+                            $data['task_list_id'] = $task->id;
+                            $data['external_link_ref'] = (isset($task->external_link_ref) && !empty($task->external_link_ref) ? $task->external_link_ref : null);
+                            $data['status'] = 'Pending';
+                            $data['created_by'] = auth()->user()->id;
 
-            if(isset($statusDetails->process_list_id) && $statusDetails->process_list_id > 0):
-                $processTask = TaskList::where('process_list_id', $statusDetails->process_list_id)->orderBy('id', 'ASC')->get();
-                if(!empty($processTask) && $processTask->count() > 0 ):
-                    foreach($processTask as $task):
-                        $data = [];
-                        $data['student_id'] = $student_id;
-                        $data['task_list_id'] = $task->id;
-                        $data['external_link_ref'] = (isset($task->external_link_ref) && !empty($task->external_link_ref) ? $task->external_link_ref : null);
-                        $data['status'] = 'Pending';
-                        $data['created_by'] = auth()->user()->id;
-
-                        StudentTask::create($data);
-                    endforeach;
+                            StudentTask::create($data);
+                        endforeach;
+                    endif;
                 endif;
             endif;
 
