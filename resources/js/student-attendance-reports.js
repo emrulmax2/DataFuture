@@ -148,6 +148,28 @@ var attendanceReportListTable = (function () {
                     }
                 },
                 {
+                    title: "E.P",
+                    field: "EVENING_P",
+                    headerHozAlign: "center",
+                    hozAlign: "center", 
+                    headerSort: false,
+                    width: "45",
+                    formatter(cell, formatterParams) { 
+                        return '<div class="text-xs font-medium">'+cell.getData().EVENING_P+'</div>';
+                    }
+                },
+                {
+                    title: "W.P",
+                    field: "WEEKEND_P",
+                    headerHozAlign: "center",
+                    hozAlign: "center", 
+                    headerSort: false,
+                    width: "45",
+                    formatter(cell, formatterParams) { 
+                        return '<div class="text-xs font-medium">'+cell.getData().WEEKEND_P+'</div>';
+                    }
+                },
+                {
                     title: "O",
                     field: "O",
                     headerHozAlign: "center",
