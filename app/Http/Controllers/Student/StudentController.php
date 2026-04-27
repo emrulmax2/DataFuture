@@ -2701,10 +2701,11 @@ class  StudentController extends Controller
 
 
     public function studentUpdateStatus(StudentUpdateStatusRequest $request){
+
         $student_id = $request->student_id;
         $studentOld = Student::find($student_id);
         $lastTermStatus = StudentAttendanceTermStatus::where('student_id', $student_id)->orderBy('id', 'DESC')->get()->first();
-        $lastTermId = (isset($lastTermStatus->term_declaration_id) && $lastTermStatus->term_declaration_id > 0 ? $lastTermStatus->term_declaration_id : 0);
+        //$lastTermId = (isset($lastTermStatus->term_declaration_id) && $lastTermStatus->term_declaration_id > 0 ? $lastTermStatus->term_declaration_id : 0);
 
         $status_id = $request->status_id;
         $statusDetails = Status::find($status_id);
@@ -2714,7 +2715,7 @@ class  StudentController extends Controller
         
 
         $plan_ids = Plan::where('term_declaration_id', $term_declaration_id)->pluck('id')->unique()->toArray();
-        $statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
+        //$statusActive = (isset($statusDetails->active) && $statusDetails->active == 0 ? 0 : 1);
         $attendance_indicator = (isset($request->attendance_indicator) && $request->attendance_indicator > 0 ? $request->attendance_indicator : 0);
 
         $endStatuses = [21, 26, 27, 31, 42, 13, 16, 17, 33, 22, 45];
@@ -2728,7 +2729,7 @@ class  StudentController extends Controller
         ]);
         $changes = $student->getDirty();
         $student->save();
-        if($student->wasChanged() && !empty($changes)):
+        if(isset($statusDetails->id) && $statusDetails->id > 0):
             foreach($changes as $field => $value):
                 $data = [];
                 $data['student_id'] = $student_id;
@@ -2784,7 +2785,7 @@ class  StudentController extends Controller
 
             if(!empty($plan_ids)):
                 //$assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $statusActive]);
-                $assigns = Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
+                Assign::whereIn('plan_id', $plan_ids)->where('student_id', $student_id)->update(['attendance' => $attendance_indicator]);
             endif;
 
             return response()->json(['message' => 'Student status successfully changed.'], 200);
