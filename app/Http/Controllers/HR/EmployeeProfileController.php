@@ -105,6 +105,21 @@ class EmployeeProfileController extends Controller
         ]);
     }
 
+
+    public function loginLogs($id) {
+
+        $employee = Employee::find($id);
+        $userData = User::find($employee->user_id);
+        
+        
+        return view('pages.employee.profile.login-log',[
+            'title' => 'HR Portal - London Churchill College',
+            'breadcrumbs' => [],
+            "user" => $userData,
+            "employee" => $employee,
+        ]);
+    }
+
     public function storeProfileSetting(Request $request){
         $employee_id = $request->employee_id;
         $can_access_all = (isset($request->can_access_all) && $request->can_access_all > 0 ? $request->can_access_all : 0);

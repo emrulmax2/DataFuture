@@ -430,6 +430,7 @@ export default defineConfig({
                 'resources/js/care-leaver.js',
 
                 'resources/js/login-log.js',
+                'resources/js/login-log_users.js',
 
             ],
             refresh: true,

@@ -3058,4 +3058,18 @@ class  StudentController extends Controller
             'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
         ]);
     }
+
+    public function loginLog(Student $student){
+        return view('pages.students.live.login-log', [
+            'title' => 'Live Students - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Live Student', 'href' => route('student')],
+                ['label' => 'Login Log', 'href' => 'javascript:void(0);'],
+            ],
+            'student' => $student,
+            'reasonEndings' => ReasonForEngagementEnding::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'otherAcademicQualifications' => OtherAcademicQualification::where('active', 1)->orderBy('id', 'ASC')->get(),
+            'qualAwards' => QualAwardResult::orderBy('id', 'ASC')->get(),
+        ]);
+    }
 }
