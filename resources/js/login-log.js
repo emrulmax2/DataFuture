@@ -131,7 +131,35 @@ var loginLogTable = (function () {
                     title: "IP Address",
                     field: "ip_address",
                     headerHozAlign: "left",
-                    width: 140,
+                    width: 130,
+                },
+                {
+                    title: "Device & Browser",
+                    field: "device",
+                    headerHozAlign: "left",
+                    minWidth: 160,
+                    headerSort: false,
+                    formatter(cell) {
+                        var d = cell.getData();
+                        var lines = [];
+                        if (d.device)   lines.push('<div class="font-medium">'   + d.device   + '</div>');
+                        if (d.platform) lines.push('<div class="text-xs text-slate-500">' + d.platform + '</div>');
+                        if (d.browser)  lines.push('<div class="text-xs text-slate-400">' + d.browser  + '</div>');
+                        return lines.length ? lines.join('') : '—';
+                    },
+                },
+                {
+                    title: "Location",
+                    field: "country",
+                    headerHozAlign: "left",
+                    minWidth: 130,
+                    headerSort: false,
+                    formatter(cell) {
+                        var d = cell.getData();
+                        if (!d.country && !d.city) return '—';
+                        var parts = [d.city, d.country].filter(Boolean);
+                        return '<div class="whitespace-nowrap">' + parts.join(', ') + '</div>';
+                    },
                 },
             ],
             renderComplete() {

@@ -32,7 +32,7 @@ class GoogleSocialiteStudentController extends Controller
             if($finduser){
       
                 Auth::guard('student')->login($finduser);
-                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
                 return redirect(route('students.dashboard'));
       
             } else {
@@ -46,7 +46,7 @@ class GoogleSocialiteStudentController extends Controller
                 $finduser->save();
                 
                 Auth::guard('student')->login($finduser);
-                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
       
                 return redirect(route('students.dashboard'));
             }

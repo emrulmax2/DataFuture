@@ -45,13 +45,15 @@ class AuthController extends Controller
                 'last_login_ip' => $request->getClientIp()
             ]);
             Cache::forever('employeeCache'.\Auth::user()->id, \Auth::user()->load('employee'));
+            $extra = AuthLogService::resolveExtra($request);
             AuthLogService::logLogin(
                 auth()->user()->id,
                 'user',
                 'web',
                 session()->getId(),
                 $request->getClientIp(),
-                $request->userAgent()
+                $request->userAgent(),
+                $extra
             );
         }
     }

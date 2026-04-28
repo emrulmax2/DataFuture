@@ -21,6 +21,13 @@ class LoginLog extends Model
         'logout_reason',
         'ip_address',
         'user_agent',
+        'platform',
+        'device',
+        'browser',
+        'country',
+        'city',
+        'lat',
+        'lng',
     ];
 
     protected $casts = [

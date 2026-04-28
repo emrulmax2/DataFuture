@@ -35,7 +35,7 @@ class MicrosoftSocialiteStudentController extends Controller
 
             if ($finduser) {
                 Auth::guard('student')->login($finduser);
-                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
                 return redirect(route('students.dashboard'));
             } else {
                 $finduser = StudentUser::where('email', $user->email)->first();
@@ -47,7 +47,7 @@ class MicrosoftSocialiteStudentController extends Controller
                 $finduser->save();
 
                 Auth::guard('student')->login($finduser);
-                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
                 return redirect(route('students.dashboard'));
             }
         } catch (Exception $e) {
