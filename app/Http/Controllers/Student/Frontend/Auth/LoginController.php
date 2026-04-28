@@ -36,13 +36,15 @@ class LoginController extends Controller
         ])) {
             throw new \Exception('Wrong email or password.');
         }
+        $extra = AuthLogService::resolveExtra($request);
         AuthLogService::logLogin(
             \Auth::guard('student')->user()->id,
             'student_user',
             'student',
             session()->getId(),
             $request->getClientIp(),
-            $request->userAgent()
+            $request->userAgent(),
+            $extra
         );
     }
     /**
