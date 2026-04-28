@@ -429,6 +429,8 @@ export default defineConfig({
                 'resources/js/active_students_by_date.js',
                 'resources/js/care-leaver.js',
 
+                'resources/js/login-log.js',
+
             ],
             refresh: true,
         }),

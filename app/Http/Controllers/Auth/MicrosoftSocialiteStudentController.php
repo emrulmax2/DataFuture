@@ -7,6 +7,7 @@ use Socialite;
 use Auth;
 use Exception;
 use App\Models\StudentUser;
+use App\Services\AuthLogService;
 use Illuminate\Http\Request;
 
 class MicrosoftSocialiteStudentController extends Controller
@@ -34,6 +35,7 @@ class MicrosoftSocialiteStudentController extends Controller
 
             if ($finduser) {
                 Auth::guard('student')->login($finduser);
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
                 return redirect(route('students.dashboard'));
             } else {
                 $finduser = StudentUser::where('email', $user->email)->first();
@@ -45,6 +47,7 @@ class MicrosoftSocialiteStudentController extends Controller
                 $finduser->save();
 
                 Auth::guard('student')->login($finduser);
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
                 return redirect(route('students.dashboard'));
             }
         } catch (Exception $e) {

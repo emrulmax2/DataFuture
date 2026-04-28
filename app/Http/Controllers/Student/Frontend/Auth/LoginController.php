@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\StudentLoginRequest;
+use App\Services\AuthLogService;
 
 class LoginController extends Controller
 {
@@ -35,7 +36,14 @@ class LoginController extends Controller
         ])) {
             throw new \Exception('Wrong email or password.');
         }
-        
+        AuthLogService::logLogin(
+            \Auth::guard('student')->user()->id,
+            'student_user',
+            'student',
+            session()->getId(),
+            $request->getClientIp(),
+            $request->userAgent()
+        );
     }
     /**
      * Logout user.
@@ -45,6 +53,9 @@ class LoginController extends Controller
      */
     public function logout()
     {
+        if (\Auth::guard('student')->check()) {
+            AuthLogService::logLogout(\Auth::guard('student')->user()->id, 'student_user', AuthLogService::REASON_MANUAL);
+        }
         session()->forget('selected_student_id');
         \Auth::guard('student')->logout();
         return redirect()->route('students.login');

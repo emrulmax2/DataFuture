@@ -7,6 +7,7 @@ use Socialite;
 use Auth;
 use Exception;
 use App\Models\User;
+use App\Services\AuthLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -39,6 +40,7 @@ class MicrosoftSocialiteController extends Controller
                     'last_login_ip' => request()->ip()
                 ]);
                 Cache::forever('employeeCashe' . $finduser->id, Auth::user()->load('employee'));
+                AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent());
                 return redirect('/');
             } else {
                 $finduser = User::where('email', $user->email)->first();
@@ -54,6 +56,7 @@ class MicrosoftSocialiteController extends Controller
                     'last_login_ip' => request()->ip()
                 ]);
                 Cache::forever('employeeCache' . $finduser->id, Auth::user()->load('employee'));
+                AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent());
                 return redirect('/');
             }
         } catch (Exception $e) {

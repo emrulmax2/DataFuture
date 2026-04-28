@@ -6,6 +6,7 @@ use App\Http\Request\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Option;
 use App\Models\User;
+use App\Services\AuthLogService;
 use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
@@ -44,6 +45,14 @@ class AuthController extends Controller
                 'last_login_ip' => $request->getClientIp()
             ]);
             Cache::forever('employeeCache'.\Auth::user()->id, \Auth::user()->load('employee'));
+            AuthLogService::logLogin(
+                auth()->user()->id,
+                'user',
+                'web',
+                session()->getId(),
+                $request->getClientIp(),
+                $request->userAgent()
+            );
         }
     }
 
@@ -55,6 +64,9 @@ class AuthController extends Controller
      */
     public function logout()
     {
+        if (\Auth::check()) {
+            AuthLogService::logLogout(auth()->user()->id, 'user', AuthLogService::REASON_MANUAL);
+        }
         \Auth::logout();
         Cache::flush();
         return redirect('login');
