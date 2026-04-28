@@ -103,6 +103,7 @@ use App\Http\Controllers\Applicant\Auth\ForgetPasswordController;
 use App\Http\Controllers\Settings\CommonSmtpController;
 use App\Http\Controllers\Settings\LetterSetController;
 use App\Http\Controllers\Settings\SignatoryController;
+use App\Http\Controllers\LoginLogController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Settings\SmsTemplateController;
 use App\Http\Controllers\Settings\EmailTemplateController;
@@ -1420,6 +1421,11 @@ Route::middleware('auth')->group(function() {
         
         Route::get('dashboarduser/{userId}', 'useraccess')->name('useraccess');
         Route::get('dashboarduser/staff/{userId}/{roleId}', 'useraccessStaff')->name('useraccess.staff');
+    });
+
+    Route::controller(LoginLogController::class)->group(function() {
+        Route::get('login-log', 'index')->name('login-log.index');
+        Route::get('login-log/list', 'list')->name('login-log.list');
     });
 
     Route::controller(UserProfileController::class)->group(function() {
