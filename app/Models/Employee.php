@@ -135,6 +135,7 @@ class Employee extends Model
     }
 
     public function employment(){
+        
         return $this->hasOne(Employment::class, 'employee_id', 'id')->latestOfMany();
     }
 
