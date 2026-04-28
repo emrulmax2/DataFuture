@@ -6,6 +6,7 @@ use Socialite;
 use Auth;
 use Exception;
 use App\Models\StudentUser;
+use App\Services\AuthLogService;
 use Illuminate\Http\Request;
 
 class GoogleSocialiteStudentController extends Controller
@@ -31,6 +32,7 @@ class GoogleSocialiteStudentController extends Controller
             if($finduser){
       
                 Auth::guard('student')->login($finduser);
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
                 return redirect(route('students.dashboard'));
       
             } else {
@@ -44,6 +46,7 @@ class GoogleSocialiteStudentController extends Controller
                 $finduser->save();
                 
                 Auth::guard('student')->login($finduser);
+                AuthLogService::logLogin($finduser->id, 'student_user', 'student', session()->getId(), request()->ip(), request()->userAgent());
       
                 return redirect(route('students.dashboard'));
             }
