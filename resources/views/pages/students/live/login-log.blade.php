@@ -86,7 +86,7 @@
         <!-- END: HTML Table Data -->
  
         <input type="hidden" id="actor_id" value="{{ $student->student_user_id }}"/>
-        <input type="hidden" id="actor_type" value="student"/>
+        <input type="hidden" id="actor_type" value="student_user"/>
 
 @endsection
 
