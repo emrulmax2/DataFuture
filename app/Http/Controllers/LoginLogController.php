@@ -86,6 +86,7 @@ class LoginLogController extends Controller
             $actorName  = 'N/A';
             $actorEmail = 'N/A';
 
+            
             if ($log->actor_type === 'user' && isset($users[$log->actor_id])) {
                 $u          = $users[$log->actor_id];
                 $actorName  = $u->employee->full_name  ?? 'N/A';
