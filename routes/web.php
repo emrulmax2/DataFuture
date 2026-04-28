@@ -756,7 +756,9 @@ Route::prefix('/students')->name('students.')->group(function() {
         });
 
 
-
+        Route::controller(LoginLogController::class)->group(function() {
+            Route::get('login-log/actor-list', 'listForActor')->name('login-log.list.by.actor');
+        });
 
     });
     
@@ -1056,6 +1058,8 @@ Route::middleware('auth')->group(function() {
         Route::post('student/mobile/verify','verifyMobile')->name('student.verify.mobile');
         Route::post('student/mobile/verifed','verifiedMobile')->name('student.update.mobile');
         
+
+        Route::get('student/login-log/{student}', 'loginLog')->name('student.login.log');
 
     });
 
@@ -1426,6 +1430,7 @@ Route::middleware('auth')->group(function() {
     Route::controller(LoginLogController::class)->group(function() {
         Route::get('login-log', 'index')->name('login-log.index');
         Route::get('login-log/list', 'list')->name('login-log.list');
+        Route::get('login-log/actor-list', 'listForActor')->name('login-log.list.by.actor');
     });
 
     Route::controller(UserProfileController::class)->group(function() {
@@ -1462,6 +1467,7 @@ Route::middleware('auth')->group(function() {
         Route::get('employee-profile/view/{id}', 'show')->name('profile.employee.view'); 
         Route::get('employee-profile/payslip/{id}', 'payrollSyncShow')->name('profile.employee.payslip.show'); 
         Route::post('employee-profile/store-settings', 'storeProfileSetting')->name('profile.employee.store.settings'); 
+        Route::get('employee-profile/login-log/{id}', 'loginLogs')->name('profile.employee.login.logs'); 
         
     });
 
