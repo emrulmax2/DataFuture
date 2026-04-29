@@ -141,10 +141,11 @@
         </a>
     </li>
     @endif
-
+    @if(isset(auth()->user()->priv()['view_student_logs']) && auth()->user()->priv()['view_student_logs'])
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.login.log', $student->id) }}" class="nav-link py-4 pl-0 {{ Route::currentRouteName() == 'student.login.log' ? 'active' : '' }}">
-            Login Logs
+            Logs
         </a>
     </li>
+    @endif
 </ul>
