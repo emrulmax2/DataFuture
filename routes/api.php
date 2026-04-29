@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
+use App\Http\Controllers\Api\Student\ClassRoutineController;
 use App\Http\Controllers\Api\Student\DoItOnlineController;
 use App\Http\Controllers\Api\Student\ModuleListController;
 use App\Http\Controllers\Api\Student\ResultController;
@@ -65,6 +66,10 @@ Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::cla
 
         Route::controller(ModuleListController::class)->group(function() {
             Route::get('modules', 'index')->name('user.modules.list');
+        });
+
+        Route::controller(ClassRoutineController::class)->group(function() {
+            Route::get('class-routine', 'index')->name('user.class.routine');
         });
 
         Route::post('/logout', [LoginController::class, 'logout']);
