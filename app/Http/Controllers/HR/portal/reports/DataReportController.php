@@ -101,7 +101,6 @@ class DataReportController extends Controller
             }
             $row = 2;
             $serial = 1;
-            
             foreach($query->get() as $employee):
                 $listCount = $query->count();
                 
@@ -181,7 +180,27 @@ class DataReportController extends Controller
                                 
                                 
                             }
-
+                            if($table=="EmployeeLineManager") {
+                                
+                                if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
+                                foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {
+                                    
+                                    if($fieldValue)
+                                        switch($fieldName) {
+                                            case 'line_manager':
+                                                $lineManagers = "";
+                                                foreach($employee->lineManagers as $lineManager) {
+                                                    $lineManagers.= isset($lineManager->user) ? $lineManager->user->full_name.", " : "";
+                                                }
+                                                $theCollection[$row][] = $lineManagers;
+                                                break;
+                                            default:
+                                                $theCollection[$row][] = "";
+                                        }
+                                }
+                                
+                                
+                            }
                             if($table=="EmployeeEligibilites") {
                                 if(isset($data['fields'][$keyTable]) && count($data['fields'][$keyTable])>0)
                                 foreach($data['fields'][$keyTable] as $fieldName => $fieldValue) {

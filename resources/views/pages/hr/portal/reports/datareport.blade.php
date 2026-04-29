@@ -228,9 +228,17 @@
                         <label class= "cursor-pointer ml-2" for="s26">Site Location</label>
                     </div>
                     <input type="hidden" name="labels[site_location]" value="Site Location">
+
+                    <div class="singlefields relative mb-2">
+                        
+                        <input type="hidden" name="tables[EmployeeLineManager]" value="EmployeeLineManager" />
+                        <input id="s29" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[EmployeeLineManager][line_manager]" value="1"> 
+                        <label class= "cursor-pointer ml-2" for="s29">Line Manager</label>
+                    </div>
+                    <input type="hidden" name="labels[line_manager]" value="Line Manager">
                 </div>
                 <div class="col-span-3">
-                    
+                    <input type="hidden" name="tables[employments]" value="Employment" />
                     
                     <div class="singlefields relative mb-2">
                         <input id="s35" class="cus-check transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer rounded focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50" type="checkbox" name="fields[employments][office_telephone]" value="1"> 
