@@ -80,7 +80,7 @@
     
      <li class="nav-item" role="presentation">
         <a href="{{ route('profile.employee.login.logs', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'profile.employee.login.logs' ? 'active' : '' }}">
-            Login Logs
+            Logs
         </a>
     </li>
 

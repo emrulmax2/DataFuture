@@ -11,7 +11,7 @@
     <!-- END: Profile Info -->
         <div class="intro-y box p-5 mt-5">
                 <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-            <h2 class="text-lg font-medium mr-auto">Login Log</h2>
+            <h2 class="text-lg font-medium mr-auto">Logs</h2>
         </div>
 
         <!-- BEGIN: HTML Table Data -->
