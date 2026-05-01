@@ -115,7 +115,9 @@
                                                 <a href="javascript:void(0);" data-id="{{ $item->id }}"  class="delete_btn text-danger mr-1"><i data-lucide="Trash2" class="w-3 h-3"></i></a>
                                                 <a href="javascript:void(0);" data-id="{{ $item->id }}" data-tw-toggle="modal" data-tw-target="#editRequisitionItemModal"  class="edit_btn text-success"><i data-lucide="pencil" class="w-3 h-3"></i></a>
                                             </span>
-                                            {!! $item->description !!}
+                                            <div class="whitespace-normal break-all">
+                                                {!! $item->description !!}
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="w-24">{{ $item->quantity }}</td>

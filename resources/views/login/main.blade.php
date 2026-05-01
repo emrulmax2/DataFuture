@@ -278,7 +278,7 @@
                     email: email,
                     password: password
                 }).then(res => {
-                    location.href = '/'
+                    location.href = res.data.redirect;
                 }).catch(err => {
                     $('#btn-login').html('Login')
                     if (err.response.data.message != 'Wrong email or password.') {

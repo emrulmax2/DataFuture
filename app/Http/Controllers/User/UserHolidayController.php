@@ -1032,10 +1032,11 @@ class UserHolidayController extends Controller
                         $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : $approver->email);
                         
                         if(!empty($approverEmail)):
+                            $the_url = url('/go?redirect=' . urlencode('/employee-profile/holidays/'.$employee_id));
                             $message = '';
                             $message .= 'Dear '.$approverName.',<br/>';
                             $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has designated you as the approver.<br/>';
-                            $message .= 'Please log in <a href="'.url('/').'">here</a> to review and approve the leave.<br/>';
+                            $message .= 'Please log in <a href="'.$the_url.'">here</a> to review and approve the leave.<br/>';
                             $message .= 'Leave details are provided below for your reference.<br/><br/>';
 
                             $message .= '<table border="1" style="text-align: left;">';
@@ -1076,9 +1077,10 @@ class UserHolidayController extends Controller
                     endforeach;
                 endif;
                 if(!empty($employee_emails)):
+                    $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
                     $message2 = 'Dear '.$employeeName.',<br/><br/>';
                     $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
-                    $message2 .= '<a href="'.url('/').'">Click Here</a><br/><br/>';
+                    $message2 .= '<a href="'.$the_url.'">Click Here</a><br/><br/>';
                     $message2 .= 'Thank you for your cooperation.<br/>Sincerely,<br/>'.$siteName;
 
                     UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request', $message2, []));
