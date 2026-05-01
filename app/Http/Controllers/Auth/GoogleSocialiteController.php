@@ -38,8 +38,8 @@ class GoogleSocialiteController extends Controller
                 ]);
                 Cache::forever('employeeCashe'.$finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                return redirect('/');
-      
+                //return redirect('/');
+                return redirect()->intended('/');
             }else{
                 
                 $finduser = User::where('email', $user->email)->first();
@@ -56,7 +56,8 @@ class GoogleSocialiteController extends Controller
                 ]);
                 Cache::forever('employeeCache'.$finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                return redirect('/');
+                //return redirect('/');
+                return redirect()->intended('/');
             }
      
         } catch (Exception $e) {

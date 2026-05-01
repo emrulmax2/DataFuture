@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Option;
 use App\Models\User;
 use App\Services\AuthLogService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -17,7 +19,7 @@ class AuthController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function loginView()
+    public function loginView(Request $request)
     {
         $env= env('APP_ENV');
         return view('login.main', [
@@ -55,6 +57,14 @@ class AuthController extends Controller
                 $request->userAgent(),
                 $extra
             );
+
+            $redirect = session()->pull('url.intended');
+            if ($redirect && Str::startsWith($redirect, '/')):
+                session()->forget('url.intended');
+                return response()->json(['redirect' => $redirect]);
+            endif;
+
+            return response()->json(['redirect' => '/dashboard']);
         }
     }
 

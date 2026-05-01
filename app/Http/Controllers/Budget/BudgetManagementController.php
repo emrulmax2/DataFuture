@@ -288,7 +288,8 @@ class BudgetManagementController extends Controller
                     $MAILBODY .= '</table>';
                 endif;
 
-                $MAILBODY .= '<p>Please click <a href="'.route('budget.management.show.req', $requisition->id).'">here</a> and take a action.<br/>';
+                $the_url = url('/go?redirect=' . urlencode('/budget-management/requisition/'.$requisition->id));
+                $MAILBODY .= '<p>Please click <a href="'.$the_url.'">here</a> and take a action.<br/>';
                 $MAILBODY .= 'If the "Click here" button isn\'t working, please copy the following link and paste it into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
                 $MAILBODY .= '<br/>Regards<br/>';
                 $MAILBODY .= 'London Churchill College';
@@ -499,7 +500,8 @@ class BudgetManagementController extends Controller
                     $MAILBODY .= '</table>';
                 endif;
 
-                $MAILBODY .= '<p>Please <a href="'.route('budget.management.show.req', $requisition->id).'">click here</a> to take action.<br/>';
+                $the_url = url('/go?redirect=' . urlencode('/budget-management/requisition/'.$requisition->id));
+                $MAILBODY .= '<p>Please <a href="'.$the_url.'">click here</a> to take action.<br/>';
                 $MAILBODY .= 'If the "click here" button does not work, copy and paste the following link into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
 
                 $MAILBODY .= '<br/>Regards<br/>';
@@ -513,6 +515,7 @@ class BudgetManagementController extends Controller
                 $subject = 'Requisition Fully Approved - Ready for Payment Processing';
                 $to = ['accounts@lcc.ac.uk'];
 
+                $the_url = url('/go?redirect=' . urlencode('/budget-management/requisition/'.$requisition->id));
                 $MAILBODY = 'Dear Accounts Team, <br/><br/>';
                 $MAILBODY .= '<p>The following requisition has received final approval and is now ready for payment processing:</p>';
                 $MAILBODY .= '<p><strong>Requisition REF:</strong> '.$requisition->reference_no.'<br/>';
@@ -520,7 +523,7 @@ class BudgetManagementController extends Controller
                 $MAILBODY .= '<strong>Amount:</strong> '.Number::currency($requisition->items->sum('total'), 'GBP').'<br/>';
                 $MAILBODY .= '<strong>Vendor/Supplier:</strong> '.(isset($requisition->vendor->name) && !empty($requisition->vendor->name) ? $requisition->vendor->name : 'Unknown').'</p>';
                 $MAILBODY .= '<p> Kindly proceed with arranging the payment at the earliest convenience.</p>';
-                $MAILBODY .= '<p>Please <a href="'.route('budget.management.show.req', $requisition->id).'">click here</a> to view.<br/>';
+                $MAILBODY .= '<p>Please <a href="'.$the_url.'">click here</a> to view.<br/>';
                 $MAILBODY .= 'If the "click here" button does not work, copy and paste the following link into your web browser.<br/>'.route('budget.management.show.req', $requisition->id).'</p>';
 
                 $MAILBODY .= 'Best regards,<br/>';  

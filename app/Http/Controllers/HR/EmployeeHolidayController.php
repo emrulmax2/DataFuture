@@ -1066,11 +1066,12 @@ class EmployeeHolidayController extends Controller
                         $approverName .= (isset($approver->employee->last_name) ? $approver->employee->last_name.' ' : '');
                         $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : '');
                         
+                        $the_url = url('/go?redirect=' . urlencode('/employee-profile/holidays/'.$employee_id));
                         if(!empty($approverEmail)):
                             $message = '';
                             $message .= 'Dear '.$approverName.',<br/>';
                             $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has identified you as the approver.<br/>';
-                            $message .= 'Please log in using the <a href="'.url('/').'">link</a> below to review and approve the request. Kindly note that a decision is required within 5 working days of this notification.<br/>';
+                            $message .= 'Please log in using the <a href="'.$the_url.'">link</a> below to review and approve the request. Kindly note that a decision is required within 5 working days of this notification.<br/>';
                             $message .= 'For your reference, the leave details are as follows:<br/><br/>';
 
                             $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
@@ -1112,9 +1113,10 @@ class EmployeeHolidayController extends Controller
                 endif;
 
                 if(!empty($employee_emails) && $leave_type == 1):
+                    $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
                     $message2 = 'Dear '.$employeeName.',<br/><br/>';
                     $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
-                    $message2 .= '<a href="'.url('/').'">Click Here</a><br/><br/>';
+                    $message2 .= '<a href="'.$the_url.'">Click Here</a><br/><br/>';
                     $message2 .= 'Thank you for your cooperation.<br/>Sincerely,<br/>'.$siteName;
 
                     UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request', $message2, []));
@@ -1314,8 +1316,9 @@ class EmployeeHolidayController extends Controller
         endif;
 
         if(!empty($employee_emails)):
+            $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
             $message = 'Hi '.$employeeName.'<br/><br/>';
-            $message .= 'You have an update of your holiday request. Please <a href="'.url('/').'">login</a> on HR System for update.<br/><br/>';
+            $message .= 'You have an update of your holiday request. Please <a href="'.$the_url.'">login</a> on HR System for update.<br/><br/>';
             
             $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
                 $message .= '<tr>';
@@ -1428,8 +1431,9 @@ class EmployeeHolidayController extends Controller
             endif;
 
             if(!empty($employee_emails)):
+                $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
                 $message = 'Hi '.$employeeName.'<br/><br/>';
-                $message .= 'You have an update of your holiday request. Please <a href="'.url('/').'">login</a> on HR System for update.<br/><br/>';
+                $message .= 'You have an update of your holiday request. Please <a href="'.$the_url.'">login</a> on HR System for update.<br/><br/>';
                 
                 $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
                     $message .= '<tr>';
@@ -1550,8 +1554,9 @@ class EmployeeHolidayController extends Controller
             endif;
 
             if(!empty($employee_emails)):
+                $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
                 $message = 'Hi '.$employeeName.'<br/><br/>';
-                $message .= 'You have an update of your holiday request. Please <a href="'.url('/').'">login</a> on HR System for update.<br/><br/>';
+                $message .= 'You have an update of your holiday request. Please <a href="'.$the_url.'">login</a> on HR System for update.<br/><br/>';
                 
                 $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
                     $message .= '<tr>';
