@@ -42,13 +42,14 @@ class ActiveStudentByDateController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
+        //AND s2.status_change_date <= ?
         $latestStatusSub = DB::table('student_attendance_term_statuses as s1')
             ->select('s1.student_id', 's1.status_id')
             ->whereRaw('s1.id = (
                 SELECT MAX(s2.id)
                 FROM student_attendance_term_statuses s2
                 WHERE s2.student_id = s1.student_id
-                AND s2.created_at <= ?
+                AND COALESCE(s2.status_change_date, s2.created_at) <= ?
             )', [$theDate]);
 
         $query = DB::table('students')
