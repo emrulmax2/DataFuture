@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardControll
 use App\Http\Controllers\Api\Student\ClassRoutineController;
 use App\Http\Controllers\Api\Student\DoItOnlineController;
 use App\Http\Controllers\Api\Student\ModuleListController;
+use App\Http\Controllers\Api\Student\PerformanceController;
 use App\Http\Controllers\Api\Student\ResultController;
 
 use Illuminate\Http\Request;
@@ -70,6 +71,10 @@ Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::cla
 
         Route::controller(ClassRoutineController::class)->group(function() {
             Route::get('class-routine', 'index')->name('user.class.routine');
+        });
+
+        Route::controller(PerformanceController::class)->group(function() {
+            Route::get('academic-performance', 'index')->name('user.performance');
         });
 
         Route::post('/logout', [LoginController::class, 'logout']);

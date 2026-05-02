@@ -56,7 +56,7 @@ class ResultController extends Controller
             $QueryPart->orderBy('id','DESC');
             $QueryInner = $QueryPart->get();
 
-
+            
             foreach($QueryInner as $list):
                 $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
                 $checkPrimaryResult = Result::with([
@@ -79,23 +79,6 @@ class ResultController extends Controller
                     }
                 }
             endforeach;
-
-
-            // Adjusted query and mapping logic
-            // $termDeclarationIds = Plan::whereHas('assign', function($query) use ($student) {
-            //     $query->where('student_id', $student->id);
-            // })->with('creations.module')->get()->groupBy(function ($plan) {
-            //     return $plan->creations->module->name;
-            // })->map(function ($group) {
-            //     return $group->pluck('term_declaration_id')->unique()->map(function ($termDeclarationId) {
-            //         return TermDeclaration::find($termDeclarationId);
-            //     });
-            // });
-            // $termSet = $termDeclarationIds;
-
-
-                
-
 
             $serial = 0;
             $results = [];
@@ -132,13 +115,24 @@ class ResultController extends Controller
                 endforeach;
                 $serial++;
             }
-            return new ResultResource($results);
+            return $results;
         });
+
+        $totalModules = (is_array($resultData) ? count($resultData) : 0);
+        $completedModules = collect($resultData)->filter(function ($result) {
+            $gradeCode = strtoupper((string) ($result['grade'] ?? ''));
+            return in_array($gradeCode, ['P', 'M', 'D'], true);
+        })->count();
+        $outstandingModules = max(0, $totalModules - $completedModules);
         
         return response()->json([
                 'status' => 'success',
-                'data' => $resultData,
+                'data' => new ResultResource($resultData),
                 'previous_result_count' => $prevResultCount,
+                'total_modules' => $totalModules,
+                'outstanding_modules' => $outstandingModules,
+                'completed_modules' => $completedModules,
+
             ]);
         
     }

@@ -22,6 +22,7 @@ class ClassRoutineController extends Controller
         }
 
         $selectedStudentId = $request->query('selected_student_id', null);
+        //return $selectedStudentId;
         try {
             $fromDate = Carbon::parse($request->query('date', now()->toDateString()))->toDateString();
         } catch (\Throwable $e) {
@@ -30,7 +31,7 @@ class ClassRoutineController extends Controller
                 'error' => 'Invalid date format. Expected a valid date string.',
             ], 422);
         }
-
+        //Cache::flush(); // Clear cache to ensure fresh data for testing
         $cacheKey = 'class_routine_student_' . $theUser->id . '_' . ($selectedStudentId ?: 'latest') . '_' . $fromDate;
         $data = Cache::remember($cacheKey, now()->addHours(1), function () use ($theUser, $selectedStudentId, $fromDate) {
             $studentQuery = Student::query()
@@ -38,7 +39,7 @@ class ClassRoutineController extends Controller
                 ->orderBy('id', 'DESC');
 
             if (!empty($selectedStudentId)) {
-                $studentQuery->where('id', $selectedStudentId);
+                $studentQuery=Student::query()->where('id', $selectedStudentId);
             }
 
             $student = $studentQuery->first();
@@ -93,7 +94,7 @@ class ClassRoutineController extends Controller
                 ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
                 ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
                 ->whereIn('datelist.plan_id', $planIds)
-                ->whereDate('datelist.date', '>=', $fromDate)
+                ->whereDate('datelist.date', '=', $fromDate)
                 ->orderBy('datelist.date')
                 ->orderBy('plan.start_time')
                 ->get();
