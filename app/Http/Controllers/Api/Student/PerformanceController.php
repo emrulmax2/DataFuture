@@ -37,7 +37,7 @@ class PerformanceController extends Controller
                 'message' => 'Student not found.',
             ], 404);
         }
-        Cache::flush(); // Clear cache to ensure fresh data for testing
+        //Cache::flush(); // Clear cache to ensure fresh data for testing
 
         $performanceData = Cache::remember($cacheKey, now()->addHours(1), function () use ($student) {
             return $this->buildPerformanceData($student);

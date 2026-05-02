@@ -31,7 +31,7 @@ class ClassRoutineController extends Controller
                 'error' => 'Invalid date format. Expected a valid date string.',
             ], 422);
         }
-        Cache::flush(); // Clear cache to ensure fresh data for testing
+        //Cache::flush(); // Clear cache to ensure fresh data for testing
         $cacheKey = 'class_routine_student_' . $theUser->id . '_' . ($selectedStudentId ?: 'latest') . '_' . $fromDate;
         $data = Cache::remember($cacheKey, now()->addHours(1), function () use ($theUser, $selectedStudentId, $fromDate) {
             $studentQuery = Student::query()
