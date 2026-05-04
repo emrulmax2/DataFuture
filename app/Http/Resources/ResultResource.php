@@ -31,7 +31,7 @@ class ResultResource extends JsonResource
                     //'date' => $item['date'] ?? null,
                     //'grade' => $item['grade'] ?? null,
                     'merit' => $item['merit'] ?? null,
-                    //'attempted' => $item['attempted'] ?? null,
+                    'attempted' => $item['attempted'] ?? null,
                     //'updated_by' => $item['updated_by'] ?? null,
                     //'attemptData' => $item['attemptData'] ?? null,
                 ];
@@ -49,7 +49,7 @@ class ResultResource extends JsonResource
             //'date' => $result['date'] ?? null,
             //'grade' => $result['grade'] ?? null,
             'merit' => $result['merit'] ?? null,
-            //'attempted' => $result['attempted'] ?? null,
+            'attempted' => $result['attempted'] ?? null,
             //'updated_by' => $result['updated_by'] ?? null,
             //'attemptData' => $result['attemptData'] ?? null,
         ];
