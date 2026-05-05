@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ClassRoutineItemResource extends JsonResource
@@ -23,8 +24,10 @@ class ClassRoutineItemResource extends JsonResource
             ', '
         );
 
+        $status = $this->resolveStatus($row->plan_date, $row->start_time, $row->end_time);
+
         return [
-            'term_name'            => $row->term_name,
+            'term_name'           => $row->term_name,
             'plan_date_list_id'   => $row->plan_date_list_id,
             'plan_id'             => $row->plan_id,
             'plan_date'           => $row->plan_date,
@@ -44,6 +47,34 @@ class ClassRoutineItemResource extends JsonResource
             'room'                => $row->room_name,
             'venue_room'          => $venue,
             'virtual_room'        => $row->virtual_room,
+            'status'              => $status,
         ];
+    }
+
+    private function resolveStatus(?string $planDate, ?string $startTime, ?string $endTime): string
+    {
+        if (empty($planDate)) {
+            return 'UPCOMING';
+        }
+
+        $now = Carbon::now();
+
+        $classStart = !empty($startTime)
+            ? Carbon::parse($planDate . ' ' . $startTime)
+            : Carbon::parse($planDate)->startOfDay();
+
+        $classEnd = !empty($endTime)
+            ? Carbon::parse($planDate . ' ' . $endTime)
+            : Carbon::parse($planDate)->endOfDay();
+
+        if ($now->lt($classStart)) {
+            return 'UPCOMING';
+        }
+
+        if ($now->between($classStart, $classEnd)) {
+            return 'ONGOING';
+        }
+
+        return 'COMPLETED';
     }
 }
