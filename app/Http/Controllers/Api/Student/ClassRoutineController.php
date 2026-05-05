@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ClassRoutineController extends Controller
 {
@@ -31,9 +32,9 @@ class ClassRoutineController extends Controller
                 'error' => 'Invalid date format. Expected a valid date string.',
             ], 422);
         }
-        //Cache::flush(); // Clear cache to ensure fresh data for testing
+        Cache::flush(); // Clear cache to ensure fresh data for testing
         $cacheKey = 'class_routine_student_' . $theUser->id . '_' . ($selectedStudentId ?: 'latest') . '_' . $fromDate;
-        $data = Cache::remember($cacheKey, now()->addHours(1), function () use ($theUser, $selectedStudentId, $fromDate) {
+        $data = Cache::remember($cacheKey, now()->addMinutes(30), function () use ($theUser, $selectedStudentId, $fromDate) {
             $studentQuery = Student::query()
                 ->where('student_user_id', $theUser->id)
                 ->orderBy('id', 'DESC');
@@ -71,6 +72,7 @@ class ClassRoutineController extends Controller
 
             $rows = DB::table('plans_date_lists as datelist')
                 ->select([
+                    'term.name as term_name',
                     'datelist.id as plan_date_list_id',
                     'datelist.date as plan_date',
                     'datelist.plan_id',
@@ -84,15 +86,19 @@ class ClassRoutineController extends Controller
                     'group.name as group_name',
                     'venue.name as venue_name',
                     'room.name as room_name',
-                    'user.name as tutor_name',
+                    "emp.id as tutor_id",
+                    "emp.photo as tutor_photo",
+                    DB::raw("CONCAT(emp.first_name, ' ', emp.last_name) as tutor_name"),
                 ])
                 ->leftJoin('plans as plan', 'datelist.plan_id', 'plan.id')
+                ->leftJoin('term_declarations as term', 'plan.term_declaration_id', 'term.id')
                 ->leftJoin('courses as course', 'plan.course_id', 'course.id')
                 ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
                 ->leftJoin('groups as group', 'plan.group_id', 'group.id')
                 ->leftJoin('venues as venue', 'plan.venue_id', 'venue.id')
                 ->leftJoin('rooms as room', 'plan.rooms_id', 'room.id')
                 ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
+                ->leftJoin('employees as emp', 'user.id', 'emp.user_id')
                 ->whereIn('datelist.plan_id', $planIds)
                 ->whereDate('datelist.date', '=', $fromDate)
                 ->orderBy('datelist.date')
@@ -114,6 +120,7 @@ class ClassRoutineController extends Controller
                     'classType' => (!empty($row->class_type) ? $row->class_type : $row->module_class_type),
                     'group' => $row->group_name,
                     'tutor' => $row->tutor_name,
+                    'tutor_profile_photo' => !empty($row->tutor_photo) ? Storage::disk('local')->exists('public/employees/'.$row->tutor_id.'/'.$row->tutor_photo) : null,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
                     'hr_time' => trim(($startTime ?? '') . (!empty($endTime) ? ' - ' . $endTime : '')),
