@@ -193,7 +193,7 @@
                                         </div>
                                         @endif
                                         @php
-                                            $uploadRecords = $paySlipUploadSync->where('type', 'P60');
+                                            $uploadRecords = $paySlipUploadSync->where('type', 'P60')->where('holiday_year_id', $holidayYearData->id);
                                         @endphp
                                         @if($uploadRecords && count($uploadRecords) > 0)
                                         <div id="employeeP60Collapse-{{ $holidayYearData->id }}" class="accordion-collapse collapse {{ $holidayYearData->active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayHeading-{{ $holidayYearData->id }}" data-tw-parent="#employeeHolidayAccordion">
