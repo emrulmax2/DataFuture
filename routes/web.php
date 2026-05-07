@@ -376,6 +376,18 @@ Route::controller(ApplicantVarifyTempEmailController::class)->middleware('applic
     Route::get('varify-temporary-email/{token}',  'varifyTempEmail')->name('varify.temp.email');
 });
 
+Route::get('/go', function (\Illuminate\Http\Request $request) {
+    $redirect = $request->redirect;
+    if ($redirect && \Illuminate\Support\Str::startsWith($redirect, '/')):
+        session(['url.intended' => $redirect]);
+    endif;
+
+    if (auth()->check()):
+        return redirect($redirect ?? '/dashboard');
+    endif;
+    return redirect()->route('login');
+});
+
 Route::controller(AuthController::class)->middleware('loggedin')->group(function() {
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
