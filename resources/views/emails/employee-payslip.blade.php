@@ -308,8 +308,8 @@
 				<tr>
 					<td style="padding: 30px 30px; text-align: justify;">
                         <p>Dear {{ $employeeName ?? 'Employee' }},</p>
-                        <p>I am writing to inform you that your <b>{{ $monthYear ?? 'the current period' }} payslip</b> is now available to view and download via the <b>HR Portal</b>.</p>
-                        <p>For your convenience, a copy of the payslip is also <b>attached to this email</b>.If you experience any issues accessing the HR Portal or have any queries regarding your payslip, please contact the HR Department.</p>
+                        <p>I am writing to inform you that your <b>{{ $monthYear ?? 'the current period' }} {{ $type ?? 'data' }}</b> is now available to view and download via the <b>HR Portal</b>.</p>
+                        <p>For your convenience, a copy of the {{ $type ?? 'data' }} is also <b>attached to this email</b>.If you experience any issues accessing the HR Portal or have any queries regarding your {{ $type ?? 'payslip' }}, please contact the HR Department.</p>
 						<p>Regards,<br><b>HR Department</b></p>
 					</td>
 				</tr>

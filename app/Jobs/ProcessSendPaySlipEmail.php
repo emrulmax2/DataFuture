@@ -55,7 +55,7 @@ class ProcessSendPaySlipEmail implements ShouldQueue
         if (empty($attachment)) {
             return;
         }
-
+        
         Mail::to($paySlip->employee->email)->send(new EmployeePaySlipMail($paySlip, $attachment));
 
         $paySlip->update([

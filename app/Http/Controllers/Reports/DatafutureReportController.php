@@ -193,8 +193,8 @@ class DatafutureReportController extends Controller
                 $COURSE_REF = '';
                 $COURSE_ROL = '';
 
-                $COURSE_XML .= '<COURSEID>'.$course_id.'</COURSEID>';
-                $COURSE_XML .= (isset($course->name) && !empty($course->name) ? '<COURSETITLE>'.$course->name.'</COURSETITLE>' : '');
+                //$COURSE_XML .= '<COURSEID>'.$course_id.'</COURSEID>';
+                //$COURSE_XML .= (isset($course->name) && !empty($course->name) ? '<COURSETITLE>'.$course->name.'</COURSETITLE>' : '');
 
                 if($dfFields->count() > 0):
                     foreach($dfFields as $dfld):
