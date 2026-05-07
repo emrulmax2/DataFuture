@@ -32,10 +32,11 @@ class EmployeePaySlipMail extends Mailable
      */
     public function envelope()
     {
-        $subjectMonth = date('F Y', strtotime($this->paySlip->month_year.'-01')) ?? 'Payslip';
+        
+        $subjectMonth = date('F Y', strtotime($this->paySlip->month_year.'-01')) ?? '';
 
         return new Envelope(
-            subject: $subjectMonth .' Payslip Available',
+            subject: $subjectMonth .' '. ucfirst($this->paySlip->type) .' Available',
             replyTo: [
                 new Address('hr@lcc.ac.uk', 'HR Department'),
             ],
@@ -51,7 +52,8 @@ class EmployeePaySlipMail extends Mailable
             view: 'emails.employee-payslip',
             with: [
                 'employeeName' => optional($this->paySlip->employee)->full_name,
-                'monthYear' => date('F Y', strtotime($this->paySlip->month_year.'-01')),
+                'monthYear' => ($this->paySlip->type == 'Payslips') ? date('F Y', strtotime($this->paySlip->month_year.'-01')) : (($this->paySlip->type == 'P60')? $this->paySlip->holidayYear->holiday_year : ''),
+                'type' => ($this->paySlip->type == 'Payslips') ? 'Payslip' : ucfirst($this->paySlip->type),
             ]
         );
     }
