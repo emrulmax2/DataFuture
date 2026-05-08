@@ -183,7 +183,7 @@
                                                                     <table class="table table-bordered table-hover">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th class="whitespace-nowrap uppercase">Month</th>
+                                                                                <th class="whitespace-nowrap uppercase">Year</th>
                                                                                 <th class="whitespace-nowrap uppercase">Action</th>
                                                                             </tr>
                                                                         </thead>
