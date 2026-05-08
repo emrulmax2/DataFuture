@@ -32,11 +32,24 @@ class EmployeePaySlipMail extends Mailable
      */
     public function envelope()
     {
+
+        $subjectData = date('F Y', strtotime($this->paySlip->month_year.'-01')) ?? '';
+
+        if($this->paySlip->type == 'P60') {
+            $subjectData = $this->paySlip->holidayYear->holiday_year ?? '';
+
+            $subject = 'Notification of '. $subjectData .' '. ucfirst($this->paySlip->type) .' Availability';
+        } else if($this->paySlip->type == 'P45'){
+            $subject = 'Notification of '. ucfirst($this->paySlip->type) .' Availability';
+        }else {
+            
+             $subject = 'Notification of '. $subjectData .' '. ucfirst($this->paySlip->type) .' Available';
+        }
         
-        $subjectMonth = date('F Y', strtotime($this->paySlip->month_year.'-01')) ?? '';
+        
 
         return new Envelope(
-            subject: $subjectMonth .' '. ucfirst($this->paySlip->type) .' Available',
+            subject: $subject,
             replyTo: [
                 new Address('hr@lcc.ac.uk', 'HR Department'),
             ],
@@ -48,14 +61,16 @@ class EmployeePaySlipMail extends Mailable
      */
     public function content()
     {
-        return new Content(
-            view: 'emails.employee-payslip',
-            with: [
-                'employeeName' => optional($this->paySlip->employee)->full_name,
-                'monthYear' => ($this->paySlip->type == 'Payslips') ? date('F Y', strtotime($this->paySlip->month_year.'-01')) : (($this->paySlip->type == 'P60')? $this->paySlip->holidayYear->holiday_year : ''),
-                'type' => ($this->paySlip->type == 'Payslips') ? 'Payslip' : ucfirst($this->paySlip->type),
-            ]
-        );
+        
+            return new Content(
+                view: 'emails.employee-payslip',
+                with: [
+                    'employeeName' => optional($this->paySlip->employee)->full_name,
+                    'monthYear' => ($this->paySlip->type == 'Payslips') ? date('F Y', strtotime($this->paySlip->month_year.'-01')) : (($this->paySlip->type == 'P60')? $this->paySlip->holidayYear->holiday_year : ''),
+                    'type' => ($this->paySlip->type == 'Payslips') ? 'Payslip' : ucfirst($this->paySlip->type),
+                ]
+            );
+        
     }
 
     /**
