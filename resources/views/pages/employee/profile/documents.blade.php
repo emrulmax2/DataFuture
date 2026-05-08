@@ -162,71 +162,7 @@
             </div>
         </div>
     </div>
-    @php
-        use Carbon\Carbon;
-    @endphp
-    <!-- <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Payslips</div>
-            </div>
-        </div>
-        <div class="intro-y mt-5">
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12">
-                    @if(!empty($holidayDetails))
-                    <div id="employeeHolidayAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
-                        @foreach($holidayDetails  as $yearDetails)
-                            <div class="accordion-item bg-slate-100">
-                                <div id="employeeHolidayAccordion-{{ $yearDetails->id }}" class="accordion-header">
-                                    <button class="accordion-button {{ $yearDetails->is_active == 1 ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $yearDetails->id }}" aria-expanded="{{ $yearDetails->is_active == 1 ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $yearDetails->id }}">
-                                        <span class="font-normal">Year:</span> {{ date('Y', strtotime($yearDetails->start_date)) }} - {{ date('Y', strtotime($yearDetails->end_date)) }}
-                                        <span class="accordionCollaps"></span>
-                                    </button>
-                                </div>
-                                <div id="employeeHolidayAccordion-collapse-{{ $yearDetails->id }}" class="accordion-collapse collapse {{ $yearDetails->is_active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayAccordion-{{ $yearDetails->index }}" data-tw-parent="#employeeHolidayAccordion">
-                                    <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                                        <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
-                                            @php
-                                               $paySlips = \App\Models\PaySlipUploadSync::where('employee_id', $employee->id)->where('holiday_year_id', $yearDetails->id)->get();
-                                                
-                                            @endphp
-                                            <table class="table table-report table-report--tabulator box">
-                                                <thead>
-                                                    <tr>
-                                                        <th class="border border-slate-200">Type</th>
-                                                        <th class="border border-slate-200">Month</th>
-                                                        <th class="border border-slate-200">File Name</th>
-                                                        <th class="border border-slate-200">Download</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($paySlips as $payslip)
-                                                        <tr>
-                                                            <td class="border-b border-r border-slate-200">{{ $payslip->type }}</td><td class="border-b border-r border-slate-200">{{ Carbon::createFromFormat('Y-m', $payslip->month_year)->format('F Y') }} ({{ $payslip->month_year }})</td>
-                                                            <td class="border-b border-r border-slate-200">{{ $payslip->file_name }}</td>
-                                                            <td class="border-b border-r border-slate-200">
-                                                                <a href="{{ route('payslip-upload.download', ['id' => $payslip->id]) }}" class="btn btn-primary"><i data-lucide="download" class="w-4 h-4 mr-2"></i> Download</a>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach 
-                    </div>
-                    @else
-                        <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                            <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holiday data not found!
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    </div> -->
+  
     <!-- BEGIN: Send Email Modal -->
     <div id="addCommunicationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
