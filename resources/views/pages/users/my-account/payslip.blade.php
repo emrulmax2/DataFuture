@@ -162,7 +162,7 @@
                                         </div>
                                         @endif
                                         @php
-                                            $uploadRecords = $paySlipUploadSync->where('type', 'P60');
+                                            $uploadRecords = $paySlipUploadSync->where('type', 'P60')->where('holiday_year_id', $holidayYearData->id);
                                         @endphp
                                         @if($uploadRecords && count($uploadRecords) > 0)
                                         <div id="employeeP60Collapse-{{ $holidayYearData->id }}" class="accordion-collapse collapse {{ $holidayYearData->active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayHeading-{{ $holidayYearData->id }}" data-tw-parent="#employeeHolidayAccordion">
@@ -183,31 +183,16 @@
                                                                     <table class="table table-bordered table-hover">
                                                                         <thead>
                                                                             <tr>
-                                                                                {{-- <th class="whitespace-nowrap uppercase">S/N</th> --}}
                                                                                 <th class="whitespace-nowrap uppercase">Month</th>
-                                                                                {{-- <th class="whitespace-nowrap uppercase">Uploaded By</th>
-                                                                                <th class="whitespace-nowrap uppercase">Upload Date</th>
-                                                                                <th class="whitespace-nowrap uppercase">File Name</th> --}}
                                                                                 <th class="whitespace-nowrap uppercase">Action</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                         @foreach($uploadRecords as $key => $record)
                                                                         <tr>
-                                                                            {{-- <td class="whitespace-nowrap">{{ $key + 1 }}</td> --}}
-                                                                            <td class="whitespace-nowrap">{{ \Carbon\Carbon::createFromFormat('Y-m', $record->month_year)->format('F, Y') }}</td>
-                                                                            {{--
+                                                                            <td class="whitespace-nowrap">{{ $record->holidayYear->holiday_year }}</td>
                                                                             <td class="whitespace-nowrap">
-                                                                                @if($record->uploadedBy)
-                                                                                    {{ $record->uploadedBy->name }}
-                                                                                @else
-                                                                                    N/A
-                                                                                @endif
-                                                                            </td>
-                                                                            <td class="whitespace-nowrap">{{ date('d M, Y', strtotime($record->file_transffered_at)) }}</td>
-                                                                            <td class="whitespace-nowrap">{{ $record->file_name }}</td> --}}
-                                                                            <td class="whitespace-nowrap">
-                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->month_year.(in_array(strtolower($record->type ?? ''), ['p45','p60']) ? '/'.strtolower($record->type) : '').'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
+                                                                                <a href="{{ Storage::disk('s3')->temporaryUrl('public/employee_payslips/'.$record->type.'_'.$record->holiday_year_id."/".strtolower($record->type).'/'.$record->file_name, now()->addMinutes(120)) }}" target="_blank" class="btn btn-primary btn-sm"><i data-lucide="download" class="w-4 h-4 mr-2"></i>Download</a>
                                                                             </td>
                                                                         </tr>
                                                                         @endforeach
