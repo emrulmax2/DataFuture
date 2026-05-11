@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\Student\DoItOnlineController;
 use App\Http\Controllers\Api\Student\ModuleListController;
 use App\Http\Controllers\Api\Student\PerformanceController;
 use App\Http\Controllers\Api\Student\ResultController;
-
+use App\Http\Controllers\Api\Student\StudentProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stripe\Stripe;
@@ -75,6 +75,10 @@ Route::get('auth/google/callback', [APIAuthGoogleSocialiteStudentController::cla
 
         Route::controller(PerformanceController::class)->group(function() {
             Route::get('academic-performance', 'index')->name('user.performance');
+        });
+
+        Route::controller(StudentProfileController::class)->group(function() {
+            Route::get('profile', 'index')->name('user.profile');
         });
 
         Route::post('/logout', [LoginController::class, 'logout']);
