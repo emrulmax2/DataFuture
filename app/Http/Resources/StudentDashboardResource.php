@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class StudentResource extends JsonResource
+class StudentDashboardResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -57,6 +57,7 @@ class StudentResource extends JsonResource
                         'alt_text' => 'Training and Guidance',
                     ],
                 ],
+            'profile_url' => route('api.user.profile'),
         ];
     }
 }
