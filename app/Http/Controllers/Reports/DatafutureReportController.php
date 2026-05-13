@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateDatafutureReportJob;
 use App\Models\Assign;
 use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\CourseBaseDatafutures;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseModule;
+use App\Models\DatafutureReportExport;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
 use App\Models\Plan;
@@ -28,10 +30,43 @@ use App\Models\Venue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use XMLWriter;
 
 class DatafutureReportController extends Controller
 {
+    public function startMultipleStudentsProcess(Request $request){ 
+        $fileName = 'Datafuture_XML_' . time() . '.xml';
+
+        $export = DatafutureReportExport::create([ 
+            'file_name' => $fileName,
+            'status' => 'pending',
+            'progress' => 0,
+            'payload' => $request->all()
+        ]);
+
+        GenerateDatafutureReportJob::dispatch($export->id);
+
+        return response()->json([
+            'success' => true,
+            'export_id' => $export->id
+        ], 200);
+    }
+
+    public function checkMultipleStudentXmlStatus($id)
+    {
+        $export = DatafutureReportExport::findOrFail($id);
+
+        return response()->json([
+            'status' => $export->status,
+            'progress' => $export->progress,
+            'file' => Storage::url($export->file_path),
+            'file_name' => $export->file_name,
+            'error' => $export->error
+        ]);
+    }
+
+
     public function getSingleStudentXml(Request $request){
         $student_id = $request->student_id;
         $course_id = $request->course_id;
@@ -71,7 +106,10 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
+                        ->whereHas('studentCR.creation', function ($q) {
+                            $q->whereNotIn('course_id', [30, 31]);
+                        })->orderBy('student_id', 'ASC')->get();
 
             if($stuloads->count() > 0):
                 $student_ids = $stuloads->pluck('student_id')->unique()->toArray();
@@ -83,8 +121,12 @@ class DatafutureReportController extends Controller
                             ->get()->pluck('course_id')->unique()->toArray();
             endif;
         endif;
+        if(empty($course_ids) || empty($student_ids) || empty($dateRanges)):
+            return response()->json(['msg' => 'Student data not found!'], 404);
+        endif;
 
         $XMLDATA = $this->generateXml($course_ids, $student_ids, $dateRanges);
+        
         if(!empty($XMLDATA)):
             $XMLDATA = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $XMLDATA);
             $XML = new XMLWriter();
@@ -105,10 +147,12 @@ class DatafutureReportController extends Controller
         endif;
     }
 
-    public function getMultipleStudentXml(Request $request){
-        $term_declaration_ids = (isset($request->term_declaration_id) && !empty($request->term_declaration_id) ? $request->term_declaration_id : []);
-        $from_date = (isset($request->from_date) && !empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : '');
-        $to_date = (isset($request->to_date) && !empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : '');
+    public function getMultipleStudentXml($data){
+        set_time_limit(0);
+
+        $term_declaration_ids = $data['term_declaration_id'] ?? [];
+        $from_date = $data['from_date'] ?? '';
+        $to_date = $data['to_date'] ?? '';
 
         $dateRanges = [];
         if(!empty($term_declaration_ids)):
@@ -141,7 +185,10 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)
+                        ->whereHas('studentCR.creation', function ($q) {
+                            $q->whereNotIn('course_id', [30, 31]);
+                        })->orderBy('student_id', 'ASC')->get();
             //dd(DB::getQueryLog());
 
             if($stuloads->count() > 0):
@@ -151,42 +198,75 @@ class DatafutureReportController extends Controller
                             ->select('cc.course_id')
                             ->leftJoin('course_creations as cc', 'cc.id', 'scr.course_creation_id')
                             ->whereIn('scr.id', $student_course_relation_ids)
+                            ->whereNotIn('cc.course_id', [30,31])
                             ->get()->pluck('course_id')->unique()->toArray();
             endif;
         endif;
 
-        $XMLDATA = $this->generateXml($course_ids, $student_ids, $dateRanges);
-        if(!empty($XMLDATA)):
-            $XMLDATA = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $XMLDATA);
-            $XML = new XMLWriter();
-            $XML->openMemory();
-            $XML->startDocument('1.0', 'UTF-8');
-                $XML->writeRaw($XMLDATA);
-            $XML->endDocument();
-
-            $HEADERS = [
-                'Content-Type' => 'application/xml',
-                'Content-Disposition' => 'attachment; filename="Data_Future.xml"',
-            ];
-            $response = new Response($XML->outputMemory(), 200, $HEADERS);
-
-            return $response;
-        else:
+        if(empty($student_ids)):
             return response()->json(['msg' => 'Data not found!'], 304);
         endif;
+        $XMLDATA = $this->generateXml($course_ids, $student_ids, $dateRanges);
+
+        return $XMLDATA;
+
+        // return response()->download($finalPath, 'Data_Future.xml', [
+        //         'Content-Type' => 'application/xml',
+        //     ]
+        // )->deleteFileAfterSend(true);
+
+        // $XMLDATA = $this->generateXml($course_ids, $student_ids, $dateRanges);
+        // if(!empty($XMLDATA)):
+        //     $XMLDATA = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $XMLDATA);
+        //     $XML = new XMLWriter();
+        //     $XML->openMemory();
+        //     $XML->startDocument('1.0', 'UTF-8');
+        //         $XML->writeRaw($XMLDATA);
+        //     $XML->endDocument();
+
+        //     $HEADERS = [
+        //         'Content-Type' => 'application/xml',
+        //         'Content-Disposition' => 'attachment; filename="Data_Future.xml"',
+        //     ];
+        //     $response = new Response($XML->outputMemory(), 200, $HEADERS);
+
+        //     return $response;
+        // else:
+        //     return response()->json(['msg' => 'Data not found!'], 304);
+        // endif;
     }
 
     public function generateXml($course_ids, $student_ids, $dateRanges = []){
         $XML = '';
         $VENUE_IDS = [];
+        
+        $courses = [];
+        $courseDfFields = [];
+        $courseDfFields2 = [];
+        $SessionStatus = SessionStatus::all()->keyBy('id');
+        $ReasonForEndingCourseSession = ReasonForEndingCourseSession::all()->keyBy('id');
+        $students = Student::with('other', 'contact', 'qualHigest', 'disability', 'termStatus')->whereIn('id', $student_ids)->get()->keyBy('id');
+        $studentsCrels = $this->getStudentCourseRelations($student_ids, $dateRanges);
+        $studentAwards = StudentAward::with('qual')->whereIn('student_id', $student_ids)->get()->groupBy([
+                    'student_id',
+                    'student_course_relation_id'
+                ]);
+        $allStudentStuloads = $this->getStudentCourseSessions($student_ids, $dateRanges);
+        $getAllStuloadSessionStatuses = $this->getAllStuloadSessionStatuses($student_ids);
 
         /* Course XML START */
         if(!empty($course_ids)):
-            foreach($course_ids as $course_id):
-                $course = Course::find($course_id);
-                $dfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
+            $courses = Course::whereIn('id', $course_ids)->get()->keyBy('id');
+            $courseDfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
                                 $q->where('datafuture_field_category_id', 1);
-                            })->where('course_id', $course_id)->get();
+                            })->whereIn('course_id', $course_ids)->get()->groupBy('course_id');
+            $courseDfFields2 = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
+                                    $q->where('datafuture_field_category_id', 2);
+                                })->whereIn('course_id', $course_ids)->get()->groupBy('course_id');
+
+            foreach($course_ids as $course_id):
+                $course = $courses[$course_id] ?? null;
+                $dfFields = $courseDfFields[$course_id] ?? collect();
 
                 $COURSE_XML = '';
                 $COURSE_INI = '';
@@ -262,10 +342,12 @@ class DatafutureReportController extends Controller
         /* QUALIFICATIONS XML START */
         if(!empty($course_ids)):
             foreach($course_ids as $course_id):
-                $course = Course::find($course_id);
-                $dfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
-                                $q->where('datafuture_field_category_id', 2);
-                            })->where('course_id', $course_id)->get();
+                // $course = Course::find($course_id);
+                // $dfFields = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
+                //                 $q->where('datafuture_field_category_id', 2);
+                //             })->where('course_id', $course_id)->get();
+                $course = $courses[$course_id] ?? null;
+                $dfFields = $courseDfFields[$course_id] ?? collect();
                 
                 $QUALIF_XML = '';
                 $QUALIF_ROL = '';
@@ -308,23 +390,31 @@ class DatafutureReportController extends Controller
         //     endforeach;
         // endif;
         /* SESSION YEARS XML END */
-
+        
         /* STUDENT XML START */
         if(!empty($student_ids)):
+            $I = 1;
             foreach($student_ids as $student_id):
-                $student_crels = $this->getStudentCourseRelations($student_id, $dateRanges);
-                $STUDENT = Student::with('other', 'contact', 'qualHigest', 'disability', 'termStatus')->find($student_id);
+                //if($I > 10): break; endif;
+                //$I++;
+                //$student_crels = $this->getStudentCourseRelations($student_id, $dateRanges);
+                //$STUDENT = Student::with('other', 'contact', 'qualHigest', 'disability', 'termStatus')->find($student_id);
 
+                $student_crels = $studentsCrels[$student_id] ?? [];
+                $STUDENT = $students[$student_id] ?? collect();
+                
                 if(!empty($student_crels)):
-                    foreach($student_crels as $CRELID):
-                        $STUDENT_CREL = StudentCourseRelation::with('creation', 'creation.available')->find($CRELID);
+                    //foreach($student_crels as $CRELID):
+                    foreach($student_crels as $CRELID => $STUDENT_CREL):
+                        //$STUDENT_CREL = StudentCourseRelation::with('creation', 'creation.available')->find($CRELID);
                         if(isset($STUDENT_CREL->propose->venue_id) && $STUDENT_CREL->propose->venue_id > 0):
                             $VENUE_IDS[] = $STUDENT_CREL->propose->venue_id;
                         endif;
                         $STUDENT_COURSE_ID = (isset($STUDENT_CREL->creation->course_id) && $STUDENT_CREL->creation->course_id > 0 ? $STUDENT_CREL->creation->course_id : 0);
-                        $DF_QUAL_FIELDS = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
-                                            $q->where('datafuture_field_category_id', 2);
-                                        })->where('course_id', $STUDENT_COURSE_ID)->get();
+                        // $DF_QUAL_FIELDS = CourseBaseDatafutures::with('field')->whereHas('field', function($q){
+                        //                     $q->where('datafuture_field_category_id', 2);
+                        //                 })->where('course_id', $STUDENT_COURSE_ID)->get();
+                        $DF_QUAL_FIELDS = $courseDfFields2[$STUDENT_COURSE_ID] ?? collect();
 
                         $Student_XML = '';
                         $StudentRoot_XML = '';
@@ -448,7 +538,8 @@ class DatafutureReportController extends Controller
                                         endif;
                                     endforeach;
                                 endif;
-                                $STUDENT_AWARD = StudentAward::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)->orderBy('id', 'DESC')->get()->first();
+                                //$STUDENT_AWARD = StudentAward::where('student_id', $STUDENT->id)->where('student_course_relation_id', $CRELID)->orderBy('id', 'DESC')->get()->first();
+                                $STUDENT_AWARD = $studentAwards[$STUDENT->id][$CRELID][0] ?? null;
 
                                 $QualificationAwardedRoot_XML .= (isset($STUDENT_AWARD->qual_award_type) && !empty($STUDENT_AWARD->qual_award_type) ? '<QUALAWARDID>'.$STUDENT_AWARD->qual_award_type.'</QUALAWARDID>' : '');
                                 $QualificationAwardedRoot_XML .= (!empty($QUALID) && isset($STUDENT_AWARD->qual_award_type) && !empty($STUDENT_AWARD->qual_award_type) ? '<QUALID>'.$QUALID.'</QUALID>' : '');
@@ -460,7 +551,8 @@ class DatafutureReportController extends Controller
                                 /* QUALIFICATION AWARDED END */
 
                                 /* COURSE SESSION START */
-                                $STULOADS = $this->getStudentCourseSessions($STUDENT->id, $CRELID, $dateRanges);
+                                //$STULOADS = $this->getStudentCourseSessions($STUDENT->id, $CRELID, $dateRanges);
+                                $STULOADS = $allStudentStuloads[$STUDENT->id][$CRELID] ?? collect();
                                 $S = 1;
                                 if($STULOADS && $STULOADS->count()):
                                     foreach($STULOADS as $STU):
@@ -494,7 +586,7 @@ class DatafutureReportController extends Controller
                                                 $RSNSCSEND = '';
                                             endif;
                                             $RSNSCSEND_ID = (isset($STU->df->RSNSCSEND) && !empty($STU->df->RSNSCSEND) ? $STU->df->RSNSCSEND : $RSNSCSEND_ID);
-                                            $RSNSCSEND_ROW = ($RSNSCSEND_ID > 0 ? ReasonForEndingCourseSession::find($RSNSCSEND_ID) : []);
+                                            $RSNSCSEND_ROW = ($RSNSCSEND_ID > 0 ? $ReasonForEndingCourseSession[$RSNSCSEND_ID] ?? [] : []);
                                             $RSNSCSEND = (isset($RSNSCSEND_ROW->df_code) && !empty($RSNSCSEND_ROW->df_code) ? $RSNSCSEND_ROW->df_code : '');
 
                                             $FUNDCOMP = (!empty($periodEndDate) && $periodEndDate < date('Y-m-d') ? '01' : (!empty($periodStartDate) && $periodStartDate <= date('Y-m-d') && !empty($periodEndDate) && $periodEndDate > date('Y-m-d') ? '03' : '02'));
@@ -556,13 +648,15 @@ class DatafutureReportController extends Controller
                                             $COURSE_SESS_XML .= (!empty($REF_PRD_XML) ? '<ReferencePeriodStudentLoad>'.$REF_PRD_XML.'</ReferencePeriodStudentLoad>' : '');
 
                                             $CRS_SES_STS_XML = '';
-                                            $SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
+                                            //$SESSIONSTATUES = $this->getStuloadSessionStatuses($STUDENT->id, $CRELID);
+                                            $SESSIONSTATUES = $getAllStuloadSessionStatuses[$STUDENT->id][$CRELID] ?? [];
+                                            //dd($STUDENT->id, $CRELID,$SESSIONSTATUES,$SESSIONSTATUES1);
                                             if(isset($SESSIONSTATUES[$STU->id]) && !empty($SESSIONSTATUES[$STU->id])):
                                                 foreach($SESSIONSTATUES[$STU->id] as $TERMDECID => $CSTS):
                                                     $CRS_SES_STS_XML .= '<SessionStatus>';
                                                         $CRS_SES_STS_XML .= (isset($CSTS['STATUSVALIDFROM']) && !empty($CSTS['STATUSVALIDFROM']) ? '<STATUSVALIDFROM>'.$CSTS['STATUSVALIDFROM'].'</STATUSVALIDFROM>' : '');
                                                         if(isset($CSTS['STATUSCHANGEDTO']) && $CSTS['STATUSCHANGEDTO'] > 0):
-                                                            $DBSESSIONSTATUS = SessionStatus::find($CSTS['STATUSCHANGEDTO']);
+                                                            $DBSESSIONSTATUS = $SessionStatus[$CSTS['STATUSCHANGEDTO']] ?? collect();
                                                             $CRS_SES_STS_XML .= (isset($DBSESSIONSTATUS->df_code) && !empty($DBSESSIONSTATUS->df_code) ? '<STATUSCHANGEDTO>'.$DBSESSIONSTATUS->df_code.'</STATUSCHANGEDTO>' : '');
                                                         endif;
                                                     $CRS_SES_STS_XML .= '</SessionStatus>';
@@ -620,18 +714,20 @@ class DatafutureReportController extends Controller
         endif;
         /* STUDENT XML END */
 
+        $VENUE_XML = '';
         if(!empty($VENUE_IDS)):
             $VENUE_IDS = array_unique($VENUE_IDS);
             $venues = Venue::whereIn('id', $VENUE_IDS)->get();
+
             if($venues->count() > 0):
                 foreach($venues as $venue):
-                    $XML .= '<Venue>';
-                        $XML .= (isset($venue->idnumber) && !empty($venue->idnumber) ? '<VENUEID>'.$venue->idnumber.'</VENUEID>' : '');
-                        $XML .= (isset($venue->id) && !empty($venue->id) ? '<OWNVENUEID>'.$venue->id.'</OWNVENUEID>' : '');
-                        $XML .= (isset($venue->postcode) && !empty($venue->postcode) ? '<POSTCODE>'.$venue->postcode.'</POSTCODE>' : '');
-                        $XML .= (isset($venue->name) && !empty($venue->name) ? '<VENUENAME>'.$venue->name.'</VENUENAME>' : '');
-                        $XML .= (isset($venue->ukprn) && !empty($venue->ukprn) ? '<VENUEUKPRN>'.$venue->ukprn.'</VENUEUKPRN>' : '');
-                    $XML .= '</Venue>';
+                    $VENUE_XML .= '<Venue>';
+                        $VENUE_XML .= (isset($venue->idnumber) && !empty($venue->idnumber) ? '<VENUEID>'.$venue->idnumber.'</VENUEID>' : '');
+                        $VENUE_XML .= (isset($venue->id) && !empty($venue->id) ? '<OWNVENUEID>'.$venue->id.'</OWNVENUEID>' : '');
+                        $VENUE_XML .= (isset($venue->postcode) && !empty($venue->postcode) ? '<POSTCODE>'.$venue->postcode.'</POSTCODE>' : '');
+                        $VENUE_XML .= (isset($venue->name) && !empty($venue->name) ? '<VENUENAME>'.$venue->name.'</VENUENAME>' : '');
+                        $VENUE_XML .= (isset($venue->ukprn) && !empty($venue->ukprn) ? '<VENUEUKPRN>'.$venue->ukprn.'</VENUEUKPRN>' : '');
+                    $VENUE_XML .= '</Venue>';
                 endforeach;
             endif;
         endif;
@@ -680,30 +776,6 @@ class DatafutureReportController extends Controller
             endif;
         endforeach;
 
-        // if(!empty($dateRanges)):
-        //     $whereRaw = "";
-        //     foreach($dateRanges as $date):
-        //         $FROM_DATE = $date['start'];
-        //         $TO_DATE = $date['end'];
-        //         $whereRaw .= (!empty($whereRaw) ? " OR " : '');
-        //         $whereRaw .= " (
-        //             (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
-        //             OR 
-        //             ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
-        //         ) ";
-        //     endforeach;
-        //     $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->whereIn('student_id', $student_ids)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get();
-
-        //     if($stuloads->count() > 0):
-        //         $instance_ids = $stuloads->pluck('course_creation_instance_id')->unique()->toArray();
-        //         $instance_term_ids = InstanceTerm::whereIn('course_creation_instance_id', $instance_ids)->pluck('id')->unique()->toArray();
-        //         $plan_ids = Plan::whereIn('instance_term_id', $instance_term_ids)->whereIn('course_id', $course_ids)->whereHas('assign', function($q) use($student_ids){
-        //                         $q->whereIn('student_id', $student_ids);
-        //                     })->pluck('id')->unique()->toArray();
-        //         return($student_ids);
-        //     endif;
-        // endif;
-
         if(!empty($plan_ids)):
             $plan_ids = array_unique($plan_ids);
             $module_creation_ids = Plan::whereIn('id', $plan_ids)->where(function($q){
@@ -744,28 +816,36 @@ class DatafutureReportController extends Controller
         return false;
     }
 
-    public function getStudentCourseRelations($student_id, $dateRanges = []){
+    public function getStudentCourseRelations($student_ids, $dateRanges = []){
         if(!empty($dateRanges)):
-            $whereRaw = "";
-            foreach($dateRanges as $date):
-                $FROM_DATE = $date['start'];
-                $TO_DATE = $date['end'];
-                $whereRaw .= (!empty($whereRaw) ? " OR " : '');
-                $whereRaw .= " (
-                    (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
-                    OR 
-                    ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
-                ) ";
-            endforeach;
-            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
+            $res = [];
+            foreach($student_ids as $student_id):
+                $whereRaw = "";
+                foreach($dateRanges as $date):
+                    $FROM_DATE = $date['start'];
+                    $TO_DATE = $date['end'];
+                    $whereRaw .= (!empty($whereRaw) ? " OR " : '');
+                    $whereRaw .= " (
+                        (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
+                        OR 
+                        ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
+                    ) ";
+                endforeach;
+                $crel_ids = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
                         ->orderBy('student_course_relation_id', 'ASC')->get()->pluck('student_course_relation_id')->unique()->toArray();
+                $res[$student_id] = StudentCourseRelation::with('creation', 'creation.available')->whereIn('id', $crel_ids)->get()->keyBy('id');
+            endforeach;
+
+            return $res;
         endif;
 
         return [];
     }
 
-    public function getStudentCourseSessions($student_id, $student_course_relation_id, $dateRanges = []){
+    //public function getStudentCourseSessions($student_id, $student_course_relation_id, $dateRanges = []){
+    public function getStudentCourseSessions($student_ids, $dateRanges = []){
         if(!empty($dateRanges)):
+            $res = [];
             $whereRaw = "";
             foreach($dateRanges as $date):
                 $FROM_DATE = $date['start'];
@@ -777,7 +857,12 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            return StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_course_relation_id', $student_course_relation_id)->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get();
+            foreach($student_ids as $student_id):
+                //$res[$student_id] = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_course_relation_id', $student_course_relation_id)->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get();
+                $res[$student_id] = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get()->groupBy('student_course_relation_id');
+            endforeach;
+
+            return $res;
         endif;
 
         return false;
@@ -835,9 +920,117 @@ class DatafutureReportController extends Controller
         return $inRange;
     }
 
+    public function getAllStuloadSessionStatuses($student_ids){
+        $res = [];
+
+        // 1. Load ALL stuloads for given students
+        $stuloads = StudentStuloadInformation::whereIn('student_id', $student_ids)
+            ->where('report_visibility', 1)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        if ($stuloads->isEmpty()) {
+            return $res;
+        }
+
+        // 2. Preload instances with terms
+        $instanceIds = $stuloads->pluck('course_creation_instance_id')->unique();
+        $instances = CourseCreationInstance::with('terms')
+            ->whereIn('id', $instanceIds)
+            ->get()
+            ->keyBy('id');
+
+        // 3. Preload attendance statuses
+        $attendanceStatuses = StudentAttendanceTermStatus::whereIn('student_id', $student_ids)->orderBy('id', 'DESC')
+            ->get()->groupBy(fn($i) => $i->student_id . '_' . $i->term_declaration_id);
+
+        // 4. Preload attendances
+        // $attendances = Attendance::whereIn('student_id', $student_ids)
+        //     ->whereHas('feed', fn($q) => $q->where('attendance_count', 1))
+        //     ->orderBy('attendance_date', 'DESC')
+        //     ->get()->groupBy(fn($a) => $a->student_id . '_' . $a->plan->term_declaration_id);
+        $attendances = Attendance::with('plan:id,term_declaration_id')
+                ->whereIn('student_id', $student_ids)
+                ->whereHas('feed', fn($q) => $q->where('attendance_count', 1))
+                ->orderBy('attendance_date', 'DESC')
+                ->get()
+                ->groupBy(function ($a) {
+
+                    if (!$a->plan) {
+                        return null;
+                    }
+
+                    return $a->student_id . '_' . $a->plan->term_declaration_id;
+                });
+
+        // 5. Build response
+        foreach ($stuloads as $stu) {
+            $studentId = $stu->student_id;
+            $relationId = $stu->student_course_relation_id;
+            $instance = $instances[$stu->course_creation_instance_id] ?? null;
+            if (!$instance || $instance->terms->isEmpty()) {
+                continue;
+            }
+
+            $suspendedFound = false;
+            $suspendedContinued = false;
+            $termCount = 1;
+
+            foreach ($instance->terms as $term) {
+
+                $termDeclarationId = $term->term_declaration_id;
+                $key = $studentId . '_' . $termDeclarationId;
+
+                $status = $attendanceStatuses[$key][0] ?? null;
+                $lastAttendance = $attendances[$key][0] ?? null;
+                $isSuspended = isset($status->status_id) && in_array($status->status_id, [17, 27, 30, 31, 33, 36]); 
+                
+
+                if ($suspendedFound || ($suspendedContinued && $termCount == 1)) {
+                    if ($isSuspended) {
+                        $res[$studentId][$relationId][$stu->id][$termDeclarationId] = [
+                            'term_declaration_id' => $termDeclarationId,
+                            'STATUSVALIDFROM' => isset($lastAttendance->attendance_date)
+                                ? date('Y-m-d', strtotime($lastAttendance->attendance_date))
+                                : '',
+                            'STATUSCHANGEDTO' => 2,
+                        ];
+                        $suspendedContinued = ($instance->terms->count() == $termCount);
+                    } else {
+                        $termDeclaration = $term->termDeclaration ?? null;
+                        $res[$studentId][$relationId][$stu->id][$termDeclarationId] = [
+                            'term_declaration_id' => $termDeclarationId,
+                            'STATUSVALIDFROM' => isset($termDeclaration->start_date)
+                                ? date('Y-m-d', strtotime($termDeclaration->start_date))
+                                : '',
+                            'STATUSCHANGEDTO' => 1,
+                        ];
+                        $suspendedContinued = false;
+                    }
+
+                } else {
+                    if ($isSuspended) {
+                        $suspendedFound = true;
+                        $suspendedContinued = ($instance->terms->count() == $termCount);
+                        $res[$studentId][$relationId][$stu->id][$termDeclarationId] = [
+                            'term_declaration_id' => $termDeclarationId,
+                            'STATUSVALIDFROM' => isset($lastAttendance->attendance_date)
+                                ? date('Y-m-d', strtotime($lastAttendance->attendance_date))
+                                : '',
+                            'STATUSCHANGEDTO' => 2,
+                        ];
+                    }
+                }
+                $termCount++;
+            }
+        }
+        return $res;
+    }
+
     public function getStuloadSessionStatuses($student_id, $student_course_relation_id){
         $res = [];
         $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('report_visibility', 1)->orderBy('id', 'ASC')->get();
+        $terms = [];
         if($stuloads->count() > 0):
             $suspendedContinued = false;
             foreach($stuloads as $stu):
@@ -856,6 +1049,7 @@ class DatafutureReportController extends Controller
                                 })->whereHas('feed', function($q){
                                     $q->where('attendance_count', 1);
                                 })->orderBy('attendance_date', 'DESC')->get()->first();
+                              
                         if($suspendedFound || ($suspendedContinued && $termCount == 1)):
                             if(isset($stdAttenTermStatus->status_id) && $stdAttenTermStatus->status_id > 0 && in_array($stdAttenTermStatus->status_id, [17, 27, 30, 31, 33, 36])):
                                 $res[$stu->id][$term_declaration_id]['STATUSVALIDFROM'] = (isset($lastAttendance->attendance_date) && !empty($lastAttendance->attendance_date) ? date('Y-m-d', strtotime($lastAttendance->attendance_date)) : '');
@@ -913,5 +1107,30 @@ class DatafutureReportController extends Controller
         endif;
 
         return $stuLoadTotal;
+    }
+
+
+    public function checkXmlFile(Request $request){
+        $file_name = $request->file_name;
+        if(empty($file_name)):
+            return response()->json([
+                'ready' => false
+            ]);
+        endif;
+
+        $path = storage_path('app/public/temp_xml/'.$file_name);
+        if(file_exists($path)):
+            $size = filesize($path);
+            if($size > 100):
+                return response()->json([
+                    'ready' => true,
+                    'file' => asset('storage/temp_xml/'.$file_name)
+                ]);
+            endif;
+        endif;
+
+        return response()->json([
+            'ready' => false
+        ]);
     }
 }
