@@ -19,6 +19,7 @@
                 <div>
                     <label for="date" class="form-label block">Date <span class="text-danger">*</span></label>
                     <input id="date" type="text" name="date" class="datepicker form-control w-80" data-format="DD-MM-YYYY"  data-single-mode="true">
+                    <div class="text-xs text-slate-500 italic mt-1">Please, select the date between any term declaration start date and end date.</div>
                     <div class="acc__input-error error-date text-danger hidden"></div>
                 </div>
                 <div class="ml-3 pt-7">

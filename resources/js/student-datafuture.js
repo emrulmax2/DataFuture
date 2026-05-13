@@ -162,7 +162,7 @@ import { saveAs } from 'file-saver';
     });
 
     const xmlExportModalEl = document.getElementById('xmlExportModal')
-    xmlExportModalEl.addEventListener('hide.tw.modal', function(event) {
+    xmlExportModalEl.addEventListener('hiden.tw.modal', function(event) {
         $('#xmlExportModal .acc__input-error').html('');
         $('#xmlExportModal .modal-body input)').val('');
         
@@ -553,7 +553,7 @@ import { saveAs } from 'file-saver';
                             $(`#xmlExportForm .${key}`).addClass('border-danger');
                             $(`#xmlExportForm  .error-${key}`).html(val);
                         }
-                    } else if (error.response.status == 304){
+                    } else if (error.response.status == 304 || error.response.status == 404){
                         xmlExportModal.hide();
 
                         warningModal.show(); 

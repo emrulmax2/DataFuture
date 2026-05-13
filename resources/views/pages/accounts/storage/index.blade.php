@@ -214,7 +214,7 @@
                         <div class="mt-3">
                             <div class="form-check form-switch">
                                 <input id="has_cto_receipts" name="has_cto_receipts" class="form-check-input" type="checkbox" value="1">
-                                <label class="form-check-label" for="has_cto_receipts">CTO Receipts Upload</label>
+                                <label class="form-check-label" for="has_cto_receipts">COT Receipts Upload</label>
                             </div>
                         </div>
                         <div class="mt-3 relative cto_receipts_wrap" style="display: none;">
