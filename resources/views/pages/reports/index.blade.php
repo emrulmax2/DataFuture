@@ -3,7 +3,44 @@
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
-
+@section('style')
+<style>
+        .progress-container {
+            max-width: 600px;
+            margin-top: 20px;
+            display: none;
+        }
+        .progress {
+            height: 30px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            line-height: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: width 0.5s ease;
+        }
+        .status-message {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .download-section {
+            margin-top: 20px;
+            display: none;
+        }
+        .error-message {
+            margin-top: 20px;
+            display: none;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 5px;
+        }
+    </style>
+@endsection
 @section('subcontent')
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">All Reports</h2>
@@ -129,9 +166,27 @@
                                 <div class="acc__input-error error-to_date text-danger mt-2"></div>
                             </div>
                         </div>
+                        <div class="mt-3 hidden" id="xmlProgressWrap">
+                            <div class="flex items-center justify-between mb-2 leading-none">
+                                <span class="font-medium">Generating XML...</span>
+                                <span id="xmlProgressText" class="font-medium">0%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded overflow-hidden h-4">
+                                <div id="xmlProgressBar" class="bg-success h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-danger w-auto mr-1"><i data-lucide="x-circle" class="w-4 h-4 mr-2"></i>Cancel</button>
+                        <div class="float-left hidden" id="xmlDownloadWrap">
+                            <a href="#"
+                            target="_blank"
+                            id="xmlDownloadBtn" 
+                            download 
+                            class="btn btn-primary text-white">
+                                <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> XML
+                            </a>
+                        </div>
+                        <button id="xmlDownCancelBtn" type="button" data-tw-dismiss="modal" class="btn btn-danger w-auto mr-1"><i data-lucide="x-circle" class="w-4 h-4 mr-2"></i>Cancel</button>
                         <button type="submit" id="xmlDownBtn" class="btn btn-success w-auto text-white">  
                             <i data-lucide="download" class="w-4 h-4 mr-2"></i>  
                             Download Now                      
