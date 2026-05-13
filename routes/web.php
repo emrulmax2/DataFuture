@@ -4015,8 +4015,8 @@ Route::middleware('auth')->group(function() {
     });
 
     Route::controller(DatafutureReportController::class)->group(function(){
-        Route::post('reports/datafuture/single-student', 'getSingleStudentXml')->name('reports.datafuture.single.student'); 
-        Route::post('reports/datafuture/check-file', 'checkXmlFile')->name('reports.datafuture.check.xml'); 
+        Route::post('reports/datafuture/single-student', 'getSingleStudentXml')->name('reports.datafuture.single.student');  
+        Route::post('reports/datafuture/check-file', 'checkXmlFile')->name('reports.datafuture.check.xml');  
 
         Route::post('reports/datafuture/multiple-students', 'startMultipleStudentsProcess')->name('reports.datafuture.start.process.multiple.student');
         Route::post('reports/datafuture/check-xml-status/{id}', 'checkMultipleStudentXmlStatus')->name('reports.datafuture.check.multiple.students.xml.status');
