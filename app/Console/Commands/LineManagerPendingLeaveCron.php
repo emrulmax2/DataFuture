@@ -276,7 +276,7 @@ class LineManagerPendingLeaveCron extends Command
 </html>
 HTML;
 
-                            UserMailerJob::dispatch($configuration, [$theUser->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
+                            UserMailerJob::dispatch($configuration, [$theUser->email, 'hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, [],false));
                         endforeach;
                         //endif;
                     endforeach;
