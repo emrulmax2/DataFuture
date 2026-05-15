@@ -27,3 +27,4 @@ deployment:
         - /usr/local/bin/ea-php81 artisan route:cache
         - /usr/local/bin/ea-php81 artisan view:cache
         - /usr/local/bin/ea-php81 artisan optimize
+        - /usr/local/bin/ea-php81 artisan queue:restart

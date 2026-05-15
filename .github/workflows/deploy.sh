@@ -32,4 +32,7 @@ php artisan view:cache
 #Clear all
 php artisan optimize:clear
 
+#clrear queue
+php artisan queue:restart
+
 
