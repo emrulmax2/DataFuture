@@ -30,5 +30,7 @@ class DashboardController extends Controller
             'data' => $data,
         ], 200);
     }
+
+    
     
 }
