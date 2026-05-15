@@ -13,17 +13,22 @@ use Illuminate\Queue\SerializesModels;
 class CommunicationSendMail extends Mailable
 {
     use Queueable, SerializesModels;
-    public $subject,$content,$attachmentList;
+    public $subject;
+    public $content;
+    public $attachmentList;
+    public $templateSet;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($subject,$content,$attachmentList)
+    public function __construct($subject, $content, $attachmentList, $defaultTemplate = true)
     {
         $this->subject = $subject;
         $this->content = $content;
         $this->attachmentList = $attachmentList;
+        $this->templateSet = $defaultTemplate;
+
     }
 
     /**
@@ -45,9 +50,10 @@ class CommunicationSendMail extends Mailable
      */
     public function content()
     {
+        $template = $this->templateSet == true ? 'emails.communication-email' : 'emails.html-content-email';
          
         return new Content(
-            view: 'emails.communication-email',
+            view:  $template,
             with: [
                 'content' => $this->content,
             ]
