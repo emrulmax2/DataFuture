@@ -16,9 +16,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('queue:work --queue=default --tries=3 --timeout=90 --stop-when-empty')
-            ->everyMinute()
-            ->withoutOverlapping();
         $schedule->command('passportexpiry:cron')->weeklyOn(7, '23:00');
         $schedule->command('visaexpiry:cron')->weeklyOn(7, '23:10');
         $schedule->command('visaexpired:cron')->weeklyOn(7, '23:20');
