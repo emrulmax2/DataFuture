@@ -12,6 +12,8 @@ class StudentStuloadInformation extends Model
 
     protected $guarded = ['id'];
 
+    protected $dates = ['deleted_at'];
+
     public function student(){
         return $this->belongsTo(Student::class, 'student_id');
     }
