@@ -1024,7 +1024,7 @@ class EmployeeHolidayController extends Controller
                 $fractionCount = 0;
                 $totalHours = 0;
                 $days = 0;
-                $daysHtml = '';
+                $daysTableRows = '';
                 $i = 1;
                 foreach($leaves as $leave):
                     $leave_date = (isset($leave['date']) && !empty($leave['date']) ? date('Y-m-d', strtotime($leave['date'])) : '');
@@ -1045,7 +1045,10 @@ class EmployeeHolidayController extends Controller
                     EmployeeLeaveDay::create($leaveDaysData);
 
                     $totalHours += $leave_hour;
-                    $daysHtml .= '<li>'.date('d-m-Y', strtotime($leave_date)).' => '.$this->calculateHourMinute($leave_hour).'</li>';
+                    $daysTableRows .= '<tr>';
+                        $daysTableRows .= '<td style="padding:8px 10px; border:1px solid #e5e7eb;">'.date('d F Y', strtotime($leave_date)).'</td>';
+                        $daysTableRows .= '<td style="padding:8px 10px; border:1px solid #e5e7eb; text-align:right;">'.$this->calculateHourMinute($leave_hour).'</td>';
+                    $daysTableRows .= '</tr>';
                     $fractionCount += $isFraction;
                     $days += 1;
                     $i++;
@@ -1068,58 +1071,304 @@ class EmployeeHolidayController extends Controller
                         
                         $the_url = url('/go?redirect=' . urlencode('/employee-profile/holidays/'.$employee_id));
                         if(!empty($approverEmail)):
+                            $startDateFormatted = date('d F Y', strtotime($startDate));
+                            $endDateFormatted = date('d F Y', strtotime($endDate));
+                            $totalHoursFormatted = $this->calculateHourMinute($totalHours);
+                            $requestedAtFormatted = date('jS F, Y \a\t H:i');
+                            $dayLabel = ($days == 1 ? 'day' : 'days');
+                            $dateRowsHtml = (!empty($daysTableRows) ? $daysTableRows : '<tr><td style="padding:8px 10px; border:1px solid #e5e7eb;">N/A</td><td style="padding:8px 10px; border:1px solid #e5e7eb; text-align:right;">00:00</td></tr>');
+                            $noteRowHtml = '';
+                            if(!empty($note)):
+                                $noteRowHtml .= '<tr>';
+                                    $noteRowHtml .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; font-size:13px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">Notes</td>';
+                                    $noteRowHtml .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; color:#111827;">'.$note.'</td>';
+                                $noteRowHtml .= '</tr>';
+                            endif;
+
                             $message = '';
-                            $message .= 'Dear '.$approverName.',<br/>';
-                            $message .= $employeeName.' has submitted a request for leave from '.date('d-m-Y', strtotime($startDate)).' to '.date('d-m-Y', strtotime($endDate)).' and has identified you as the approver.<br/>';
-                            $message .= 'Please log in using the <a href="'.$the_url.'">link</a> below to review and approve the request. Kindly note that a decision is required within 5 working days of this notification.<br/>';
-                            $message .= 'For your reference, the leave details are as follows:<br/><br/>';
+                            $message .= '<!DOCTYPE html>';
+                            $message .= '<html>';
+                            $message .= '<head>';
+                                $message .= '<meta charset="UTF-8">';
+                                $message .= '<title>Leave Approval Request</title>';
+                            $message .= '</head>';
+                            $message .= '<body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">';
 
-                            $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
-                                $message .= '<tr>';
-                                    $message .= '<th>No of Days</th>';
-                                    $message .= '<td>'.$days.'Days</td>';
-                                $message .= '</tr>';
-                                if(!empty($daysHtml)):
+                                $message .= '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">';
                                     $message .= '<tr>';
-                                        $message .= '<th>Dates</th>';
-                                        $message .= '<td>'; 
-                                            $message .= '<ul>'; 
-                                                $message .= $daysHtml;
-                                            $message .= '</ul>'; 
-                                        $message .= '</td>'; 
-                                    $message .= '</tr>';
-                                endif;
-                                $message .= '<tr>';
-                                    $message .= '<th>Total Hours</th>';
-                                    $message .= '<td>'.$this->calculateHourMinute($totalHours).'</td>';
-                                $message .= '</tr>';
-                                if(!empty($note)):
-                                $message .= '<tr>';
-                                    $message .= '<th>Notes</th>';
-                                    $message .= '<td>'.$note.'</td>';
-                                $message .= '</tr>';
-                                endif;
-                                $message .= '<tr>';
-                                    $message .= '<th>Requested By</th>';
-                                    $message .= '<td>'.$employeeName.' on '.date('jS F, Y H:i').'</td>';
-                                $message .= '</tr>';
-                            $message .= '</table><br/>';
-                            $message .= 'Thank you for your prompt attention to this matter.<br/><br/>';
-                            $message .= 'Sincerely,<br/>'.$siteName;
+                                        $message .= '<td align="center">';
 
-                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Approval Needed', $message, []));
+                                            $message .= '<table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">';
+
+                                                $message .= '<tr>';
+                                                    $message .= '<td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">';
+
+                                                        $message .= '<img src="https://sms.lcc.ac.uk/storage/company_logo.png" alt="London Churchill College" style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;">';
+
+                                                        $message .= '<div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">';
+                                                            $message .= 'Leave Approval Request';
+                                                        $message .= '</div>';
+
+                                                        $message .= '<h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">';
+                                                            $message .= 'Leave Request Requires Your Approval';
+                                                        $message .= '</h1>';
+
+                                                        $message .= '<p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">';
+                                                            $message .= 'A staff leave request has been assigned to you for review.';
+                                                        $message .= '</p>';
+
+                                                    $message .= '</td>';
+                                                $message .= '</tr>';
+
+                                                $message .= '<tr>';
+                                                    $message .= '<td style="background-color:#eff6ff; border-bottom:1px solid #bfdbfe; padding:16px 38px;">';
+                                                        $message .= '<p style="margin:0; font-size:14px; color:#1e3a8a; line-height:1.5; text-align:justify;">';
+                                                            $message .= '<strong>Action Required:</strong> Please log in to review and approve the leave request.';
+                                                        $message .= '</p>';
+                                                    $message .= '</td>';
+                                                $message .= '</tr>';
+
+                                                $message .= '<tr>';
+                                                    $message .= '<td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">';
+
+                                                        $message .= '<p style="margin-top:0; text-align:left;">';
+                                                            $message .= 'Dear <strong>'.$approverName.'</strong>,';
+                                                        $message .= '</p>';
+
+                                                        $message .= '<p style="text-align:justify;">';
+                                                            $message .= '<strong>'.$employeeName.'</strong> has submitted a leave request for the period <strong>'.$startDateFormatted.'</strong> to <strong>'.$endDateFormatted.'</strong>, and the request has been assigned to you for approval.';
+                                                        $message .= '</p>';
+
+                                                        $message .= '<p style="text-align:justify;">';
+                                                            $message .= 'Please log in via the button below to review and approve the request. The leave details are provided below for your reference.';
+                                                        $message .= '</p>';
+
+                                                        $message .= '<table cellpadding="0" cellspacing="0" style="margin:24px 0;">';
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="background-color:#1f5f8f; border-radius:8px;">';
+                                                                    $message .= '<a href="'.$the_url.'" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none;">';
+                                                                        $message .= 'Review Leave Request';
+                                                                    $message .= '</a>';
+                                                                $message .= '</td>';
+                                                            $message .= '</tr>';
+                                                        $message .= '</table>';
+
+                                                        $message .= '<table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0; border:1px solid #e5e7eb; border-radius:14px; overflow:hidden; border-collapse:separate; border-spacing:0; text-align:left;">';
+
+                                                            $message .= '<tr>';
+                                                                $message .= '<td colspan="2" style="background-color:#f8fafc; padding:16px 20px; border-bottom:1px solid #e5e7eb;">';
+                                                                    $message .= '<span style="font-size:15px; font-weight:700; color:#0f172a;">Leave Request Details</span>';
+                                                                $message .= '</td>';
+                                                            $message .= '</tr>';
+
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="padding:14px 20px; width:35%; border-bottom:1px solid #eef2f7; font-size:13px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">Number of Days</td>';
+                                                                $message .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; color:#111827;">'.$days.' '.$dayLabel.'</td>';
+                                                            $message .= '</tr>';
+
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; font-size:13px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.3px; vertical-align:top;">Dates &amp; Hours</td>';
+                                                                $message .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; color:#111827;">';
+
+                                                                    $message .= '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:14px;">';
+                                                                        $message .= '<tr>';
+                                                                            $message .= '<td style="padding:8px 10px; background-color:#f8fafc; border:1px solid #e5e7eb; font-weight:700; color:#334155;">Date</td>';
+                                                                            $message .= '<td style="padding:8px 10px; background-color:#f8fafc; border:1px solid #e5e7eb; font-weight:700; color:#334155; text-align:right;">Hours</td>';
+                                                                        $message .= '</tr>';
+                                                                        $message .= $dateRowsHtml;
+                                                                    $message .= '</table>';
+
+                                                                $message .= '</td>';
+                                                            $message .= '</tr>';
+
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; font-size:13px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">Total Hours</td>';
+                                                                $message .= '<td style="padding:14px 20px; border-bottom:1px solid #eef2f7; color:#111827;">'.$totalHoursFormatted.'</td>';
+                                                            $message .= '</tr>';
+
+                                                            $message .= $noteRowHtml;
+
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="padding:14px 20px; font-size:13px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.3px;">Requested By</td>';
+                                                                $message .= '<td style="padding:14px 20px; color:#111827;">';
+                                                                    $message .= $employeeName.'<br><span style="font-size:13px; color:#64748b;">'.$requestedAtFormatted.'</span>';
+                                                                $message .= '</td>';
+                                                            $message .= '</tr>';
+
+                                                        $message .= '</table>';
+
+                                                        $message .= '<table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; background-color:#f8fafc; border-left:5px solid #1f5f8f; border-radius:10px; text-align:justify;">';
+                                                            $message .= '<tr>';
+                                                                $message .= '<td style="padding:18px 20px; color:#334155; font-size:14px; line-height:1.7; text-align:justify;">';
+                                                                    $message .= 'Please review the submitted leave request and complete the approval process as soon as possible.';
+                                                                $message .= '</td>';
+                                                            $message .= '</tr>';
+                                                        $message .= '</table>';
+
+                                                        $message .= '<p style="text-align:justify;">Thank you for your attention to this matter.</p>';
+
+                                                        $message .= '<p style="margin-bottom:0; text-align:left;">Sincerely,<br><strong>'.$siteName.'</strong></p>';
+
+                                                    $message .= '</td>';
+                                                $message .= '</tr>';
+
+                                                $message .= '<tr>';
+                                                    $message .= '<td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">';
+
+                                                        $message .= '<p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">';
+                                                            $message .= 'This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.';
+                                                        $message .= '</p>';
+
+                                                        $message .= '<p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">';
+                                                            $message .= 'Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. '.$siteName.' accepts no responsibility for any loss or damage arising from their use.';
+                                                        $message .= '</p>';
+
+                                                        $message .= '<p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">';
+                                                            $message .= '<strong>'.$siteName.'</strong><br>';
+                                                            $message .= 'Barclay Hall, 156B Green Street, London, E7 8JQ<br>';
+                                                            $message .= '+44 (0) 207 377 1077';
+                                                        $message .= '</p>';
+
+                                                    $message .= '</td>';
+                                                $message .= '</tr>';
+
+                                            $message .= '</table>';
+
+                                            $message .= '<p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">';
+                                                $message .= 'Automated notification from '.$siteName;
+                                            $message .= '</p>';
+
+                                        $message .= '</td>';
+                                    $message .= '</tr>';
+                                $message .= '</table>';
+
+                            $message .= '</body>';
+                            $message .= '</html>';
+
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Approval Needed', $message, [],false));
                         endif;
                     endforeach;
                 endif;
 
                 if(!empty($employee_emails) && $leave_type == 1):
                     $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
-                    $message2 = 'Dear '.$employeeName.',<br/><br/>';
-                    $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review. You may monitor the status of your request by accessing the following link:<br/><br/>';
-                    $message2 .= '<a href="'.$the_url.'">Click Here</a><br/><br/>';
-                    $message2 .= 'Thank you for your cooperation.<br/>Sincerely,<br/>'.$siteName;
+                    $message2 = '';
+                    $message2 .= '<!DOCTYPE html>';
+                    $message2 .= '<html>';
+                    $message2 .= '<head>';
+                        $message2 .= '<meta charset="UTF-8">';
+                        $message2 .= '<title>Leave Request Submitted</title>';
+                    $message2 .= '</head>';
+                    $message2 .= '<body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">';
 
-                    UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request', $message2, []));
+                        $message2 .= '<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">';
+                            $message2 .= '<tr>';
+                                $message2 .= '<td align="center">';
+
+                                    $message2 .= '<table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">';
+
+                                        $message2 .= '<tr>';
+                                            $message2 .= '<td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">';
+
+                                                $message2 .= '<img src="https://sms.lcc.ac.uk/storage/company_logo.png" alt="London Churchill College" style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;">';
+
+                                                $message2 .= '<div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">';
+                                                    $message2 .= 'Leave Request Submitted';
+                                                $message2 .= '</div>';
+
+                                                $message2 .= '<h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">';
+                                                    $message2 .= 'Your Leave Request Has Been Submitted';
+                                                $message2 .= '</h1>';
+
+                                                $message2 .= '<p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">';
+                                                    $message2 .= 'Your request has been received and is now awaiting review.';
+                                                $message2 .= '</p>';
+
+                                            $message2 .= '</td>';
+                                        $message2 .= '</tr>';
+
+                                        $message2 .= '<tr>';
+                                            $message2 .= '<td style="background-color:#ecfdf5; border-bottom:1px solid #bbf7d0; padding:16px 38px;">';
+                                                $message2 .= '<p style="margin:0; font-size:14px; color:#166534; line-height:1.5; text-align:justify;">';
+                                                    $message2 .= '<strong>Status:</strong> Your leave request has been successfully submitted for review.';
+                                                $message2 .= '</p>';
+                                            $message2 .= '</td>';
+                                        $message2 .= '</tr>';
+
+                                        $message2 .= '<tr>';
+                                            $message2 .= '<td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">';
+
+                                                $message2 .= '<p style="margin-top:0; text-align:left;">';
+                                                    $message2 .= 'Dear <strong>'.$employeeName.'</strong>,';
+                                                $message2 .= '</p>';
+
+                                                $message2 .= '<p style="text-align:justify;">';
+                                                    $message2 .= 'We are writing to inform you that your leave request has been successfully submitted for review.';
+                                                $message2 .= '</p>';
+
+                                                $message2 .= '<p style="text-align:justify;">';
+                                                    $message2 .= 'You may monitor the status of your request by accessing the link below.';
+                                                $message2 .= '</p>';
+
+                                                $message2 .= '<table cellpadding="0" cellspacing="0" style="margin:24px 0;">';
+                                                    $message2 .= '<tr>';
+                                                        $message2 .= '<td style="background-color:#1f5f8f; border-radius:8px;">';
+                                                            $message2 .= '<a href="'.$the_url.'" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none;">';
+                                                                $message2 .= 'View Leave Request Status';
+                                                            $message2 .= '</a>';
+                                                        $message2 .= '</td>';
+                                                    $message2 .= '</tr>';
+                                                $message2 .= '</table>';
+
+                                                $message2 .= '<table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; background-color:#f8fafc; border-left:5px solid #1f5f8f; border-radius:10px; text-align:justify;">';
+                                                    $message2 .= '<tr>';
+                                                        $message2 .= '<td style="padding:18px 20px; color:#334155; font-size:14px; line-height:1.7; text-align:justify;">';
+                                                            $message2 .= 'Please note that your request will remain under review until it has been processed by the assigned approver.';
+                                                        $message2 .= '</td>';
+                                                    $message2 .= '</tr>';
+                                                $message2 .= '</table>';
+
+                                                $message2 .= '<p style="text-align:justify;">Thank you for your cooperation.</p>';
+
+                                                $message2 .= '<p style="margin-bottom:0; text-align:left;">Sincerely,<br><strong>'.$siteName.'</strong></p>';
+
+                                            $message2 .= '</td>';
+                                        $message2 .= '</tr>';
+
+                                        $message2 .= '<tr>';
+                                            $message2 .= '<td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">';
+
+                                                $message2 .= '<p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">';
+                                                    $message2 .= 'This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.';
+                                                $message2 .= '</p>';
+
+                                                $message2 .= '<p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">';
+                                                    $message2 .= 'Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. '.$siteName.' accepts no responsibility for any loss or damage arising from their use.';
+                                                $message2 .= '</p>';
+
+                                                $message2 .= '<p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">';
+                                                    $message2 .= '<strong>'.$siteName.'</strong><br>';
+                                                    $message2 .= 'Barclay Hall, 156B Green Street, London, E7 8JQ<br>';
+                                                    $message2 .= '+44 (0) 207 377 1077';
+                                                $message2 .= '</p>';
+
+                                            $message2 .= '</td>';
+                                        $message2 .= '</tr>';
+
+                                    $message2 .= '</table>';
+
+                                    $message2 .= '<p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">';
+                                        $message2 .= 'Automated notification from '.$siteName;
+                                    $message2 .= '</p>';
+
+                                $message2 .= '</td>';
+                            $message2 .= '</tr>';
+                        $message2 .= '</table>';
+
+                    $message2 .= '</body>';
+                    $message2 .= '</html>';
+
+                    UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request', $message2, [],false));
                 endif;
 
                 return response()->json(['res' => 'Request successfully submitted'], 200);

@@ -48,4 +48,22 @@ class CourseModule extends Model
     public function df(){
         return $this->hasMany(ModuleDatafuture::class, 'course_module_id', 'id');
     }
+
+    public function dfModule(){
+        return $this->hasMany(ModuleDatafuture::class, 'course_module_id', 'id')->whereHas('field', function($q){
+                            $q->whereNotIn('name', ['COSTCN', 'COSTCNPROPORTION', 'MODSBJ', 'MODPROPORTION']);
+                        })->where('course_module_id', $this->id);
+    }
+
+    public function dfModuleCostCenter(){
+        return $this->hasMany(ModuleDatafuture::class, 'course_module_id', 'id')->whereHas('field', function($q){
+                            $q->whereIn('name', ['COSTCN', 'COSTCNPROPORTION']);
+                        })->where('course_module_id', $this->id);
+    }
+
+    public function dfModuleSubject(){
+        return $this->hasMany(ModuleDatafuture::class, 'course_module_id', 'id')->whereHas('field', function($q){
+                            $q->whereIn('name', ['MODSBJ', 'MODPROPORTION']);
+                        })->where('course_module_id', $this->id);
+    }
 }

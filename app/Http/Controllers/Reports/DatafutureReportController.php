@@ -106,6 +106,7 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
+            //dd($whereRaw);
             $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
                         ->whereHas('studentCR.creation', function ($q) {
                             $q->whereNotIn('course_id', [30, 31]);
@@ -148,8 +149,6 @@ class DatafutureReportController extends Controller
     }
 
     public function getMultipleStudentXml($data){
-        set_time_limit(0);
-
         $term_declaration_ids = $data['term_declaration_id'] ?? [];
         $from_date = $data['from_date'] ?? '';
         $to_date = $data['to_date'] ?? '';
@@ -236,7 +235,7 @@ class DatafutureReportController extends Controller
         // endif;
     }
 
-    public function generateXml($course_ids, $student_ids, $dateRanges = []){
+    public function generateXml($course_ids, $student_ids, DatafutureReportExport $export, $dateRanges = []){
         $XML = '';
         $VENUE_IDS = [];
         
@@ -394,7 +393,12 @@ class DatafutureReportController extends Controller
         /* STUDENT XML START */
         if(!empty($student_ids)):
             $I = 1;
-            foreach($student_ids as $student_id):
+            foreach($student_ids as $index => $student_id):
+                // $progress = intval((($index + 1) / count($student_ids)) * 90);
+                // $export->update([
+                //     'progress' => $progress
+                // ]);
+
                 //if($I > 10): break; endif;
                 //$I++;
                 //$student_crels = $this->getStudentCourseRelations($student_id, $dateRanges);
