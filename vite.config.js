@@ -432,6 +432,8 @@ export default defineConfig({
                 'resources/js/login-log.js',
                 'resources/js/login-log_users.js',
 
+                'resources/js/hesa-my-downloads.js',
+
             ],
             refresh: true,
         }),

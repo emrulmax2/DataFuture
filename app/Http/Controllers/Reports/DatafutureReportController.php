@@ -42,7 +42,9 @@ class DatafutureReportController extends Controller
             'file_name' => $fileName,
             'status' => 'pending',
             'progress' => 0,
-            'payload' => $request->all()
+            'payload' => $request->all(),
+            'created_by' => auth()->user()->id,
+            'updated_by' => auth()->user()->id
         ]);
 
         GenerateDatafutureReportJob::dispatch($export->id);
@@ -235,7 +237,7 @@ class DatafutureReportController extends Controller
         // endif;
     }
 
-    public function generateXml($course_ids, $student_ids, DatafutureReportExport $export, $dateRanges = []){
+    public function generateXml($course_ids, $student_ids, $dateRanges = []){
         $XML = '';
         $VENUE_IDS = [];
         
@@ -1136,5 +1138,75 @@ class DatafutureReportController extends Controller
         return response()->json([
             'ready' => false
         ]);
+    }
+
+
+    public function myDownloads(){
+        return view('pages.reports.datafuture.index', [
+            'title' => 'Site Reports - London Churchill College',
+            'breadcrumbs' => [
+                ['label' => 'Reports', 'href' => 'javascript:void(0);'],
+                ['label' => 'My Downloads', 'href' => 'javascript:void(0);']
+            ],
+        ]);
+    }
+
+    public function list(Request $request){
+        $user_id = auth()->user()->id;
+        $status = (isset($request->status) ? $request->status : 1);
+
+        $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $sorts = [];
+        foreach($sorters as $sort):
+            $sorts[] = $sort['field'].' '.$sort['dir'];
+        endforeach;
+
+        $query = DatafutureReportExport::orderByRaw(implode(',', $sorts))->where('created_by', $user_id);
+        if($status !== 'all'):
+            $query->where('status', $status);
+        endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
+        $Query= $query->skip($offset)
+               ->take($limit)
+               ->get();
+
+        $data = array();
+
+        if(!empty($Query)):
+            $i = 1;
+            foreach($Query as $list):
+                $data[] = [
+                    'id' => $list->id,
+                    'sl' => $i,
+                    'file_name' => $list->file_name,
+                    'download_url' => $list->download_url,
+                    'created_at' => date('jS F, Y \a\t h:i A', strtotime($list->created_at)),
+                    'status' => $list->status,
+                ];
+                $i++;
+            endforeach;
+        endif;
+        return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function destroy($id){
+        $report = DatafutureReportExport::find($id);
+        if($report):
+            if($report->file_name && Storage::disk('public')->exists('temp_xml/'.$report->file_path)):
+                Storage::disk('public')->delete('temp_xml/'.$report->file_path);
+            endif;
+            $report->delete();
+            return response()->json(['success' => true, 'message' => 'Report deleted successfully.']);
+        else:
+            return response()->json(['success' => false, 'message' => 'Report not found.']);
+        endif;
     }
 }

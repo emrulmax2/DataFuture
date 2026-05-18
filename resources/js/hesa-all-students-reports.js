@@ -76,119 +76,6 @@ import { saveAs } from 'file-saver';
         })
     }
 
-    // $('#xmlExportForm').on('submit', function(e){
-    //     e.preventDefault();
-    //     let $form = $(this);
-    //     const form = document.getElementById('xmlExportForm');
-
-    //     let term_declaration_ids = $('#terms_declaration_id', $form).val();
-    //     let from_date = $('#from_date', $form).val();
-    //     let to_date = $('#to_date', $form).val();
-    //     const file_name = 'Datafuture_XML_' + Date.now() + '.xml';
-    
-    //     document.querySelector('#xmlDownBtn').setAttribute('disabled', 'disabled');
-    //     document.querySelector("#xmlDownBtn .theLoader").style.cssText ="display: inline-block;";
-
-    //     if((term_declaration_ids.length  > 0 || (from_date != '' && to_date != ''))){
-    //         let form_data = new FormData(form);
-    //         form_data.append('file_name', file_name);
-    //         axios({
-    //             method: "post",
-    //             //url: route('reports.datafuture.single.student'),
-    //             url: route('reports.datafuture.multiple.student'),
-    //             data: form_data,
-    //             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-    //             //responseType: 'blob',
-    //         }).then(response => {
-    //             // document.querySelector('#xmlDownBtn').removeAttribute('disabled');
-    //             // document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
-
-    //             // console.log(response.data);
-    //             // return false;
-
-    //             // // To get selected text(s)
-    //             // let selectedTexts = [];
-    //             // if (Array.isArray(selectedValues)) {
-    //             //     selectedTexts = selectedValues.map(val => {
-    //             //         let option = termsDeclarationId.options[val];
-    //             //         return option ? option.text : '';
-    //             //     });
-    //             // } else if (selectedValues) {
-    //             //     let option = termsDeclarationId.options[selectedValues];
-    //             //     selectedTexts = option ? [option.text] : [];
-    //             // }
-
-    //             // // Now selectedTexts is an array of the selected option(s) text
-    //             // console.log(selectedTexts);
-    //             // if (response.status == 200) {
-    //             //     //console.log(response.data);
-    //             //     if(selectedTexts.length > 0){
-    //             //         let fileName = selectedTexts.join('_') + '_DataFuture.xml';
-    //             //         saveAs(response.data, fileName);
-    //             //     } else {
-    //             //         // add
-    //             //         saveAs(response.data, 'All_DataFuture.xml');
-    //             //     }
-    //             // }
-
-    //             console.log(response.data);
-    //             startCheckingFile();
-
-    //         }).catch(error => {
-    //             // document.querySelector('#xmlDownBtn').removeAttribute('disabled');
-    //             // document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
-    //             if (error.response) {
-    //                 if (error.response.status == 422) {
-    //                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-    //                         $(`#xmlExportForm .${key}`).addClass('border-danger');
-    //                         $(`#xmlExportForm  .error-${key}`).html(val);
-    //                     }
-
-    //                     return false;
-    //                 } else if (error.response.status == 304){
-    //                     xmlExportModal.hide();
-
-    //                     warningModal.show(); 
-    //                     document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
-    //                         $("#warningModal .warningModalTitle").html("Oops!" );
-    //                         $("#warningModal .warningModalDesc").html(error.response.data.msg);
-    //                     });  
-                        
-    //                     setTimeout(function(){
-    //                         warningModal.hide();
-    //                     }, 2000);
-    //                     return false;
-    //                 }  else if (error.response.status == 504){
-    //                     console.log('504 timeout detected. Start polling.');
-    //                     startCheckingFile(file_name);
-    //                     return false;
-    //                 } else if(error.code === 'ECONNABORTED' || error.message.includes('timeout') || error.message == 'Network Error' ){
-    //                     console.log('Network timeout detected. Start polling.');
-    //                     startCheckingFile(file_name);
-    //                     return false;
-    //                 }else {
-    //                     console.log('error');
-    //                 }
-    //             }
-    //         });
-    //     }else{
-    //         document.querySelector('#xmlDownBtn').removeAttribute('disabled');
-    //         document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
-
-    //         $('#xmlExportModal .modal-content .submissionError').remove();
-    //         $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Validation Error</strong>. Select Term declaration or insert Form & To date.</span></div>');
-
-    //         createIcons({
-    //             icons,
-    //             "stroke-width": 1.5,
-    //             nameAttr: "data-lucide",
-    //         });
-    //         setTimeout(function(){
-    //             $('#xmlExportModal .modal-content .submissionError').remove();
-    //         }, 2000)
-    //     }
-    // });
-
     
 
     $('#xmlExportForm').on('submit', function(e){
@@ -276,6 +163,26 @@ import { saveAs } from 'file-saver';
                     document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
                     document.querySelector('#xmlDownBtn').removeAttribute('disabled');
                     document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
+                }else if(response.data.status === 'failed'){
+                    $('#xmlDownloadWrap').addClass('hidden').attr('href', '#');
+                    $('#xmlProgressWrap').addClass('hidden');
+                    $('#xmlProgressText').text('0%');
+                    $('#xmlProgressBar').css('width', '0%');
+                    document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                    document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+                    document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
+
+                    $('#xmlExportModal .modal-content .submissionError').remove();
+                    $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong>. Something went wrong. Please try again later or contact with the administrator.</span></div>');
+
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
+                    setTimeout(function(){
+                        $('#xmlExportModal .modal-content .submissionError').remove();
+                    }, 2000)
                 }
             }).catch(error => {
                 console.log(error);
