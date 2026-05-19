@@ -1533,32 +1533,196 @@ class EmployeeHolidayController extends Controller
                     $approverEmail = (isset($approver->employee->employment->email) && !empty($approver->employee->employment->email) ? $approver->employee->employment->email : '');
 
                     if(!empty($approverEmail)):
-                        $message            = '';
-                        $message .= 'Hi '.$approverName.'<br/><br/>';
-                        $message .= 'An update regarding '.$employeeName.'\'s leave request is available.';
-                        $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
-                            $message .= '<tr>';
-                                $message .= '<td style="padding: 5px 10px;">Requested</td>';
-                                $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                                $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($requestedHour).'</td>';
-                            $message .= '</tr>';
-                            $message .= '<tr>';
-                                $message .= '<td style="padding: 5px 10px;">Approved</td>';
-                                $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                                $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($approvedHour).'</td>';
-                            $message .= '</tr>';
-                            $message .= '<tr>';
-                                $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>Details</strong></td>';
-                            $message .= '</tr>';
-                            $message .= $leaveDayHTML;
-                            $message .= '<tr>';
-                                $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
-                            $message .= '</tr>';
-                        $message .= '</table><br/>';
-                        $message .= 'Thank you for your cooperation.<br/><br/>';
-                        $message .= 'Sincerely,<br/>'.$siteName;
+                        // $message            = '';
+                        // $message .= 'Hi '.$approverName.'<br/><br/>';
+                        // $message .= 'An update regarding '.$employeeName.'\'s leave request is available.';
+                        // $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
+                        //     $message .= '<tr>';
+                        //         $message .= '<td style="padding: 5px 10px;">Requested</td>';
+                        //         $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
+                        //         $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($requestedHour).'</td>';
+                        //     $message .= '</tr>';
+                        //     $message .= '<tr>';
+                        //         $message .= '<td style="padding: 5px 10px;">Approved</td>';
+                        //         $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
+                        //         $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($approvedHour).'</td>';
+                        //     $message .= '</tr>';
+                        //     $message .= '<tr>';
+                        //         $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>Details</strong></td>';
+                        //     $message .= '</tr>';
+                        //     $message .= $leaveDayHTML;
+                        //     $message .= '<tr>';
+                        //         $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
+                        //     $message .= '</tr>';
+                        // $message .= '</table><br/>';
+                        // $message .= 'Thank you for your cooperation.<br/><br/>';
+                        // $message .= 'Sincerely,<br/>'.$siteName;
 
-                        UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Reviewed', $message, []));
+                        $message = '';
+ 
+                        $message .= '<!DOCTYPE html>
+                        <html>
+                        <head>
+                        <meta charset="UTF-8">
+                        <title>Leave Request Update</title>
+                        </head>
+                        
+                        <body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+                        
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">
+                        <tr>
+                        <td align="center">
+                        
+                                <table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">
+                        
+                                <!-- Header -->
+                        <tr>
+                        <td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">
+                        
+                                    <img 
+                                        src="https://sms.lcc.ac.uk/storage/company_logo.png"
+                                        alt="London Churchill College"
+                                        style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;"
+                        >
+                        
+                                    <div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">
+                                        Leave Request Update
+                        </div>
+                        
+                                    <h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">
+                                        Leave Request Hours Have Been Updated
+                        </h1>
+                        
+                                    <p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">
+                                        An update is available for an employee leave request.
+                        </p>
+                        
+                                    </td>
+                        </tr>
+                        
+                                <!-- Status Bar -->
+                        <tr>
+                        <td style="background-color:#eff6ff; border-bottom:1px solid #bfdbfe; padding:16px 38px;">
+                        <p style="margin:0; font-size:14px; color:#1e40af; line-height:1.5; text-align:justify;">
+                        <strong>Update Notice:</strong> Please review the requested and approved leave hours shown below.
+                        </p>
+                        </td>
+                        </tr>
+                        
+                                <!-- Body -->
+                        <tr>
+                        <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
+                        
+                                    <p style="margin-top:0; text-align:left;">
+                                        Dear <strong>'.$approverName.'</strong>,
+                        </p>
+                        
+                                    <p style="text-align:justify;">
+                                        An update regarding <strong>'.$employeeName.'</strong>&rsquo;s leave request is now available.
+                        </p>
+                        
+                                    <p style="text-align:justify;">
+                                        The latest requested and approved leave hours are provided below for your reference.
+                        </p>
+                        
+                                    <!-- Leave Summary -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                        <tr>
+                        <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:15px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                            Leave Request Summary
+                        </td>
+                        </tr>
+                        
+                                        <tr>
+                        <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                            Requested
+                        </th>
+                        <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                        &mdash;
+                        </td>
+                        <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                            '.$this->calculateHourMinute($requestedHour).'
+                        </td>
+                        </tr>
+                        
+                                        <tr>
+                        <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                            Approved
+                        </th>
+                        <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                        &mdash;
+                        </td>
+                        <td style="padding:13px 18px; color:#166534; font-size:14px; font-weight:700; border-bottom:1px solid #e5e7eb;">
+                                            '.$this->calculateHourMinute($approvedHour).'
+                        </td>
+                        </tr>
+                        
+                                        <tr>
+                        <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:14px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                            Details
+                        </td>
+                        </tr>
+                        
+                                        '.$leaveDayHTML.'
+                        
+                                        <tr>
+                        <td colspan="3" style="padding:14px 18px; color:#334155; font-size:14px; background-color:#f8fafc;">
+                        <strong>Updated by '.$currentUserName.'</strong>
+                        </td>
+                        </tr>
+                        </table>
+                        
+                                    <!-- Information Note -->
+                        <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; background-color:#f8fafc; border-left:5px solid #1f5f8f; border-radius:10px; text-align:justify;">
+                        <tr>
+                        <td style="padding:18px 20px; color:#334155; font-size:14px; line-height:1.7; text-align:justify;">
+                                            This notification is provided for your reference. Please check the leave record if any further review or action is required.
+                        </td>
+                        </tr>
+                        </table>
+                        
+                                    <p style="text-align:justify; margin-bottom:0;">
+                                        Thank you for your cooperation.
+                        </p>
+                        
+                                    </td>
+                        </tr>
+                        
+                                <!-- Footer -->
+                        <tr>
+                        <td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">
+                        
+                                    <p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                        This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.
+                        </p>
+                        
+                                    <p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                        Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. London Churchill College accepts no responsibility for any loss or damage arising from their use.
+                        </p>
+                        
+                                    <p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">
+                        <strong>London Churchill College</strong><br>
+                                        Barclay Hall, 156B Green Street, London, E7 8JQ<br>
+                                        +44 (0) 207 377 1077
+                        </p>
+                        
+                                    </td>
+                        </tr>
+                        
+                                </table>
+                        
+                                <p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">
+                                Automated notification from London Churchill College
+                        </p>
+                        
+                            </td>
+                        </tr>
+                        </table>
+                        
+                        </body>
+                        </html>';
+
+                        UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Reviewed', $message, [], false));
                     endif;
                 endif;
             endforeach;
@@ -1566,30 +1730,185 @@ class EmployeeHolidayController extends Controller
 
         if(!empty($employee_emails)):
             $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
-            $message = 'Hi '.$employeeName.'<br/><br/>';
-            $message .= 'You have an update of your holiday request. Please <a href="'.$the_url.'">login</a> on HR System for update.<br/><br/>';
-            
-            $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
-                $message .= '<tr>';
-                    $message .= '<td style="padding: 5px 10px;">Requested</td>';
-                    $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                    $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($requestedHour).'</td>';
-                $message .= '</tr>';
-                $message .= '<tr>';
-                    $message .= '<td style="padding: 5px 10px;">Approved</td>';
-                    $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                    $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($approvedHour).'</td>';
-                $message .= '</tr>';
-                $message .= '<tr>';
-                    $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>Details</strong></td>';
-                $message .= '</tr>';
-                $message .= $leaveDayHTML;
-            $message .= '</table>';
-            
-            $message .= '<br/><br/>Thanks<br/><br/>';
-            $message .= $siteName;
 
-            UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request Review', $message, []));
+            $message = '';
+            $message .= '<!DOCTYPE html>
+                <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>Holiday Request Update</title>
+                    </head>
+                
+                    <body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+                        <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">
+                            <tr>
+                                <td align="center">
+                                    <table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">
+                                    <!-- Header -->
+                                        <tr>
+                                            <td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">
+                
+                                                <img src="https://sms.lcc.ac.uk/storage/company_logo.png" alt="London Churchill College" style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;">
+                                                <div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">
+                                                    Holiday Request Update
+                                                </div>
+                                                <h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">
+                                                    Your Holiday Request Has Been Updated
+                                                </h1>
+                                                <p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">
+                                                    The latest requested and approved holiday hours are now available.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <!-- Status Bar -->
+                                        <tr>
+                                            <td style="background-color:#eff6ff; border-bottom:1px solid #bfdbfe; padding:16px 38px;">
+                                                <p style="margin:0; font-size:14px; color:#1e40af; line-height:1.5; text-align:justify;">
+                                                    <strong>Update Available:</strong> Please review the latest information for your holiday request.
+                                                </p>
+                                            </td>
+                                        </tr>
+                                        <!-- Body -->
+                                        <tr>
+                <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
+                
+                            <p style="margin-top:0; text-align:left;">
+                                Dear <strong>FAYE ELIZABETH MITCHAM</strong>,
+                </p>
+                
+                            <p style="text-align:justify;">
+                                An update has been made to your holiday request. Please review the latest requested and approved hours below.
+                </p>
+                
+                            <p style="text-align:justify;">
+                                You can view the full details of your request by logging in to the HR system using the button below.
+                </p>
+                
+                            <!-- Button -->
+                <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+                <tr>
+                <td style="background-color:#1f5f8f; border-radius:8px;">
+                <a href="'.$the_url.'" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none;">
+                                    View Holiday Request
+                </a>
+                </td>
+                </tr>
+                </table>
+                
+                            <!-- Holiday Summary -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                <tr>
+                <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:15px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                    Holiday Request Summary
+                </td>
+                </tr>
+                
+                                <tr>
+                <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    Requested
+                </th>
+                <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    37 hours 30 minutes
+                </td>
+                </tr>
+                
+                                <tr>
+                <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    Approved
+                </th>
+                <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#166534; font-size:14px; font-weight:700; border-bottom:1px solid #e5e7eb;">
+                                    30 hours 00 minutes
+                </td>
+                </tr>
+                
+                                <tr>
+                <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:14px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                    Details
+                </td>
+                </tr>
+                
+                                <tr>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    24-06-2026
+                </td>
+                <td style="padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    7 hours 30 minutes approved
+                </td>
+                </tr>
+                
+                                <tr>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    25-06-2026
+                </td>
+                <td style="padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    7 hours 30 minutes approved
+                </td>
+                </tr>
+                </table>
+                
+                            <!-- Information Note -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; background-color:#f8fafc; border-left:5px solid #1f5f8f; border-radius:10px; text-align:justify;">
+                <tr>
+                <td style="padding:18px 20px; color:#334155; font-size:14px; line-height:1.7; text-align:justify;">
+                                    This notification is provided to keep you informed of the latest update to your holiday request. Please log in to the HR system if you need to review the full record.
+                </td>
+                </tr>
+                </table>
+                
+                            <p style="text-align:justify; margin-bottom:0;">
+                                Thank you for your cooperation.
+                </p>
+                
+                            </td>
+                </tr>
+                
+                        <!-- Footer -->
+                <tr>
+                <td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">
+                
+                            <p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.
+                </p>
+                
+                            <p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. London Churchill College accepts no responsibility for any loss or damage arising from their use.
+                </p>
+                
+                            <p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">
+                <strong>London Churchill College</strong><br>
+                                Barclay Hall, 156B Green Street, London, E7 8JQ<br>
+                                +44 (0) 207 377 1077
+                </p>
+                
+                            </td>
+                </tr>
+                
+                        </table>
+                
+                        <p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">
+                        Automated notification from London Churchill College
+                </p>
+                
+                    </td>
+                </tr>
+                </table>
+                
+                </body>
+                </html>';
+
+            UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request Review', $message, [], false));
         endif;
 
         return response()->json(['res' => 'Leave request successfully udpated.'], 200);
@@ -1771,32 +2090,161 @@ class EmployeeHolidayController extends Controller
     
                         if(!empty($approverEmail)):
                             $message = '';
-                            $message .= 'Hi '.$approverName.'<br/><br/>';
-                            $message .= 'An update regarding '.$employeeName.'\'s leave request is available.';
-                            $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
-                                $message .= '<tr>';
-                                    $message .= '<td style="padding: 5px 10px;">Requested Date</td>';
-                                    $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                                    $message .= '<td style="padding: 5px 10px;">'.date('jS F, Y', strtotime($empLeaveDay->leave_date)).'</td>';
-                                $message .= '</tr>';
-                                $message .= '<tr>';
-                                    $message .= '<td style="padding: 5px 10px;">Requested</td>';
-                                    $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                                    $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
-                                $message .= '</tr>';
-                                $message .= '<tr>';
-                                    $message .= '<td style="padding: 5px 10px;">Rejected</td>';
-                                    $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                                    $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
-                                $message .= '</tr>';
-                                $message .= '<tr>';
-                                    $message .= '<td colspan="3" style="padding: 5px 10px;"><strong>By '.$currentUserName.'</strong></td>';
-                                $message .= '</tr>';
-                            $message .= '</table><br/>';
-                            $message .= 'Thank you for your cooperation.<br/><br/>';
-                            $message .= 'Sincerely,<br/>'.$siteName;
+ 
+                            $message .= '<!DOCTYPE html>
+                                <html>
+                                <head>
+                                <meta charset="UTF-8">
+                                <title>Leave Request Rejection Update</title>
+                                </head>
+                                
+                                <body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+                                
+                                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">
+                                <tr>
+                                <td align="center">
+                                
+                                        <table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">
+                                
+                                        <!-- Header -->
+                                <tr>
+                                <td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">
+                                
+                                            <img 
+                                                src="https://sms.lcc.ac.uk/storage/company_logo.png"
+                                                alt="London Churchill College"
+                                                style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;"
+                                >
+                                
+                                            <div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">
+                                                Leave Request Update
+                                </div>
+                                
+                                            <h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">
+                                                Leave Request Date Rejected
+                                </h1>
+                                
+                                            <p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">
+                                                A leave request date has been updated with a rejection outcome.
+                                </p>
+                                
+                                            </td>
+                                </tr>
+                                
+                                        <!-- Status Bar -->
+                                <tr>
+                                <td style="background-color:#fef2f2; border-bottom:1px solid #fecaca; padding:16px 38px;">
+                                <p style="margin:0; font-size:14px; color:#991b1b; line-height:1.5; text-align:justify;">
+                                <strong>Status:</strong> Rejected leave hours have been recorded for the date shown below.
+                                </p>
+                                </td>
+                                </tr>
+                                
+                                        <!-- Body -->
+                                <tr>
+                                <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
+                                
+                                            <p style="margin-top:0; text-align:left;">
+                                                Dear <strong>'.$approverName.'</strong>,
+                                </p>
+                                
+                                            <p style="text-align:justify;">
+                                                Please review the latest update for <strong>'.$employeeName.'</strong>&rsquo;s leave request.
+                                </p>
+                                
+                                            <!-- Leave Details -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                                <tr>
+                                <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:15px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                                    Leave Rejection Details
+                                </td>
+                                </tr>
+                                
+                                                <tr>
+                                <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                                    Requested Date
+                                </th>
+                                <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                &mdash;
+                                </td>
+                                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                                    '.date('jS F, Y', strtotime($empLeaveDay->leave_date)).'
+                                </td>
+                                </tr>
+                                
+                                                <tr>
+                                <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                                    Requested
+                                </th>
+                                <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                &mdash;
+                                </td>
+                                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                                    '.$this->calculateHourMinute($empLeaveDay->hour).'
+                                </td>
+                                </tr>
+                                
+                                                <tr>
+                                <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                                    Rejected
+                                </th>
+                                <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                &mdash;
+                                </td>
+                                <td style="padding:13px 18px; color:#991b1b; font-size:14px; font-weight:700; border-bottom:1px solid #e5e7eb;">
+                                                    '.$this->calculateHourMinute($empLeaveDay->hour).'
+                                </td>
+                                </tr>
+                                
+                                                <tr>
+                                <td colspan="3" style="padding:14px 18px; color:#334155; font-size:14px; background-color:#f8fafc;">
+                                <strong>Updated by '.$currentUserName.'</strong>
+                                </td>
+                                </tr>
+                                </table>
+                                
+                                            <p style="text-align:justify; margin-bottom:0;">
+                                                Thank you for your cooperation.
+                                </p>
+                                
+                                            </td>
+                                </tr>
+                                
+                                        <!-- Footer -->
+                                <tr>
+                                <td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">
+                                
+                                            <p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                                This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.
+                                </p>
+                                
+                                            <p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                                Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. London Churchill College accepts no responsibility for any loss or damage arising from their use.
+                                </p>
+                                
+                                            <p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">
+                                <strong>London Churchill College</strong><br>
+                                                Barclay Hall, 156B Green Street, London, E7 8JQ<br>
+                                                +44 (0) 207 377 1077
+                                </p>
+                                
+                                            </td>
+                                </tr>
+                                
+                                        </table>
+                                
+                                        <p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">
+                                        Automated notification from London Churchill College
+                                </p>
+                                
+                                    </td>
+                                </tr>
+                                </table>
+                                
+                                </body>
+                                </html>';
     
-                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Single Day Rejected', $message, []));
+                            UserMailerJob::dispatch($configuration, [$approverEmail], new CommunicationSendMail('Leave Request Single Day Rejected', $message, [], false));
                         endif;
                     endif;
                 endforeach;
@@ -1804,31 +2252,166 @@ class EmployeeHolidayController extends Controller
 
             if(!empty($employee_emails)):
                 $the_url = url('/go?redirect=' . urlencode('/my-account/holidays'));
-                $message = 'Hi '.$employeeName.'<br/><br/>';
-                $message .= 'You have an update of your holiday request. Please <a href="'.$the_url.'">login</a> on HR System for update.<br/><br/>';
-                
-                $message .= '<table border="1" style="text-align: left; margin: 0 !important;">';
-                    $message .= '<tr>';
-                        $message .= '<td style="padding: 5px 10px;">Requested Date</td>';
-                        $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                        $message .= '<td style="padding: 5px 10px;">'.date('jS F, Y', strtotime($empLeaveDay->leave_date)).'</td>';
-                    $message .= '</tr>';
-                    $message .= '<tr>';
-                        $message .= '<td style="padding: 5px 10px;">Requested</td>';
-                        $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                        $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
-                    $message .= '</tr>';
-                    $message .= '<tr>';
-                        $message .= '<td style="padding: 5px 10px;">Rejected</td>';
-                        $message .= '<td style="padding: 5px 10px;">&nbsp;</td>';
-                        $message .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($empLeaveDay->hour).'</td>';
-                    $message .= '</tr>';
-                $message .= '</table>';
-                
-                $message .= '<br/><br/>Thanks<br/><br/>';
-                $message .= $siteName;
+                $message = '';
+                $message .= '<!DOCTYPE html>
+                    <html>
+                    <head>
+                    <meta charset="UTF-8">
+                    <title>Holiday Request Rejection Update</title>
+                    </head>
+                    
+                    <body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">
+                    <tr>
+                    <td align="center">
+                    
+                            <table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">
+                    
+                            <!-- Header -->
+                    <tr>
+                    <td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">
+                    
+                                <img 
+                                    src="https://sms.lcc.ac.uk/storage/company_logo.png"
+                                    alt="London Churchill College"
+                                    style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;"
+                    >
+                    
+                                <div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">
+                                    Holiday Request Update
+                    </div>
+                    
+                                <h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">
+                                    Holiday Request Date Rejected
+                    </h1>
+                    
+                                <p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">
+                                    A decision has been recorded for one requested holiday date.
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            <!-- Status Bar -->
+                    <tr>
+                    <td style="background-color:#fef2f2; border-bottom:1px solid #fecaca; padding:16px 38px;">
+                    <p style="margin:0; font-size:14px; color:#991b1b; line-height:1.5; text-align:justify;">
+                    <strong>Status:</strong> Rejected holiday hours are shown below.
+                    </p>
+                    </td>
+                    </tr>
+                    
+                            <!-- Body -->
+                    <tr>
+                    <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
+                    
+                                <p style="margin-top:0; text-align:left;">
+                                    Dear <strong>'.$employeeName.'</strong>,
+                    </p>
+                    
+                                <p style="text-align:justify;">
+                                    Please review the latest update to your holiday request using the summary below.
+                    </p>
+                    
+                                <!-- Button -->
+                    <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+                    <tr>
+                    <td style="background-color:#1f5f8f; border-radius:8px;">
+                    <a href="'.$the_url.'" style="display:inline-block; padding:12px 22px; font-size:14px; font-weight:700; color:#ffffff; text-decoration:none;">
+                                        View Holiday Request
+                    </a>
+                    </td>
+                    </tr>
+                    </table>
+                    
+                                <!-- Holiday Rejection Details -->
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                    <tr>
+                    <td colspan="3" style="background-color:#f8fafc; padding:14px 18px; font-size:15px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                        Holiday Rejection Details
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        Requested Date
+                    </th>
+                    <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                    &mdash;
+                    </td>
+                    <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        '.date('jS F, Y', strtotime($empLeaveDay->leave_date)).'
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        Requested
+                    </th>
+                    <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                    &mdash;
+                    </td>
+                    <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        '.$this->calculateHourMinute($empLeaveDay->hour).'
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:38%; text-align:left; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px;">
+                                        Rejected
+                    </th>
+                    <td style="width:10%; padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center;">
+                    &mdash;
+                    </td>
+                    <td style="padding:13px 18px; color:#991b1b; font-size:14px; font-weight:700;">
+                                        '.$this->calculateHourMinute($empLeaveDay->hour).'
+                    </td>
+                    </tr>
+                    </table>
+                    
+                                <p style="text-align:justify; margin-bottom:0;">
+                                    Thank you for your cooperation.
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            <!-- Footer -->
+                    <tr>
+                    <td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">
+                    
+                                <p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                    This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.
+                    </p>
+                    
+                                <p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                    Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. London Churchill College accepts no responsibility for any loss or damage arising from their use.
+                    </p>
+                    
+                                <p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">
+                    <strong>London Churchill College</strong><br>
+                                    Barclay Hall, 156B Green Street, London, E7 8JQ<br>
+                                    +44 (0) 207 377 1077
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            </table>
+                    
+                            <p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">
+                            Automated notification from London Churchill College
+                    </p>
+                    
+                        </td>
+                    </tr>
+                    </table>
+                    
+                    </body>
+                    </html>';
 
-                UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request Single Day Rejected', $message, []));
+                UserMailerJob::dispatch($configuration, $employee_emails, new CommunicationSendMail('Leave Request Single Day Rejected', $message, [], false));
             endif;
 
             return response()->json(['res' => 'Success'], 200);
