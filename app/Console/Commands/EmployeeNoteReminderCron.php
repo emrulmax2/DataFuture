@@ -49,17 +49,163 @@ class EmployeeNoteReminderCron extends Command
                 ])->orderBy('reminder_date', 'ASC')->get();
         if($notes->count() > 0):
             foreach($notes as $note):
-                $content = '<p>Dear HR Staff</p>';
-                $content .= '<p>This is a reminder to review a note and take the necessary action. If it has already been completed, please close the reminder note.</p>';
+                $employeeName = (isset($note->employee->full_name) && !empty($note->employee->full_name) ? $note->employee->full_name : 'N/A');
+                $reminderSetBy = (
+                    isset($note->user->employee->full_name) && !empty($note->user->employee->full_name)
+                        ? $note->user->employee->full_name
+                        : $note->user->name
+                );
+                $reminderSetByText = $reminderSetBy.(!empty($note->created_at) ? ' on '.date('jS F, Y \a\t h:i A', strtotime($note->created_at)) : '');
                 
-                $content .= '<p>';
-                    $content .= '<strong>Note:</strong><br/>'.$note->note;
-                    $content .= '<strong>Employee:</strong> '.(isset($note->employee->full_name) && !empty($note->employee->full_name) ? $note->employee->full_name : 'N/A').'<br/>';
-                    $content .= '<strong>Reminder set by:</strong> '.(isset($note->user->employee->full_name) && !empty($note->user->employee->full_name) ? $note->user->employee->full_name : $note->user->name).(!empty($note->created_at) ? ' on '.date('jS F, Y \a\t h:i A', strtotime($note->created_at)) : '');
-                $content .= '<p/>';
-                $content .= 'Thank you.';
+                $content = '';
+                $content .= '<!DOCTYPE html>
+                    <html>
+                    <head>
+                    <meta charset="UTF-8">
+                    <title>Reminder Note Review Required</title>
+                    </head>
+                    
+                    <body style="margin:0; padding:0; background-color:#eef2f7; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+                    
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#eef2f7; padding:36px 0;">
+                    <tr>
+                    <td align="center">
+                    
+                            <table width="680" cellpadding="0" cellspacing="0" style="width:680px; max-width:94%; background-color:#ffffff; border-radius:18px; overflow:hidden; box-shadow:0 20px 45px rgba(15,23,42,0.16);">
+                    
+                            <!-- Header -->
+                    <tr>
+                    <td style="background:linear-gradient(135deg,#b7dff1 0%,#5fa8cf 45%,#1f5f8f 100%); padding:34px 38px; text-align:center;">
+                    
+                                <img 
+                                    src="https://sms.lcc.ac.uk/storage/company_logo.png"
+                                    alt="London Churchill College"
+                                    style="display:block; margin:0 auto 22px auto; max-width:265px; height:auto;"
+                    >
+                    
+                                <div style="display:inline-block; background-color:rgba(11,42,74,0.18); color:#0b2a4a; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">
+                                    HR Reminder
+                    </div>
+                    
+                                <h1 style="margin:18px 0 0 0; color:#0b2a4a; font-size:25px; line-height:1.3; font-weight:700;">
+                                    Reminder Note Review Required
+                    </h1>
+                    
+                                <p style="margin:10px 0 0 0; color:#17324a; font-size:15px; line-height:1.5; text-align:center;">
+                                    A reminder note has been assigned for HR review.
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            <!-- Status Bar -->
+                    <tr>
+                    <td style="background-color:#fff7ed; border-bottom:1px solid #fed7aa; padding:16px 38px;">
+                    <p style="margin:0; font-size:14px; color:#9a3412; line-height:1.5; text-align:justify;">
+                    <strong>Action Required:</strong> Please review the reminder note below.
+                    </p>
+                    </td>
+                    </tr>
+                    
+                            <!-- Body -->
+                    <tr>
+                    <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
+                    
+                                <p style="margin-top:0; text-align:left;">
+                                    Dear <strong>HR Staff</strong>,
+                    </p>
+                    
+                                <p style="text-align:justify;">
+                                    Please check the note details and complete any required follow-up in the HR system.
+                    </p>
+                    
+                                <!-- Note Details -->
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; border-collapse:collapse; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden;">
+                    <tr>
+                    <td colspan="2" style="background-color:#f8fafc; padding:14px 18px; font-size:15px; font-weight:700; color:#1f2937; border-bottom:1px solid #e5e7eb;">
+                                        Reminder Note Details
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:34%; text-align:left; vertical-align:top; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        Note
+                    </th>
+                    <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        '.$note->note.'
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:34%; text-align:left; vertical-align:top; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        Employee
+                    </th>
+                    <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                        '.$employeeName.'
+                    </td>
+                    </tr>
+                    
+                                    <tr>
+                    <th style="width:34%; text-align:left; vertical-align:top; padding:13px 18px; background-color:#f8fafc; color:#334155; font-size:14px;">
+                                        Reminder Set By
+                    </th>
+                    <td style="padding:13px 18px; color:#374151; font-size:14px;">
+                                        '.$reminderSetByText.'
+                    </td>
+                    </tr>
+                    </table>
+                    
+                                <!-- Closing Note -->
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin:26px 0; background-color:#f8fafc; border-left:5px solid #1f5f8f; border-radius:10px; text-align:justify;">
+                    <tr>
+                    <td style="padding:18px 20px; color:#334155; font-size:14px; line-height:1.7; text-align:justify;">
+                                        Once completed, please close the reminder note to keep the record up to date.
+                    </td>
+                    </tr>
+                    </table>
+                    
+                                <p style="text-align:justify; margin-bottom:0;">
+                                    Thank you.
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            <!-- Footer -->
+                    <tr>
+                    <td style="background-color:#f8fafc; padding:26px 38px; border-top:1px solid #e5e7eb;">
+                    
+                                <p style="margin:0 0 14px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                    This e-mail and its attachments are intended for the above-named recipient only and may be confidential. If you have received this e-mail in error, you must take no action based on it, nor copy or show it to anyone. Please reply to this e-mail and notify us of the error.
+                    </p>
+                    
+                                <p style="margin:0 0 18px 0; font-size:12px; line-height:1.6; color:#64748b; text-align:justify;">
+                                    Although this e-mail and any attachments are believed to be free from viruses or other defects that may affect any computer or IT system on which they are received and opened, it is the responsibility of the recipient to ensure that they are virus-free. London Churchill College accepts no responsibility for any loss or damage arising from their use.
+                    </p>
+                    
+                                <p style="margin:0; font-size:13px; line-height:1.5; color:#334155; border-top:1px solid #e5e7eb; padding-top:16px; text-align:left;">
+                    <strong>London Churchill College</strong><br>
+                                    Barclay Hall, 156B Green Street, London, E7 8JQ<br>
+                                    +44 (0) 207 377 1077
+                    </p>
+                    
+                                </td>
+                    </tr>
+                    
+                            </table>
+                    
+                            <p style="margin:18px 0 0 0; font-size:12px; color:#94a3b8; text-align:center;">
+                            Automated notification from London Churchill College
+                    </p>
+                    
+                        </td>
+                    </tr>
+                    </table>
+                    
+                    </body>
+                    </html>';
 
-                UserMailerJob::dispatch($configuration, ['hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, []));
+                UserMailerJob::dispatch($configuration, ['hr@lcc.ac.uk'], new CommunicationSendMail($subject, $content, [], false));
             endforeach;
         endif;
 

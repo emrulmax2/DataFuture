@@ -4020,6 +4020,10 @@ Route::middleware('auth')->group(function() {
 
         Route::post('reports/datafuture/multiple-students', 'startMultipleStudentsProcess')->name('reports.datafuture.start.process.multiple.student');
         Route::post('reports/datafuture/check-xml-status/{id}', 'checkMultipleStudentXmlStatus')->name('reports.datafuture.check.multiple.students.xml.status');
+
+        Route::get('reports/datafuture/my-downloads', 'myDownloads')->name('reports.datafuture.downloads'); 
+        Route::get('reports/datafuture/list', 'list')->name('reports.datafuture.downloads.list'); 
+        Route::delete('reports/datafuture/delete/{id}', 'destroy')->name('reports.datafuture.downloads.delete');
     });
 
     Route::controller(StudyModeController::class)->group(function() {
