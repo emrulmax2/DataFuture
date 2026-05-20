@@ -77,7 +77,7 @@ class ProcessStudentTask implements ShouldQueue
                         'task_list_id' => $stsk->id,
                         'external_link_ref'=> (isset($stsk->external_link) && $stsk->external_link == 1 ? $stsk->external_link_ref : null),
                         'status'=> 'Pending',
-                        'created_by'=>auth()->user()->id,
+                        'created_by'=>($this->applicant->updated_by) ? $this->applicant->updated_by : $this->applicant->created_by,
                     ];
                     StudentTask::create($task);
                 endforeach;
