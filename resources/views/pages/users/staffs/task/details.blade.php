@@ -140,7 +140,7 @@
             </div>
         </div>
         <div class="overflow-x-auto scrollbar-hidden">
-            <div id="taskAssignedStudentTable" data-pearsonreg="{{ $task->pearson_reg }}" data-addressrequest="{{ $task->address_request }}" data-excuse="{{ $task->attendance_excuses }}" data-email="{{ $task->org_email }}" data-idcard="{{ $task->id_card }}" data-interview="{{ $task->interview }}" data-taskid="{{ $task->id }}" data-phase={{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }} class="mt-5 table-report table-report--tabulator"></div>
+            <div id="taskAssignedStudentTable" data-pearsonreg="{{ $task->pearson_reg }}" data-addressrequest="{{ $task->address_request }}" data-excuse="{{ $task->attendance_excuses }}" data-email="{{ $task->org_email }}" data-idcard="{{ $task->id_card }}" data-interview="{{ $task->interview }}" data-taskid="{{ $task->id }}" data-phase="{{ (isset($task->processlist->phase) && !empty($task->processlist->phase) ? $task->processlist->phase : 'Live') }}" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: HTML Table Data -->

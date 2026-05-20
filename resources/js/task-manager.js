@@ -37,7 +37,7 @@ var taskAssignedStudentTable = (function () {
             paginationSize: 100,
             paginationSizeSelector: [true, 50, 100, 200, 300, 500],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             
             selectable: true,
