@@ -36,17 +36,25 @@ class PaySlipUploadSyncController extends Controller
         $employee_ids = $request->employee_id ?? [];
         
         foreach ($ids as $index => $id) {
+            $exists = $id ? PaySlipUploadSync::where('id', $id)->exists() : false;
+
+            $data = [
+                'employee_id' => $employee_ids[$index] ?? null,
+                'file_transffered_at' => now(),
+                'file_transffered' => 1,
+                'updated_at' => now(),
+                'updated_by' => auth()->id(),
+            ];
+
+            if (!$exists) {
+                $data['created_by'] = auth()->id();
+            }
+
             $paySlipUploadSync = PaySlipUploadSync::updateOrCreate(
                 [
                     'id' => $id
                 ],
-                [
-                    'employee_id' => $employee_ids[$index] ?? null,
-                    'file_transffered_at' => now(),
-                    'file_transffered' => 1,
-                    'updated_at' => now(),
-                    'updated_by' => auth()->id(),
-                ]
+                $data
             );
 
             if ($paySlipUploadSync && !empty($paySlipUploadSync->employee_id)) {
