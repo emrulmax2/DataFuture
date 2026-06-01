@@ -4,9 +4,22 @@ import INTAddressLookUps from './address_lookup';
 
 (function(){
     // INIT Address Lookup
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     INTAddressLookUps();
+    // });
+
     document.addEventListener('DOMContentLoaded', () => {
-        INTAddressLookUps();
+        waitForGoogle();
     });
+
+    function waitForGoogle() {
+        if (window.google && google.maps && google.maps.places) {
+            INTAddressLookUps();
+            return;
+        }
+
+        setTimeout(waitForGoogle, 100);
+    }
 
     // Turn Off Autocomplete for Datepicker Fields.
     if($('.datepicker').length > 0){

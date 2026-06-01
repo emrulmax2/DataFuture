@@ -1,5 +1,10 @@
 /* Google Map INIT Code Start */
 export default function INTAddressLookUps(){
+    if (!window.google || !google.maps || !google.maps.places) {
+        console.warn('Google Places API not loaded');
+        return;
+    }
+
     let componentForm = {
         locality: "long_name",
         postal_town: "short_name",
