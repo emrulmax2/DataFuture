@@ -23,19 +23,21 @@ class ProcessExtractedFiles implements ShouldQueue
     protected $type;
     protected $holiday_year_Id;
     protected $employeeMap;
+    protected $created_by;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($tempPath, $dirName, $type, $holiday_year_Id,$employeeMap)
+    public function __construct($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap, $created_by = null)
     {
         $this->tempPath = $tempPath; // path relative to storage/app
         $this->dirName = $dirName;
         $this->type = $type;
         $this->holiday_year_Id = $holiday_year_Id;
         $this->employeeMap = $employeeMap;
+        $this->created_by = $created_by;
     }
 
     /**
@@ -159,7 +161,7 @@ class ProcessExtractedFiles implements ShouldQueue
                         'file_transffered' => 0,
                         'file_transffered_at' => null,
                         'is_file_uploaded' => 1,
-                        'created_by' => auth()->id(),
+                        'created_by' => $this->created_by,
 
                     ]);
                     if($paySlipUploadSync){

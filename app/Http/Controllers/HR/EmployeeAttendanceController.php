@@ -91,7 +91,7 @@ class EmployeeAttendanceController extends Controller
             }
         }
 
-        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap);
+        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap, auth()->id());
 
         return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
         
