@@ -626,7 +626,7 @@ class DashboardController extends Controller
             foreach($planids as $plan_id):
                 $plan = Plan::find($plan_id);
                 $planDateList = PlansDateList::where('plan_id', $plan_id)->where('status', 'Scheduled')->where('date', '>', $today)->orderBy('date', 'DESC')->get();
-                if($planDateList->count() > 0):
+                if(isset($plan) && $planDateList->count() > 0):
                     $list[$plan_id]['module'] = $plan->creations->module_name;
                     $i = 1;
                     foreach($planDateList as $pdl):
