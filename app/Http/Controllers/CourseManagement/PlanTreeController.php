@@ -139,6 +139,7 @@ class PlanTreeController extends Controller
         $query = DB::table('plans')->select('groups.name')
             ->leftJoin('groups', 'plans.group_id', '=', 'groups.id')
             ->groupBy('groups.name')
+            ->whereNull('plans.deleted_at')
             ->where('plans.academic_year_id', '=', $academicYearId)
             ->where('plans.term_declaration_id', '=', $termDeclaredId)
             ->where('plans.course_id', '=', $courseId)
