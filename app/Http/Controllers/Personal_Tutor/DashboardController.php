@@ -805,6 +805,7 @@ class DashboardController extends Controller
         $term_id = (isset($request->term_id) && $request->term_id > 0 ? $request->term_id : 0);
         $modules = Plan::with('activeAssign', 'tutor', 'personalTutor')->where('term_declaration_id', $term_id)->where('personal_tutor_id', $id)->orderBy('id', 'ASC')->get();
         
+        
         $statsHtml = '';
         $modulHtml = '';
         if($term_id > 0):
