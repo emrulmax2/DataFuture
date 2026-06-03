@@ -811,7 +811,9 @@ class DashboardController extends Controller
             $plans = Plan::where('personal_tutor_id', $id)->where('term_declaration_id', $term_id)->orderBy('term_declaration_id', 'DESC')->get();
             $plan_ids = $plans->pluck('id')->unique()->toArray();
             $myModules = DB::table('plans')->select('class_type', DB::raw('COUNT(DISTINCT id) as TOTAL_MODULE'))
-                        ->where('term_declaration_id', $term_id)->where('personal_tutor_id', $id)
+                        ->where('term_declaration_id', $term_id)
+                        ->where('personal_tutor_id', $id)
+                        ->whereNull('plans.deleted_at')
                         ->groupBy('class_type')->orderBy('class_type', 'ASC')->get();
             $no_of_assigned = Assign::whereIn('plan_id', $plan_ids)->where(function($q){
                                 $q->whereNull('attendance')->orWhere('attendance', 1)->orWhere('attendance', '');

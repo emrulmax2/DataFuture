@@ -72,6 +72,8 @@ class AssignController extends Controller
             ->where('groups.course_id', '=', $courseId)
             ->where('groups.term_declaration_id', '=', $termDeclaredId)
             ->where('groups.name', '!=', $existGroupName)
+            ->whereNull('plans.deleted_at')
+            ->whereNull('groups.deleted_at')
             ->orderBy('groups.name','ASC')->get();
 
         $groups = [];
