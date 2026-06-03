@@ -36,6 +36,7 @@ class PlanTreeController extends Controller
         $academicYears = DB::table('plans')
                 ->select('academic_year_id')
                 ->groupBy('academic_year_id')
+                ->whereNull('plans.deleted_at')
                 ->distinct()
                 ->get();
         $yearPush = [];
@@ -69,6 +70,7 @@ class PlanTreeController extends Controller
                 ->select('term_declaration_id as id')
                 ->groupBy('term_declaration_id')
                 ->where('academic_year_id', $academicYear)
+                ->whereNull('plans.deleted_at')
                 ->distinct()
                 ->get();
 
@@ -140,6 +142,7 @@ class PlanTreeController extends Controller
             ->leftJoin('groups', 'plans.group_id', '=', 'groups.id')
             ->groupBy('groups.name')
             ->whereNull('plans.deleted_at')
+            ->whereNull('groups.deleted_at')
             ->where('plans.academic_year_id', '=', $academicYearId)
             ->where('plans.term_declaration_id', '=', $termDeclaredId)
             ->where('plans.course_id', '=', $courseId)
