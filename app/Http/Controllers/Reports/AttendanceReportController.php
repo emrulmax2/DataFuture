@@ -93,7 +93,23 @@ class AttendanceReportController extends Controller
                         'std.id', 'std.photo', 'std.first_name', 'std.last_name', 'std.registration_no', 'std.ssn_no',
                         'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
                         'scr.id as course_relation_id', 'grp.name as group_name', 'cc.semester_id', 'sm.name as semester_name',
-                        'cc.course_id', 'cr.name as course_name',
+                        'cc.course_id', 'cr.name as course_name', 
+                        'ccv.slc_code',
+                         DB::raw("
+                            CASE 
+                                WHEN EXISTS (
+                                    SELECT 1
+                                    FROM student_notes AS sn
+                                    WHERE sn.student_id = std.id
+                                    AND sn.is_flaged = 'Yes'
+                                    AND sn.flaged_status = 'Active'
+                                    AND sn.deleted_at IS NULL
+                                )
+                                THEN 1 
+                                ELSE 0 
+                            END AS note_flag
+                        "),
+
 
 
                         DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
@@ -120,6 +136,7 @@ class AttendanceReportController extends Controller
                         $j->on('scr.active', DB::raw(1));
                         $j->on('scr.id', DB::raw('(SELECT MAX(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1)'));
                     })
+                    ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
                     ->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
                     ->leftJoin('student_awarding_body_details as sabd', function($j){
@@ -129,6 +146,10 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
+                    ->leftJoin('course_creation_venue as ccv', function($ccv){
+                        $ccv->on('ccv.course_creation_id', '=', 'scr.course_creation_id');
+                        $ccv->on('ccv.venue_id', '=', 'spc.venue_id');
+                    })
                     ->whereIn('atn.plan_id', $plan_ids)
                     ->whereNull('atn.deleted_at')
                     ->where('pln.course_id', DB::raw('cc.course_id'));
@@ -178,6 +199,8 @@ class AttendanceReportController extends Controller
                     'name' => $list->first_name.' '.$list->last_name,
                     'semester' => (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : ''),
                     'course' => (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : ''),
+                    'slc_code' => (isset($list->slc_code) && !empty($list->slc_code) ? $list->slc_code : ''),
+                    'note_flag' => (isset($list->note_flag) ? $list->note_flag : 0),
                     'ssn' => $list->ssn_no,
                     'aw_body_ref' => $list->reference,
                     'status' => $list->status,
@@ -256,6 +279,21 @@ class AttendanceReportController extends Controller
                         'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
                         'scr.id as course_relation_id', 'grp.name as group_name', 'cc.semester_id', 'sm.name as semester_name',
                         'cc.course_id', 'cr.name as course_name',
+                        'ccv.slc_code',
+                         DB::raw("
+                            CASE 
+                                WHEN EXISTS (
+                                    SELECT 1
+                                    FROM student_notes AS sn
+                                    WHERE sn.student_id = std.id
+                                    AND sn.is_flaged = 'Yes'
+                                    AND sn.flaged_status = 'Active'
+                                    AND sn.deleted_at IS NULL
+                                )
+                                THEN 1 
+                                ELSE 0 
+                            END AS note_flag
+                        "),
 
 
                         DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
@@ -282,6 +320,7 @@ class AttendanceReportController extends Controller
                         $j->on('scr.active', DB::raw(1));
                         $j->on('scr.id', DB::raw('(SELECT MAX(scrr.id) FROM student_course_relations as scrr WHERE scrr.student_id = std.id AND scrr.active = 1)'));
                     })
+                    ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
                     ->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
                     ->leftJoin('student_awarding_body_details as sabd', function($j){
@@ -291,6 +330,10 @@ class AttendanceReportController extends Controller
                     ->leftJoin('course_creations as cc', 'scr.course_creation_id', 'cc.id')
                     ->leftJoin('semesters as sm', 'cc.semester_id', 'sm.id')
                     ->leftJoin('courses as cr', 'cc.course_id', 'cr.id')
+                    ->leftJoin('course_creation_venue as ccv', function($ccv){
+                        $ccv->on('ccv.course_creation_id', '=', 'scr.course_creation_id');
+                        $ccv->on('ccv.venue_id', '=', 'spc.venue_id');
+                    })
                     ->whereIn('atn.plan_id', $plan_ids)
                     ->whereNull('atn.deleted_at')
                     ->where('pln.course_id', DB::raw('cc.course_id'));
@@ -306,10 +349,12 @@ class AttendanceReportController extends Controller
         $theCollection = [];
         $theCollection[1][] = 'ID';
         $theCollection[1][] = 'Reg No';
+        $theCollection[1][] = 'Flag';
         $theCollection[1][] = 'Name';
         $theCollection[1][] = 'Date of Birth';
         $theCollection[1][] = 'Semester';
         $theCollection[1][] = 'Course';
+        $theCollection[1][] = 'Course Code';
         $theCollection[1][] = 'SSN';
         $theCollection[1][] = 'Awarding Body Ref';
         $theCollection[1][] = 'Status';
@@ -335,10 +380,12 @@ class AttendanceReportController extends Controller
             foreach($Query as $list):
                 $theCollection[$row][] = $list->id;
                 $theCollection[$row][] = $list->registration_no;
+                $theCollection[$row][] = $list->note_flag && $list->note_flag == 1 ? 'Yes' : 'No';
                 $theCollection[$row][] = $list->first_name.' '.$list->last_name;
                 $theCollection[$row][] = (isset($list->date_of_birth) && !empty($list->date_of_birth) ? date('d-m-Y', strtotime($list->date_of_birth)) : '');
                 $theCollection[$row][] = (isset($list->semester_name) && !empty($list->semester_name) ? $list->semester_name : '');
                 $theCollection[$row][] = (isset($list->course_name) && !empty($list->course_name) ? $list->course_name : '');
+                $theCollection[$row][] = (isset($list->slc_code) && !empty($list->slc_code) ? $list->slc_code : '');
                 $theCollection[$row][] = $list->ssn_no;
                 $theCollection[$row][] = (isset($list->reference) && !empty($list->reference) ? $list->reference : '');
                 $theCollection[$row][] = $list->status;
