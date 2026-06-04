@@ -37,9 +37,7 @@ class StudentPerformanceController extends Controller
     public function index(Student $student)
     {
 
-        $planList = Assign::where('student_id',$student->id)->whereHas('plan', function ($query) {
-            $query->whereNull('deleted_at');
-        })->get()->unique()->pluck('plan_id')->toArray();
+        $planList = Assign::where('student_id',$student->id)->whereHas('plan')->get()->unique()->pluck('plan_id')->toArray();
 
         //$planKeySet = array_flip($planList); // Convert to array key set
 
@@ -135,7 +133,7 @@ class StudentPerformanceController extends Controller
     public function frontEndIndex(Student $student)
     {
        
-        $planList = Assign::where('student_id',$student->id)->get()->unique()->pluck('plan_id')->toArray();
+        $planList = Assign::where('student_id',$student->id)->whereHas('plan')->get()->unique()->pluck('plan_id')->toArray();
 
         //$planKeySet = array_flip($planList); // Convert to array key set
 
