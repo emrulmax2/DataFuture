@@ -7,7 +7,7 @@
     <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
         <h2 class="text-lg font-medium mr-auto">Leave Calendar</h2>
         <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Portal</a>
+            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Portal</a>
         </div>
     </div>
     <!-- BEGIN: HTML Table Data -->
