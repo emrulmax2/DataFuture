@@ -81,6 +81,24 @@ var attendanceReportListTable = (function () {
                     }
                 },
                 {
+                    title: "Flag",
+                    field: "note_flag",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    formatter(cell, formatterParams) { 
+                        return '<div class="whitespace-normal break-all">'+(cell.getData().note_flag == 1 ? 'Yes' : 'No')+'</div>';
+                    }
+                },
+                {
+                    title: "Code",
+                    field: "slc_code",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    formatter(cell, formatterParams) { 
+                        return '<div class="whitespace-normal break-all">'+cell.getData().slc_code+'</div>';
+                    }
+                },
+                {
                     title: "SSN",
                     field: "ssn",
                     headerHozAlign: "left",
@@ -137,7 +155,7 @@ var attendanceReportListTable = (function () {
                     }
                 },
                 {
-                    title: "P",
+                    title: "Total P",
                     field: "P",
                     headerHozAlign: "center",
                     hozAlign: "center", 
@@ -148,7 +166,7 @@ var attendanceReportListTable = (function () {
                     }
                 },
                 {
-                    title: "E.P",
+                    title: "WD.P",
                     field: "EVENING_P",
                     headerHozAlign: "center",
                     hozAlign: "center", 
@@ -159,7 +177,7 @@ var attendanceReportListTable = (function () {
                     }
                 },
                 {
-                    title: "W.P",
+                    title: "WE.P",
                     field: "WEEKEND_P",
                     headerHozAlign: "center",
                     hozAlign: "center", 

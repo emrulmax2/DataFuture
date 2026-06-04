@@ -361,8 +361,8 @@ class AttendanceReportController extends Controller
         $theCollection[1][] = 'Mobile';
         $theCollection[1][] = 'Email';
         $theCollection[1][] = 'Group';
-        $theCollection[1][] = 'P';
-        $theCollection[1][] = 'EVENING P';
+        $theCollection[1][] = 'Total P';
+        $theCollection[1][] = 'WEEKDAYS P';
         $theCollection[1][] = 'WEEKEND P';
         $theCollection[1][] = 'O';
         $theCollection[1][] = 'A';
