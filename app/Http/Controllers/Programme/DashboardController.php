@@ -432,9 +432,9 @@ class DashboardController extends Controller
         $row = 0;
         $res = [];
         foreach($employees as $employee):
-            if($row > 5): 
-                break; 
-            endif;
+            // if($row > 5): 
+            //     break; 
+            // endif;
 
             if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes'):
                 $employee_id = $employee->id;
