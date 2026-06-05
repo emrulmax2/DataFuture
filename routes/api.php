@@ -36,10 +36,11 @@ use Stripe\PaymentIntent;
 
 //     return response()->json(['clientSecret' => $intent->client_secret]);
 // });
+Route::middleware(['client.credentials', 'scope:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
 
 Route::prefix('/v1')->name('api.')->group(function() {    
 
-    Route::middleware(['client.credentials', 'scope:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
+    
 
     // Test route to check StudentUser authentication via student guard
     Route::middleware('auth:student-api')->get('/profile', function (Request $request) {
