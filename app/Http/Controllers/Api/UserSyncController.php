@@ -38,7 +38,7 @@ class UserSyncController extends Controller
 
             return [
                 'email' => $user->email,
-                'name' => $user->name,
+                'name' => $user->full_name,
                 'position' => $employment?->employeeJobTitle?->name,
                 'active' => (bool) $user->active,
                 'google_id' => $user->google_id ?? null,
