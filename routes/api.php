@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\Student\PerformanceController;
 use App\Http\Controllers\Api\Student\ResultController;
 use App\Http\Controllers\Api\Student\StudentProfileController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -36,7 +37,22 @@ use Stripe\PaymentIntent;
 
 //     return response()->json(['clientSecret' => $intent->client_secret]);
 // });
-Route::middleware(['client.credentials', 'scope:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
+// For client_credentials grants, enforce scope via client.credentials itself.
+Route::middleware(['client.credentials:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
+
+// Temporary diagnostics for Authorization header and token parsing.
+Route::get('/users/sync/auth-diagnostic', function (Request $request) {
+    $authorizationHeader = $request->headers->get('authorization')
+        ?? $request->server('HTTP_AUTHORIZATION')
+        ?? $request->server('REDIRECT_HTTP_AUTHORIZATION')
+        ?? $request->server('X_FORWARDED_AUTHORIZATION');
+
+    return response()->json([
+        'has_authorization_header' => !empty($authorizationHeader),
+        'bearer_token_present' => !empty($request->bearerToken()),
+        'current_authenticated_user_id' => Auth::id(),
+    ]);
+});
 
 Route::prefix('/v1')->name('api.')->group(function() {    
 
