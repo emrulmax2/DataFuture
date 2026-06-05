@@ -56,6 +56,9 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.api' => \App\Http\Middleware\Api\Authenticate::class,
+        'client.credentials' => \Laravel\Passport\Http\Middleware\CheckClientCredentials::class,
+        'scope' => \Laravel\Passport\Http\Middleware\CheckForAnyScope::class,
+        'scopes' => \Laravel\Passport\Http\Middleware\CheckScopes::class,
         'redirect.by.role' => \App\Http\Middleware\RedirectIfAuthenticatedByRole::class,
         'auth.agent' => \App\Http\Middleware\AuthAgent::class,
         'agent.loggedin' => \App\Http\Middleware\AgentLoggedIn::class,
