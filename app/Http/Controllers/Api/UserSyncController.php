@@ -13,7 +13,7 @@ class UserSyncController extends Controller
         $perPage = max((int) $request->integer('per_page', 100), 1);
 
         $users = User::query()
-            ->select(['id', 'name', 'email', 'active', 'google_id', 'photo'])
+            ->select(['id', 'name', 'email', 'active', 'social_id','social_type', 'photo'])
             ->with([
                 'roles',
                 'employee.employment.employeeJobTitle',
@@ -41,7 +41,8 @@ class UserSyncController extends Controller
                 'name' => $user->full_name,
                 'position' => $employment?->employeeJobTitle?->name,
                 'active' => (bool) $user->active,
-                'google_id' => $user->google_id ?? null,
+                'social_id' => $user->social_id ?? null,
+                'social_type' => $user->social_type ?? null,
                 'avatar_url' => $user->photo_url,
                 'department_key' => $departmentId,
                 'department_keys' => !empty($departmentId) ? [$departmentId] : [],
