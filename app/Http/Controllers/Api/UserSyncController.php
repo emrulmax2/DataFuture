@@ -44,11 +44,11 @@ class UserSyncController extends Controller
                 'social_id' => $user->social_id ?? null,
                 'social_type' => $user->social_type ?? null,
                 'avatar_url' => $user->photo_url,
-                'department_key' => $departmentId,
-                'department_keys' => !empty($departmentId) ? [$departmentId] : [],
-                'is_manager' => !empty($managedDepartmentKeys),
-                'manager_department_keys' => $managedDepartmentKeys,
-                'department_roles' => $user->roles->pluck('display_name')->filter()->values()->all(),
+                //'department_key' => $departmentId,
+                // 'department_keys' => !empty($departmentId) ? [$departmentId] : [],
+                // 'is_manager' => !empty($managedDepartmentKeys),
+                // 'manager_department_keys' => $managedDepartmentKeys,
+                // 'department_roles' => $user->roles->pluck('display_name')->filter()->values()->all(),
             ];
         });
 
