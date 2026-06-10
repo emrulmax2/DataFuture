@@ -1055,8 +1055,10 @@ class PlanController extends Controller
                                    SELECT MAX(id) AS id
                                    FROM course_creations
                                    WHERE id IN ($placeholders)
+                                   AND deleted_at IS NULL
                                    GROUP BY course_id
-                               ) latest ON latest.id = cc.id";
+                               ) latest ON latest.id = cc.id
+                               WHERE cc.deleted_at IS NULL";
 
                     Log::debug('Preparing latest course creation query', [
                         'course_creation_ids_count' => count($sanitizedCourseCreationIds),
