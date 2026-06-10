@@ -27,6 +27,7 @@ use App\Models\PlansDateList;
 use App\Models\TermDeclaration;
 use App\Models\TermType;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 
 class PlanController extends Controller
 {
@@ -1017,26 +1018,79 @@ class PlanController extends Controller
         $academicYear = $request->academicYear;
         $term_declaration_id = $request->term_declaration_id;
         $data = [];
-        //check
-        $courseCreationInstanceIds = InstanceTerm::where('term_declaration_id', $term_declaration_id)->pluck('course_creation_instance_id')->unique()->toArray();
-        if(!empty($courseCreationInstanceIds)):
-            $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)->where('academic_year_id', $academicYear)->pluck('course_creation_id')->unique()->toArray();
-            if(!empty($courseCreationIds)):
-                $courseCreations = DB::table('course_creations as cc') 
-                    ->select('cc.id', 'cc.course_id', 'cr.name')
-                    ->leftJoin('courses as cr', 'cr.id', 'cc.course_id')
-                    ->whereRaw('cc.id IN (SELECT MAX(id) FROM course_creations WHERE id IN ('.implode(',', $courseCreationIds).') GROUP BY (course_id))')
-                    ->get();
-                if(!empty($courseCreations)):
-                    $i = 1;
-                    foreach($courseCreations as $ccrs):
-                        $data[$i]['id'] = $ccrs->id;
-                        $data[$i]['name'] = $ccrs->name;
-                        $i++;
-                    endforeach;
+        Log::info('PlanController@getCourseByAcademicTerm started', [
+            'academic_year_id' => $academicYear,
+            'term_declaration_id' => $term_declaration_id,
+        ]);
+
+        try {
+            //check
+            $courseCreationInstanceIds = InstanceTerm::where('term_declaration_id', $term_declaration_id)
+                ->pluck('course_creation_instance_id')
+                ->unique()
+                ->toArray();
+
+            Log::debug('Fetched course creation instance IDs', [
+                'count' => count($courseCreationInstanceIds),
+            ]);
+
+            if(!empty($courseCreationInstanceIds)):
+                $courseCreationIds = CourseCreationInstance::whereIn('id', $courseCreationInstanceIds)
+                    ->where('academic_year_id', $academicYear)
+                    ->pluck('course_creation_id')
+                    ->unique()
+                    ->toArray();
+
+                Log::debug('Filtered course creation IDs for academic year', [
+                    'count' => count($courseCreationIds),
+                ]);
+
+                if(!empty($courseCreationIds)):
+                    $sanitizedCourseCreationIds = array_map('intval', $courseCreationIds);
+                    $placeholders = implode(',', array_fill(0, count($sanitizedCourseCreationIds), '?'));
+                    $rawSql = "SELECT cc.id, cc.course_id, cr.name
+                               FROM course_creations cc
+                               LEFT JOIN courses cr ON cr.id = cc.course_id
+                               INNER JOIN (
+                                   SELECT MAX(id) AS id
+                                   FROM course_creations
+                                   WHERE id IN ($placeholders)
+                                   GROUP BY course_id
+                               ) latest ON latest.id = cc.id";
+
+                    Log::debug('Preparing latest course creation query', [
+                        'course_creation_ids_count' => count($sanitizedCourseCreationIds),
+                        'course_creation_ids_sample' => array_slice($sanitizedCourseCreationIds, 0, 20),
+                        'raw_sql' => $rawSql,
+                    ]);
+
+                    $courseCreations = collect(DB::select($rawSql, $sanitizedCourseCreationIds));
+
+                    Log::info('Course creations fetched successfully', [
+                        'result_count' => $courseCreations->count(),
+                    ]);
+
+                    if(!empty($courseCreations)):
+                        $i = 1;
+                        foreach($courseCreations as $ccrs):
+                            $data[$i]['id'] = $ccrs->id;
+                            $data[$i]['name'] = $ccrs->name;
+                            $i++;
+                        endforeach;
+                    endif;
                 endif;
             endif;
-        endif;
+        } catch (\Throwable $exception) {
+            Log::error('PlanController@getCourseByAcademicTerm failed', [
+                'academic_year_id' => $academicYear,
+                'term_declaration_id' => $term_declaration_id,
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine(),
+                'file' => $exception->getFile(),
+            ]);
+
+            return response()->json(['res' => '', 'message' => 'Unable to load course list at the moment.'], 500);
+        }
 
         if(!empty($data)):
             return response()->json(['res' => $data], 200);
