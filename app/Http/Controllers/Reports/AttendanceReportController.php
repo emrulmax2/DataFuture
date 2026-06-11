@@ -90,12 +90,12 @@ class AttendanceReportController extends Controller
 
         $query = DB::table('attendances as atn')
                     ->select(
-                        'std.id', 'std.photo', 'std.first_name', 'std.last_name', 'std.registration_no', 'std.ssn_no',
-                        'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
+                        'std.id', 'std.photo', 'std.first_name', 'std.last_name', 'std.date_of_birth', 'std.registration_no',
+                        'std.ssn_no', 'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
                         'scr.id as course_relation_id', 'grp.name as group_name', 'cc.semester_id', 'sm.name as semester_name',
-                        'cc.course_id', 'cr.name as course_name', 
-                        'ccv.slc_code',
-                         DB::raw("
+                        'cc.course_id', 'cr.name as course_name', 'ccv.slc_code',
+
+                        DB::raw("
                             CASE 
                                 WHEN EXISTS (
                                     SELECT 1
@@ -110,23 +110,59 @@ class AttendanceReportController extends Controller
                             END AS note_flag
                         "),
 
+                        DB::raw('COUNT(DISTINCT atn.id) AS TOTAL'),
 
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END) AS P'),
+                        DB::raw('GROUP_CONCAT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END ORDER BY atn.id ASC SEPARATOR ",") AS P_ids'),
 
-                        DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                        DB::raw("
+                            COUNT(DISTINCT CASE 
+                                WHEN atn.attendance_feed_status_id = 1 
+                                AND DAYOFWEEK(atn.attendance_date) BETWEEN 2 AND 6 
+                                THEN atn.id 
+                            END) AS EVENING_P
+                        "),
 
-                        DB::raw("SUM(CASE WHEN atn.attendance_feed_status_id = 1 AND DAYOFWEEK(atn.attendance_date) BETWEEN 2 AND 6 THEN 1 ELSE 0 END ) AS EVENING_P"),
-                        DB::raw("SUM(CASE WHEN atn.attendance_feed_status_id = 1 AND DAYOFWEEK(atn.attendance_date) IN (1,7) THEN 1 ELSE 0 END) AS WEEKEND_P"),
+                        DB::raw("
+                            COUNT(DISTINCT CASE 
+                                WHEN atn.attendance_feed_status_id = 1 
+                                AND DAYOFWEEK(atn.attendance_date) IN (1,7) 
+                                THEN atn.id 
+                            END) AS WEEKEND_P
+                        "),
 
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END) AS O'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 3 THEN atn.id END) AS LE'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 4 THEN atn.id END) AS A'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END) AS L'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 6 THEN atn.id END) AS E'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 7 THEN atn.id END) AS M'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 8 THEN atn.id END) AS H'),
+
+                        DB::raw("
+                            ROUND(
+                                (
+                                    COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END)
+                                ) * 100 / NULLIF(COUNT(DISTINCT atn.id), 0),
+                                2
+                            ) AS percentage_withoutexcuse
+                        "),
+
+                        DB::raw("
+                            ROUND(
+                                (
+                                    COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 6 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 7 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 8 THEN atn.id END)
+                                ) * 100 / NULLIF(COUNT(DISTINCT atn.id), 0),
+                                2
+                            ) AS percentage_withexcuse
+                        ")
                     )
                     ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                     ->leftJoin('groups as grp', 'pln.group_id', 'grp.id')
@@ -138,7 +174,22 @@ class AttendanceReportController extends Controller
                     })
                     ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
-                    ->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
+                    //->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
+                    ->leftJoin('student_contacts as stc', function ($sc) {
+                        $sc->on('stc.student_id', '=', 'std.id');
+                        $sc->whereNull('stc.deleted_at');
+                        $sc->whereRaw("
+                            stc.id = (
+                                SELECT stc2.id
+                                FROM student_contacts AS stc2
+                                WHERE stc2.student_id = std.id
+                                AND stc2.deleted_at IS NULL
+                                AND NULLIF(TRIM(stc2.institutional_email), '') IS NOT NULL
+                                ORDER BY stc2.updated_at DESC, stc2.id DESC
+                                LIMIT 1
+                            )
+                        ");
+                    })
                     ->leftJoin('student_awarding_body_details as sabd', function($j){
                         $j->on('sabd.student_id', '=', 'std.id');
                         $j->on('sabd.student_course_relation_id', '=', 'scr.id');
@@ -275,12 +326,12 @@ class AttendanceReportController extends Controller
 
         $query = DB::table('attendances as atn')
                     ->select(
-                        'std.id', 'std.photo', 'std.first_name', 'std.last_name', 'std.date_of_birth', 'std.registration_no', 'std.ssn_no',
-                        'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
+                        'std.id', 'std.photo', 'std.first_name', 'std.last_name', 'std.date_of_birth', 'std.registration_no',
+                        'std.ssn_no', 'sts.name as status', 'stc.institutional_email', 'stc.mobile', 'sabd.reference',
                         'scr.id as course_relation_id', 'grp.name as group_name', 'cc.semester_id', 'sm.name as semester_name',
-                        'cc.course_id', 'cr.name as course_name',
-                        'ccv.slc_code',
-                         DB::raw("
+                        'cc.course_id', 'cr.name as course_name', 'ccv.slc_code',
+
+                        DB::raw("
                             CASE 
                                 WHEN EXISTS (
                                     SELECT 1
@@ -295,22 +346,59 @@ class AttendanceReportController extends Controller
                             END AS note_flag
                         "),
 
+                        DB::raw('COUNT(DISTINCT atn.id) AS TOTAL'),
 
-                        DB::raw('COUNT(atn.attendance_feed_status_id) AS TOTAL'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) AS P'), 
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END) AS P'),
+                        DB::raw('GROUP_CONCAT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END ORDER BY atn.id ASC SEPARATOR ",") AS P_ids'),
 
-                        DB::raw("SUM(CASE WHEN atn.attendance_feed_status_id = 1 AND DAYOFWEEK(atn.attendance_date) BETWEEN 2 AND 6 THEN 1 ELSE 0 END ) AS EVENING_P"),
-                        DB::raw("SUM(CASE WHEN atn.attendance_feed_status_id = 1 AND DAYOFWEEK(atn.attendance_date) IN (1,7) THEN 1 ELSE 0 END) AS WEEKEND_P"),
+                        DB::raw("
+                            COUNT(DISTINCT CASE 
+                                WHEN atn.attendance_feed_status_id = 1 
+                                AND DAYOFWEEK(atn.attendance_date) BETWEEN 2 AND 6 
+                                THEN atn.id 
+                            END) AS EVENING_P
+                        "),
 
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) AS O'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 3 THEN 1 ELSE 0 END) AS LE'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 4 THEN 1 ELSE 0 END) AS A'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END) AS L'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) AS E'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) AS M'),
-                        DB::raw('SUM(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) AS H'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))* 100 / Count(*), 2) ) as percentage_withoutexcuse'),
-                        DB::raw('(ROUND((SUM(CASE WHEN atn.attendance_feed_status_id = 1 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 2 THEN 1 ELSE 0 END)+sum(CASE WHEN atn.attendance_feed_status_id = 6 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 7 THEN 1 ELSE 0 END) + sum(CASE WHEN atn.attendance_feed_status_id = 8 THEN 1 ELSE 0 END) + SUM(CASE WHEN atn.attendance_feed_status_id = 5 THEN 1 ELSE 0 END))*100 / Count(*), 2) ) as percentage_withexcuse'),
+                        DB::raw("
+                            COUNT(DISTINCT CASE 
+                                WHEN atn.attendance_feed_status_id = 1 
+                                AND DAYOFWEEK(atn.attendance_date) IN (1,7) 
+                                THEN atn.id 
+                            END) AS WEEKEND_P
+                        "),
+
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END) AS O'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 3 THEN atn.id END) AS LE'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 4 THEN atn.id END) AS A'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END) AS L'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 6 THEN atn.id END) AS E'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 7 THEN atn.id END) AS M'),
+                        DB::raw('COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 8 THEN atn.id END) AS H'),
+
+                        DB::raw("
+                            ROUND(
+                                (
+                                    COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END)
+                                ) * 100 / NULLIF(COUNT(DISTINCT atn.id), 0),
+                                2
+                            ) AS percentage_withoutexcuse
+                        "),
+
+                        DB::raw("
+                            ROUND(
+                                (
+                                    COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 1 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 2 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 5 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 6 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 7 THEN atn.id END)
+                                    + COUNT(DISTINCT CASE WHEN atn.attendance_feed_status_id = 8 THEN atn.id END)
+                                ) * 100 / NULLIF(COUNT(DISTINCT atn.id), 0),
+                                2
+                            ) AS percentage_withexcuse
+                        ")
                     )
                     ->leftJoin('plans as pln', 'atn.plan_id', 'pln.id')
                     ->leftJoin('groups as grp', 'pln.group_id', 'grp.id')
@@ -322,7 +410,22 @@ class AttendanceReportController extends Controller
                     })
                     ->leftJoin('student_proposed_courses as spc', 'scr.id', 'spc.student_course_relation_id')
                     ->leftJoin('statuses as sts', 'std.status_id', 'sts.id')
-                    ->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
+                    //->leftJoin('student_contacts as stc', 'stc.student_id', 'std.id')
+                    ->leftJoin('student_contacts as stc', function ($sc) {
+                        $sc->on('stc.student_id', '=', 'std.id');
+                        $sc->whereNull('stc.deleted_at');
+                        $sc->whereRaw("
+                            stc.id = (
+                                SELECT stc2.id
+                                FROM student_contacts AS stc2
+                                WHERE stc2.student_id = std.id
+                                AND stc2.deleted_at IS NULL
+                                AND NULLIF(TRIM(stc2.institutional_email), '') IS NOT NULL
+                                ORDER BY stc2.updated_at DESC, stc2.id DESC
+                                LIMIT 1
+                            )
+                        ");
+                    })
                     ->leftJoin('student_awarding_body_details as sabd', function($j){
                         $j->on('sabd.student_id', '=', 'std.id');
                         $j->on('sabd.student_course_relation_id', '=', 'scr.id');
@@ -378,6 +481,7 @@ class AttendanceReportController extends Controller
         $row = 2;
         if(!empty($Query)):
             foreach($Query as $list):
+                if($list->id !== 19626): continue; endif;
                 $theCollection[$row][] = $list->id;
                 $theCollection[$row][] = $list->registration_no;
                 $theCollection[$row][] = $list->note_flag && $list->note_flag == 1 ? 'Yes' : 'No';
