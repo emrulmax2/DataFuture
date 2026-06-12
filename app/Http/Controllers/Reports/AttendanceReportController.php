@@ -481,7 +481,7 @@ class AttendanceReportController extends Controller
         $row = 2;
         if(!empty($Query)):
             foreach($Query as $list):
-                if($list->id !== 19626): continue; endif;
+                //if($list->id !== 19626): continue; endif;
                 $theCollection[$row][] = $list->id;
                 $theCollection[$row][] = $list->registration_no;
                 $theCollection[$row][] = $list->note_flag && $list->note_flag == 1 ? 'Yes' : 'No';
