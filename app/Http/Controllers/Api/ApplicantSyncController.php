@@ -17,7 +17,7 @@ class ApplicantSyncController extends Controller
 
         $applicants = Applicant::query()
             ->with(['contact', 'course', 'status','allTasks' => function($query){
-                $query->whereIn('status', ['pending', 'in_progress']);
+                //$query->whereIn('status', ['pending', 'in_progress']);
                 $query->where('task_list_id', 7);
             }])
             ->whereIn('status_id', 3)
