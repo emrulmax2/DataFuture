@@ -48,11 +48,17 @@ class ResultSubmissionByStaffImport implements ToModel, WithHeadingRow
             ]);
 
         }
-        $studentAssigns = Assign::with('student')->where('plan_id', $this->plan->id)->get()->pluck('student.id')->toArray();
+        $studentAssigns = Assign::where('plan_id', $this->plan->id)
+            ->where(function ($query) {
+                $query->where('attendance', 1)
+                    ->orWhereNull('attendance');
+            })
+            ->pluck('student_id')
+            ->toArray();
 
         $studentUserId = StudentUser::where('email', $row["email"])->get()->first();
             if($studentUserId!=null){
-                $student = Student::where('student_user_id',$studentUserId->id)->get()->first();
+                $student = Student::whereIn('id', $studentAssigns)->where('student_user_id',$studentUserId->id)->get()->first();
                 if($row['grade'] === '' && $row['paper_id'] === ""){
                     $row['grade'] = 'A';
                 } else if($row['paper_id'] != "" && $row['grade'] == 8){
