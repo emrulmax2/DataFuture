@@ -16,8 +16,11 @@ class ApplicantSyncController extends Controller
         $applicationNo = trim((string) $request->query('application_no', ''));
 
         $applicants = Applicant::query()
-            ->with(['contact', 'course', 'status'])
-            ->whereIn('status_id', [2, 3])
+            ->with(['contact', 'course', 'status','allTasks' => function($query){
+                $query->whereIn('status', ['pending', 'in_progress']);
+                $query->where('task_list_id', 7);
+            }])
+            ->whereIn('status_id', 3)
             ->when($name !== '', function (Builder $query) use ($name) {
                 $query->where(function (Builder $nameQuery) use ($name) {
                     $nameQuery->where('first_name', 'like', "%{$name}%")
