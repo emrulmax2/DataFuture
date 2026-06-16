@@ -29,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
         Passport::tokensCan([
             'sms.users.sync' => 'Read users for SMS system synchronization.',
             'sms.applicants.read' => 'Read current applicants for external synchronization.',
+            'sms.courses.read' => 'Read courses for external synchronization.',
         ]);
         
         Passport::tokensExpireIn(now()->addDays(15));

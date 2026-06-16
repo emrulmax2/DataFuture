@@ -24,6 +24,6 @@ composer.lock
 composer.lock
 pnpm-lock.yaml
 *.lock
-
+.claude
 pnpm-lock.yaml
 composer.lock
