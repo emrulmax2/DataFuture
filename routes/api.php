@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\CourseSyncController;
 use App\Http\Controllers\Api\UserSyncController;
 use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\Student\ClassRoutineController;
@@ -41,6 +42,7 @@ use Stripe\PaymentIntent;
 // For client_credentials grants, enforce scope via client.credentials itself.
 Route::middleware(['client.credentials:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.applicants.read'])->get('/applicants/current', [ApplicantSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.courses.read'])->get('/courses/sync', [CourseSyncController::class, 'index']);
 
 // Temporary diagnostics for Authorization header and token parsing.
 Route::get('/users/sync/auth-diagnostic', function (Request $request) {
