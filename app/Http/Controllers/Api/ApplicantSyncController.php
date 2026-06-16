@@ -20,7 +20,7 @@ class ApplicantSyncController extends Controller
                 //$query->whereIn('status', ['pending', 'in_progress']);
                 $query->where('task_list_id', 7);
             }])
-            ->whereIn('status_id', 3)
+            ->whereIn('status_id', [3])
             ->when($name !== '', function (Builder $query) use ($name) {
                 $query->where(function (Builder $nameQuery) use ($name) {
                     $nameQuery->where('first_name', 'like', "%{$name}%")
