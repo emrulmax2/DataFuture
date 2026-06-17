@@ -16,7 +16,7 @@ class ApplicantSyncController extends Controller
         $applicationNo = trim((string) $request->query('application_no', ''));
 
         $applicants = Applicant::query()
-            ->with(['contact', 'course.creation.course', 'status','allTasks' => function($query){
+            ->with(['contact', 'users', 'course.creation.course', 'status','allTasks' => function($query){
                 //$query->whereIn('status', ['pending', 'in_progress']);
                 $query->where('task_list_id', 7);
             }])
@@ -40,6 +40,11 @@ class ApplicantSyncController extends Controller
             $courseName = optional(optional(optional($a->course)->creation)->course)->name;
             $candidateName = trim(($a->first_name ?? '').' '.($a->last_name ?? ''));
 
+            // Email comes from the applicant's login account; mobile from their
+            // contact details (falling back to the account phone).
+            $email  = optional($a->users)->email;
+            $mobile = optional($a->contact)->mobile ?: optional($a->users)->phone;
+
             return [
                 'id'              => $a->id,
                 'candidate_name'  => $candidateName,
@@ -47,6 +52,8 @@ class ApplicantSyncController extends Controller
                 'last_name'       => $a->last_name,
                 'application_no'  => $a->application_no,
                 'proposed_course' => $courseName,
+                'email'           => $email,
+                'mobile'          => $mobile,
             ];
         })->all();
 
