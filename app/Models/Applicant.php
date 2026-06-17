@@ -142,7 +142,7 @@ class Applicant extends Model
     public function notes(){
         return $this->hasMany(ApplicantNote::class, 'applicant_id', 'id');
     }
-
+    //pending
     public function pendingTasks(){
         $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
         $tasks->getQuery()->where('status', '=', 'Pending');
