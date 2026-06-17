@@ -560,9 +560,10 @@ class DatafutureReportController extends Controller
                                 //$STULOADS = $this->getStudentCourseSessions($STUDENT->id, $CRELID, $dateRanges);
                                 $STULOADS = $allStudentStuloads[$STUDENT->id][$CRELID] ?? collect();
                                 $S = 1;
+                                $TOTALSTULOADS = $STULOADS->count();
                                 if($STULOADS && $STULOADS->count()):
                                     foreach($STULOADS as $STU):
-                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID, $dateRanges);
+                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID, $S, $TOTALSTULOADS, $dateRanges);
                                         if($modules && $modules->count() > 0):
                                             $instanceStart = (isset($STU->instance->start_date) && !empty($STU->instance->start_date) ? date('Y-m-d', strtotime($STU->instance->start_date)) : '');
                                             $instanceEnd = (isset($STU->instance->end_date) && !empty($STU->instance->end_date) ? date('Y-m-d', strtotime($STU->instance->end_date)) : '');
@@ -874,7 +875,7 @@ class DatafutureReportController extends Controller
         return false;
     }
 
-    public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $dateRanges = []){
+    public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $SERIAL, $TOTALSTULOADS, $dateRanges = []){
         $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get()->first();
         $plan_ids = [];
 
@@ -885,7 +886,7 @@ class DatafutureReportController extends Controller
                 $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
                 $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
 
-                if($this->isTermInRange($dateRanges, $termStart, $termEnd)):
+                if($this->isTermInRange($dateRanges, $termStart, $termEnd) || $SERIAL == 1):
                     $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
                     $plan_ids = array_merge($plan_ids, $student_plan_ids);
                 endif;
