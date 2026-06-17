@@ -16,11 +16,11 @@ class ApplicantSyncController extends Controller
         $applicationNo = trim((string) $request->query('application_no', ''));
 
         $applicants = Applicant::query()
-            ->with(['contact', 'course', 'status','allTasks' => function($query){
+            ->with(['contact', 'course.creation.course', 'status','allTasks' => function($query){
                 //$query->whereIn('status', ['pending', 'in_progress']);
                 $query->where('task_list_id', 7);
             }])
-            ->whereIn('status_id', 3)
+            ->whereIn('status_id', [3])
             ->when($name !== '', function (Builder $query) use ($name) {
                 $query->where(function (Builder $nameQuery) use ($name) {
                     $nameQuery->where('first_name', 'like', "%{$name}%")
@@ -34,8 +34,24 @@ class ApplicantSyncController extends Controller
             ->orderBy('id')
             ->paginate($perPage);
 
+        // Flatten to a clean sync DTO. proposed_course is the applicant's proposed
+        // course name (applicant -> course -> creation -> course -> name).
+        $data = collect($applicants->items())->map(function ($a) {
+            $courseName = optional(optional(optional($a->course)->creation)->course)->name;
+            $candidateName = trim(($a->first_name ?? '').' '.($a->last_name ?? ''));
+
+            return [
+                'id'              => $a->id,
+                'candidate_name'  => $candidateName,
+                'first_name'      => $a->first_name,
+                'last_name'       => $a->last_name,
+                'application_no'  => $a->application_no,
+                'proposed_course' => $courseName,
+            ];
+        })->all();
+
         return response()->json([
-            'data' => $applicants->items(),
+            'data' => $data,
             'meta' => [
                 'current_page' => $applicants->currentPage(),
                 'last_page' => $applicants->lastPage(),
