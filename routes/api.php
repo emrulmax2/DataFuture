@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\CourseSyncController;
+use App\Http\Controllers\Api\CourseModuleSyncController;
+use App\Http\Controllers\Api\HrDepartmentSyncController;
 use App\Http\Controllers\Api\RoomSyncController;
 use App\Http\Controllers\Api\VenueSyncController;
 use App\Http\Controllers\Api\UserSyncController;
@@ -46,6 +48,8 @@ use Stripe\PaymentIntent;
 Route::middleware(['client.credentials:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.applicants.read'])->get('/applicants/current', [ApplicantSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.courses.read'])->get('/courses/sync', [CourseSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.course-modules.read'])->get('/course-modules/sync', [CourseModuleSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.departments.read'])->get('/departments/sync', [HrDepartmentSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [VenueSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [RoomSyncController::class, 'index']);
 
