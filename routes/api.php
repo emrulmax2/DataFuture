@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoogleSocialiteStudentController;
+use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\CourseSyncController;
@@ -47,6 +48,11 @@ Route::middleware(['client.credentials:sms.applicants.read'])->get('/applicants/
 Route::middleware(['client.credentials:sms.courses.read'])->get('/courses/sync', [CourseSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [VenueSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [RoomSyncController::class, 'index']);
+
+// Attach a finalised interview-outcome PDF to an applicant and complete their
+// interview task (task_list_id = 7). Called by the LCC Operations app.
+Route::middleware(['client.credentials:sms.applicants.write'])
+    ->post('/applicants/{applicant}/interview-document', [ApplicantInterviewDocumentSyncController::class, 'store']);
 
 // Temporary diagnostics for Authorization header and token parsing.
 Route::get('/users/sync/auth-diagnostic', function (Request $request) {

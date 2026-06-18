@@ -61,6 +61,15 @@ return [
         'sandbox' => env('PAYPAL_SANDBOX', true),
     ],
 
-
+    /*
+    | External SMS sync — writes made by machine-to-machine (client credentials)
+    | API callers, which have no authenticated user. created_by/updated_by on
+    | those writes are stamped with this system user id. interview_task_list_id
+    | is the task_lists row that represents the admission interview (id 7).
+    */
+    'sms_sync' => [
+        'created_by' => (int) env('SMS_API_SYSTEM_USER_ID', 1),
+        'interview_task_list_id' => (int) env('SMS_INTERVIEW_TASK_LIST_ID', 7),
+    ],
 
 ];
