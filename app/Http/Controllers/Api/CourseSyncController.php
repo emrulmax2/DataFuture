@@ -19,15 +19,31 @@ class CourseSyncController extends Controller
         $perPage = max((int) $request->integer('per_page', 100), 1);
 
         $courses = Course::query()
-            ->select(['id', 'name', 'active'])
+            ->select([
+                'id',
+                'name',
+                'degree_offered',
+                'pre_qualification',
+                'awarding_body_id',
+                'source_tuition_fee_id',
+                'franchise_course',
+                'active',
+                'updated_at',
+            ])
             ->orderBy('name')
             ->paginate($perPage);
 
         $courses->getCollection()->transform(function (Course $course) {
             return [
-                'id'     => $course->id,
-                'name'   => $course->name,
+                'id' => $course->id,
+                'name' => $course->name,
+                'degree_offered' => $course->degree_offered,
+                'pre_qualification' => $course->pre_qualification,
+                'awarding_body_id' => $course->awarding_body_id,
+                'source_tuition_fee_id' => $course->source_tuition_fee_id,
+                'franchise_course' => $course->franchise_course,
                 'active' => (bool) ($course->active ?? true),
+                'updated_at' => optional($course->updated_at)->toISOString(),
             ];
         });
 
