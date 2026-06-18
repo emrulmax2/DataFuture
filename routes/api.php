@@ -4,6 +4,8 @@ use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoo
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\CourseSyncController;
+use App\Http\Controllers\Api\RoomSyncController;
+use App\Http\Controllers\Api\VenueSyncController;
 use App\Http\Controllers\Api\UserSyncController;
 use App\Http\Controllers\Api\Student\DashboardController as ApiDashboardController;
 use App\Http\Controllers\Api\Student\ClassRoutineController;
@@ -43,6 +45,8 @@ use Stripe\PaymentIntent;
 Route::middleware(['client.credentials:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.applicants.read'])->get('/applicants/current', [ApplicantSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.courses.read'])->get('/courses/sync', [CourseSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [VenueSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [RoomSyncController::class, 'index']);
 
 // Temporary diagnostics for Authorization header and token parsing.
 Route::get('/users/sync/auth-diagnostic', function (Request $request) {
