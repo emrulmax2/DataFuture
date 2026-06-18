@@ -49,7 +49,7 @@
                                                 <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
                                                     <div class="accordion-item bg-white">
                                                         @php
-                                                            $uploadRecords = $paySlipUploadSync->where('type', 'Payslips');
+                                                            $uploadRecords = $paySlipUploadSync->where('type', 'Payslips')->where('holiday_year_id', $holidayYearData->id);
                                                         @endphp
                                                         <div id="employeePatternAccordion-payslips" class="accordion-header">
                                                             <button class="accordion-button relative w-full text-lg font-semibold flex" type="button" data-tw-toggle="collapse" data-tw-target="#employeePatternAccordion-collapse-payslips" aria-expanded="false" aria-controls="employeePatternAccordion-collapse-payslips">
@@ -103,7 +103,7 @@
                                             </div>
                                         </div>
                                         @php
-                                            $uploadRecords = $paySlipUploadSync->where('type', 'P45');
+                                            $uploadRecords = $paySlipUploadSync->where('type', 'P45')->where('holiday_year_id', $holidayYearData->id);
                                         @endphp
                                         @if($uploadRecords && count($uploadRecords) > 0)
                                         <div id="employeeP45Collapse-{{ $holidayYearData->id }}" class="accordion-collapse collapse {{ $holidayYearData->active == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayHeading-{{ $holidayYearData->id }}" data-tw-parent="#employeeHolidayAccordion">
