@@ -131,6 +131,7 @@ class ApplicantInterviewDocumentSyncController extends Controller
             'applicant_task_id' => $task->id,
             'status' => 'Completed',
             'task_status_id' => $taskStatusId,
+            
         ], 201);
     }
 }
