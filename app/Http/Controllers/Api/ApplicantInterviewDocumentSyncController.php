@@ -7,6 +7,7 @@ use App\Models\ApplicantDocument;
 use App\Models\ApplicantTask;
 use App\Models\ApplicantTaskDocument;
 use App\Models\ApplicantTaskLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -22,8 +23,10 @@ use Illuminate\Support\Facades\DB;
  * The PDF itself is already uploaded to the smschurchill S3 bucket by the
  * caller; this endpoint stores the provided URL. Authenticated via Passport
  * client-credentials (scope sms.applicants.write), so there is no logged-in
- * user — created_by/updated_by use the configured system user
- * (services.sms_sync.created_by).
+ * user. created_by/updated_by are attributed to the ops staff member who
+ * finalised the interview, resolved to this system's users.id from the
+ * created_by_email in the payload, falling back to the configured system user
+ * (services.sms_sync.created_by) when that email is unknown here.
  */
 class ApplicantInterviewDocumentSyncController extends Controller
 {
@@ -35,10 +38,21 @@ class ApplicantInterviewDocumentSyncController extends Controller
             'display_file_name' => ['nullable', 'string', 'max:255'],
             'doc_type' => ['nullable', 'string', 'max:32'],
             'outcome' => ['required', 'string', 'in:Pass,Fail'],
+            'created_by_email' => ['nullable', 'email', 'max:255'],
+            'created_by_name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $systemUserId = (int) config('services.sms_sync.created_by', 1);
-        if ($systemUserId <= 0) {
+        // Attribute the writes to the ops staff member who finalised the interview,
+        // resolved to this system's own users.id by email. Fall back to the
+        // configured system user when the caller is unknown here.
+        $actorEmail = strtolower(trim((string) ($data['created_by_email'] ?? '')));
+        $writerId = $actorEmail !== ''
+            ? (int) (User::where('email', $actorEmail)->value('id') ?? 0)
+            : 0;
+        if ($writerId <= 0) {
+            $writerId = (int) config('services.sms_sync.created_by', 1);
+        }
+        if ($writerId <= 0) {
             return response()->json([
                 'message' => 'SMS sync system user is not configured (set SMS_API_SYSTEM_USER_ID).',
             ], 500);
@@ -78,25 +92,25 @@ class ApplicantInterviewDocumentSyncController extends Controller
 
         $taskStatusId = $data['outcome'] === 'Pass' ? 1 : 2;
 
-        $document = DB::transaction(function () use ($data, $applicant, $task, $systemUserId, $taskStatusId) {
+        $document = DB::transaction(function () use ($data, $applicant, $task, $writerId, $taskStatusId) {
             $document = ApplicantDocument::create([
                 'applicant_id' => $applicant,
                 'doc_type' => $data['doc_type'] ?: 'pdf',
                 'path' => $data['path'],
                 'display_file_name' => $data['display_file_name'] ?: $data['current_file_name'],
                 'current_file_name' => $data['current_file_name'],
-                'created_by' => $systemUserId,
+                'created_by' => $writerId,
             ]);
 
             ApplicantTaskDocument::create([
                 'applicant_task_id' => $task->id,
                 'applicant_document_id' => $document->id,
-                'created_by' => $systemUserId,
+                'created_by' => $writerId,
             ]);
 
             $task->status = 'Completed';
             $task->task_status_id = $taskStatusId;
-            $task->updated_by = $systemUserId;
+            $task->updated_by = $writerId;
             $task->save();
 
             ApplicantTaskLog::create([
@@ -105,7 +119,7 @@ class ApplicantInterviewDocumentSyncController extends Controller
                 'field_name' => '',
                 'prev_field_value' => '',
                 'current_field_value' => $document->id,
-                'created_by' => $systemUserId,
+                'created_by' => $writerId,
             ]);
 
             return $document;
