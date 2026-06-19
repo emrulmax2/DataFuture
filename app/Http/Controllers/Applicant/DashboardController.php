@@ -66,8 +66,8 @@ class DashboardController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
-    //its not working why ?
-
+    //its not working why ?p
+        // Only incomplete applications (not yet submitted) can be deleted by the applicant.
     public function destroy($id){
         //$userId = \Auth::guard('applicant')->user()->id;
         $applicant = Applicant::where('id', $id)->where('status_id', 1)->first();
