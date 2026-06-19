@@ -450,6 +450,7 @@ Route::prefix('/applicant')->name('applicant.')->group(function() {
         Route::controller(ApplicantDashboard::class)->group(function() {
             Route::get('/dashboard', 'index')->name('dashboard');
             Route::get('/dashboard/list', 'list')->name('dashboard.applications.list');
+            Route::delete('/dashboard/{id}', 'destroy')->name('dashboard.applications.destroy');
         });
 
         Route::controller(ApplicationController::class)->group(function() {

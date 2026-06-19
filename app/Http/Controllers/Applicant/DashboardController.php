@@ -58,11 +58,30 @@ class DashboardController extends Controller
                     'course' => (isset($list->course->creation->course->name) ? $list->course->creation->course->name : '').(isset($list->course->semester->name) ? ' - '.$list->course->semester->name : ''),
                     'submission_date' => $list->submission_date,
                     'status' => (!empty($list->submission_date) ? (isset($list->status->name) ? $list->status->name : 'Unknown') : 'Incomplete'),
+                    'status_id' => $list->status_id,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
             endforeach;
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
+    }
+
+    public function destroy($id){
+        //$userId = \Auth::guard('applicant')->user()->id;
+        $applicant = Applicant::where('id', $id)->where('status_id', 1)->first();
+
+        if(empty($applicant)){
+            return response()->json(['message' => 'Application not found.'], 404);
+        }
+
+        // Only incomplete applications (not yet submitted) can be deleted by the applicant.
+        if($applicant->status_id > 1 || !empty($applicant->submission_date)){
+            return response()->json(['message' => 'Submitted applications cannot be deleted.'], 422);
+        }
+
+        $applicant->delete();
+
+        return response()->json(['message' => 'Incomplete application successfully deleted.'], 200);
     }
 }
