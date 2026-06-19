@@ -13,11 +13,11 @@ use Tests\TestCase;
  * Verifies the receiver endpoint that the LCC Operations app calls to attach an
  * interview-outcome PDF and complete the applicant's interview task.
  *
- * Runs against an in-memory sqlite connection (force with
- * DB_CONNECTION=sqlite DB_DATABASE=:memory:) and hand-rolls only the few tables
- * the controller touches — so it never runs the full migration set and never
- * touches the production DataFuture database. The controller is invoked directly
- * to bypass the Passport client-credentials middleware.
+ * Runs against its own in-memory sqlite connection (set up in setUp, no env
+ * overrides needed) and hand-rolls only the few tables the controller touches —
+ * so it always runs in CI, never runs the full migration set, and never touches
+ * the production DataFuture database. The controller is invoked directly to
+ * bypass the Passport client-credentials middleware.
  */
 class InterviewDocumentSyncTest extends TestCase
 {
@@ -25,9 +25,18 @@ class InterviewDocumentSyncTest extends TestCase
     {
         parent::setUp();
 
-        if (DB::connection()->getDriverName() !== 'sqlite') {
-            $this->markTestSkipped('Run with DB_CONNECTION=sqlite DB_DATABASE=:memory: to keep this test off the real database.');
-        }
+        // Stand up a private in-memory sqlite connection and make it the default
+        // for this test only. This guarantees the test ALWAYS runs (never skipped
+        // in CI) while NEVER touching the real DataFuture MySQL database — the
+        // hand-rolled tables below live solely in this throwaway connection.
+        config()->set('database.connections.sqlite_testing', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+            'foreign_key_constraints' => false,
+        ]);
+        config()->set('database.default', 'sqlite_testing');
+        DB::purge('sqlite_testing');
 
         Schema::create('users', function (Blueprint $t) {
             $t->id();
