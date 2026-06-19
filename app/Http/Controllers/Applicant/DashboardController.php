@@ -66,6 +66,7 @@ class DashboardController extends Controller
         endif;
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
+    //its not working why ?
 
     public function destroy($id){
         //$userId = \Auth::guard('applicant')->user()->id;
