@@ -387,8 +387,9 @@ class Student extends Model
     }
     public function laststuload(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
-        return $this->hasOne(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
+        return $this->hasOne(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel)->orderByDesc('id');
     }
+
 
     public function df(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);

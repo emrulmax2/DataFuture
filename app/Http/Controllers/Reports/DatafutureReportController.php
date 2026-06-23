@@ -110,7 +110,9 @@ class DatafutureReportController extends Controller
             endforeach;
             //dd($whereRaw);
             $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('student_id', $student_id)->where('report_visibility', 1)
-                        ->whereHas('studentCR.creation', function ($q) {
+                        ->whereHas('student', function($sq){
+                            $sq->where('hesa_status', 1);
+                        })->whereHas('studentCR.creation', function ($q) {
                             $q->whereNotIn('course_id', [30, 31]);
                         })->orderBy('student_id', 'ASC')->get();
 
@@ -187,7 +189,9 @@ class DatafutureReportController extends Controller
                 ) ";
             endforeach;
             $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)
-                        ->whereHas('studentCR.creation', function ($q) {
+                        ->whereHas('student', function($sq){
+                            $sq->where('hesa_status', 1);
+                        })->whereHas('studentCR.creation', function ($q) {
                             $q->whereNotIn('course_id', [30, 31]);
                         })->orderBy('student_id', 'ASC')->get();
             //dd(DB::getQueryLog());
@@ -348,7 +352,7 @@ class DatafutureReportController extends Controller
                 //                 $q->where('datafuture_field_category_id', 2);
                 //             })->where('course_id', $course_id)->get();
                 $course = $courses[$course_id] ?? null;
-                $dfFields = $courseDfFields[$course_id] ?? collect();
+                $dfFields = $courseDfFields2[$course_id] ?? collect();
                 
                 $QUALIF_XML = '';
                 $QUALIF_ROL = '';
