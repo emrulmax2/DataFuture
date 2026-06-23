@@ -27,3 +27,5 @@ pnpm-lock.yaml
 .claude
 pnpm-lock.yaml
 composer.lock
+app/.DS_Store
+.DS_Store
