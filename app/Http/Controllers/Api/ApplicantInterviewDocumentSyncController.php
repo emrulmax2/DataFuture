@@ -40,6 +40,7 @@ class ApplicantInterviewDocumentSyncController extends Controller
             'outcome' => ['required', 'string', 'in:Pass,Fail'],
             'created_by_email' => ['nullable', 'email', 'max:255'],
             'created_by_name' => ['nullable', 'string', 'max:255'],
+            
         ]);
 
         // Attribute the writes to the ops staff member who finalised the interview,
