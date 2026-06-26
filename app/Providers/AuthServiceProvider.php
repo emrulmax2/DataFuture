@@ -30,6 +30,8 @@ class AuthServiceProvider extends ServiceProvider
             'sms.users.sync' => 'Read users for SMS system synchronization.',
             'sms.applicants.read' => 'Read current applicants for external synchronization.',
             'sms.courses.read' => 'Read courses for external synchronization.',
+            'sms.academic-years.read' => 'Read academic years for external synchronization.',
+            'sms.terms.read' => 'Read terms for external synchronization.',
             'sms.applicants.write' => 'Attach documents and complete tasks for applicants from external systems.',
         ]);
         

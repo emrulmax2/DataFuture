@@ -4,7 +4,9 @@ use App\Http\Controllers\Api\Auth\GoogleSocialiteStudentController as APIAuthGoo
 use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\AcademicYearSyncController;
 use App\Http\Controllers\Api\CourseSyncController;
+use App\Http\Controllers\Api\TermSyncController;
 use App\Http\Controllers\Api\CourseModuleSyncController;
 use App\Http\Controllers\Api\HrDepartmentSyncController;
 use App\Http\Controllers\Api\RoomSyncController;
@@ -48,6 +50,8 @@ use Stripe\PaymentIntent;
 Route::middleware(['client.credentials:sms.users.sync'])->get('/users/sync', [UserSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.applicants.read'])->get('/applicants/current', [ApplicantSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.courses.read'])->get('/courses/sync', [CourseSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.academic-years.read'])->get('/academic-years/sync', [AcademicYearSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.terms.read'])->get('/terms/sync', [TermSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.course-modules.read'])->get('/course-modules/sync', [CourseModuleSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.departments.read'])->get('/departments/sync', [HrDepartmentSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [VenueSyncController::class, 'index']);
