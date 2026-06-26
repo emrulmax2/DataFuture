@@ -44,7 +44,7 @@ class TermSyncController extends Controller
                 'start_date'       => $this->isoDate($term->getRawOriginal('start_date')),
                 'end_date'         => $this->isoDate($term->getRawOriginal('end_date')),
                 'active'           => (bool) ($term->is_active ?? true),
-                'updated_at'       => optional($term->updated_at)->toISOString(),
+                'updated_at'       => $this->isoTimestamp($term->updated_at),
             ];
         });
 
@@ -76,9 +76,24 @@ class TermSyncController extends Controller
             return null;
         }
         try {
-            return Carbon::parse($raw)->toDateString();
+            $date = Carbon::parse($raw);
         } catch (\Throwable) {
             return null;
         }
+        // Don't emit MySQL zero-dates ("0000-00-00" -> year -1) — return null.
+        return $date->year < 1970 ? null : $date->toDateString();
+    }
+
+    private function isoTimestamp($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            $ts = Carbon::parse($value);
+        } catch (\Throwable) {
+            return null;
+        }
+        return $ts->year < 1970 ? null : $ts->toISOString();
     }
 }

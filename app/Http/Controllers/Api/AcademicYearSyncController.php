@@ -38,7 +38,7 @@ class AcademicYearSyncController extends Controller
                 'start_date' => $this->isoDate($from),
                 'end_date'   => $this->isoDate($to),
                 'is_current' => $this->isCurrent($today, $from, $to),
-                'updated_at' => optional($year->updated_at)->toISOString(),
+                'updated_at' => $this->isoTimestamp($year->updated_at),
             ];
         });
 
@@ -59,10 +59,25 @@ class AcademicYearSyncController extends Controller
             return null;
         }
         try {
-            return Carbon::parse($raw)->toDateString();
+            $date = Carbon::parse($raw);
         } catch (\Throwable) {
             return null;
         }
+        // Don't emit MySQL zero-dates ("0000-00-00" -> year -1) — return null.
+        return $date->year < 1970 ? null : $date->toDateString();
+    }
+
+    private function isoTimestamp($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+        try {
+            $ts = Carbon::parse($value);
+        } catch (\Throwable) {
+            return null;
+        }
+        return $ts->year < 1970 ? null : $ts->toISOString();
     }
 
     private function isCurrent(Carbon $today, $from, $to): bool
