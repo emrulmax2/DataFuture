@@ -5,7 +5,9 @@ use App\Http\Controllers\Api\ApplicantInterviewDocumentSyncController;
 use App\Http\Controllers\Api\ApplicantSyncController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\AcademicYearSyncController;
+use App\Http\Controllers\Api\BookLocationSyncController;
 use App\Http\Controllers\Api\CourseSyncController;
+use App\Http\Controllers\Api\LibraryBookSyncController;
 use App\Http\Controllers\Api\TermSyncController;
 use App\Http\Controllers\Api\CourseModuleSyncController;
 use App\Http\Controllers\Api\HrDepartmentSyncController;
@@ -56,6 +58,8 @@ Route::middleware(['client.credentials:sms.course-modules.read'])->get('/course-
 Route::middleware(['client.credentials:sms.departments.read'])->get('/departments/sync', [HrDepartmentSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.venues.read'])->get('/venues/sync', [VenueSyncController::class, 'index']);
 Route::middleware(['client.credentials:sms.rooms.read'])->get('/rooms/sync', [RoomSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.book-locations.read'])->get('/book-locations/sync', [BookLocationSyncController::class, 'index']);
+Route::middleware(['client.credentials:sms.library-books.read'])->get('/library/books/sync', [LibraryBookSyncController::class, 'index']);
 
 // Attach a finalised interview-outcome PDF to an applicant and complete their
 // interview task (task_list_id = 7). Called by the LCC Operations app.
