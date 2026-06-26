@@ -33,6 +33,12 @@ class AuthServiceProvider extends ServiceProvider
             'sms.academic-years.read' => 'Read academic years for external synchronization.',
             'sms.terms.read' => 'Read terms for external synchronization.',
             'sms.applicants.write' => 'Attach documents and complete tasks for applicants from external systems.',
+            'sms.course-modules.read' => 'Read course modules for external synchronization.',
+            'sms.departments.read' => 'Read HR departments for external synchronization.',
+            'sms.venues.read' => 'Read venues for external synchronization.',
+            'sms.rooms.read' => 'Read rooms for external synchronization.',
+            'sms.book-locations.read' => 'Read book locations for external synchronization.',
+            'sms.library-books.read' => 'Read library books for external synchronization.',
         ]);
         
         Passport::tokensExpireIn(now()->addDays(15));
