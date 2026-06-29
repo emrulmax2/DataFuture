@@ -148,6 +148,39 @@ routes/         Route definitions (web.php, api.php)
 storage/        Logs, cache, and uploaded files
 ```
 
+## External sync API (LCC Operations integration)
+
+DataFutureD exposes a **sync API** consumed by the LCC Operations Management app
+(`lcc_operation_management`). All endpoints use **OAuth2 client-credentials** (Laravel Passport)
+and are gated per-endpoint by scope via the `client.credentials:<scope>` middleware
+(`routes/api.php`). Scopes are registered in `app/Providers/AuthServiceProvider.php`
+(`Passport::tokensCan([...])`); controllers live in `app/Http/Controllers/Api/`.
+
+Each GET returns `{ "data": [...], "meta": { current_page, last_page, per_page, total } }` and
+accepts `?page=` / `?per_page=` (default 100). Dates are emitted as ISO `Y-m-d`; zero/empty
+timestamps are returned as `null`.
+
+| Method | Endpoint | Scope | Returns |
+| --- | --- | --- | --- |
+| GET | `/api/users/sync` | `sms.users.sync` | Staff |
+| GET | `/api/applicants/current` | `sms.applicants.read` | Current applicants (live lookup) |
+| GET | `/api/courses/sync` | `sms.courses.read` | Course catalogue |
+| GET | `/api/course-modules/sync` | `sms.course-modules.read` | Course modules |
+| GET | `/api/academic-years/sync` | `sms.academic-years.read` | Academic years — for the Operations Student Engagement tracker |
+| GET | `/api/terms/sync` | `sms.terms.read` | Term declarations — for the Operations Student Engagement tracker |
+| GET | `/api/departments/sync` | `sms.departments.read` | HR departments |
+| GET | `/api/venues/sync` | `sms.venues.read` | Venues |
+| GET | `/api/rooms/sync` | `sms.rooms.read` | Rooms |
+| GET | `/api/book-locations/sync` | `sms.book-locations.read` | Library book locations |
+| GET | `/api/library/books/sync` | `sms.library-books.read` | Library books |
+| POST | `/api/applicants/{applicant}/interview-document` | `sms.applicants.write` | Attach a finalised interview-outcome PDF and complete the applicant's interview task |
+
+> **Academic years / terms:** `AcademicYearSyncController` maps `from_date`/`to_date` →
+> `start_date`/`end_date` and derives `is_current` from today's date. `TermSyncController` exposes
+> `term_declarations` (carrying `academic_year_id` + dates), deriving a short `key` from the term
+> type. After adding a scope here, the consumer must request a token with it and set the matching
+> endpoint/scope in the Operations app's `.env`.
+
 ## License
 
 This project is built on the Laravel framework, which is open-sourced software
