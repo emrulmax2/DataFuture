@@ -1019,13 +1019,13 @@ class  StudentController extends Controller
     protected function PlanWithAttendanceSet(Student $student) {
 
             // Try to return cached result for this student (30 minutes)
-            $cacheKey = 'plan_with_attendance_set_student_' . ($student->id ?? '0');
-            //remove cache for testing
-            //\Illuminate\Support\Facades\Cache::forget($cacheKey);
-            $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
-            if ($cached !== null) {
-                return $cached;
-            }
+            // $cacheKey = 'plan_with_attendance_set_student_' . ($student->id ?? '0');
+            // //remove cache for testing
+            // //\Illuminate\Support\Facades\Cache::forget($cacheKey);
+            // $cached = \Illuminate\Support\Facades\Cache::get($cacheKey);
+            // if ($cached !== null) {
+            //     return $cached;
+            // }
 
             $courseCreationIds = StudentCourseRelation::where('student_id', $student->id)->get()->pluck('course_creation_id')->toArray();
             $theInactiveCourse = StudentCourseRelation::where('student_id', $student->id)->where('active',0)->get()->first();
