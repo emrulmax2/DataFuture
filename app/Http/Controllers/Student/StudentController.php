@@ -1481,7 +1481,7 @@ class  StudentController extends Controller
                      'codeDistributionString' => $overallCodeDistributionString];
 
             // Cache the result for 30 minutes
-            \Illuminate\Support\Facades\Cache::put($cacheKey, $result, now()->addMinutes(30));
+            //\Illuminate\Support\Facades\Cache::put($cacheKey, $result, now()->addMinutes(30));
 
             return $result;
 
