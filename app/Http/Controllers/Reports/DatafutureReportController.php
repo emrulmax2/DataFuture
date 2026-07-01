@@ -932,38 +932,27 @@ class DatafutureReportController extends Controller
             ->orderBy('course_creation_id', 'ASC')
             ->value('course_creation_id');
         $plan_ids = [];
-        $term_ids = [];
 
-        $instance = CourseCreationInstance::with('terms')->find($stuload->course_creation_instance_id);
-        
-        if (isset($instance->terms) && $instance->terms->count() > 0):
-            foreach ($instance->terms as $term):
-                $termStart = (!empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
-                $termEnd = (!empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+        $periodStart = (!empty($stuload->periodstart) && $stuload->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($stuload->periodstart)) : '');
+        $periodEnd = (!empty($stuload->periodend) && $stuload->periodend != '0000-00-00' ? date('Y-m-d', strtotime($stuload->periodend)) : '');
 
-                if ($this->isTermInRange($dateRanges, $termStart, $termEnd) || $SERIAL == 1):
-                    $term_ids[] = $term->id;
+        if (!empty($periodStart) && !empty($periodEnd)):
+            $plan_ids = Attendance::where('student_id', $student_id)
+                ->whereBetween('attendance_date', [$periodStart, $periodEnd])
+                ->whereHas('plan', function ($q) use ($course_id, $courseCreationId, $nextCourseCreationId) {
+                    $q->where('course_id', $course_id)
+                        ->where('course_creation_id', '>=', $courseCreationId);
 
-                    $student_plan_ids = Attendance::where('student_id', $student_id)
-                        ->whereBetween('attendance_date', [$termStart, $termEnd])
-                        ->whereHas('plan', function ($q) use ($course_id, $courseCreationId, $nextCourseCreationId) {
-                            $q->where('course_id', $course_id)
-                                ->where('course_creation_id', '>=', $courseCreationId);
-
-                            if (!empty($nextCourseCreationId)) {
-                                $q->where('course_creation_id', '<', $nextCourseCreationId);
-                            }
-                        })
-                        ->pluck('plan_id')
-                        ->unique()
-                        ->toArray();
-
-                    $plan_ids = array_merge($plan_ids, $student_plan_ids);
-                endif;
-            endforeach;
+                    if (!empty($nextCourseCreationId)) {
+                        $q->where('course_creation_id', '<', $nextCourseCreationId);
+                    }
+                })
+                ->pluck('plan_id')
+                ->unique()
+                ->toArray();
         endif;
+
         $plan_ids = array_unique($plan_ids);
-        $term_ids = array_unique($term_ids);
 
 
         if (!empty($plan_ids)):
