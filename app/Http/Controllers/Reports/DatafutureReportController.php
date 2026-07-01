@@ -400,16 +400,7 @@ class DatafutureReportController extends Controller
         if(!empty($student_ids)):
             $I = 1;
             foreach($student_ids as $index => $student_id):
-                // $progress = intval((($index + 1) / count($student_ids)) * 90);
-                // $export->update([
-                //     'progress' => $progress
-                // ]);
-
-                //if($I > 10): break; endif;
-                //$I++;
-                //$student_crels = $this->getStudentCourseRelations($student_id, $dateRanges);
-                //$STUDENT = Student::with('other', 'contact', 'qualHigest', 'disability', 'termStatus')->find($student_id);
-
+                
                 $student_crels = $studentsCrels[$student_id] ?? [];
                 $STUDENT = $students[$student_id] ?? collect();
                 
@@ -567,7 +558,7 @@ class DatafutureReportController extends Controller
                                 $TOTALSTULOADS = $STULOADS->count();
                                 if($STULOADS && $STULOADS->count()):
                                     foreach($STULOADS as $STU):
-                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $STUDENT_COURSE_ID, $S, $TOTALSTULOADS, $dateRanges);
+                                        $modules = $this->getStudentModuleInstances($STU->id, $STUDENT->id, $CRELID, $STUDENT_COURSE_ID, $S, $TOTALSTULOADS, $dateRanges);
                                         if($modules && $modules->count() > 0):
                                             $instanceStart = (isset($STU->instance->start_date) && !empty($STU->instance->start_date) ? date('Y-m-d', strtotime($STU->instance->start_date)) : '');
                                             $instanceEnd = (isset($STU->instance->end_date) && !empty($STU->instance->end_date) ? date('Y-m-d', strtotime($STU->instance->end_date)) : '');
@@ -619,7 +610,7 @@ class DatafutureReportController extends Controller
                                             $COURSE_SESS_XML .= (!empty($SCSMODE) ? '<SCSMODE>'.$SCSMODE.'</SCSMODE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->periodstart) && !empty($STU->periodstart) && $STU->periodstart != '0000-00-00' ? '<SCSSTARTDATE>'.$STU->periodstart.'</SCSSTARTDATE>' : '');
                                             $COURSE_SESS_XML .= (isset($STU->course_creation_instance_id) && !empty($STU->course_creation_instance_id) ? '<SESSIONYEARID>'.$STU->course_creation_instance_id.'</SESSIONYEARID>' : '');
-                                            $COURSE_SESS_XML .= ($FINALTERMLOAD > 0 ? '<STULOAD>'.$FINALTERMLOAD.'</STULOAD>' : '<STULOAD> </STULOAD>');
+                                            //$COURSE_SESS_XML .= ($FINALTERMLOAD > 0 ? '<STULOAD>'.$FINALTERMLOAD.'</STULOAD>' : '<STULOAD> </STULOAD>');
                                             $COURSE_SESS_XML .= (isset($STU->yearprg) && $STU->yearprg > 0 ? '<YEARPRG>'.$STU->yearprg.'</YEARPRG>' : '');
                                             $COURSE_SESS_XML .= (!empty($RSNSCSEND) ? '<RSNSCSEND>'.$RSNSCSEND.'</RSNSCSEND>' : '');
 
@@ -879,40 +870,123 @@ class DatafutureReportController extends Controller
         return false;
     }
 
-    public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $SERIAL, $TOTALSTULOADS, $dateRanges = []){
-        $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get()->first();
+    // public function getStudentModuleInstances($stuload_id, $student_id, $course_id, $SERIAL, $TOTALSTULOADS, $CRELID, $dateRanges = []){
+    //     $stuload = StudentStuloadInformation::where('student_id', $student_id)->where('id', $stuload_id)->where('report_visibility', 1)->orderBy('student_id', 'ASC')->get()->first();
+    //     $plan_ids = [];
+
+    //     $instance_id = $stuload->course_creation_instance_id;
+    //     $instance = CourseCreationInstance::find($instance_id);
+    //     if(isset($instance->terms) && $instance->terms->count() > 0):
+    //         foreach($instance->terms as $term):
+    //             $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+    //             $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+    //             if($this->isTermInRange($dateRanges, $termStart, $termEnd) || $SERIAL == 1):
+    //                 $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
+    //                 $plan_ids = array_merge($plan_ids, $student_plan_ids);
+    //             endif;
+    //         endforeach;
+    //     endif;
+        
+    //     if(!empty($plan_ids)):
+    //         return Plan::whereIn('id', $plan_ids)->where('course_id', $course_id)->where(function($q){
+    //                     $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
+    //                 })->whereDoesntHave('creations', function($q){
+    //                     $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+    //                             ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+    //                             ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+    //                             ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+    //                 })->whereHas('assign', function($q) use($student_id){
+    //                     $q->where('student_id', $student_id);
+    //                 })->orderBy('id', 'DESC')->get();
+    //     else:
+    //         return false;
+    //     endif;
+        
+    //     return $plans;
+    // }
+    public function getStudentModuleInstances($stuload_id, $student_id, $student_course_relation_id, $course_id, $SERIAL, $TOTALSTULOADS, $dateRanges = [])
+    {
+        $stuload = StudentStuloadInformation::with('instance')
+            ->where('student_id', $student_id)
+            ->where('student_course_relation_id', $student_course_relation_id)
+            ->where('id', $stuload_id)
+            ->where('report_visibility', 1)
+            ->first();
+
+        if (!$stuload || !$stuload->instance) {
+            return false;
+        }
+
+        $studentCrel = StudentCourseRelation::where('id', $student_course_relation_id)
+            ->where('student_id', $student_id)
+            ->first();
+
+        if (!$studentCrel) {
+            return false;
+        }
+
+        $courseCreationId = $studentCrel->course_creation_id;
+        $nextCourseCreationId = StudentCourseRelation::where('student_id', $student_id)
+            ->where('course_creation_id', '>', $courseCreationId)
+            ->orderBy('course_creation_id', 'ASC')
+            ->value('course_creation_id');
         $plan_ids = [];
 
-        $instance_id = $stuload->course_creation_instance_id;
-        $instance = CourseCreationInstance::find($instance_id);
-        if(isset($instance->terms) && $instance->terms->count() > 0):
-            foreach($instance->terms as $term):
-                $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
-                $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+        $periodStart = (!empty($stuload->periodstart) && $stuload->periodstart != '0000-00-00' ? date('Y-m-d', strtotime($stuload->periodstart)) : '');
+        $periodEnd = (!empty($stuload->periodend) && $stuload->periodend != '0000-00-00' ? date('Y-m-d', strtotime($stuload->periodend)) : '');
 
-                if($this->isTermInRange($dateRanges, $termStart, $termEnd) || $SERIAL == 1):
-                    $student_plan_ids = Attendance::where('student_id', $student_id)->whereBetween('attendance_date', [$termStart, $termEnd])->pluck('plan_id')->unique()->toArray();
-                    $plan_ids = array_merge($plan_ids, $student_plan_ids);
-                endif;
-            endforeach;
+        if (!empty($periodStart) && !empty($periodEnd)):
+            $plan_ids = Attendance::where('student_id', $student_id)
+                ->whereBetween('attendance_date', [$periodStart, $periodEnd])
+                ->whereHas('plan', function ($q) use ($course_id, $courseCreationId, $nextCourseCreationId) {
+                    $q->where('course_id', $course_id)
+                        ->where('course_creation_id', '>=', $courseCreationId);
+
+                    if (!empty($nextCourseCreationId)) {
+                        $q->where('course_creation_id', '<', $nextCourseCreationId);
+                    }
+                })
+                ->pluck('plan_id')
+                ->unique()
+                ->toArray();
         endif;
-        
-        if(!empty($plan_ids)):
-            return Plan::whereIn('id', $plan_ids)->where('course_id', $course_id)->where(function($q){
-                        $q->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])->orWhereNull('class_type');
-                    })->whereDoesntHave('creations', function($q){
-                        $q->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
-                                ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
-                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
-                                ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
-                    })->whereHas('assign', function($q) use($student_id){
-                        $q->where('student_id', $student_id);
-                    })->orderBy('id', 'DESC')->get();
+
+        $plan_ids = array_unique($plan_ids);
+
+
+        if (!empty($plan_ids)):
+            $plans = Plan::with('attenTerm', 'creations')
+                ->whereIn('id', $plan_ids)
+                ->where('course_id', $course_id)
+                ->where('course_creation_id', '>=', $courseCreationId);
+
+            if (!empty($nextCourseCreationId)) {
+                $plans->where('course_creation_id', '<', $nextCourseCreationId);
+            }
+
+            return $plans
+                ->where(function ($qt) {
+                    $qt->whereNotIn('class_type', ['Tutorial', 'Seminar', 'Practical'])
+                        ->orWhereNull('class_type');
+                })
+                ->whereDoesntHave('creations', function ($qc) {
+                    $qc->where('module_name', 'LIKE', '%GROUP TUTORIAL (QCF)%')
+                        ->orWhere('module_name', 'LIKE', '%Group Tutorial (RQF)%')
+                        ->orWhere('module_name', 'LIKE', '%GROUP TUTORIAL (RQF)%')
+                        ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL%')
+                        ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (QCF)%')
+                        ->orWhere('module_name', 'LIKE', '%Personal Tutorial (RQF)%')
+                        ->orWhere('module_name', 'LIKE', '%PERSONAL TUTORIAL (RQF)%');
+                })
+                ->whereHas('assign', function ($q) use ($student_id) {
+                    $q->where('student_id', $student_id);
+                })
+                ->orderBy('id', 'DESC')
+                ->get();
         else:
             return false;
         endif;
-        
-        return $plans;
     }
 
     public function isTermInRange($ranges, $termStart, $termEnd){
