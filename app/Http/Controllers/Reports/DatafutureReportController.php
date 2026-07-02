@@ -20,8 +20,10 @@ use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAward;
 use App\Models\StudentCourseRelation;
+use App\Models\StudentDisability;
 use App\Models\StudentModuleInstanceDatafuture;
 use App\Models\StudentProposedCourse;
+use App\Models\StudentQualification;
 use App\Models\StudentStuloadInformation;
 use App\Models\StudentTermStuload;
 use App\Models\StudyMode;
@@ -1287,5 +1289,220 @@ class DatafutureReportController extends Controller
         else:
             return response()->json(['success' => false, 'message' => 'Report not found.']);
         endif;
+    }
+
+    public function autoloadData(Request $request){
+        $term_declaration_ids = $request->term_declaration_id ?? [];
+        $from_date = (!empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : '');
+        $to_date = (!empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : '');
+
+        $dateRanges = [];
+        if(!empty($term_declaration_ids)):
+            $i = 1;
+            foreach($term_declaration_ids as $id):
+                $term = TermDeclaration::find($id);
+                if((isset($term->start_date) && !empty($term->start_date)) && (isset($term->end_date) && !empty($term->end_date))):
+                    $dateRanges[$i]['start'] = date('Y-m-d', strtotime($term->start_date));
+                    $dateRanges[$i]['end'] = date('Y-m-d', strtotime($term->end_date));
+                    $i++;
+                endif;
+            endforeach;
+        elseif(!empty($from_date) && !empty($to_date)):
+            $dateRanges[1]['start'] = date('Y-m-d', strtotime($from_date));
+            $dateRanges[1]['end'] = date('Y-m-d', strtotime($to_date));
+        endif;
+
+        $studentCounts = 0;
+        if(!empty($dateRanges)):
+            $whereRaw = "";
+            foreach($dateRanges as $date):
+                $FROM_DATE = $date['start'];
+                $TO_DATE = $date['end'];
+                $whereRaw .= (!empty($whereRaw) ? " OR " : '');
+                $whereRaw .= " (
+                    (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
+                    OR 
+                    ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
+                ) ";
+            endforeach;
+            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)
+                        ->whereHas('student', function($sq){
+                            $sq->where('hesa_status', 1);
+                        })->whereHas('studentCR.creation', function ($q) {
+                            $q->whereNotIn('course_id', [30, 31]);
+                        })->orderBy('student_id', 'ASC')->get()
+                        ->groupBy(['student_id', 'student_course_relation_id']);
+
+            if($stuloads->count() > 0):
+                foreach($stuloads as $student_id => $courseRelations):
+                    foreach($courseRelations as $student_course_relation_id => $rows):
+                        $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
+
+                        $studentCounts += 1;
+                    endforeach;
+                endforeach;
+            endif;
+        endif;
+
+        return response()->json(['message' => '<strong>'.$studentCounts.'</strong> students data successfull autoloaded.'], 200);
+    }
+
+    public function autoLoadStudentStuloads($student_id, $student_course_relation_id){
+        $student = Student::find($student_id);
+        $studentCrel = StudentCourseRelation::find($student_course_relation_id);
+        $course_id = (isset($studentCrel->creation->course_id) && $studentCrel->creation->course_id > 0 ? $studentCrel->creation->course_id : null);
+        $course_creation_id = $studentCrel->course_creation_id;
+
+        $counts = 0; //26100303910002618
+        $instances = CourseCreationInstance::where('course_creation_id', $course_creation_id)->orderBy('id', 'ASC')->get();
+        
+        if($instances->count() > 0):
+            foreach($instances as $instance):
+                $existInstance = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $instance->id)->withTrashed()->get();
+                if($existInstance->count() == 0):
+                    $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
+                    $lastRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
+                    
+                    $priprov_id = null;
+                    $qual_type = null;
+                    $qual_sub = null;
+                    $qual_sit = null;
+                    $qualent3_id = null;
+                    $sid_number = (isset($lastRow->sid_number) && !empty($lastRow->sid_number) ? $lastRow->sid_number : $this->calculateSidNumber($student->registration_no));
+                    $is_education_qualification = (isset($student->other->is_education_qualification) && $student->other->is_education_qualification > 0 ? $student->other->is_education_qualification : 0);
+                    if($is_education_qualification == 1):
+                        $qualification = StudentQualification::orderBy('id', 'DESC')->get()->first();
+                        $priprov_id = (isset($qualification->previous_provider_id) && $qualification->previous_provider_id > 0 ? $qualification->previous_provider_id : null);
+                        $qual_type = (isset($qualification->qualification_type_identifier_id) && $qualification->qualification_type_identifier_id > 0 ? $qualification->qualification_type_identifier_id : null);
+                        $qual_sub = (isset($qualification->hesa_qualification_subject_id) && $qualification->hesa_qualification_subject_id > 0 ? $qualification->hesa_qualification_subject_id : null);
+                        $qual_sit = (isset($qualification->hesa_exam_sitting_venue_id) && $qualification->hesa_exam_sitting_venue_id > 0 ? $qualification->hesa_exam_sitting_venue_id : null);
+                        $qualent3_id = (isset($qualification->highest_qualification_on_entry_id) && $qualification->highest_qualification_on_entry_id > 0 ? $qualification->highest_qualification_on_entry_id : null);
+                    endif;
+                    $disall_id = null;
+                    if(isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0):
+                        $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->get()->first();
+                        $disall_id = (isset($studentDis->disability_id) && $studentDis->disability_id > 0 ? $studentDis->disability_id : null);
+                    endif;
+                    $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get()->first();
+                    $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
+                    
+
+                    //$YEARPREG = (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1);
+                    $YEARPREG = $counts + 1;
+                    $data = [
+                        'student_id' => $student->id,
+                        'student_course_relation_id' => $student_course_relation_id,
+                        'course_creation_instance_id' => $instance->id,
+                        'year_of_the_course' => ($existingRowCount > 0 ? ($existingRowCount + 1) : 1),
+                        'auto_stuload' => 1,
+                        'student_load' => null,
+                        'disall_id' => $disall_id,
+                        'exchind_id' => null,
+                        'gross_fee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                        'locsdy_id' => null,
+                        'mode_id' => 1,
+                        'mstufee_id' => null,
+                        'netfee' => (isset($instance->fees) && $instance->fees > 0 ? $instance->fees : 0),
+                        'notact_id' => null,
+                        'periodstart' => (isset($instance->start_date) && !empty($instance->start_date) ? date('Y-m-d', strtotime($instance->start_date)) : null),
+                        'periodend' => (isset($instance->end_date) && !empty($instance->end_date) ? date('Y-m-d', strtotime($instance->end_date)) : null),
+                        'priprov_id' => $priprov_id,
+                        'sselig_id' => null,
+                        'yearprg' => $YEARPREG > 1 ? 2 : $YEARPREG,
+                        'yearstu' => (isset($student->stuload) && $student->stuload->count() > 0 ? $student->stuload->count() + 1 : 1),
+                        'qual_id' => null,
+                        'heapespop_id' => null,
+                        'class_id' => $class_id,
+                        'courseaim_id' => $course_id,
+                        'genderid_id' => (isset($student->other->hesa_gender_id) && $student->other->hesa_gender_id > 0 ? $student->other->hesa_gender_id : null),
+                        'regbody_id' => null,
+                        'relblf_id' => (isset($student->other->religion_id) && $student->other->religion_id > 0 ? $student->other->religion_id : null),
+                        'rsnend_id' => null,
+                        'sexort_id' => (isset($student->other->sexual_orientation_id) && $student->other->sexual_orientation_id > 0 ? $student->other->sexual_orientation_id : null),
+                        'ttcid_id' => (isset($student->contact->term_time_accommodation_type_id) && $student->contact->term_time_accommodation_type_id > 0 ? $student->contact->term_time_accommodation_type_id : null),
+                        'uhn_number' => (isset($student->uhn_no) && !empty($student->uhn_no) ? $student->uhn_no : null),
+                        'sid_number' => $sid_number,
+                        'provider_name' => $priprov_id,
+                        'qual_type' => $qual_type,
+                        'qual_sub' => $qual_sub,
+                        'qual_sit' => $qual_sit,
+                        'domicile_id' => (isset($student->contact->permanent_country_id) && $student->contact->permanent_country_id > 0 ? $student->contact->permanent_country_id : null),
+                        'numhus' => null,
+                        'owninst' => $student->registration_no,
+                        'comdate' => (isset($studentCrel->course_start_date) && !empty($studentCrel->course_start_date) ? date('Y-m-d', strtotime($studentCrel->course_start_date)) : null),
+                        'enddate' => (isset($studentCrel->course_end_date) && !empty($studentCrel->course_end_date) ? date('Y-m-d', strtotime($studentCrel->course_end_date)) : null),
+                        'qualent3_id' => $qualent3_id,
+                        'reporting_period' => 0,
+                        'created_by' => auth()->user()->id,
+                    ];
+
+                    $stuload = StudentStuloadInformation::create($data);
+                    if($stuload->id):
+                        $counts += 1;
+                    endif;
+                else:
+                    $df_sid_number = (isset($student->df_sid_number) && !empty($student->df_sid_number) ? $student->df_sid_number : null);
+                    $sid_number = (isset($existInstance[0]->sid_number) && !empty($existInstance[0]->sid_number) ? $existInstance[0]->sid_number : null);
+                    if($sid_number == ''):
+                        if(!empty($df_sid_number)):
+                            StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $df_sid_number]);
+                        else:
+                            $sidRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->whereNotNull('sid_number')->first();
+                            if(isset($sidRow->sid_number) && !empty($sidRow->sid_number)):
+                                StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $sidRow->sid_number]);
+                            else:
+                                $the_sid_number = $this->calculateSidNumber($student->registration_no);
+                                StudentStuloadInformation::where('id', $existInstance[0]->id)->update(['sid_number' => $the_sid_number]);
+                            endif;
+                        endif;
+                    endif;
+                endif;
+            endforeach;
+        endif;
+
+        if(!isset($student->df_sid_number) || empty($student->df_sid_number)):
+            $sidRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->whereNotNull('sid_number')->first();
+            Student::where('id', $student->id)->update([
+                'df_sid_number' => (isset($sidRow->sid_number) && !empty($sidRow->sid_number) ? $sidRow->sid_number : null)
+            ]);
+        endif;
+
+        return $counts;
+    }
+
+    function calculateSidNumber($student_reg_no){
+        $theNumber = substr($student_reg_no, 5);
+        $theYear2Digit = substr($theNumber, 0, 2);
+        $theUKPRN = 10030391;
+        $theAllocatedID = substr($student_reg_no, 7, 6);
+        if(strlen($theAllocatedID) < 6):
+            $theAllocatedID = sprintf('%06d', $theAllocatedID);
+        elseif(strlen($theAllocatedID) > 6):
+            $theAllocatedID = substr($theAllocatedID, -6);
+        endif;
+        $weight = [1 => 1, 2 => 3, 3 => 7, 4 => 9, 5 => 1, 6 => 3, 7 => 7, 8 => 9, 9 => 1, 10 => 3, 11 => 7, 12 => 9, 13 => 1, 14 => 3, 15 => 7, 16 => 9];
+        $theWeightMultiplieds = [];
+
+        $theNumber = $theYear2Digit.$theUKPRN.$theAllocatedID;
+        $theAllocatedIDArray = str_split($theNumber);
+        $theIncrement = 1;
+        foreach($theAllocatedIDArray as $theNum):
+            $theWeight = $weight[$theIncrement];
+            $theMultipliedValue = $theNum * $theWeight;
+            $theWeightMultiplieds[] = $theMultipliedValue;
+            $theIncrement++;
+        endforeach;
+
+        $theTotalOfMultiplied = 0;
+        foreach($theWeightMultiplieds as $theWMV):
+            $theTotalOfMultiplied += $theWMV;
+        endforeach;
+        $theLastDigit = substr($theTotalOfMultiplied, -1);
+        $theLastDigit = (int) $theLastDigit;
+        $theCheckDigit = ($theLastDigit == 0 ? '0' : (10 - $theLastDigit));
+
+        $theSID = $theNumber.$theCheckDigit;
+
+        return $theSID;
     }
 }
