@@ -4025,6 +4025,8 @@ Route::middleware('auth')->group(function() {
         Route::get('reports/datafuture/my-downloads', 'myDownloads')->name('reports.datafuture.downloads'); 
         Route::get('reports/datafuture/list', 'list')->name('reports.datafuture.downloads.list'); 
         Route::delete('reports/datafuture/delete/{id}', 'destroy')->name('reports.datafuture.downloads.delete');
+
+        Route::post('reports/datafuture/autoload-data', 'autoloadData')->name('reports.datafuture.autoload.data');
     });
 
     Route::controller(StudyModeController::class)->group(function() {
