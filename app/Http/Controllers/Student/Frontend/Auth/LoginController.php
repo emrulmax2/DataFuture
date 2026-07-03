@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student\Frontend\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Request\StudentLoginRequest;
+use App\Models\Option;
 use App\Services\AuthLogService;
 
 class LoginController extends Controller
@@ -17,7 +18,8 @@ class LoginController extends Controller
     public function loginView()
     {
         return view('login.student', [
-            'layout' => 'login'
+            'layout' => 'login',
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
