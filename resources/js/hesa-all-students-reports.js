@@ -1,6 +1,7 @@
 
 import TomSelect from "tom-select";
 import { saveAs } from 'file-saver';
+import { createIcons, icons } from 'lucide';
 ("use strict");
 
 
@@ -76,6 +77,92 @@ import { saveAs } from 'file-saver';
         })
     }
 
+    $('#xmlAutoloadBtn').on('click', function(e){
+        e.preventDefault();
+        let $form = $('#xmlExportForm');
+        const form = document.getElementById('xmlExportForm');
+
+        let term_declaration_ids = $('#terms_declaration_id', $form).val();
+        let from_date = $('#from_date', $form).val();
+        let to_date = $('#to_date', $form).val();
+
+        $('#xmlDownloadWrap').addClass('hidden').attr('href', '#');
+        $('#xmlProgressWrap').addClass('hidden');
+        $('#xmlProgressText').text('0%');
+        $('#xmlProgressBar').css('width', '0%');
+        document.querySelector('#xmlDownCancelBtn').setAttribute('disabled', 'disabled');
+        document.querySelector('#xmlAutoloadBtn').setAttribute('disabled', 'disabled');
+        document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText ="display: inline-block;";
+        document.querySelector('#xmlDownBtn').setAttribute('disabled', 'disabled');
+
+        if((term_declaration_ids.length  > 0 || (from_date != '' && to_date != ''))){
+            let form_data = new FormData(form);
+            axios({
+                method: 'post',
+                url: route('reports.datafuture.autoload.data'),
+                data: form_data,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            }).then(response => {
+                //console.log(response.data);
+                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
+                document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display:none;";
+                document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                document.querySelector('#xmlDownBtn').removeAttribute('disabled');  
+
+                $('#xmlExportModal .modal-content .submissionError').remove();
+                $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Success</strong>. '+response.data.message+'</span></div>');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+                setTimeout(function(){
+                    $('#xmlExportModal .modal-content .submissionError').remove();
+                }, 2000)
+
+            }).catch(error => {
+                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
+                document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display:none;";
+                document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+
+                $('#xmlExportModal .modal-content .submissionError').remove();
+                $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Error</strong>. Something went wrong. Please try again later.</span></div>');
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+                setTimeout(function(){
+                    $('#xmlExportModal .modal-content .submissionError').remove();
+                }, 2000)
+
+                console.log(error);
+            });
+        }else{
+            document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+            document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
+            document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display: none;";
+            document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+
+            $('#xmlExportModal .modal-content .submissionError').remove();
+            $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Validation Error</strong>. Select Term declaration or insert Form & To date.</span></div>');
+
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+            setTimeout(function(){
+                $('#xmlExportModal .modal-content .submissionError').remove();
+            }, 2000)
+        }
+    })
+
     
 
     $('#xmlExportForm').on('submit', function(e){
@@ -92,6 +179,7 @@ import { saveAs } from 'file-saver';
         $('#xmlProgressText').text('0%');
         $('#xmlProgressBar').css('width', '0%');
         document.querySelector('#xmlDownCancelBtn').setAttribute('disabled', 'disabled');
+        document.querySelector('#xmlAutoloadBtn').setAttribute('disabled', 'disabled');
         document.querySelector('#xmlDownBtn').setAttribute('disabled', 'disabled');
         document.querySelector("#xmlDownBtn .theLoader").style.cssText ="display: inline-block;";
 
@@ -117,6 +205,7 @@ import { saveAs } from 'file-saver';
                 $('#xmlProgressWrap').addClass('hidden');
                 $('#xmlProgressText').text('0%');
                 $('#xmlProgressBar').css('width', '0%');
+                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
                 document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
                 document.querySelector('#xmlDownBtn').removeAttribute('disabled');
                 document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
@@ -124,6 +213,7 @@ import { saveAs } from 'file-saver';
                 console.log(error);
             });
         }else{
+            document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
             document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
             document.querySelector('#xmlDownBtn').removeAttribute('disabled');
             document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display: none;";
@@ -161,6 +251,7 @@ import { saveAs } from 'file-saver';
                     $('#xmlDownloadBtn').attr('href', response.data.file);
 
                     document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                    document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
                     document.querySelector('#xmlDownBtn').removeAttribute('disabled');
                     document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
                 }else if(response.data.status === 'failed'){
@@ -169,6 +260,7 @@ import { saveAs } from 'file-saver';
                     $('#xmlProgressText').text('0%');
                     $('#xmlProgressBar').css('width', '0%');
                     document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                    document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
                     document.querySelector('#xmlDownBtn').removeAttribute('disabled');
                     document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
 
@@ -192,6 +284,7 @@ import { saveAs } from 'file-saver';
                 $('#xmlProgressText').text('0%');
                 $('#xmlProgressBar').css('width', '0%');
                 document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
                 document.querySelector('#xmlDownBtn').removeAttribute('disabled');
                 document.querySelector("#xmlDownBtn .theLoader").style.cssText = "display:none;";
 
