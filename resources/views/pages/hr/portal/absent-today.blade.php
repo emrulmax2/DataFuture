@@ -4,33 +4,29 @@
     <title>{{ $title }}</title>
 @endsection
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Absent Employees of <u>{{ date('jS M, Y', $date)}}</u></h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            {{--<a href="{{ route('hr.portal.absent.employee', strtotime($yesterday)) }}" class="transition duration-200 border shadow-sm justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed !box !box flex items-center text-slate-600 dark:text-slate-300">
-                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>
-                Prev Day
-            </a>
-            <a href="{{ route('hr.portal.absent.employee', strtotime($tomorrow)) }}" class="transition duration-200 border shadow-sm justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed !box !box ml-3 flex items-center text-slate-600 dark:text-slate-300">
-                Next Day
-                <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
-            </a>--}}
-            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
-                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
-                <input type="text" readonly name="class_date" class="w-full h-full form-control border-0 absentAttendanceDate" id="absentAttendanceDate" value="{{ date('d-m-Y', $date) }}" style="max-width: 110px;"/>
-            </div>
+    <!-- BEGIN: Page Header -->
+    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Absent Employees</h2>
+            <p class="text-sm text-slate-400 mt-1">{{ date('jS M, Y', $date) }} &middot; London Churchill College</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 dark:bg-darkmode-800 dark:border-darkmode-400 rounded-lg px-3 h-[42px] focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <i data-lucide="calendar-days" class="w-4 h-4 text-slate-400 flex-none"></i>
+            <input type="text" readonly name="class_date" class="bg-transparent border-0 outline-none text-sm font-semibold text-slate-700 dark:text-slate-300 absentAttendanceDate" id="absentAttendanceDate" value="{{ date('d-m-Y', $date) }}" style="max-width: 110px;"/>
         </div>
     </div>
-    <div class="intro-y mt-8 overflow-auto sm:mt-0 lg:overflow-visible">
+    <!-- END: Page Header -->
+
+    <div class="intro-y mt-5 overflow-auto sm:mt-0 lg:overflow-visible">
         <table class="w-full text-left border-separate border-spacing-y-[10px] sm:mt-2">
             <thead>
                 <tr>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Image</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase">Name</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Date</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Contract</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center">Authorised Hour</th>
-                    <th class="font-medium px-5 py-3 dark:border-darkmode-300 whitespace-nowrap text-right border-b-0 uppercase">Reason</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-xs font-bold tracking-wider text-slate-400">Image</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-xs font-bold tracking-wider text-slate-400">Name</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center text-xs font-bold tracking-wider text-slate-400">Date</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center text-xs font-bold tracking-wider text-slate-400">Contract</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap border-b-0 uppercase text-center text-xs font-bold tracking-wider text-slate-400">Authorised Hour</th>
+                    <th class="px-5 py-3 dark:border-darkmode-300 whitespace-nowrap text-right border-b-0 uppercase text-xs font-bold tracking-wider text-slate-400">Reason</th>
                 </tr>
             </thead>
             <tbody>

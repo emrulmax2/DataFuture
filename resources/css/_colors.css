@@ -1,12 +1,17 @@
-/* Default colors */
+/* Default colors — "Slate & Teal" preset (Preset 2d) */
 :root {
-    --color-primary: theme("colors.rgb.cyan.900");
+    --color-primary: 14 124 134;        /* #0E7C86 — buttons, links, active */
+    --color-primary-hover: 11 102 112;  /* #0B6670 — hover / pressed */
+    --color-brand: 20 48 56;            /* #143038 — top bar, sidebars */
+    --color-accent: 224 168 46;         /* #E0A82E — crest, top rule, avatar */
+    --color-soft: 220 241 239;          /* #DCF1EF — active pill, chips */
+    --color-soft-text: 11 102 112;      /* #0B6670 — text on soft tint */
     --color-secondary: theme("colors.rgb.slate.200");
-    --color-success: theme("colors.rgb.teal.600");
+    --color-success: 11 102 112;        /* #0B6670 — Active / positive (teal) */
     --color-info: theme("colors.rgb.cyan.500");
-    --color-warning: theme("colors.rgb.amber.500");
-    --color-pending: theme("colors.rgb.amber.600");
-    --color-danger: theme("colors.rgb.red.700");
+    --color-warning: 180 83 9;          /* #B45309 — Warning (due soon) */
+    --color-pending: 154 107 18;        /* #9A6B12 — On Leave (gold) */
+    --color-danger: 180 35 24;          /* #B42318 — Critical (expired) */
     --color-light: theme("colors.rgb.slate.100");
     --color-dark: theme("colors.rgb.slate.800");
     --color-slate-50: theme("colors.rgb.slate.50");
@@ -23,7 +28,9 @@
 
 /* Default dark-mode colors */
 .dark {
-    --color-primary: theme("colors.rgb.cyan.800");
+    --color-primary: 13 148 136; /* teal.600 — brighter for dark surfaces */
+    --color-primary-hover: 17 169 154;
+    --color-success: 13 148 136;
     --color-slate-500: theme("colors.rgb.slate.400");
     --color-darkmode-50: 87 103 132;
     --color-darkmode-100: 74 90 121;

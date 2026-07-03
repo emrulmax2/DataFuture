@@ -5,14 +5,17 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Holiday Management</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Holiday Calendar
-            </a>
+    <!-- BEGIN: Page Header -->
+    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Holiday Management</h2>
+            <p class="text-sm text-slate-400 mt-1">Leave requests by holiday year &middot; London Churchill College</p>
         </div>
+        <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-outline-secondary h-[42px] text-sm">
+            <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i> Holiday Calendar
+        </a>
     </div>
+    <!-- END: Page Header -->
     <!-- BEGIN: HTML Table Data -->
     <div class="intro-y box p-5 mt-5">
         <div id="employeeHolidayAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
@@ -28,12 +31,11 @@
                         <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ ($loop->index == 0 ? 'show' : '') }}" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
                             <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
                                 <div class="intro-y box p-5 pb-7">
-                                    <div class="grid grid-cols-12 gap-0 items-center">
-                                        <div class="col-span-6">
-                                            <div class="font-medium text-lg text-base">Pending Leaves</div>
-                                        </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none"><i data-lucide="clock" class="w-3.5 h-3.5"></i></span>
+                                        <div class="font-semibold text-base text-slate-700 dark:text-white">Pending Leaves</div>
                                     </div>
-                                    <div class="mt-4 pt-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-darkmode-400"></div>
                                     <div class="grid grid-cols-12 gap-4"> 
                                         <div class="col-span-12">
                                             <div class="overflow-x-auto scrollbar-hidden">
@@ -44,12 +46,11 @@
                                 </div>
 
                                 <div class="intro-y box p-5 pb-7 mt-5">
-                                    <div class="grid grid-cols-12 gap-0 items-center">
-                                        <div class="col-span-6">
-                                            <div class="font-medium text-lg text-base">Approved Leaves</div>
-                                        </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i></span>
+                                        <div class="font-semibold text-base text-slate-700 dark:text-white">Approved Leaves</div>
                                     </div>
-                                    <div class="mt-4 pt-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-darkmode-400"></div>
                                     <div class="grid grid-cols-12 gap-4"> 
                                         <div class="col-span-12">
                                             <div class="overflow-x-auto scrollbar-hidden">
@@ -60,12 +61,11 @@
                                 </div>
 
                                 <div class="intro-y box p-5 pb-7 mt-5">
-                                    <div class="grid grid-cols-12 gap-0 items-center">
-                                        <div class="col-span-6">
-                                            <div class="font-medium text-lg text-base">Rejected Leaves</div>
-                                        </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none"><i data-lucide="x-circle" class="w-3.5 h-3.5"></i></span>
+                                        <div class="font-semibold text-base text-slate-700 dark:text-white">Rejected Leaves</div>
                                     </div>
-                                    <div class="mt-4 pt-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
+                                    <div class="mt-4 pt-4 border-t border-slate-100 dark:border-darkmode-400"></div>
                                     <div class="grid grid-cols-12 gap-4"> 
                                         <div class="col-span-12">
                                             <div class="overflow-x-auto scrollbar-hidden">

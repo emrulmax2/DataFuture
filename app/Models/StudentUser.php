@@ -67,7 +67,7 @@ class StudentUser extends Authenticatable  implements MustVerifyEmail
         if ($this->photo !== null) {
             return asset('storage/users/'.$this->id.'/'.$this->photo);
         } else {
-            return asset('build/assets/images/placeholders/200x200.jpg');
+            return \App\Support\Avatar::initials($this->name);
         }
     }
     

@@ -32,6 +32,7 @@ use App\Models\TaskListUser;
 use App\Models\User;
 use App\Models\UserPrivilege;
 use App\Models\VenueIpAddress;
+use App\Services\AttendanceLiveStatsService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -228,62 +229,7 @@ class DashboardController extends Controller
     }
 
     public function getUserAttendanceLiveStatistics(){
-        $user_id = auth()->user()->id;
-        $employee_id = auth()->user()->employee->id;
-        $today = date('Y-m-d');
-        $employee = Employee::find($employee_id);
-
-        $html = '';
-        $last_date = (isset($employee->employment->last_action_date) && $employee->employment->last_action_date != '') ? $employee->employment->last_action_date : '';
-        $last_action = (isset($employee->employment->last_action) && $employee->employment->last_action > 0) ? $employee->employment->last_action : 0;
-        $last_action_label = '';
-        switch ($last_action) {
-            case 1:
-                $last_action_label = 'Working';
-                break;
-            case 2:
-                $last_action_label = 'Break';
-                break;
-            case 3:
-                $last_action_label = 'Working';
-                break;
-            case 4:
-                $last_action_label = 'Clocked Out';
-                break;
-            default:
-                $last_action_label = 'No clock-in';
-        }
-        $live = EmployeeAttendanceLive::where('attendance_type', 1)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
-        $liveLast = EmployeeAttendanceLive::where('attendance_type', 4)->where('date', $today)->where('employee_id', $employee_id)->orderBy('id', 'DESC')->get()->first();
-        if(isset($employee->employment->id) && $employee->employment->id > 0):
-            if($today == $last_date && (isset($live->id) && $live->id > 0)):
-                $rtime = (isset($live->time) && $live->time != '00:00:00' && $live->time ? strtotime($live->time) : strtotime(date('H:i:s')));
-                $duration_seconds = $rtime * 1000;
-
-                $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
-                    $html .= '<div class="statusArea">';
-                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
-                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.$last_action_label.'</div>';
-                    $html .= '</div>';
-                    $html .= '<div class="sinceArea">';
-                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">since</div>';
-                        $html .= '<div class="font-medium whitespace-nowrap uppercase">'.date('H:i A', strtotime($live->time)).(isset($liveLast->time) && !empty($liveLast->time) ? ' - '.date('H:i A', strtotime($liveLast->time)) : '').'</div>';
-                        if($last_action != 4):
-                            $html .= '<div class="text-slate-500 text-xs whitespace-nowrap clockedInFrom" id="clockedInFrom" data-starts="'.$duration_seconds.'">00:00</div>';
-                        endif;
-                    $html .= '</div>';
-                $html .= '</div>';
-            else:
-                $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
-                    $html .= '<div class="statusArea">';
-                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
-                        $html .= '<div class="font-medium whitespace-nowrap uppercase text-danger">No clock-in</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            endif;
-        endif;
-
-        return $html;
+        return app(AttendanceLiveStatsService::class)->getUserAttendanceLiveStatistics();
     }
 
     public function getUserAttendanceLiveBtns(){

@@ -81,12 +81,12 @@ class EmployeeTimeKeepingController extends Controller
         $holiday_year = $request->holiday_year;
         $the_date = (isset($request->the_date) && !empty($request->the_date) ? date('Y-m-d', strtotime($request->the_date)) : date('Y-m-d'));
 
-        $res = $this->getEmployeeMonthlyAttendanceDetails($employee_id, $the_date, $holiday_year);
+        $res = $this->getEmployeeMonthlyAttendanceDetails($employee_id, $the_date, $holiday_year, true);
 
         return response()->json(['res' => $res], 200);
     }
 
-    public function getEmployeeMonthlyAttendanceDetails($employee_id, $date, $holiday_year){
+    public function getEmployeeMonthlyAttendanceDetails($employee_id, $date, $holiday_year, $forWeb = false){
         $employee = Employee::find($employee_id);
         $monthStart = date('Y-m-d', strtotime($date));
         $monthEnd = date('Y-m-t', strtotime($date));
@@ -110,6 +110,23 @@ class EmployeeTimeKeepingController extends Controller
 
         $html = '';
         $workingHoursTotal = $holidayHoursTotal = $monthTotalPay = 0;
+
+        // Modern (web) rendering helpers: status pill map, note-warning icon, and an
+        // off-schedule "gap" buffer used to collapse consecutive non-working days.
+        $pillMap = [
+            'Working'             => ['wk', 'Working'],
+            'Overtime'            => ['ov', 'Overtime'],
+            'Bank Holiday'        => ['bh', 'Bank holiday'],
+            'Holiday Vacation'    => ['hv', 'Holiday'],
+            'Unauthorised Absent' => ['mt', 'Unauthorised absent'],
+            'Sick'                => ['sl', 'Sick'],
+            'Authorise Unpaid'    => ['au', 'Authorised unpaid'],
+            'Authorise Paid'      => ['ap', 'Authorised paid'],
+        ];
+        $noteWarnings = ['Late', 'Leave Early', 'Clock Out Not Found', 'Break Not Found'];
+        $warnSvg = '<svg class="ep-tk-note__ico" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        $gapStart = $gapEnd = null; $gapCount = 0;
+
         for($i = 1; $i <= $lastDate; $i++):
             $today = date('Y-m', strtotime($date)).($i < 10 ? '-0'.$i : '-'.$i);
             $D = date('D', strtotime($today));
@@ -250,46 +267,125 @@ class EmployeeTimeKeepingController extends Controller
                 endswitch;
             endif;
 
-            $html .= '<tr class="'.$dayClass.'">';
-                $html .= '<td class="font-medium whitespace-nowrap">';
-                    $html .= date('l, jS F', strtotime($today));
-                    if($isWorkingDay && !$isLeaveDay && !$isBankHoliday && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
-                        $html .= $isWorkStarted ? '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')' : '';
+            // Pay is computed for both web + PDF so the month totals stay identical.
+            $totalHourToday = ($dayHour + $holidayHour);
+            $todaysPay = $this->calculateHoursPayment($totalHourToday, $payRate);
+            $monthTotalPay += $todaysPay;
+
+            if($forWeb):
+                // Collapse consecutive off-schedule days into a single slim gap row.
+                if($dayStatus === 'Not in Schedule'):
+                    if($gapStart === null){ $gapStart = $today; }
+                    $gapEnd = $today; $gapCount++;
+                    continue;
+                endif;
+                if($gapCount > 0):
+                    $gapLabel = date('D j', strtotime($gapStart)).($gapEnd !== $gapStart ? ' &rarr; '.date('D j', strtotime($gapEnd)) : '');
+                    $gapMeta  = 'Not in schedule'.($gapCount > 1 ? ' &middot; '.$gapCount.' days' : '');
+                    $html .= '<tr class="ep-tk-row ep-tk-gap"><td class="ep-tk-td ep-tk-gap__cell"><span class="ep-tk-gap__label">'.$gapLabel.'</span><span class="ep-tk-gap__meta">'.$gapMeta.'</span></td></tr>';
+                    $gapStart = $gapEnd = null; $gapCount = 0;
+                endif;
+
+                if(isset($pillMap[$dayStatus])):
+                    $pillMod = $pillMap[$dayStatus][0]; $pillLabel = $pillMap[$dayStatus][1];
+                else:
+                    $pillMod = 'nt'; $pillLabel = ($dayStatus === '' ? 'Scheduled' : $dayStatus);
+                endif;
+
+                $dateCell = '<span class="ep-tk-date__day">'.date('D j', strtotime($today)).'</span>';
+                if($isWorkingDay && $isWorkStarted && !empty($todayPattern->start) && !empty($todayPattern->end)):
+                    $dateCell .= '<span class="ep-tk-date__sub">'.htmlspecialchars($todayPattern->start, ENT_QUOTES).' &ndash; '.htmlspecialchars($todayPattern->end, ENT_QUOTES).'</span>';
+                endif;
+
+                if($isClockedIn && isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0):
+                    $clockCell  = '<span class="ep-tk-clock__main">'.htmlspecialchars($todayAttendance->clockin_punch ?? '', ENT_QUOTES).' &ndash; '.htmlspecialchars($todayAttendance->clockout_punch ?? '', ENT_QUOTES).'</span>';
+                    $clockCell .= '<span class="ep-tk-clock__sub">Sched '.htmlspecialchars($todayAttendance->clockin_system ?? '', ENT_QUOTES).' &ndash; '.htmlspecialchars($todayAttendance->clockout_system ?? '', ENT_QUOTES).'</span>';
+                else:
+                    $clockCell = '<span class="ep-tk-muted">&ndash;</span>';
+                endif;
+
+                $breakCell      = ($isClockedIn && !empty($todayAttendance->break_time)) ? '<span>'.htmlspecialchars($todayAttendance->break_time, ENT_QUOTES).'</span>' : '<span class="ep-tk-muted">&ndash;</span>';
+                $contractedCell = ($isWorkingDay && $isWorkStarted && !empty($todayPattern->total)) ? '<span>'.htmlspecialchars($todayPattern->total, ENT_QUOTES).'</span>' : '<span class="ep-tk-muted">&ndash;</span>';
+                $workedCell     = ($dayHour > 0) ? '<span class="ep-tk-strong">'.$this->calculateHourMinute($dayHour).'</span>' : '<span class="ep-tk-muted">&ndash;</span>';
+                $holCell        = ($holidayHour > 0) ? '<span class="ep-tk-hol">'.$this->calculateHourMinute($holidayHour).'</span>' : '<span class="ep-tk-muted">&ndash;</span>';
+
+                if($todaysPay > 0):
+                    $payCell = '<span class="ep-tk-pay__amt">&pound;'.number_format($todaysPay, 2).'</span>';
+                    if($dayHour > 0 || $holidayHour > 0):
+                        $payCell .= '<span class="ep-tk-pay__rate">&pound;'.number_format($payRate, 2).' / hr</span>';
                     endif;
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($isWorkingDay && $isWorkStarted ? $todayPattern->total : '&nbsp;');
-                $html .= '</td>';
-                $html .= '<td>'.$dayStatus.'</td>';
-                $html .= '<td>';
-                    $html .= ($dayHour > 0 || $holidayHour > 0 ? '£'.number_format($payRate, 2) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($dayHour > 0 ? $this->calculateHourMinute($dayHour) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $totalHourToday = ($dayHour + $holidayHour);
-                    $todaysPay = $this->calculateHoursPayment($totalHourToday, $payRate);
-                    $monthTotalPay += $todaysPay;
-                    $html .= ($todaysPay > 0 ? '£'.number_format($todaysPay, 2) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    if(isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 && $isClockedIn):
-                        $html .= 'A: '.$todayAttendance->clockin_punch.' - '.$todayAttendance->clockout_punch.'<br/>';
-                        $html .= 'S: '.$todayAttendance->clockin_system.' - '.$todayAttendance->clockout_system;
+                else:
+                    $payCell = '<span class="ep-tk-muted">&ndash;</span>';
+                endif;
+
+                $noteCell = '';
+                foreach($note as $n):
+                    $n = trim($n, " \t\n\r\0\x0B:");
+                    if($n === ''){ continue; }
+                    if(in_array($n, $noteWarnings)):
+                        $noteCell .= '<span class="ep-tk-note ep-tk-note--warn">'.$warnSvg.htmlspecialchars($n, ENT_QUOTES).'</span>';
+                    else:
+                        $noteCell .= '<span class="ep-tk-note">'.htmlspecialchars($n, ENT_QUOTES).'</span>';
                     endif;
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($isClockedIn && (isset($todayAttendance->break_time) && !empty($todayAttendance->break_time)) ? $todayAttendance->break_time : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= implode(', ', $note);
-                $html .= '</td>';
-            $html .= '</tr>';
+                endforeach;
+                if($noteCell === ''){ $noteCell = '<span class="ep-tk-muted">&ndash;</span>'; }
+
+                $html .= '<tr class="ep-tk-row">';
+                    $html .= '<td class="ep-tk-td ep-tk-date">'.$dateCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-status"><span class="ep-tk-pill ep-tk-pill--'.$pillMod.'"><span class="ep-tk-dot"></span>'.htmlspecialchars($pillLabel, ENT_QUOTES).'</span></td>';
+                    $html .= '<td class="ep-tk-td ep-tk-clock">'.$clockCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-num">'.$breakCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-num">'.$contractedCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-num">'.$workedCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-num">'.$holCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-pay">'.$payCell.'</td>';
+                    $html .= '<td class="ep-tk-td ep-tk-notes">'.$noteCell.'</td>';
+                $html .= '</tr>';
+            else:
+                $html .= '<tr class="'.$dayClass.'">';
+                    $html .= '<td class="font-medium whitespace-nowrap">';
+                        $html .= date('l, jS F', strtotime($today));
+                        if($isWorkingDay && !$isLeaveDay && !$isBankHoliday && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
+                            $html .= $isWorkStarted ? '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')' : '';
+                        endif;
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= ($isWorkingDay && $isWorkStarted ? $todayPattern->total : '&nbsp;');
+                    $html .= '</td>';
+                    $html .= '<td>'.$dayStatus.'</td>';
+                    $html .= '<td>';
+                        $html .= ($dayHour > 0 || $holidayHour > 0 ? '£'.number_format($payRate, 2) : '');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= ($dayHour > 0 ? $this->calculateHourMinute($dayHour) : '');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= ($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= ($todaysPay > 0 ? '£'.number_format($todaysPay, 2) : '');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        if(isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 && $isClockedIn):
+                            $html .= 'A: '.$todayAttendance->clockin_punch.' - '.$todayAttendance->clockout_punch.'<br/>';
+                            $html .= 'S: '.$todayAttendance->clockin_system.' - '.$todayAttendance->clockout_system;
+                        endif;
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= ($isClockedIn && (isset($todayAttendance->break_time) && !empty($todayAttendance->break_time)) ? $todayAttendance->break_time : '');
+                    $html .= '</td>';
+                    $html .= '<td>';
+                        $html .= implode(', ', $note);
+                    $html .= '</td>';
+                $html .= '</tr>';
+            endif;
         endfor;
+
+        if($forWeb && $gapCount > 0):
+            $gapLabel = date('D j', strtotime($gapStart)).($gapEnd !== $gapStart ? ' &rarr; '.date('D j', strtotime($gapEnd)) : '');
+            $gapMeta  = 'Not in schedule'.($gapCount > 1 ? ' &middot; '.$gapCount.' days' : '');
+            $html .= '<tr class="ep-tk-row ep-tk-gap"><td class="ep-tk-td ep-tk-gap__cell"><span class="ep-tk-gap__label">'.$gapLabel.'</span><span class="ep-tk-gap__meta">'.$gapMeta.'</span></td></tr>';
+        endif;
 
         $res = [];
         $res['workingHourTotal'] = ($workingHoursTotal > 0 ? $this->calculateHourMinute($workingHoursTotal) : '00:00');

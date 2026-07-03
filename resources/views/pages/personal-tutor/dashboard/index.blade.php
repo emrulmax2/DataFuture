@@ -18,7 +18,7 @@
                             <div class="col-span-12 lg:col-span-4 px-8 py-12 flex flex-col justify-center">
                                 <div class="pr-8 pt-12 flex flex-col justify-center flex-1">
                                     <div class="w-30 h-30 flex-none image-fit rounded-full overflow-hidden">
-                                        <img alt="{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}" class="rounded-full" src="{{ (isset($employee->photo) && !empty($employee->photo) && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo) ? Storage::disk('local')->url('public/employees/'.$employee->id.'/'.$employee->photo) : asset('build/assets/images/avater.png')) }}">
+                                        <img alt="{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}" class="rounded-full" src="{{ $employee->brand_photo_url }}">
                                     </div>
                                     <div class="relative text-3xl font-medium mt-5">
                                         {{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}

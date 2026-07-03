@@ -142,7 +142,7 @@ class Applicant extends Model
     public function notes(){
         return $this->hasMany(ApplicantNote::class, 'applicant_id', 'id');
     }
-    //pending
+
     public function pendingTasks(){
         $tasks = $this->hasMany(ApplicantTask::class, 'applicant_id');
         $tasks->getQuery()->where('status', '=', 'Pending');
@@ -206,8 +206,16 @@ class Applicant extends Model
         if ($this->photo !== null && Storage::disk('local')->exists('public/applicants/'.$this->id.'/'.$this->photo)) {
             return Storage::disk('local')->url('public/applicants/'.$this->id.'/'.$this->photo);
         } else {
-            return asset('build/assets/images/user_avatar.png');
+            return \App\Support\Avatar::initials($this->first_name.' '.$this->last_name);
         }
+    }
+
+    public function getBrandPhotoUrlAttribute()
+    {
+        $url = $this->photo_url;
+        return str_starts_with($url, 'data:')
+            ? \App\Support\Avatar::brand($this->first_name.' '.$this->last_name)
+            : $url;
     }
 
     public function getCreationVenueStatusAttribute(){

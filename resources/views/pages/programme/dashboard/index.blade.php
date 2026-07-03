@@ -203,9 +203,9 @@
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
                         <div class="intro-x flex items-center h-10">
                             <h2 class="text-lg font-medium truncate mr-5">Staff Absence Today</h2>
-                            <!-- <a href="{{ route('hr.portal.live.attedance') }}" class="ml-auto text-primary truncate">Show More</a> -->
+                            <a href="{{ route('hr.portal.live.attedance') }}" class="ml-auto text-primary truncate">Show More</a>
                         </div>
-                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden" id="absentWrap">
+                        <div class="mt-5" id="absentWrap">
                             @if(!empty($absentToday))
                                 @foreach($absentToday as $employee_id => $absent)
                                     <div class="intro-x">
@@ -230,7 +230,7 @@
                                     <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not absent attendance found for today.
                                 </div>
                             @endif
-                            <!-- <a href="{{ route('hr.portal.live.attedance') }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a> -->
+                            <a href="{{ route('hr.portal.live.attedance') }}" class="intro-x w-full block text-center rounded-md py-3 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>
                         </div>
                     </div>
                 </div>

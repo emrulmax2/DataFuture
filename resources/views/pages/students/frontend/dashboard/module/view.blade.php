@@ -38,7 +38,7 @@
                 @if(isset($data->tutor) && $data->tutor!=null)
                 <div class="relative flex items-center w-full col-span-12 py-3 sm:py-0">
                     <div class="w-12 h-12 flex-none image-fit">
-                        <img alt="{{ $data->tutor->title->name.' '.$data->tutor->first_name.' '.$data->tutor->last_name }}" class="rounded-full" src="{{ (isset($data->tutor->photo) && !empty($data->tutor->photo) && Storage::disk('local')->exists('public/employees/'.$data->tutor->id.'/'.$data->tutor->photo) ? Storage::disk('local')->url('public/employees/'.$data->tutor->id.'/'.$data->tutor->photo) : asset('build/assets/images/avater.png')) }}">
+                        <img alt="{{ $data->tutor->title->name.' '.$data->tutor->first_name.' '.$data->tutor->last_name }}" class="rounded-full" src="{{ $data->tutor->photo_url }}">
                     </div>
                     <div class="ml-4 mr-auto">
                         <a href="" class="font-medium">{{ $data->tutor->full_name }}</a>
@@ -50,7 +50,7 @@
                 @if(isset($data->personalTutor) && $data->personalTutor!=null)
                 <div class="relative flex items-center sm:mt-2 w-full col-span-12">
                     <div class="w-12 h-12 flex-none image-fit">
-                        <img alt="{{ $data->personalTutor->name.' '.$data->personalTutor->first_name.' '.$data->personalTutor->last_name }}" class="rounded-full" src="{{ (isset($data->personalTutor->photo) && !empty($data->personalTutor->photo) && Storage::disk('local')->exists('public/employees/'.$data->personalTutor->id.'/'.$data->personalTutor->photo) ? Storage::disk('local')->url('public/employees/'.$data->personalTutor->id.'/'.$data->personalTutor->photo) : asset('build/assets/images/avater.png')) }}">
+                        <img alt="{{ $data->personalTutor->name.' '.$data->personalTutor->first_name.' '.$data->personalTutor->last_name }}" class="rounded-full" src="{{ $data->personalTutor->photo_url }}">
                     </div>
                     <div class="ml-4 mr-auto">
                         <a href="" class="font-medium">{{ $data->personalTutor->full_name }}</a>

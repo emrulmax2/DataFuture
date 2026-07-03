@@ -2,7 +2,7 @@
     animation: 0.4s intro-top-menu-animation ease-in-out 0.33333s;
     animation-fill-mode: forwards;
     animation-delay: 0.2s;
-    @apply z-50 relative opacity-0 pt-32 -mt-4;
+    @apply z-50 relative opacity-0 pt-4 -mt-4;
     @include media-breakpoint-down(md) {
         @apply hidden;
     }

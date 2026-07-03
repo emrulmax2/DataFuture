@@ -53,7 +53,7 @@ class Student extends Model
         if ($this->photo !== null && Storage::disk('local')->exists('public/students/'.$this->id.'/'.$this->photo)) {
             return Storage::disk('local')->url('public/students/'.$this->id.'/'.$this->photo);
         } else {
-            return asset('build/assets/images/user_avatar.png');
+            return \App\Support\Avatar::initials($this->first_name.' '.$this->last_name);
         }
     }
     public function getReferralInfoAttribute() {
@@ -387,9 +387,8 @@ class Student extends Model
     }
     public function laststuload(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);
-        return $this->hasOne(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel)->orderByDesc('id');
+        return $this->hasOne(StudentStuloadInformation::class, 'student_id')->where('student_course_relation_id', $activeCRel)->latestOfMany();
     }
-
 
     public function df(){
         $activeCRel = (isset($this->crel->id) && $this->crel->id > 0 ? $this->crel->id : 0);

@@ -10,12 +10,34 @@ use Illuminate\Http\Request;
 class EmployeePassportExpiryController extends Controller
 {
     public function index(){
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+
+        $records = EmployeeEligibilites::where('document_type', 1)->whereDate('doc_expire', '<=', $expireDate)
+                ->whereHas('employee', function($q){
+                    $q->where('status', 1);
+                })->orderBy('doc_expire', 'ASC')->get();
+
+        $exportRows = $records->map(function($rec){
+            $expiryDate = date('Y-m-d', strtotime($rec->doc_expire));
+            $days = Carbon::parse($expiryDate)->diffInDays(Carbon::now());
+            return [
+                'Name' => $rec->employee->first_name.' '.$rec->employee->last_name,
+                'Designation' => (isset($rec->employee->employment->employeeJobTitle->name) ? $rec->employee->employment->employeeJobTitle->name : ''),
+                'Passport Number' => $rec->doc_number,
+                'Expiry Date' => date('D jS M, Y', strtotime($rec->doc_expire)),
+                'Days Remaining' => $days,
+                'Status' => (date('Y-m-d') > $expiryDate ? 'Expired' : 'Due'),
+            ];
+        })->values();
+
         return view('pages.hr.portal.passport-expiry', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
-                ['label' => 'Visa Expiry', 'href' => 'javascript:void(0);']
-            ]
+                ['label' => 'Passport Expiry', 'href' => 'javascript:void(0);']
+            ],
+            'records' => $records,
+            'exportRows' => $exportRows,
         ]);
     }
 

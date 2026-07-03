@@ -1501,22 +1501,10 @@ class EmployeeHolidayController extends Controller
 
             $requestedHour += $employeeLeaveDay->hour;
             $approvedHour += ($status == 'Active' ? $employeeLeaveDay->hour : 0);
-            // $leaveDayHTML .= '<tr>'; 
-            //     $leaveDayHTML .= '<td style="padding: 5px 10px;">'.date('jS F, Y', strtotime($employeeLeaveDay->leave_date)).'</td>';
-            //     $leaveDayHTML .= '<td style="padding: 5px 10px;">'.($status == 'Active' ? '<span style="color: green;">Approved</span>' : '<span style="color: red;">Rejected</span>').'</td>';
-            //     $leaveDayHTML .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($employeeLeaveDay->hour).'</td>';
-            // $leaveDayHTML .= '</tr>';
-
-            $leaveDayHTML .= '<tr>';
-                $leaveDayHTML .= '<td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">';
-                    $leaveDayHTML .= date('jS F, Y', strtotime($employeeLeaveDay->leave_date));
-                $leaveDayHTML .= '</td>';
-                $leaveDayHTML .= '<td style="padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">';
-                    $leaveDayHTML .= '—';
-                $leaveDayHTML .= '</td>';
-                $leaveDayHTML .= '<td style="padding:13px 18px; color:'.($status == 'Active' ? '#198754' : '#dc3545').'; font-size:14px; border-bottom:1px solid #e5e7eb;">';
-                    $leaveDayHTML .= $this->calculateHourMinute($employeeLeaveDay->hour);
-                $leaveDayHTML .= '</td>';
+            $leaveDayHTML .= '<tr>'; 
+                $leaveDayHTML .= '<td style="padding: 5px 10px;">'.date('jS F, Y', strtotime($employeeLeaveDay->leave_date)).'</td>';
+                $leaveDayHTML .= '<td style="padding: 5px 10px;">'.($status == 'Active' ? '<span style="color: green;">Approved</span>' : '<span style="color: red;">Rejected</span>').'</td>';
+                $leaveDayHTML .= '<td style="padding: 5px 10px;">'.$this->calculateHourMinute($employeeLeaveDay->hour).'</td>';
             $leaveDayHTML .= '</tr>';
         endforeach;
 
@@ -1785,7 +1773,7 @@ class EmployeeHolidayController extends Controller
                 <td style="padding:34px 38px 28px 38px; font-size:15px; line-height:1.7; color:#374151; text-align:justify;">
                 
                             <p style="margin-top:0; text-align:left;">
-                                Dear <strong>'.$employeeName.'</strong>,
+                                Dear <strong>FAYE ELIZABETH MITCHAM</strong>,
                 </p>
                 
                             <p style="text-align:justify;">
@@ -1823,7 +1811,7 @@ class EmployeeHolidayController extends Controller
                                     —
                 </td>
                 <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
-                                    '.$this->calculateHourMinute($requestedHour).'
+                                    37 hours 30 minutes
                 </td>
                 </tr>
                 
@@ -1835,7 +1823,7 @@ class EmployeeHolidayController extends Controller
                                     —
                 </td>
                 <td style="padding:13px 18px; color:#166534; font-size:14px; font-weight:700; border-bottom:1px solid #e5e7eb;">
-                                    '.$this->calculateHourMinute($approvedHour). '
+                                    30 hours 00 minutes
                 </td>
                 </tr>
                 
@@ -1845,7 +1833,29 @@ class EmployeeHolidayController extends Controller
                 </td>
                 </tr>
                 
-                                '.$leaveDayHTML.'
+                                <tr>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    24-06-2026
+                </td>
+                <td style="padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    7 hours 30 minutes approved
+                </td>
+                </tr>
+                
+                                <tr>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    25-06-2026
+                </td>
+                <td style="padding:13px 8px; color:#94a3b8; font-size:14px; text-align:center; border-bottom:1px solid #e5e7eb;">
+                                    —
+                </td>
+                <td style="padding:13px 18px; color:#374151; font-size:14px; border-bottom:1px solid #e5e7eb;">
+                                    7 hours 30 minutes approved
+                </td>
+                </tr>
                 </table>
                 
                             <!-- Information Note -->

@@ -5,39 +5,47 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex items-center mt-5">
-        <h2 class="text-lg font-medium mr-auto">Vacancy List</h2>
-        <div class="ml-auto flex justify-end">
-            <button data-tw-toggle="modal" data-tw-target="#addVacancyModal" type="button" class="btn btn-primary text-white w-auto ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Vacancy</button>
+    <!-- BEGIN: Page Header -->
+    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Vacancy List</h2>
+            <p class="text-sm text-slate-400 mt-1">Open roles &amp; recruitment &middot; London Churchill College</p>
         </div>
+        <button data-tw-toggle="modal" data-tw-target="#addVacancyModal" type="button" class="btn btn-primary text-white h-[42px] text-sm"><i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Add Vacancy</button>
     </div>
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+    <!-- END: Page Header -->
+
+    <div class="intro-y box mt-5">
+        <!-- Toolbar -->
+        <div class="flex flex-col xl:flex-row xl:items-end gap-4 px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
+            <form id="tabulatorFilterForm" class="flex flex-wrap xl:flex-nowrap gap-3 items-end mr-auto">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Query</label>
+                    <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 dark:bg-darkmode-800 dark:border-darkmode-400 rounded-lg px-3 h-[42px] w-60 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-none"></i>
+                        <input id="query" name="query" type="text" class="bg-transparent border-0 outline-none text-sm text-slate-700 dark:text-slate-300 w-full placeholder:text-slate-400" placeholder="Search...">
+                    </div>
                 </div>
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                    <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400">Status</label>
+                    <select id="status" name="status" class="form-select h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-36">
                         <option value="1">Active</option>
                         <option value="0">Inactive</option>
                         <option value="2">Archived</option>
                     </select>
                 </div>
-                <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+                <div class="flex gap-2">
+                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary h-[42px] px-5 text-sm">Go</button>
+                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-outline-secondary h-[42px] px-5 text-sm">Reset</button>
                 </div>
             </form>
-            <div class="flex mt-5 sm:mt-0">
-                <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+            <div class="flex flex-wrap gap-2">
+                <button id="tabulator-print" class="btn btn-outline-secondary h-[42px] text-sm">
+                    <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Print
                 </button>
-                <div class="dropdown w-1/2 sm:w-auto mr-2">
-                    <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                <div class="dropdown">
+                    <button class="dropdown-toggle btn btn-outline-secondary h-[42px] text-sm" aria-expanded="false" data-tw-toggle="dropdown">
+                        <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-1.5"></i>
                     </button>
                     <div class="dropdown-menu w-40">
                         <ul class="dropdown-content">
@@ -56,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto scrollbar-hidden">
+        <div class="overflow-x-auto scrollbar-hidden px-5 pb-5">
             <div id="vacancyListTable" class="mt-5 table-report table-report--tabulator"></div>
         </div>
     </div>

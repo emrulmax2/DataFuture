@@ -15,37 +15,45 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
 @endif
 
 <!-- BEGIN: Top Bar -->
-<div class="top-bar-boxed {{ isset($class) ? $class : '' }} h-[70px] md:h-[65px] z-[51] border-b border-white/[0.08] mt-12 md:mt-0 -mx-3 sm:-mx-8 md:-mx-0 px-3 md:border-b-0 relative md:fixed md:inset-x-0 md:top-0 sm:px-8 md:px-10 md:pt-10 md:bg-gradient-to-b md:from-slate-100 md:to-transparent dark:md:from-darkmode-700">
+<div class="top-bar-boxed hr-topbar {{ isset($class) ? $class : '' }} h-[70px] md:h-[65px] z-[51] mt-12 md:mt-0 -mx-3 sm:-mx-8 md:-mx-0 px-3 relative md:fixed md:inset-x-0 md:top-0 sm:px-8 md:px-10">
     <div class="h-full flex items-center">
         <!-- BEGIN: Logo -->
 
         @if(Auth::guard('applicant')->check())
-            <a href="{{ route('applicant.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+            <a href="{{ route('applicant.login') }}" class="logo college-identity -intro-x hidden md:flex xl:w-auto block max-[639px]:hidden">
                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                {{-- <span class="logo__text text-white text-lg ml-3">
-                    Enigma
-                </span> --}}
+                <span class="college-identity__text">
+                    <span class="college-identity__line">LONDON</span>
+                    <span class="college-identity__line">CHURCHILL</span>
+                    <span class="college-identity__line college-identity__line--gold">COLLEGE</span>
+                </span>
             </a>
         @elseif(Auth::guard('student')->check())
-            <a href="{{ route('students.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+            <a href="{{ route('students.login') }}" class="logo college-identity -intro-x hidden md:flex xl:w-auto block max-[639px]:hidden">
                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                {{-- <span class="logo__text text-white text-lg ml-3">
-                    Enigma
-                </span> --}}
+                <span class="college-identity__text">
+                    <span class="college-identity__line">LONDON</span>
+                    <span class="college-identity__line">CHURCHILL</span>
+                    <span class="college-identity__line college-identity__line--gold">COLLEGE</span>
+                </span>
             </a>
         @elseif(Auth::guard('agent')->check())
-            <a href="{{ route('agent.login') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+            <a href="{{ route('agent.login') }}" class="logo college-identity -intro-x hidden md:flex xl:w-auto block max-[639px]:hidden">
                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                {{-- <span class="logo__text text-white text-lg ml-3">
-                    Enigma
-                </span> --}}
+                <span class="college-identity__text">
+                    <span class="college-identity__line">LONDON</span>
+                    <span class="college-identity__line">CHURCHILL</span>
+                    <span class="college-identity__line college-identity__line--gold">COLLEGE</span>
+                </span>
             </a>
         @else
-            <a href="{{ url('/') }}" class="logo -intro-x hidden md:flex xl:w-[180px] block max-[639px]:hidden">
+            <a href="{{ url('/') }}" class="logo college-identity -intro-x hidden md:flex xl:w-auto block max-[639px]:hidden">
                 <img alt="London Churchill College" class="logo__image w-auto h-12" src="{{ (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']) ? Storage::disk('local')->url('public/'.$opt['site_logo']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
-                {{-- <span class="logo__text text-white text-lg ml-3">
-                    Enigma
-                </span> --}}
+                <span class="college-identity__text">
+                    <span class="college-identity__line">LONDON</span>
+                    <span class="college-identity__line">CHURCHILL</span>
+                    <span class="college-identity__line college-identity__line--gold">COLLEGE</span>
+                </span>
             </a>
         @endif
         
@@ -351,8 +359,24 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
         @endif
         </div>
         <!-- BEGIN: Account Menu -->
-        <div class="intro-x dropdown w-8 h-8">
-            <div class="dropdown-toggle w-8 h-8 rounded-full overflow-hidden shadow-lg image-fit zoom-in scale-110" role="button" aria-expanded="false" data-tw-toggle="dropdown">
+        <div class="intro-x dropdown w-auto h-auto">
+            <div class="dropdown-toggle account-pill" role="button" aria-expanded="false" data-tw-toggle="dropdown">
+                <div class="account-pill__who hidden lg:block">
+                    @if(Auth::guard('agent')->check())
+                        <div class="account-pill__name">{{ auth('agent')->user()->email }}</div>
+                        <div class="account-pill__role">Agent User</div>
+                    @elseif(Auth::guard('applicant')->check())
+                        <div class="account-pill__name">{{ auth('applicant')->user()->email }}</div>
+                        <div class="account-pill__role">Applicant User</div>
+                    @elseif(Auth::guard('student')->check())
+                        <div class="account-pill__name">{{ auth('student')->user()->email }}</div>
+                        <div class="account-pill__role">Student User</div>
+                    @else
+                        <div class="account-pill__name">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
+                        <div class="account-pill__role">Staff User</div>
+                    @endif
+                </div>
+                <div class="account-pill__avatar image-fit">
                 @if(Auth::guard('applicant')->check())
                     <img src="{{ asset('build/assets/images/avater.png') }}">
                 @elseif(Auth::guard('student')->check())
@@ -361,9 +385,9 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                 @elseif(Auth::guard('agent')->check())
                     <img src="{{ asset('build/assets/images/avater.png') }}" >
                 @else
-                    <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ (isset($employeeUser->employee->photo) && !empty($employeeUser->employee->photo) && Storage::disk('local')->exists('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) ? Storage::disk('local')->url('public/employees/'.$employeeUser->employee->id.'/'.$employeeUser->employee->photo) : asset('build/assets/images/avater.png')) }}" />
+                    <img alt="{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}"  src="{{ $employeeUser->employee->photo_url }}" />
                 @endif
-                
+                </div>
             </div>
             <div class="dropdown-menu w-56">
                 <ul class="dropdown-content bg-primary/80 before:block before:absolute before:bg-black before:inset-0 before:rounded-md before:z-[-1] text-white">

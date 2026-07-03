@@ -6,12 +6,17 @@ use App\Models\PlansDateList;
 use App\Models\Student;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentUser;
+use App\Models\UserPrivilege;
+use App\Models\VenueIpAddress;
 use App\Observers\PlansDateListObserver;
 use App\Observers\StudentAwardingBodyDetailsObserver;
 use App\Observers\StudentUserObserver;
+use App\Services\AttendanceLiveStatsService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Illuminate\Mail\Mailer;
 use Arr;
 
@@ -69,6 +74,36 @@ class AppServiceProvider extends ServiceProvider
         StudentUser::observe(StudentUserObserver::class);
         
         Schema::defaultStringLength(191);
+
+        View::composer('layout.top-menu', function ($view) {
+            $shared = [
+                'home_work' => false,
+                'desktop_login' => false,
+                'home_work_statistics' => '',
+                'venue_ips' => ['62.31.168.43', '79.171.153.100', '149.34.178.243'],
+            ];
+
+            if (Auth::check() && isset(Auth::user()->id)) {
+                $workHome = UserPrivilege::where('user_id', Auth::user()->id)
+                    ->where('category', 'remote_access')
+                    ->where('name', 'work_home')
+                    ->first();
+
+                $desktopLogin = UserPrivilege::where('user_id', Auth::user()->id)
+                    ->where('category', 'remote_access')
+                    ->where('name', 'desktop_login')
+                    ->first();
+
+                $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
+
+                $shared['home_work'] = isset($workHome->access) && (int) $workHome->access === 1;
+                $shared['desktop_login'] = isset($desktopLogin->access) && (int) $desktopLogin->access === 1;
+                $shared['home_work_statistics'] = app(AttendanceLiveStatsService::class)->getUserAttendanceLiveStatistics();
+                $shared['venue_ips'] = !empty($ips) ? $ips : $shared['venue_ips'];
+            }
+
+            $view->with($shared);
+        });
         
     }
 }

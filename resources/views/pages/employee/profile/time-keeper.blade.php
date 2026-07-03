@@ -1,15 +1,19 @@
-@extends('../layout/' . $layout)
+@extends('../layout/employee-profile')
 
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
 
 @section('subcontent')
-    
-    @include('pages.employee.profile.title-info')
+
+@include('pages.employee.profile.partials.cover-header')
+
+@include('pages.employee.profile.partials.side-tabs')
+
+<div class="ep-grid">
+    <div class="ep-col">
 
     <!-- BEGIN: Profile Info -->
-    @include('pages.employee.profile.show-info')
     <!-- END: Profile Info -->
 
     <div class="intro-y box p-5 mt-5">
@@ -27,7 +31,7 @@
                     @foreach($empAttendances as $year_id => $year)
                         <div class="lcc_accordion_item mb-1">
                             <button class="lcc_accordion_button relative w-full text-lg font-semibold bg-slate-100 p-5 text-left" type="button" data-target="#employeeTKYear_{{ $year_id }}">
-                                Year: {{ date('Y', strtotime($year['start_date'])).' - '.date('y', strtotime($year['end_date'])) }} 
+                                Year: {{ date('Y', strtotime($year['start_date'])).' - '.date('y', strtotime($year['end_date'])) }}
                                 <span class="accordionCollaps"></span>
                             </button>
                             <div id="employeeTKYear_{{ $year_id }}" class="lcc_accordion_body text-slate-600 dark:text-slate-500 leading-relaxed p-5" style="display: none;">
@@ -36,183 +40,65 @@
                                         @foreach($year['month'] as $key => $month)
                                             <div class="lcc_month_accordion_item mb-1">
                                                 <button data-year="{{ $year_id }}" data-employee="{{ $employee->id }}" data-date="{{ $month['start_date'] }}" class="lcc_month_accordion_button lccEmpTimeKeepingBtn relative w-full text-lg font-semibold bg-slate-100 p-5 text-left" type="button" data-target="#employeeTKMonth_{{ $year_id }}_{{ $key }}">
-                                                    {{ date('F Y', strtotime($month['start_date'])) }} 
+                                                    {{ date('F Y', strtotime($month['start_date'])) }}
                                                     <span class="accordionCollaps"></span>
                                                 </button>
                                                 <div id="employeeTKMonth_{{ $year_id }}_{{ $key }}" class="lcc_month_accordion_body text-slate-600 dark:text-slate-500 leading-relaxed p-5" style="display: none;">
                                                     @if(!empty($month['attendances']))
-                                                        <div class="grid grid-cols-12 gap-0">
-                                                            <div class="col-span-12 text-right mb-5">
-                                                                <a href="{{ route('employee.time.keeper.download.pdf', [$employee->id, $month['start_date'], $year_id]) }}" class="btn btn-success text-white"><i data-lucide="printer" class="w-4 h-4 mr-2"></i> Download PDF</a>
+                                                        <div class="ep-tk-card">
+                                                            <div class="ep-tk-card__head">
+                                                                <div class="ep-tk-card__titles">
+                                                                    <div class="ep-tk-card__title">{{ date('F Y', strtotime($month['start_date'])) }}</div>
+                                                                    <div class="ep-tk-card__sub">{{ $employee->full_name }} &middot; Time recorded</div>
+                                                                </div>
+                                                                <a href="{{ route('employee.time.keeper.download.pdf', [$employee->id, $month['start_date'], $year_id]) }}" class="ep-tk-pdf">
+                                                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                                    <span>Download PDF</span>
+                                                                </a>
                                                             </div>
-                                                        </div>
-                                                        <div class="overflow-x-auto">
-                                                            <table class="table table-bordered attendanceDetailsTable">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th class="whitespace-nowrap">Date</th>
-                                                                        <th class="whitespace-nowrap">Contracted Hour</th>
-                                                                        <th class="whitespace-nowrap">Status</th>
-                                                                        <th class="whitespace-nowrap">Rate</th>
-                                                                        <th class="whitespace-nowrap">Working Hour</th>
-                                                                        <th class="whitespace-nowrap">Holiday Hour</th>
-                                                                        <th class="whitespace-nowrap">Pay</th>
-                                                                        <th class="whitespace-nowrap">Clock In - Out</th>
-                                                                        <th class="whitespace-nowrap">Break</th>
-                                                                        <th class="whitespace-nowrap">Note</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <td colspan="10">
-                                                                            <div class="flex flex-col justify-center items-center">
-                                                                                <i data-loading-icon="tail-spin" class="w-20 h-20"></i>
-                                                                                <div class="text-center font-medium mt-2">Loading...</div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                                <tfoot>
-                                                                    <tr>
-                                                                        <th colspan="4"></th>
-                                                                        <th class="tfootTotalWorkingHour"></th>
-                                                                        <th class="tfootTotalHolidayHour"></th>
-                                                                        <th class="tfootTotalPay"></th>
-                                                                        <th colspan="3"></th>
-                                                                    </tr>
-                                                                </tfoot>
-                                                            </table>
-                                                        </div>
-                                                        {{--<div class="overflow-x-auto">
-                                                            <table class="table table-bordered table-sm">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th class="whitespace-nowrap">Date</th>
-                                                                        <th class="whitespace-nowrap">Status</th>
-                                                                        <th class="whitespace-nowrap">Note</th>
-                                                                        <th class="whitespace-nowrap">Clock In - Out</th>
-                                                                        <th class="whitespace-nowrap">Break</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    @foreach($month['attendances'] as $attn)
-                                                                        @php 
-                                                                            $note = [];
-                                                                            $clockin_punch = (isset($attn->clockin_punch) && !empty($attn->clockin_punch) && $attn->clockin_punch != '00:00' ? $attn->clockin_punch.':00' : '');
-                                                                            $clockin_contract = (isset($attn->clockin_contract) && !empty($attn->clockin_contract) && $attn->clockin_contract != '00:00' ? $attn->clockin_contract.':00' : '');
-                                                                            $clockin_system = (isset($attn->clockin_system) && !empty($attn->clockin_system) && $attn->clockin_system != '00:00' ? $attn->clockin_system.':00' : '');
-                                                                            
-                                                                            $clockout_punch = (isset($attn->clockout_punch) && !empty($attn->clockout_punch) && $attn->clockout_punch != '00:00' ? $attn->clockout_punch.':00' : '');
-                                                                            $clockout_contract = (isset($attn->clockout_contract) && !empty($attn->clockout_contract) && $attn->clockout_contract != '00:00' ? $attn->clockout_contract.':00' : '');
-                                                                            $clockout_system = (isset($attn->clockout_system) && !empty($attn->clockout_system) && $attn->clockout_system != '00:00' ? $attn->clockout_system.':00' : '');
-                                                                            if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status)) && $attn->overtime_status != 1):
-                                                                                if(!empty($clockin_punch) && !empty($clockin_contract)):
-                                                                                    $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
-                                                                                    if($clockin_punch > $lastIn):
-                                                                                        $note[] = 'Late - '.$clockin_punch.' - '.$lastIn;
-                                                                                    endif;
-                                                                                endif;
-                                                                                if(!empty($clockout_punch) && !empty($clockout_contract)):
-                                                                                    $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
-                                                                                    if($clockout_punch < $earlyLeave):
-                                                                                        $note[] = 'Leave Early';
-                                                                                    endif;
-                                                                                elseif(empty($clockout_punch) && !empty($clockout_contract)):
-                                                                                    $note[] = 'Clock Out Not Found';
-                                                                                endif;
-                                                                                if(empty($attn->total_break) || $attn->total_break == 0):
-                                                                                    $note[] = 'Break Not Found';
-                                                                                endif;
-                                                                            elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && ($attn->leave_status == 1 && !empty($attn->leave_status)) && $attn->overtime_status != 1):
-                                                                                if(!empty($clockin_punch) && !empty($clockin_contract)):
-                                                                                    $lastIn = date('H:i', strtotime('+'.$clockin.' minutes', strtotime($clockin_contract))).':00';
-                                                                                    if($clockin_punch > $lastIn):
-                                                                                        $note[] = 'Late';
-                                                                                    endif;
-                                                                                endif;
-                                                                                if(!empty($clockout_punch) && !empty($clockout_contract)):
-                                                                                    $earlyLeave = date('H:i', strtotime('-'.$clockout.' minutes', strtotime($clockout_contract))).':00';
-                                                                                    if($clockout_punch < $earlyLeave):
-                                                                                        $note[] = 'Leave Early';
-                                                                                    endif;
-                                                                                elseif(empty($clockout_punch) && !empty($clockout_contract)):
-                                                                                    $note[] = 'Clock Out Not Found';
-                                                                                endif;
-                                                                                if(empty($attn->total_break) || $attn->total_break == 0):
-                                                                                    $note[] = 'Break Not Found';
-                                                                                endif;
-                                                                                if($attn->leave_status == 1):
-                                                                                    $note[] = 'Holiday / Vacation'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                                endif;
-                                                                            elseif($attn->leave_status == 1 && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00')):
-                                                                                $note[] = 'Holiday / Vacation'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                            elseif($attn->leave_status == 2):
-                                                                                $note[] = 'Unauthorised Absent'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                            elseif($attn->leave_status == 5):
-                                                                                $note[] = 'Authorised Paid'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                            elseif($attn->leave_status == 4):
-                                                                                $note[] = 'Authorised Unpaid'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                            elseif($attn->leave_status == 3):
-                                                                                $note[] = 'Sick'.(isset($attn->leaveDay->leave->note) && !empty($attn->leaveDay->leave->note) ? ': '.$attn->leaveDay->leave->note : '');
-                                                                            elseif($attn->overtime_status = 1):
-                                                                                $note[] = 'Overtime';
-                                                                            endif;
-                                                                        @endphp
-                                                                        <tr class="timeKeepingRow timeKeepingRow_{{ ($attn->leave_status > 0 ? $attn->leave_status : ($attn->overtime_status == 1 ? 'ov' : 0)) }}" data-id="{{ $attn->id }}">
-                                                                            <td class="font-medium w-72">
-                                                                                {{ date('jS F, Y, l', strtotime($attn->date)) }}<br/>
-                                                                                {{ (isset($attn->clockin_contract) && !empty($attn->clockin_contract) ? $attn->clockin_contract : '').(isset($attn->clockout_contract) && !empty($attn->clockout_contract) ? ' - '.$attn->clockout_contract : '') }}
-                                                                            </td>
-                                                                            <td>
-                                                                                @if($attn->total_work_hour > 0 && ($attn->leave_status == 0 || empty($attn->leave_status)))
-                                                                                    Worked: {{ $attn->work_hour }}
-                                                                                @elseif($attn->total_work_hour > 0 && (!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && ($attn->leave_status == 1) && !empty($attn->leave_status)))
-                                                                                    Worked: {{ $attn->work_hour }}<br/>
-                                                                                    Holiday: {{ $attn->leaves_hour }}
-                                                                                @elseif($attn->leave_status == 1 && (empty($attn->clockin_punch) || $attn->clockin_punch == '00:00'))
-                                                                                    Holiday: {{ $attn->leaves_hour }}
-                                                                                @elseif($attn->leave_status == 5)
-                                                                                    Authorised Paid: {{ $attn->leaves_hour }}
-                                                                                @elseif($attn->leave_status == 4)
-                                                                                    Authorise Unpaid
-                                                                                @elseif($attn->leave_status == 3)
-                                                                                    Sick
-                                                                                @elseif($attn->leave_status == 2)
-                                                                                    Unauthorised Absent
-                                                                                @endif
-                                                                            </td>
-                                                                            <td>
-                                                                                {{ implode(', ', $note) }}
-                                                                            </td>
-                                                                            <td>
-                                                                                @if($attn->total_work_hour > 0 && ($attn->clockin_punch != '' && $attn->clockin_punch != '00:00'))
-                                                                                    {{ 'A: '.$attn->clockin_punch.' - '.$attn->clockout_punch }}<br/>
-                                                                                    {{ 'S: '.$attn->clockin_system.' - '.$attn->clockout_system }}
-                                                                                @endif
-                                                                            </td>
-                                                                            <td>
-                                                                                @if((!empty($attn->clockin_punch) && $attn->clockin_punch != '00:00') && $attn->total_work_hour > 0)
-                                                                                    {{ $attn->break_time }}
-                                                                                @endif
-                                                                            </td>
+                                                                <table class="ep-tk-table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th class="ep-tk-th">Date</th>
+                                                                            <th class="ep-tk-th">Status</th>
+                                                                            <th class="ep-tk-th">Clock in &rarr; out</th>
+                                                                            <th class="ep-tk-th ep-tk-th--num">Break</th>
+                                                                            <th class="ep-tk-th ep-tk-th--num">Contracted</th>
+                                                                            <th class="ep-tk-th ep-tk-th--num">Worked</th>
+                                                                            <th class="ep-tk-th ep-tk-th--num">Holiday</th>
+                                                                            <th class="ep-tk-th ep-tk-th--num">Pay</th>
+                                                                            <th class="ep-tk-th">Notes</th>
                                                                         </tr>
-                                                                    @endforeach
-                                                                </tbody>
-                                                            </table>
-                                                        </div>--}}
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr class="ep-tk-loading">
+                                                                            <td class="ep-tk-td"><span class="ep-tk-spinner"></span> Loading timesheet&hellip;</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                        <tr class="ep-tk-foot">
+                                                                            <td class="ep-tk-foot__title">{{ date('F Y', strtotime($month['start_date'])) }} totals</td>
+                                                                            <td class="ep-tk-foot__stat"><span class="ep-tk-foot__k">Worked</span><span class="ep-tk-foot__v tfootTotalWorkingHour">00:00</span></td>
+                                                                            <td class="ep-tk-foot__stat"><span class="ep-tk-foot__k">Holiday</span><span class="ep-tk-foot__v tfootTotalHolidayHour">00:00</span></td>
+                                                                            <td class="ep-tk-foot__stat ep-tk-foot__stat--pay"><span class="ep-tk-foot__k">Gross pay</span><span class="ep-tk-foot__v tfootTotalPay">&pound;0.00</span></td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            
+                                                        </div>
                                                     @endif
                                                 </div>
-                                            </div>  
+                                            </div>
                                         @endforeach
                                     </div>
-                                @else 
+                                @else
 
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 </div>
-            @else 
+            @else
 
             @endif
         </div>
@@ -255,6 +141,8 @@
         </div>
     </div>
     <!-- END: Warning Modal Content -->
+</div>
+</div>
 @endsection
 
 @section('script')
