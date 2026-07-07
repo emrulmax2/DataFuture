@@ -100,6 +100,7 @@ class StudentResultController extends Controller
         
         return view('pages.students.live.result.index', [
             'title' => 'Students - Results',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Results', 'href' => 'javascript:void(0);'],
@@ -136,6 +137,7 @@ class StudentResultController extends Controller
         $dataPrevious = [];
         $termSetPrevious = [];
         $courseCreation = "";
+        $courseCreationStart = "";
         foreach($QueryInner as $list):
             $moduleCreation = ModuleCreation::with('module','level')->where('id',$list->module_creation_id)->get()->first();
             $uniqueLevelArry = $moduleCreation->pluck('module_level_id')->unique()->toArray();
@@ -182,9 +184,63 @@ class StudentResultController extends Controller
 
         }
 
-        $pdf = PDF::loadView('pages.students.live.result.pdf.index', compact('data', 'termSet', 'student', 'grades','level_list','dataPrevious','termSetPrevious','courseCreationStart'));
+        $logo = public_path('build/assets/images/LCC-logo.png');
+        $gradient = $this->buildGradientBar();
+        $pdf = PDF::loadView('pages.students.live.result.pdf.index', compact('data', 'termSet', 'student', 'grades','level_list','dataPrevious','termSetPrevious','courseCreationStart','logo','gradient'))
+                    ->setPaper('a4');
         return $pdf->download('student_result.pdf');
-        
+
+    }
+
+    /**
+     * Build the gold -> red -> teal gradient rule used on the transcript header
+     * as a base64 PNG. dompdf's CSS linear-gradient support is unreliable, so we
+     * render an actual image and stretch it to full width in the view.
+     */
+    protected function buildGradientBar()
+    {
+        if (!function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $width = 900;
+        $height = 6;
+        $img = imagecreatetruecolor($width, $height);
+
+        // Stops: position (0..1) => [r, g, b]
+        $stops = [
+            [0.00, [0xc9, 0x99, 0x2e]], // gold
+            [0.55, [0xa3, 0x16, 0x21]], // red
+            [1.00, [0x0b, 0x6b, 0x66]], // teal
+        ];
+
+        for ($x = 0; $x < $width; $x++) {
+            $t = $x / ($width - 1);
+            // Locate the surrounding stops.
+            $lo = $stops[0];
+            $hi = $stops[count($stops) - 1];
+            for ($i = 0; $i < count($stops) - 1; $i++) {
+                if ($t >= $stops[$i][0] && $t <= $stops[$i + 1][0]) {
+                    $lo = $stops[$i];
+                    $hi = $stops[$i + 1];
+                    break;
+                }
+            }
+            $span = ($hi[0] - $lo[0]) ?: 1;
+            $f = ($t - $lo[0]) / $span;
+            $r = (int) round($lo[1][0] + ($hi[1][0] - $lo[1][0]) * $f);
+            $g = (int) round($lo[1][1] + ($hi[1][1] - $lo[1][1]) * $f);
+            $b = (int) round($lo[1][2] + ($hi[1][2] - $lo[1][2]) * $f);
+            $col = imagecolorallocate($img, $r, $g, $b);
+            imageline($img, $x, 0, $x, $height - 1, $col);
+        }
+
+        ob_start();
+        imagepng($img);
+        $png = ob_get_clean();
+        imagedestroy($img);
+
+        return 'data:image/png;base64,' . base64_encode($png);
     }
 
  /**

@@ -6,172 +6,176 @@
 
 @section('subcontent')
 
-    <!-- BEGIN: Profile Info -->
+    <!-- BEGIN: Profile Info (navy hero + course sub-tabs) -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <!-- BEGIN: Term Sales -->
-      @php $termstart=0 @endphp
-      @if(isset($termSet))
-          @foreach($termSet as $term)
-                  
-              @php $termstart++; $planId=1; @endphp
-              <div class="intro-y box col-span-12 p-5 mt-5  ">
-                  <div class="flex flex-col md:flex-row items-center px-5 py-5 sm:py-3  border-slate-200/60 bg-cyan-600 text-slate-100 rounded-tl rounded-tr">
-                      @php
+    @php
+        // Rating label -> [accent, header background tint, header border]
+        $ratingTint = function ($label) {
+            $l = strtolower($label ?? '');
+            if (str_contains($l, 'good'))     return ['#0B6B66', '#E9F4F2', '#CBE3DF'];
+            if (str_contains($l, 'standard')) return ['#8A6D1F', '#FAF3E1', '#EAD9A8'];
+            return ['#B3392E', '#FBEDEB', '#F0C7C2']; // requires improvement / other
+        };
+        // Achieved vs expected -> bar colour band
+        $bandColor = function ($a, $e) {
+            $p = $e > 0 ? $a / $e : 0;
+            return $p >= 0.7 ? '#0B6B66' : ($p >= 0.4 ? '#8A6D1F' : '#B3392E');
+        };
+        // Bar width, min 2% so a sliver always shows
+        $barW = function ($a, $e) {
+            return ($e > 0 ? max(($a / $e) * 100, 2) : 2) . '%';
+        };
+        $gradeMeta = [
+            'P' => ['#0B6B66', '#E5F2F0'],
+            'M' => ['#8A6D1F', '#F4EBD6'],
+            'D' => ['#0F252D', '#E2E8E9'],
+        ];
+    @endphp
 
-                          $avarageAttendance = isset($termAttendanceCount[$term->id]['avg']) ? round($termAttendanceCount[$term->id]['avg']) : 0;
-                          
-                          $attendanceCriteriaFound = \App\Models\AttendanceCriteria::where('range_from', '<=', $avarageAttendance)
-                          ->where('range_to', '>=', $avarageAttendance)
-                          ->first();
-                      
-                          $attendance_criteria = isset($attendanceCriteriaFound->id) ? round($attendanceCriteriaFound->point) : 0;
-                          
-                          if(isset($perTermModuleCriteria[$term->id])):
-                              $achivedResult = $perTermModuleCriteria[$term->id];
-                              $expectedResult = $perTermTopSet[$term->id];
-                              $achivedPerformance = $attendance_criteria +  $perTermModuleCriteria[$term->id]; 
-                              $expectedPerformance = $TopAttendanceCriteria +  $perTermTopSet[$term->id];
-                          else:
-                              $achivedPerformance = 0;
-                              $expectedPerformance = 0;
-                              $achivedResult = 0;
-                              $expectedResult = 0;
-                          endif;
-                          if($expectedPerformance!=0)
-                            $avgPerformance = number_format(($achivedPerformance/$expectedPerformance)*100,2);
-                          else 
-                             $avgPerformance = 0;
-                          $performanceOutput = \App\Models\TermPerformanceCriteria::where('range_from', '<=', $avgPerformance)
-                          ->where('range_to', '>=', $avgPerformance)
-                          ->first();
-                      
+    <!-- BEGIN: Term Performance -->
+    @if(isset($termSet) && count($termSet))
+        <div class="intro-y mt-5 student-performance-page" style="display:flex; flex-direction:column; gap:14px; margin-top:16px;">
+            @foreach($termSet as $term)
+                @php
+                    $avarageAttendance = isset($termAttendanceCount[$term->id]['avg']) ? round($termAttendanceCount[$term->id]['avg']) : 0;
 
-                      @endphp
-                      <h2 class="font-medium text-base mr-auto text-center md:text-left ">{{ $term->name }} 
-                          
-                          <div class="font-medium dark:text-slate-500 {{ ($avarageAttendance>79)? "bg-green-700" : "bg-warning" }} {{ ($avarageAttendance>79)? "text-white" : "text-white" }} rounded px-2 mt-1.5  w-{{ $avarageAttendance/5 }} inline-flex item-center">{{ $avarageAttendance }}%</div>
-                          
-                          <div class="font-medium dark:text-slate-500 bg-cyan-900 text-white rounded px-2 mt-1.5  w-{{ ($avgPerformance>45) ? $avgPerformance/2 : 60 }} inline-flex item-center">{{ $performanceOutput->label}} {{ $avgPerformance }}%</div>
-                          
-                          <div class="text-slate-100 sm:mr-5 ml-auto text-sm mt-2">Attendnace Performacne {{ $attendance_criteria }}/ {{ $TopAttendanceCriteria }} </div>
-                      </h2>
-                      
-                      <div class="font-medium text-base sm:mr-5 md:ml-auto">
-                          Term Performance: {{ $attendance_criteria +  $achivedResult }}/{{ $TopAttendanceCriteria +  $expectedResult }}
-                          
-                      </div>
-                  </div>
-                  <div class="w-full py-3 border-cyan-600 border-2 rounded-b-lg bg-transparent h-full">
-                      <div class="w-full px-5 py-3  text-xl">
-                          <div class="grid grid-cols-12 gap-4 md:items-center">
-                              <div class="col-span-12 md:col-span-4 font-medium md:ml-2 md:py-3">Expected Performance</div>
-                              <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                  <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                      <div class="bg-info h-2.5 rounded-full " style="width: 100%"></div> <!-- Adjust width as needed -->
-                                  </div>   
-                              </div>
-                              <div class="col-span-1 ml-auto md:py-3 -mt-2 md:mt-0 font-medium ">{{ $TopAttendanceCriteria +  $expectedResult }}</div>
-                          </div>
-                          <div class="grid grid-cols-12 gap-4 md:items-center">
-                              <div class="col-span-12 md:col-span-4 font-medium md:ml-2 md:py-3">Achieved Performance</div>
-                              <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                  <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                      <div class="bg-{{ $performanceOutput->color }} h-2.5 rounded-full " style="width: {{ $avgPerformance }}%"></div> <!-- Adjust width as needed -->
-                                  </div>   
-                              </div>
-                              <div class="col-span-1 ml-auto md:py-3 -mt-2 md:mt-0 font-medium ">{{ $attendance_criteria +  $achivedResult }}</div>
-                          </div>
-                      </div>
-                      <div class="grid grid-cols-12 gap-4 mx-5 my-3">
-                          <div class="col-span-12 md:col-span-6">
-                              <div class="flex items-center px-5 py-5 sm:py-3 border-slate-200/60 bg-cyan-600 text-slate-100 rounded-tl rounded-tr w-full">
-                                  <h2 class="font-medium text-base mr-auto">Attendance Performance</h2>
-                              </div>
-                              <div class="w-full px-5 py-3 border-cyan-600 border-2 rounded-b-md bg-transparent text-sm">
-                                  <div class="grid grid-cols-12 gap-1 md:gap-4 md:items-center">
-                                      <div class="col-span-12 md:col-span-4 font-medium ml-2 py-3">Attendance Expected</div>
-                                      <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                          <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                              <div class="bg-info h-2.5 rounded-full " style="width: 100%"></div> <!-- Adjust width as needed -->
-                                          </div>  
-                                      </div>
-                                      <div class="col-span-1 ml-auto md:py-3 -mt-1 md:mt-0 font-medium ">{{ $TopAttendanceCriteria }} </div>
-                                  </div>
-                                  <div class="grid grid-cols-12 gap-1 md:gap-4 md:items-center">
-                                      <div class="col-span-12 md:col-span-4 font-medium ml-2 py-3">Attendance Achieved</div>
-                                      <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                          <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                              <div class="bg-success h-2.5 rounded-full " style="width: {{  (isset($TopAttendanceCriteria) && $TopAttendanceCriteria>0) ? number_format(($attendance_criteria/$TopAttendanceCriteria)*100,2) : 0 }}%"></div> <!-- Adjust width as needed -->
-                                          </div>  
-                                      </div>
-                                          <div class="col-span-1 ml-auto md:py-3 -mt-1 md:mt-0 font-medium ">{{ $attendance_criteria }}</div>
-                                  </div>
-                              </div>
-                          </div>
-                          <div class="col-span-12 md:col-span-6">
-                              <div class="flex items-center px-5 py-5 sm:py-3 border-slate-200/60 bg-cyan-600 text-slate-100 rounded-tl rounded-tr w-full">
-                                  <h2 class="font-medium text-base mr-auto">Academic Performance</h2>
-                              </div>
-                              <div class="w-full px-5 py-3 border-cyan-600 border-2 rounded-b-md bg-transparent">
-                                  <div class="grid grid-cols-12 gap1 md:gap-4 md:items-center">
-                                      <div class="col-span-12 md:col-span-4 font-medium ml-2 py-3">Result Expected</div>
-                                      <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                          <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                              <div class="bg-info h-2.5 rounded-full " style="width: 100%"></div> <!-- Adjust width as needed -->
-                                          </div>  
-                                      </div>
-                                      <div class="col-span-1 font-medium ml-2 md:py-3 -mt-1 md:mt-0">{{ $expectedResult }}</div>
-                                  </div>
-                                  <div class="grid grid-cols-12 gap-1 md:gap-4 md:items-center">
-                                      <div class="col-span-12 md:col-span-4 font-medium ml-2 py-3">Result Achieved</div>
-                                      <div class="col-span-11 md:col-span-7 md:ml-auto md:py-3">
-                                          <div class="md:w-96 bg-gray-200 rounded-full h-2.5">
-                                              <div class="bg-success h-2.5 rounded-full " style="width: {{ isset($expectedResult) && $expectedResult>0 ? number_format(($achivedResult/$expectedResult)*100,2) : 0 }}%"></div> <!-- Adjust width as needed -->
-                                          </div> 
-                                      </div>
-                                      <div class="col-span-1 font-medium ml-2 md:py-3 -mt-1 md:mt-0">{{ $achivedResult }}</div> 
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                      @if(isset($results[$term->id]))
-                      <div class="grid grid-cols-12 gap-4 mx-5 my-3">
-                          <div class="col-span-12">
-                              <table class="w-full">
-                                  <thead>
-                                      <tr>
-                                          <th colspan="3" class="text-right font-medium px-5 py-3 border-0 dark:border-darkmode-300 md:whitespace-nowrap">Academic Performance</th>
-                                      </tr>
-                                      <tr>
-                                          <th colspan="3" class="text-right font-medium px-5 py-3 border-0 dark:border-darkmode-300 md:whitespace-nowrap">{{ $achivedResult }} / {{ $expectedResult }}</th>
-                                      </tr>
-                                  </thead>
-                                  <tbody>
-                                      @foreach($results[$term->id] as $moduleName => $result)
-                                          <tr>
-                                              <td class="md:px-5 py-3 border-0 dark:border-darkmode-300 md:whitespace-nowrap"><i data-lucide="check-circle" class="text-green-600 w-5 h-5 md:mr-2 md:ml-2 inline-flex"></i> {{ $result['module'] }}</td>
-                                              <td class="px-5 py-3 border-0 dark:border-darkmode-300 md:whitespace-nowrap text-right 
-                                              {{ empty($result['grade']) ? 'hidden md:table-cell' : '' }}">
-                                              {{ $result['grade'] }}
-                                          </td>
-                                          <td class="px-5 py-3 border-0 dark:border-darkmode-300 md:whitespace-nowrap text-right 
-                                              {{ empty($result['academic_criteria']) ? 'hidden md:table-cell' : '' }}">
-                                              {{ $result['academic_criteria'] }}
-                                          </td>
-                                          </tr>
-                                      @endforeach
-                                  </tbody>
-                              </table>
-                          </div>
-                      </div>
-                      @endif
-                  </div>
-              </div>
-          @endforeach
-      @endif
-    <!-- END: Term Info -->
+                    $attendanceCriteriaFound = \App\Models\AttendanceCriteria::where('range_from', '<=', $avarageAttendance)
+                        ->where('range_to', '>=', $avarageAttendance)
+                        ->first();
+                    $attendance_criteria = isset($attendanceCriteriaFound->id) ? round($attendanceCriteriaFound->point) : 0;
+
+                    if(isset($perTermModuleCriteria[$term->id])):
+                        $achivedResult       = $perTermModuleCriteria[$term->id];
+                        $expectedResult      = $perTermTopSet[$term->id];
+                        $achivedPerformance  = $attendance_criteria + $perTermModuleCriteria[$term->id];
+                        $expectedPerformance = $TopAttendanceCriteria + $perTermTopSet[$term->id];
+                    else:
+                        $achivedPerformance = 0; $expectedPerformance = 0; $achivedResult = 0; $expectedResult = 0;
+                    endif;
+
+                    $avgPerformance = $expectedPerformance != 0 ? number_format(($achivedPerformance / $expectedPerformance) * 100, 2) : 0;
+
+                    $performanceOutput = \App\Models\TermPerformanceCriteria::where('range_from', '<=', $avgPerformance)
+                        ->where('range_to', '>=', $avgPerformance)
+                        ->first();
+
+                    // ---- derived display values ----
+                    [$accent, $hdrBg, $hdrBorder] = $ratingTint($performanceOutput->label ?? '');
+                    $rating       = $performanceOutput->label ?? 'N/A';
+                    $termPerf     = $achivedPerformance . '/' . $expectedPerformance;
+                    $overallWidth = ($expectedPerformance > 0 ? max(($achivedPerformance / $expectedPerformance) * 100, 2) : 2) . '%';
+                    $attColor     = $bandColor($attendance_criteria, $TopAttendanceCriteria);
+                    $acaColor     = $bandColor($achivedResult, $expectedResult);
+                    $attWidth     = $barW($attendance_criteria, $TopAttendanceCriteria);
+                    $acaWidth     = $barW($achivedResult, $expectedResult);
+                    $moduleCount  = isset($results[$term->id]) ? count($results[$term->id]) : 0;
+                @endphp
+
+                <div class="intro-y" style="background:#fff; border-radius:12px; border:1px solid #E5EBEC; overflow:hidden;">
+
+                    <!-- Term header -->
+                    <div style="display:flex; align-items:center; gap:12px; padding:13px 24px; background:{{ $hdrBg }}; border-bottom:1px solid {{ $hdrBorder }}; box-shadow:inset 0 3px 0 {{ $accent }}; flex-wrap:wrap;">
+                        <div style="font-size:14px; font-weight:700; color:#152528;">{{ $term->name }}</div>
+                        <span style="display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:{{ $accent }}; background:#fff; padding:3px 11px; border-radius:999px;">
+                            <span style="width:5px; height:5px; border-radius:50%; background:{{ $accent }};"></span>{{ $rating }} &middot; {{ $avgPerformance }}%
+                        </span>
+                        <span style="font-size:11.5px; color:#5B6E72;">Attendance {{ $avarageAttendance }}%</span>
+                        <div style="margin-left:auto; display:flex; align-items:baseline; gap:7px;">
+                            <span style="font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:#7C8D91; font-weight:700;">Term Performance</span>
+                            <span style="font-size:16px; font-weight:700; color:{{ $accent }};">{{ $termPerf }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Metric bars -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; border-bottom:1px solid #EDF1F2;">
+
+                        <!-- Overall -->
+                        <div style="padding:14px 20px 16px 24px; border-right:1px solid #EDF1F2;">
+                            <div style="font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:#7C8D91; font-weight:700; margin-bottom:10px;">Overall</div>
+                            <div style="display:flex; flex-direction:column; gap:9px;">
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Expected</span><span style="margin-left:auto; font-weight:700;">{{ $expectedPerformance }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:#B7C8CC; width:100%;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Achieved</span><span style="margin-left:auto; font-weight:700; color:{{ $accent }};">{{ $achivedPerformance }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:{{ $accent }}; width:{{ $overallWidth }};"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Attendance Performance -->
+                        <div style="padding:14px 20px 16px; border-right:1px solid #EDF1F2;">
+                            <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:10px;">
+                                <div style="font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:#7C8D91; font-weight:700;">Attendance Performance</div>
+                                <span style="font-size:12px; font-weight:700; color:{{ $attColor }};">{{ $attendance_criteria }}/{{ $TopAttendanceCriteria }}</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:9px;">
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Expected</span><span style="margin-left:auto; font-weight:700;">{{ $TopAttendanceCriteria }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:#B7C8CC; width:100%;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Achieved</span><span style="margin-left:auto; font-weight:700; color:{{ $attColor }};">{{ $attendance_criteria }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:{{ $attColor }}; width:{{ $attWidth }};"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Performance -->
+                        <div style="padding:14px 24px 16px 20px;">
+                            <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:10px;">
+                                <div style="font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:#7C8D91; font-weight:700;">Academic Performance</div>
+                                <span style="font-size:12px; font-weight:700; color:{{ $acaColor }};">{{ $achivedResult }}/{{ $expectedResult }}</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:9px;">
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Result expected</span><span style="margin-left:auto; font-weight:700;">{{ $expectedResult }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:#B7C8CC; width:100%;"></div></div>
+                                </div>
+                                <div>
+                                    <div style="display:flex; font-size:11.5px; margin-bottom:4px;"><span style="color:#5B6E72;">Result achieved</span><span style="margin-left:auto; font-weight:700; color:{{ $acaColor }};">{{ $achivedResult }}</span></div>
+                                    <div style="height:6px; border-radius:999px; background:#EEF2F3;"><div style="height:100%; border-radius:999px; background:{{ $acaColor }}; width:{{ $acaWidth }};"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modules -->
+                    @if(isset($results[$term->id]))
+                        <div style="padding:12px 24px 16px;">
+                            <div style="display:flex; align-items:center; gap:8px; padding-bottom:8px;">
+                                <div style="font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:#7C8D91; font-weight:700;">Modules this term</div>
+                                <span style="font-size:10.5px; font-weight:700; color:#9AA7AA; background:#EEF2F3; padding:1px 7px; border-radius:999px;">{{ $moduleCount }}</span>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 24px;">
+                                @foreach($results[$term->id] as $moduleName => $result)
+                                    @php
+                                        $gm = !empty($result['grade']) ? ($gradeMeta[$result['grade']] ?? ['#43585D', '#EEF2F3']) : null;
+                                    @endphp
+                                    <div style="display:flex; align-items:center; gap:9px; padding:5px 0; font-size:12.5px;">
+                                        <span style="width:16px; height:16px; border-radius:50%; background:#E5F2F0; color:#0B6B66; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                                        </span>
+                                        <span style="color:#33484D;">{{ $result['module'] }}</span>
+                                        @if(!empty($result['grade']))
+                                            <span style="margin-left:auto; display:inline-flex; align-items:center; gap:6px;">
+                                                <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:6px; font-size:11px; font-weight:700; color:{{ $gm[0] }}; background:{{ $gm[1] }};">{{ $result['grade'] }}</span>
+                                                <span style="font-size:11px; color:#9AA7AA;">{{ $result['academic_criteria'] }} pts</span>
+                                            </span>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    @endif
+    <!-- END: Term Performance -->
 
 @endsection
 

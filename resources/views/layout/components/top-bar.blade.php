@@ -373,7 +373,6 @@ $opt = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name','site
                         <div class="account-pill__role">Student User</div>
                     @else
                         <div class="account-pill__name">{{ $employeeUser->employee->title->name.' '.$employeeUser->employee->first_name.' '.$employeeUser->employee->last_name }}</div>
-                        <div class="account-pill__role">Staff User</div>
                     @endif
                 </div>
                 <div class="account-pill__avatar image-fit">

@@ -10,6 +10,37 @@ var liveStudentsListTable = (function () {
         // Setup Tabulator
         let form_data = $('#studentSearchForm').serialize();
         let hasCommunication = ($('#liveStudentsListTable').attr('data-coummunication') ? $('#liveStudentsListTable').attr('data-coummunication') : 0);
+        let liveStudentsTotalRows = 0;
+
+        let formatStudentNumber = function (value) {
+            return new Intl.NumberFormat('en-GB').format(parseInt(value || 0, 10));
+        };
+
+        let updateLiveStudentsFooter = function (table) {
+            let totalRows = liveStudentsTotalRows || parseInt($('#unsignedResultCount').attr('data-total') || 0, 10);
+            let footer = $('#liveStudentsListTable .tabulator-footer');
+
+            if (!footer.length) {
+                return;
+            }
+
+            if (!footer.find('.student-live-footer-range').length) {
+                footer.prepend('<span class="student-live-footer-range"></span>');
+            }
+
+            let pageSize = parseInt(table.getPageSize(), 10) || totalRows || 0;
+            let page = parseInt(table.getPage(), 10) || 1;
+            let startRow = totalRows > 0 ? ((page - 1) * pageSize) + 1 : 0;
+            let endRow = totalRows > 0 ? Math.min(page * pageSize, totalRows) : 0;
+
+            footer.find('.student-live-footer-range').html(
+                'Showing <strong>' + formatStudentNumber(startRow) + '&ndash;' + formatStudentNumber(endRow) + '</strong> of <strong>' + formatStudentNumber(totalRows) + '</strong>'
+            );
+            footer.find('.tabulator-page[data-page="first"]').html('&laquo; First');
+            footer.find('.tabulator-page[data-page="prev"]').html('&lsaquo; Prev');
+            footer.find('.tabulator-page[data-page="next"]').html('Next &rsaquo;');
+            footer.find('.tabulator-page[data-page="last"]').html('Last &raquo;');
+        };
 
         let tableContent = new Tabulator('#liveStudentsListTable', {
             ajaxURL: route('student.list'),
@@ -20,9 +51,11 @@ var liveStudentsListTable = (function () {
             printStyled: true,
             pagination: 'remote',
             paginationSize: 50,
-            paginationSizeSelector: [50, 100, 250, 500],
+            paginationSizeSelector: [25, 50, 100, 250, 500],
+            paginationButtonCount: 3,
             layout: 'fitColumns',
             responsiveLayout: 'collapse',
+            virtualDom: false,
             placeholder: 'No matching records found',
             selectable: (hasCommunication == 1 ? true : false),
             columns: [
@@ -31,7 +64,7 @@ var liveStudentsListTable = (function () {
                     titleFormatter: "rowSelection", 
                     hozAlign: "left", 
                     headerHozAlign: "left",
-                    width: "60",
+                    width: 64,
                     headerSort: false, 
                     download: false,
                     visible: (hasCommunication == 1 ? true : false),
@@ -43,25 +76,22 @@ var liveStudentsListTable = (function () {
                     title: 'Reg. No',
                     field: 'registration_no',
                     headerHozAlign: 'left',
+                    width: 216,
                     formatter(cell, formatterParams) {
-                        var html = '<div class="block">';
-                        html +=
-                            '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
-                        html +=
-                            '<img alt="' +
-                            cell.getData().first_name +
-                            '" class="rounded-full shadow" src="' +
-                            cell.getData().photo_url +
-                            '">';
-                        html += '</div>';
-                        html +=
-                            '<div class="inline-block relative" style="top: -13px;">';
-                        html +=
-                            '<div class="font-medium whitespace-nowrap uppercase">' +
-                            cell.getData().registration_no +
-                            '</div>';
-
-                        html += '</div>';
+                        let firstName = cell.getData().first_name || '';
+                        let lastName = cell.getData().last_name || '';
+                        let initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+                        initials = initials != '' ? initials : 'ST';
+                        let photoUrl = cell.getData().photo_url || '';
+                        let html = '<div class="student-live-reg-cell">';
+                        html += '<span class="student-live-avatar">';
+                        if (photoUrl != '') {
+                            html += '<img alt="' + firstName + '" src="' + photoUrl + '">';
+                        } else {
+                            html += initials;
+                        }
+                        html += '</span>';
+                        html += '<span class="student-live-reg-no">' + cell.getData().registration_no + '</span>';
                         html += '</div>';
                         html += '<input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().id+'"/>';
                         return html;
@@ -72,18 +102,15 @@ var liveStudentsListTable = (function () {
                     }
                 },
                 {
-                    title: 'First Name',
+                    title: 'Name',
                     field: 'first_name',
                     headerHozAlign: 'left',
-                    cellClick:function(e, cell){
-                        let theRow = cell.getRow();
-                        window.open(theRow.getData().url, '_blank');
-                    }
-                },
-                {
-                    title: 'Last Name',
-                    field: 'last_name',
-                    headerHozAlign: 'left',
+                    width: 274,
+                    formatter(cell, formatterParams) {
+                        let firstName = cell.getData().first_name || '';
+                        let lastName = cell.getData().last_name || '';
+                        return '<div class="student-live-name-cell"><span>' + firstName + '</span> <em>' + lastName + '</em></div>';
+                    },
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();
                         window.open(theRow.getData().url, '_blank');
@@ -92,53 +119,37 @@ var liveStudentsListTable = (function () {
                 {
                     title: '',
                     field: 'full_time',
-                    headerHozAlign: 'left',
+                    headerHozAlign: 'center',
+                    hozAlign: 'center',
+                    width: 72,
                     headerSort: false,
                     formatter(cell, formatterParams) {
-                        let day = false;
-                        if (cell.getData().full_time == 1)
-                            day = 'text-slate-900';
-                        else day = 'text-amber-600';
-                        var html = '<div class="flex justify-center text-center">';
-                        if (cell.getData().flag_html != '') {
-                            html += cell.getData().flag_html;
+                        var html = '<div class="student-live-indicators">';
+                        let flagHtml = cell.getData().flag_html || '';
+                        if (flagHtml != '') {
+                            html += '<span class="student-live-indicator student-live-indicator-flag">' + flagHtml + '</span>';
                         }
                         if (cell.getData().multi_agreement_status > 1) {
-                            html += '<div class="mr-2 inline-flex  intro-x " style="color:#f59e0b"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-octagon" class="lucide lucide-alert-octagon w-6 h-6"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg></div>';
+                            html += '<span class="student-live-indicator student-live-indicator-alert"><i data-lucide="alert-octagon" class="w-4 h-4"></i></span>';
                         }
                         if (cell.getData().due > 1) {
-                            html +=
-                                '<div class="mr-2 ' +
-                                (cell.getData().due == 2
-                                    ? 'text-success'
-                                    : cell.getData().due == 3
-                                    ? 'text-warning'
-                                    : 'text-danger') +
-                                '"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="badge-pound-sterling" class="lucide lucide-badge-pound-sterling w-6 h-6"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path><path d="M8 12h4"></path><path d="M10 16V9.5a2.5 2.5 0 0 1 5 0"></path><path d="M8 16h7"></path></svg></div>';
+                            let dueTone = cell.getData().due == 2 ? 'success' : cell.getData().due == 3 ? 'warning' : 'danger';
+                            html += '<span class="student-live-indicator student-live-indicator-due is-' + dueTone + '"><i data-lucide="badge-pound-sterling" class="w-4 h-4"></i></span>';
                         }
-                        html +=
-                            '<div class="w-8 h-8 ' +
-                            day +
-                            ' intro-x inline-flex">';
+                        html += '<span class="student-live-indicator student-live-indicator-mode ' + (cell.getData().full_time == 1 ? 'is-day' : 'is-evening') + '">';
                         if (cell.getData().full_time == 1)
                             html +=
-                                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>';
+                                '<i data-lucide="sun" class="w-4 h-4"></i>';
                         else
                             html +=
-                                '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
+                                '<i data-lucide="moon" class="w-4 h-4"></i>';
 
-                        html += '</div>';
+                        html += '</span>';
                         if (cell.getData().disability == 1)
                             html +=
-                                '<div class="inline-flex intro-x " style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
+                                '<span class="student-live-indicator student-live-indicator-accessibility"><i data-lucide="accessibility" class="w-4 h-4"></i></span>';
 
                         html += '</div>';
-                        createIcons({
-                            icons,
-                            'stroke-width': 1.5,
-                            nameAttr: 'data-lucide',
-                        });
-
                         return html;
                     },
                     cellClick:function(e, cell){
@@ -151,6 +162,7 @@ var liveStudentsListTable = (function () {
                     field: 'semester',
                     headerSort: false,
                     headerHozAlign: 'left',
+                    width: 173,
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();
                         window.open(theRow.getData().url, '_blank');
@@ -161,6 +173,12 @@ var liveStudentsListTable = (function () {
                     field: 'course',
                     headerSort: false,
                     headerHozAlign: 'left',
+                    variableHeight: true,
+                    cssClass: 'student-live-course-col',
+                    formatter(cell, formatterParams) {
+                        let course = cell.getData().course || '';
+                        return '<div class="student-live-course-cell" title="' + course + '">' + course + '</div>';
+                    },
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();
                         window.open(theRow.getData().url, '_blank');
@@ -170,7 +188,11 @@ var liveStudentsListTable = (function () {
                     title: 'Status',
                     field: 'status_id',
                     headerHozAlign: 'left',
-                    width: 180,
+                    width: 142,
+                    formatter(cell, formatterParams) {
+                        let status = cell.getValue() || '';
+                        return '<span class="student-live-status-pill"><span></span>' + status + '</span>';
+                    },
                     cellClick:function(e, cell){
                         let theRow = cell.getRow();
                         window.open(theRow.getData().url, '_blank');
@@ -182,15 +204,16 @@ var liveStudentsListTable = (function () {
                     response.all_rows && response.all_rows > 0
                         ? response.all_rows
                         : 0;
+                liveStudentsTotalRows = total_rows;
 
                 if (total_rows > 0) {
                     $('#unsignedResultCount').removeClass('hidden');
 
                     $('#unsignedResultCount')
                         .attr('data-total', total_rows)
-                        .html(total_rows + ' students found');
+                        .html(formatStudentNumber(total_rows) + ' students found');
                 } else {
-                    $('#unsignedResultCount').attr('data-total', '0').html('');
+                    $('#unsignedResultCount').addClass('hidden').attr('data-total', '0').html('');
                 }
 
                 return response;
@@ -201,12 +224,7 @@ var liveStudentsListTable = (function () {
                     'stroke-width': 1.5,
                     nameAttr: 'data-lucide',
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
+                updateLiveStudentsFooter(this);
 
                 $(document).find('.autoFillDropdown').html('').fadeOut();
                 $(document)
@@ -216,11 +234,18 @@ var liveStudentsListTable = (function () {
                     });
             },
             rowSelectionChanged:function(data, rows){
-                var ids = [];
                 if(rows.length > 0){
-                    $('#communicationBtnsArea').fadeIn();
+                    $('#communicationBtnsArea').css('display', 'flex').hide().fadeIn();
+                    $('#studentSelectedCount')
+                        .removeClass('hidden')
+                        .attr('data-count', rows.length)
+                        .html('<span></span>' + rows.length + ' selected');
                 }else{
                     $('#communicationBtnsArea').fadeOut();
+                    $('#studentSelectedCount')
+                        .addClass('hidden')
+                        .attr('data-count', 0)
+                        .html('');
                 }
             },
             // rowClick: function (e, row) {
@@ -286,6 +311,8 @@ var liveStudentsListTable = (function () {
             dropdown_input: {},
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-dropdown',
         persist: false,
         create: true,
         allowEmptyOption: true,

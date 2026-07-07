@@ -11,6 +11,7 @@ var studentEducationQualTable = (function () {
         let student_id = $("#studentEducationQualTable").attr('data-student') != "" ? $("#studentEducationQualTable").attr('data-student') : "0";
         let querystr = $("#query-SEQ").val() != "" ? $("#query-SEQ").val() : "";
         let status = $("#status-SEQ").val() != "" ? $("#status-SEQ").val() : "";
+        const dash = (v) => (v === null || v === undefined || v === "" || v === "null") ? "—" : v;
 
         let tableContent = new Tabulator("#studentEducationQualTable", {
             ajaxURL: route("student.qualification.list"),
@@ -23,71 +24,69 @@ var studentEducationQualTable = (function () {
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#SL",
+                    title: "#",
                     field: "sl",
-                    minWidth: 80,
+                    minWidth: 44,
+                    formatter(cell) {
+                        return dash(cell.getData().sl);
+                    },
                 },
                 {
                     title: "Awarding Body",
                     field: "awarding_body",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 90,
                     formatter(cell, formatterParams) {
-                        return `<div class="whitespace-normal">${cell.getData().awarding_body}</div>`;
+                        return dash(cell.getData().awarding_body);
                     }
                 },
-                // {
-                //     title: "Highest Academic Qualification",
-                //     field: "highest_academic",
-                //     headerHozAlign: "left",
-                //     minWidth: 200,
-                //     formatter(cell, formatterParams) {
-                //         return `<div class="whitespace-normal">${cell.getData().highest_academic}</div>`;
-                //     }
-                // },
                 {
-                    title: "Highest Academic Qualification",
+                    title: "Highest Qualification",
                     field: "other_academic_qualification_id",
                     headerHozAlign: "left",
-                    minWidth: 200,
+                    minWidth: 110,
                     formatter(cell, formatterParams) {
-                        return `<div class="whitespace-normal">${cell.getData().other_academic_qualification_id}</div>`;
+                        return dash(cell.getData().other_academic_qualification_id);
                     }
                 },
                 {
                     title: "Subjects",
                     field: "subjects",
                     headerHozAlign: "left",
-                    minWidth: 100,
+                    minWidth: 80,
+                    formatter(cell) {
+                        return dash(cell.getData().subjects);
+                    },
                 },
-                /*{
-                    title: "Result",
-                    field: "result",
-                    headerHozAlign: "left",
-                },*/
                 {
                     title: "Result",
                     field: "qualification_grade_id",
                     headerHozAlign: "left",
-                    minWidth: 100,
+                    minWidth: 80,
+                    formatter(cell) {
+                        return dash(cell.getData().qualification_grade_id);
+                    },
                 },
                 {
                     title: "Award Date",
                     field: "degree_award_date",
                     headerHozAlign: "left",
-                    minWidth: 100,
+                    minWidth: 80,
+                    formatter(cell) {
+                        return dash(cell.getData().degree_award_date);
+                    },
                 },
                 {
-                    title: "HIghest Qualification Entry",
+                    title: "Qualification Entry",
                     field: "highest_qualification_on_entry_id",
                     headerHozAlign: "left",
-                    minWidth: 200,
+                    minWidth: 130,
                     formatter(cell, formatterParams) {
-                        return `<div class="whitespace-normal">${cell.getData().highest_qualification_on_entry_id}</div>`;
+                        return dash(cell.getData().highest_qualification_on_entry_id);
                     },
                 },
                 {
@@ -97,7 +96,7 @@ var studentEducationQualTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    minWidth: 120,
+                    minWidth: 70,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -135,6 +134,11 @@ var studentEducationQualTable = (function () {
                 nameAttr: "data-lucide",
             });
         });
+
+        // Ensure columns fit once the container has its final width.
+        setTimeout(function () {
+            tableContent.redraw(true);
+        }, 300);
 
         // Export
         $("#tabulator-export-csv-SEQ").on("click", function (event) {

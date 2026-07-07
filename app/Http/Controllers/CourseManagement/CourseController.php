@@ -122,6 +122,7 @@ class CourseController extends Controller
             'pre_qualification'=> $request->pre_qualification,
             'awarding_body_id'=> $request->awarding_body_id,
             'source_tuition_fee_id'=> $request->source_tuition_fee_id,
+            'color_theme'=> $request->color_theme,
             'franchise_course'=> ($request->has('franchise_course') ? 'Yes' : 'No'),
             'active'=> (isset($request->active) && $request->active > 0 ? $request->active : 0),
             'updated_by' => auth()->user()->id

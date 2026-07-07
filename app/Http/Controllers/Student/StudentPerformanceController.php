@@ -108,10 +108,11 @@ class StudentPerformanceController extends Controller
         $termSet = TermDeclaration::whereIn('id',$termList)->orderBy('id','DESC')->get();
 
         return view('pages.students.live.performance.index', [
-            'title' => 'Students - Results',
+            'title' => 'Student Performance - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
-                ['label' => 'Results', 'href' => 'javascript:void(0);'],
+                ['label' => 'Student Performance', 'href' => 'javascript:void(0);'],
             ],
             'termSet' =>$termSet,
             'student' => $student,

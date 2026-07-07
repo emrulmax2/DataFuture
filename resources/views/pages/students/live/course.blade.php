@@ -17,14 +17,14 @@
             </div>
             <div class="col-span-12 md:col-span-6 text-right">
 
-                <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="btn btn-outline-secondary mr-2 w-auto"><i data-lucide="book-copy" class="stroke-1.5 h-4 w-4"></i></button>
+                <button data-tw-toggle="modal" data-tw-target="#editStudentCourseChangeModal" class="btn btn-primary mr-2 w-auto student-profile-header-iconbtn"><i data-lucide="book-copy" class="stroke-1.5 h-4 w-4"></i></button>
                 <button data-tw-toggle="modal" data-tw-target="#editStudentCourseDetailsModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
                     <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Course Informations
                 </button>
             </div>
         </div>
         <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-        <div class="grid grid-cols-12 gap-4"> 
+        <div class="grid grid-cols-12 gap-4 student-profile-course-grid">
             <div class="col-span-12 sm:col-span-12">
                 <div class="grid grid-cols-12 gap-0">
                     <div class="col-span-6 md:col-span-4 text-slate-500 font-medium">Course & Semester</div>

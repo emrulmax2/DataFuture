@@ -10,232 +10,183 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->  
 
-    <!-- BEGIN: Page Title -->
-    <div class="intro-y flex items-center p-5 mt-5 box">
-        <h2 class="text-lg font-medium mr-auto">
-            {{ $title }}
-        </h2>
-        <div class="flex md:mt-4 sm:mt-0 items-center">
-            <h4 id="frequency-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">Completed: []</h4>
-            <h4 id="outstanding-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">Outstanding: []</h4>
-            <h4 id="total-distribution" data-content="" class="text-sm font-medium mr-2 md:py-5 tabltooltip">total: []</h4>
-            <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="btn btn-outline-secondary w-1/2 sm:w-auto ml-2 hidden md:inline-flex">
-                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-            </a>
-            
-            @if(isset($student->status->eligible_for_award) && $student->status->eligible_for_award == 1 && empty($award) && !isset($award->id))
-                <button data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="btn btn-success text-white w-auto ml-2">Add Award</button>
-            @endif
-        </div>
-    </div>
-    <!-- END: Page Title -->
-     
-    <!-- BEGIN: Daily Sales -->
-    <div class="intro-y box col-span-12 p-5 mt-5">
-        <div id="tabledata1" class=" overflow-x-auto p-5 pt-5" >
-            <table id="sortable-table" data-tw-merge class="min-w-full divide-y divide-gray-200">
-                  <thead>
-                    <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                        <th data-sort="s/n" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
-                            S/N <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="id" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between">
-                            Id <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="attendance_term" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Attendance Term <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="module" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Module <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="module_code" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Code <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="awarding_body" data-tw-merge class="cursor-pointer text-center font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Awarding Body <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="exam_published_date" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Published Date <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="grade" data-tw-merge class=" text-center cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Grade <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="merit" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Merit <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="attempted" data-tw-merge class="text-center cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Attempted <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="last_updated_by" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between ">
-                            Updated By <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                        <th data-sort="action" data-tw-merge class="cursor-pointer font-medium px-3 py-3 border-b-2  dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap items-center justify-between w-80">
-                            Action <i data-lucide="arrow-up-down" class="w-4 h-4 ml-2 inline-flex"></i>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($dataSet)
-                        @php
-                            $serial = 1;
-                        @endphp
-                        @foreach($dataSet as $moduleDetails => $resultSet)
-                            @php
-                                $currentResult = $resultSet[0];
-                            @endphp
-                            <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $serial++ }}
-                                    </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    
-                                    {{ $currentResult->id  }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    @if($currentResult->term_declaration_id == Null)
-                                        {{ $currentResult->plan->attenTerm->name }}
-                                    @else
-                                        {{ $currentResult->term->name }}
-                                    @endif
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->plan->creations->code }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->plan->course->body->name }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ date('d F, Y ',strtotime($currentResult->published_at))  }}<br />
-                                    {{ date('h:i a',strtotime($currentResult->published_at))  }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 text-center border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->grade->code }} 
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    {{ $currentResult->grade->name }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 text-center border-b dark:border-darkmode-300 border-l border-r border-t">
-                                        <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="intro-x text-slate-500 block mt-2 text-xs sm:text-sm" title="attempt count">{{ count($resultSet) }}</a>
-                                        
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    
-                                    {{ isset($currentResult->updatedBy->employee->full_name)  ? $currentResult->updatedBy->employee->full_name : (isset($currentResult->createdBy->employee->full_name) ? $currentResult->createdBy->employee->full_name : $currentResult->createdBy->name) }}
-                                </td>
-                                <td data-tw-merge class="px-3 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                    @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
-                                        <button class="mr-3 items-center inline-flex" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ? $currentResult->term_declaration_id : $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('H:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
-                                            <i data-lucide="check-square" class="w-4 h-4 mr-1"></i>
-                                            Edit
-                                        </button>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
+    @php
+        $gradeMeta = [
+            'P' => ['color' => '#0B6B66', 'bg' => '#E5F2F0'],
+            'M' => ['color' => '#8A6D1F', 'bg' => '#F4EBD6'],
+            'D' => ['color' => '#0F252D', 'bg' => '#E2E8E9'],
+            'R' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
+            'U' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
+            'A' => ['color' => '#B3392E', 'bg' => '#FBEDEB'],
+        ];
+        $completedCount = 0; $outstandingCount = 0; $totalCount = 0;
+        if(!empty($dataSet)):
+            foreach($dataSet as $mName => $rSet):
+                $totalCount++;
+                $gcode = isset($rSet[0]->grade->code) ? trim($rSet[0]->grade->code) : '';
+                if(in_array($gcode, ['P','M','D'])) { $completedCount++; } else { $outstandingCount++; }
+            endforeach;
+        endif;
+    @endphp
+
+    <!-- BEGIN: Results -->
+    <div class="intro-y mt-5">
+        <div class="sp-card sp-results" data-screen-label="Results Table">
+            <div class="sp-card-head">
+                <div class="sp-card-title">Results</div>
+                <div class="sp-pills">
+                    <span class="sp-pill sp-pill--done"><span class="sp-dot"></span>Completed {{ $completedCount }}</span>
+                    <span class="sp-pill sp-pill--out"><span class="sp-dot"></span>Outstanding {{ $outstandingCount }}</span>
+                    <span class="sp-pill sp-pill--total">Total {{ $totalCount }}</span>
+                </div>
+                <div class="sp-card-actions">
+                    <a href="{{ route('student-results.print',$student->id) }}" id="tabulator-print-x" class="sp-btn sp-btn--ghost">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print
+                    </a>
+                    @if(isset($student->status->eligible_for_award) && $student->status->eligible_for_award == 1 && empty($award) && !isset($award->id))
+                        <button data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="sp-btn sp-btn--dark">Add Award</button>
                     @endif
-                </tbody>
-            </table>
+                </div>
+            </div>
+            <div class="sp-rtable-wrap">
+                <table id="sortable-table" class="sp-rtable">
+                    <thead>
+                        <tr>
+                            <th data-sort="module" class="sp-th sp-th--sort">Module <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="term" class="sp-th sp-th--sort">Term <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="published" class="sp-th sp-th--sort">Published <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="grade" class="sp-th sp-th--sort">Grade <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="merit" class="sp-th sp-th--sort">Merit <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="attempts" class="sp-th sp-th--sort sp-th--center">Attempts <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th data-sort="updated_by" class="sp-th sp-th--sort">Updated By <i data-lucide="chevrons-up-down" class="sp-th-ic"></i></th>
+                            <th class="sp-th sp-th--right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($dataSet)
+                            @foreach($dataSet as $moduleDetails => $resultSet)
+                                @php
+                                    $currentResult = $resultSet[0];
+                                    $gcode = isset($currentResult->grade->code) ? trim($currentResult->grade->code) : '';
+                                    $gm = $gradeMeta[$gcode] ?? ['color' => '#43585D', 'bg' => '#EEF2F3'];
+                                    $attemptCount = count($resultSet);
+                                @endphp
+                                <tr class="sp-tr">
+                                    <td class="sp-td">
+                                        <span class="sp-mod-name">{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}</span>
+                                        <span class="sp-mod-sub">
+                                            <span class="sp-mono">{{ $currentResult->plan->creations->code }}</span>
+                                            <span class="sp-sep">&middot;</span>
+                                            <span>{{ $currentResult->plan->course->body->name }}</span>
+                                            <span class="sp-sep">&middot;</span>
+                                            <span class="sp-mono">#{{ $currentResult->id }}</span>
+                                        </span>
+                                    </td>
+                                    <td class="sp-td sp-td--muted">
+                                        @if($currentResult->term_declaration_id == Null)
+                                            {{ $currentResult->plan->attenTerm->name }}
+                                        @else
+                                            {{ $currentResult->term->name }}
+                                        @endif
+                                    </td>
+                                    <td class="sp-td sp-td--muted sp-td--num">
+                                        {{ date('d M, Y',strtotime($currentResult->published_at)) }} &middot; {{ date('h:i a',strtotime($currentResult->published_at)) }}
+                                    </td>
+                                    <td class="sp-td">
+                                        <span class="sp-grade" style="color:{{ $gm['color'] }};background:{{ $gm['bg'] }}">{{ $gcode }}</span>
+                                    </td>
+                                    <td class="sp-td sp-td--grade" style="color:{{ $gm['color'] }}">{{ $currentResult->grade->name }}</td>
+                                    <td class="sp-td sp-td--center">
+                                        <a href="javascript:;" data-theme="light" data-tw-toggle="modal" data-tw-target="#callLockModal{{ $resultSet[0]->id }}" data-trigger="click" class="sp-attempts {{ $attemptCount > 1 ? 'is-multi' : '' }}" title="attempt count">{{ $attemptCount }}</a>
+                                    </td>
+                                    <td class="sp-td sp-td--muted">
+                                        {{ isset($currentResult->updatedBy->employee->full_name)  ? $currentResult->updatedBy->employee->full_name : (isset($currentResult->createdBy->employee->full_name) ? $currentResult->createdBy->employee->full_name : $currentResult->createdBy->name) }}
+                                    </td>
+                                    <td class="sp-td sp-td--right">
+                                        @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
+                                            <button class="sp-edit-btn" type="button" data-tw-toggle="modal" data-tw-target="#editAttemptModal{{ $resultSet[0]->id  }}" data-module="{{ $currentResult->plan->creations->module_name }} - {{ $currentResult->plan->creations->level->name }}" data-code= "{{ $currentResult->plan->creations->code }}" data-termid="{{ ($currentResult->term_declaration_id) ? $currentResult->term_declaration_id : $currentResult->plan->attenTerm->id }}" data-term="{{ $currentResult->plan->attenTerm->name }}" data-publishTime={{ date('H:m',strtotime($currentResult->published_at))  }} data-publishDate={{ date('d-m-Y',strtotime($currentResult->published_at))  }} data-grade="{{ $currentResult->grade->id }}" data-id="{{ $currentResult->id  }}">
+                                                Edit
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+            <div class="sp-results-foot">
+                <span>Showing <strong>{{ $totalCount }}</strong> of <strong>{{ $totalCount }}</strong> results</span>
+            </div>
         </div>
     </div>
-    <!-- END: Daily Sales -->
+    <!-- END: Results -->
 
     <!-- BEGIN: Award Section -->
     @if(isset($student->status->eligible_for_award) && $student->status->eligible_for_award == 1 && (isset($award->id) && $award->id > 0))
-    <div class="intro-y box mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center p-5">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Award Details</div>
+    <div class="intro-y mt-5">
+        <div class="sp-card sp-award" data-screen-label="Award Details">
+            <div class="sp-card-head">
+                <div class="sp-card-title">Award Details</div>
+                @if(isset($award->qual->name) && !empty($award->qual->name))
+                    <span class="sp-pill sp-pill--done"><span class="sp-dot"></span>{{ $award->qual->name }}</span>
+                @endif
+                <div class="sp-card-actions">
+                    <button data-student="{{ $student->id }}" data-id="{{ $award->id }}" data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="editStudentAwardBtn sp-btn sp-btn--dark">
+                        <i data-lucide="pencil" class="w-4 h-4"></i> Update Award
+                    </button>
+                </div>
             </div>
-            <div class="col-span-6 text-right">
-                <button data-student="{{ $student->id }}" data-id="{{ $award->id }}" data-tw-toggle="modal" data-tw-target="#addStudentAwardInfoModal" type="button" class="editStudentAwardBtn btn btn-success text-white w-auto mr-0 mb-0">
-                    <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Update Award
-                </button>
+            <div class="sp-award-grid">
+                <div class="sp-field">
+                    <div class="sp-field-label">Award Type</div>
+                    <div class="sp-field-value">{{ (isset($award->qual_award_type) && !empty($award->qual_award_type) ? $award->qual_award_type : 'N/A') }}</div>
+                </div>
+                <div class="sp-field">
+                    <div class="sp-field-label">Date of Award</div>
+                    <div class="sp-field-value">{{ (isset($award->date_of_award) && !empty($award->date_of_award) ? date('jS M, Y', strtotime($award->date_of_award)) : '—') }}</div>
+                </div>
+                <div class="sp-field">
+                    <div class="sp-field-label">Overall Result</div>
+                    <div class="sp-field-value sp-field-value--accent">{{ (isset($award->qual->name) && !empty($award->qual->name) ? $award->qual->name : '—') }}</div>
+                </div>
+                <div class="sp-field">
+                    <div class="sp-field-label">Requested By</div>
+                    <div class="sp-field-value">{{ (isset($award->requested->employee->full_name) && !empty($award->requested->employee->full_name) ? $award->requested->employee->full_name : '—') }}</div>
+                </div>
             </div>
-        </div>
-        <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
-        <div class="p-5">
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Date Of Award</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_award) && !empty($award->date_of_award) ? date('jS F, Y', strtotime($award->date_of_award)) : '') }}</div>
+            <div class="sp-milestones-wrap">
+                <div class="sp-milestones">
+                    <div class="sp-ms-head">
+                        <div>Certificate Milestone</div>
+                        <div>Status</div>
+                        <div>Date</div>
+                    </div>
+                    <div class="sp-ms-row">
+                        <div class="sp-ms-name">Requested from awarding body</div>
+                        <div>
+                            @php $reqYes = isset($award->certificate_requested) && $award->certificate_requested == 'Yes'; @endphp
+                            <span class="sp-yn {{ $reqYes ? 'is-yes' : 'is-no' }}"><span class="sp-dot"></span>{{ $reqYes ? 'Yes' : 'No' }}</span>
+                        </div>
+                        <div class="sp-ms-date">{{ (isset($award->date_of_certificate_requested) && !empty($award->date_of_certificate_requested) ? date('j M Y', strtotime($award->date_of_certificate_requested)) : '—') }}</div>
+                    </div>
+                    <div class="sp-ms-row">
+                        <div class="sp-ms-name">Certificate received</div>
+                        <div>
+                            @php $rcvYes = isset($award->certificate_received) && $award->certificate_received == 'Yes'; @endphp
+                            <span class="sp-yn {{ $rcvYes ? 'is-yes' : 'is-no' }}"><span class="sp-dot"></span>{{ $rcvYes ? 'Yes' : 'No' }}</span>
+                        </div>
+                        <div class="sp-ms-date">{{ (isset($award->date_of_certificate_received) && !empty($award->date_of_certificate_received) ? date('j M Y', strtotime($award->date_of_certificate_received)) : '—') }}</div>
+                    </div>
+                    <div class="sp-ms-row">
+                        <div class="sp-ms-name">Released to student</div>
+                        <div>
+                            @php $relYes = isset($award->certificate_released) && $award->certificate_released == 'Yes'; @endphp
+                            <span class="sp-yn {{ $relYes ? 'is-yes' : 'is-no' }}"><span class="sp-dot"></span>{{ $relYes ? 'Yes' : 'No' }}</span>
+                        </div>
+                        <div class="sp-ms-date">{{ (isset($award->date_of_certificate_released) && !empty($award->date_of_certificate_released) ? date('j M Y', strtotime($award->date_of_certificate_released)) : '—') }}</div>
                     </div>
                 </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Award Type</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->qual_award_type) && !empty($award->qual_award_type) ? $award->qual_award_type : 'N/A') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Overall Result</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->qual->name) && !empty($award->qual->name) ? $award->qual->name : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
-
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Certificate Requested from Awarding body?</div>
-                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_requested) && !empty($award->certificate_requested) ? '<span class="btn btn-'.($award->certificate_requested == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_requested.'</span>' : '') !!}</div>
-                    </div>
-                </div>
-                @if(isset($award->certificate_requested) && $award->certificate_requested == 'Yes')
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Date of request</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_requested) && !empty($award->date_of_certificate_requested) ? date('jS F, Y', strtotime($award->date_of_certificate_requested)) : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Requested by</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->requested->employee->full_name) && !empty($award->requested->employee->full_name) ? $award->requested->employee->full_name : '') }}</div>
-                    </div>
-                </div>
-                @endif
-                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
-
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Certificate Received?</div>
-                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_received) && !empty($award->certificate_received) ? '<span class="btn btn-'.($award->certificate_received == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_received.'</span>' : '') !!}</div>
-                    </div>
-                </div>
-                @if(isset($award->certificate_received) && $award->certificate_received == 'Yes')
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Date of received</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_received) && !empty($award->date_of_certificate_received) ? date('jS F, Y', strtotime($award->date_of_certificate_received)) : '') }}</div>
-                    </div>
-                </div>
-                @endif
-                <div class="col-span-12"><div class="border-t border-slate-200/60 dark:border-darkmode-400"></div></div>
-
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Certificate Release to Student?</div>
-                        <div class="col-span-7 font-medium">{!! (isset($award->certificate_released) && !empty($award->certificate_released) ? '<span class="btn btn-'.($award->certificate_released == 'Yes' ? 'success' : 'danger').' px-2 py-0 text-white rounded-0">'.$award->certificate_released.'</span>' : '') !!}</div>
-                    </div>
-                </div>
-                @if(isset($award->certificate_released) && $award->certificate_released == 'Yes')
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Date of Released</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->date_of_certificate_released) && !empty($award->date_of_certificate_released) ? date('jS F, Y', strtotime($award->date_of_certificate_released)) : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-5 text-slate-500 font-medium">Released by</div>
-                        <div class="col-span-7 font-medium">{{ (isset($award->released->employee->full_name) && !empty($award->released->employee->full_name) ? $award->released->employee->full_name : '') }}</div>
-                    </div>
-                </div>
-                @endif
             </div>
         </div>
     </div>
@@ -342,30 +293,31 @@
         <form method="POST" id="editAttemptForm{{ $resultSet[0]->id  }}">
             <div class="modal-content ">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Result Update</h2>
+                    <div class="sp-rmodal-titlewrap mr-auto">
+                        <h2 class="font-medium text-base">Result Update</h2>
+                        <div class="sp-rmodal-subtitle">Edit grade history for this module</div>
+                    </div>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
-                    
+
                 </div>
                 <div class="modal-body ">
                     <div role="alert" class="alert hidden relative border rounded-md px-5 py-4 bg-warning border-warning text-slate-900 dark:border-warning mb-2 flex items-center"><i data-tw-merge data-lucide="alert-circle" class="stroke-1.5 w-5 h-5 mr-2 h-6 w-6 mr-2 h-6 w-6"></i>
                         <span class="error-text">Awesome alert with icon</span>
                         <button data-tw-merge data-tw-dismiss="alert" type="button" aria-label="Close" type="button" aria-label="Close" class="text-slate-800 py-2 px-3 absolute right-0 my-auto mr-2 btn-close"><i data-tw-merge data-lucide="x" class="stroke-1.5 w-5 h-5 h-4 w-4 h-4 w-4"></i></button>
                     </div>
-                    <div class="flex">
-                        <div class="mr-2 mb-5">
-                            <label class="form-label">Module</label>
-                            <div class="text-base font-medium">{{  $key }}</div>
-                            <div class=" font-normal  text-slate-500">Level {{  $resultSet[0]->plan->creations->level->name }}</div>
+                    <div class="sp-rmodal-sub">
+                        <span class="sp-rmodal-ic"><i data-lucide="graduation-cap" class="w-4 h-4"></i></span>
+                        <div class="sp-rmodal-copy">
+                            <div class="sp-rmodal-name">{{ $key }}</div>
+                            <div class="sp-rmodal-meta"><span class="sp-mono">{{ $resultSet[0]->plan->creations->code }}</span> &middot; Level {{ $resultSet[0]->plan->creations->level->name }} &middot; {{ $resultSet[0]->plan->course->body->name }}</div>
                         </div>
                         @if(isset(auth()->user()->priv()['result_add']) && auth()->user()->priv()['result_add'] == 1)
-                        <div class="mb-5 ml-auto items-end">
-                            <button type="button" data-id="{{ $resultSet[0]->id }}" class="btn btn-primary shadow-md mr-2 addNewRowBtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add New Row</button>
-                        </div>
+                        <button type="button" data-id="{{ $resultSet[0]->id }}" class="sp-btn sp-btn--dark addNewRowBtn"><i data-lucide="plus-circle" class="w-4 h-4"></i> Add New Row</button>
                         @endif
                     </div>
-                    <table id="result-bulk{{ $resultSet[0]->id }}" class="min-w-full divide-y divide-gray-200">
+                    <table id="result-bulk{{ $resultSet[0]->id }}" class="sp-rmodal-table min-w-full divide-y divide-gray-200">
                         <thead data-tw-merge class="">
                             <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
                                 <th data-tw-merge class="font-medium px-2 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
@@ -432,7 +384,8 @@
                                         <div class="acc__input-error error-published_at text-danger mt-2" data-index="{{ $index }}"></div>
                                     </td>
                                     <td data-tw-merge class="px-1 py-1 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                        <select id="grade_id" name="grade_id[]" data-index="{{ $index }}" class="form-control w-full">
+                                        @php $ggm = $gradeMeta[trim($result->grade->code ?? '')] ?? null; @endphp
+                                        <select id="grade_id" name="grade_id[]" data-index="{{ $index }}" class="form-control w-full sp-grade-select" style="{{ $ggm ? 'color:'.$ggm['color'].';font-weight:600;' : '' }}">
                                             <option value="">Please Select</option>
                                             @if(!empty($grades))
                                                 @foreach($grades as $grade)
@@ -449,8 +402,8 @@
                                             </div>
                                             @if(isset(auth()->user()->priv()['result_delete']) && auth()->user()->priv()['result_delete'] == 1)
                                             <div class="py-1 ml-2 item-center anchor-box">
-                                                <a href="javascript:;" data-theme="light"  data-id="{{ $result->id }}" data-url="{{ route('result.destroy', $result->id); }}"  data-action="DELETE" class="delete_btn intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer" title="delete result">
-                                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                                                <a href="javascript:;" data-theme="light"  data-id="{{ $result->id }}" data-url="{{ route('result.destroy', $result->id); }}"  data-action="DELETE" class="delete_btn sp-del-btn cursor-pointer" title="delete result">
+                                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                                 </a>
                                             </div>
                                             @endif
@@ -464,6 +417,7 @@
                         
                 </div>
                 <div class="modal-footer">
+                    <div class="sp-rmodal-foot-note">{{ count($resultSet) }} grade {{ count($resultSet) == 1 ? 'entry' : 'entries' }} &middot; latest published {{ date('j M Y', strtotime($resultSet[0]->published_at)) }}</div>
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     @if(isset(auth()->user()->priv()['result_edit']) && auth()->user()->priv()['result_edit'] == 1)
                     <button type="submit" id="update" data-id="{{ $resultSet[0]->id }}" class="btn btn-primary w-auto update_btn">

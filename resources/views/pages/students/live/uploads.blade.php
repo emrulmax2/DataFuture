@@ -10,19 +10,19 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-4 md:col-span-6">
+    <div class="intro-y box mt-5 student-profile-documents">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">Documents</div>
             </div>
-            <div class="col-span-8 md:col-span-6 text-right relative">
-                <button data-studentid="{{ $student->id }}" class="btn btn-success text-white mr-2" id="downloadIDCardBtn">
+            <div class="student-profile-secthead-actions student-profile-documents-actions">
+                <button data-studentid="{{ $student->id }}" class="btn btn-outline-secondary" id="downloadIDCardBtn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 lucide lucide-id-card-lanyard-icon lucide-id-card-lanyard"><path d="M13.5 8h-3"/><path d="m15 2-1 2h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3"/><path d="M16.899 22A5 5 0 0 0 7.1 22"/><path d="m9 2 3 6"/><circle cx="12" cy="15" r="3"/></svg>
                     Print ID Card
                 </button>
-                <div class="dropdown inline-flex {{ isset(auth()->user()->priv()['document_add']) && auth()->user()->priv()['document_add'] == 1 ? '' : 'hidden' }}" id="uploadsDropdown">
-                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Document List <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
-                    <div class="dropdown-menu w-72">
+                <div class="dropdown inline-flex student-profile-documents-dropdown {{ isset(auth()->user()->priv()['document_add']) && auth()->user()->priv()['document_add'] == 1 ? '' : 'hidden' }}" id="uploadsDropdown">
+                    <button class="dropdown-toggle btn student-profile-addbtn" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Add Document <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                    <div class="dropdown-menu w-72 student-profile-documents-menu">
                         <ul class="dropdown-content">
                             <li><h6 class="dropdown-header">Document List</h6></li>
                             <li><hr class="dropdown-divider mt-0"></li>
@@ -30,7 +30,7 @@
                                 @foreach($docSettings as $ds)
                                     <li>
                                         <div class="form-check dropdown-item">
-                                            <label class="inline-flex items-center cursor-pointer" for="student_doc_{{ $ds->id }}"><i data-lucide="activity" class="w-4 h-4 mr-2"></i> {{ $ds->name }}</label>
+                                            <label class="inline-flex items-center cursor-pointer" for="student_doc_{{ $ds->id }}"><i data-lucide="file-plus-2" class="w-4 h-4 mr-2"></i> {{ $ds->name }}</label>
                                             <input id="student_doc_{{ $ds->id }}" name="student_doc_ids[]" class="form-check-input student_doc_ids ml-auto" type="radio" value="{{ $ds->id }}" data-label="{{ $ds->name }}">
                                         </div>
                                     </li>
@@ -56,31 +56,23 @@
                 </div>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-UP" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-UP" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-UP" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-UP" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-UP" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+        <div class="intro-y">
+            <div class="student-profile-tablefilter student-profile-documents-filter">
+                <form id="tabulatorFilterForm-UP" class="student-profile-tablefilter-form" >
+                    <input id="query-UP" name="query" type="text" class="form-control student-profile-tablefilter-search"  placeholder="Search documents...">
+                    <select id="status-UP" name="status" class="form-select student-profile-tablefilter-status" >
+                        <option selected value="1">Active</option>
+                        <option value="2">Archived</option>
+                    </select>
+                    <button id="tabulator-html-filter-go-UP" type="button" class="btn btn-primary" >Go</button>
+                    <button id="tabulator-html-filter-reset-UP" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset" >Reset</button>
                 </form>
-                <div class="mt-5 sm:mt-0 hidden md:flex">
-                    <button id="tabulator-print-UP" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                <div class="student-profile-tablefilter-actions hidden md:flex">
+                    <button id="tabulator-print-UP" class="btn btn-outline-secondary">
                         <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                     </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle btn btn-outline-secondary" aria-expanded="false" data-tw-toggle="dropdown">
                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                         </button>
                         <div class="dropdown-menu w-40">
@@ -110,8 +102,8 @@
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentUploadListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="student-profile-tablebody">
+                <div id="studentUploadListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>

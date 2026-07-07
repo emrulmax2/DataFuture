@@ -76,6 +76,7 @@ class DatafutureController extends Controller
         $module_ids = $this->getStudentModules($student->id, $student->crel->id, $course_id);
         return view('pages.students.live.datafuture', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Documents', 'href' => 'javascript:void(0);'],

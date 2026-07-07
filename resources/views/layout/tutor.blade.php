@@ -2,13 +2,7 @@
 
 @section('body')
     <body class="py-5 md:py-0">
-        <div class="sitePreLoader">
-            <div class="la-ball-scale-multiple la-2x">
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
-        </div>
+        @include('../layout/components/preloader')
         
         @yield('content')
         {{--

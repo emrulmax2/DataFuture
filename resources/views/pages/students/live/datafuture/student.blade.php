@@ -481,7 +481,7 @@
                                         <span class="accordionCollaps"></span>
                                     </button>
                                     @if((isset(auth()->user()->priv()['datafuture_edit']) && auth()->user()->priv()['datafuture_edit'] == 1))
-                                    <div class="absolute l-0 t-0 b-0 m-auto ml-4 inline-flex justify-start items-center">
+                                    <div class="absolute left-3 top-0 bottom-0 my-auto inline-flex justify-start items-center">
                                         <button type="button" data-tw-toggle="modal" data-tw-target="#editStudentStuloadModal" data-student-id="{{ $student->id }}" data-id="{{ $stu->id }}" class="editStudentLoadBtn btn btn-success w-[30px] h-[30px] p-0 items-center justify-center rounded-full text-white">
                                             <i data-lucide="pencil" class="w-4 h-4"></i>
                                         </button>

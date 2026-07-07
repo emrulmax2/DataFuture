@@ -10,17 +10,16 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <form method="POST" action="#" id="studentDFForm">
-        <div class="intro-y box p-5 mt-5">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6 inline-flex items-center">
+    <form method="POST" action="#" id="studentDFForm" class="student-profile-datafuture-form">
+        <div class="intro-y box mt-5 student-profile-datafuture-head">
+            <div class="student-profile-secthead">
+                <div class="student-profile-secthead-title">
                     <div class="form-check form-switch mb-0">
                         <input data-id="{{ $student->id }}" {{ (isset($student->hesa_status) && $student->hesa_status == 1 ? 'Checked' : '') }} id="hesa_status" class="form-check-input" type="checkbox" name="hesa_status" value="1">
                         <label class="form-check-label ml-3 font-medium text-base mb-0" for="hesa_status">Datafuture Report</label>
                     </div>
-                    <!-- <div class="font-medium text-base">Datafuture Report</div> -->
                 </div>
-                <div class="col-span-6 text-right relative">
+                <div class="student-profile-secthead-actions">
                     <input type="hidden" name="student_id" value="{{ $student->id }}" />
                     <input type="hidden" name="course_id" value="{{ $course_id }}" />
                     <input type="hidden" name="student_course_relation_id" value="{{ $student_course_relation_id }}"/>
@@ -63,7 +62,7 @@
                 </div>
             </div>
         </div>
-        <div class="intro-y box mt-5 p-5 dfReportWrap">                      
+        <div class="intro-y box mt-5 dfReportWrap student-profile-datafuture-body">
             <div id="df-accordion-main" class="accordion accordion-boxed">
                 <div class="accordion-item">
                     <div id="df-accr-main-content-1" class="accordion-header">

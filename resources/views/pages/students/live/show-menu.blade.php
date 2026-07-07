@@ -9,7 +9,7 @@
 
 <ul 
     class="nav nav-link-tabs flex-col md:flex-row justify-center lg:justify-start md:text-center liveStudentProfileMainMenu md:relative hidden md:flex" 
-    style="padding-bottom: {{  Route::currentRouteName() == 'student.visits.edit' || Route::currentRouteName() == 'student.visits' || Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student-performance.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? '55' : '0' }}px;" 
+    style="padding-bottom: {{  Route::currentRouteName() == 'student.visits.edit' || Route::currentRouteName() == 'student.visits' || Route::currentRouteName() == 'student-results.index' || Route::currentRouteName() == 'student.workplacement' || Route::currentRouteName() == 'student-performance.index' || Route::currentRouteName() == 'student.attendance.edit' || Route::currentRouteName() == 'student.attendance' || Route::currentRouteName() == 'student.accounts' || Route::currentRouteName() == 'student.slc.history' || Route::currentRouteName() == 'student.course' ? '45' : '0' }}px;"
     >
     <li class="nav-item" role="presentation">
         <a href="{{ route('student.show', $student->id) }}" class="nav-link py-4  pl-0 {{ Route::currentRouteName() == 'student.show' ? 'active' : '' }}">

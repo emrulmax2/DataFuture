@@ -12,6 +12,7 @@ var studentEmploymentHistoryTable = (function () {
         let student_id = $("#studentEmploymentHistoryTable").attr('data-student') != "" ? $("#studentEmploymentHistoryTable").attr('data-student') : "0";
         let querystr = $("#query-SEH").val() != "" ? $("#query-SEH").val() : "";
         let status = $("#status-SEH").val() != "" ? $("#status-SEH").val() : "";
+        const dash = (v) => (v === null || v === undefined || v === "" || v === "null") ? "—" : v;
 
         let tableContent = new Tabulator("#studentEmploymentHistoryTable", {
             ajaxURL: route("student.employment.list"),
@@ -24,72 +25,85 @@ var studentEmploymentHistoryTable = (function () {
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#SL",
+                    title: "#",
                     field: "sl",
-                    width: "80",
-                    minWidth: 50,
+                    width: 44,
+                    minWidth: 40,
+                    formatter(cell) {
+                        return dash(cell.getData().sl);
+                    },
                 },
                 {
                     title: "Company",
                     field: "company_name",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 90,
+                    formatter(cell) {
+                        return dash(cell.getData().company_name);
+                    },
                 },
                 {
                     title: "Phone",
                     field: "company_phone",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 85,
+                    formatter(cell) {
+                        return dash(cell.getData().company_phone);
+                    },
                 },
                 {
                     title: "Position",
                     field: "position",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 85,
+                    formatter(cell) {
+                        return dash(cell.getData().position);
+                    },
                 },
                 {
                     title: "Start",
                     field: "start_date",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 70,
+                    formatter(cell) {
+                        return dash(cell.getData().start_date);
+                    },
                 },
                 {
                     title: "End",
                     field: "end_date",
                     headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 70,
+                    formatter(cell) {
+                        return dash(cell.getData().end_date);
+                    },
                 },
                 {
                     title: "Address",
                     field: "address",
                     headerHozAlign: "left",
-                    width: "180",
-                    minWidth: 150,
-                    formatter(cell, formatterParams) {   
-                        return '<div class="whitespace-pre">'+cell.getData().address+'</div>';
+                    minWidth: 110,
+                    formatter(cell, formatterParams) {
+                        return dash(cell.getData().address);
                     }
                 },
                 {
                     title: "Contact Person",
                     field: "name",
                     headerHozAlign: "left",
-                    minWidth: 150,
-                },
-                {
-                    title: "Position",
-                    field: "contact_position",
-                    headerHozAlign: "left",
-                    minWidth: 150,
-                },
-                {
-                    title: "Phone",
-                    field: "contact_phone",
-                    headerHozAlign: "left",
-                    minWidth: 150,
+                    minWidth: 120,
+                    formatter(cell, formatterParams) {
+                        const d = cell.getData();
+                        const name = dash(d.name);
+                        if (name === "—") return "—";
+                        const pos = (d.contact_position && d.contact_position !== "null") ? ' · ' + d.contact_position : '';
+                        const phone = (d.contact_phone && d.contact_phone !== "null") ? ' · ' + d.contact_phone : '';
+                        return name + pos + phone;
+                    },
                 },
                 {
                     title: "Actions",
@@ -98,7 +112,7 @@ var studentEmploymentHistoryTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    minWidth: 150,
+                    minWidth: 70,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
@@ -136,6 +150,11 @@ var studentEmploymentHistoryTable = (function () {
                 nameAttr: "data-lucide",
             });
         });
+
+        // Ensure columns fit once the container has its final width.
+        setTimeout(function () {
+            tableContent.redraw(true);
+        }, 300);
 
         // Export
         $("#tabulator-export-csv-SEH").on("click", function (event) {
