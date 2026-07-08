@@ -2519,33 +2519,44 @@ class AdmissionController extends Controller
                  * workers) the dependent jobs frequently executed BEFORE their prerequisites,
                  * dereferencing null and failing with "Attempt to read property ... on null".
                  * (It only appeared to work on the local `sync` queue, which happens to run batch
-                 * jobs in array order.) Bus::chain() runs them strictly in order and, on failure,
-                 * halts so a retry resumes the chain instead of leaving a half-migrated student.
+                 * jobs in array order.)
+                 *
+                 * A plain Bus::chain() runs them strictly in order, but its dispatch() returns a
+                 * PendingDispatch (not a Batch), so $chainedBatch->id blew up with
+                 * "Attempt to read property 'id' on string" and the progress poller
+                 * (progressForStudentStoreProcess) had no job_batches row to read.
+                 *
+                 * Wrapping the jobs as a *chain within a batch* (a nested array inside Bus::batch())
+                 * keeps the strict sequential ordering AND yields a real Batch, so we still get a
+                 * batch id to track progress. On failure the chain halts so a retry resumes it
+                 * instead of leaving a half-migrated student.
                  */
-                $chainedBatch = Bus::chain([
-                    new ProcessNewStudentToUser($applicant),
-                    new ProcessStudents($applicant),
-                    new ProcessStudentNoteDetails($applicant),
-                    new ProcessStudentTask($applicant),
-                    new ProcessStudentTaskDocument($applicant),
-                    new ProcessStudentQualification($applicant),
-                    new ProcessStudentContact($applicant),
-                    new ProcessStudentDisability($applicant),
-                    new ProcessStudentEmployement($applicant),
-                    new ProcessStudentProposedCourse($applicant),
-                    new ProcessStudentKinDetail($applicant),
-                    new ProcessStudentOtherDetails($applicant),
-                    new ProcessStudentResidencyAndCriminalConviction($applicant),
-                    new ProcessStudentProofOfId($applicant),
-                    new ProcessStudentFeeEligibility($applicant),
-                    new ProcessStudentSms($applicant),
-                    new ProcessStudentLetter($applicant),
-                    new ProcessStudentInterview($applicant),
-                    new ProcessStudentEmail($applicant),
-                    new ProcessStudentConsent($applicant),
-                    new ProcessStudentDocuments($applicant),
+                $chainedBatch = Bus::batch([
+                    [
+                        new ProcessNewStudentToUser($applicant),
+                        new ProcessStudents($applicant),
+                        new ProcessStudentNoteDetails($applicant),
+                        new ProcessStudentTask($applicant),
+                        new ProcessStudentTaskDocument($applicant),
+                        new ProcessStudentQualification($applicant),
+                        new ProcessStudentContact($applicant),
+                        new ProcessStudentDisability($applicant),
+                        new ProcessStudentEmployement($applicant),
+                        new ProcessStudentProposedCourse($applicant),
+                        new ProcessStudentKinDetail($applicant),
+                        new ProcessStudentOtherDetails($applicant),
+                        new ProcessStudentResidencyAndCriminalConviction($applicant),
+                        new ProcessStudentProofOfId($applicant),
+                        new ProcessStudentFeeEligibility($applicant),
+                        new ProcessStudentSms($applicant),
+                        new ProcessStudentLetter($applicant),
+                        new ProcessStudentInterview($applicant),
+                        new ProcessStudentEmail($applicant),
+                        new ProcessStudentConsent($applicant),
+                        new ProcessStudentDocuments($applicant),
+                    ],
                 ])->dispatch();
-                
+
                 session()->put("lastBatchId", $chainedBatch->id);
                 /* Student Process END */
             elseif($statusidID == 6):
