@@ -392,6 +392,8 @@ Route::controller(AuthController::class)->middleware('loggedin')->group(function
     Route::get('login', 'loginView')->name('login.index');
     Route::post('login', 'login')->name('login.check');
 });
+// First-login welcome interstitial for staff (behind auth so the shell can show the welcome state).
+Route::get('welcome', [AuthController::class, 'welcomeView'])->middleware('auth')->name('welcome.first');
 Route::controller(StudentController::class)->group(function() {
     Route::get('old-student/email/verified/{code}','verifiedEmail')->name('student.update.email.verified');
     

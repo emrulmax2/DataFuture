@@ -43,6 +43,9 @@ class AuthController extends Controller
         ])) {
             throw new \Exception('Wrong email or password.');
         } else {
+            // Detect a genuine first login (no previous login recorded) for the welcome state.
+            $isFirstLogin = is_null(auth()->user()->last_login_ip);
+
             User::where('id', auth()->user()->id)->update([
                 'last_login_ip' => $request->getClientIp()
             ]);
@@ -64,8 +67,47 @@ class AuthController extends Controller
                 return response()->json(['redirect' => $redirect]);
             endif;
 
+            // First-time users get the welcome interstitial before the dashboard.
+            if ($isFirstLogin) {
+                session()->flash('login_welcome', $this->firstName(auth()->user()->name));
+                return response()->json(['redirect' => route('welcome.first')]);
+            }
+
             return response()->json(['redirect' => '/dashboard']);
         }
+    }
+
+    /**
+     * First-login welcome interstitial (shown once, right after the first sign in).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function welcomeView(Request $request)
+    {
+        // If the welcome flash is gone (e.g. page refresh), fall straight through to the dashboard.
+        if (!session()->has('login_welcome')) {
+            return redirect('/');
+        }
+        // Keep the flash alive for this render.
+        session()->keep(['login_welcome']);
+
+        return view('login.welcome', [
+            'layout' => 'login',
+            'name' => $this->firstName(auth()->user()->name ?? null),
+            'dashboardUrl' => '/',
+            'opt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
+        ]);
+    }
+
+    /**
+     * Extract a display first name from a full name.
+     */
+    private function firstName(?string $name): ?string
+    {
+        if (empty($name)) {
+            return null;
+        }
+        return trim(explode(' ', trim($name))[0]);
     }
 
     /**

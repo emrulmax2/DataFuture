@@ -10,7 +10,7 @@
         title="Applicant sign in"
         subtitle="Sign in to continue your application, or register to get started."
         brand-eyebrow="Admissions Portal"
-        brand-headline="Your application, all in one place."
+        brand-headline="Your application,<br>all in one <em>place</em>."
         brand-subhead="Complete your details, upload documents and track your application status with London Churchill College."
         :brand-features="[
             ['icon' => 'lock', 'text' => 'Sign in with the email you registered with'],

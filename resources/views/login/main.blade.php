@@ -10,8 +10,8 @@
         title="Sign in"
         subtitle="Use your college account to access the Student Management System."
         brand-eyebrow="Student Management System"
-        brand-headline="One sign-in for everything at LCC."
-        brand-subhead="Records, attendance, assessments and student support — all in one place, secured with your college account."
+        brand-headline="Your studies,<br>one <em>sign-in</em> away."
+        brand-subhead="Records, attendance, assessments and student support — secured with your college account."
         :brand-features="[
             ['icon' => 'lock', 'text' => 'Single sign-on with your LCC email — no extra passwords'],
             ['icon' => 'shield', 'text' => 'Your data is protected and only visible to authorised staff'],
@@ -20,7 +20,12 @@
         {{-- Primary: LCC email single sign-on --}}
         @include('login.partials.sso-google', ['route' => route('redirect.google')])
 
-        @if($env != 'production')
+        <div class="lcc-ssohint">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Single sign-on · no extra passwords
+        </div>
+
+        @unless(app()->environment('production'))
             {{-- Email / password is available only outside production --}}
             <div class="lcc-divider">
                 <span class="lcc-divider__ln"></span>
@@ -45,42 +50,18 @@
                 <button id="btn-login" type="submit" class="lcc-btn">Staff sign in</button>
                 <a href="{{ route('applicant.register') }}" class="lcc-btn-ghost">Register as applicant</a>
             </form>
-        @endif
+        @endunless
 
         <x-slot:footer>
-            Trouble signing in? Contact <a href="mailto:it-support@londonchurchillcollege.ac.uk">it-support@londonchurchillcollege.ac.uk</a>
+            Trouble signing in? Contact <a href="mailto:itsupport@lcc.ac.uk">itsupport@lcc.ac.uk</a>
         </x-slot>
     </x-login-shell>
-
-    @if (session('google'))
-    <div id="success-notification-content" class="toastify-content hidden ">
-        <i class="text-danger" data-lucide="x-octagon"></i>
-        <div class="ml-4 mr-4">
-            <div class="font-medium">No Linked Account Found!</div>
-            <div class="text-slate-500 mt-1">{{ session('google') }}</div>
-        </div>
-    </div>
-    <button id="success-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
-    @endif
-
-    @if (session('microsoft'))
-    <div id="microsoft-notification-content" class="toastify-content hidden ">
-        <i class="text-danger" data-lucide="x-octagon"></i>
-        <div class="ml-4 mr-4">
-            <div class="font-medium">No Linked Account Found!</div>
-            <div class="text-slate-500 mt-1">{{ session('microsoft') }}</div>
-        </div>
-    </div>
-    <button id="microsoft-notification-toggle" class="btn hidden btn-primary">Show Notification</button>
-    @endif
+    {{-- SSO "no linked account" errors are now surfaced by the shell's error state (session google/microsoft). --}}
 @endsection
 
 @section('script')
     <script type="module">
         (function () {
-            if ($('#success-notification-toggle').length > 0) { $("#success-notification-toggle").trigger('click') }
-            if ($('#microsoft-notification-toggle').length > 0) { $("#microsoft-notification-toggle").trigger('click') }
-
             if ($('#login-form').length === 0) return;
 
             async function login() {

@@ -10,7 +10,7 @@
         title="Agent sign in"
         subtitle="Sign in to manage referrals, applications and commissions."
         brand-eyebrow="Agent Portal"
-        brand-headline="Manage your referrals with confidence."
+        brand-headline="Manage your referrals<br>with <em>confidence</em>."
         brand-subhead="Submit applications, track student progress and view commissions with London Churchill College."
         :brand-features="[
             ['icon' => 'lock', 'text' => 'Sign in with your registered agent email'],

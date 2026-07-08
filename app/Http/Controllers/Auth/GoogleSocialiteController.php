@@ -27,42 +27,55 @@ class GoogleSocialiteController extends Controller
         try {
             config(['services.google.redirect' => env('GOOGLE_REDIRECT_URL')]);
             $user = Socialite::driver('google')->user();
-            
+
             $finduser = User::where('social_id', $user->id)->first();
-      
+
             if($finduser){
-      
+
+                $isFirstLogin = is_null($finduser->last_login_ip);
                 Auth::login($finduser);
                 User::where('id', $finduser->id)->update([
                     'last_login_ip' => request()->ip()
                 ]);
                 Cache::forever('employeeCashe'.$finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                //return redirect('/');
-                return redirect()->intended('/');
+                return $this->afterLoginRedirect($finduser, $isFirstLogin);
             }else{
-                
+
                 $finduser = User::where('email', $user->email)->first();
-                
+
                 $finduser = User::find($finduser->id);
-                
+
+                $isFirstLogin = is_null($finduser->last_login_ip);
                 $finduser->social_id=$user->id;
                 $finduser->social_type='google';
                 $finduser->save();
-                
+
                 Auth::login($finduser);
                 User::where('id', $finduser->id)->update([
                     'last_login_ip' => request()->ip()
                 ]);
                 Cache::forever('employeeCache'.$finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                //return redirect('/');
-                return redirect()->intended('/');
+                return $this->afterLoginRedirect($finduser, $isFirstLogin);
             }
-     
+
         } catch (Exception $e) {
 
-             return redirect('login')->with('google', "Your email not linked with google account");  
+             return redirect('login')->with('google', "Your email not linked with google account");
         }
+    }
+
+    /**
+     * Send first-time users through the welcome interstitial; everyone else to their intended page.
+     */
+    private function afterLoginRedirect(User $user, bool $isFirstLogin)
+    {
+        if ($isFirstLogin) {
+            $first = trim(explode(' ', trim((string) $user->name))[0]);
+            session()->flash('login_welcome', $first !== '' ? $first : null);
+            return redirect()->route('welcome.first');
+        }
+        return redirect()->intended('/');
     }
 }

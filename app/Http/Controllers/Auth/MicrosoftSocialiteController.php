@@ -35,18 +35,20 @@ class MicrosoftSocialiteController extends Controller
             $finduser = User::where('social_id', $user->id)->first();
 
             if ($finduser) {
+                $isFirstLogin = is_null($finduser->last_login_ip);
                 Auth::login($finduser);
                 User::where('id', $finduser->id)->update([
                     'last_login_ip' => request()->ip()
                 ]);
                 Cache::forever('employeeCashe' . $finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                return redirect('/');
+                return $this->afterLoginRedirect($finduser, $isFirstLogin);
             } else {
                 $finduser = User::where('email', $user->email)->first();
 
                 $finduser = User::find($finduser->id);
 
+                $isFirstLogin = is_null($finduser->last_login_ip);
                 $finduser->social_id = $user->id;
                 $finduser->social_type = 'microsoft';
                 $finduser->save();
@@ -57,10 +59,23 @@ class MicrosoftSocialiteController extends Controller
                 ]);
                 Cache::forever('employeeCache' . $finduser->id, Auth::user()->load('employee'));
                 AuthLogService::logLogin($finduser->id, 'user', 'web', session()->getId(), request()->ip(), request()->userAgent(), AuthLogService::resolveExtra(request()));
-                return redirect('/');
+                return $this->afterLoginRedirect($finduser, $isFirstLogin);
             }
         } catch (Exception $e) {
             return redirect('login')->with('microsoft', 'Your email not linked with microsoft account');
         }
+    }
+
+    /**
+     * Send first-time users through the welcome interstitial; everyone else to the dashboard.
+     */
+    private function afterLoginRedirect(User $user, bool $isFirstLogin)
+    {
+        if ($isFirstLogin) {
+            $first = trim(explode(' ', trim((string) $user->name))[0]);
+            session()->flash('login_welcome', $first !== '' ? $first : null);
+            return redirect()->route('welcome.first');
+        }
+        return redirect('/');
     }
 }
