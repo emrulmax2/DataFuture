@@ -245,6 +245,12 @@ import TomSelect from 'tom-select';
                                 '#editAdmissionContactDetailsModal input[name="permanent_post_code"]'
                             ).val(post_code);
                         }
+
+                        if (wrapid == '#termTimeAddressWrap') {
+                            $(
+                                '#editAdmissionContactDetailsModal input[name="term_time_post_code"]'
+                            ).val(post_code);
+                        }
                     }
                 })
                 .catch((error) => {
