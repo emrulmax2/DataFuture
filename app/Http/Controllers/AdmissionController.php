@@ -2522,7 +2522,7 @@ class AdmissionController extends Controller
                  * jobs in array order.) Bus::chain() runs them strictly in order and, on failure,
                  * halts so a retry resumes the chain instead of leaving a half-migrated student.
                  */
-                Bus::chain([
+                $chainedBatch = Bus::chain([
                     new ProcessNewStudentToUser($applicant),
                     new ProcessStudents($applicant),
                     new ProcessStudentNoteDetails($applicant),
@@ -2545,6 +2545,8 @@ class AdmissionController extends Controller
                     new ProcessStudentConsent($applicant),
                     new ProcessStudentDocuments($applicant),
                 ])->dispatch();
+                
+                session()->put("lastBatchId", $chainedBatch->id);
                 /* Student Process END */
             elseif($statusidID == 6):
                 $docuSealDoc = $this->sendDocusealForm($applicant_id);
