@@ -25,6 +25,7 @@
             Single sign-on · no extra passwords
         </div>
 
+        
         @unless(app()->environment('production'))
             {{-- Email / password is available only outside production --}}
             <div class="lcc-divider">
