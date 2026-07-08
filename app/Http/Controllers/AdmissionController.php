@@ -2509,7 +2509,20 @@ class AdmissionController extends Controller
                 endif;
 
                 /* Student Process Start */
-                $bus = Bus::batch([
+                /**
+                 * These jobs have a strict dependency order and MUST run sequentially:
+                 *  - ProcessNewStudentToUser creates the StudentUser (needed by every job below).
+                 *  - ProcessStudents creates the Student record (needed by every job below).
+                 *  - ProcessStudentTaskDocument depends on the StudentTasks created by ProcessStudentTask.
+                 *
+                 * Bus::batch() dispatches all jobs concurrently, so on the redis queue (multiple
+                 * workers) the dependent jobs frequently executed BEFORE their prerequisites,
+                 * dereferencing null and failing with "Attempt to read property ... on null".
+                 * (It only appeared to work on the local `sync` queue, which happens to run batch
+                 * jobs in array order.) Bus::chain() runs them strictly in order and, on failure,
+                 * halts so a retry resumes the chain instead of leaving a half-migrated student.
+                 */
+                Bus::chain([
                     new ProcessNewStudentToUser($applicant),
                     new ProcessStudents($applicant),
                     new ProcessStudentNoteDetails($applicant),
@@ -2532,8 +2545,6 @@ class AdmissionController extends Controller
                     new ProcessStudentConsent($applicant),
                     new ProcessStudentDocuments($applicant),
                 ])->dispatch();
-                
-                session()->put("lastBatchId",$bus->id);
                 /* Student Process END */
             elseif($statusidID == 6):
                 $docuSealDoc = $this->sendDocusealForm($applicant_id);
