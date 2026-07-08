@@ -11,22 +11,22 @@
     <!-- END: Profile Info -->
 
     <!-- BEGIN: Archives -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-ARCV" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-ARCV" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-ARCV" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-ARCV" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+    <div class="intro-y box mt-5 student-profile-archives">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
+                <div class="font-medium text-base">Archives</div>
+            </div>
+        </div>
+        <div class="intro-y">
+            <div class="student-profile-tablefilter">
+                <form id="tabulatorFilterForm-ARCV" class="student-profile-tablefilter-form" >
+                    <input id="query-ARCV" name="query" type="text" class="form-control student-profile-tablefilter-search" placeholder="Search archives...">
+                    <button id="tabulator-html-filter-go-ARCV" type="button" class="btn btn-primary" >Go</button>
+                    <button id="tabulator-html-filter-reset-ARCV" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset" >Reset</button>
                 </form>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentArchiveListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="student-profile-tablebody">
+                <div id="studentArchiveListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>

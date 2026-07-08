@@ -10,14 +10,14 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+    <div class="intro-y box mt-5 student-profile-process-head">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">My Task</div>
             </div>
-            <div class="col-span-6 text-right relative">
+            <div class="student-profile-secthead-actions">
                 <div class="dropdown" id="processDropdown">
-                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Task <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                    <button class="dropdown-toggle btn student-profile-addbtn" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="activity" class="w-4 h-4 mr-2"></i>  Add Task <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
                     <div class="dropdown-menu w-72">
                         <form method="post" action="#" id="studentProcessListForm">
                             <ul class="dropdown-content">
@@ -92,7 +92,7 @@
             </div>
         </div>
     </div>
-    <div class="intro-y box p-5 mt-5">
+    <div class="intro-y box mt-5 student-profile-process-body">
         @if(!empty($processGroup))
             <div id="studentProcessAccordion" class="accordion">
                 @foreach($processGroup as $proGroup)

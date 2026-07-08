@@ -11,130 +11,94 @@
     <!-- END: Profile Info -->
 
     <!-- BEGIN: Letters -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-5 md:col-span-6">
+    <div class="intro-y box mt-5">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">Letters</div>
             </div>
-            <div class="col-span-7 md:col-span-6 text-right relative">
-                <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-success text-white shadow-md mr-2 hidden md:inline-flex">
+            <div class="student-profile-secthead-actions">
+                <a href="{{ route('student.print.communications', [$student->id, 'all'] )}}" class="btn btn-outline-secondary hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print All
                 </a>
-                @if(isset(auth()->user()->priv()['communication_send_letter']) && auth()->user()->priv()['communication_send_letter'] == 1)
-                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
-                @endif
-                <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary w-auto hidden md:inline-flex">
+                <a href="{{ route('student.print.communications', [$student->id, 'letter'] )}}" class="btn btn-outline-secondary hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Letters
                 </a>
+                @if(isset(auth()->user()->priv()['communication_send_letter']) && auth()->user()->priv()['communication_send_letter'] == 1)
+                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn student-profile-addbtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
+                @endif
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CML" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CML" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CML" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CML" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CML" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentCommLetterListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
-            </div>
+        <div class="student-profile-tablefilter" id="tabulatorFilterForm-CML">
+            <input id="query-CML" name="query" type="text" class="form-control student-profile-tablefilter-search" placeholder="Search...">
+            <select id="status-CML" name="status" class="form-select student-profile-tablefilter-status">
+                <option selected value="1">Active</option>
+                <option value="2">Archived</option>
+            </select>
+            <button id="tabulator-html-filter-go-CML" type="button" class="btn btn-primary">Go</button>
+            <button id="tabulator-html-filter-reset-CML" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset">Reset</button>
+        </div>
+        <div class="student-profile-tablebody">
+            <div id="studentCommLetterListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: Letters -->
 
     <!-- BEGIN: Email -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+    <div class="intro-y box mt-5">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">Email</div>
             </div>
-            <div class="col-span-6 text-right relative">
-                @if(isset(auth()->user()->priv()['communication_send_email']) && auth()->user()->priv()['communication_send_email'] == 1)
-                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
-                @endif
-                <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
+            <div class="student-profile-secthead-actions">
+                <a href="{{ route('student.print.communications', [$student->id, 'email'] )}}" class="btn btn-outline-secondary hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print Emails
                 </a>
+                @if(isset(auth()->user()->priv()['communication_send_email']) && auth()->user()->priv()['communication_send_email'] == 1)
+                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn student-profile-addbtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
+                @endif
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CME" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CME" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CME" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CME" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CME" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentCommEmailListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
-            </div>
+        <div class="student-profile-tablefilter" id="tabulatorFilterForm-CME">
+            <input id="query-CME" name="query" type="text" class="form-control student-profile-tablefilter-search" placeholder="Search...">
+            <select id="status-CME" name="status" class="form-select student-profile-tablefilter-status">
+                <option selected value="1">Active</option>
+                <option value="2">Archived</option>
+            </select>
+            <button id="tabulator-html-filter-go-CME" type="button" class="btn btn-primary">Go</button>
+            <button id="tabulator-html-filter-reset-CME" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset">Reset</button>
+        </div>
+        <div class="student-profile-tablebody">
+            <div id="studentCommEmailListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: Email -->
 
     <!-- BEGIN: SMS -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+    <div class="intro-y box mt-5">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">SMS</div>
             </div>
-            <div class="col-span-6 text-right relative">
-                @if(isset(auth()->user()->priv()['communication_send_sms']) && auth()->user()->priv()['communication_send_sms'] == 1)
-                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
-                @endif
-                <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary w-1/2 sm:w-auto hidden md:inline-flex">
+            <div class="student-profile-secthead-actions">
+                <a href="{{ route('student.print.communications', [$student->id, 'sms'] )}}" class="btn btn-outline-secondary hidden md:inline-flex">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print SMS
                 </a>
+                @if(isset(auth()->user()->priv()['communication_send_sms']) && auth()->user()->priv()['communication_send_sms'] == 1)
+                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn student-profile-addbtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
+                @endif
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CMS" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CMS" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CMS" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CMS" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CMS" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentCommSMSListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
-            </div>
+        <div class="student-profile-tablefilter" id="tabulatorFilterForm-CMS">
+            <input id="query-CMS" name="query" type="text" class="form-control student-profile-tablefilter-search" placeholder="Search...">
+            <select id="status-CMS" name="status" class="form-select student-profile-tablefilter-status">
+                <option selected value="1">Active</option>
+                <option value="2">Archived</option>
+            </select>
+            <button id="tabulator-html-filter-go-CMS" type="button" class="btn btn-primary">Go</button>
+            <button id="tabulator-html-filter-reset-CMS" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset">Reset</button>
+        </div>
+        <div class="student-profile-tablebody">
+            <div id="studentCommSMSListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
         </div>
     </div>
     <!-- END: SMS -->

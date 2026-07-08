@@ -90,9 +90,8 @@ class EmployeeAttendanceController extends Controller
                 $employeeMap[$normalizedNi] = $emp->id;
             }
         }
-        
 
-        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap, auth()->id());
+        ProcessExtractedFiles::dispatch($tempPath, $dirName, $type, $holiday_year_Id, $employeeMap);
 
         return response()->json(['success' => 'File process started. Extraction and processing are running in background.'], 200);
         
@@ -185,6 +184,7 @@ class EmployeeAttendanceController extends Controller
         $html = '';
         $month = date('m', strtotime($attendanceDate));
         $year = date('Y', strtotime($attendanceDate));
+        $canDelete = (isset(auth()->user()->priv()['del_attendance']) && auth()->user()->priv()['del_attendance'] == 1);
         for($i = 1; $i <= date('t', strtotime($attendanceDate)); $i++):
             $todayDate = $year.'-'.$month.'-'.($i < 10 ? '0'.$i: $i);
             $isSyncronised = $this->isSynchronised($todayDate);
@@ -195,27 +195,56 @@ class EmployeeAttendanceController extends Controller
             $overtime = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->where('overtime_status', 1)->get()->count() : 0);
             $pendings = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->whereNull('updated_by')->get()->count() : 0);
             $allRows = ($isSyncronised == 1 ? EmployeeAttendance::where('date', $todayDate)->get()->count() : 0);
-            $html .= '<tr>';
-                $html .= '<td>'.date('D jS M, Y', strtotime($todayDate)).'</td>';
+
+            $ts      = strtotime($todayDate);
+            $weekend = ((int) date('N', $ts) >= 6);
+            $hasAtt  = $allRows > 0;
+
+            $badgeClass = 'att-date__badge';
+            if($weekend):
+                $badgeClass .= ' att-date__badge--weekend';
+            elseif($isSyncronised == 1 && $hasAtt):
+                $badgeClass .= ' att-date__badge--synced';
+            endif;
+
+            if($weekend):
+                $tag = 'Weekend'; $tagClass = 'att-date__tag';
+            elseif($isSyncronised == 1):
+                $tag = 'Working day'; $tagClass = 'att-date__tag';
+            else:
+                $tag = 'Awaiting sync'; $tagClass = 'att-date__tag att-date__tag--await';
+            endif;
+
+            $html .= '<tr'.($weekend ? ' class="att-row--weekend"' : '').'>';
+
+                /* Date */
+                $html .= '<td>';
+                    $html .= '<div class="att-date">';
+                        $html .= '<div class="'.$badgeClass.'">';
+                            $html .= '<span class="att-date__dow">'.strtoupper(date('D', $ts)).'</span>';
+                            $html .= '<span class="att-date__day">'.date('j', $ts).'</span>';
+                        $html .= '</div>';
+                        $html .= '<div class="att-date__meta">';
+                            $html .= '<div class="att-date__long">'.date('D jS F, Y', $ts).'</div>';
+                            $html .= '<div class="'.$tagClass.'">'.$tag.'</div>';
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</td>';
+
+                /* Synchronise */
                 $html .= '<td>';
                     if($isSyncronised == 1):
-                        $html .= '<button class="btn btn-sm btn-primary rounded-0 w-auto text-white" type="button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check-circle" class="lucide lucide-check-circle w-4 h-4 mr-2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                                    Synchronised
-                                </button>';
+                        $html .= '<span class="att-sync--done"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>Synchronised</span>';
                     else:
-                        $html .= '<button type="button"
-                                    data-date="'.$todayDate.'"
-                                    class="btn btn-sm btn-success text-white rounded-0 w-auto syncroniseAttendance">
+                        $html .= '<button type="button" data-date="'.$todayDate.'" class="att-sync-btn syncroniseAttendance">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"></path><path d="M21 3v5h-5"></path></svg>
                                     Synchronise
-                                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                        stroke="white" class="w-4 h-4 ml-2">
+                                    <svg style="display: none;" width="14" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" class="w-4 h-4 ml-1">
                                         <g fill="none" fill-rule="evenodd">
                                             <g transform="translate(1 1)" stroke-width="4">
                                                 <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
                                                 <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
                                                 </path>
                                             </g>
                                         </g>
@@ -224,49 +253,35 @@ class EmployeeAttendanceController extends Controller
                     endif;
                 $html .= '</td>';
 
+                /* Counts */
+                $html .= '<td>'.$this->renderCountPill($theUrl, $issues, 'Issues', 'issue').'</td>';
+                $html .= '<td>'.$this->renderCountPill($theUrl, $absents, 'Absents', 'issue').'</td>';
+                $html .= '<td>'.$this->renderCountPill($theUrl, $overtime, 'Overtime', 'warn').'</td>';
+                $html .= '<td>'.$this->renderCountPill($theUrl, $pendings, 'Pendings', 'warn').'</td>';
+                /* Actions */
                 $html .= '<td>';
-                    if($issues > 0):
-                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$issues.' Issues</a>';
+                    if($hasAtt):
+                        $html .= '<div class="att-actions">';
+                            $html .= '<a href="'.$theUrl.'" target="_blank" class="att-link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>'.$allRows.' Attendances</a>';
+                            if($canDelete):
+                                $html .= '<button data-date="'.date('Y-m-d', $ts).'" class="att-del deleteAllSyncd" type="button" title="Clear day"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path></svg></button>';
+                            endif;
+                        $html .= '</div>';
                     else:
-                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Issues</a>';
-                    endif;
-                $html .= '</td>';
-
-                $html .= '<td>';
-                    if($absents > 0):
-                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$absents.' Absents</a>';
-                    else:
-                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Absents</a>';
-                    endif;
-                $html .= '</td>';
-
-                $html .= '<td>';
-                    if($overtime > 0):
-                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$overtime.' Overtime</a>';
-                    else:
-                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Overtime</a>';
-                    endif;
-                $html .= '</td>';
-                $html .= '<td>';
-                    if($pendings > 0):
-                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$pendings.' Pendings</a>';
-                    else:
-                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Pendings</a>';
-                    endif;
-                $html .= '</td>';
-                $html .= '<td>';
-                    if($allRows > 0):
-                        $html .= '<a href="'.$theUrl.'" target="_blank" class="btn btn-sm btn-warning text-white rounded-0">'.$allRows.' Attendances</a>';
-                        if(isset(auth()->user()->priv()['del_attendance']) && auth()->user()->priv()['del_attendance'] == 1):
-                            $html .= '<button data-date="'.date('Y-m-d', strtotime($todayDate)).'" class="deleteAllSyncd btn btn-sm btn-danger text-white rounded-0 ml-1 relative" style="top: 4px;" type="button"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
-                        endif;
-                    else:
-                        $html .= '<a href="'.$theUrl.'" class="btn btn-sm btn-success text-white rounded-0">0 Attendances</a>';
+                        $html .= '<span class="att-link att-link--zero">0 Attendances</span>';
                     endif;
                 $html .= '</td>';
             $html .= '</tr>';
         endfor;
         return $html;
+    }
+
+    private function renderCountPill($url, $count, $word, $tone){
+        if($count > 0):
+            $cls = ($tone == 'issue') ? 'att-pill att-pill--issue' : 'att-pill att-pill--warn';
+            return '<a href="'.$url.'" target="_blank" class="'.$cls.'">'.$count.' '.$word.'</a>';
+        endif;
+        return '<a href="'.$url.'" class="att-pill att-pill--zero">0 '.$word.'</a>';
     }
 
     public function isSynchronised($theDate){

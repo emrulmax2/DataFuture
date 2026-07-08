@@ -10,12 +10,35 @@ use Illuminate\Http\Request;
 class EmployeeVisaExpiryController extends Controller
 {
     public function index(){
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+
+        $records = EmployeeEligibilites::where('eligible_to_work', 'Yes')->where('employee_work_permit_type_id', 3)
+                ->whereDate('workpermit_expire', '<=', $expireDate)
+                ->whereHas('employee', function($q){
+                    $q->where('status', 1);
+                })->orderBy('workpermit_expire', 'ASC')->get();
+
+        $exportRows = $records->map(function($rec){
+            $expiryDate = date('Y-m-d', strtotime($rec->workpermit_expire));
+            $days = Carbon::parse($expiryDate)->diffInDays(Carbon::now());
+            return [
+                'Name' => $rec->employee->first_name.' '.$rec->employee->last_name,
+                'Designation' => (isset($rec->employee->employment->employeeJobTitle->name) ? $rec->employee->employment->employeeJobTitle->name : ''),
+                'Work Permit Number' => $rec->workpermit_number,
+                'Expiry Date' => date('D jS M, Y', strtotime($rec->workpermit_expire)),
+                'Days Remaining' => $days,
+                'Status' => (date('Y-m-d') > $expiryDate ? 'Expired' : 'Due'),
+            ];
+        })->values();
+
         return view('pages.hr.portal.visa-expiry', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Visa Expiry', 'href' => 'javascript:void(0);']
-            ]
+            ],
+            'records' => $records,
+            'exportRows' => $exportRows,
         ]);
     }
 

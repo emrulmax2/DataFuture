@@ -58,10 +58,10 @@
                     $theBtn.addClass('dataLoaded');
                     let res = response.data.res;
                     
-                    $(target+' .attendanceDetailsTable tbody').html(res.html);
-                    $(target+' .attendanceDetailsTable tfoot .tfootTotalWorkingHour').html(res.workingHourTotal);
-                    $(target+' .attendanceDetailsTable tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
-                    $(target+' .attendanceDetailsTable tfoot .tfootTotalPay').html(res.monthTotalPay);
+                    $(target+' .ep-tk-table tbody').html(res.html);
+                    $(target+' .ep-tk-table tfoot .tfootTotalWorkingHour').html(res.workingHourTotal);
+                    $(target+' .ep-tk-table tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
+                    $(target+' .ep-tk-table tfoot .tfootTotalPay').html(res.monthTotalPay);
                 }
             })
             .catch((error) => {

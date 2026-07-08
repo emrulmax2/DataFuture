@@ -29,6 +29,7 @@ class CourseUpdateRequests extends FormRequest
             'pre_qualification' => 'required',
             'awarding_body_id' => 'required',
             'source_tuition_fee_id' => 'required',
+            'color_theme' => 'nullable|in:lcc_teal,burgundy,oxford_blue,forest_green,aubergine,terracotta,slate,deep_petrol',
             'franchise_course' => 'nullable|in:Yes,No',
         ];
     }

@@ -769,13 +769,11 @@ var studentNotesListTable = (function () {
 
             CreateNewAnchor.addClass('delete_btn_new');
             // Set classes
-            CreateNewAnchor.addClass(
-                'intro-x text-danger flex items-center text-xs sm:text-sm cursor-pointer'
-            );
+            CreateNewAnchor.addClass('sp-del-btn cursor-pointer');
 
             // Append inner HTML content
             CreateNewAnchor.html(
-                '<i data-lucide="x-circle" class="w-5 h-5"></i>'
+                '<i data-lucide="trash-2" class="w-4 h-4"></i>'
             );
 
             // Reinitialize Lucide icons to ensure the new icon is rendered

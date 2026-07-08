@@ -64,13 +64,13 @@ var employeeListTable = (function () {
                     width: 150,
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 1){
-                            return '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
+                            return '<span class="lcc-badge lcc-badge--active has-dot">Active</span>';
                         }else if(cell.getData().status == 2){
-                            return '<span class="btn inline-flex btn-pending w-auto px-2 text-white py-0 rounded-0">Temporary</span>';
+                            return '<span class="lcc-badge lcc-badge--leave has-dot">Temporary</span>';
                         }else if(cell.getData().status == 4){
-                            return '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">Submitted</span>';
+                            return '<span class="lcc-badge lcc-badge--warning has-dot">Submitted</span>';
                         }else{
-                            return '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
+                            return '<span class="lcc-badge lcc-badge--inactive has-dot">Inactive</span>';
                         }
                     }
                 }
@@ -150,6 +150,11 @@ var employeeListTable = (function () {
 
         // On click go button
         $("#tabulator-html-filter-go").on("click", function (event) {
+            filterTitleHTMLForm();
+        });
+
+        // Status dropdown filters immediately (Go button removed to match design)
+        $("#status").on("change", function (event) {
             filterTitleHTMLForm();
         });
 

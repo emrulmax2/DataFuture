@@ -85,6 +85,19 @@
         </div>
     </div>
 
+    @php
+        $colorThemes = [
+            'lcc_teal'     => 'LCC Teal',
+            'burgundy'     => 'Burgundy',
+            'oxford_blue'  => 'Oxford Blue',
+            'forest_green' => 'Forest Green',
+            'aubergine'    => 'Aubergine',
+            'terracotta'   => 'Terracotta',
+            'slate'        => 'Slate',
+            'deep_petrol'  => 'Deep Petrol',
+        ];
+    @endphp
+
     <!-- BEGIN: Add Modal -->
     <div id="addModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -135,6 +148,16 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-source_tuition_fee_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="color_theme" class="form-label">Color Theme</label>
+                            <select id="color_theme" name="color_theme" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @foreach($colorThemes as $slug => $themeName)
+                                    <option value="{{ $slug }}">{{ $themeName }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-color_theme text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <div class="form-check form-switch">
@@ -222,6 +245,16 @@
                                 @endif
                             </select>
                             <div class="acc__input-error error-source_tuition_fee_id text-danger mt-2"></div>
+                        </div>
+                        <div class="mt-3">
+                            <label for="edit_color_theme" class="form-label">Color Theme</label>
+                            <select id="edit_color_theme" name="color_theme" class="form-control w-full">
+                                <option value="">Please Select</option>
+                                @foreach($colorThemes as $slug => $themeName)
+                                    <option value="{{ $slug }}">{{ $themeName }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-color_theme text-danger mt-2"></div>
                         </div>
                         <div class="mt-3">
                             <div class="form-check form-switch">

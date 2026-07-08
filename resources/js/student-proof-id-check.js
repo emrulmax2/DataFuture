@@ -44,7 +44,7 @@ var studentProofOfIdCheckTable = (function () {
                     minWidth: 120,
                 },
                 {
-                    title: "Proof Expire Date",
+                    title: "Expires",
                     field: "proof_expiredate",
                     headerHozAlign: "left",
                     minWidth: 180,
@@ -56,8 +56,8 @@ var studentProofOfIdCheckTable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
                     download: false,
                     minWidth: 120,
                     formatter(cell, formatterParams) {                        

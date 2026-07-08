@@ -1,76 +1,97 @@
-<div class="intro-y box px-5 pt-5 mt-5">
-    <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
-        <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
-            <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
-                <img alt="{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}" class="rounded-full" src="{{ (isset($employee->photo) && !empty($employee->photo) && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo) ? Storage::disk('local')->url('public/employees/'.$employee->id.'/'.$employee->photo) : asset('build/assets/images/avater.png')) }}">
-                <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" type="button" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
-                    <i class="w-4 h-4 text-white" data-lucide="camera"></i>
+@php
+    $jobTitle   = $employment->employeeJobTitle->name ?? null;
+    $deptName   = $employment->department->name ?? null;
+    $worksNo    = $employment->works_number ?? null;
+    $roleBits   = array_filter([$jobTitle, $deptName, ($worksNo ? 'No. '.$worksNo : null)]);
+@endphp
+
+<div class="intro-y box mt-5 overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(280px,1.3fr)_minmax(240px,1fr)_minmax(220px,.9fr)] gap-6 lg:gap-7 p-6">
+
+        {{-- Identity --}}
+        <div class="flex items-center gap-5">
+            <div class="relative flex-none w-24 h-24 image-fit">
+                <img alt="{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}" class="rounded-full ring-4 ring-slate-100 dark:ring-darkmode-400" src="{{ $employee->brand_photo_url }}">
+                <button data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" type="button" title="Change photo" class="absolute -bottom-0.5 -right-0.5 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white border-2 border-white dark:border-darkmode-600 hover:bg-primary-hover transition-colors">
+                    <i data-lucide="camera" class="w-4 h-4"></i>
                 </button>
             </div>
-            <div class="ml-5">
-                <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg"></div>
-                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium text-lg uppercase">{{ $employee->title->name.' '.$employee->first_name }} <br/><span class="font-black">{{ $employee->last_name }}</span></div>
-                <div class="w-24 sm:w-72 truncate sm:whitespace-normal font-medium {{ $employee->status == 1 ? 'text-success' : 'text-danger' }}">{{ ($employee->status == 1 ? 'Active' : 'Inactive') }}</span></div>
-                
+            <div class="min-w-0">
+                <div class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight">{{ $employee->title->name.' '.$employee->first_name.' '.$employee->last_name }}</div>
+                @if(count($roleBits))
+                <div class="text-[13px] font-semibold text-slate-500 dark:text-slate-400 mt-1.5">{{ implode(' · ', $roleBits) }}</div>
+                @endif
+                <div class="mt-3">
+                    <span class="lcc-badge has-dot {{ $employee->status == 1 ? 'lcc-badge--active' : 'lcc-badge--inactive' }}">{{ $employee->status == 1 ? 'Active' : 'Inactive' }}</span>
+                </div>
             </div>
         </div>
-        <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-r border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
-            <div class="font-medium text-center lg:text-left lg:mt-3">Contact Details</div>
-            <div class="flex flex-col justify-center items-center lg:items-start mt-4">
-                <div class="truncate sm:whitespace-normal flex items-center">
-                    <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $employee->email }}
+
+        {{-- Contact --}}
+        <div class="lg:border-l border-slate-100 dark:border-darkmode-400 lg:pl-7 border-t lg:border-t-0 pt-5 lg:pt-0">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3">Contact Details</div>
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <i data-lucide="mail" class="w-4 h-4 text-primary flex-none"></i>
+                    <span class="text-[13.5px] font-semibold text-slate-700 dark:text-slate-200 truncate">{{ $employee->email ?: '—' }}</span>
                 </div>
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="phone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Phone:</span> {{ $employee->telephone }}
+                <div class="flex items-center gap-3">
+                    <i data-lucide="phone" class="w-4 h-4 text-primary flex-none"></i>
+                    <span class="text-[13.5px] font-semibold text-slate-700 dark:text-slate-200">{{ $employee->telephone ?: '—' }}</span>
+                    <span class="text-[11px] font-semibold text-slate-400">Phone</span>
                 </div>
-                <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $employee->mobile }}
+                <div class="flex items-center gap-3">
+                    <i data-lucide="smartphone" class="w-4 h-4 text-primary flex-none"></i>
+                    <span class="text-[13.5px] font-semibold text-slate-700 dark:text-slate-200">{{ $employee->mobile ?: '—' }}</span>
+                    <span class="text-[11px] font-semibold text-slate-400">Mobile</span>
                 </div>
-                
-                {{--<div class="truncate sm:whitespace-normal flex items-center mt-3">
-                    <i data-lucide="tent-tree" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Expected Retirement :</span> {{ $employee->retire }}
-                </div>--}}
             </div>
         </div>
-        <div class="mt-6 lg:mt-0 flex-1 px-5 border-t lg:border-0 border-slate-200/60 dark:border-darkmode-400 pt-5 lg:pt-0 addressWrap" id="employeeAddress">
-            <div class="font-medium text-center lg:text-left">Address 
+
+        {{-- Address --}}
+        <div class="lg:border-l border-slate-100 dark:border-darkmode-400 lg:pl-7 border-t lg:border-t-0 pt-5 lg:pt-0 addressWrap" id="employeeAddress">
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Address</div>
                 @if(isset(auth()->user()->priv()['hr_porta']) && auth()->user()->priv()['hr_porta'] == 1)
-                <button data-id="{{ $employee->address_id }}" data-type="employee" data-tw-toggle="modal" data-tw-target="#addressModal" class="addressPopupToggler transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&amp;:hover:not(:disabled)]:bg-slate-100 [&amp;:hover:not(:disabled)]:border-slate-100 [&amp;:hover:not(:disabled)]:dark:border-darkmode-300/80 [&amp;:hover:not(:disabled)]:dark:bg-darkmode-300/80 mb-2 mr-1 ml-2"><i data-lucide="Pencil" width="24" height="24" class="stroke-1.5 h-4 w-4"></i></button>
+                <button data-id="{{ $employee->address_id }}" data-type="employee" data-tw-toggle="modal" data-tw-target="#addressModal" title="Edit address" class="addressPopupToggler inline-flex items-center justify-center w-7 h-7 rounded-md border border-slate-200 dark:border-darkmode-400 bg-white dark:bg-darkmode-600 text-slate-500 hover:text-primary hover:border-primary transition-colors">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                </button>
                 @endif
             </div>
-            <div class="flex flex-col justify-center items-center lg:items-start mt-4">
-                <div class="truncate sm:whitespace-normal flex items-start">
-                    <i data-lucide="map-pin" class="w-4 h-4 mr-2" style="padding-top: 3px;"></i> 
-                    <span class="uppercase addresses">
-                        @if(isset($employee->address->address_line_1) && $employee->address->address_line_1 > 0)
-                            @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
-                                <span class="font-medium">{{ $employee->address->address_line_1 }}</span><br/>
-                            @endif
-                            @if(isset($employee->address->address_line_2) && !empty($employee->address->address_line_2))
-                                <span class="font-medium">{{ $employee->address->address_line_2 }}</span><br/>
-                            @endif
-                            @if(isset($employee->address->city) && !empty($employee->address->city))
-                                <span class="font-medium">{{ $employee->address->city }}</span>,
-                            @endif
-                            @if(isset($employee->address->state) && !empty($employee->address->state))
-                                <span class="font-medium">{{ $employee->address->state }}</span>,
-                            @endif
-                            @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
-                                <span class="font-medium">{{ $employee->address->post_code }}</span>,<br/>
-                            @endif
-                            @if(isset($employee->address->country) && !empty($employee->address->country))
-                                <span class="font-medium">{{ $employee->address->country }}</span><br/>
-                            @endif
-                        @else 
-                            <span class="font-medium text-warning">Not Set Yet!</span><br/>
+            <div class="flex items-start gap-2.5">
+                <i data-lucide="map-pin" class="w-4 h-4 text-primary flex-none mt-0.5"></i>
+                <span class="uppercase text-[13.5px] font-semibold text-slate-700 dark:text-slate-200 leading-relaxed addresses">
+                    @if(isset($employee->address->address_line_1) && $employee->address->address_line_1 > 0)
+                        @if(isset($employee->address->address_line_1) && !empty($employee->address->address_line_1))
+                            <span class="font-medium">{{ $employee->address->address_line_1 }}</span><br/>
                         @endif
-                    </span>
-                    
-                </div>
+                        @if(isset($employee->address->address_line_2) && !empty($employee->address->address_line_2))
+                            <span class="font-medium">{{ $employee->address->address_line_2 }}</span><br/>
+                        @endif
+                        @if(isset($employee->address->city) && !empty($employee->address->city))
+                            <span class="font-medium">{{ $employee->address->city }}</span>,
+                        @endif
+                        @if(isset($employee->address->state) && !empty($employee->address->state))
+                            <span class="font-medium">{{ $employee->address->state }}</span>,
+                        @endif
+                        @if(isset($employee->address->post_code) && !empty($employee->address->post_code))
+                            <span class="font-medium">{{ $employee->address->post_code }}</span>,<br/>
+                        @endif
+                        @if(isset($employee->address->country) && !empty($employee->address->country))
+                            <span class="font-medium">{{ $employee->address->country }}</span><br/>
+                        @endif
+                    @else
+                        <span class="font-medium text-warning normal-case italic">Not Set Yet!</span><br/>
+                    @endif
+                </span>
             </div>
         </div>
     </div>
-    @include('pages.employee.profile.show-menu')
+
+    {{-- Tabs / section navigation --}}
+    <div class="border-t border-slate-100 dark:border-darkmode-400 px-3">
+        @include('pages.employee.profile.show-menu')
+    </div>
 </div>
 
 <!-- BEGIN: Import Modal -->
@@ -85,7 +106,7 @@
             </div>
             <div class="modal-body">
                 <form method="post"  action="{{ route('employee.upload.photo') }}" class="dropzone" id="addStudentPhotoForm" style="padding: 5px;" enctype="multipart/form-data">
-                    @csrf    
+                    @csrf
                     <div class="fallback">
                         <input name="documents" type="file" />
                     </div>
@@ -100,8 +121,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                <button type="button" id="uploadStudentPhotoBtn" class="btn btn-primary w-auto">     
-                    Upload                      
+                <button type="button" id="uploadStudentPhotoBtn" class="btn btn-primary w-auto">
+                    Upload
                     <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                         stroke="white" class="w-4 h-4 ml-2">
                         <g fill="none" fill-rule="evenodd">

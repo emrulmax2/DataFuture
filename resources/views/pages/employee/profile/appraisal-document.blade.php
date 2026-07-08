@@ -1,4 +1,4 @@
-@extends('../layout/' . $layout)
+@extends('../layout/employee-profile')
 
 @section('subhead')
     <title>{{ $title }} </title>
@@ -6,11 +6,12 @@
 
 @section('subcontent')
 
-    @include('pages.employee.profile.title-info')
+@include('pages.employee.profile.partials.cover-header')
 
-    <!-- BEGIN: Profile Info -->
-    @include('pages.employee.profile.show-info')
-    <!-- END: Profile Info -->
+@include('pages.employee.profile.partials.side-tabs')
+
+<div class="ep-grid">
+    <div class="ep-col">
 
     <div class="intro-y mt-5">
         <div class="intro-y box p-5 pb-7">
@@ -499,7 +500,8 @@
     </div>
     <!-- END: Delete Confirm Modal Content -->
 
-
+    </div>
+</div>
 @endsection
 
 @section('script')

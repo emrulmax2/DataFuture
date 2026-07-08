@@ -4,23 +4,34 @@
     <title>{{ $title }}</title>
 @endsection
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Monthly Attendance</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-success text-white shadow-md mr-2">Planner</a>
-            <a href="{{ route('hr.portal.live.attedance') }}" class="btn btn-primary shadow-md mr-0">Live Attendance</a>
+    <!-- BEGIN: Page Header -->
+    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
+        <div>
+            <h2 class="font-display text-3xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Monthly Attendance</h2>
+            <p class="text-sm text-slate-400 mt-1">Daily sync &amp; payroll status &middot; London Churchill College</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-outline-secondary h-[42px] text-sm">
+                <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i> Planner
+            </a>
+            <a href="{{ route('hr.portal.live.attedance') }}" class="btn btn-primary text-white h-[42px] text-sm">
+                <span class="mr-2" style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:#7de3b0;box-shadow:0 0 0 3px rgba(125,227,176,.3)"></span> Live Attendance
+            </a>
         </div>
     </div>
+    <!-- END: Page Header -->
+
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="filterMonthAttenForm" class="xl:flex sm:mr-auto">
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" value="{{ date('m-Y') }}" name="queryDate" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="MM-YYYY">
+    <div class="intro-y box mt-5">
+        <!-- Toolbar -->
+        <div class="flex flex-col xl:flex-row xl:items-end gap-4 px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
+            <form id="filterMonthAttenForm" class="flex flex-wrap xl:flex-nowrap gap-3 items-end mr-auto">
+                <div class="flex items-center gap-2.5">
+                    <label class="text-[13px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">Query</label>
+                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" value="{{ date('m-Y') }}" name="queryDate" type="text" class="form-control h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-40" placeholder="MM-YYYY">
                 </div>
-                <div class="mt-2 xl:mt-0 mr-auto">
-                    <button type="submit" id="filterMonthAtten" class="btn btn-primary text-white w-auto syncroniseAttendance">
+                <div class="flex gap-2">
+                    <button type="submit" id="filterMonthAtten" class="btn btn-primary text-white h-[42px] px-5 text-sm syncroniseAttendance">
                         Go
                         <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
@@ -35,12 +46,12 @@
                             </g>
                         </svg>
                     </button>
-                    <button type="button" id="generateReport" class="btn btn-success text-white w-auto ml-2">Generage Report</button>
+                    <button type="button" id="generateReport" class="btn btn-outline-secondary h-[42px] text-sm"><i data-lucide="file-text" class="w-4 h-4 mr-1.5"></i> Generate Report</button>
                 </div>
             </form>
-            <div class="col-span-6 text-right relative">
+            <div class="relative">
                 <div class="dropdown" id="uploadsDropdown">
-                    <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>  Upload PaySlips <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i></button>
+                    <button class="dropdown-toggle btn btn-outline-accent h-[42px] text-sm" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="upload" class="w-4 h-4 mr-1.5"></i> Upload PaySlips <i data-lucide="chevron-down" class="w-4 h-4 ml-1.5"></i></button>
                     <div class="dropdown-menu w-72">
                         <ul class="dropdown-content">
                             <li><h6 class="dropdown-header">Pending Payslips</h6></li>
@@ -72,17 +83,17 @@
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto scrollbar-hidden mt-5 " id="attendanceSyncListTable">
-            <table class="table table-bordered table-hover">
+        <div class="overflow-x-auto scrollbar-hidden pb-2" id="attendanceSyncListTable">
+            <table class="att-table">
                 <thead>
                     <tr>
-                        <th class="whitespace-nowrap">Date</th>
-                        <th class="whitespace-nowrap">Synchronise</th>
-                        <th class="whitespace-nowrap">Issues</th>
-                        <th class="whitespace-nowrap">Absents</th>
-                        <th class="whitespace-nowrap">Overtime</th>
-                        <th class="whitespace-nowrap">Pendings</th>
-                        <th class="whitespace-nowrap">Actions</th>
+                        <th>Date</th>
+                        <th>Synchronise</th>
+                        <th>Issues</th>
+                        <th>Absents</th>
+                        <th>Overtime</th>
+                        <th>Pendings</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>

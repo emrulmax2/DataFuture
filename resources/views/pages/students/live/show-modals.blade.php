@@ -1575,11 +1575,11 @@
                         <div class="col-span-12">
                             <div class="font-medium">Have you been convicted of any criminal offence in the UK or any other Country?</div>
                             <div class="mt-2 flex flex-wrap gap-6">
-                                <div class="form-check">
+                                <div class="form-check items-center">
                                     <input id="student_criminal_conviction_yes" class="form-check-input" type="radio" name="have_you_been_convicted" value="1" {{ isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="student_criminal_conviction_yes">Yes</label>
                                 </div>
-                                <div class="form-check">
+                                <div class="form-check items-center">
                                     <input id="student_criminal_conviction_no" class="form-check-input" type="radio" name="have_you_been_convicted" value="0" {{ isset($student->criminalConviction->have_you_been_convicted) && (int) $student->criminalConviction->have_you_been_convicted === 0 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="student_criminal_conviction_no">No</label>
                                 </div>
@@ -1604,7 +1604,7 @@
                                 <li>Termination of enrolment</li>
                                 <li>Further action in line with College policies</li>
                             </ul>
-                            <div class="form-check mt-4">
+                            <div class="form-check items-center mt-4">
                                 <input id="student_criminal_declaration" class="form-check-input" type="checkbox" name="criminal_declaration" value="1" {{ isset($student->criminalConviction->criminal_declaration) && (int) $student->criminalConviction->criminal_declaration === 1 ? 'checked' : '' }}>
                                 <label class="form-check-label" for="student_criminal_declaration">I confirm I have read and understood the above declaration.</label>
                             </div>
@@ -1815,4 +1815,3 @@
         
     </div>
 </div>
-

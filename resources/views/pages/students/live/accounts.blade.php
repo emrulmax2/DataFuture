@@ -9,292 +9,352 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Student Accounts</div>
-            </div>
-            <div class="col-span-6 text-right relative">
-                @if($can_add) <button data-tw-toggle="modal" data-tw-target="#addAgreementModal" type="button" class="btn btn-primary shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Agreement</button> @endif
-            </div>
-        </div>
-    </div>
+    @php
+        $agreementCollection = collect($agreements ?? []);
+        $agreementCount = $agreementCollection->count();
+        $totalFeesAcrossAgreements = $agreementCollection->sum(function ($agreement) {
+            $fees = (float) ($agreement->fees ?? 0);
+            $discount = (float) ($agreement->discount ?? 0);
+            return max($fees - $discount, 0);
+        });
+        $totalBalanceAcrossAgreements = $agreementCollection->sum(function ($agreement) {
+            $received = (float) ($agreement->only_received_amount ?? 0);
+            $claim = (float) ($agreement->claim_amount ?? 0);
+            $refund = (float) ($agreement->refund_amount ?? 0);
+            return $received - ($claim + $refund);
+        });
+    @endphp
 
-    @if(!empty($agreements) && $agreements->count() > 0)
-        @foreach($agreements as $agr)
-            @php 
-                $discount = (isset($agr->discount) && $agr->discount > 0 ? $agr->discount : 0);
-                $claimAmount = (isset($agr->claim_amount) && $agr->claim_amount > 0 ? $agr->claim_amount : 0);
-                $onlyReceivedAmount = (isset($agr->only_received_amount) && $agr->only_received_amount > 0 ? $agr->only_received_amount : 0);
-                $refundAmount = (isset($agr->refund_amount) && $agr->refund_amount > 0 ? $agr->refund_amount : 0);
-                $balance = $onlyReceivedAmount - ($claimAmount + $refundAmount);
-
-                $fees = (isset($agr->fees) && $agr->fees > 0 ? $agr->fees : 0);
-                $commission = (isset($agr->commission_amount) && $agr->commission_amount > 0 ? $agr->commission_amount : 0);
-                $totalFees = $fees + $commission;
-            @endphp
-            <div class="intro-y box p-5 mt-5 {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'bg-danger-soft') }}">
-                <div class="grid grid-cols-12 gap-0 items-center">
-                    <div class="col-span-6">
-                        <div class="font-medium text-base">
-                            Agreements Details for <u class="text-success">Year {{ $agr->year }}</u><br/>
-                            {{ '('.$agr->id.'-'.$agr->slc_registration_id.')' }}
-                        </div>
-                    </div>
-                    <div class="col-span-6 text-right relative">
-                        @if($can_edit) <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button> @endif
-                        @if($can_delete) <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn btn-rounded btn btn-danger text-white p-0 w-9 h-9"><i data-lucide="trash-2" class="w-4 h-4"></i></button> @endif
-                        @if(!empty($registrations) && $registrations->count() > 0 && (empty($agr->slc_registration_id) || $agr->slc_registration_id == 0) && $can_add)
-                            <div class="dropdown inline-block ml-1" data-tw-placement="bottom-end">
-                                <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-9 h-9 mr-1" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-4 h-4"></i></button>
-                                <div class="dropdown-menu w-64">
-                                    <ul class="dropdown-content">
-                                        @foreach($registrations as $regs)
-                                            <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-agr="{{ $agr->id }}" class="dropdown-item assignAgreementToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
+    <div class="intro-y mt-5">
+        <div class="student-accounts-page">
+            <div class="acc-page-head">
+                <div class="acc-page-copy">
+                    <h1 class="acc-page-title">Student Accounts</h1>
+                    <p class="acc-page-subtitle">
+                        {{ $agreementCount }} {{ \Illuminate\Support\Str::plural('agreement', $agreementCount) }}
+                        · Total fees {{ Number::currency($totalFeesAcrossAgreements, 'GBP') }}
+                        · Balance {{ Number::currency($totalBalanceAcrossAgreements, 'GBP') }}
+                    </p>
                 </div>
-                <div class="intro-y mt-5">
-                    <div class="grid grid-cols-12 gap-3">
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Date</div>
-                                <div class="col-span-8 font-medium">
-                                    {{ (!empty($agr->date) ? date('jS M, Y', strtotime($agr->date)) : '---') }}
-                                    {!! (isset($agr->user->employee->full_name) && !empty($agr->user->employee->full_name) ? 'by '.$agr->user->employee->full_name : '') !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">SLC Course Code</div>
-                                <div class="col-span-8 font-medium">
-                                    {{ (!empty($agr->slc_coursecode) ? $agr->slc_coursecode : '---') }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Self Funded</div>
-                                <div class="col-span-8 font-medium">
-                                    {!! (isset($agr->is_self_funded) && $agr->is_self_funded == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>') !!}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Agreement Balance</div>
-                                <div class="col-span-8 font-medium">
-                                    <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($balance >= 0 ? '<span class="text-success">£'.number_format($balance, 2).'</span>' : '<span class="text-danger">'.($balance < 0 ? '- £'.number_format(str_replace('-', '', $balance), 2) : '£'.number_format($balance, 2)).'</span>') !!}
-                                </div>
-                            </div>
-                        </div>
-                        @if($discount > 0)
-                            <div class="col-span-12 sm:col-span-3">
-                                <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                    <div class="col-span-4 text-slate-500 font-medium">Discount</div>
-                                    <div class="col-span-8 font-medium text-pending">
-                                        {{ (!empty($agr->discount) ? '£'.number_format($agr->discount, 2) : '£0.00') }}
+                @if($can_add)
+                    <button data-tw-toggle="modal" data-tw-target="#addAgreementModal" type="button" class="btn btn-primary shadow-md acc-page-action">
+                        + Add Agreement
+                    </button>
+                @endif
+            </div>
+
+        @if(!empty($agreements) && $agreements->count() > 0)
+            <div class="acc-card-stack">
+                @foreach($agreements as $agr)
+                    @php
+                        $discount = (isset($agr->discount) && $agr->discount > 0 ? $agr->discount : 0);
+                        $claimAmount = (isset($agr->claim_amount) && $agr->claim_amount > 0 ? $agr->claim_amount : 0);
+                        $onlyReceivedAmount = (isset($agr->only_received_amount) && $agr->only_received_amount > 0 ? $agr->only_received_amount : 0);
+                        $refundAmount = (isset($agr->refund_amount) && $agr->refund_amount > 0 ? $agr->refund_amount : 0);
+                        $balance = $onlyReceivedAmount - ($claimAmount + $refundAmount);
+                        $fees = (isset($agr->fees) && $agr->fees > 0 ? $agr->fees : 0);
+                        $commission = (isset($agr->commission_amount) && $agr->commission_amount > 0 ? $agr->commission_amount : 0);
+                        $totalFees = $fees + $commission;
+                        $displayFees = ($discount > 0 ? ($fees - $discount) : $fees);
+                        $claimCount = (isset($agr->installments) ? $agr->installments->count() : 0);
+                        $payments = collect($agr->payments ?? []);
+                        $paymentCount = $payments->count();
+                        $paymentTotal = $payments->sum('amount');
+                        $agreementOwner = (isset($agr->user->employee->full_name) && !empty($agr->user->employee->full_name) ? $agr->user->employee->full_name : '');
+                        $agreementSettled = abs(round($balance, 2)) < 0.01;
+                        $agreementStateLabel = ($agreementSettled ? 'Settled' : 'Outstanding');
+                        $agreementStateClass = ($agreementSettled ? 'acc-meta-pill--settled' : 'acc-meta-pill--open');
+                        $selfFundingLabel = (isset($agr->is_self_funded) && $agr->is_self_funded == 1 ? 'Yes — self funded' : 'No — SLC funded');
+                    @endphp
+
+                    <section class="acc-card {{ (isset($agr->student_course_relation_id) && $agr->student_course_relation_id > 0 ? '' : 'acc-card--unassigned') }}">
+                        <div class="acc-card-head">
+                            <div class="acc-card-headcopy">
+                                <div class="acc-year-badge">Y{{ $agr->year }}</div>
+                                <div>
+                                    <div class="acc-card-titlewrap">
+                                        <h2 class="acc-card-title">Agreement — Year {{ $agr->year }}</h2>
+                                        <span class="acc-meta-pill {{ $agreementStateClass }}">
+                                            <span class="acc-pill-dot"></span>{{ $agreementStateLabel }}
+                                        </span>
+                                    </div>
+                                    <div class="acc-card-meta">
+                                        <span class="acc-card-id">#{{ $agr->id }}@if(!empty($agr->slc_registration_id))-{{ $agr->slc_registration_id }}@endif</span>
+                                        <span>{{ (!empty($agr->date) ? date('j M Y', strtotime($agr->date)) : 'No date') }}</span>
+                                        @if(!empty($agreementOwner))
+                                            <span>by {{ $agreementOwner }}</span>
+                                        @endif
+                                        @if(empty($agr->slc_registration_id))
+                                            <span class="acc-meta-pill acc-meta-pill--warn">Not linked to registration</span>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
-                        @endif
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Fees</div>
-                                <div class="col-span-8 font-medium">
+                            <div class="acc-card-actions">
+                                @if($can_edit)
+                                    <button data-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#editAgreementModal" type="button" class="edit_agreement_btn acc-icon-btn" title="Edit agreement">
+                                        <i data-lucide="Pencil" class="w-4 h-4"></i>
+                                    </button>
+                                @endif
+                                @if($can_delete)
+                                    <button data-id="{{ $agr->id }}" type="button" class="deleteAgreementBtn acc-icon-btn acc-icon-btn--danger" title="Delete agreement">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                @endif
+                                @if(!empty($registrations) && $registrations->count() > 0 && (empty($agr->slc_registration_id) || $agr->slc_registration_id == 0) && $can_add)
+                                    <div class="dropdown" data-tw-placement="bottom-end">
+                                        <button class="dropdown-toggle acc-icon-btn" aria-expanded="false" data-tw-toggle="dropdown" title="Assign to registration">
+                                            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                                        </button>
+                                        <div class="dropdown-menu w-64">
+                                            <ul class="dropdown-content">
+                                                @foreach($registrations as $regs)
+                                                    <li><a href="javascript:void(0);" data-reg="{{ $regs->id }}" data-agr="{{ $agr->id }}" class="dropdown-item assignAgreementToReg text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>ID: {{ $regs->id }} - Year {{ $regs->registration_year }} {{ (isset($regs->year->name) && !empty($regs->year->name) ? ' - '.$regs->year->name : '') }}</a></li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="acc-summary-grid">
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">Fees</div>
+                                <div class="acc-summary-value">
                                     @if($discount > 0)
-                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
-                                        {{ (!empty($fees) ? '£'.number_format(($fees - $discount), 2) : '£0.00') }}
+                                        <del class="acc-summary-old">{{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}</del>
                                     @elseif($commission > 0)
-                                        <del class="text-slate-400 mr-2">{{ (!empty($fees) ? '£'.number_format($totalFees, 2) : '£0.00') }}</del>
-                                        {{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}
-                                    @else
-                                        {{ (!empty($fees) ? '£'.number_format($fees, 2) : '£0.00') }}
+                                        <del class="acc-summary-old">{{ (!empty($totalFees) ? '£'.number_format($totalFees, 2) : '£0.00') }}</del>
+                                    @endif
+                                    {{ (!empty($displayFees) ? '£'.number_format($displayFees, 2) : '£0.00') }}
+                                </div>
+                            </div>
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">Claim Amount</div>
+                                <div class="acc-summary-value">{{ ($claimAmount > 0 ? '£'.number_format($claimAmount, 2) : '£0.00') }}</div>
+                            </div>
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">No of Claims</div>
+                                <div class="acc-summary-value">{{ $claimCount }}</div>
+                            </div>
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">SLC Course Code</div>
+                                <div class="acc-summary-value acc-summary-code">{{ (!empty($agr->slc_coursecode) ? $agr->slc_coursecode : '---') }}</div>
+                            </div>
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">Self Funded</div>
+                                <div class="acc-summary-value">
+                                    <span class="acc-state-pill {{ (isset($agr->is_self_funded) && $agr->is_self_funded == 1 ? 'acc-state-pill--yes' : 'acc-state-pill--no') }}">
+                                        {{ $selfFundingLabel }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="acc-summary-item">
+                                <div class="acc-summary-label">Balance / Due</div>
+                                <div class="acc-summary-value {{ ($balance < 0 ? 'text-danger' : 'text-success') }}">
+                                    {{ ($balance < 0 ? '- £'.number_format(abs($balance), 2) : '£'.number_format($balance, 2)) }}
+                                    <span class="acc-summary-sub">· due {{ Number::currency($agr->due_to_date, 'GBP') }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="acc-panels">
+                            <div class="acc-panel">
+                                <div class="acc-panel-head">
+                                    <div class="acc-panel-titlewrap">
+                                        <h3 class="acc-panel-title">Installments</h3>
+                                        <span class="acc-panel-count">{{ $claimCount }}</span>
+                                    </div>
+                                    @if($can_add)
+                                        <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn acc-panel-btn">
+                                            + Add
+                                        </button>
                                     @endif
                                 </div>
+
+                                <div class="acc-table-wrap">
+                                    <table class="acc-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Term</th>
+                                                <th>Date</th>
+                                                <th class="text-right">Amount</th>
+                                                <th class="text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if(!empty($agr->installments) && $agr->installments->count() > 0)
+                                                @foreach($agr->installments as $inst)
+                                                    <tr class="cursor-pointer installmentRow {{ isset($inst->slc_money_receipt_id) && $inst->slc_money_receipt_id > 0 ? 'paidInstllment' : '' }}" data-id="{{ $inst->id }}">
+                                                        <td>
+                                                            <div class="acc-table-primary">
+                                                                {{ isset($inst->declaraton->name) && !empty($inst->declaraton->name) ? $inst->declaraton->name : '---' }}
+                                                            </div>
+                                                            <div class="acc-table-secondary">
+                                                                <span>#{{ $inst->id }}</span>
+                                                                @if(isset($inst->declaraton->termType->code) && !empty($inst->declaraton->termType->code))
+                                                                    <span>{{ $inst->declaraton->termType->code }}</span>
+                                                                @endif
+                                                                @if(isset($inst->session_term) && $inst->session_term > 0)
+                                                                    <span>Term {{ $inst->session_term }}</span>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                        <td>{{ !empty($inst->installment_date) ? date('j M Y', strtotime($inst->installment_date)) : '' }}</td>
+                                                        <td class="text-right acc-table-amount">{{ ($inst->amount > 0 ? '£'.number_format($inst->amount, 2) : '£0.00') }}</td>
+                                                        <td>
+                                                            <div class="acc-row-actions">
+                                                                @if($can_edit)
+                                                                    <button data-id="{{ $inst->id }}" data-tw-toggle="modal" data-tw-target="#editInstallmentModal" type="button" class="editInstallmentBtn acc-mini-btn" title="Edit instalment">
+                                                                        <i data-lucide="Pencil" class="w-3 h-3"></i>
+                                                                    </button>
+                                                                @endif
+                                                                @if($can_delete)
+                                                                    <button data-id="{{ $inst->id }}" type="button" class="deleteInstallmentBtn acc-mini-btn acc-mini-btn--danger" title="Delete instalment">
+                                                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                                                    </button>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="4" class="acc-empty-row">Installments not found for this agreement.</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="2">Total</td>
+                                                <td class="text-right">{{ '£'.number_format(($agr->installments ? $agr->installments->sum('amount') : 0), 2) }}</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">No of Claim</div>
-                                <div class="col-span-8 font-medium">
-                                    {{ (isset($agr->installments) ? $agr->installments->count() : '0') }}
+
+                            <div class="acc-panel">
+                                <div class="acc-panel-head">
+                                    <div class="acc-panel-titlewrap">
+                                        <h3 class="acc-panel-title">Invoices & Payments</h3>
+                                        <span class="acc-panel-count">{{ $paymentCount }}</span>
+                                    </div>
+                                    @if($can_add)
+                                        <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn acc-panel-btn acc-panel-btn--solid">
+                                            + Add Payment
+                                        </button>
+                                    @endif
+                                </div>
+
+                                <div class="acc-table-wrap">
+                                    <table class="acc-table acc-table--payments">
+                                        <thead>
+                                            <tr>
+                                                <th>Invoice</th>
+                                                <th>Term</th>
+                                                <th>Received By</th>
+                                                <th class="text-right">Amount</th>
+                                                <th class="text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if($paymentCount > 0)
+                                                @foreach($payments as $payment)
+                                                    @php
+                                                        $invoiceMeta = array_values(array_filter([
+                                                            (!empty($payment->payment_date) ? date('j M Y', strtotime($payment->payment_date)) : ''),
+                                                            (isset($payment->method->name) && $payment->slc_payment_method_id > 0 ? $payment->method->name : '')
+                                                        ]));
+                                                        $termMeta = array_values(array_filter([
+                                                            (isset($payment->declaraton->termType->code) && !empty($payment->declaraton->termType->code) ? $payment->declaraton->termType->code : ''),
+                                                            (isset($payment->session_term) && $payment->session_term > 0 ? 'Term '.$payment->session_term : ''),
+                                                            (isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '')
+                                                        ]));
+                                                    @endphp
+                                                    <tr title="{!! $payment->remarks !!}" class="payment_row {{ !empty($payment->remarks) ? 'tooltip' : '' }} payment_row_{{ isset($payment->payment_type) && !empty($payment->payment_type) ? str_replace(' ', '_', strtolower($payment->payment_type)) : '' }}">
+                                                        <td>
+                                                            <div class="acc-table-primary">
+                                                                <span class="acc-invoice-no">{{ $payment->invoice_no }}</span>
+                                                                @if($payment->mailed_pdf_file != null || $payment->mailed_pdf_file != '')
+                                                                    <i data-lucide="send" class="w-4 h-4 text-orange-500"></i>
+                                                                @endif
+                                                            </div>
+                                                            <div class="acc-table-secondary acc-table-secondary--inline">{{ implode(' · ', $invoiceMeta) }}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="acc-table-primary">{{ isset($payment->declaraton->name) && !empty($payment->declaraton->name) ? $payment->declaraton->name : '' }}</div>
+                                                            <div class="acc-table-secondary acc-table-secondary--inline">{{ implode(' · ', $termMeta) }}</div>
+                                                        </td>
+                                                        <td class="acc-payee-cell">{{ isset($payment->received->employee->full_name) && !empty($payment->received->employee->full_name) ? $payment->received->employee->full_name : '' }}</td>
+                                                        <td class="text-right acc-table-amount">{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
+                                                        <td>
+                                                            <div class="acc-row-actions">
+                                                                <a data-id="{{ $payment->id }}" href="{{ route('student.accounts.print',[$student->id, $payment->id]) }}" class="printBtn acc-mini-btn" title="Print receipt"><i data-lucide="printer" class="w-3 h-3"></i></a>
+                                                                <a data-id="{{ $payment->id }}" data-student="{{ $student->id }}" href="{{ route('student.accounts.send_mail',[$student->id, $payment->id]) }}" data-tw-toggle="modal" data-tw-target="#sendMailModal" class="sendAccountMailBtn acc-mini-btn" title="Email receipt"><i data-lucide="send" class="w-3 h-3"></i></a>
+                                                                @if($can_edit)
+                                                                    <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn acc-mini-btn" title="Edit payment"><i data-lucide="Pencil" class="w-3 h-3"></i></button>
+                                                                @endif
+                                                                @if($can_delete)
+                                                                    <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn acc-mini-btn acc-mini-btn--danger" title="Delete payment"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                                @endif
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            @else
+                                                <tr>
+                                                    <td colspan="5" class="acc-empty-row">Payments not found for this agreement.</td>
+                                                </tr>
+                                            @endif
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3">Total received</td>
+                                                <td class="text-right">{{ '£'.number_format($paymentTotal, 2) }}</td>
+                                                <td></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Claim Amount</div>
-                                <div class="col-span-8 font-medium">
-                                    {{ ($claimAmount > 0 ? '£'.number_format($claimAmount, 2) : '£0.00') }}
-                                </div>
+
+                        @if($discount > 0 || !empty($agr->note))
+                            <div class="acc-card-foot">
+                                @if($discount > 0)
+                                    <div class="acc-foot-item">
+                                        <span class="acc-foot-label">Discount</span>
+                                        <span class="acc-foot-value text-pending">{{ '£'.number_format($discount, 2) }}</span>
+                                    </div>
+                                @endif
+                                @if(!empty($agr->note))
+                                    <div class="acc-foot-item acc-foot-item--note">
+                                        <span class="acc-foot-label">Note</span>
+                                        <span class="acc-foot-value">{{ $agr->note }}</span>
+                                    </div>
+                                @endif
                             </div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-3">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Due to Date</div>
-                                <div class="col-span-8 font-medium">
-                                    <!--{{ (!empty($agr->total) ? '£'.number_format($agr->total, 2) : '£0.00') }}-->
-                                    {!! ($agr->due_to_date >= 0 ? '<span class="text-success">'.Number::currency($agr->due_to_date, 'GBP').'</span>' : '<span class="text-danger">'.Number::currency($agr->due_to_date, 'GBP').'</span>') !!}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        @if(!empty($agr->note))
-                        <div class="col-span-12"></div>
-                        <div class="col-span-12 sm:col-span-4">
-                            <div class="grid grid-cols-12 gap-0 gap-x-3">
-                                <div class="col-span-4 text-slate-500 font-medium">Note</div>
-                                <div class="col-span-8 font-medium">
-                                    {{ (!empty($agr->note) ? $agr->note : '') }}
-                                </div>
-                            </div>
-                        </div>
                         @endif
-                    </div>
-                    <div class="installmentAndPaymentWrap mt-7">
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 sm:col-span-5">
-                                <div class="intro-y md:box md:p-5 md:bg-success-soft-2">
-                                    <div class="grid grid-cols-12 gap-0 items-center">
-                                        <div class="col-span-6">
-                                            <div class="font-medium text-base">Installments</div>
-                                        </div>
-                                        <div class="col-span-6 text-right">
-                                            @if($can_add) <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addInstallmentModal" type="button" class="add_installment_btn btn btn-sm btn-linkedin shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Instalment</button> @endif
-                                        </div>
-                                    </div>
-                                    <div class="intro-y mt-5 bg-white overflow-x-auto">
-                                        <table class="table table-bordered table-sm padding-less">
-                                            <thead>
-                                                <tr>
-                                                    <th class="whitespace-nowrap">#</th>
-                                                    <th class="whitespace-nowrap">Date</th>
-                                                    <th class="whitespace-nowrap">Term</th>
-                                                    <th class="whitespace-nowrap">Ses. Term</th>
-                                                    <th class="whitespace-nowrap">Amount</th>
-                                                    <th class="whitespace-nowrap">Course Code</th>
-                                                    <th class="whitespace-nowrap">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if(!empty($agr->installments) && $agr->installments->count() > 0)
-                                                    @foreach($agr->installments as $inst)
-                                                        <tr class="cursor-pointer installmentRow {{ isset($inst->slc_money_receipt_id) && $inst->slc_money_receipt_id > 0 ? 'paidInstllment' : '' }}" data-id="{{ $inst->id }}">
-                                                            <td>{{ $inst->id. ( !empty($inst->slc_attendance_id) ? ' - '.$inst->slc_attendance_id : '') }}</td>
-                                                            <td>{{ !empty($inst->installment_date) ? date('jS M, Y', strtotime($inst->installment_date)) : '' }}</td>
-                                                            <td>
-                                                                {{ isset($inst->declaraton->name) && !empty($inst->declaraton->name) ? $inst->declaraton->name : '' }}
-                                                                {!! isset($inst->declaraton->termType->code) && !empty($inst->declaraton->termType->code) ? '<br/>'.$inst->declaraton->termType->code : '' !!}
-                                                            </td>
-                                                            <td>{{ isset($inst->session_term) && $inst->session_term > 0 ? 'Term '.$inst->session_term : '' }}</td>
-                                                            <td class="font-medium">{{ ($inst->amount > 0 ? '£'.number_format($inst->amount, 2) : '£0.00') }}</td>
-                                                            <td>{{ (isset($inst->agreement->slc_coursecode) && !empty($inst->agreement->slc_coursecode) ? $inst->agreement->slc_coursecode : '') }}</td>
-                                                            <td>
-                                                                @if($can_edit) <button data-id="{{ $inst->id }}" data-tw-toggle="modal" data-tw-target="#editInstallmentModal" type="button" class="editInstallmentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button> @endif
-                                                                @if($can_delete) <button data-id="{{ $inst->id }}" type="button" class="deleteInstallmentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button> @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @else
-                                                    <tr>
-                                                        <td colspan="7" class="text-center">Installments not found for this agreement.</td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-12 sm:col-span-7">
-                                <div class="intro-y md:box md:p-5 md:bg-danger-soft-2">
-                                    <div class="grid grid-cols-12 gap-0 items-center">
-                                        <div class="col-span-6">
-                                            <div class="font-medium text-base">Invoices</div>
-                                        </div>
-                                        <div class="col-span-6 text-right">
-                                            @if($can_add) <button data-agr-id="{{ $agr->id }}" data-tw-toggle="modal" data-tw-target="#addPaymentModal" type="button" class="addPaymentBtn btn btn-sm btn-twitter shadow-md"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i>Add Payment</button> @endif
-                                        </div>
-                                    </div>
-                                    <div class="intro-y mt-5 bg-white overflow-x-auto">
-                                        <table class="table table-bordered table-sm padding-less">
-                                            <thead>
-                                                <tr>
-                                                    <th class="whitespace-nowrap">Inv.</th>
-                                                    <th class="whitespace-nowrap">Date</th>
-                                                    <th class="whitespace-nowrap">Term</th>
-                                                    <th class="whitespace-nowrap">Ses. Term</th>
-                                                    <th class="whitespace-nowrap">Method</th>
-                                                    <th class="whitespace-nowrap">Rec. By</th>
-                                                    <th class="whitespace-nowrap">Type</th>
-                                                    <th class="whitespace-nowrap">Amount</th>
-                                                    <th class="whitespace-nowrap">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @if(isset($agr->payments) && $agr->payments->count() > 0)
-                                                    @foreach($agr->payments as $payment)
-                                                        <tr title="{!! $payment->remarks !!}" class="payment_row {{ !empty($payment->remarks) ? 'tooltip' : '' }} payment_row_{{ isset($payment->payment_type) && !empty($payment->payment_type) ? str_replace(' ', '_', strtolower($payment->payment_type)) : '' }}">
-                                                            <td><span class="flex">{{ $payment->invoice_no }}
-                                                                @if($payment->mailed_pdf_file!=null || $payment->mailed_pdf_file!='')
-                                                                    <i data-lucide="send" class="w-4 h-4 text-orange-500 ml-auto"></i></a>
-                                                                @endif
-                                                                </span>
-                                                            </td>
-                                                            <td>{{ (!empty($payment->payment_date) ? date('jS M, Y', strtotime($payment->payment_date)) : '') }}</td>
-                                                            <td>
-                                                                {{ isset($payment->declaraton->name) && !empty($payment->declaraton->name) ? $payment->declaraton->name : '' }}
-                                                                {!! isset($payment->declaraton->termType->code) && !empty($payment->declaraton->termType->code) ? '<br/>'.$payment->declaraton->termType->code : '' !!}
-                                                            </td>
-                                                            <td>{{ isset($payment->session_term) && $payment->session_term > 0 ? 'Term '.$payment->session_term : '' }}</td>
-                                                            <td>{{ isset($payment->method->name) && $payment->slc_payment_method_id > 0 ? $payment->method->name : '' }}</td>
-                                                            <td>{{ isset($payment->received->employee->full_name) && !empty($payment->received->employee->full_name) ? $payment->received->employee->full_name : '' }}</td>
-                                                            <td>{{ isset($payment->payment_type) && !empty($payment->payment_type) ? $payment->payment_type : '' }}</td>
-                                                            <td>{{ isset($payment->amount) && $payment->amount > 0 ? '£'.number_format($payment->amount, 2) : '£0.00' }}</td>
-                                                            <td>
-                                                                <a data-id="{{ $payment->id }}" href="{{ route('student.accounts.print',[$student->id, $payment->id]) }}" class="printBtn btn-rounded btn btn-primary text-white p-0 w-6 h-6"><i data-lucide="printer" class="w-3 h-3"></i></a>
-                                                                <a data-id="{{ $payment->id }}" data-student="{{ $student->id }}" href="{{ route('student.accounts.send_mail',[$student->id, $payment->id]) }}" data-tw-toggle="modal" data-tw-target="#sendMailModal" class="sendAccountMailBtn btn-rounded btn btn-warning text-white p-0 w-6 h-6"><i data-lucide="send" class="w-3 h-3"></i></a>
-                                                                @if($can_edit) <button data-id="{{ $payment->id }}" data-tw-toggle="modal" data-tw-target="#editPaymentModal" type="button" class="editPaymentBtn btn-rounded btn btn-success text-white p-0 w-6 h-6"><i data-lucide="Pencil" class="w-3 h-3"></i></button> @endif
-                                                                @if($can_delete) <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn btn-rounded btn btn-danger text-white p-0 w-6 h-6"><i data-lucide="trash-2" class="w-3 h-3"></i></button> @endif
-                                                                @if(!empty($agreements) && $agreements->count() > 0 && $can_add)
-                                                                    <div class="dropdown inline-flex" data-tw-placement="bottom-end">
-                                                                        <button class="dropdown-toggle btn-rounded btn btn-success text-white p-0 w-6 h-6" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="arrow-right-left" class="w-3 h-3"></i></button>
-                                                                        <div class="dropdown-menu w-64">
-                                                                            <ul class="dropdown-content">
-                                                                                @foreach($agreements as $sagr)
-                                                                                    @if($sagr->id != $agr->id)
-                                                                                        <li><a href="javascript:void(0);" data-agr="{{ $sagr->id }}" data-pay="{{ $payment->id }}" class="dropdown-item assignPaymentToAgr text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Agreement ID: {{ $sagr->id }} - Year {{ $sagr->year }}</a></li>
-                                                                                    @endif
-                                                                                @endforeach
-                                                                            </ul>
-                                                                        </div>
-                                                                    </div>
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                @else
-                                                    <tr>
-                                                        <td colspan="10" class="text-center">Payments not found for this agreement.</td>
-                                                    </tr>
-                                                @endif
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    </section>
+                @endforeach
             </div>
-        @endforeach
-    @endif
+        @else
+            <div class="acc-empty-state">
+                <div class="acc-empty-kicker">Accounts</div>
+                <h2>No agreements found</h2>
+                <p>Create the first agreement to start tracking installments and money receipts for this student.</p>
+                @if($can_add)
+                    <button data-tw-toggle="modal" data-tw-target="#addAgreementModal" type="button" class="btn btn-primary shadow-md">
+                        + Add Agreement
+                    </button>
+                @endif
+            </div>
+            @endif
+        </div>
+    </div>
     
 
     <!-- BEGIN: Add Agreement Modal -->

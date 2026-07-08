@@ -132,6 +132,7 @@ class  StudentController extends Controller
         return view('pages.students.live.index', [
 
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
 
                 ['label' => 'Students Live', 'href' => 'javascript:void(0);']
@@ -298,6 +299,7 @@ class  StudentController extends Controller
         endif;
         return view('pages.students.live.show', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Details', 'href' => 'javascript:void(0);'],
@@ -359,6 +361,7 @@ class  StudentController extends Controller
         
         return view('pages.students.live.course', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Course', 'href' => 'javascript:void(0);'],
@@ -386,6 +389,7 @@ class  StudentController extends Controller
     public function communications($studentId){
         return view('pages.students.live.communication', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Communications', 'href' => 'javascript:void(0);'],
@@ -407,6 +411,7 @@ class  StudentController extends Controller
     public function uploads($studentId){
         return view('pages.students.live.uploads', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Documents', 'href' => 'javascript:void(0);'],
@@ -426,6 +431,7 @@ class  StudentController extends Controller
         $userData = \Auth::guard('web')->user();
         return view('pages.students.live.notes', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Notes', 'href' => 'javascript:void(0);'],
@@ -471,6 +477,7 @@ class  StudentController extends Controller
 
         return view('pages.students.live.process', [
             'title' => 'Live Student - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Process & Tasks', 'href' => 'javascript:void(0);'],
@@ -563,6 +570,7 @@ class  StudentController extends Controller
 
         return view('pages.students.live.slc-history', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student SLC History', 'href' => 'javascript:void(0);'],
@@ -607,12 +615,23 @@ class  StudentController extends Controller
 
         return view('pages.students.live.accounts', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
             ],
             'student' => $student,
-            'agreements' => SlcAgreement::with(['scr', 'scr.creation', 'installments'])->where('student_id', $student_id)->where(function($q) use($courseRelationId){
+            'agreements' => SlcAgreement::with([
+                                'scr',
+                                'scr.creation',
+                                'user.employee',
+                                'installments',
+                                'installments.declaraton.termType',
+                                'payments',
+                                'payments.method',
+                                'payments.received.employee',
+                                'payments.declaraton.termType'
+                            ])->where('student_id', $student_id)->where(function($q) use($courseRelationId){
                                 $q->where('student_course_relation_id', $courseRelationId)->orWhere('student_course_relation_id', 0)->orWhereNull('student_course_relation_id');
                             })->orderBy('id', 'ASC')->get(),
             'instances' => CourseCreationInstance::where('course_creation_id', $courseCreationID)->orderBy('academic_year_id', 'ASC')->get(),
@@ -955,6 +974,7 @@ class  StudentController extends Controller
         
         return view('pages.students.live.attendance.index', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -996,6 +1016,7 @@ class  StudentController extends Controller
 
          return view('pages.students.live.visits.index', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Communications', 'href' => 'javascript:void(0);'],
@@ -1658,6 +1679,7 @@ class  StudentController extends Controller
 
         return view('pages.students.live.attendance.form', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Accounts', 'href' => 'javascript:void(0);'],
@@ -3051,6 +3073,7 @@ class  StudentController extends Controller
     public function archives($studentId){
         return view('pages.students.live.archives', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Student Archives', 'href' => 'javascript:void(0);'],
@@ -3065,6 +3088,7 @@ class  StudentController extends Controller
     public function loginLog(Student $student){
         return view('pages.students.live.login-log', [
             'title' => 'Live Students - London Churchill College',
+            'layout' => 'student-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Live Student', 'href' => route('student')],
                 ['label' => 'Login Log', 'href' => 'javascript:void(0);'],

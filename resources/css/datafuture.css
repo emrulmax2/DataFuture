@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
 
 /* Core Setup Extended Start */
 .block{
@@ -53,6 +54,760 @@
 }
 /* Core Setup Extended End */
 
+/* ── Global Navigation Redesign ── */
+@media (min-width: 768px) {
+    body {
+        background: rgb(238, 241, 244);
+    }
+
+    .content.content--top-nav {
+        background: transparent;
+    }
+
+    /* Top bar: dark pine gradient with gold accent line */
+    .top-bar-boxed.hr-topbar {
+        background: linear-gradient(105deg, #102a31 0%, #143038 58%, #17414a 100%) !important;
+        border-bottom: 3px solid #e0a82e !important;
+        box-shadow: 0 8px 18px -14px rgba(19, 38, 43, 0.85);
+        position: relative;
+        overflow: hidden;
+    }
+    .top-bar-boxed.hr-topbar::before {
+        display: none !important;
+    }
+    .top-bar-boxed.hr-topbar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        /* background: radial-gradient(620px 210px at 82% 0%, rgba(255, 255, 255, 0.12), transparent 20%); */
+        z-index: 0;
+    }
+    .top-bar-boxed.hr-topbar > div {
+        position: relative;
+        z-index: 1;
+    }
+
+    .top-bar-boxed.hr-topbar .logo.college-identity {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.85rem;
+        /* margin-right: 1.35rem;
+        padding-right: 1.25rem;
+        border-right: 1px solid rgba(255, 255, 255, 0.17); */
+    }
+    .top-bar-boxed.hr-topbar .logo.college-identity .logo__image {
+        height: 3rem;
+        width: auto;
+        filter: saturate(0.92) contrast(1.05);
+    }
+    .top-bar-boxed.hr-topbar .college-identity__text {
+        display: none;
+        flex-direction: column;
+        line-height: 1;
+    }
+    .top-bar-boxed.hr-topbar .college-identity__line {
+        font-family: "Georgia", "Times New Roman", serif;
+        font-size: 0.82rem;
+        letter-spacing: 0.18em;
+        color: #fbf7ee;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .top-bar-boxed.hr-topbar .college-identity__line--gold {
+        color: #e0a82e;
+        letter-spacing: 0.28em;
+        font-size: 0.63rem;
+        margin-top: 0.15rem;
+    }
+
+    .top-bar-boxed.hr-topbar .breadcrumb,
+    .top-bar-boxed.hr-topbar .breadcrumb .breadcrumb-item a {
+        color: rgba(255, 255, 255, 0.72) !important;
+    }
+    .top-bar-boxed.hr-topbar .breadcrumb .breadcrumb-item.active,
+    .top-bar-boxed.hr-topbar .breadcrumb .breadcrumb-item.active a {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+    .top-bar-boxed.hr-topbar .breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+        color: rgba(255, 255, 255, 0.45) !important;
+    }
+
+    /* Profile button on right side */
+    .top-bar-boxed.hr-topbar .account-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.32rem 0.32rem 0.32rem 0.95rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    .top-bar-boxed.hr-topbar .account-pill__who {
+        line-height: 1.05;
+        text-align: right;
+        max-width: 240px;
+    }
+    .top-bar-boxed.hr-topbar .account-pill__name {
+        font-size: 0.76rem;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .top-bar-boxed.hr-topbar .account-pill__role {
+        margin-top: 0.18rem;
+        font-size: 0.64rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+    .top-bar-boxed.hr-topbar .account-pill__avatar {
+        width: 2.35rem;
+        height: 2.35rem;
+        border-radius: 9999px;
+        overflow: hidden;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.26);
+    }
+
+    /* White card nav bar sitting below the dark top bar */
+    .hr-top-nav > ul {
+        /* background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06); */
+        border-radius: 0;
+    }
+
+    /* Active nav item: clean bottom-border underline, no SVG chevron */
+    .hr-top-nav > ul > li > .top-menu--active {
+        background: transparent !important;
+        border-bottom: 3px solid rgb(var(--color-primary)) !important;
+        border-radius: 0 !important;
+        margin-bottom: -1px;
+    }
+    /* Hide the decorative pseudo-elements on active items */
+    .hr-top-nav > ul > li > .top-menu--active::before,
+    .hr-top-nav > ul > li > .top-menu--active::after {
+        display: none !important;
+    }
+    /* Active item text colour */
+    .hr-top-nav > ul > li > .top-menu--active .top-menu__icon,
+    .hr-top-nav > ul > li > .top-menu--active .top-menu__title {
+        color: rgb(var(--color-primary)) !important;
+        font-weight: 600;
+    }
+    /* Hover state: subtle tint instead of the bg-slate-100 box */
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active) {
+        background: rgb(var(--color-primary) / 0.06) !important;
+        border-radius: 0.5rem;
+    }
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active)::before {
+        display: none !important;
+    }
+
+    .hr-top-nav > ul li .top-menu {
+        color: #5d6562;
+    }
+
+    .hr-top-nav > ul > li > .top-menu {
+        position: relative;
+        transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+    }
+
+    .hr-top-nav > ul > li > .top-menu:not(.top-menu--active)::after {
+        content: "";
+        position: absolute;
+        left: 0.95rem;
+        right: 0.95rem;
+        bottom: 0.38rem;
+        height: 2px;
+        border-radius: 9999px;
+        background: rgb(var(--color-primary) / 0.55);
+        transform: scaleX(0);
+        transform-origin: center;
+        transition: transform 0.18s ease;
+    }
+
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active) {
+        transform: translateY(-1px);
+    }
+
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active)::after {
+        transform: scaleX(1);
+    }
+
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active) .top-menu__icon,
+    .hr-top-nav > ul > li:hover > .top-menu:not(.top-menu--active) .top-menu__title {
+        color: rgb(var(--color-primary)) !important;
+    }
+
+    .hr-top-nav > ul li ul,
+    .hr-top-nav > ul li ul ul {
+        background: #ffffff;
+    }
+
+    /* Right-side status summary in top navigation */
+    .hr-top-nav {
+        display: flex;
+        align-items: center;
+        gap: 0;
+    }
+
+    .hr-top-nav > ul {
+        flex: 1 1 auto;
+        padding-right: 0.5rem;
+    }
+
+    .hr-top-nav .nav-clockin-statistics {
+        margin-left: auto;
+        margin-right: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.9rem;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 0.45rem 0.8rem;
+
+    }
+
+    .hr-top-nav .nav-clockin-statistics .statusArea,
+    .hr-top-nav .nav-clockin-statistics .sinceArea {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: max-content;
+        
+    }
+    .hr-top-nav .nav-clockin-statistics .statusArea {
+        padding-right: 1rem;
+    }
+    .hr-top-nav .nav-clockin-statistics .sinceArea {
+        margin-left: 0;
+        padding-left: 0.9rem;
+        border-left: 1px solid #e2e8f0;
+        
+    }
+
+    .hr-top-nav .nav-clockin-statistics .statusArea > :first-child,
+    .hr-top-nav .nav-clockin-statistics .sinceArea > :first-child,
+    .hr-top-nav .nav-clockin-statistics .sinceArea > :last-child {
+        color: #6b7280 !important;
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        line-height: 1.15;
+    }
+
+    .hr-top-nav .nav-clockin-statistics .statusArea > :nth-child(2),
+    .hr-top-nav .nav-clockin-statistics .sinceArea > :nth-child(2) {
+        margin-top: 0.15rem;
+        color: rgb(var(--color-primary)) !important;
+        font-size: 0.82rem !important;
+        font-weight: 700 !important;
+        line-height: 1.1;
+    }
+
+    .hr-top-nav .nav-clockin-statistics .statusArea .text-red-800 {
+        color: rgb(var(--color-danger)) !important;
+    }
+}
+
+/* Primary actions — "Slate & Teal" FLAT preset (no gradient, no glow) */
+.btn.btn-primary,
+.btn-primary,
+.btn.btn-go {
+    background: #0e7c86 !important;
+    background-image: none !important;
+    border: 1px solid #0e7c86 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.btn.btn-primary:hover,
+.btn-primary:hover,
+.btn.btn-go:hover,
+.btn.btn-primary:active,
+.btn-primary:active,
+.btn.btn-go:active {
+    background: #0b6670 !important;
+    background-image: none !important;
+    border-color: #0b6670 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+}
+
+.btn.btn-primary:focus,
+.btn-primary:focus,
+.btn.btn-go:focus,
+.btn.btn-primary:focus-visible,
+.btn-primary:focus-visible,
+.btn.btn-go:focus-visible {
+    background-image: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(14, 124, 134, 0.20) !important;
+}
+
+/* Dark mode keeps the buttons flat but tracks the brighter dark teal token */
+.dark .btn.btn-primary,
+.dark .btn-primary,
+.dark .btn.btn-go {
+    background: #0d9488 !important;
+    background-image: none !important;
+    border-color: #0d9488 !important;
+}
+.dark .btn.btn-primary:hover,
+.dark .btn-primary:hover,
+.dark .btn.btn-go:hover {
+    background: #0f766e !important;
+    background-image: none !important;
+    border-color: #0f766e !important;
+}
+
+/* Accent (gold) outline action — e.g. "Add Temp Employee" */
+.btn.btn-outline-accent,
+.btn-outline-accent {
+    background: transparent;
+    border: 1px solid #e0a82e;
+    color: #9a6b12; /* dark gold — AA on white */
+}
+.btn.btn-outline-accent:hover,
+.btn-outline-accent:hover {
+    background: rgba(224, 168, 46, 0.12);
+    border-color: #e0a82e;
+    color: #9a6b12;
+}
+.btn.btn-outline-accent:focus,
+.btn-outline-accent:focus {
+    box-shadow: 0 0 0 0.2rem rgba(224, 168, 46, 0.28);
+}
+
+/* ── Status & alert tones (matches the HR design handoff) ── */
+.lcc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.1875rem 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+.lcc-badge.has-dot::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    background: currentColor;
+    flex: none;
+    opacity: 0.9;
+}
+.lcc-badge--active   { background: #dcf1ef; color: #0b6670; }
+.lcc-badge--leave    { background: #fbf1dd; color: #9a6b12; }
+.lcc-badge--inactive { background: #eceef0; color: #67717a; }
+.lcc-badge--critical { background: #fdecec; color: #b42318; }
+.lcc-badge--warning  { background: #fbf3e2; color: #b45309; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   HR Monthly Attendance — "Slate & Teal" daily-sync table (design handoff).
+   Date badge + status pills + synchronise chip/button + row actions, all
+   scoped under .att-table so the look never leaks to other tables. Light
+   surfaces are the source of truth; .dark variants restated for legibility.
+   ════════════════════════════════════════════════════════════════════════ */
+.att-table { width: 100%; border-collapse: collapse; }
+.att-table thead tr { background: #f7fafb; border-bottom: 1px solid #e7e9e6; }
+.att-table thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8a95a3;
+    white-space: nowrap;
+    padding: 0.85rem 1rem 0.85rem 0;
+}
+.att-table tbody td {
+    padding: 0.65rem 1rem 0.65rem 0;
+    border-bottom: 1px solid #f1f4f2;
+    vertical-align: middle;
+}
+.att-table th:first-child,
+.att-table td:first-child { padding-left: 1.25rem; }
+.att-table th:last-child,
+.att-table td:last-child { padding-right: 1.25rem; }
+.att-table tbody tr { transition: background-color 0.12s ease; }
+.att-table tbody tr:hover { background: #f6fbfb; }
+.att-table tbody tr.att-row--weekend { background: #fafbfc; }
+
+/* Date cell — colored day badge + long date + status tag */
+.att-date { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.att-date__badge {
+    width: 42px; height: 42px; flex: 0 0 auto;
+    border-radius: 11px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: #f2f5f8; border: 1px solid #e7e9e6;
+}
+.att-date__badge--synced  { background: #eaf6f5; border-color: #cde8e4; }
+.att-date__badge--weekend { background: #f4f6f8; }
+.att-date__dow { font-size: 9px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #0e7c86; line-height: 1; }
+.att-date__day { font-size: 16px; font-weight: 800; color: #13262b; line-height: 1.05; }
+.att-date__badge--weekend .att-date__dow { color: #aeb6bd; }
+.att-date__badge--weekend .att-date__day { color: #8a95a3; }
+.att-date__meta { min-width: 0; }
+.att-date__long { font-size: 13.5px; font-weight: 700; color: #1f2733; }
+.att-date__tag  { font-size: 11.5px; font-weight: 600; color: #9aa6b0; }
+.att-date__tag--await { color: #b45309; }
+
+/* Count pills (Issues / Absents / Overtime / Pendings) */
+.att-pill {
+    display: inline-flex; align-items: center; white-space: nowrap;
+    padding: 5px 12px; border-radius: 9999px;
+    font-size: 12.5px; font-weight: 700; line-height: 1.2;
+    text-decoration: none;
+}
+.att-pill--issue { background: #fdecec; color: #b42318; }
+.att-pill--warn  { background: #fbf3e2; color: #b45309; }
+.att-pill--zero  { background: transparent; color: #b6bec6; }
+
+/* Synchronise chip (done) + button (pending) */
+.att-sync--done {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 13px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700;
+    background: #dcf1ef; color: #0b6670;
+}
+.att-sync-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 13px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 700;
+    background: #fff; border: 1px solid #cfe3e5; color: #0e7c86;
+    cursor: pointer; transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.att-sync-btn:hover { background: #f2fafa; border-color: #0e7c86; }
+.att-sync-btn:disabled { opacity: 0.6; cursor: default; }
+
+/* Actions — attendances link + clear-day delete */
+.att-actions { display: flex; align-items: center; gap: 9px; }
+.att-link {
+    display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
+    font-size: 12.5px; font-weight: 700; color: #0e7c86;
+    padding: 6px 12px; border-radius: 9px;
+    border: 1px solid #cfe3e5; background: #f4fafa;
+    text-decoration: none; transition: background-color 0.12s ease;
+}
+.att-link:hover { background: #e6f4f3; }
+.att-link--zero { color: #b6bec6; font-weight: 600; border: 0; background: transparent; }
+.att-del {
+    width: 32px; height: 32px; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; border: 1px solid #f0dada;
+    background: #fff; color: #c0392b; cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.att-del:hover { background: #fdeded; border-color: #e0a8a8; }
+
+/* Dark mode — keep rows readable on the dark surface */
+.dark .att-table thead tr { background: rgba(255, 255, 255, 0.03); border-bottom-color: rgba(255, 255, 255, 0.08); }
+.dark .att-table thead th { color: #64748b; }
+.dark .att-table tbody td { border-bottom-color: rgba(255, 255, 255, 0.06); }
+.dark .att-table tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+.dark .att-table tbody tr.att-row--weekend { background: rgba(255, 255, 255, 0.02); }
+.dark .att-date__badge { background: #1f2c30; border-color: #2b3a3f; }
+.dark .att-date__badge--synced { background: #11302e; border-color: #1d4b46; }
+.dark .att-date__badge--weekend { background: #1a2428; }
+.dark .att-date__dow { color: #2dd4bf; }
+.dark .att-date__day { color: #e2e8f0; }
+.dark .att-date__badge--weekend .att-date__dow { color: #6b7780; }
+.dark .att-date__badge--weekend .att-date__day { color: #94a3b8; }
+.dark .att-date__long { color: #e2e8f0; }
+.dark .att-date__tag { color: #94a3b8; }
+.dark .att-pill--zero { color: #5b6770; }
+.dark .att-sync-btn { background: #16242a; border-color: #2b4a4e; color: #45c4cd; }
+.dark .att-sync-btn:hover { background: #1b2d33; border-color: #45c4cd; }
+.dark .att-link { background: #16242a; border-color: #2b4a4e; color: #45c4cd; }
+.dark .att-link:hover { background: #1b2d33; }
+.dark .att-link--zero { color: #5b6770; background: transparent; }
+.dark .att-del { background: #241a1c; border-color: #4a2b2e; color: #f08c84; }
+.dark .att-del:hover { background: #2e2024; border-color: #f08c84; }
+
+/* ── Typography — Newsreader (display headings) + Public Sans (UI body) ──
+   Matches the "HR Dashboard — Design Handoff": serif display + grotesque body. */
+body {
+    font-family: 'Public Sans', 'Roboto', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    background: rgb(238, 241, 244);
+}
+.font-display {
+    font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+    letter-spacing: -0.01em;
+    font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   HR / report tables — custom "Slate & Teal" design.
+   Fully replaces the Tabulator + Midone component defaults for any table with
+   the .table-report--tabulator wrapper (employee/visa/passport/appraisal/
+   vacancy/holiday/course/plan/etc). Clean white rows (no zebra), hairline
+   #E7E9E6 dividers, tinted #F6F8F5 header with uppercase muted labels, teal
+   sort arrows + active page. Scoped via .table-report--tabulator so the look
+   never leaks to unrelated tables; light surfaces guarded with html:not(.dark)
+   and dark variants restated under .dark.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ---- Container ---- */
+.table-report--tabulator .tabulator {
+    border: 0;
+    background: transparent;
+    font-size: 14px;
+    text-align: left;
+}
+
+/* ───────────────────── LIGHT MODE ───────────────────── */
+
+/* Header row */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header {
+    background: #F6F8F5;
+    border-top: 0;
+    border-bottom: 1px solid #E7E9E6;
+    color: #7A847D;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-headers .tabulator-col {
+    background: transparent;
+    background-color: transparent;
+    border-right: 0;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-headers .tabulator-col:hover,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+    background: transparent;
+    background-color: transparent;
+}
+.table-report--tabulator .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    padding: 0.65rem 0.85rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #7A847D;
+    text-align: left;
+    padding-right: 0;
+}
+/* defeat the legacy nth-child(3..6) center-align rule from _table-report.css */
+html:not(.dark) .table-report.table-report--tabulator .tabulator-header .tabulator-headers .tabulator-col:nth-child(3) .tabulator-col-content .tabulator-col-title,
+html:not(.dark) .table-report.table-report--tabulator .tabulator-header .tabulator-headers .tabulator-col:nth-child(4) .tabulator-col-content .tabulator-col-title,
+html:not(.dark) .table-report.table-report--tabulator .tabulator-header .tabulator-headers .tabulator-col:nth-child(5) .tabulator-col-content .tabulator-col-title,
+html:not(.dark) .table-report.table-report--tabulator .tabulator-header .tabulator-headers .tabulator-col:nth-child(6) .tabulator-col-content .tabulator-col-title {
+    text-align: left;
+}
+
+/* Sort arrows — muted by default, teal when active (descendant path; matches
+   the Midone component's own .tabulator-col-content .tabulator-arrow rule) */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-arrow {
+    border-bottom-color: #7A847D;
+    border-top-color: #7A847D;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="none"] .tabulator-col-content .tabulator-arrow {
+    border-top: none;
+    border-bottom: 6px solid #C7CEC9 !important;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="asc"] .tabulator-col-content .tabulator-arrow {
+    border-top: none;
+    border-bottom: 6px solid #0E7C86 !important;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="desc"] .tabulator-col-content .tabulator-arrow {
+    border-bottom: none;
+    border-top: 6px solid #0E7C86 !important;
+}
+
+/* Body rows — white, NO zebra, hairline divider, soft hover */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row.tabulator-row-odd,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row.tabulator-row-even {
+    background: #FFFFFF;
+    background-color: #FFFFFF;
+    border-bottom: 1px solid #E7E9E6;
+    transition: background 120ms ease;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row:hover,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row.tabulator-row-even:hover,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row.tabulator-row-odd:hover {
+    background: #F6F8F5;
+    background-color: #F6F8F5;
+    cursor: pointer;
+}
+
+/* Cells */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-row .tabulator-cell {
+    padding: 0.85rem;
+    border-right: 0;
+    vertical-align: middle;
+    color: #3C463F;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+/* Name/identity cell uses the column formatter's own markup; avatar + name +
+   role render via the formatter. (No utility-class targeting here — Tailwind's
+   @apply engine rejects rules that redefine utilities like .relative/.block.) */
+
+/* Footer / pagination */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer {
+    background: #FFFFFF;
+    border-top: 1px solid #E7E9E6;
+    padding: 0.65rem 0.85rem;
+    margin-top: 0;
+    text-align: left;
+    color: #7A847D;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator > label {
+    color: #7A847D;
+    font-size: 13px;
+    font-weight: 400;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page-size {
+    background-color: #FFFFFF;
+    border: 1px solid #E7E9E6;
+    border-radius: 8px;
+    height: 32px;
+    color: #3C463F;
+    font-size: 13px;
+    padding: 0 1.9rem 0 0.6rem;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page-size:focus {
+    outline: none;
+    border-color: #0E7C86;
+    box-shadow: 0 0 0 0.18rem rgba(14, 124, 134, 0.18);
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page {
+    background: transparent;
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #3C463F;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 4px 10px;
+    min-width: 32px;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+    background: #F6F8F5;
+    background-color: #F6F8F5;
+    color: #3C463F;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active,
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active:hover {
+    background: #0E7C86 !important;
+    background-color: #0E7C86 !important;
+    color: #FFFFFF !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-weight: 600;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:disabled {
+    opacity: 0.5;
+    color: #7A847D;
+}
+
+/* Placeholder (empty state) + loader */
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-tableHolder .tabulator-placeholder span {
+    color: #7A847D;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 2.5rem 0;
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-loader {
+    background: rgba(255, 255, 255, 0.74);
+}
+html:not(.dark) .table-report--tabulator .tabulator .tabulator-loader .tabulator-loader-msg {
+    background: transparent;
+    color: #3C463F;
+    font-weight: 400;
+}
+
+/* ───────────────────── DARK MODE ───────────────────── */
+.dark .table-report--tabulator .tabulator .tabulator-header {
+    background: transparent;
+    border-top: 0;
+    border-bottom: 1px solid #2d3748;
+}
+.dark .table-report--tabulator .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+    text-transform: uppercase;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+.dark .table-report--tabulator .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-arrow {
+    border-bottom-color: #94a3b8;
+    border-top-color: #94a3b8;
+}
+.dark .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="none"] .tabulator-col-content .tabulator-arrow {
+    border-top: none;
+    border-bottom: 6px solid #475569 !important;
+}
+.dark .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="asc"] .tabulator-col-content .tabulator-arrow {
+    border-top: none;
+    border-bottom: 6px solid #0E7C86 !important;
+}
+.dark .table-report--tabulator .tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="desc"] .tabulator-col-content .tabulator-arrow {
+    border-bottom: none;
+    border-top: 6px solid #0E7C86 !important;
+}
+.dark .table-report--tabulator .tabulator .tabulator-row,
+.dark .table-report--tabulator .tabulator .tabulator-table .tabulator-row,
+.dark .table-report--tabulator .tabulator .tabulator-table .tabulator-row.tabulator-row-even {
+    background: transparent;
+    background-color: transparent;
+    border-bottom: 1px solid rgb(250, 250, 200);
+}
+.dark .table-report--tabulator .tabulator .tabulator-table .tabulator-row:hover,
+.dark .table-report--tabulator .tabulator .tabulator-table .tabulator-row.tabulator-row-even:hover {
+    background-color: rgba(250, 250, 248, 0.04);
+}
+.dark .table-report--tabulator .tabulator .tabulator-row .tabulator-cell {
+    color: #e2e8f0;
+}
+.dark .table-report--tabulator .tabulator .tabulator-footer,
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator,
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator > label {
+    background: transparent;
+    border-top: 1px solid #2d3748;
+    color: #94a3b8;
+}
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page {
+    color: #e2e8f0;
+}
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active,
+.dark .table-report--tabulator .tabulator .tabulator-footer .tabulator-paginator .tabulator-page.active:hover {
+    background-color: #0d9488 !important;
+    color: #fff !important;
+    border: 0 !important;
+}
+.dark .table-report--tabulator .tabulator .tabulator-tableHolder .tabulator-placeholder span {
+    color: #94a3b8;
+}
+.dark .table-report--tabulator .tabulator .tabulator-loader {
+    background: rgba(15, 23, 42, 0.55);
+}
+.dark .table-report--tabulator .tabulator .tabulator-loader .tabulator-loader-msg {
+    background: transparent;
+    color: #e2e8f0;
+}
 
 .modal-alert{
     display: none;
@@ -61,10 +816,8 @@
     border-radius: 0;
 }
 
-.tabulator#courseCreationInstTable .tabulator-row:hover, .tabulator#courseCreationInstTable .tabulator-row.tabulator-row-even:hover, 
-.tabulator#courseCreationInstTable .tabulator-row.tabulator-row-even{
-    background-color: #fff;
-}
+/* (Removed legacy #courseCreationInstTable white-row/no-hover override — it now
+   shares .table-report--tabulator and is styled uniformly by the custom design.) */
 
 .singleModule{
     position: relative;
@@ -492,15 +1245,113 @@
 }
 
 
-.sitePreLoader{
+/* ===== LCC Preloader (from LCC Preloader prototype) ===== */
+:root {
+    --lcc-navy: #0F252D;       /* panel background */
+    --lcc-gold: #C9992E;       /* accent */
+    --lcc-gold-light: #E5B94E;
+    --lcc-muted: #8FA6AC;      /* "COLLEGE" line */
+    --lcc-muted-2: #6E8A91;    /* status text */
+}
+
+.sitePreLoader.lcc-preloader {
     position: fixed;
     left: 0;
     top: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
     height: 100%;
     z-index: 9999;
-    background: rgb(var(--color-primary));
+    background: var(--lcc-navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    font-family: 'Public Sans', system-ui, sans-serif;
+    transition: opacity .55s ease, visibility .55s;
 }
+.lcc-preloader.is-done {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.lcc-preloader__mark {
+    position: relative;
+    width: 104px;
+    height: 104px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: lccFadeUp .5s ease both;
+}
+.lcc-preloader__ring {
+    position: absolute;
+    inset: 0;
+    animation: lccRing 1.15s linear infinite;
+}
+.lcc-preloader__tile {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: var(--lcc-gold);
+    color: var(--lcc-navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    animation: lccTile 1.8s ease-in-out infinite;
+}
+
+.lcc-preloader__wordmark {
+    text-align: center;
+    animation: lccFadeUp .5s ease .12s both;
+}
+.lcc-preloader__wordmark-top {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+.lcc-preloader__wordmark-bottom {
+    color: var(--lcc-muted);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.34em;
+    margin-top: 2px;
+}
+
+.lcc-preloader__track {
+    width: 168px;
+    height: 3px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    animation: lccFadeUp .5s ease .2s both;
+}
+.lcc-preloader__bar {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--lcc-gold), var(--lcc-gold-light));
+    animation: lccBar 1.9s ease .1s both;
+}
+
+.lcc-preloader__status {
+    color: var(--lcc-muted-2);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    animation: lccFadeUp .5s ease .28s both;
+}
+
+@keyframes lccRing  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes lccTile  { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(201,153,46,0.35); }
+                      50%     { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(201,153,46,0); } }
+@keyframes lccBar   { 0% { width: 0%; } 55% { width: 72%; } 100% { width: 100%; } }
+@keyframes lccFadeUp{ from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .la-ball-scale-multiple,
 .la-ball-scale-multiple>div{position:relative;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 .la-ball-scale-multiple{display:block;font-size:0;color:#fff}
@@ -2682,3 +3533,409 @@ fieldset.modInstSet legend{
     text-align: left;
     font-weight: normal;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Employee Profile — scoped remodel (app bar + cover header + left tab nav)
+   Applies ONLY on the `employee-profile` layout. Nothing global is touched.
+   ══════════════════════════════════════════════════════════════════════════ */
+.ep-shell {
+    background: rgb(238, 241, 244);
+    min-height: 100vh;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100%;
+}
+
+/* ---------- App bar ---------- */
+.ep-appbar { display: none; }
+@media (min-width: 768px) {
+    .ep-appbar {
+        display: block;
+        position: sticky;
+        top: 0;
+        z-index: 55;
+        background: #0a2724;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-family: 'Public Sans', system-ui, sans-serif;
+    }
+}
+.ep-appbar__inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ep-brand { display: inline-flex; align-items: center; gap: 11px; margin-right: 18px; text-decoration: none; flex: none; }
+.ep-brand__img { height: 34px; width: auto; }
+.ep-brand__mark {
+    width: 34px; height: 34px; border-radius: 9px; background: #e0a82e; color: #0a2724;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+    font-family: 'Newsreader', Georgia, serif;
+}
+.ep-brand__text { display: flex; flex-direction: column; line-height: 1.22; font-family: 'Newsreader', Georgia, serif; }
+.ep-brand__l1 { color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; }
+.ep-brand__l2 { color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; }
+
+.ep-nav { display: flex; align-items: center; gap: 2px; }
+.ep-nav__item { position: relative; }
+.ep-nav__link {
+    display: flex; align-items: center; gap: 8px; padding: 8px 13px; border-radius: 9px;
+    font-size: 13.5px; font-weight: 500; color: rgba(255, 255, 255, 0.62); text-decoration: none;
+    white-space: nowrap; transition: background .15s, color .15s;
+}
+.ep-nav__link:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
+.ep-nav__link.is-active { color: #fff; background: rgba(255, 255, 255, 0.12); font-weight: 600; }
+
+.ep-nav__drop {
+    position: absolute; top: calc(100% + 7px); left: 0; min-width: 214px;
+    background: #fff; border: 1px solid #e6ecec; border-radius: 12px; padding: 6px;
+    box-shadow: 0 18px 40px -18px rgba(11, 43, 40, 0.5);
+    opacity: 0; visibility: hidden; transform: translateY(4px);
+    transition: opacity .16s, transform .16s, visibility .16s; z-index: 60;
+}
+.ep-nav__drop::before { content: ""; position: absolute; bottom: 100%; left: 0; right: 0; height: 9px; }
+.ep-nav__item.has-sub:hover > .ep-nav__drop,
+.ep-account.has-sub:hover > .ep-nav__drop { opacity: 1; visibility: visible; transform: translateY(0); }
+.ep-nav__dropitem {
+    display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 8px;
+    font-size: 13px; font-weight: 500; color: #43605d; text-decoration: none;
+}
+.ep-nav__dropitem:hover { background: #eef4f3; color: #12302d; }
+
+.ep-appbar__right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.ep-leave {
+    display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 9px;
+    background: rgb(var(--color-success) / 0.92); color: #fff; font-size: 12.5px; font-weight: 600; text-decoration: none;
+}
+.ep-leave:hover { filter: brightness(1.05); }
+.ep-account { position: relative; }
+.ep-account__btn { display: flex; align-items: center; gap: 11px; background: transparent; border: 0; cursor: pointer; padding: 4px; }
+.ep-account__who { text-align: right; line-height: 1.3; }
+.ep-account__name { display: block; color: #fff; font-size: 12.5px; font-weight: 600; }
+.ep-account__role { display: block; color: rgba(255, 255, 255, 0.5); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.ep-account__avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.25); overflow: hidden; flex: none;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700;
+}
+.ep-account__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ep-account__drop { left: auto; right: 0; }
+.ep-account__head { padding: 8px 11px 10px; }
+.ep-account__head-name { font-size: 13px; font-weight: 700; color: #12302d; }
+.ep-account__head-mail { font-size: 11.5px; color: #7c9491; margin-top: 2px; word-break: break-all; }
+
+/* ---------- Cover header ---------- */
+.ep-cover { background: #0b2b28; border-bottom: 3px solid #e0a82e; font-family: 'Public Sans', system-ui, sans-serif; }
+.ep-cover__inner { max-width: 1320px; margin: 0 auto; padding: 16px 32px 30px; }
+.ep-crumb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: rgba(255, 255, 255, 0.55); margin-bottom: 20px; }
+.ep-crumb a { color: rgba(255, 255, 255, 0.55); text-decoration: none; }
+.ep-crumb a:hover { color: rgba(255, 255, 255, 0.85); }
+.ep-crumb .is-current { color: rgba(255, 255, 255, 0.9); font-weight: 600; }
+.ep-cover__row { display: flex; align-items: center; gap: 26px; flex-wrap: wrap; }
+
+.ep-cover__avatar { position: relative; flex: none; width: 92px; height: 92px; }
+.ep-cover__avatar > img {
+    width: 92px; height: 92px; border-radius: 50%; object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.2); background: rgb(var(--color-primary));
+}
+.ep-cover__cam {
+    position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; border-radius: 50%;
+    background: #e0a82e; border: 2.5px solid #0b2b28; color: #0b2b28; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.ep-cover__cam:hover { filter: brightness(1.08); }
+
+.ep-cover__id { flex: 1; min-width: 260px; }
+.ep-cover__eyebrow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+.ep-cover__label { font-size: 11.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e0a82e; }
+.ep-cover__name { margin: 0 0 8px; font-family: 'Newsreader', Georgia, serif; font-size: 32px; font-weight: 700; color: #fff; line-height: 1.1; }
+.ep-cover__role { font-size: 14px; color: rgba(255, 255, 255, 0.65); margin-bottom: 15px; }
+.ep-cover__chips { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ep-chip {
+    display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.13); border-radius: 999px; padding: 7px 14px;
+    font-size: 12.5px; font-weight: 500; color: rgba(255, 255, 255, 0.92);
+}
+.ep-chip i, .ep-chip svg { color: #e0a82e; }
+.ep-chip em { font-style: normal; color: rgba(255, 255, 255, 0.5); font-size: 11px; font-weight: 600; }
+
+.ep-cover__actions { display: flex; flex-direction: row; flex-wrap: wrap; gap: 10px; flex: none; }
+.ep-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px; border-radius: 10px;
+    padding: 11px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; border: 1px solid transparent;
+    text-decoration: none; white-space: nowrap; transition: background .15s, color .15s, filter .15s;
+}
+.ep-btn--light { background: #fff; color: #0b2b28; }
+.ep-btn--light:hover { background: #edf4f3; }
+.ep-btn--ghost { background: transparent; color: rgba(255, 255, 255, 0.9); border-color: rgba(255, 255, 255, 0.25); font-weight: 600; }
+.ep-btn--ghost:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+@media (min-width: 1100px) {
+    .ep-cover__actions { flex-direction: column; align-items: flex-end; }
+}
+
+/* ---------- Horizontal tab nav (full-bleed, sticky under the app bar) ---------- */
+.ep-tabs {
+    background: #fff;
+    border-bottom: 1px solid #e1eae9;
+    box-shadow: 0 1px 3px rgba(11, 43, 40, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    font-family: 'Public Sans', system-ui, sans-serif;
+}
+/* On desktop the app bar (60px) stays sticky, so the tab bar sits directly beneath it */
+@media (min-width: 768px) { .ep-tabs { top: 60px; } }
+.ep-tabs__inner {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.ep-tabs__inner::-webkit-scrollbar { display: none; }
+@media (min-width: 1024px) { .ep-tabs__inner { padding: 0 32px; } }
+.ep-tabs__link {
+    display: flex; align-items: center; gap: 6px;
+    padding: 14px 11px 11px;
+    font-size: 13px; font-weight: 500; color: #5c7977;
+    border-bottom: 3px solid transparent;
+    text-decoration: none; white-space: nowrap;
+    transition: color .15s ease, border-color .15s ease;
+}
+.ep-tabs__link:hover { color: #17312f; }
+.ep-tabs__link.is-active { color: rgb(var(--color-primary)); border-bottom-color: rgb(var(--color-primary)); font-weight: 700; }
+.ep-tabs__link i, .ep-tabs__link svg { width: 14px; height: 14px; flex: none; }
+
+/* ---------- Body shell ---------- */
+.ep-grid { max-width: 1320px; margin: 0 auto; padding: 24px 20px 70px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }
+@media (min-width: 1024px) { .ep-grid { padding: 26px 32px 72px; } }
+.ep-col { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+
+/* =====================================================================
+   Employee Profile · Time Recorded — modern timesheet table (.ep-tk-*)
+   Scoped to .ep-tk-table so the legacy .attendanceDetailsTable styling
+   used on other pages / in the PDF is untouched. The <table> DOM is kept
+   (thead / tbody / tfoot) for the AJAX injection contract, but rows are
+   laid out with CSS grid for a modern look.
+   ===================================================================== */
+.ep-tk-card {
+    background: #fff;
+    border: 1px solid #e6eaef;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16, 38, 45, .04), 0 14px 34px -20px rgba(16, 38, 45, .28);
+}
+.ep-tk-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef2f6;
+}
+.ep-tk-card__title {
+    font-family: 'Newsreader', ui-serif, Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.15;
+    color: #10262e;
+}
+.ep-tk-card__sub { margin-top: 2px; font-size: 12.5px; color: #7a8891; }
+.ep-tk-pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid #10262e;
+    background: #10262e;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background .15s ease, transform .05s ease;
+}
+.ep-tk-pdf:hover { background: #183a44; color: #fff; }
+.ep-tk-pdf:active { transform: translateY(1px); }
+.ep-tk-pdf svg { width: 16px; height: 16px; flex: none; }
+
+.ep-tk-scroll { overflow: auto; max-height: 70vh; }
+
+.ep-tk-table {
+    display: block;
+    width: 100%;
+    min-width: 1080px;
+    border-collapse: collapse;
+    font-family: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+}
+.ep-tk-table thead,
+.ep-tk-table tbody,
+.ep-tk-table tfoot { display: block; }
+
+/* Shared 9-column grid for the header row + every data row */
+.ep-tk-table thead tr,
+.ep-tk-table tbody tr {
+    display: grid;
+    grid-template-columns: 132px 128px 176px 72px 104px 88px 88px 124px minmax(170px, 1fr);
+    align-items: center;
+}
+.ep-tk-table thead tr {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #f8fafc;
+    border-bottom: 1px solid #e6eaef;
+}
+.ep-tk-th {
+    padding: 11px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #64748b;
+    white-space: nowrap;
+}
+.ep-tk-th--num { text-align: right; }
+
+.ep-tk-table tbody tr.ep-tk-row { transition: background .12s ease; }
+.ep-tk-table tbody tr.ep-tk-row:hover { background: #f8fafc; }
+.ep-tk-td {
+    padding: 10px 14px;
+    border-top: 1px solid #eef2f6;
+    min-width: 0;
+    font-size: 13px;
+    color: #334155;
+}
+
+/* Date */
+.ep-tk-date__day { display: block; font-weight: 700; font-size: 13px; color: #0f172a; }
+.ep-tk-date__sub { display: block; font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+
+/* Status pills — dot inherits the pill text colour */
+.ep-tk-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+.ep-tk-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.ep-tk-pill--wk { background: #e3f3ec; color: #0b6b4f; }
+.ep-tk-pill--ov { background: #fdecd6; color: #9a5b00; }
+.ep-tk-pill--bh { background: #fde9dc; color: #b5470f; }
+.ep-tk-pill--hv { background: #e5f0fb; color: #1f5c9e; }
+.ep-tk-pill--mt { background: #f6e7e2; color: #7a2410; }
+.ep-tk-pill--sl { background: #fce7e7; color: #b01818; }
+.ep-tk-pill--au { background: #efe9fb; color: #5b34a6; }
+.ep-tk-pill--ap { background: #def1ee; color: #0b7268; }
+.ep-tk-pill--nt { background: #eef1f4; color: #5b6b74; }
+
+/* Clock in/out */
+.ep-tk-clock__main { display: block; font-size: 13px; color: #0f172a; font-variant-numeric: tabular-nums; }
+.ep-tk-clock__sub  { display: block; font-size: 11px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+
+/* Numeric columns */
+.ep-tk-num { text-align: right; font-variant-numeric: tabular-nums; }
+.ep-tk-strong { font-weight: 700; color: #0f172a; }
+.ep-tk-hol    { font-weight: 700; color: #b5470f; }
+.ep-tk-muted  { color: #cbd5e1; }
+
+/* Pay */
+.ep-tk-pay { text-align: right; }
+.ep-tk-pay__amt  { display: block; font-weight: 700; font-size: 13px; color: #0f172a; font-variant-numeric: tabular-nums; }
+.ep-tk-pay__rate { display: block; font-size: 11px; color: #94a3b8; }
+
+/* Notes */
+.ep-tk-notes { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.ep-tk-note { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #64748b; }
+.ep-tk-note--warn {
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: #fdf2df;
+    border: 1px solid #f5dca8;
+    color: #9a5b00;
+    font-weight: 600;
+}
+.ep-tk-note__ico { width: 13px; height: 13px; flex: none; }
+
+/* Collapsed off-schedule gap rows */
+.ep-tk-table tbody tr.ep-tk-gap { display: flex; align-items: center; }
+.ep-tk-gap__cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 16px;
+    border-top: 1px solid #eef2f6;
+    background: repeating-linear-gradient(135deg, #fbfcfd, #fbfcfd 10px, #f5f7f9 10px, #f5f7f9 20px);
+}
+.ep-tk-gap__label { font-size: 12px; font-weight: 700; color: #8b97a0; white-space: nowrap; }
+.ep-tk-gap__meta  { font-size: 11.5px; color: #aab4bb; }
+
+/* Loading placeholder */
+.ep-tk-table tbody tr.ep-tk-loading { display: flex; }
+.ep-tk-loading .ep-tk-td {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 34px 16px;
+    border-top: 0;
+    color: #7a8891;
+    font-weight: 500;
+}
+.ep-tk-spinner {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    border: 2.5px solid #d7dee3;
+    border-top-color: rgb(var(--color-primary));
+    border-radius: 50%;
+    animation: ep-tk-spin .7s linear infinite;
+}
+@keyframes ep-tk-spin { to { transform: rotate(360deg); } }
+
+/* Dark totals footer (sticky to the bottom of the scroll area) */
+.ep-tk-table tfoot tr.ep-tk-foot {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: #10262e;
+    color: #fff;
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+}
+.ep-tk-foot__title {
+    margin-right: auto;
+    font-family: 'Newsreader', ui-serif, Georgia, serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+.ep-tk-foot__stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+.ep-tk-foot__k {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 600;
+    color: #8fb3ad;
+}
+.ep-tk-foot__v { font-size: 15px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+.ep-tk-foot__stat--pay .ep-tk-foot__v { color: #e0a82e; }

@@ -13,6 +13,12 @@ import TomSelect from 'tom-select';
         create: true,
         allowEmptyOption: true,
         maxOptions: null,
+        // The modal body is a scroll container (overflow-y:auto), which clips a
+        // dropdown rendered inside it. Append the dropdown to <body> so the
+        // option list and search field are never cut off. The custom class
+        // scopes the floating dropdown styling (see _student-profile-redesign.css).
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-dropdown',
         onDelete: function (values) {
             return confirm(
                 values.length > 1

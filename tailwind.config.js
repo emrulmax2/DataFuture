@@ -50,8 +50,14 @@ module.exports = {
                     neutral: colors.neutral,
                     gray: colors.gray,
                     slate: colors.slate,
+                    cream: '#faf8f4', // custom name
                 }),
                 primary: withOpacityValue('--color-primary'),
+                'primary-hover': withOpacityValue('--color-primary-hover'),
+                brand: withOpacityValue('--color-brand'),
+                accent: withOpacityValue('--color-accent'),
+                soft: withOpacityValue('--color-soft'),
+                'soft-text': withOpacityValue('--color-soft-text'),
                 secondary: withOpacityValue('--color-secondary'),
                 success: withOpacityValue('--color-success'),
                 info: withOpacityValue('--color-info'),
@@ -87,6 +93,8 @@ module.exports = {
             },
             fontFamily: {
                 roboto: ['Roboto'],
+                sans: ['Public Sans', 'Roboto', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+                display: ['Newsreader', 'Georgia', 'Times New Roman', 'serif'],
             },
             container: {
                 center: true,

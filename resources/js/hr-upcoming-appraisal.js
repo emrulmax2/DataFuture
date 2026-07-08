@@ -82,7 +82,7 @@ var upcomingAppraisalListTable = (function () {
                     field: "promotion_consideration",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return (cell.getData().promotion_consideration == 1 ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>');
+                        return (cell.getData().promotion_consideration == 1 ? '<span class="lcc-badge lcc-badge--active has-dot">Yes</span>' : '<span class="lcc-badge lcc-badge--inactive has-dot">No</span>');
                     }
                 },
                 {
@@ -91,9 +91,9 @@ var upcomingAppraisalListTable = (function () {
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 3){
-                            return '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Completed</span>';
+                            return '<span class="lcc-badge lcc-badge--active has-dot">Completed</span>';
                         }else{
-                            return (cell.getData().status == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue By: '+cell.getData().due_days+'</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due in: '+cell.getData().due_days+'</span>');
+                            return (cell.getData().status == 2 ? '<span class="lcc-badge lcc-badge--critical has-dot">Overdue By: '+cell.getData().due_days+'</span>' : '<span class="lcc-badge lcc-badge--warning has-dot">Due in: '+cell.getData().due_days+'</span>');
                         }
                     }
                 },

@@ -3,8 +3,7 @@
 @section('body')
     <body class="login">
         @yield('content')
-        @include('../layout/components/dark-mode-switcher')
-        @include('../layout/components/main-color-switcher')
+        {{-- Color-scheme / dark-mode switchers intentionally omitted: the LCC auth design is a fixed full-bleed light theme. --}}
 
         <!-- BEGIN: JS Assets-->
         @vite('resources/js/app.js')

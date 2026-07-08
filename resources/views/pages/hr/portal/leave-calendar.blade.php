@@ -4,18 +4,26 @@
     <title>{{ $title }}</title>
 @endsection
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Leave Calendar</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back to Portal</a>
+    <!-- BEGIN: Page Header -->
+    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
+        <div>
+            <h2 class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Leave Calendar</h2>
+            <p class="text-sm text-slate-400 mt-1">Monthly leave overview &middot; London Churchill College</p>
         </div>
+        <a href="{{ route('hr.portal') }}" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Portal
+        </a>
     </div>
+    <!-- END: Page Header -->
+
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box p-5 mt-5">
+    <div class="intro-y box mt-5">
+        <!-- Toolbar -->
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
         <form method="post" action="#" id="leaveCalendarFilterForm">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-6 sm:col-span-2">
-                    <lable class="form-lable block mb-1">Department</lable>
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Department</label>
                     <select name="department" id="department" class="form-control w-full">
                         <option value="">Please Select</option>
                         @if($department->count() > 0)
@@ -26,7 +34,7 @@
                     </select>
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <lable class="form-lable block mb-1">Employee</lable>
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Employee</label>
                     <select name="employee[]" multiple id="employee" class="w-full tom-selects">
                         <option value="">Please Select</option>
                         @if($employees->count() > 0)
@@ -37,7 +45,7 @@
                     </select>
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <lable class="form-lable block mb-1">Month</lable>
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Month</label>
                     <select name="month" id="month" class="form-control w-full">
                         @php
                             for($i = 1; $i <= 12; $i++):
@@ -54,7 +62,7 @@
                     </select>
                 </div>
                 <div class="col-span-6 sm:col-span-2">
-                    <lable class="form-lable block mb-1">Year</lable>
+                    <label class="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-1.5">Year</label>
                     <select name="year" id="year" class="form-control w-full">
                         @php
                             for($i = 2015; $i <= date('Y'); $i++):
@@ -68,17 +76,19 @@
                         @endphp
                     </select>
                 </div>
-                <div class="col-span-6 sm:col-span-4 flex justify-end items-end">
-                    <button id="leave-calendar-prev" data-value="prev" data-date="{{ date('Y-m-d') }}" class="leaveCalendarActionBtn btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i>Prev Month
+                <div class="col-span-12 sm:col-span-4 flex justify-end items-end gap-2">
+                    <button id="leave-calendar-prev" data-value="prev" data-date="{{ date('Y-m-d') }}" class="leaveCalendarActionBtn btn btn-outline-secondary h-[42px] text-sm">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-1.5"></i>Prev Month
                     </button>
-                    <button id="leave-calendar-next" data-value="next" data-date="{{ date('Y-m-d') }}" class="leaveCalendarActionBtn btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        Next Month<i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                    <button id="leave-calendar-next" data-value="next" data-date="{{ date('Y-m-d') }}" class="leaveCalendarActionBtn btn btn-outline-secondary h-[42px] text-sm">
+                        Next Month<i data-lucide="arrow-right" class="w-4 h-4 ml-1.5"></i>
                     </button>
                 </div>
             </div>
         </form>
-        <div class="leaveCalendarWrap mt-5">
+        </div>
+        <div class="px-5 py-5">
+        <div class="leaveCalendarWrap">
             <div class="leaveTableLoader">
                 <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
                     <g fill="none" fill-rule="evenodd">
@@ -95,13 +105,14 @@
                 {!! $calendarHtml !!}
             </table>
         </div>
-        <div class="flex justify-start items-center pt-5 labelsBtnsGroup">
-            <span class="inline-flex px-3 py-1 font-medium holidayVacationBG mr-1">Holiday / Vacation</span>
-            <span class="inline-flex px-3 py-1 font-medium meetingTrainingBG mr-1">Unauthorised Absent</span>
-            <span class="inline-flex px-3 py-1 font-medium sickLeaveBG mr-1">Sick Leave</span>
-            <span class="inline-flex px-3 py-1 font-medium authoriseUnpaidBG mr-1">Authorise Unpaid</span>
-            <span class="inline-flex px-3 py-1 font-medium authorisedPaidBG mr-1">Authorise Paid</span>
-            <span class="inline-flex px-3 py-1 font-medium bankHolidayBG mr-1">Bank Holiday</span>
+        <div class="flex flex-wrap justify-start items-center gap-2 pt-5 labelsBtnsGroup">
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md holidayVacationBG">Holiday / Vacation</span>
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md meetingTrainingBG">Unauthorised Absent</span>
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md sickLeaveBG">Sick Leave</span>
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md authoriseUnpaidBG">Authorise Unpaid</span>
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md authorisedPaidBG">Authorise Paid</span>
+            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-md bankHolidayBG">Bank Holiday</span>
+        </div>
         </div>
     </div>
     <!-- END: HTML Table Data -->

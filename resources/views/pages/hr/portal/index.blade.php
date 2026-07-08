@@ -5,88 +5,106 @@
 @endsection
 
 @section('subcontent')
-    <div class="grid grid-cols-12 gap-6">       
-        <div class="col-span-12 2xl:col-span-9"> 
-            <div class="grid grid-cols-12 gap-6">
-                <!-- BEGIN: General Report -->
-                <div class="col-span-12 mt-8">
-                    <div class="intro-y flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">HR Dashboard</h2>
-                        <a href="{{ route('hr.portal.employment.reports.show') }}" class="ml-auto flex items-center text-primary">
-                            <i data-lucide="refresh-ccw" class="w-4 h-4 mr-3"></i> Reports
-                        </a>
-                    </div>
-                    
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-12">
+            <!-- BEGIN: Breadcrumb -->
+            <nav class="intro-y mt-5 ml-2" aria-label="breadcrumb">
+                <ol class="flex items-center flex-wrap gap-1.5 text-sm text-slate-400">
+                    <li><a href="javascript:void(0);" class="hover:text-primary transition-colors">User</a></li>
+                    <li class="text-slate-300 dark:text-darkmode-300">&rsaquo;</li>
+                    <li><a href="{{ route('staff.dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a></li>
+                    <li class="text-slate-300 dark:text-darkmode-300">&rsaquo;</li>
+                    <li class="font-semibold text-primary" aria-current="page">HR Portal</li>
+                </ol>
+            </nav>
+            <!-- END: Breadcrumb -->
+
+            <!-- BEGIN: Dashboard Header -->
+            <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-2 mb-2">
+                <div>
+                    <h2 class="font-display text-3xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">HR Dashboard</h2>
+                    <p class="text-sm text-slate-400 mt-1">Workforce overview &middot; London Churchill College</p>
                 </div>
+                <a href="{{ route('hr.portal.employment.reports.show') }}" class="btn btn-outline-primary h-[42px] text-sm text-primary">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 mr-1.5"></i> Reports
+                </a>
             </div>
-            <div class="grid grid-cols-12 gap-6">
-                <div class="col-span-12">
-                    <div class="intro-y box p-5 mt-5">
-                        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                                </div>
-                                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                    <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                        <option value="1">Active</option>
-                                        <option value="0">Inactive</option>
-                                        <option value="2">Temporary</option>
-                                        <option value="4">Submitted</option>
-                                        <option value="3">Archived</option>
-                                    </select>
-                                </div>
-                                <div class="mt-2 xl:mt-0">
-                                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                                </div>
-                            </form>
-                            <div class="flex mt-5 sm:mt-0">
-                                <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                    <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                                </button>
-                                <div class="dropdown w-1/2 sm:w-auto mr-2">
-                                    <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                    </button>
-                                    <div class="dropdown-menu w-40">
-                                        <ul class="dropdown-content">
-                                            <li>
-                                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <a href="{{ route('employee.create') }}" class="btn btn-success text-white w-auto"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Employee</a>
-                                <button data-tw-toggle="modal" data-tw-target="#addTempEmployeeModal" type="button" class="btn btn-facebook text-white w-auto ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Temp Employee</button>
-                                
+            <!-- END: Dashboard Header -->
+        </div>
+        <div class="col-span-12 xl:col-span-8 2xl:col-span-9">
+            <!-- BEGIN: Employee Table Panel -->
+            <div class="intro-y box mt-3">
+                <!-- Toolbar -->
+                <div class="flex flex-col xl:flex-row xl:items-end gap-4 px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
+                    <form id="tabulatorFilterForm" class="flex flex-wrap items-center gap-2 mr-auto">
+                        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 dark:bg-darkmode-800 dark:border-darkmode-400 rounded-lg px-3 h-[42px] w-72 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                            <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-none"></i>
+                            <input id="query" name="query" type="text" class="bg-transparent border-0 outline-none text-sm text-slate-700 dark:text-slate-300 w-full placeholder:text-slate-400" placeholder="Search name, role, department...">
+                        </div>
+                        <select id="status" name="status" class="form-select h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-36">
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                            <option value="2">Temporary</option>
+                            <option value="4">Submitted</option>
+                            <option value="3">Archived</option>
+                        </select>
+                        <button id="tabulator-html-filter-reset" type="button" class="btn btn-outline-secondary h-[42px] px-5 text-sm">Reset</button>
+                    </form>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="tabulator-print" class="btn btn-outline-secondary h-[42px] text-sm">
+                            <i data-lucide="printer" class="w-4 h-4 mr-1.5"></i> Print
+                        </button>
+                        <div class="dropdown">
+                            <button class="dropdown-toggle btn btn-outline-secondary h-[42px] text-sm" aria-expanded="false" data-tw-toggle="dropdown">
+                                <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-1.5"></i>
+                            </button>
+                            <div class="dropdown-menu w-40">
+                                <ul class="dropdown-content">
+                                    <li>
+                                        <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
-                        <div class="overflow-x-auto scrollbar-hidden">
-                            <div id="employeeListTable" class="mt-5 table-report table-report--tabulator"></div>
-                        </div>
+                        <a href="{{ route('employee.create') }}" class="btn btn-primary text-white h-[42px] text-sm">
+                            <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Add Employee
+                        </a>
+                        <button data-tw-toggle="modal" data-tw-target="#addTempEmployeeModal" type="button" class="btn btn-outline-accent h-[42px] text-sm">
+                            <i data-lucide="plus-circle" class="w-4 h-4 mr-1.5"></i> Temp
+                        </button>
                     </div>
                 </div>
+                <div class="overflow-x-auto scrollbar-hidden px-5 pb-5">
+                    <div id="employeeListTable" class="mt-5 table-report table-report--tabulator"></div>
+                </div>
             </div>
-            <div class="grid grid-cols-12 gap-6 mt-5 pt-5">
+            <!-- END: Employee Table Panel -->
+
+            <!-- BEGIN: Bottom Three Sections -->
+            <div class="grid grid-cols-12 gap-6 mt-6">
+
+                <!-- Pending Holiday Request -->
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
-                    <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Pending Holiday Request {!! ($pendingLeaves->count() > 0 ? '<span class="text-success ml-2">('.$pendingLeaves->count().')</span>' : '') !!}</h2>
-                        <a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-primary truncate">Manage Holidays</a>
+                    <div class="intro-x flex items-center gap-2 mb-4">
+                        <h2 class="text-base font-semibold text-slate-700 dark:text-white truncate">Pending Holiday Request</h2>
+                        @if($pendingLeaves->count() > 0)
+                            <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ $pendingLeaves->count() }}</span>
+                        @endif
+                        <a href="{{ route('hr.portal.holiday') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                            Manage Holidays <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
-                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
+                    <div class="overflow-y-auto max-h-96 space-y-2 pr-0.5">
                         @if($pendingLeaves->count() > 0)
                             @foreach($pendingLeaves as $leave)
-                                @php 
+                                @php
                                     $leaveMinute = 0;
                                     $hourMins = '00:00';
                                     if( $leave->leaveDays->count() > 0 ):
@@ -98,7 +116,7 @@
                                     endif;
                                     $hours = (intval(trim($leaveMinute)) / 60 >= 1) ? intval(intval(trim($leaveMinute)) / 60) : '00';
                                     $mins = (intval(trim($leaveMinute)) % 60 != 0) ? intval(trim($leaveMinute)) % 60 : '00';
-                                
+
                                     $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
                                     $hourMins .= ':';
                                     $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
@@ -113,260 +131,259 @@
                                     endif;
                                 @endphp
                                 <div class="intro-x">
-                                    <div class="flex items-center px-5 py-3 mb-3 box zoom-in {{ ($authUsers ? 'actPendingHoliday' : '') }}" data-leave="{{ $leave->id }}">
-                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
+                                    <div class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in {{ ($authUsers ? 'actPendingHoliday' : '') }}" data-leave="{{ $leave->id }}">
+                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
                                             <img src="{{ $leave->employee->photo_url }}" alt="{{ $leave->employee->first_name.' '.$leave->employee->last_name }}">
                                         </div>
-                                        <div class="ml-4 mr-auto">
-                                            <div class="font-medium uppercase">{{ $leave->employee->first_name.' '.$leave->employee->last_name }}</div>
-                                            <div class="mt-0.5 text-xs text-slate-500">
-                                                {{ date('jS M, Y', strtotime($leave->from_date)).' - '.date('jS M, Y', strtotime($leave->to_date))}}
-                                            </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $leave->employee->first_name.' '.$leave->employee->last_name }}</div>
+                                            <div class="text-xs text-slate-400 mt-0.5">{{ date('jS M, Y', strtotime($leave->from_date)).' - '.date('jS M, Y', strtotime($leave->to_date)) }}</div>
                                         </div>
                                         @if(isset($leave->supervisedDays) && $leave->supervisedDays->count() > 0)
-                                            <span class="w-auto px-2 text-success py-0 ml-auto"><i data-lucide="shield-check" class="w-6 h-6"></i></span>
+                                            <span class="text-success"><i data-lucide="shield-check" class="w-5 h-5"></i></span>
                                         @endif
-                                        <div class="text-danger">
-                                            {{ $hourMins }}
-                                        </div>
+                                        <span class="text-sm font-bold text-danger">{{ $hourMins }}</span>
                                     </div>
                                 </div>
                             @endforeach
-                        @else 
-                            <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not panding leave available.
+                        @else
+                            <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No pending leave available.
                             </div>
                         @endif
                     </div>
                 </div>
+
+                <!-- Absent Today -->
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
-                    <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Absent Today  {!! (!empty($absentToday) ? '<span class="text-success ml-2">('.count($absentToday).')</span>' : '') !!}</h2>
-                        <a href="{{ route('hr.attendance') }}" class="ml-auto text-primary truncate">Manage Attendance</a>
+                    <div class="intro-x flex items-center gap-2 mb-4">
+                        <h2 class="text-base font-semibold text-slate-700 dark:text-white truncate">Absent Today</h2>
+                        @if(!empty($absentToday))
+                            <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ count($absentToday) }}</span>
+                        @endif
+                        <a href="{{ route('hr.attendance') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                            Manage Attendance <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
-                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
+                    <div class="overflow-y-auto max-h-96 space-y-2 pr-0.5">
                         @if(!empty($absentToday))
                             @foreach($absentToday as $employee_id => $absent)
-                                <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday" data-emloyee="{{ $employee_id }}" data-date="{{ $absent['the_date'] }}" data-minute="{{ $absent['minute'] }}"  data-hour-min="{{ $absent['hourMinute'] }}">
-                                    <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
-                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
+                                <div data-tw-toggle="modal" data-tw-target="#absentUpdateModal" class="intro-x absentToday cursor-pointer" data-emloyee="{{ $employee_id }}" data-date="{{ $absent['the_date'] }}" data-minute="{{ $absent['minute'] }}" data-hour-min="{{ $absent['hourMinute'] }}">
+                                    <div class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in hover:border-primary/30 transition-colors">
+                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
                                             <img src="{{ $absent['photo_url'] }}" alt="{{ $absent['full_name'] }}">
                                         </div>
-                                        <div class="ml-4 mr-auto">
-                                            <div class="font-medium uppercase">{{ $absent['full_name'] }}</div>
-                                            <div class="mt-0.5 text-xs text-slate-500">
-                                                {{ $absent['start'].' - '.$absent['end'] }}
-                                            </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $absent['full_name'] }}</div>
+                                            <div class="text-xs text-slate-400 mt-0.5">{{ $absent['start'].' - '.$absent['end'] }}</div>
                                         </div>
-                                        <div class="text-danger">
-                                            {{ $absent['hourMinute'] }}
-                                        </div>
+                                        <span class="text-sm font-bold text-danger">{{ $absent['hourMinute'] }}</span>
                                     </div>
                                 </div>
                             @endforeach
-                        @else 
-                            <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are not absent attendance found for today.
+                        @else
+                            <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No absent attendance found for today.
                             </div>
                         @endif
-                        <a href="{{ route('hr.portal.absent.employee', date('d-m-Y')) }}" class="intro-x block w-full rounded-md border border-dotted border-slate-400 py-3 text-center text-slate-500 dark:border-darkmode-300">
+                        <a href="{{ route('hr.portal.absent.employee', date('d-m-Y')) }}" class="intro-x flex items-center justify-center w-full rounded-xl border border-dashed border-slate-300 dark:border-darkmode-400 py-3 text-sm text-slate-400 hover:border-primary hover:text-primary transition-colors mt-1">
                             View More
                         </a>
                     </div>
                 </div>
+
+                <!-- Holiday Today -->
                 <div class="col-span-12 sm:col-span-6 2xl:col-span-4">
-                    <div class="intro-x flex items-center h-10">
-                        <h2 class="text-lg font-medium truncate mr-5">Holiday Today {!! ($holidays->count() > 0 ? '<span class="text-success ml-2">('.$holidays->count().')</span>' : '') !!}</h2>
-                        <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-primary truncate">Leave Calendar</a>
+                    <div class="intro-x flex items-center gap-2 mb-4">
+                        <h2 class="text-base font-semibold text-slate-700 dark:text-white truncate">Holiday Today</h2>
+                        @if($holidays->count() > 0)
+                            <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ $holidays->count() }}</span>
+                        @endif
+                        <a href="{{ route('hr.portal.leave.calendar') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                            Leave Calendar <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                        </a>
                     </div>
-                    <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden">
+                    <div class="overflow-y-auto max-h-96 space-y-2 pr-0.5">
                         @if($holidays->count() > 0)
                             @foreach($holidays as $hol)
-                                @php 
+                                @php
                                     $hours = (intval(trim($hol->hour)) / 60 >= 1) ? intval(intval(trim($hol->hour)) / 60) : '00';
                                     $mins = (intval(trim($hol->hour)) % 60 != 0) ? intval(trim($hol->hour)) % 60 : '00';
-                                
+
                                     $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
                                     $hourMins .= ':';
                                     $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
                                 @endphp
                                 <div class="intro-x">
-                                    <div class="flex items-center px-5 py-3 mb-3 box zoom-in">
-                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit">
+                                    <div class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in">
+                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
                                             <img src="{{ $hol->leave->employee->photo_url }}" alt="{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}">
                                         </div>
-                                        <div class="ml-4 mr-auto">
-                                            <div class="font-medium uppercase">{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}</div>
-                                            <div class="mt-0.5 text-xs text-slate-500">
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $hol->leave->employee->first_name.' '.$hol->leave->employee->last_name }}</div>
+                                            <div class="text-xs text-slate-400 mt-0.5">
                                                 {{ date('jS M, Y', strtotime($hol->leave_date)) }}
                                             </div>
                                         </div>
-                                        <div class="text-danger">
-                                            {{ $hourMins }}
-                                        </div>
+                                        <span class="text-sm font-bold text-danger">{{ $hourMins }}</span>
                                     </div>
-                                </div>  
-                            @endforeach     
-                        @else 
-                            <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> There are no Holiday / Vacation found for today.
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No Holiday / Vacation found for today.
                             </div>
                         @endif
                     </div>
                 </div>
+
             </div>
+            <!-- END: Bottom Three Sections -->
+
         </div>
-        <div class="col-span-12 2xl:col-span-3">
-            <div class="2xl:border-l 2xl:h-full -mb-10 pb-10">
+        <!-- BEGIN: Right Sidebar -->
+        <div class="col-span-12 xl:col-span-4 2xl:col-span-3">
+            <div class="dark:border-darkmode-400 2xl:h-full -mb-10 pb-10">
                 <div class="2xl:pl-6 grid grid-cols-12 gap-x-6 2xl:gap-x-0 gap-y-6 relative">
+
+                    <!-- Passport Expiry -->
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
-                        <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Passport Expiry {!! ($passExpiry->count() > 0 ? '<span class="text-success ml-2">('.$passExpiry->count().')</span>' : '') !!}</h2>
-                            <a href="{{ route('hr.portal.passport.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
+                        <div class="intro-x flex items-center gap-2 mb-4">
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none">
+                                <i data-lucide="scan-face" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <h2 class="text-base font-semibold text-slate-700 dark:text-white truncate">Passport Expiry</h2>
+                            @if($passExpiry->count() > 0)
+                                <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ $passExpiry->count() }}</span>
+                            @endif
+                            <a href="{{ route('hr.portal.passport.expiry') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                                Show More <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </a>
                         </div>
-                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="space-y-2 overflow-y-auto max-h-72 pr-0.5">
                             @if($passExpiry->count() > 0)
                                 @foreach($passExpiry as $pass)
-                                    <div class="intro-x relative flex items-center mb-3">
-                                        <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                            <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                                <img src="{{ $pass->employee->photo_url }}" alt="{{ $pass->employee->first_name.' '.$pass->employee->last_name }}">
-                                            </div>
+                                    @php
+                                        $expiryDate = date('Y-m-d', strtotime($pass->doc_expire));
+                                        $isExpired = date('Y-m-d') > $expiryDate;
+                                        $diffDays = \Carbon\Carbon::parse($expiryDate)->diffInDays(\Carbon\Carbon::now());
+                                    @endphp
+                                    <div class="intro-x flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in">
+                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
+                                            <img src="{{ $pass->employee->photo_url }}" alt="{{ $pass->employee->first_name.' '.$pass->employee->last_name }}">
                                         </div>
-                                        <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                            <div class="flex items-center">
-                                                <div class="font-medium uppercase">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
-                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->doc_expire))}}</div>
-                                            </div>
-                                            <div class="text-slate-500 mt-1">
-                                                @php 
-                                                    $expiryDate = date('Y-m-d', strtotime($pass->doc_expire));
-                                                    if(date('Y-m-d') > $expiryDate){
-                                                        $date = \Carbon\Carbon::parse($expiryDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-danger">'.$date->diffInDays($now).' Days</span>';
-                                                    }else{
-                                                        $date = \Carbon\Carbon::parse($expiryDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-warning">'.$date->diffInDays($now).' Days</span>';
-                                                    }
-                                                @endphp
-                                            </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
+                                            <div class="text-xs text-slate-400 mt-0.5">{{ date('jS F, Y', strtotime($pass->doc_expire)) }}</div>
                                         </div>
+                                        <span class="lcc-badge {{ $isExpired ? 'lcc-badge--critical' : 'lcc-badge--warning' }}">
+                                            {{ $diffDays }} Days
+                                        </span>
                                     </div>
                                 @endforeach
-                            @else 
-                                <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!.
+                            @else
+                                <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No data found.
                                 </div>
                             @endif
                         </div>
                     </div>
+
+                    <!-- Visa Expiry -->
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
-                        <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Visa Expiry {!! ($visaExpiry->count() > 0 ? '<span class="text-success ml-2">('.$visaExpiry->count().')</span>' : '') !!}</h2>
-                            <a href="{{ route('hr.portal.visa.expiry') }}" class="ml-auto text-primary truncate">Show More</a>
+                        <div class="intro-x flex items-center gap-2 mb-4">
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none">
+                                <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <h2 class="text-base font-semibold text-slate-700 dark:text-white truncate">Visa Expiry</h2>
+                            @if($visaExpiry->count() > 0)
+                                <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ $visaExpiry->count() }}</span>
+                            @endif
+                            <a href="{{ route('hr.portal.visa.expiry') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                                Show More <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </a>
                         </div>
-                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="space-y-2 overflow-y-auto max-h-72 pr-0.5">
                             @if($visaExpiry->count() > 0)
                                 @foreach($visaExpiry as $pass)
-                                    <div class="intro-x relative flex items-center mb-3">
-                                        <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                            <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
-                                                <img src="{{ $pass->employee->photo_url }}" alt="{{ $pass->employee->first_name.' '.$pass->employee->last_name }}">
-                                            </div>
+                                    @php
+                                        $expiryDate = date('Y-m-d', strtotime($pass->workpermit_expire));
+                                        $isExpired = date('Y-m-d') > $expiryDate;
+                                        $diffDays = \Carbon\Carbon::parse($expiryDate)->diffInDays(\Carbon\Carbon::now());
+                                    @endphp
+                                    <div class="intro-x flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in">
+                                        <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
+                                            <img src="{{ $pass->employee->photo_url }}" alt="{{ $pass->employee->first_name.' '.$pass->employee->last_name }}">
                                         </div>
-                                        <div class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                            <div class="flex items-center">
-                                                <div class="font-medium uppercase">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
-                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS F, Y', strtotime($pass->workpermit_expire))}}</div>
-                                            </div>
-                                            <div class="text-slate-500 mt-1">
-                                                @php 
-                                                    $expiryDate = date('Y-m-d', strtotime($pass->workpermit_expire));
-                                                    if(date('Y-m-d') > $expiryDate){
-                                                        $date = \Carbon\Carbon::parse($expiryDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-danger">'.$date->diffInDays($now).' Days</span>';
-                                                    }else{
-                                                        $date = \Carbon\Carbon::parse($expiryDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-warning">'.$date->diffInDays($now).' Days</span>';
-                                                    }
-                                                @endphp
-                                            </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $pass->employee->first_name.' '.$pass->employee->last_name }}</div>
+                                            <div class="text-xs text-slate-400 mt-0.5">{{ date('jS F, Y', strtotime($pass->workpermit_expire)) }}</div>
                                         </div>
+                                        <span class="lcc-badge {{ $isExpired ? 'lcc-badge--critical' : 'lcc-badge--warning' }}">
+                                            {{ $diffDays }} Days
+                                        </span>
                                     </div>
                                 @endforeach
-                            @else 
-                                <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!.
+                            @else
+                                <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No data found.
                                 </div>
                             @endif
                         </div>
                     </div>
+
+                    <!-- Upcoming Appraisal -->
                     <div class="col-span-12 md:col-span-6 xl:col-span-4 2xl:col-span-12 mt-3">
-                        <div class="intro-x flex items-center h-10">
-                            <h2 class="text-lg font-medium truncate mr-5">Upcoming Appraisal in 60 Days {!! ($appraisal->count() > 0 ? '<span class="text-success ml-2">('.$appraisal->count().')</span>' : '') !!}</h2>
-                            <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-primary truncate">Show More</a>
+                        <div class="intro-x flex items-center gap-2 mb-4">
+                            <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-soft text-soft-text flex-none">
+                                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            </span>
+                            <h2 class="text-base font-semibold text-slate-700 dark:text-white">Upcoming Appraisal in 60 Days</h2>
+                            @if($appraisal->count() > 0)
+                                <span class="inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-success rounded-full">{{ $appraisal->count() }}</span>
+                            @endif
+                            <a href="{{ route('hr.portal.upcoming.appraisal') }}" class="ml-auto text-xs font-semibold text-primary hover:underline flex items-center gap-1 whitespace-nowrap">
+                                Show More <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </a>
                         </div>
-                        <div class="mt-5 overflow-y-auto max-h-96 overflow-hidden relative before:block before:absolute before:w-px before:h-[85%] before:bg-slate-200 before:dark:bg-darkmode-400 before:ml-5 before:mt-5">
+                        <div class="space-y-2 overflow-y-auto max-h-72 pr-0.5">
                             @if($appraisal->count() > 0)
                                 @foreach($appraisal as $apr)
-                                    @php 
-                                        $today = date('Y-m-d');
-                                        $dueOn = date('Y-m-d', strtotime($apr->due_on));
-                                        $label = ($dueOn < $today ? 'Overdue' : 'Due');
+                                    @php
+                                        $dueDate = date('Y-m-d', strtotime($apr->due_on));
+                                        $isOverdue = date('Y-m-d') > $dueDate;
+                                        $diffDays = \Carbon\Carbon::parse($dueDate)->diffInDays(\Carbon\Carbon::now());
                                     @endphp
-                                    <div class="intro-x relative flex items-center mb-3">
-                                        <div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">
-                                            <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                                    <div class="intro-x">
+                                        <a href="{{ route('employee.appraisal', $apr->employee_id) }}" class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-darkmode-600 rounded-xl border border-slate-100 dark:border-darkmode-400 shadow-sm zoom-in hover:border-primary/30 transition-colors">
+                                            <div class="flex-none w-10 h-10 overflow-hidden rounded-full image-fit ring-2 ring-slate-100 dark:ring-darkmode-400">
                                                 <img src="{{ $apr->employee->photo_url }}" alt="{{ $apr->employee->first_name.' '.$apr->employee->last_name }}">
                                             </div>
-                                        </div>
-                                        <a href="{{ route('employee.appraisal', $apr->employee_id) }}" class="box px-5 py-3 ml-4 flex-1 zoom-in">
-                                            <div class="flex items-center">
-                                                <div class="font-medium uppercase">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
-                                                <div class="text-xs text-slate-500 ml-auto">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="font-semibold text-sm text-slate-700 dark:text-slate-200 uppercase truncate">{{ $apr->employee->first_name.' '.$apr->employee->last_name }}</div>
+                                                <div class="text-xs text-slate-400 mt-0.5">{{ date('jS M, Y', strtotime($apr->due_on)) }}</div>
+                                                <span class="text-xs font-medium {{ $isOverdue ? 'text-danger' : 'text-warning' }}">{{ $isOverdue ? 'Overdue' : 'Due to Complete' }}</span>
                                             </div>
-                                            <div class="text-slate-500 mt-1 flex justify-between items-center">
-                                                <!-- <span class="{{ ($dueOn < $today ? 'text-danger' : 'text-warning') }}">{{ $label }}</span> -->
-                                                @php 
-                                                    $dueDate = date('Y-m-d', strtotime($apr->due_on));
-                                                    if(date('Y-m-d') > $dueDate){
-                                                        $date = \Carbon\Carbon::parse($dueDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-danger">Overdue</span>';
-                                                        echo '<span class="text-danger ml-auto">by '.$date->diffInDays($now).' days</span>';
-                                                    }else{
-                                                        $date = \Carbon\Carbon::parse($dueDate);
-                                                        $now = \Carbon\Carbon::now();
-
-                                                        echo '<span class="text-warning">Due to Complete</span>';
-                                                        echo '<span class="text-warning ml-auto">in '.$date->diffInDays($now).' days</span>';
-                                                    }
-                                                @endphp
-                                            </div>
+                                            <span class="lcc-badge {{ $isOverdue ? 'lcc-badge--critical' : 'lcc-badge--warning' }}">
+                                                {{ $isOverdue ? 'by ' : 'in ' }}{{ $diffDays }} days
+                                            </span>
                                         </a>
                                     </div>
                                 @endforeach
-                            @else 
-                                <div class="alert alert-pending-soft show flex items-center mb-2 zoom-in" role="alert">
-                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No data found!.
+                            @else
+                                <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-none"></i> No data found.
                                 </div>
                             @endif
                         </div>
                     </div>
+
                 </div>
 
-                <a href="{{ route('hr.portal.vacancy') }}" class="btn btn-twitter w-auto justify-center absolute b-0 r-0 mb-6 mr-6"><i data-lucide="list-todo" class="w-4 h-4 mr-2"></i> Vacancies</a>
+                <a href="{{ route('hr.portal.vacancy') }}" class="btn btn-primary text-white w-auto justify-center absolute b-0 r-0 mb-6 mr-6"><i data-lucide="list-todo" class="w-4 h-4 mr-2"></i> Vacancies</a>
             </div>
-        </div> 
+        </div>
+        <!-- END: Right Sidebar -->
     </div>
     <!-- BEGIN: Add Modal -->
     <div id="absentUpdateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

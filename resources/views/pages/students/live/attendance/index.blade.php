@@ -9,252 +9,207 @@
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
-    <div class="intro-y box col-span-12 p-5 mt-5  no-print">
 
-        <div id="overall-progress" class="md:flex items-center px-5 py-5 sm:py-3 border border-slate-200 bg-white text-slate-700 rounded-lg shadow-sm">
-                
-            <div class="mr-auto flex items-center gap-4">
-                <div class="flex items-start gap-1 bg-white text-slate-800 px-4 py-2 flex-col border border-slate-300 rounded-md ">
-                    <div class="flex items-baseline">
-                        <div class="text-xs uppercase tracking-wide text-slate-500 mr-2 item">Overall Attendance</div>
-                        <div class="text-2xl font-semibold text-slate-900">{{ $finalAverage }}%</div>
+    @php
+        // Overall attendance colour band (>=70 good, 40-69 mid, <40 low)
+        $finalBand = ($finalAverage >= 70) ? 'atn-good' : (($finalAverage >= 40) ? 'atn-mid' : 'atn-low');
+        // Overall code distribution grouped into Present / Online / Late+Excused / Absent
+        $cd = is_array($codeDistribution) ? $codeDistribution : [];
+        $cP = (int) ($cd['P'] ?? 0);
+        $cO = (int) ($cd['O'] ?? 0);
+        $cA = (int) ($cd['A'] ?? 0);
+        $cLate = (int) ($cd['L'] ?? 0) + (int) ($cd['E'] ?? 0) + (int) ($cd['LE'] ?? 0);
+        $barTotal = $cP + $cO + $cLate + $cA;
+        $segP = $barTotal > 0 ? round($cP / $barTotal * 100, 2) : 0;
+        $segO = $barTotal > 0 ? round($cO / $barTotal * 100, 2) : 0;
+        $segLate = $barTotal > 0 ? round($cLate / $barTotal * 100, 2) : 0;
+        $segA = $barTotal > 0 ? round($cA / $barTotal * 100, 2) : 0;
+        $totalDays = is_array($totalClassFullSet) ? array_sum($totalClassFullSet) : 0;
+
+        $hasTermAttendance = false;
+        if(isset($termAttendanceFound)) {
+            if(is_array($termAttendanceFound)) {
+                foreach($termAttendanceFound as $v) { if($v === true || $v === 1 || $v === '1') { $hasTermAttendance = true; break; } }
+            } else { $hasTermAttendance = (bool) $termAttendanceFound; }
+        }
+    @endphp
+
+    <div class="student-profile-atn-wrap intro-y mt-5">
+
+        <!-- ===== Overall attendance summary ===== -->
+        <div class="atn-summary no-print">
+            <div class="atn-summary-inner">
+                <div class="atn-summary-head">
+                    <div class="atn-summary-label">Overall Attendance</div>
+                    <div class="atn-summary-pct {{ $finalBand }}">{{ $finalAverage }}%</div>
+                </div>
+                <div class="atn-summary-barwrap">
+                    <div class="atn-bar-track">
+                        @if($segP > 0)<span class="atn-bar-seg atn-seg-present" style="width: {{ $segP }}%" title="Present · {{ $cP }}"></span>@endif
+                        @if($segO > 0)<span class="atn-bar-seg atn-seg-online" style="width: {{ $segO }}%" title="Online · {{ $cO }}"></span>@endif
+                        @if($segLate > 0)<span class="atn-bar-seg atn-seg-late" style="width: {{ $segLate }}%" title="Late/Excused · {{ $cLate }}"></span>@endif
+                        @if($segA > 0)<span class="atn-bar-seg atn-seg-absent" style="width: {{ $segA }}%" title="Absent · {{ $cA }}"></span>@endif
                     </div>
-                    <div class="text-sm text-slate-500 flex mt-2">
-                        @if(!empty($codeDistribution))
-                            <span class="mr-2">[ {{ $codeDistributionString }} ]</span>
-                        @endif
-                        <span>Total: {{ array_sum($totalClassFullSet) }} days class</span>
+                    <div class="atn-legend">
+                        <span class="atn-legend-item"><span class="atn-legend-dot" style="background:#0B6B66"></span>Present {{ $cP }}</span>
+                        <span class="atn-legend-item"><span class="atn-legend-dot" style="background:#6FB5AE"></span>Online {{ $cO }}</span>
+                        <span class="atn-legend-item"><span class="atn-legend-dot" style="background:#E3B8B3"></span>Absent {{ $cA }}</span>
+                        <span class="atn-legend-item"><span class="atn-legend-dot" style="background:#C9992E"></span>Late/Excused {{ $cLate }}</span>
+                        <span class="atn-legend-total">Total {{ $totalDays }} days of class</span>
                     </div>
                 </div>
-                {{-- <div class="hidden sm:block w-48 h-3 bg-slate-100 rounded overflow-hidden self-center" aria-hidden="true">
-                    <div class="h-full bg-teal-500" style="width: {{ is_numeric($finalAverage) ? $finalAverage : 0 }}%"></div>
-                </div> --}}
-            </div>
-            @php
-                $hasTermAttendance = false;
-                if(isset($termAttendanceFound)) {
-                    if(is_array($termAttendanceFound)) {
-                        foreach($termAttendanceFound as $v) {
-                            if($v === true || $v === 1 || $v === '1') { $hasTermAttendance = true; break; }
-                        }
-                    } else {
-                        $hasTermAttendance = (bool) $termAttendanceFound;
-                    }
-                }
-            @endphp
-
-            @if(isset($dataSet) && count($dataSet)>0 && $hasTermAttendance)
-                <a href="{{ route('student.attendance.edit',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-slate-100 dark:border-primary mb-2 mr-2 w-38 ">
-                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                </a>
-                          
-            @endif
-            <a id="print-all-btn" data-base="{{ route('student.attendance.print', $student->id) }}" href="{{ route('student.attendance.print',$student->id) }}" class="transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-warning border-warning text-slate-900 dark:border-warning mb-2 mr-2 w-38 ">
-                <i data-tw-merge data-lucide="file-text" class="stroke-1.5 w-5 h-5 mr-2 "></i>Print All
-            </a>
-        </div>
-    </div>
-
-    <!-- BEGIN: Daily Sales -->
-        @php $termstart=0 @endphp
-        @foreach($dataSet as $termId =>$dataStartPoint)
-            
-        @php $termstart++; $planId=1; @endphp
-        <div class="intro-y box col-span-12 p-5 mt-5  ">
-            <div class="md:flex items-center px-5 py-5 sm:py-3  border-slate-200/60 {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "bg-red-600" : "bg-teal-600 " ) }} text-slate-100 rounded-tl rounded-tr">
-                
-                <h2 class="font-medium text-base mr-auto ">{{ $term[$termId]["name"] }} 
-                    @if(isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0)
-                    <div class="font-medium dark:text-slate-500 text-white rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
-                    
-                    @else
-                    <div class="font-medium dark:text-slate-500 {{ ($avarageTotalPercentage[$termId]>79)? "bg-teal-900" : "bg-warning" }} {{ ($avarageTotalPercentage[$termId]>79)? "text-white" : "text-white" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
+                <div class="atn-summary-actions">
+                    @if(isset($dataSet) && count($dataSet)>0 && $hasTermAttendance)
+                        <a href="{{ route('student.attendance.edit',$student->id) }}" class="atn-btn atn-btn-outline">
+                            <i data-lucide="pencil" class="w-4 h-4"></i> Edit
+                        </a>
                     @endif
-                    <div class="text-slate-100 sm:mr-5 ml-auto text-sm mt-2">{{ strlen($totalFullSetFeedList[$termId]) > 0 ? "[".$totalFullSetFeedList[$termId]."]" : ""  }} {{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? "Total: ".$totalClassFullSet[$termId]. " days class" : "No class found" }} </div>
-                </h2>
-                <div class="text-slate-100 sm:mr-5 ml-auto">
-                    Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} 
-                    <div class="col-span-12 pt-1">
-                        <div class="grid grid-cols-12 gap-0">
-                            <div class="col-span-12 text-slate-100 font-medium">Last Attendance: {{ isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId] && $lastAttendanceDate[$termId]!="N/A") ?  date("jS F, Y",strtotime($lastAttendanceDate[$termId])) : '---' }}</div>
-                        </div>
+                    <a id="print-all-btn" data-base="{{ route('student.attendance.print', $student->id) }}" href="{{ route('student.attendance.print',$student->id) }}" class="atn-btn atn-btn-dark">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print All
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Term cards ===== -->
+        @foreach($dataSet as $termId => $dataStartPoint)
+            @php
+                $isInactive = (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0);
+                $termPct = isset($avarageTotalPercentage[$termId]) ? $avarageTotalPercentage[$termId] : 0;
+                $termBand = ($termPct >= 70) ? 'atn-good' : (($termPct >= 40) ? 'atn-mid' : 'atn-low');
+                $statsRaw = isset($totalFullSetFeedList[$termId]) ? trim($totalFullSetFeedList[$termId]) : '';
+                $statsFmt = $statsRaw !== '' ? str_replace([' : ', ', '], [' ', ' · '], $statsRaw) : '';
+            @endphp
+            <div class="atn-term">
+                <div class="atn-termhead {{ $isInactive ? 'is-inactive' : 'is-active' }}">
+                    <div class="atn-term-title">{{ $term[$termId]["name"] }}</div>
+                    <span class="atn-term-pct {{ $termBand }}">{{ $termPct }}%</span>
+                    <span class="atn-term-stats">{{ $statsFmt }}{{ (isset($totalClassFullSet[$termId]) && $totalClassFullSet[$termId]!=0) ? ' — '.$totalClassFullSet[$termId].' days' : '' }}</span>
+                    <div class="atn-term-meta">
+                        <span class="atn-term-range">{{ date('j M', strtotime($term[$termId]["start_date"])) }} &ndash; {{ date('j M Y', strtotime($term[$termId]["end_date"])) }} &middot; Last attendance {{ (isset($lastAttendanceDate[$termId]) && !empty($lastAttendanceDate[$termId]) && $lastAttendanceDate[$termId]!="N/A") ? date('j M Y', strtotime($lastAttendanceDate[$termId])) : '---' }}</span>
+                        <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn atn-term-icon no-print" title="Status history">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                        <a data-term="{{ $termId }}" data-base="{{ route('student.attendance.print', [$student->id, $termId]) }}" href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="single-print-btn atn-btn atn-btn-outline atn-btn-sm no-print">
+                            <i data-lucide="printer" class="w-4 h-4"></i> Print
+                        </a>
                     </div>
                 </div>
-                {{-- <div class="dropdown ml-auto hidden md:block no-print">
-                    <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-100"></i>
-                    </a>
-                    <div class="dropdown-menu w-40">
-                        <ul class="dropdown-content">
-                            <li>
-                                <a href="javascript:;" class="dropdown-item">
-                                    <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div> --}}
-                <a data-term="{{ $termId }}" data-base="{{ route('student.attendance.print', [$student->id, $termId]) }}" href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="single-print-btn no-print btn hidden transition duration-200 border shadow-sm md:inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70">
-                    <i data-lucide="file" class="w-4 h-4 mr-2"></i> Print
-                </a>
-                {{-- @if($termstart==1 && $termAttendanceFound[$termId]===true)
-                <a href="{{ route('student.attendance.edit',$student->id) }}" class="btn btn-primary hidden sm:flex ml-2">
-                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit
-                </a>
-                @endif --}}
-                <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn btn btn-twitter text-white rounded-full w-9 h-9 p-0 items-center justify-center md:ml-2 no-print">
-                    <i data-lucide="info" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="w-full py-3  {{ (isset($attendanceIndicator[$termId]) && $attendanceIndicator[$termId]===0 ? "border-red-600" : "border-teal-600" ) }} border-2 rounded-b-lg bg-transparent h-full">
+
+                <div class="atn-cols">
+                    <div>Module</div>
+                    <div>Schedule</div>
+                    <div>Group</div>
+                    <div>Tutor</div>
+                    <div class="ta-right">Attendance</div>
+                </div>
+
+                @php $hasRow = false; @endphp
                 @foreach($dataStartPoint as $planId => $data)
                     @if(isset($planDetails[$termId][$planId]) && !empty($planDetails[$termId][$planId]))
-                        
-                    <div class="p-5 ">
+                        @php
+                            $hasRow = true;
+                            if(isset($planDetails[$termId][$planId]->start_time) && isset($planDetails[$termId][$planId]->end_time)) {
+                                $start_time = date('h:i A', strtotime(date("Y-m-d ".$planDetails[$termId][$planId]->start_time)));
+                                $end_time = date('h:i A', strtotime(date("Y-m-d ".$planDetails[$termId][$planId]->end_time)));
+                            } else { $start_time = "N/A"; $end_time = "N/A"; }
 
-                        <div class="relative md:flex items-center mb-5">
-                            <div id="tablepoint-{{ $termId }}" data-term="{{ $termId }}" data-planid="{{ $planId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer ">
-                                <i data-lucide="minus" class="plusminus w-6 h-6 mr-2 hidden"></i>
-                                    <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 "></i>
-                            </div>
-                            @php
-                            if(isset($planDetails[$termId][$planId]->start_time) && isset($planDetails[$termId][$planId]->end_time)){
-
-                                $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
-                                $start_time = date('h:i A', strtotime($start_time));
-                                
-                                $end_time = date("Y-m-d ".$planDetails[$termId][$planId]->end_time);
-                                $end_time = date('h:i A', strtotime($end_time));  
+                            $planPct = isset($avarageDetails[$termId][$planId]) ? (float) $avarageDetails[$termId][$planId] : 0;
+                            $planBand = ($planPct >= 70) ? 'good' : (($planPct >= 40) ? 'mid' : 'low');
+                            $roomName = isset($planDetails[$termId][$planId]->room->name) ? $planDetails[$termId][$planId]->room->name : '';
+                            $isOnline = (stripos($roomName, 'online') !== false);
+                            if($ClassType[$planId] != "Tutorial") {
+                                $tutorName = !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A";
                             } else {
-                                $start_time = "N/A";
-                                $end_time = "N/A";
+                                $tutorName = !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : "N/A";
                             }
-                            @endphp
-                            <div class="ml-4 mr-auto toggle-heading">
-                                <a href="" class="font-medium flex flex-col md:flex-row gap-2 md:gap-0">
-                                    {{ $moduleNameList[$planId] }} 
-                                    <span class="text-teal-700 ml-1">[ {{ $planId }} ]</span> 
-                                    <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span> 
-                                    <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->group->name }}</span>
-                                    <span class="rounded cursor-pointer font-medium w-auto border-slate-100 border inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1 transition duration-200  shadow-sm  focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-secondary/70 border-secondary/70 text-slate-500 dark:border-darkmode-400 dark:bg-darkmode-400 dark:text-slate-300 [&:hover:not(:disabled)]:bg-slate-100 [&:hover:not(:disabled)]:border-slate-100 [&:hover:not(:disabled)]:dark:border-darkmode-300/80 [&:hover:not(:disabled)]:dark:bg-darkmode-300/80">{{ $planDetails[$termId][$planId]->room->name }}</span>
-                                </a>
-                                
-                                <div class="text-slate-500 text-xs md:text-md mr-5 sm:mr-5 inline-flex mt-4 md:mt-1">
-                                    <i data-lucide="book" class="w-4 h-4 mr-1"></i> {{ $ClassType[$planId] }}  
-                                    <i data-lucide="user" class="w-4 h-4 mr-1 ml-2"></i> 
-                                    @if($ClassType[$planId]!="Tutorial")
-                                        {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A" }}
-                                    @else
-                                        {{ !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : "N/A" }} 
-                                    @endif
-                                </div>
+                        @endphp
+
+                        <div class="atn-row tablepoint-toggle" id="tablepoint-{{ $termId }}-{{ $planId }}" data-term="{{ $termId }}" data-planid="{{ $planId }}">
+                            <div class="atn-cell-module">
+                                <span class="atn-toggle-icon">
+                                    <i data-lucide="minus" class="plusminus minus-ic w-4 h-4 hidden"></i>
+                                    <i data-lucide="plus" class="plusminus plus-ic w-4 h-4"></i>
+                                </span>
+                                <span>
+                                    <span class="atn-mod-title">{{ $moduleNameList[$planId] }}</span>
+                                    <span class="atn-mod-sub">
+                                        <span class="atn-mod-code">[ {{ $planId }} ]</span>
+                                        <span class="atn-mod-dot">&middot;</span>
+                                        <span>{{ $ClassType[$planId] }}</span>
+                                    </span>
+                                </span>
                             </div>
-                            <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$planId] }}%</div>
-                            <div class="flex-none"></div>
+                            <div class="atn-schedule">{{ $start_time }} &ndash; {{ $end_time }}</div>
+                            <div class="atn-cell-group">
+                                <span class="atn-group-badge">{{ isset($planDetails[$termId][$planId]->group->name) ? $planDetails[$termId][$planId]->group->name : '—' }}</span>
+                                <span class="atn-room {{ $isOnline ? 'is-online' : '' }}">{{ $roomName !== '' ? $roomName : '—' }}</span>
+                            </div>
+                            <div class="atn-tutor">{{ $tutorName }}</div>
+                            <div class="atn-att">
+                                <span class="atn-att-pct atn-{{ $planBand }}">{{ $planPct }}%</span>
+                                <span class="atn-att-bar"><span class="atn-bar-{{ $planBand }}" style="width: {{ max($planPct, 2) }}%"></span></span>
+                            </div>
                         </div>
-                        
-                        
-                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto p-5 pt-0" style="display: none;">
-                            <table data-tw-merge class="w-full text-left">
-                                <thead data-tw-merge class="">
-                                    <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            ID
-                                        </th>
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Date
-                                        </th>
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Time
-                                        </th>
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Taken By
-                                        </th>
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Code
-                                        </th>
-                                        
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Status
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if(isset($data) && count($data)>0)
+
+                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset atn-detail" style="display: none;">
+                            <div class="atn-detail-card">
+                                <div class="atn-detail-cols">
+                                    <div>ID</div><div>Date</div><div>Time</div><div>Taken By</div><div>Code</div><div>Status</div>
+                                </div>
+                                @if(isset($data) && count($data)>0)
                                     @foreach($data as $planDateList)
-                                    
                                         @if(isset($planDateList["attendance"]) && $planDateList["attendance"]!=null)
-
-                                        @php
-                                            // $start_time = date("Y-m-d ".$planDateList["attendance_information"]->start_time);
-                                            // $start_time = date('h:i A', strtotime($start_time));
-                                            
-                                            // $end_time = date("Y-m-d ".$planDateList["attendance_information"]->end_time);
-                                            // $end_time = date('h:i A', strtotime($end_time));  
-                                            
-                                        @endphp
-                                        <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                            
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t inline-flex w-full">
-                                                {{ $planDateList["attendance"]->id }} 
-                                                @if(isset($planDateList["prev_plan_id"]))
-                                                <!-- BEGIN: Custom Tooltip Toggle -->
-                                                <a href="javascript:;" data-theme="light" data-tooltip-content="#custom-content-tooltip" data-trigger="click" class="tooltip intro-x text-slate-500 block ml-2" title="old group"><i data-lucide="info" class="w-4 h-4 ml-1"></i></a>
-                                                <!-- END: Custom Tooltip Toggle -->
-                                                <!-- BEGIN: Custom Tooltip Content -->
-                                                <div class="tooltip-content">
-                                                    <div id="custom-content-tooltip" class="relative flex items-center py-1">
-                                                        <span class="rounded btn-primary text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">{{ $planDateList["prev_plan_id"]->group->name }}</span>
-                                                        <span class="rounded text-slate-500 cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5 ml-2 -mt-1">[ {{ $planDateList["prev_plan_id"]->id }} ]</span>
-                                                    </div>
+                                            @php
+                                                $fcode = strtoupper(trim($planDateList["attendance"]->feed->code));
+                                                $cc = in_array($fcode, ['P','O','H']) ? 'present' : ($fcode === 'A' ? 'absent' : 'late');
+                                            @endphp
+                                            <div class="atn-detail-row">
+                                                <div class="atn-detail-id">
+                                                    {{ $planDateList["attendance"]->id }}
+                                                    @if(isset($planDateList["prev_plan_id"]))
+                                                        <a href="javascript:;" data-theme="light" data-tooltip-content="#atn-tt-{{ $planDateList["attendance"]->id }}" data-trigger="click" class="tooltip" title="old group"><i data-lucide="info" class="w-3.5 h-3.5"></i></a>
+                                                        <div class="tooltip-content">
+                                                            <div id="atn-tt-{{ $planDateList["attendance"]->id }}" class="relative flex items-center py-1">
+                                                                <span class="rounded btn-primary text-white font-medium inline-flex justify-center items-center px-3 py-0.5 ml-2">{{ $planDateList["prev_plan_id"]->group->name }}</span>
+                                                                <span class="rounded text-slate-500 font-medium inline-flex justify-center items-center px-3 py-0.5 ml-2">[ {{ $planDateList["prev_plan_id"]->id }} ]</span>
+                                                            </div>
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                                <!-- END: Custom Tooltip Content -->
-                                                @endif
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                @if(!empty($planDateList["attendance"]->note))
-                                                {{ date('d F, Y',strtotime($planDateList["attendance"]->attendance_date))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
-                                                @else
-                                                {{ date('d F, Y',strtotime($planDateList["date"]))  }}
-                                                @endif
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $start_time }} - {{ $end_time  }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : (!empty($planDateList["attendance"]->note) ? "N/A" : "Tutor Not Found") }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                {{ $planDateList["attendance"]->feed->code }}
-                                            </td>
-                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-
-                                                {{ $planDateList["attendance"]->feed->name }}
-                                        
-                                            </td>
-                                        </tr>
+                                                <div class="atn-detail-date">
+                                                    @if(!empty($planDateList["attendance"]->note))
+                                                        {{ date('d M, Y', strtotime($planDateList["attendance"]->attendance_date)) }} [ {{ $planDateList["attendance"]->note }} ]
+                                                    @else
+                                                        {{ date('d M, Y', strtotime($planDateList["date"])) }}
+                                                    @endif
+                                                </div>
+                                                <div class="atn-detail-time">{{ $start_time }} &ndash; {{ $end_time }}</div>
+                                                <div class="atn-detail-takenby">{{ !empty($planDateList["attendance_information"]->tutor->employee) ? $planDateList["attendance_information"]->tutor->employee->full_name : (!empty($planDateList["attendance"]->note) ? "N/A" : "Tutor Not Found") }}</div>
+                                                <div><span class="atn-code-chip atn-c-{{ $cc }}">{{ $planDateList["attendance"]->feed->code }}</span></div>
+                                                <div class="atn-status atn-c-{{ $cc }}">{{ $planDateList["attendance"]->feed->name }}</div>
+                                            </div>
                                         @endif
                                     @endforeach
-                                    @endif
-                                </tbody>
-                                <tfoot>
-                                    <tr class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                        <th colspan="3" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">Total</th>
-                                        <th colspan="4" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">{{ $totalFeedList[$termId][$planId] }}</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                @endif
+                                <div class="atn-detail-total">
+                                    <span class="atn-detail-total-label">Total</span>
+                                    <span class="atn-detail-total-val">{{ isset($totalFeedList[$termId][$planId]) ? $totalFeedList[$termId][$planId] : '' }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
                     @endif
                 @endforeach
+
+                @if(!$hasRow)
+                    <div class="atn-empty">No class schedule found for this term.</div>
+                @endif
             </div>
-        </div>
         @endforeach
-    
-    
-    <!-- END: Daily Sales -->
-     <!-- BEGIN: Edit Personal Details Modal -->
+
+    </div>
+
+    <!-- BEGIN: Term Status History Modal -->
     <div id="stdAtnTermStatusHistoryModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -275,8 +230,7 @@
             </div>
         </div>
     </div>
-    <!-- END: Edit Personal Details Modal -->
-
+    <!-- END: Term Status History Modal -->
 
 @endsection
 
@@ -289,9 +243,7 @@
             const expandedByTerm = new Map();
             const buildUrl = (base, params) => {
                 const query = params.toString();
-                if (!query) {
-                    return base;
-                }
+                if (!query) { return base; }
                 const joiner = base.includes('?') ? '&' : '?';
                 return `${base}${joiner}${query}`;
             };
@@ -309,49 +261,39 @@
                     $(this).attr('href', buildUrl($(this).data('base'), termParams));
                 });
             };
-            $(".tablepoint-toggle").on('click', function(e) {
-                e.preventDefault();
-                let tthis = $(this)
-                
-                let currentThis=tthis.children(".plusminus").eq(0);
-                console.log(currentThis);
-                let nextThis=tthis.children(".plusminus").eq(1);
-                if(currentThis.hasClass('hidden') ) {
-                    currentThis.removeClass('hidden')
-                    nextThis.addClass('hidden')
-                }else {
-                    nextThis.removeClass('hidden')
-                    currentThis.addClass('hidden')
-                }
 
-                const planId = tthis.data('planid');
-                const termId = tthis.data('term');
-                const $dataset = tthis.parent().siblings('div.tabledataset');
-                const isOpening = !$dataset.is(':visible');
+            $(document).on('click', '.atn-row', function(e) {
+                e.preventDefault();
+                const $row = $(this);
+                const $detail = $row.next('.tabledataset');
+                if (!$detail.length) { return; }
+
+                const planId = $row.data('planid');
+                const termId = $row.data('term');
+                const isOpening = !$detail.is(':visible');
+
+                $row.find('.plus-ic').toggleClass('hidden', isOpening);
+                $row.find('.minus-ic').toggleClass('hidden', !isOpening);
+
                 if (isOpening) {
                     expandedGlobal.add(planId);
-                    if (!expandedByTerm.has(termId)) {
-                        expandedByTerm.set(termId, new Set());
-                    }
+                    if (!expandedByTerm.has(termId)) { expandedByTerm.set(termId, new Set()); }
                     expandedByTerm.get(termId).add(planId);
                 } else {
                     expandedGlobal.delete(planId);
                     if (expandedByTerm.has(termId)) {
                         expandedByTerm.get(termId).delete(planId);
-                        if (expandedByTerm.get(termId).size === 0) {
-                            expandedByTerm.delete(termId);
-                        }
+                        if (expandedByTerm.get(termId).size === 0) { expandedByTerm.delete(termId); }
                     }
                 }
                 updatePrintLinks();
-                $dataset.slideToggle();
-
+                $detail.slideToggle(180);
             });
-            $(".toggle-heading").on('click', function(e) {
-                e.preventDefault();
-                let tthis = $(this)
-                tthis.siblings("div.tablepoint-toggle").trigger('click')
-            })
-        })()
+
+            // Keep the term-header action buttons from triggering a row toggle.
+            $(document).on('click', '.atn-termhead a, .atn-termhead button', function(e) {
+                e.stopPropagation();
+            });
+        })();
     </script>
 @endsection

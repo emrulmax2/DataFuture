@@ -10,145 +10,116 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <!-- BEGIN: Daily Sales -->
-    
     <form id="attendance-update_all" method="post">
-        @foreach($dataSet as $termId =>$dataStartPoint)
-        <div id="attendance-editAll" class="intro-y box col-span-12 p-5 mt-5">
-            <div class="flex items-center px-5 py-5 sm:py-3 border-b border-slate-200/60 dark:border-darkmode-400">
-                <h2 class="font-medium text-base mr-auto">{{ $term[$termId]["name"] }} <div class="font-medium dark:text-slate-500 bg-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }}/20 text-{{ ($avarageTotalPercentage[$termId]>79)? "success" : "warning" }} rounded px-2 mt-1.5  w-{{ $avarageTotalPercentage[$termId]/5 }} inline-flex ml-2">{{ $avarageTotalPercentage[$termId] }}%</div>
-                    <div class="text-slate-500 sm:mr-5 ml-auto text-sm mt-2">[ {{ $totalFullSetFeedList[$termId] }} ] Total: {{ $totalClassFullSet[$termId] }} days class</div>
-                </h2>
-                <div class="text-slate-500 sm:mr-5 ml-auto">Date From {{ date("d-m-Y",strtotime($term[$termId]["start_date"])) }} To {{ date("d-m-Y",strtotime($term[$termId]["end_date"])) }} </div>
-                <div class="dropdown ml-auto sm:hidden">
-                    <a class="dropdown-toggle w-5 h-5 block" href="javascript:;" aria-expanded="false" data-tw-toggle="dropdown">
-                        <i data-lucide="more-horizontal" class="w-5 h-5 text-slate-500"></i>
-                    </a>
-                    <div class="dropdown-menu w-40">
-                        <ul class="dropdown-content">
-                            <li>
-                                <a href="{{ route('student.attendance',$student->id) }}" class="dropdown-item">
-                                    <i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Back To Attendance View
-                                </a>
-                            </li>
-                            <li>
-                                <button type="submit" class="dropdown-item update-all">
-                                    <i data-lucide="save-all" class="w-4 h-4 mr-2"></i> Update
-                                </button>
-                            </li>
-                        </ul>
+        <div id="attendance-editAll" class="student-profile-atn-wrap intro-y mt-5">
+            @foreach($dataSet as $termId => $dataStartPoint)
+                @php
+                    $termPct = isset($avarageTotalPercentage[$termId]) ? $avarageTotalPercentage[$termId] : 0;
+                    $termBand = ($termPct >= 70) ? 'atn-good' : (($termPct >= 40) ? 'atn-mid' : 'atn-low');
+                    $statsRaw = isset($totalFullSetFeedList[$termId]) ? trim($totalFullSetFeedList[$termId]) : '';
+                @endphp
+                <div class="atn-term">
+                    <div class="atn-edithead">
+                        <div class="atn-term-title">{{ $term[$termId]["name"] }}</div>
+                        <span class="atn-term-pct {{ $termBand }}">{{ $termPct }}%</span>
+                        <span class="atn-term-stats">@if($statsRaw !== '')[ {{ $statsRaw }} ] &middot; @endif{{ isset($totalClassFullSet[$termId]) ? $totalClassFullSet[$termId] : 0 }} days class</span>
+                        <div class="atn-term-meta">
+                            <span class="atn-term-range">{{ date('j M', strtotime($term[$termId]["start_date"])) }} &ndash; {{ date('j M Y', strtotime($term[$termId]["end_date"])) }}</span>
+                            <a href="{{ route('student.attendance',$student->id) }}" class="atn-btn atn-btn-outline atn-btn-sm">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to view
+                            </a>
+                            <button type="submit" class="update-all atn-btn atn-btn-dark atn-btn-sm">
+                                <i data-lucide="save-all" class="w-4 h-4"></i> Update
+                                <i data-loading-icon="oval" class="load-update w-4 h-4 hidden"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <a href="{{ route('student.attendance',$student->id) }}" class="btn btn-outline-primary hidden sm:flex ml-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> back to view attendance
-                </a>
-                <button type="submit" class="btn btn-outline-success text-success hidden sm:flex ml-2 update-all">
-                    <i data-lucide="save-all" class="w-4 h-4 mr-2"></i> Update <i  data-loading-icon="oval" class="load-update w-4 h-4 ml-2 hidden"></i>
-                </button>
-            </div>
-                @foreach($dataStartPoint as $planId => $data)
-                    <div class="p-5">
 
-                        <div class="relative flex items-center mb-5">
-                            <div id="tablepoint-{{ $termId }}" class="tablepoint-toggle flex-none image-fit table-collapsed cursor-pointer">
-                                <i data-lucide="minus" class="plusminus w-6 h-6 mr-2"></i>
-                                <i data-lucide="plus" class="plusminus w-6 h-6 mr-2 hidden"></i>
+                    @foreach($dataStartPoint as $planId => $data)
+                        @php
+                            $start_time = date('h:i A', strtotime(date("Y-m-d ".$planDetails[$termId][$planId]->start_time)));
+                            $end_time = date('h:i A', strtotime(date("Y-m-d ".$planDetails[$termId][$planId]->end_time)));
+                            $planPct = isset($avarageDetails[$termId][$planId]) ? $avarageDetails[$termId][$planId] : 0;
+                            $planBand = ($planPct >= 70) ? 'atn-good' : (($planPct >= 40) ? 'atn-mid' : 'atn-low');
+                            if($ClassType[$planId] != "Tutorial") {
+                                $tutorName = !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A";
+                            } else {
+                                $tutorName = !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : "N/A";
+                            }
+                        @endphp
+                        <div class="atn-edit-plan">
+                            <div class="atn-edit-planhead">
+                                <div id="tablepoint-{{ $termId }}-{{ $planId }}" class="tablepoint-toggle atn-edit-toggle table-collapsed cursor-pointer">
+                                    <i data-lucide="minus" class="plusminus w-4 h-4"></i>
+                                    <i data-lucide="plus" class="plusminus w-4 h-4 hidden"></i>
+                                </div>
+                                <div class="toggle-heading atn-edit-headinfo">
+                                    <div class="atn-edit-modtitle">
+                                        {{ $moduleNameList[$planId] }}
+                                        <span class="atn-edit-time"><i data-lucide="clock" class="w-4 h-4"></i> {{ $start_time }} &ndash; {{ $end_time }}</span>
+                                    </div>
+                                    <div class="atn-edit-tutor"><i data-lucide="user" class="w-4 h-4"></i> {{ $tutorName }}</div>
+                                </div>
+                                <span class="atn-term-pct {{ $planBand }}">{{ $planPct }}%</span>
                             </div>
-                            @php
-                                
-                                $start_time = date("Y-m-d ".$planDetails[$termId][$planId]->start_time);
-                                $start_time = date('h:i A', strtotime($start_time));
-                                
-                                $end_time = date("Y-m-d ".$planDetails[$termId][$planId]->end_time);
-                                $end_time = date('h:i A', strtotime($end_time));  
-                            @endphp
-                            <div class="ml-4 mr-auto toggle-heading">
-                                <a href="" class="font-medium flex">{{ $moduleNameList[$planId] }} <span class="text-slate-500 inline-flex" ><i data-lucide="clock" class="w-4 h-4 ml-2 mr-1 " style="margin-top:2px"></i> {{  $start_time }} - {{  $end_time }}   </span></a>
-                                <div class="text-slate-500 mr-5 sm:mr-5 inline-flex mt-1">
-                                    <i data-lucide="user" class="w-4 h-4 mr-1"></i> 
-                                    @if($ClassType[$planId]!="Tutorial")
-                                        {{ !empty($planDetails[$termId][$planId]->tutor->employee) ? $planDetails[$termId][$planId]->tutor->employee->full_name : "N/A" }}
-                                    @else
-                                        {{ !empty($planDetails[$termId][$planId]->personalTutor->employee) ? $planDetails[$termId][$planId]->personalTutor->employee->full_name : "N/A" }} 
-                                    @endif
+
+                            <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset atn-edit-tablewrap">
+                                <div class="atn-edit-card">
+                                    <table class="atn-edit-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                @foreach($attendanceFeedStatus as $status)
+                                                    <th>{{ $status->code }}</th>
+                                                @endforeach
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($data as $planDateList)
+                                                @if($planDateList["attendance"]!=null)
+                                                    @php $iCountColSpan = 0; @endphp
+                                                    <tr>
+                                                        <td>
+                                                            {{ date('d M, Y', strtotime($planDateList["date"])) }}@if(!empty($planDateList["attendance"]->note)) [ {{ $planDateList["attendance"]->note }} ]@endif
+                                                        </td>
+                                                        <input name="id[]" value="{{ $planDateList["attendance"]->id }}" type="hidden" />
+                                                        @foreach($attendanceFeedStatus as $status)
+                                                            @php $iCountColSpan++; @endphp
+                                                            @if($planDateList["attendance"]->feed->code == $status->code)
+                                                                <td class="atn-edit-current {{ $planDateList["attendance"]->feed->attendance_count ? 'is-present' : 'is-absent' }}">
+                                                                    {{ $planDateList["attendance"]->feed->code }} - {{ $planDateList["attendance"]->feed->name }}
+                                                                </td>
+                                                            @else
+                                                                <td>
+                                                                    <input {{ (!empty($planDateList["attendance"]->note)) ? 'disabled' : '' }} id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}" type="radio" />
+                                                                    <label for="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}">{{ $status->name }}</label>
+                                                                </td>
+                                                            @endif
+                                                        @endforeach
+                                                        <td class="atn-edit-action">
+                                                            <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id="{{ $planDateList["attendance"]->id}}" class="delete_btn"><i data-lucide="trash-2" class="w-4 h-4"></i>Delete</span>
+                                                        </td>
+                                                    </tr>
+                                                @endif
+                                            @endforeach
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <th colspan="1">Total</th>
+                                                <th colspan="{{ isset($iCountColSpan) ? $iCountColSpan : 1 }}">{{ isset($totalFeedList[$termId][$planId]) ? $totalFeedList[$termId][$planId] : '' }}</th>
+                                                <th>Total</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="font-medium dark:text-slate-500 bg-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }}/20 text-{{ ($avarageDetails[$termId][$planId]>79)? "success" : "warning" }} rounded px-2 mt-1.5">{{ $avarageDetails[$termId][$planId] }}%</div>
-                            <div class="flex-none"></div>
                         </div>
-                        
-                        
-                        <div id="tabledata{{ $planDetails[$termId][$planId]->id }}" class="tabledataset overflow-x-auto p-5 pt-0">
-                            <table data-tw-merge class="w-full text-left">
-                                <thead data-tw-merge class="">
-                                    <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Date
-                                        </th>
-                                        @foreach($attendanceFeedStatus as $status)
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            {{  $status->code }}
-                                        </th>
-                                        @endforeach
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                    @foreach($data as $planDateList)
-                                    
-                                        @if($planDateList["attendance"]!=null)
-                                            @php $iCountColSpan = 0; @endphp
-                                           
-                                                <tr data-tw-merge class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                                    <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                        @if(!empty($planDateList["attendance"]->note))
-                                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }} {{ $planDateList["attendance"]->note ? " [ ".$planDateList["attendance"]->note." ]" : "" }}
-                                                        @else
-                                                         {{ date('d F, Y',strtotime($planDateList["date"]))  }}
-                                                        @endif
-                                                    </td>
-                                                    <input name="id[]" value="{{ $planDateList["attendance"]->id }}" type="hidden" />
-                                                    @foreach($attendanceFeedStatus as $status)
-                                                        @php $iCountColSpan++; @endphp    
-                                                        @if($planDateList["attendance"]->feed->code == $status->code)
-                                                        
-                                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t {{ ($planDateList["attendance"]->feed->attendance_count ? "text-emerald-600" : "text-red-600") }}  ">
-                                                                {{ $planDateList["attendance"]->feed->code }} - {{ $planDateList["attendance"]->feed->name }}
-                                                            </td>
-                                                        @else
-                                                            <td data-tw-merge class="px-5 py-3 border-b dark:border-darkmode-300 border-l border-r border-t">
-                                                                <input {{ (!empty($planDateList["attendance"]->note)) ? 'disabled' : '' }} data-tw-merge  id="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" data-attendanceId="{{ $planDateList["attendance"]->id}}" name="attendance_feed[{{ $planDateList["attendance"]->id}}]" value="{{ $status->id }}"  type="radio" class="transition-all duration-100 ease-in-out shadow-sm border-slate-200 cursor-pointer focus:ring-4 focus:ring-offset-0 focus:ring-primary focus:ring-opacity-20 dark:bg-darkmode-800 dark:border-transparent dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&[type='radio']]:checked:bg-primary [&[type='radio']]:checked:border-primary [&[type='radio']]:checked:border-opacity-10 [&[type='checkbox']]:checked:bg-primary [&[type='checkbox']]:checked:border-primary [&[type='checkbox']]:checked:border-opacity-10 [&:disabled:not(:checked)]:bg-slate-100 [&:disabled:not(:checked)]:cursor-not-allowed [&:disabled:not(:checked)]:dark:bg-darkmode-800/50 [&:disabled:checked]:opacity-70 [&:disabled:checked]:cursor-not-allowed [&:disabled:checked]:dark:bg-darkmode-800/50"/>
-                                                                <label data-tw-merge for="radio-switch-{{ $planDateList["attendance"]->id}}{{ $status->id }}" class="cursor-pointer ml-2">{{ $status->name }}</label>
-                                                                
-                                                            </td>
-                                                        @endif
-                                                    @endforeach
-                                                    <td data-tw-merge class="px-5 py-3 text-danger dark:border-darkmode-300  border-r border-b">
-                                                        <span data-tw-target="#confirmModal" data-tw-toggle="modal" data-id={{ $planDateList["attendance"]->id}} class="delete_btn inline-flex cursor-pointer"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Delete</span>
-                                                    </td>
-                                                </tr>
-                                        @endif
-                                    @endforeach
-                                </tbody>
-                                <tfoot>
-                                    <tr class="[&:hover_td]:bg-slate-100 [&:hover_td]:dark:bg-darkmode-300 [&:hover_td]:dark:bg-opacity-50">
-                                        <th colspan="1" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">Total</th>
-                                        <th colspan="{{ $iCountColSpan }}" data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">{{ $totalFeedList[$termId][$planId] }}</th>
-                                        <th data-tw-merge class="font-medium px-5 py-3 border-b-2 dark:border-darkmode-300 border-l border-r border-t whitespace-nowrap">Total</th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
+            @endforeach
         </div>
-        @endforeach
-
     </form>
-    <!-- END: Daily Sales -->
 
     <!-- BEGIN: Error Modal Content -->
     <div id="errorModal" class="modal" tabindex="-1" aria-hidden="true">
@@ -163,8 +134,8 @@
                 </div>
             </div>
         </div>
+    </div>
     <!-- END: Error Modal Content -->
-
 
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">

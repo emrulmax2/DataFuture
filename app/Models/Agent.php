@@ -12,16 +12,20 @@ class Agent extends Model
 
     protected $guarded  = ['id'];
     
-    protected $appends = ['full_name'];
+    protected $appends = ['full_name', 'photo_url'];
 
     protected $dates = ['deleted_at'];
-    
+
     public function title() {
         return $this->belongsTo(Title::class);
     }
 
     public function getFullNameAttribute() {
         return $this->first_name . ' ' . $this->last_name.'';
+    }
+
+    public function getPhotoUrlAttribute() {
+        return \App\Support\Avatar::initials($this->first_name . ' ' . $this->last_name);
     }
 
     public function AgentUser() {

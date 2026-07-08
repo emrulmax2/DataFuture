@@ -10,51 +10,40 @@
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
+    <div class="intro-y box mt-5 student-profile-notes">
+        <div class="student-profile-secthead">
+            <div class="student-profile-secthead-title">
                 <div class="font-medium text-base">Notes</div>
             </div>
-            <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="btn btn-primary shadow-md md:mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Notes</button>
+            <div class="student-profile-secthead-actions student-profile-notes-actions">
+                <button data-tw-toggle="modal" data-tw-target="#addNoteModal" type="button" class="btn student-profile-addbtn"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Note</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Term</label>
-                        <select id="term-SN" name="term" class="mt-2 sm:mt-0 sm:w-40 2xl:w-48 tom-selects" >
-                            <option selected value="">Please Select</option>
-                            @if($terms->count() > 0)
-                                @foreach($terms as $trm)
-                                    <option value="{{ $trm->id }}">{{ $trm->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-AN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-AN" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-AN" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+        <div class="intro-y">
+            <div class="student-profile-tablefilter student-profile-notes-filter">
+                <form id="tabulatorFilterForm-AN" class="student-profile-tablefilter-form" >
+                    <select id="term-SN" name="term" class="student-profile-tablefilter-term tom-selects" >
+                        <option selected value="">All Terms</option>
+                        @if($terms->count() > 0)
+                            @foreach($terms as $trm)
+                                <option value="{{ $trm->id }}">{{ $trm->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                    <input id="query-AN" name="query" type="text" class="form-control student-profile-tablefilter-search"  placeholder="Search notes...">
+                    <select id="status-AN" name="status" class="form-select student-profile-tablefilter-status" >
+                        <option selected value="1">Active</option>
+                        <option value="2">Archived</option>
+                    </select>
+                    <button id="tabulator-html-filter-go-AN" type="button" class="btn btn-primary" >Go</button>
+                    <button id="tabulator-html-filter-reset-AN" type="button" class="btn btn-outline-secondary student-profile-tablefilter-reset" >Reset</button>
                 </form>
-                <div class="hidden md:flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-AN" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
+                <div class="student-profile-tablefilter-actions hidden md:flex">
+                    <button id="tabulator-print-AN" class="btn btn-outline-secondary">
                         <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
                     </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
+                    <div class="dropdown">
+                        <button class="dropdown-toggle btn btn-outline-secondary" aria-expanded="false" data-tw-toggle="dropdown">
                             <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
                         </button>
                         <div class="dropdown-menu w-40">
@@ -74,8 +63,8 @@
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="studentNotesListTable" data-student="{{ $student->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="student-profile-tablebody">
+                <div id="studentNotesListTable" data-student="{{ $student->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>

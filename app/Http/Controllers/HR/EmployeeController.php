@@ -122,7 +122,7 @@ class EmployeeController extends Controller
                 if ($list->photo !== null && Storage::disk('local')->exists('public/employees/'.$list->id.'/'.$list->photo)) {
                     $photo_url = Storage::disk('local')->url('public/employees/'.$list->id.'/'.$list->photo);
                 } else {
-                    $photo_url = asset('build/assets/images/placeholders/200x200.jpg');
+                    $photo_url = \App\Support\Avatar::initials($list->first_name.' '.$list->last_name);
                 }
 
                 if($list->status == 2):

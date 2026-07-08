@@ -66,7 +66,7 @@ class User extends Authenticatable
         if ($this->photo !== null && Storage::disk('s3')->exists('public/users/'.$this->id.'/'.$this->photo)) {
             return Storage::disk('s3')->url('public/users/'.$this->id.'/'.$this->photo);
         } else {
-            return asset('build/assets/images/placeholders/200x200.jpg');
+            return \App\Support\Avatar::initials($this->name);
         }
     }
     
