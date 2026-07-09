@@ -90,6 +90,11 @@
                         <button data-term="{{ $termId }}" data-student="{{ $student->id }}" data-tw-toggle="modal" data-tw-target="#stdAtnTermStatusHistoryModal" class="sts_history_btn atn-term-icon no-print" title="Status history">
                             <i data-lucide="info" class="w-4 h-4"></i>
                         </button>
+                        @if(!isset($termAttendanceFound[$termId]) || !empty($termAttendanceFound[$termId]))
+                            <a href="{{ route('student.attendance.edit', $student->id) }}" class="atn-btn atn-btn-outline atn-btn-sm no-print" title="Edit attendance">
+                                <i data-lucide="pencil" class="w-4 h-4"></i> Edit
+                            </a>
+                        @endif
                         <a data-term="{{ $termId }}" data-base="{{ route('student.attendance.print', [$student->id, $termId]) }}" href="{{ route('student.attendance.print', [$student->id, $termId]) }}" class="single-print-btn atn-btn atn-btn-outline atn-btn-sm no-print">
                             <i data-lucide="printer" class="w-4 h-4"></i> Print
                         </a>

@@ -100,7 +100,7 @@
                             @endforeach
                         </ul>
                     @else
-                        <span class="text-sm font-semibold italic text-slate-400">Not provided</span>
+                        <span class="text-sm font-semibold italic text-slate-400">N/A</span>
                     @endif
                 </div>
 
