@@ -98,17 +98,17 @@ class ApplicationController extends Controller
                 ['label' => 'Application Form', 'href' => 'javascript:void(0);']
             ],
             'titles' => Title::where('active', 1)->get(),
-            'venues' => Venue::all(),
+            'venues' => Venue::where('active', 1)->get(),
             'country' => Country::where('active', 1)->get(),
             'ethnicity' => Ethnicity::where('active', 1)->get(),
             'disability' => Disability::where('active', 1)->get(),
             'relations' => KinsRelation::where('active', 1)->get(),
-            'bodies' => AwardingBody::all(),
+            'bodies' => AwardingBody::where('active', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
             'sexid' => SexIdentifier::where('active', 1)->get(),
             'applicant' => \Auth::guard('applicant')->user(),
             'apply' => $appliedApplication,
-            'residencyStatuses' => ResidencyStatus::all(),
+            'residencyStatuses' => ResidencyStatus::where('is_active', 1)->get(),
             'courseCreationAvailibility' => CourseCreationAvailability::all()->filter(function($item) {
                 if (Carbon::now()->between($item->admission_date, $item->admission_end_date)) {
                   return $item;
