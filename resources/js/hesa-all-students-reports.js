@@ -105,42 +105,18 @@ import { createIcons, icons } from 'lucide';
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             }).then(response => {
-                //console.log(response.data);
-                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
-                document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display:none;";
-                document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
-                document.querySelector('#xmlDownBtn').removeAttribute('disabled');  
-
-                $('#xmlExportModal .modal-content .submissionError').remove();
-                $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-success-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Success</strong>. '+response.data.message+'</span></div>');
-
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                setTimeout(function(){
-                    $('#xmlExportModal .modal-content .submissionError').remove();
-                }, 2000)
-
+                // Autoload runs on the queue; poll silently. No progress bar here —
+                // that belongs to the Download Now / XML export flow only. The
+                // "Run Autoloader" button keeps its spinner until we get a result.
+                if(response.data.autoload_id){
+                    startCheckingAutoload(response.data.autoload_id);
+                }else{
+                    resetAutoloadButtons();
+                    showXmlAlert('danger', '<strong>Error</strong>. Could not start the autoload process. Please try again.');
+                }
             }).catch(error => {
-                document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
-                document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display:none;";
-                document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
-                document.querySelector('#xmlDownBtn').removeAttribute('disabled');
-
-                $('#xmlExportModal .modal-content .submissionError').remove();
-                $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Error</strong>. Something went wrong. Please try again later.</span></div>');
-
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                setTimeout(function(){
-                    $('#xmlExportModal .modal-content .submissionError').remove();
-                }, 2000)
-
+                resetAutoloadButtons();
+                showXmlAlert('danger', '<strong>Error</strong>. Something went wrong. Please try again later.');
                 console.log(error);
             });
         }else{
@@ -301,6 +277,52 @@ import { createIcons, icons } from 'lucide';
                 }, 2000)
             });
 
+        }, 3000);
+    }
+
+    function resetAutoloadButtons(){
+        document.querySelector('#xmlAutoloadBtn').removeAttribute('disabled');
+        document.querySelector("#xmlAutoloadBtn .theLoader").style.cssText = "display:none;";
+        document.querySelector('#xmlDownCancelBtn').removeAttribute('disabled');
+        document.querySelector('#xmlDownBtn').removeAttribute('disabled');
+    }
+
+    function showXmlAlert(type, html){
+        $('#xmlExportModal .modal-content .submissionError').remove();
+        $('#xmlExportModal .modal-content').prepend('<div class="alert submissionError alert-'+type+'-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span>'+html+'</span></div>');
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+        setTimeout(function(){
+            $('#xmlExportModal .modal-content .submissionError').remove();
+        }, 4000);
+    }
+
+    function startCheckingAutoload(autoload_id){
+        let autoloadInterval = setInterval(() => {
+            axios.post(route('reports.datafuture.check.autoload.status', autoload_id), {
+                autoload_id: autoload_id
+            }).then(response => {
+                if(response.data.status === 'completed'){
+                    clearInterval(autoloadInterval);
+                    resetAutoloadButtons();
+
+                    showXmlAlert('success', '<strong>Success</strong>. ' + (response.data.message || 'Students data successfully autoloaded.'));
+                }else if(response.data.status === 'failed'){
+                    clearInterval(autoloadInterval);
+                    resetAutoloadButtons();
+
+                    showXmlAlert('danger', '<strong>Oops</strong>. Autoload failed. Please try again later or contact with the administrator.');
+                }
+            }).catch(error => {
+                clearInterval(autoloadInterval);
+                console.log(error);
+                resetAutoloadButtons();
+
+                showXmlAlert('danger', '<strong>Oops</strong>. Something went wrong. Please try again later or contact with the administrator.');
+            });
         }, 3000);
     }
 })();

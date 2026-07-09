@@ -4029,6 +4029,7 @@ Route::middleware('auth')->group(function() {
         Route::delete('reports/datafuture/delete/{id}', 'destroy')->name('reports.datafuture.downloads.delete');
 
         Route::post('reports/datafuture/autoload-data', 'autoloadData')->name('reports.datafuture.autoload.data');
+        Route::post('reports/datafuture/check-autoload-status/{id}', 'checkAutoloadStatus')->name('reports.datafuture.check.autoload.status');
     });
 
     Route::controller(StudyModeController::class)->group(function() {
