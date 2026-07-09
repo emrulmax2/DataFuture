@@ -13,505 +13,333 @@
 
 <div class="ep-grid">
     <div class="ep-col">
-
-    <!-- BEGIN: Profile Info -->
-    <!-- END: Profile Info -->
-
-    <div class="intro-y mt-5">
-        <div class="grid grid-cols-12 gap-4">
-            <div class="col-span-12 sm:col-span-8">
-                <div class="intro-y box p-5 pb-7">
-                    <div class="grid grid-cols-12 gap-0 items-center">
-                        <div class="col-span-6">
-                            <div class="font-medium text-base">Employee Holiday</div>
+        <div class="ep-holiday-page intro-y mt-5">
+            <div class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 xl:col-span-8">
+                    <div class="ep-holiday-main">
+                        <div class="ep-holiday-intro-bar">
+                            <div class="ep-holiday-card__icon">
+                                <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            </div>
+                            <div class="ep-holiday-card__copy">
+                                <h2>Employee Holiday</h2>
+                                <p>Annual leave, bank holidays and booked time off.</p>
+                            </div>
                         </div>
-                        <div class="col-span-6 text-right">
-                            
-                        </div>
-                    </div>
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="grid grid-cols-12 gap-4"> 
-                        <div class="col-span-12">
-                            @if(!empty($holidayDetails))
-                            <div id="employeeHolidayAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
-                                @foreach($holidayDetails  as $year => $yearDetails)
-                                    <div class="accordion-item bg-slate-100">
-                                        <div id="employeeHolidayAccordion-{{ $loop->index }}" class="accordion-header">
-                                            <button class="accordion-button {{ $yearDetails['is_active'] == 1 ? '' : 'collapsed' }} relative w-full text-lg font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#employeeHolidayAccordion-collapse-{{ $loop->index }}" aria-expanded="{{ $yearDetails['is_active'] == 1 ? 'true' : 'false' }}" aria-controls="employeeHolidayAccordion-collapse-{{ $loop->index }}">
-                                                <span class="font-normal">Holiday Year:</span> {{ date('Y', strtotime($yearDetails['start'])) }} - {{ date('Y', strtotime($yearDetails['end'])) }}
-                                                <span class="accordionCollaps"></span>
+                        @if(!empty($holidayDetails))
+                            <div id="employeeHolidayAccordion" class="ep-holiday-year-list">
+                                @foreach($holidayDetails as $year => $yearDetails)
+                                    @php
+                                        $yearKey = 'holiday-year-'.$loop->index;
+                                        $isCurrentYear = ($yearDetails['is_active'] == 1);
+                                    @endphp
+                                    <div class="ep-holiday-year-block">
+                                        <div id="{{ $yearKey }}-header" class="ep-holiday-year-block__header">
+                                            <button class="ep-holiday-year-toggle {{ $isCurrentYear ? '' : 'collapsed' }}" type="button" data-holiday-toggle="collapse" data-holiday-target="#{{ $yearKey }}-body" data-holiday-parent="#employeeHolidayAccordion" aria-expanded="{{ $isCurrentYear ? 'true' : 'false' }}" aria-controls="{{ $yearKey }}-body">
+                                                <span class="ep-holiday-year-toggle__eyebrow">Holiday Year</span>
+                                                <span class="ep-holiday-year-toggle__title">{{ date('Y', strtotime($yearDetails['start'])) }} - {{ date('Y', strtotime($yearDetails['end'])) }}</span>
+                                                <span class="ep-holiday-year-toggle__badge{{ $isCurrentYear ? ' is-current' : '' }}">{{ $isCurrentYear ? 'Current' : 'Archived' }}</span>
+                                                <span class="ep-holiday-year-toggle__arrow">
+                                                    <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                </span>
                                             </button>
                                         </div>
-                                        <div id="employeeHolidayAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ $yearDetails['is_active'] == 1 ? 'show' : '' }}" aria-labelledby="employeeHolidayAccordion-{{ $loop->index }}" data-tw-parent="#employeeHolidayAccordion">
-                                            <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                                                <div id="employeePatternAccordion" class="accordion accordion-boxed employeeHolidayAccordion">
+                                        <div id="{{ $yearKey }}-body" class="ep-holiday-collapse{{ $isCurrentYear ? ' is-open' : '' }}" aria-labelledby="{{ $yearKey }}-header">
+                                            <div class="ep-holiday-year-block__body">
+                                                <div id="{{ $yearKey }}-patterns" class="ep-holiday-pattern-list">
                                                     @foreach($yearDetails['patterns'] as $pattern)
-                                                        <div class="accordion-item bg-white">
-                                                            <div id="employeePatternAccordion-{{ $loop->index }}" class="accordion-header">
-                                                                <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }} relative w-full text-lg font-semibold flex" type="button" data-tw-toggle="collapse" data-tw-target="#employeePatternAccordion-collapse-{{ $loop->index }}" aria-expanded="{{ $loop->first ? 'true' : 'false' }}" aria-controls="employeePatternAccordion-collapse-{{ $loop->index }}">
-                                                                    <span class="font-normal">Pattern ID:</span> {{ $pattern->id }}
-                                                                    
+                                                        @php
+                                                            $patternKey = $yearKey.'-pattern-'.$pattern->id;
+                                                            $openPattern = ($loop->first && $isCurrentYear);
+                                                            $totalEntitlementMinutes = max(0, (int) ($pattern->totalHolidayEntitlementMinutes ?? 0));
+                                                            $bankMinutes = max(0, (int) ($pattern->autoBookedBankHolidayMinutes ?? 0));
+                                                            $usedMinutes = max(0, (int) ($pattern->usedMinutes ?? 0));
+                                                            $balanceMinutes = (int) ($pattern->existingLeaveHours['balance'] ?? 0);
+                                                            $remainingMinutes = max(0, $balanceMinutes);
+                                                            $scale = max(1, $totalEntitlementMinutes > 0 ? $totalEntitlementMinutes : ($bankMinutes + $usedMinutes + $remainingMinutes));
+                                                            $bankPercent = min(100, round(($bankMinutes / $scale) * 100, 2));
+                                                            $usedPercent = min(100, round(($usedMinutes / $scale) * 100, 2));
+                                                            $remainingPercent = min(100, round(($remainingMinutes / $scale) * 100, 2));
+                                                            $activityRows = collect($pattern->activityRows ?? []);
+                                                            $activityCounts = $pattern->activityCounts ?? ['all' => 0, 'bank' => 0, 'approved' => 0, 'pending' => 0, 'taken' => 0, 'rejected' => 0];
+                                                        @endphp
+                                                        <div class="ep-holiday-pattern-card">
+                                                            <div id="{{ $patternKey }}-header" class="ep-holiday-pattern-card__header">
+                                                                <button class="ep-holiday-pattern-toggle {{ $openPattern ? '' : 'collapsed' }}" type="button" data-holiday-toggle="collapse" data-holiday-target="#{{ $patternKey }}-body" data-holiday-parent="#{{ $yearKey }}-patterns" aria-expanded="{{ $openPattern ? 'true' : 'false' }}" aria-controls="{{ $patternKey }}-body">
+                                                                    <span class="ep-holiday-pattern-toggle__icon">
+                                                                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                                                                    </span>
+                                                                    <span class="ep-holiday-pattern-toggle__title">Pattern ID: {{ $pattern->id }}</span>
                                                                     @if(isset($pattern->patterns) && $pattern->patterns->count() > 0)
-                                                                        <span class="patternHours text-sm ml-auto" style="padding: 7px 49px 0 0;">
+                                                                        <span class="ep-holiday-pattern-toggle__chips">
                                                                             @foreach($pattern->patterns as $pt)
-                                                                                <span>[{{ $pt->day_name }} - {{ $pt->total }}]</span>
+                                                                                <span class="ep-holiday-day-chip">{{ $pt->day_name }} {{ $pt->total }}</span>
                                                                             @endforeach
                                                                         </span>
                                                                     @endif
-
-                                                                    <span class="accordionCollaps"></span>
+                                                                    <span class="ep-holiday-pattern-toggle__arrow">
+                                                                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                                                    </span>
                                                                 </button>
                                                             </div>
-                                                            <div id="employeePatternAccordion-collapse-{{ $loop->index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="employeePatternAccordion-{{ $loop->index }}" data-tw-parent="#employeePatternAccordion">
-                                                                <div class="accordion-body text-slate-600 dark:text-slate-500 leading-relaxed">
-                                                                    <div class="grid grid-cols-12 gap-4">
-                                                                        <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">Date</div>
-                                                                            <div class="font-medium">
-                                                                                {{ date('jS F, Y', strtotime($pattern->pattern_start)) }}
-                                                                                 - 
-                                                                                {{ date('jS F, Y', strtotime($pattern->pattern_end)) }}
+                                                            <div id="{{ $patternKey }}-body" class="ep-holiday-collapse{{ $openPattern ? ' is-open' : '' }}" aria-labelledby="{{ $patternKey }}-header">
+                                                                <div class="ep-holiday-pattern-card__body">
+                                                                    <div class="ep-holiday-balance-panel">
+                                                                            <div class="ep-holiday-balance-panel__hero">
+                                                                                <div class="ep-holiday-balance-panel__eyebrow">{{ $balanceMinutes < 0 ? 'Overtaken' : 'Balance Remaining' }}</div>
+                                                                                <div class="ep-holiday-balance-panel__value{{ $balanceMinutes < 0 ? ' is-negative' : '' }}">
+                                                                                    {{ $balanceMinutes < 0 ? '-' : '' }}{{ $pattern->existingLeaveHours['balance_html'] ?? '00:00' }}
+                                                                                </div>
+                                                                                <div class="ep-holiday-balance-panel__subvalue">of {{ $pattern->totalHolidayEntitlement ?? '00:00' }}</div>
+                                                                                <div class="ep-holiday-balance-panel__meter">
+                                                                                    <span class="is-bank" style="width: {{ $bankPercent }}%"></span>
+                                                                                    <span class="is-used" style="width: {{ $usedPercent }}%"></span>
+                                                                                    <span class="is-left" style="width: {{ $remainingPercent }}%"></span>
+                                                                                </div>
+                                                                                <div class="ep-holiday-balance-panel__legend">
+                                                                                    <span><i class="is-bank"></i>Bank {{ $pattern->autoBookedBankHoliday ?? '00:00' }}</span>
+                                                                                    <span><i class="is-used"></i>Used {{ $pattern->existingLeaveHours['total_taken'] ?? '00:00' }}</span>
+                                                                                    <span><i class="is-left"></i>Left {{ $pattern->existingLeaveHours['balance_html'] ?? '00:00' }}</span>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">Entitlement</div>
-                                                                            <div class="font-medium flex justify-start items-center">
-                                                                                <span style="line-height: 24px;">
-                                                                                    {{ (isset($pattern->holidayEntitlement) && !empty($pattern->holidayEntitlement) ? $pattern->holidayEntitlement : '00:00') }}
-                                                                                </span>
-                                                                                @if($can_auth)
-                                                                                <button data-year="{{ $year }}" data-pattern="{{ $pattern->id }}" data-tw-toggle="modal" data-tw-target="#empHolidayAdjustmentModal" class="holidayAdjustmentBtn btn btn-success w-auto px-1 py-1 border-0 text-white ml-2 mr-2">
-                                                                                    <i data-lucide="repeat-1" class="w-4 h-4"></i>
-                                                                                </button>
-                                                                                @endif
-                                                                                <span class="line-height: 24px;">{{ $pattern->adjustmentHtml }} = {{ $pattern->totalHolidayEntitlement }}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-6"></div>
-                                                                        <div class="col-span-6 sm:col-span-3">
-                                                                            <div class="text-slate-500 font-medium">Bank Holiday</div>
-                                                                            <div class="font-medium">{{ (isset($pattern->autoBookedBankHoliday) && !empty($pattern->autoBookedBankHoliday) ? $pattern->autoBookedBankHoliday : '00:00') }}</div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-2">
-                                                                            <div class="text-slate-500 font-medium">Taken/Booked</div>
-                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['taken']) && !empty($pattern->existingLeaveHours['taken']) ? $pattern->existingLeaveHours['taken'] : '00:00') }}</div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-2">
-                                                                            <div class="text-slate-500 font-medium">Requested</div>
-                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['requested']) && !empty($pattern->existingLeaveHours['requested']) ? $pattern->existingLeaveHours['requested'] : '00:00') }}</div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-2">
-                                                                            <div class="text-slate-500 font-medium">Total</div>
-                                                                            <div class="font-medium">{{ (isset($pattern->existingLeaveHours['total_taken']) && !empty($pattern->existingLeaveHours['total_taken']) ? $pattern->existingLeaveHours['total_taken'] : '00:00') }}</div>
-                                                                        </div>
-                                                                        <div class="col-span-6 sm:col-span-2">
-                                                                            <div class="text-slate-500 font-medium">{{ ($pattern->existingLeaveHours['balance'] >= 0 ? 'Balance' : 'Overtaken') }}</div>
-                                                                            <div class="font-medium {{ ($pattern->existingLeaveHours['balance'] >= 0 ? '' : 'text-danger') }}">{{ ($pattern->existingLeaveHours['balance'] >= 0 ? '' : '-') }} {{ (isset($pattern->existingLeaveHours['balance_html']) && !empty($pattern->existingLeaveHours['balance_html']) ? $pattern->existingLeaveHours['balance_html'] : '00:00') }}</div>
-                                                                        </div>
-
-                                                                        <div class="col-span-12">
-                                                                            <table class="table table-bordered table-hover">
-                                                                                <tr>
-                                                                                    <td>Holiday Base</td>
-                                                                                    <td>{{ (isset($employee->payment->holiday_base) && !empty($employee->payment->holiday_base) ? $employee->payment->holiday_base : '') }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>Start Date</td>
-                                                                                    <td>{{ date('jS F, Y', strtotime($pattern->pattern_start)) }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>End Date</td>
-                                                                                    <td>{{ date('jS F, Y', strtotime($pattern->pattern_end)) }}</td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>Years Working Days</td>
-                                                                                    <td>
-                                                                                        @php 
-                                                                                            $fd = new DateTime(date('Y-m-d', strtotime($pattern->pattern_start)));
-                                                                                            $ed = new DateTime(date('Y-m-d', strtotime($pattern->pattern_end)));
-                                                                                            $df = $fd->diff($ed);
-                                                                                            $years_working_days = $df->format('%a');
-                                                                                            $years_working_days += 1;
-
-                                                                                            echo $years_working_days;
-                                                                                        @endphp
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
-                                                                        </div>
-                                                                        
-                                                                        <div class="col-span-12">
-                                                                            <table class="table table-bordered table-hover bankHolidayTable">
-                                                                                <thead class="cursor-pointer">
-                                                                                    <tr>
-                                                                                        <th class="whitespace-nowrap w-1/5">Status</th>
-                                                                                        <th class="whitespace-nowrap w-1/5">Start Date</th>
-                                                                                        <th class="whitespace-nowrap w-1/5">End Date</th>
-                                                                                        <th class="whitespace-nowrap">Title</th>
-                                                                                        <th class="whitespace-nowrap w-24">Hour</th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    @if(isset($pattern->bankHolidays) && !empty($pattern->bankHolidays))
-                                                                                        @foreach($pattern->bankHolidays as $bhd)
-                                                                                            <tr class="bankHolidayRow">
-                                                                                                <td class="w-1/5">Bank Holiday Auto Booked</td>
-                                                                                                <td class="w-1/5">{{ isset($bhd['start_date']) && !empty($bhd['start_date']) ? date('D jS F, Y', strtotime($bhd['start_date'])) : '' }}</td>
-                                                                                                <td class="w-1/5">{{ isset($bhd['end_date']) && !empty($bhd['end_date']) ? date('D jS F, Y', strtotime($bhd['end_date'])) : '' }}</td>
-                                                                                                <td>{{ isset($bhd['name']) && !empty($bhd['name']) ? $bhd['name'] : '' }}</td>
-                                                                                                <td class="w-24">{{ isset($bhd['hour']) && !empty($bhd['hour']) ? $bhd['hour'] : '00:00' }}</td>
-                                                                                            </tr>
-                                                                                        @endforeach
-                                                                                    @endif
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-
-                                                                        @if(isset($pattern->approvedLeaves) && !empty($pattern->approvedLeaves))
-                                                                        <div class="col-span-12">
-                                                                            <table class="table table-bordered approvedLeaveTable">
-                                                                                @foreach($pattern->approvedLeaves as $leaveDay)
-                                                                                    <tr  class="approvedDayRow {{ (!$can_auth ? 'disabledRow' : '') }}" data-leavedayid="{{ $leaveDay->id }}">
-                                                                                        <td class="w-1/5">
-                                                                                            Approved 
-                                                                                            @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
-                                                                                                @switch($leaveDay->leave->leave_type)
-                                                                                                    @case(1)
-                                                                                                        Holiday / Vacation
-                                                                                                        @break
-                                                                                                    @case(2)
-                                                                                                        Unauthorised Absent
-                                                                                                        @break
-                                                                                                    @case(3)
-                                                                                                        Sick Leave
-                                                                                                        @break
-                                                                                                    @case(4)
-                                                                                                        Authorised Unpaid
-                                                                                                        @break
-                                                                                                    @case(5)
-                                                                                                        Authorised Paid
-                                                                                                        @break
-                                                                                                @endswitch
-                                                                                            @endif
-                                                                                        </td>
-                                                                                        <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                        <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                        <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
-                                                                                        <td class="w-24">
-                                                                                            @php 
-                                                                                                $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
-                                                                                                $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
-                                                                                            
-                                                                                                $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                                                $hourMins .= ':';
-                                                                                                $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                                                                
-                                                                                                echo $hourMins;
-                                                                                            @endphp
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                @endforeach
-                                                                            </table>
-                                                                        </div>
-                                                                        @endif
-
-                                                                        @if(isset($pattern->takenLeaves) && !empty($pattern->takenLeaves))
-                                                                        <div class="col-span-12">
-                                                                            <table class="table table-bordered takenLeaveTable">
-                                                                                @foreach($pattern->takenLeaves as $leaveDay)
-                                                                                    <tr  class="takenDayRow" data-leavedayid="{{ $leaveDay->id }}">
-                                                                                        <td class="w-1/5">
-                                                                                            Taken 
-                                                                                            @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
-                                                                                                @switch($leaveDay->leave->leave_type)
-                                                                                                    @case(1)
-                                                                                                        Holiday / Vacation
-                                                                                                        @break
-                                                                                                    @case(2)
-                                                                                                        Unauthorised Absent
-                                                                                                        @break
-                                                                                                    @case(3)
-                                                                                                        Sick Leave
-                                                                                                        @break
-                                                                                                    @case(4)
-                                                                                                        Authorised Unpaid
-                                                                                                        @break
-                                                                                                    @case(5)
-                                                                                                        Authorised Paid
-                                                                                                        @break
-                                                                                                @endswitch
-                                                                                            @endif
-                                                                                        </td>
-                                                                                        <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                        <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                        <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
-                                                                                        <td class="w-24">
-                                                                                            @php 
-                                                                                                $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
-                                                                                                $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
-                                                                                            
-                                                                                                $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                                                $hourMins .= ':';
-                                                                                                $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                                                                
-                                                                                                echo $hourMins;
-                                                                                            @endphp
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                @endforeach
-                                                                            </table>
-                                                                        </div>
-                                                                        @endif
-                                                                        
-                                                                        @if(isset($pattern->requestedLeaves) && !empty($pattern->requestedLeaves))
-                                                                        <div class="col-span-12">
-                                                                            <table class="table table-bordered">
-                                                                                <tbody>
-                                                                                    @foreach($pattern->requestedLeaves as $leave)
-                                                                                        @php
-                                                                                            $leaveHours = 0;
-                                                                                            $leaveDays = 0;
-                                                                                        @endphp
-                                                                                        @if(isset($leave->leaveDays))
-                                                                                            @foreach($leave->leaveDays as $day)
-                                                                                                @php 
-                                                                                                    $leaveHours += $day->hour;
-                                                                                                    $leaveDays += 1;
-                                                                                                @endphp
-                                                                                            @endforeach
+                                                                            <div class="ep-holiday-balance-panel__summary">
+                                                                                <div class="ep-holiday-balance-panel__entitlement">
+                                                                                    <span class="ep-holiday-summary__eyebrow">Entitlement</span>
+                                                                                    <div class="ep-holiday-balance-panel__entitlement-values">
+                                                                                        <span>{{ $pattern->holidayEntitlement ?? '00:00' }}</span>
+                                                                                        @if($can_auth)
+                                                                                            <button data-year="{{ $year }}" data-pattern="{{ $pattern->id }}" data-tw-toggle="modal" data-tw-target="#empHolidayAdjustmentModal" class="holidayAdjustmentBtn ep-holiday-adjust-btn" type="button">
+                                                                                                <i data-lucide="repeat-1" class="w-3.5 h-3.5"></i>
+                                                                                            </button>
                                                                                         @endif
-                                                                                        <tr class="newRequestRow  {{ (!$can_auth ? 'disabledRow' : '') }}" data-id="{{ $leave->id }}">
-                                                                                            <td class="w-1/5">
-                                                                                                <div class="flex justify-start items-start relative">
-                                                                                                    @if(isset($leave->supervisedDays) && $leave->supervisedDays->count() > 0)
-                                                                                                        <span class="w-auto text-success py-0 mr-2 relative" style="top: 2px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-check" class="lucide lucide-shield-check w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path><path d="m9 12 2 2 4-4"></path></svg></span>
-                                                                                                    @endif
-                                                                                                    <span>Request for approval ({{ ($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day') }})</span>
-                                                                                                </div>
-                                                                                            </td>
-                                                                                            <td class="w-1/5">
-                                                                                                {{ date('D jS F, Y', strtotime($leave->from_date))}}
-                                                                                            </td>
-                                                                                            <td class="w-1/5">
-                                                                                                {{ date('D jS F, Y', strtotime($leave->to_date))}}
-                                                                                            </td>
-                                                                                            <td>Holiday / Vacation</td>
-                                                                                            <td class="w-24">
-                                                                                                @php 
-                                                                                                    $hours = (intval(trim($leaveHours)) / 60 >= 1) ? intval(intval(trim($leaveHours)) / 60) : '00';
-                                                                                                    $mins = (intval(trim($leaveHours)) % 60 != 0) ? intval(trim($leaveHours)) % 60 : '00';
-                                                                                                
-                                                                                                    $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                                                    $hourMins .= ':';
-                                                                                                    $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                                                                    
-                                                                                                    echo $hourMins;
-                                                                                                @endphp
-                                                                                            </td>
-                                                                                        </tr>
-                                                                                    @endforeach
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                        @endif
-
-                                                                        @if(isset($pattern->rejectedLeaves) && !empty($pattern->rejectedLeaves))
-                                                                            <div class="col-span-12">
-                                                                                <table class="table table-bordered rejectedLeaveTable">
-                                                                                    <tbody>
-                                                                                        @foreach($pattern->rejectedLeaves as $leaveDay)
-                                                                                            <tr class="rejectedDayRow {{ (!$can_auth ? 'disabledRow' : '') }}" data-leavedayid="{{ $leaveDay->id }}">
-                                                                                                <td class="w-1/5">
-                                                                                                    Rejected  
-                                                                                                    @if(isset($leaveDay->leave->leave_type) && $leaveDay->leave->leave_type > 0)
-                                                                                                        @switch($leaveDay->leave->leave_type)
-                                                                                                            @case(1)
-                                                                                                                Holiday / Vacation
-                                                                                                                @break
-                                                                                                            @case(2)
-                                                                                                                Unauthorised Absent
-                                                                                                                @break
-                                                                                                            @case(3)
-                                                                                                                Sick Leave
-                                                                                                                @break
-                                                                                                            @case(4)
-                                                                                                                Authorised Unpaid
-                                                                                                                @break
-                                                                                                            @case(5)
-                                                                                                                Authorised Paid
-                                                                                                                @break
-                                                                                                        @endswitch
-                                                                                                    @endif
-                                                                                                </td>
-                                                                                                <td class="w-1/5">{{ isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                                <td class="w-1/5">{{ isset($leaveDay['leave_date']) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : '' }}</td>
-                                                                                                <td>{{ isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : '' }}</td>
-                                                                                                <td class="w-24">
-                                                                                                    @php 
-                                                                                                        $hours = (intval(trim($leaveDay->hour)) / 60 >= 1) ? intval(intval(trim($leaveDay->hour)) / 60) : '00';
-                                                                                                        $mins = (intval(trim($leaveDay->hour)) % 60 != 0) ? intval(trim($leaveDay->hour)) % 60 : '00';
-                                                                                                    
-                                                                                                        $hourMins = (($hours < 10 && $hours != '00') ? '0' . $hours : $hours);
-                                                                                                        $hourMins .= ':';
-                                                                                                        $hourMins .= ($mins < 10 && $mins != '00') ? '0'.$mins : $mins;
-                                                                                                        
-                                                                                                        echo $hourMins;
-                                                                                                    @endphp
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        @endforeach
-                                                                                    </tbody>
-                                                                                </table>
+                                                                                        <span class="is-adjustment">{{ $pattern->adjustmentHtml ?? '+00:00' }}</span>
+                                                                                        <span class="is-equals">=</span>
+                                                                                        <strong>{{ $pattern->totalHolidayEntitlement ?? '00:00' }}</strong>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="ep-holiday-balance-panel__stats">
+                                                                                    <div>
+                                                                                        <span>Bank Holiday</span>
+                                                                                        <strong>{{ $pattern->autoBookedBankHoliday ?? '00:00' }}</strong>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span>Taken / Booked</span>
+                                                                                        <strong>{{ $pattern->existingLeaveHours['taken'] ?? '00:00' }}</strong>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span>Holiday Base</span>
+                                                                                        <strong>{{ isset($employee->payment->holiday_base) && !empty($employee->payment->holiday_base) ? $employee->payment->holiday_base : '5.60' }}</strong>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="ep-holiday-balance-panel__dates">
+                                                                                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                                                                                    {{ date('j M Y', strtotime($pattern->pattern_start)) }} - {{ date('j M Y', strtotime($pattern->pattern_end)) }} · {{ $pattern->workingDays ?? 0 }} working days / year
+                                                                                </div>
                                                                             </div>
-                                                                        @endif
+                                                                        </div>
 
+                                                                        <div class="ep-holiday-filter-bar">
+                                                                            <span class="ep-holiday-filter-bar__label">Filter</span>
+                                                                            <button type="button" class="holiday-filter-chip is-active" data-filter="all">All <span>{{ $activityCounts['all'] ?? 0 }}</span></button>
+                                                                            <button type="button" class="holiday-filter-chip" data-filter="bank">Bank Holidays <span>{{ $activityCounts['bank'] ?? 0 }}</span></button>
+                                                                            <button type="button" class="holiday-filter-chip" data-filter="approved">Approved <span>{{ $activityCounts['approved'] ?? 0 }}</span></button>
+                                                                            <button type="button" class="holiday-filter-chip" data-filter="pending">Pending <span>{{ $activityCounts['pending'] ?? 0 }}</span></button>
+                                                                            <button type="button" class="holiday-filter-chip" data-filter="taken">Taken <span>{{ $activityCounts['taken'] ?? 0 }}</span></button>
+                                                                            @if(($activityCounts['rejected'] ?? 0) > 0)
+                                                                                <button type="button" class="holiday-filter-chip" data-filter="rejected">Rejected <span>{{ $activityCounts['rejected'] ?? 0 }}</span></button>
+                                                                            @endif
+                                                                        </div>
+
+                                                                        <div class="ep-holiday-record-table">
+                                                                            <div class="ep-holiday-record-table__head">
+                                                                                <div>Status</div>
+                                                                                <div>Title & Dates</div>
+                                                                                <div>Hours</div>
+                                                                            </div>
+                                                                            <div class="ep-holiday-record-table__body">
+                                                                                @forelse($activityRows as $row)
+                                                                                    @php
+                                                                                        $clickClass = match($row['action']) {
+                                                                                            'approved-day' => 'approvedDayRow',
+                                                                                            'taken-day' => 'takenDayRow',
+                                                                                            'new-request' => 'newRequestRow',
+                                                                                            'rejected-day' => 'rejectedDayRow',
+                                                                                            default => ''
+                                                                                        };
+                                                                                        $requiresAuth = in_array($row['action'], ['approved-day', 'new-request', 'rejected-day']);
+                                                                                    @endphp
+                                                                                    <div
+                                                                                        class="ep-holiday-record ep-holiday-record--{{ $row['status'] }} {{ $clickClass }} {{ $requiresAuth && !$can_auth ? 'disabledRow' : '' }}"
+                                                                                        data-status="{{ $row['status'] }}"
+                                                                                        @if($row['action'] === 'approved-day' || $row['action'] === 'taken-day' || $row['action'] === 'rejected-day')
+                                                                                            data-leavedayid="{{ $row['data_id'] }}"
+                                                                                        @elseif($row['action'] === 'new-request')
+                                                                                            data-id="{{ $row['data_id'] }}"
+                                                                                        @endif
+                                                                                    >
+                                                                                        <div class="ep-holiday-record__status">
+                                                                                            <span class="ep-holiday-record__dot"></span>
+                                                                                            <span class="ep-holiday-record__labels">
+                                                                                                <span>{{ $row['status_label'] }}</span>
+                                                                                                <small>{{ $row['status_meta'] }}</small>
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div class="ep-holiday-record__details">
+                                                                                            <div class="ep-holiday-record__title">
+                                                                                                @if(!empty($row['has_supervised_days']))
+                                                                                                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                                                                                @endif
+                                                                                                <span>{{ $row['title'] }}</span>
+                                                                                            </div>
+                                                                                            <div class="ep-holiday-record__date">{{ $row['date_range'] }}</div>
+                                                                                        </div>
+                                                                                        <div class="ep-holiday-record__hour">{{ $row['hour'] }}</div>
+                                                                                    </div>
+                                                                                @empty
+                                                                                    <div class="ep-holiday-record-empty">
+                                                                                        <i data-lucide="inbox" class="w-5 h-5"></i>
+                                                                                        No holiday activity found for this pattern.
+                                                                                    </div>
+                                                                                @endforelse
+                                                                                @if($activityRows->count() > 0)
+                                                                                    <div class="ep-holiday-record-empty js-holiday-record-empty" style="display:none;">
+                                                                                        <i data-lucide="inbox" class="w-5 h-5"></i>
+                                                                                        No records match this filter.
+                                                                                    </div>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    @endforeach
+                                                        @endforeach
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                @endforeach 
+                                @endforeach
                             </div>
-                            @else
-                                <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holiday data not found!
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-span-12 sm:col-span-4">
-                <div class="intro-y box p-5 pb-7">
-                    <div class="grid grid-cols-12 gap-0 items-center">
-                        <div class="col-span-6">
-                            <div class="font-medium text-base">My Leave Allowance</div>
-                        </div>
-                    </div>
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="relative holidayStatistics"> 
-                        {!! $holidayStatistics !!}
-                    </div>
-                </div>
-                <div class="intro-y box p-5 pb-7 mt-5">
-                    <div class="grid grid-cols-12 gap-0 items-center">
-                        <div class="col-span-6">
-                            <div class="font-medium text-base">Submit Leave Request</div>
-                        </div>
-                    </div>
-                    <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="relative"> 
-                        @if($holidayYears->count() > 0 && $empPatterns->count() > 0)
-                        <form method="post" action="#" id="employeeLeaveForm">
-                            <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
-                            <div class="grid grid-cols-12 gap-0">
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label class="block font-medium pt-2">Holiday Year</label>
-                                </div>
-                                <div class="col-span-12 sm:col-span-8">
-                                    <select class="form-control w-full" name="leave_holiday_years">
-                                        <option value="">Please Select</option>
-                                        @if($holidayYears->count() > 0)
-                                            @foreach($holidayYears as $hy)
-                                                @php
-                                                    $today = date('Y-m-d');
-                                                    $startDate = (isset($hy->start_date) && !empty($hy->start_date) ? date('Y-m-d', strtotime($hy->start_date)) : '');
-                                                    $endDate = (isset($hy->end_date) && !empty($hy->end_date) ? date('Y-m-d', strtotime($hy->end_date)) : '');
-                                                    $selected = ($today >= $startDate && $today <= $endDate ? 'selected' : '');
-                                                @endphp 
-                                                {{--@if($today >= $startDate && $today <= $endDate)--}}
-                                                    <option {{ $selected }} data-notice="{{ $hy->notice_period }}" value="{{ $hy->id }}">
-                                                        {{ date('Y', strtotime($hy->start_date)) }} - {{ date('Y', strtotime($hy->end_date)) }}
-                                                    </option>
-                                                {{--@endif--}}
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5">
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label class="font-medium block pt-2">Work Pattern</label>
-                                </div>
-                                <div class="col-span-12 sm:col-span-8">
-                                    <select class="form-control w-full" name="leave_pattern">
-                                        <option value="">Please Select</option>
-                                        @if($empPatterns->count() > 0)
-                                            @foreach($empPatterns as $pt)
-                                                <option {{ $activePattern == $pt->id ? 'Selected' : '' }} value="{{ $pt->id }}">{{ $pt->id }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5">
-                                <div class="col-span-12 sm:col-span-4">
-                                    <label class="font-medium block pt-2">Type</label>
-                                </div>
-                                <div class="col-span-12 sm:col-span-8">
-                                    <select class="form-control w-full" name="leave_type">
-                                        {!! $leaveOptionTypes !!}
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5  relative {{ (!$can_auth ? 'disabledElement' : '') }}">
-                                <div class="col-span-12 sm:col-span-4"></div>
-                                <div class="col-span-12 sm:col-span-8">
-                                    <div class="leaveCalendar" 
-                                        id="leaveCalendar" 
-                                        data-start="{{ (isset($calendarOptions['startDate']) ? $calendarOptions['startDate'] : '') }}" 
-                                        data-end="{{ (isset($calendarOptions['endDate']) ? $calendarOptions['endDate'] : '') }}" 
-                                        data-disable-dates="{{ (isset($calendarOptions['disableDates']) ? $calendarOptions['disableDates'] : '') }}" 
-                                        data-disable-days="{{ (isset($calendarOptions['disableDays']) ? $calendarOptions['disableDays'] : '') }}" 
-                                        ></div>
-                                </div>
-                            </div>
-                            
-                            <div class="leaveFormStep2" style="display: none;">
-                                
-                            </div>
-                            <div class="grid grid-cols-12 gap-0 mt-5 relative {{ (!$can_auth ? 'disabledElement' : '') }}">
-                                <div class="col-span-12 sm:col-span-4"></div>
-                                <div class="col-span-12 sm:col-span-8 text-right">
-                                    <button type="submit" id="confirmRequest" disabled class="btn btn-primary w-auto save">  
-                                        <i data-lucide="calendar-check" class="w-4 h-4 mr-2"></i>   
-                                        Confirm Request 
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                            stroke="white" class="w-4 h-4 ml-2 loaderSvg">
-                                            <g fill="none" fill-rule="evenodd">
-                                                <g transform="translate(1 1)" stroke-width="4">
-                                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                    </path>
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                        @else 
+                        @else
                             <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                                <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Holiday year of Employee working pattern not found!
+                                <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Valid holiday data not found!
                             </div>
                         @endif
                     </div>
                 </div>
+                <div class="col-span-12 xl:col-span-4">
+                    <div class="ep-holiday-sidebar">
+                        <section class="ep-holiday-card ep-holiday-card--accent">
+                            <div class="ep-holiday-card__header">
+                                <div class="ep-holiday-card__icon is-accent">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                                </div>
+                                <div class="ep-holiday-card__copy">
+                                    <h2>My Leave Allowance</h2>
+                                </div>
+                            </div>
+                            <div class="ep-holiday-card__body">
+                                <div class="relative holidayStatistics">
+                                    {!! $holidayStatistics !!}
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="ep-holiday-card ep-holiday-card--primary">
+                            <div class="ep-holiday-card__header">
+                                <div class="ep-holiday-card__icon">
+                                    <i data-lucide="file-check" class="w-5 h-5"></i>
+                                </div>
+                                <div class="ep-holiday-card__copy">
+                                    <h2>Submit Leave Request</h2>
+                                </div>
+                            </div>
+                            <div class="ep-holiday-card__body">
+                                @if($holidayYears->count() > 0 && $empPatterns->count() > 0)
+                                    <form method="post" action="#" id="employeeLeaveForm" class="ep-leave-form">
+                                        <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+
+                                        <div class="ep-form-field">
+                                            <label>Holiday Year</label>
+                                            <select class="form-control w-full" name="leave_holiday_years">
+                                                <option value="">Please Select</option>
+                                                @foreach($holidayYears as $hy)
+                                                    @php
+                                                        $today = date('Y-m-d');
+                                                        $startDate = (isset($hy->start_date) && !empty($hy->start_date) ? date('Y-m-d', strtotime($hy->start_date)) : '');
+                                                        $endDate = (isset($hy->end_date) && !empty($hy->end_date) ? date('Y-m-d', strtotime($hy->end_date)) : '');
+                                                        $selected = ($today >= $startDate && $today <= $endDate ? 'selected' : '');
+                                                    @endphp
+                                                    <option {{ $selected }} data-notice="{{ $hy->notice_period }}" value="{{ $hy->id }}">
+                                                        {{ date('Y', strtotime($hy->start_date)) }} - {{ date('Y', strtotime($hy->end_date)) }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="ep-form-grid ep-form-grid--two">
+                                            <div class="ep-form-field">
+                                                <label>Work Pattern</label>
+                                                <select class="form-control w-full" name="leave_pattern">
+                                                    <option value="">Please Select</option>
+                                                    @foreach($empPatterns as $pt)
+                                                        <option {{ $activePattern == $pt->id ? 'Selected' : '' }} value="{{ $pt->id }}">{{ $pt->id }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="ep-form-field">
+                                                <label>Type</label>
+                                                <select class="form-control w-full" name="leave_type">
+                                                    {!! $leaveOptionTypes !!}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="ep-leave-calendar-wrap relative {{ (!$can_auth ? 'disabledElement' : '') }}">
+                                            <div class="leaveCalendar"
+                                                id="leaveCalendar"
+                                                data-start="{{ (isset($calendarOptions['startDate']) ? $calendarOptions['startDate'] : '') }}"
+                                                data-end="{{ (isset($calendarOptions['endDate']) ? $calendarOptions['endDate'] : '') }}"
+                                                data-disable-dates="{{ (isset($calendarOptions['disableDates']) ? $calendarOptions['disableDates'] : '') }}"
+                                                data-disable-days="{{ (isset($calendarOptions['disableDays']) ? $calendarOptions['disableDays'] : '') }}"
+                                            ></div>
+                                        </div>
+
+                                        <div class="leaveFormStep2" style="display: none;"></div>
+
+                                        <div class="ep-leave-submit relative {{ (!$can_auth ? 'disabledElement' : '') }}">
+                                            <button type="submit" id="confirmRequest" disabled class="btn btn-primary save ep-holiday-submit-btn">
+                                                <i data-lucide="calendar-check" class="w-4 h-4 mr-2"></i>
+                                                Confirm Request
+                                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2 loaderSvg">
+                                                    <g fill="none" fill-rule="evenodd">
+                                                        <g transform="translate(1 1)" stroke-width="4">
+                                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                            </path>
+                                                        </g>
+                                                    </g>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
+                                    <div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
+                                        <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Holiday year of Employee working pattern not found!
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
     <!-- BEGIN: Edit New Request Modal -->
     <div id="empNewLeaveRequestModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="empNewLeaveRequestForm" enctype="multipart/form-data">
-                <div class="modal-content">
+                <div class="modal-content ep-holiday-modal ep-holiday-modal--review">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Update Leave Request</h2>
                         <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
@@ -549,24 +377,32 @@
     <div id="empHolidayAdjustmentModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="empHolidayAdjustmentForm" enctype="multipart/form-data">
-                <div class="modal-content">
+                <div class="modal-content ep-holiday-modal ep-holiday-modal--adjustment">
                     <div class="modal-header">
                         <h2 class="font-medium text-base mr-auto">Holiday Hour Adjustment</h2>
                         <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
                     </div>
                     <div class="modal-body">
-                        <div class="input-group adjustmentInpugGroup">
-                            <div class="input-group-text relative">
-                                <div class="adjustmentRadioGroup">
-                                    <input type="radio" name="adjustmentOpt" value="1" id="adjustmentOpt_1"/>
-                                    <label for="adjustmentOpt_1">+</label>
+                        <div class="ep-holiday-adjustment">
+                            <div class="ep-holiday-adjustment__intro">
+                                Choose whether to add or deduct time, then enter the adjustment amount.
+                            </div>
+                            <div class="ep-holiday-adjustment__grid">
+                                <div class="ep-holiday-adjustment__operators">
+                                    <div class="adjustmentRadioGroup">
+                                        <input type="radio" name="adjustmentOpt" value="1" id="adjustmentOpt_1"/>
+                                        <label for="adjustmentOpt_1">+</label>
+                                    </div>
+                                    <div class="adjustmentRadioGroup argMinus">
+                                        <input type="radio" name="adjustmentOpt" value="2" id="adjustmentOpt_2"/>
+                                        <label for="adjustmentOpt_2">-</label>
+                                    </div>
                                 </div>
-                                <div class="adjustmentRadioGroup argMinus">
-                                    <input type="radio" name="adjustmentOpt" value="2" id="adjustmentOpt_2"/>
-                                    <label for="adjustmentOpt_2">-</label>
+                                <div class="ep-holiday-adjustment__field">
+                                    <label for="adjustmentHourInput" class="form-label">Hours</label>
+                                    <input id="adjustmentHourInput" type="text" disabled class="form-control" placeholder="00:00" name="adjustment">
                                 </div>
                             </div>
-                            <input type="text" disabled class="form-control" placeholder="00:00" name="adjustment">
                         </div>
                         <div class="acc__input-error error-adjustment text-danger mt-2"></div>
                     </div>
@@ -601,15 +437,17 @@
     <!-- BEGIN: Success Modal Content -->
     <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+            <div class="modal-content ep-holiday-state-modal ep-holiday-state-modal--success">
+                <div class="modal-body">
+                    <div class="ep-holiday-state-modal__body">
+                        <div class="ep-holiday-state-modal__icon">
+                            <i data-lucide="check-circle" class="w-10 h-10"></i>
+                        </div>
+                        <div class="ep-holiday-state-modal__title successModalTitle"></div>
+                        <div class="ep-holiday-state-modal__desc successModalDesc"></div>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="NONE" class="btn btn-primary successCloser w-24">Ok</button>
+                    <div class="ep-holiday-state-modal__actions">
+                        <button type="button" data-action="NONE" class="btn btn-primary successCloser">Ok</button>
                     </div>
                 </div>
             </div>
@@ -620,15 +458,17 @@
     <!-- BEGIN: Warning Modal Content -->
     <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+            <div class="modal-content ep-holiday-state-modal ep-holiday-state-modal--warning">
+                <div class="modal-body">
+                    <div class="ep-holiday-state-modal__body">
+                        <div class="ep-holiday-state-modal__icon">
+                            <i data-lucide="alert-octagon" class="w-10 h-10"></i>
+                        </div>
+                        <div class="ep-holiday-state-modal__title warningModalTitle"></div>
+                        <div class="ep-holiday-state-modal__desc warningModalDesc"></div>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="warningCloser btn btn-primary w-24">Ok</button>
+                    <div class="ep-holiday-state-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="warningCloser btn btn-primary">Ok</button>
                     </div>
                 </div>
             </div>
@@ -639,16 +479,18 @@
     <!-- BEGIN: Delete Confirm Modal Content -->
     <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
+            <div class="modal-content ep-holiday-state-modal ep-holiday-state-modal--danger">
+                <div class="modal-body">
+                    <div class="ep-holiday-state-modal__body">
+                        <div class="ep-holiday-state-modal__icon">
+                            <i data-lucide="x-circle" class="w-10 h-10"></i>
+                        </div>
+                        <div class="ep-holiday-state-modal__title confModTitle">Are you sure?</div>
+                        <div class="ep-holiday-state-modal__desc confModDesc"></div>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                    <div class="ep-holiday-state-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger">Yes, I agree</button>
                     </div>
                 </div>
             </div>

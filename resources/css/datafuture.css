@@ -4326,6 +4326,19 @@ body.employee-profile-body .modal .ts-control {
     width: 100% !important;
 }
 
+body.employee-profile-body .modal .ts-control.form-control,
+body.employee-profile-body .modal .ts-control.form-select {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+}
+
 body.employee-profile-body .modal .ts-input,
 body.employee-profile-body .modal .ts-control {
     border-radius: 8px !important;
@@ -4527,6 +4540,66 @@ body.employee-profile-body .modal .ts-dropdown .dropdown-input:focus {
     outline: none !important;
 }
 
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown {
+    background: #ffffff !important;
+    border: 1px solid #d7e1e6 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 12px 30px rgba(15, 37, 45, 0.16) !important;
+    margin-top: 4px !important;
+    overflow: hidden !important;
+    z-index: 100000 !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .dropdown-input-wrap {
+    border-bottom: 1px solid #e6efef !important;
+    padding: 8px !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .dropdown-input {
+    border: 1px solid #d7e1e6 !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+    color: #203444 !important;
+    font-size: 13px !important;
+    height: 34px !important;
+    padding: 0 11px !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .dropdown-input:focus {
+    border-color: #a9cfd0 !important;
+    box-shadow: 0 0 0 3px rgba(15, 123, 118, 0.08) !important;
+    outline: none !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .dropdown-input::placeholder {
+    color: #a0aebe !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .ts-dropdown-content {
+    max-height: 260px !important;
+    overflow-y: auto !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .option,
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .optgroup-header {
+    color: #203444 !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .optgroup-header {
+    background: #f7fafb !important;
+    color: #8092a2 !important;
+    font-weight: 700 !important;
+}
+
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .option:hover:not(.active),
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .option.active,
+body.employee-profile-body .employee-profile-tom-dropdown.ts-dropdown .active {
+    background: #eaf4f3 !important;
+    color: #0f7b76 !important;
+}
+
 body.employee-profile-body .modal .form-check-input {
     border-color: #cad7d6 !important;
 }
@@ -4534,6 +4607,347 @@ body.employee-profile-body .modal .form-check-input {
 body.employee-profile-body .modal .form-check-input:checked {
     background-color: #0f7b76 !important;
     border-color: #0f7b76 !important;
+}
+
+body.employee-profile-body #empNewLeaveRequestModal .modal-body,
+body.employee-profile-body #successModal .modal-body,
+body.employee-profile-body #warningModal .modal-body,
+body.employee-profile-body #confirmModal .modal-body {
+    padding: 0 !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .modal-dialog {
+    max-width: 520px !important;
+}
+
+body.employee-profile-body .ep-holiday-adjustment {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+body.employee-profile-body .ep-holiday-adjustment__intro,
+body.employee-profile-body .ep-holiday-review__intro {
+    background: #f7fafb;
+    border: 1px solid #e4ecef;
+    border-radius: 12px;
+    color: #6e8b88;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 14px 16px;
+}
+
+body.employee-profile-body .ep-holiday-adjustment__grid {
+    align-items: end;
+    display: grid;
+    gap: 0;
+    grid-template-columns: 52px minmax(0, 1fr);
+}
+
+body.employee-profile-body .ep-holiday-adjustment__operators {
+    align-self: end;
+    border: 1px solid #d7e1e6;
+    border-radius: 8px 0 0 8px;
+    border-right: 0;
+    display: flex;
+    flex-direction: column;
+    height: 46px;
+    overflow: hidden;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup {
+    flex: 1 1 50%;
+    height: auto !important;
+    left: auto !important;
+    position: relative !important;
+    top: auto !important;
+    width: 100% !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup.argMinus {
+    bottom: auto !important;
+    top: auto !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup + .adjustmentRadioGroup {
+    border-top: 1px solid #d7e1e6;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup input {
+    height: 1px !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup label {
+    align-items: center !important;
+    background: rgb(var(--color-primary) / 0.05) !important;
+    color: #5a7471 !important;
+    display: flex !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    height: 100% !important;
+    inset: auto !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    position: relative !important;
+    transition: background-color .16s ease, color .16s ease, border-color .16s ease !important;
+    width: 100% !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup:not(.argMinus) label {
+    background: rgb(var(--color-primary) / 0.05) !important;
+    color: rgb(var(--color-primary)) !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup.argMinus label {
+    background: #fdeeee !important;
+    color: #bf5a5a !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup:not(.argMinus) label:hover {
+    background: rgb(var(--color-primary) / 0.10) !important;
+    color: rgb(var(--color-primary)) !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup.argMinus label:hover {
+    background: #fbe3e3 !important;
+    color: #ae4f4f !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup input:checked + label {
+    background: rgb(var(--color-primary) / 0.12) !important;
+    color: rgb(var(--color-primary)) !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .adjustmentRadioGroup.argMinus input:checked + label {
+    background: #f8dddd !important;
+    color: #a84a4a !important;
+}
+
+body.employee-profile-body .ep-holiday-adjustment__field .form-label {
+    margin-bottom: 8px !important;
+}
+
+body.employee-profile-body .ep-holiday-adjustment__field .form-control {
+    border-radius: 0 8px 8px 0 !important;
+    margin-left: -1px !important;
+}
+
+body.employee-profile-body #empHolidayAdjustmentModal .form-control {
+    height: 46px !important;
+    max-height: 46px !important;
+    min-height: 46px !important;
+}
+
+body.employee-profile-body .ep-holiday-review {
+    padding: 22px 24px 16px;
+}
+
+body.employee-profile-body .ep-holiday-review-table {
+    border: 1px solid #e4ecef;
+    border-radius: 14px;
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 0;
+    width: 100%;
+}
+
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable th,
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable td {
+    border-bottom: 1px solid #e9efee;
+    padding: 14px 16px;
+}
+
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable th + th,
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable td + td {
+    border-left: 1px solid #e9efee;
+}
+
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable thead th {
+    background: #f7fafb;
+    color: #7d9693;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding-top: 11px;
+    padding-bottom: 11px;
+    text-transform: uppercase;
+}
+
+body.employee-profile-body .ep-holiday-review-table .leaveRequestDaysTable tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+body.employee-profile-body .ep-holiday-review__date strong,
+body.employee-profile-body .ep-holiday-review__hour {
+    color: #17312f;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+body.employee-profile-body .ep-holiday-review__choice {
+    align-items: center;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    margin: 0;
+}
+
+body.employee-profile-body .ep-holiday-review__radio {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff;
+    border: 1.5px solid #cad7d6;
+    border-radius: 999px;
+    cursor: pointer;
+    height: 20px;
+    margin: 0;
+    position: relative;
+    transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+    width: 20px;
+}
+
+body.employee-profile-body .ep-holiday-review__radio::after {
+    background: currentColor;
+    border-radius: 999px;
+    content: "";
+    height: 8px;
+    left: 50%;
+    opacity: 0;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity .16s ease;
+    width: 8px;
+}
+
+body.employee-profile-body .ep-holiday-review__radio:checked {
+    background: rgb(var(--color-primary) / 0.10);
+    border-color: rgb(var(--color-primary));
+    color: rgb(var(--color-primary));
+}
+
+body.employee-profile-body .ep-holiday-review__choice.is-deny .ep-holiday-review__radio:checked {
+    background: #fdeeee;
+    border-color: #c4432f;
+    color: #c4432f;
+}
+
+body.employee-profile-body .ep-holiday-review__radio:checked::after {
+    opacity: 1;
+}
+
+body.employee-profile-body .ep-holiday-review__empty {
+    color: #7d9693;
+    font-size: 13px;
+    padding: 18px 0;
+    text-align: center;
+}
+
+body.employee-profile-body .ep-holiday-state-modal .modal-body {
+    background: #ffffff !important;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__body {
+    padding: 34px 32px 20px;
+    text-align: center;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__icon {
+    align-items: center;
+    border: 3px solid currentColor;
+    border-radius: 999px;
+    color: #0f7b76;
+    display: inline-flex;
+    height: 88px;
+    justify-content: center;
+    width: 88px;
+}
+
+body.employee-profile-body .ep-holiday-state-modal--warning .ep-holiday-state-modal__icon,
+body.employee-profile-body .ep-holiday-state-modal--danger .ep-holiday-state-modal__icon {
+    color: #c4432f;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__title {
+    color: #203444;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 22px;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__desc {
+    color: #61758f;
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 14px auto 0;
+    max-width: 360px;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 0 32px 32px;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn {
+    align-items: center;
+    border-radius: 10px;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 8px;
+    height: 40px;
+    justify-content: center;
+    min-width: 120px;
+    padding: 0 18px;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-outline-secondary {
+    background: #ffffff;
+    border: 1px solid #d7e1e6;
+    color: #667b95;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-outline-secondary:hover,
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-outline-secondary:focus {
+    background: #f7fafb;
+    border-color: #cbd8df;
+    color: #4f637a;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-primary {
+    background: rgb(var(--color-primary) / 0.05);
+    border: 1px solid rgb(var(--color-primary) / 0.25);
+    color: rgb(var(--color-primary));
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-primary:hover,
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-primary:focus {
+    background: rgb(var(--color-primary) / 0.10);
+    border-color: rgb(var(--color-primary) / 0.35);
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-danger {
+    background: #c4432f;
+    border: 1px solid #c4432f;
+    color: #ffffff;
+}
+
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-danger:hover,
+body.employee-profile-body .ep-holiday-state-modal__actions .btn-danger:focus {
+    background: #ab3928;
+    border-color: #ab3928;
 }
 
 .ep-payment-page {
@@ -4855,11 +5269,13 @@ body.employee-profile-body .modal .form-check-input:checked {
     align-items: center;
     justify-content: space-between;
     gap: 0.9rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    width: 100%;
 }
 
 .ep-payment-page .table-report--tabulator .tabulator-footer .tabulator-page-counter {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     gap: 0.5rem;
     min-height: 32px;
@@ -4885,6 +5301,8 @@ body.employee-profile-body .modal .form-check-input:checked {
 }
 
 .ep-payment-page .table-report--tabulator .tabulator-footer .tabulator-paginator {
+    flex: 1 1 auto;
+    width: 100%;
     margin-left: auto;
     padding: 0;
     border: 0;
@@ -4892,10 +5310,12 @@ body.employee-profile-body .modal .form-check-input:checked {
     background: transparent;
     box-shadow: none;
     flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .ep-payment-page .table-report--tabulator .tabulator-footer .tabulator-paginator > label {
     display: inline-flex;
+    margin-right: auto;
 }
 
 .ep-payment-page .table-report--tabulator .tabulator-footer .tabulator-paginator .tabulator-page {
@@ -5722,3 +6142,993 @@ body.employee-profile-body .modal .form-check-input:checked {
 }
 .ep-tk-foot__v { font-size: 15px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
 .ep-tk-foot__stat--pay .ep-tk-foot__v { color: #e0a82e; }
+
+/* Employee holiday page */
+.ep-holiday-page {
+    color: #17312f;
+}
+.ep-holiday-page .ep-holiday-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ep-holiday-page .ep-holiday-intro-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    border-left: 4px solid #0f7b76;
+    border-bottom: 1px solid #e7efee;
+    border-radius: 1rem 1rem 0.8rem 0.8rem;
+    background:
+        linear-gradient(90deg, rgba(227, 240, 239, 0.95) 0%, rgba(243, 249, 248, 0.78) 28%, rgba(255, 255, 255, 0) 72%),
+        #ffffff;
+}
+.ep-holiday-page .ep-holiday-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 5rem;
+}
+.ep-holiday-page .ep-holiday-card {
+    background: #fff;
+    border: 1px solid #e1eae9;
+    border-left: 4px solid #0f7b76;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(11, 43, 40, 0.05);
+    overflow: hidden;
+}
+.ep-holiday-page .ep-holiday-card--accent {
+    border-left-color: #e4b33c;
+}
+.ep-holiday-page .ep-holiday-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1.125rem 1.5rem;
+    border-bottom: 1px solid #edf3f2;
+    background: linear-gradient(180deg, #fbfcfc 0%, #f7f9f9 100%);
+}
+.ep-holiday-page .ep-holiday-card__icon {
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #0f7b76;
+    background: #e3f0ef;
+    flex: none;
+}
+.ep-holiday-page .ep-holiday-card__icon.is-accent {
+    color: #b07e14;
+    background: #fbf1dc;
+}
+.ep-holiday-page .ep-holiday-card__copy h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #12302d;
+}
+.ep-holiday-page .ep-holiday-card__copy p {
+    margin: 0.15rem 0 0;
+    font-size: 0.8125rem;
+    color: #6e8b88;
+}
+.ep-holiday-page .ep-holiday-card__body {
+    padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.ep-holiday-page .ep-holiday-year-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+}
+.ep-holiday-page .ep-holiday-year-block {
+    border: 1px solid #e4eceb;
+    border-radius: 0.95rem;
+    overflow: hidden;
+    background: #fff;
+}
+.ep-holiday-page .ep-holiday-year-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.95rem 1.125rem;
+    border: 0;
+    border-left: 3px solid #0f7b76;
+    background: #f3f9f8;
+    cursor: pointer;
+    text-align: left;
+}
+.ep-holiday-page .ep-holiday-year-toggle.collapsed {
+    background: #fff;
+    border-left-color: transparent;
+}
+.ep-holiday-page .ep-holiday-year-toggle__eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #0f7b76;
+}
+.ep-holiday-page .ep-holiday-year-toggle.collapsed .ep-holiday-year-toggle__eyebrow {
+    color: #8aa3a0;
+}
+.ep-holiday-page .ep-holiday-year-toggle__title {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 1.06rem;
+    font-weight: 700;
+    color: #12302d;
+}
+.ep-holiday-page .ep-holiday-year-toggle__badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: #f0f2f1;
+    color: #7a938f;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+.ep-holiday-page .ep-holiday-year-toggle__badge.is-current {
+    background: #e3f0ef;
+    color: #0f7b76;
+}
+.ep-holiday-page .ep-holiday-year-toggle__arrow,
+.ep-holiday-page .ep-holiday-pattern-toggle__arrow {
+    margin-left: auto;
+    color: #6e8b88;
+    transition: transform 0.18s ease;
+}
+.ep-holiday-page .ep-holiday-year-toggle.collapsed .ep-holiday-year-toggle__arrow,
+.ep-holiday-page .ep-holiday-pattern-toggle.collapsed .ep-holiday-pattern-toggle__arrow {
+    transform: rotate(-90deg);
+}
+.ep-holiday-page .ep-holiday-collapse {
+    display: none;
+}
+.ep-holiday-page .ep-holiday-collapse.is-open {
+    display: block;
+}
+.ep-holiday-page .ep-holiday-year-block__body {
+    padding: 1rem 1.125rem 1.125rem;
+}
+.ep-holiday-page .ep-holiday-pattern-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ep-holiday-page .ep-holiday-pattern-card {
+    border: 1px solid #e4eceb;
+    border-radius: 0.875rem;
+    overflow: hidden;
+    background: #fff;
+}
+.ep-holiday-page .ep-holiday-pattern-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.95rem 1.25rem;
+    border: 0;
+    background: #f5f8f8;
+    cursor: pointer;
+    text-align: left;
+}
+.ep-holiday-page .ep-holiday-pattern-toggle__icon {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.65rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #e4b33c;
+    background: #0b2b28;
+    flex: none;
+}
+.ep-holiday-page .ep-holiday-pattern-toggle__title {
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: #12302d;
+}
+.ep-holiday-page .ep-holiday-pattern-toggle__chips {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+.ep-holiday-page .ep-holiday-day-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #eaf0f0;
+    border: 1px solid #dce6e5;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #3c5c58;
+}
+.ep-holiday-page .ep-holiday-pattern-card__body {
+    padding: 1.125rem 1.25rem 1.25rem;
+}
+
+.ep-holiday-page .ep-holiday-balance-panel {
+    display: grid;
+    grid-template-columns: minmax(250px, 310px) 1fr;
+    border: 1px solid #e9efee;
+    border-radius: 0.85rem;
+    overflow: hidden;
+    background: #fff;
+}
+.ep-holiday-page .ep-holiday-balance-panel__hero {
+    background: #0b2b28;
+    padding: 1.25rem 1.35rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__eyebrow,
+.ep-holiday-page .ep-holiday-summary__eyebrow {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8fb0ac;
+    margin-bottom: 0.35rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__value {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #e4b33c;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-holiday-balance-panel__value.is-negative {
+    color: #ff9b87;
+}
+.ep-holiday-page .ep-holiday-balance-panel__subvalue {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: #8fb0ac;
+}
+.ep-holiday-page .ep-holiday-balance-panel__meter {
+    display: flex;
+    height: 0.55rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    margin-top: 1rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__meter > span { display: block; }
+.ep-holiday-page .ep-holiday-balance-panel__meter > .is-bank { background: #3fa79e; }
+.ep-holiday-page .ep-holiday-balance-panel__meter > .is-used { background: #e4b33c; }
+.ep-holiday-page .ep-holiday-balance-panel__meter > .is-left { background: #7fd4a0; }
+.ep-holiday-page .ep-holiday-balance-panel__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 0.95rem;
+    margin-top: 0.85rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    color: #b8cfcb;
+}
+.ep-holiday-page .ep-holiday-balance-panel__legend i,
+.ep-holiday-page .ep-holiday-stats-legend__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 0.12rem;
+    display: inline-block;
+}
+.ep-holiday-page .ep-holiday-balance-panel__legend .is-bank,
+.ep-holiday-page .ep-holiday-stats-legend__dot.is-bank { background: #3fa79e; }
+.ep-holiday-page .ep-holiday-balance-panel__legend .is-used,
+.ep-holiday-page .ep-holiday-stats-legend__dot.is-used { background: #e4b33c; }
+.ep-holiday-page .ep-holiday-balance-panel__legend .is-left,
+.ep-holiday-page .ep-holiday-stats-legend__dot.is-left { background: #cbd9d7; }
+.ep-holiday-page .ep-holiday-balance-panel__summary {
+    padding: 1.15rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__entitlement-values {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: #43605d;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-holiday-balance-panel__entitlement-values strong {
+    color: #0f7b76;
+    font-size: 0.98rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__entitlement-values .is-adjustment {
+    color: #187a45;
+}
+.ep-holiday-page .ep-holiday-balance-panel__entitlement-values .is-equals {
+    color: #b8c6c4;
+}
+.ep-holiday-page .ep-holiday-adjust-btn {
+    width: 1.55rem;
+    height: 1.55rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.45rem;
+    border: 1px solid #cfe6e2;
+    background: #e3f0ef;
+    color: #0f7b76;
+}
+.ep-holiday-page .ep-holiday-adjust-btn:hover {
+    background: #0f7b76;
+    color: #fff;
+}
+.ep-holiday-page .ep-holiday-balance-panel__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.8rem;
+    padding: 0.95rem 0;
+    border-top: 1px solid #f0f4f3;
+    border-bottom: 1px solid #f0f4f3;
+}
+.ep-holiday-page .ep-holiday-balance-panel__stats span {
+    display: block;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9fb4b2;
+    margin-bottom: 0.25rem;
+}
+.ep-holiday-page .ep-holiday-balance-panel__stats strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #17312f;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-holiday-balance-panel__dates {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #6e8b88;
+    flex-wrap: wrap;
+}
+
+.ep-holiday-page .ep-holiday-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0 0.85rem;
+}
+.ep-holiday-page .ep-holiday-filter-bar__label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6e8b88;
+    margin-right: 0.15rem;
+}
+.ep-holiday-page .holiday-filter-chip {
+    --holiday-chip-rgb: 13, 42, 41;
+    --holiday-chip-text: #0d2a29;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid rgba(var(--holiday-chip-rgb), 0.16);
+    background: rgba(var(--holiday-chip-rgb), 0.08);
+    color: var(--holiday-chip-text);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    min-height: 31px;
+    padding: 0.34rem 0.72rem;
+    transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+    cursor: pointer;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="all"] {
+    --holiday-chip-rgb: 13, 42, 41;
+    --holiday-chip-text: #0d2a29;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="approved"] {
+    --holiday-chip-rgb: 176, 126, 20;
+    --holiday-chip-text: #b07e14;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="pending"] {
+    --holiday-chip-rgb: 59, 91, 181;
+    --holiday-chip-text: #3b5bb5;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="taken"] {
+    --holiday-chip-rgb: 38, 164, 91;
+    --holiday-chip-text: #26a45b;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="bank"] {
+    --holiday-chip-rgb: 31, 124, 118;
+    --holiday-chip-text: #1f7c76;
+}
+.ep-holiday-page .holiday-filter-chip[data-filter="rejected"] {
+    --holiday-chip-rgb: 196, 67, 47;
+    --holiday-chip-text: #c4432f;
+}
+.ep-holiday-page .holiday-filter-chip span {
+    opacity: 0.74;
+}
+.ep-holiday-page .holiday-filter-chip:hover,
+.ep-holiday-page .holiday-filter-chip:focus,
+.ep-holiday-page .holiday-filter-chip.is-active {
+    background: rgb(var(--holiday-chip-rgb));
+    border-color: rgb(var(--holiday-chip-rgb));
+    color: #fff;
+    box-shadow: 0 8px 16px -14px rgba(var(--holiday-chip-rgb), 0.65);
+}
+.ep-holiday-page .holiday-filter-chip:hover span,
+.ep-holiday-page .holiday-filter-chip:focus span,
+.ep-holiday-page .holiday-filter-chip.is-active span {
+    opacity: 0.96;
+}
+
+.ep-holiday-page .ep-holiday-record-table {
+    border: 1px solid #e4eceb;
+    border-radius: 0.85rem;
+    overflow: hidden;
+}
+.ep-holiday-page .ep-holiday-record-table__head,
+.ep-holiday-page .ep-holiday-record {
+    display: grid;
+    grid-template-columns: 200px 1fr 96px;
+    gap: 0;
+    align-items: center;
+}
+.ep-holiday-page .ep-holiday-record-table__head {
+    background: #f5f8f8;
+    border-bottom: 1px solid #e9efee;
+    padding: 0.8rem 1.125rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7a938f;
+}
+.ep-holiday-page .ep-holiday-record-table__head > div:last-child {
+    text-align: right;
+}
+.ep-holiday-page .ep-holiday-record-table__body {
+    max-height: 34rem;
+    overflow-y: auto;
+}
+.ep-holiday-page .ep-holiday-record {
+    padding: 0.9rem 1.125rem;
+    border-bottom: 1px solid #f0f4f3;
+    background: #fff;
+}
+.ep-holiday-page .ep-holiday-record.takenDayRow,
+.ep-holiday-page .ep-holiday-record--taken {
+    background: #f3faf5;
+}
+.ep-holiday-page .ep-holiday-record.rejectedDayRow,
+.ep-holiday-page .ep-holiday-record--rejected {
+    background: #fff6f4;
+}
+.ep-holiday-page .ep-holiday-record__status {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+.ep-holiday-page .ep-holiday-record__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #0f7b76;
+    flex: none;
+}
+.ep-holiday-page .ep-holiday-record__labels {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.ep-holiday-page .ep-holiday-record__labels span {
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+.ep-holiday-page .ep-holiday-record__labels small {
+    font-size: 0.7rem;
+    color: #8aa3a0;
+}
+.ep-holiday-page .ep-holiday-record__details {
+    min-width: 0;
+}
+.ep-holiday-page .ep-holiday-record__title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #17312f;
+}
+.ep-holiday-page .ep-holiday-record__title span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ep-holiday-page .ep-holiday-record__date {
+    margin-top: 0.15rem;
+    font-size: 0.75rem;
+    color: #6e8b88;
+}
+.ep-holiday-page .ep-holiday-record__hour {
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #12302d;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-holiday-record--bank .ep-holiday-record__dot { background: #0f7b76; }
+.ep-holiday-page .ep-holiday-record--bank .ep-holiday-record__labels span { color: #0f7b76; }
+.ep-holiday-page .ep-holiday-record--approved .ep-holiday-record__dot { background: #b07e14; }
+.ep-holiday-page .ep-holiday-record--approved .ep-holiday-record__labels span { color: #96690a; }
+.ep-holiday-page .ep-holiday-record--pending .ep-holiday-record__dot { background: #3b5bb5; }
+.ep-holiday-page .ep-holiday-record--pending .ep-holiday-record__labels span { color: #3b5bb5; }
+.ep-holiday-page .ep-holiday-record--taken .ep-holiday-record__dot { background: #1fa45b; }
+.ep-holiday-page .ep-holiday-record--taken .ep-holiday-record__labels span { color: #187a45; }
+.ep-holiday-page .ep-holiday-record--rejected .ep-holiday-record__dot { background: #c4432f; }
+.ep-holiday-page .ep-holiday-record--rejected .ep-holiday-record__labels span { color: #c4432f; }
+.ep-holiday-page .ep-holiday-record.newRequestRow:not(.disabledRow),
+.ep-holiday-page .ep-holiday-record.approvedDayRow:not(.disabledRow),
+.ep-holiday-page .ep-holiday-record.rejectedDayRow:not(.disabledRow) {
+    cursor: pointer;
+    transition: background-color 0.18s ease, transform 0.18s ease;
+}
+.ep-holiday-page .ep-holiday-record.newRequestRow:not(.disabledRow):hover,
+.ep-holiday-page .ep-holiday-record.approvedDayRow:not(.disabledRow):hover,
+.ep-holiday-page .ep-holiday-record.rejectedDayRow:not(.disabledRow):hover {
+    background: #f7fbfb;
+}
+.ep-holiday-page .ep-holiday-record.disabledRow {
+    opacity: 0.58;
+    cursor: not-allowed;
+}
+.ep-holiday-page .ep-holiday-record-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 1.125rem;
+    color: #8aa3a0;
+    font-size: 0.84rem;
+    background: #f8faf9;
+}
+
+.ep-holiday-page .ep-holiday-stats-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ep-holiday-page .ep-holiday-stats-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #0b2b28;
+    border-radius: 0.85rem;
+    padding: 1rem 1.125rem;
+}
+.ep-holiday-page .ep-holiday-stats-eyebrow {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8fb0ac;
+    margin-bottom: 0.35rem;
+}
+.ep-holiday-page .ep-holiday-stats-value {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-holiday-stats-value.is-negative {
+    color: #ff9b87;
+}
+.ep-holiday-page .ep-holiday-stats-icon {
+    width: 3.15rem;
+    height: 3.15rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #e4b33c;
+    background: rgba(228, 179, 60, 0.16);
+}
+.ep-holiday-page .ep-holiday-stats-meter {
+    display: flex;
+    height: 0.56rem;
+    border-radius: 999px;
+    overflow: hidden;
+    background: #eef2f1;
+}
+.ep-holiday-page .ep-holiday-stats-meter__segment.is-bank { background: #0f7b76; }
+.ep-holiday-page .ep-holiday-stats-meter__segment.is-used { background: #e4b33c; }
+.ep-holiday-page .ep-holiday-stats-meter__segment.is-left { background: #cbd9d7; }
+.ep-holiday-page .ep-holiday-stats-legend {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    font-size: 0.68rem;
+    color: #6e8b88;
+}
+.ep-holiday-page .ep-holiday-stats-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.ep-holiday-page .ep-holiday-stats-rows {
+    display: flex;
+    flex-direction: column;
+}
+.ep-holiday-page .ep-holiday-stats-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.62rem 0;
+    border-bottom: 1px solid #f0f4f3;
+    font-size: 0.82rem;
+    color: #43605d;
+}
+.ep-holiday-page .ep-holiday-stats-row:last-child {
+    border-bottom: 0;
+}
+.ep-holiday-page .ep-holiday-stats-row strong {
+    font-weight: 700;
+    color: #12302d;
+    font-variant-numeric: tabular-nums;
+}
+
+.ep-holiday-page .ep-leave-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.ep-holiday-page .ep-form-grid {
+    display: grid;
+    gap: 0.85rem;
+}
+.ep-holiday-page .ep-form-grid--two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.ep-holiday-page .ep-form-field label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6e8b88;
+    margin-bottom: 0.4rem;
+}
+.ep-holiday-page .ep-form-field .form-control,
+.ep-holiday-page .ep-form-field .form-select,
+.ep-holiday-page .ep-leave-note-field .form-control {
+    border-radius: 0.625rem;
+    border: 1px solid #d5e2e0;
+    background: #fff;
+    color: #17312f;
+    min-height: 2.5rem;
+    box-shadow: none;
+}
+.ep-holiday-page .ep-form-field .form-control:focus,
+.ep-holiday-page .ep-form-field .form-select:focus,
+.ep-holiday-page .ep-leave-note-field .form-control:focus {
+    border-color: rgba(var(--color-primary) / 0.45);
+    box-shadow: 0 0 0 0.18rem rgba(var(--color-primary) / 0.12);
+}
+.ep-holiday-page .ep-leave-calendar-wrap {
+    border: 1px solid #e4eceb;
+    border-radius: 0.85rem;
+    padding: 0.9rem;
+    background: #fff;
+}
+.ep-holiday-page .leaveFormStep2 {
+    display: none;
+}
+.ep-holiday-page .ep-holiday-submit-btn {
+    width: 100%;
+    min-height: 3rem;
+    justify-content: center;
+    border-radius: 0.7rem;
+    background: #0f7b76;
+    border-color: #0f7b76;
+    box-shadow: 0 1px 2px rgba(15, 123, 118, 0.3);
+}
+.ep-holiday-page .ep-holiday-submit-btn:hover,
+.ep-holiday-page .ep-holiday-submit-btn:focus {
+    background: #0c6660;
+    border-color: #0c6660;
+}
+
+.ep-holiday-page .ep-holiday-inline-alert,
+.ep-holiday-page .ep-leave-review-note {
+    display: flex;
+    gap: 0.625rem;
+    align-items: flex-start;
+    border-radius: 0.75rem;
+    padding: 0.8rem 0.9rem;
+}
+.ep-holiday-page .ep-holiday-inline-alert {
+    background: #fdeeee;
+    border: 1px solid #f5cccc;
+    color: #8f2f23;
+}
+.ep-holiday-page .ep-leave-review-note {
+    background: #fbf6e8;
+    border: 1px solid #f0e2be;
+    color: #7a5e12;
+}
+.ep-holiday-page .ep-leave-review-note strong,
+.ep-holiday-page .ep-holiday-inline-alert strong {
+    color: #12302d;
+}
+.ep-holiday-page .ep-leave-selected-wrap {
+    margin-top: 1rem;
+}
+.ep-holiday-page .ep-leave-selected-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6e8b88;
+    margin-bottom: 0.5rem;
+}
+.ep-holiday-page .ep-leave-selected-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+.ep-holiday-page .ep-leave-selected-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    background: #f5f8f8;
+    border: 1px solid #e4eceb;
+    border-radius: 0.7rem;
+    padding: 0.55rem 0.75rem;
+}
+.ep-holiday-page .ep-leave-selected-item__date {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #17312f;
+}
+.ep-holiday-page .ep-leave-selected-item__date span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ep-holiday-page .ep-leave-selected-item__icon {
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e3f0ef;
+    color: #0f7b76;
+    flex: none;
+}
+.ep-holiday-page .ep-leave-selected-item__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: none;
+}
+.ep-holiday-page .ep-leave-selected-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.ep-holiday-page .ep-leave-selected-checkbox .form-check-input {
+    margin: 0;
+}
+.ep-holiday-page .ep-leave-selected-item__controls .form-control {
+    width: 5.25rem;
+    min-height: 2rem;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-leave-selected-remove {
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 0.5rem;
+    border: 1px solid #f2d3ce;
+    background: #fce9e7;
+    color: #c4432f;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.ep-holiday-page .ep-leave-selected-remove:hover {
+    background: #f8dad5;
+}
+.ep-holiday-page .ep-leave-totals-box {
+    margin-top: 1rem;
+    background: #f5f8f8;
+    border: 1px solid #e9efee;
+    border-radius: 0.75rem;
+    padding: 0.35rem 0.85rem;
+}
+.ep-holiday-page .ep-leave-totals-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #e9efee;
+    font-size: 0.8125rem;
+    color: #43605d;
+}
+.ep-holiday-page .ep-leave-totals-row:last-child {
+    border-bottom: 0;
+}
+.ep-holiday-page .ep-leave-totals-row strong {
+    color: #12302d;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.ep-holiday-page .ep-leave-note-field {
+    margin-top: 1rem;
+}
+.ep-holiday-page .ep-leave-note-field .form-label {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6e8b88;
+    margin-bottom: 0.45rem;
+}
+
+.ep-holiday-page #leaveCalendar .litepicker {
+    width: 100%;
+    box-shadow: none;
+    background: transparent;
+}
+.ep-holiday-page #leaveCalendar .litepicker .container__main,
+.ep-holiday-page #leaveCalendar .litepicker .container__months,
+.ep-holiday-page #leaveCalendar .litepicker .container__months .month-item {
+    width: 100%;
+}
+.ep-holiday-page #leaveCalendar .litepicker .container__months .month-item {
+    padding: 0;
+}
+.ep-holiday-page #leaveCalendar .litepicker .month-item-header {
+    margin-bottom: 0.75rem;
+}
+.ep-holiday-page #leaveCalendar .litepicker .button-previous-month,
+.ep-holiday-page #leaveCalendar .litepicker .button-next-month {
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e1eae9;
+    background: #f0f5f4;
+    color: #43605d;
+}
+.ep-holiday-page #leaveCalendar .litepicker .button-previous-month:hover,
+.ep-holiday-page #leaveCalendar .litepicker .button-next-month:hover {
+    background: #e3f0ef;
+    color: #0f7b76;
+}
+.ep-holiday-page #leaveCalendar .litepicker .month-item-name,
+.ep-holiday-page #leaveCalendar .litepicker .month-item-header > div > .month-item-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #12302d;
+}
+.ep-holiday-page #leaveCalendar .litepicker .container__days > div,
+.ep-holiday-page #leaveCalendar .litepicker .container__days > a {
+    width: calc(100% / 7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.18rem 0;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #8aa3a0;
+}
+.ep-holiday-page #leaveCalendar .litepicker .day-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-radius: 0.5rem;
+    height: 2.15rem;
+    line-height: 1;
+    color: #17312f;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-align: center;
+}
+.ep-holiday-page #leaveCalendar .litepicker .day-item:hover {
+    background: #f0f5f4;
+}
+.ep-holiday-page #leaveCalendar .litepicker .day-item.is-selected {
+    background: #0f7b76;
+    color: #fff;
+    font-weight: 700;
+}
+.ep-holiday-page #leaveCalendar .litepicker[data-plugins*="multiselect"] .container__days .day-item.is-selected::after,
+.ep-holiday-page #leaveCalendar .litepicker[data-plugins*="multiselect"] .container__days .day-item.is-selected:hover::after {
+    display: none;
+}
+.ep-holiday-page #leaveCalendar .litepicker .day-item.is-start-date,
+.ep-holiday-page #leaveCalendar .litepicker .day-item.is-end-date {
+    color: #fff;
+}
+.ep-holiday-page #leaveCalendar .litepicker .day-item.is-locked,
+.ep-holiday-page #leaveCalendar .litepicker .day-item.is-locked:hover {
+    color: #c4432f;
+    background: rgba(196, 67, 47, 0.08);
+    cursor: not-allowed;
+}
+
+@media (max-width: 1279px) {
+    .ep-holiday-page .ep-holiday-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 991px) {
+    .ep-holiday-page .ep-holiday-card__body,
+    .ep-holiday-page .ep-holiday-card__header {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .ep-holiday-page .ep-holiday-balance-panel {
+        grid-template-columns: 1fr;
+    }
+    .ep-holiday-page .ep-holiday-record-table__head,
+    .ep-holiday-page .ep-holiday-record {
+        grid-template-columns: 1fr;
+    }
+    .ep-holiday-page .ep-holiday-record-table__head {
+        display: none;
+    }
+    .ep-holiday-page .ep-holiday-record {
+        gap: 0.6rem;
+    }
+    .ep-holiday-page .ep-holiday-record__hour {
+        text-align: left;
+    }
+}
+
+@media (max-width: 767px) {
+    .ep-holiday-page .ep-form-grid--two,
+    .ep-holiday-page .ep-holiday-balance-panel__stats {
+        grid-template-columns: 1fr;
+    }
+    .ep-holiday-page .ep-holiday-pattern-toggle {
+        align-items: flex-start;
+    }
+    .ep-holiday-page .ep-holiday-pattern-toggle__chips {
+        margin-top: 0.35rem;
+    }
+    .ep-holiday-page .ep-holiday-year-toggle,
+    .ep-holiday-page .ep-holiday-pattern-toggle,
+    .ep-holiday-page .ep-leave-selected-item {
+        flex-wrap: wrap;
+    }
+    .ep-holiday-page .ep-leave-selected-item__controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

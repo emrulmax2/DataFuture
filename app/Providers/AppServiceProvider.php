@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\ComonSmtp;
+use App\Models\EmailTemplate;
 use App\Models\PlansDateList;
+use App\Models\SmsTemplate;
 use App\Models\Student;
 use App\Models\StudentAwardingBodyDetails;
 use App\Models\StudentUser;
@@ -74,6 +77,16 @@ class AppServiceProvider extends ServiceProvider
         StudentUser::observe(StudentUserObserver::class);
         
         Schema::defaultStringLength(191);
+
+        // Supplies SMTP + template data for the global quick Send-Email / Send-SMS
+        // popups so every student profile controller need not pass it explicitly.
+        View::composer('pages.students.live.partials.quick-communication-modals', function ($view) {
+            $view->with([
+                'smtps' => ComonSmtp::all(),
+                'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
+                'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
+            ]);
+        });
 
         View::composer('layout.top-menu', function ($view) {
             $shared = [
