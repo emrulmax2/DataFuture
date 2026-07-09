@@ -341,9 +341,13 @@ import Dropzone from "dropzone";
                             statusConfirmModal.hide();
                             statusStudentProgressModal.show();
 
-                            setTimeout(function(){
-                                let inProgress = $('#progressBarModal input#progress').val();
-                                if(inProgress==100) {
+                            // The student-migration jobs run sequentially on the queue and take
+                            // much longer than a single 2s tick, so poll until the progress bar
+                            // (updated live by the Vue app) reaches 100% before closing/reloading.
+                            let progressWatcher = setInterval(function(){
+                                let inProgress = parseInt($('#progressBarModal input#progress').val());
+                                if(inProgress >= 100) {
+                                    clearInterval(progressWatcher);
                                     statusStudentProgressModal.hide();
                                     window.location.reload();
                                 }
