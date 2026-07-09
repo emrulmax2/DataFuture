@@ -105,16 +105,23 @@ import { createIcons, icons } from 'lucide';
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             }).then(response => {
-                // Autoload runs on the queue; poll silently. No progress bar here —
-                // that belongs to the Download Now / XML export flow only. The
-                // "Run Autoloader" button keeps its spinner until we get a result.
+                // Autoload runs on the queue; poll the status and drive the shared
+                // progress bar (labelled "Autoloading"). The "Run Autoloader" button
+                // keeps its spinner until we get a final result.
                 if(response.data.autoload_id){
+                    $('#xmlProgressLabel').text('Autoloading');
+                    $('#xmlProgressText').text('0%');
+                    $('#xmlProgressBar').css('width', '0%');
+                    $('#xmlProgressWrap').removeClass('hidden');
                     startCheckingAutoload(response.data.autoload_id);
                 }else{
                     resetAutoloadButtons();
                     showXmlAlert('danger', '<strong>Error</strong>. Could not start the autoload process. Please try again.');
                 }
             }).catch(error => {
+                $('#xmlProgressWrap').addClass('hidden');
+                $('#xmlProgressText').text('0%');
+                $('#xmlProgressBar').css('width', '0%');
                 resetAutoloadButtons();
                 showXmlAlert('danger', '<strong>Error</strong>. Something went wrong. Please try again later.');
                 console.log(error);
@@ -171,6 +178,7 @@ import { createIcons, icons } from 'lucide';
             }).then(response => {
                 console.log(response.data);
 
+                $('#xmlProgressLabel').text('Downloading XML');
                 $('#xmlProgressWrap').removeClass('hidden');
                 if(response.data.export_id){
                     startCheckingFile(response.data.export_id);
@@ -305,13 +313,29 @@ import { createIcons, icons } from 'lucide';
             axios.post(route('reports.datafuture.check.autoload.status', autoload_id), {
                 autoload_id: autoload_id
             }).then(response => {
+                let progress = response.data.progress ?? 0;
+                $('#xmlProgressBar').css('width', progress + '%');
+                $('#xmlProgressText').text(progress + '%');
+
                 if(response.data.status === 'completed'){
                     clearInterval(autoloadInterval);
+
+                    $('#xmlProgressBar').css('width', '100%');
+                    $('#xmlProgressText').text('100%');
+                    $('#xmlProgressWrap').addClass('hidden');
+                    $('#xmlProgressText').text('0%');
+                    $('#xmlProgressBar').css('width', '0%');
+
                     resetAutoloadButtons();
 
                     showXmlAlert('success', '<strong>Success</strong>. ' + (response.data.message || 'Students data successfully autoloaded.'));
                 }else if(response.data.status === 'failed'){
                     clearInterval(autoloadInterval);
+
+                    $('#xmlProgressWrap').addClass('hidden');
+                    $('#xmlProgressText').text('0%');
+                    $('#xmlProgressBar').css('width', '0%');
+
                     resetAutoloadButtons();
 
                     showXmlAlert('danger', '<strong>Oops</strong>. Autoload failed. Please try again later or contact with the administrator.');
@@ -319,6 +343,11 @@ import { createIcons, icons } from 'lucide';
             }).catch(error => {
                 clearInterval(autoloadInterval);
                 console.log(error);
+
+                $('#xmlProgressWrap').addClass('hidden');
+                $('#xmlProgressText').text('0%');
+                $('#xmlProgressBar').css('width', '0%');
+
                 resetAutoloadButtons();
 
                 showXmlAlert('danger', '<strong>Oops</strong>. Something went wrong. Please try again later or contact with the administrator.');

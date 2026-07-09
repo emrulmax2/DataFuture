@@ -1380,32 +1380,44 @@ class DatafutureReportController extends Controller
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
-            $stuloads = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)
+            // Only the distinct student/course-relation pairs are needed. Group at
+            // the DB level instead of hydrating every matching stuload row and
+            // grouping in PHP (which was the main cost on large date ranges).
+            $combos = StudentStuloadInformation::whereRaw("(".$whereRaw.")")->where('report_visibility', 1)
                         ->whereHas('student', function($sq){
                             $sq->where('hesa_status', 1);
                         })->whereHas('studentCR.creation', function ($q) {
                             $q->whereNotIn('course_id', [30, 31]);
-                        })->orderBy('student_id', 'ASC')->get()
-                        ->groupBy(['student_id', 'student_course_relation_id']);
+                        })->select('student_id', 'student_course_relation_id')
+                        ->distinct()
+                        ->orderBy('student_id', 'ASC')
+                        ->get();
 
-            if($stuloads->count() > 0):
+            if($combos->count() > 0):
                 // Total = number of student/course-relation combinations to process.
-                $total = $stuloads->reduce(function($carry, $courseRelations){
-                    return $carry + $courseRelations->count();
-                }, 0);
+                $total = $combos->count();
                 $autoload->update(['total' => $total, 'progress' => 0, 'processed' => 0]);
+                $lastProgress = -1;
 
-                foreach($stuloads as $student_id => $courseRelations):
-                    foreach($courseRelations as $student_course_relation_id => $rows):
-                        $this->resetCourseSessions($student_id, $student_course_relation_id);
-                        $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
+                foreach($combos as $combo):
+                    $student_id = $combo->student_id;
+                    $student_course_relation_id = $combo->student_course_relation_id;
 
-                        $studentCounts += 1;
+                    $this->resetCourseSessions($student_id, $student_course_relation_id);
+                    $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
+
+                    $studentCounts += 1;
+                    // Only write the tracking row when the whole-number percent
+                    // actually changes (or on the final row), so a large dataset
+                    // does at most ~100 writes instead of one per student.
+                    $currentProgress = $total > 0 ? (int) floor(($studentCounts / $total) * 100) : 100;
+                    if($currentProgress !== $lastProgress || $studentCounts === $total):
                         $autoload->update([
                             'processed' => $studentCounts,
-                            'progress'  => $total > 0 ? (int) floor(($studentCounts / $total) * 100) : 100,
+                            'progress'  => $currentProgress,
                         ]);
-                    endforeach;
+                        $lastProgress = $currentProgress;
+                    endif;
                 endforeach;
             endif;
         endif;
@@ -1453,8 +1465,8 @@ class DatafutureReportController extends Controller
     }
 
     public function autoLoadStudentStuloads($student_id, $student_course_relation_id){
-        $student = Student::find($student_id);
-        $studentCrel = StudentCourseRelation::find($student_course_relation_id);
+        $student = Student::with(['other', 'contact', 'stuload'])->find($student_id);
+        $studentCrel = StudentCourseRelation::with('creation')->find($student_course_relation_id);
         $course_id = (isset($studentCrel->creation->course_id) && $studentCrel->creation->course_id > 0 ? $studentCrel->creation->course_id : null);
         $course_creation_id = $studentCrel->course_creation_id;
 
@@ -1465,18 +1477,17 @@ class DatafutureReportController extends Controller
             foreach($instances as $instance):
                 $existInstance = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $instance->id)->withTrashed()->get();
                 if($existInstance->count() == 0):
-                    $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
-                    $lastRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
-                    
+                    $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->count();
+
                     $priprov_id = null;
                     $qual_type = null;
                     $qual_sub = null;
                     $qual_sit = null;
                     $qualent3_id = null;
-                    $sid_number = (isset($lastRow->sid_number) && !empty($lastRow->sid_number) ? $lastRow->sid_number : $this->calculateSidNumber($student->registration_no));
+                    $sid_number = $this->calculateSidNumber($student->registration_no);
                     $is_education_qualification = (isset($student->other->is_education_qualification) && $student->other->is_education_qualification > 0 ? $student->other->is_education_qualification : 0);
                     if($is_education_qualification == 1):
-                        $qualification = StudentQualification::orderBy('id', 'DESC')->get()->first();
+                        $qualification = StudentQualification::orderBy('id', 'DESC')->first();
                         $priprov_id = (isset($qualification->previous_provider_id) && $qualification->previous_provider_id > 0 ? $qualification->previous_provider_id : null);
                         $qual_type = (isset($qualification->qualification_type_identifier_id) && $qualification->qualification_type_identifier_id > 0 ? $qualification->qualification_type_identifier_id : null);
                         $qual_sub = (isset($qualification->hesa_qualification_subject_id) && $qualification->hesa_qualification_subject_id > 0 ? $qualification->hesa_qualification_subject_id : null);
@@ -1485,10 +1496,10 @@ class DatafutureReportController extends Controller
                     endif;
                     $disall_id = null;
                     if(isset($student->other->disability_status) && $student->other->disability_status > 0 ? $student->other->disability_status : 0):
-                        $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->get()->first();
+                        $studentDis = StudentDisability::where('student_id', $student->id)->orderBy('id', 'DESC')->first();
                         $disall_id = (isset($studentDis->disability_id) && $studentDis->disability_id > 0 ? $studentDis->disability_id : null);
                     endif;
-                    $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get()->first();
+                    $awards = StudentAward::where('student_id', $student->id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->first();
                     $class_id = (isset($awards->qual_award_result_id) && $awards->qual_award_result_id > 0 ? $awards->qual_award_result_id : null);
                     
 

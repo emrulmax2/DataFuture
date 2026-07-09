@@ -168,7 +168,7 @@
                         </div>
                         <div class="mt-3 hidden" id="xmlProgressWrap">
                             <div class="flex items-center justify-between mb-2 leading-none">
-                                <span class="font-medium">Generating XML...</span>
+                                <span id="xmlProgressLabel" class="font-medium">Downloading XML</span>
                                 <span id="xmlProgressText" class="font-medium">0%</span>
                             </div>
                             <div class="w-full bg-slate-200 rounded overflow-hidden h-4">
