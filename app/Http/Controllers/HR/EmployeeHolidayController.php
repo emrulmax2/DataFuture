@@ -111,18 +111,23 @@ class EmployeeHolidayController extends Controller
                             
                             $holidayEntitlement = $this->employeeHolidayEntitlement($employee_id, $year->id, $pattern->id, $psd, $ped);
                             $pattern['holidayEntitlement'] = $this->calculateHourMinute($holidayEntitlement);
+                            $pattern['holidayEntitlementMinutes'] = $holidayEntitlement;
 
                             $adjustmentRow = $this->employeeHolidayAdjustment($employee_id, $year->id, $pattern->id);
                             $adjustmentHour = (isset($adjustmentRow['hours']) && $adjustmentRow['hours'] > 0 ? $adjustmentRow['hours'] : 0);
                             $adjustmentOpt = (isset($adjustmentRow['opt']) && $adjustmentRow['opt'] > 0 ? $adjustmentRow['opt'] : 1);
                             $pattern['adjustmentHtml'] = (isset($adjustmentRow['opt']) && $adjustmentRow['opt'] == 1 ? '+' : '-');
                             $pattern['adjustmentHtml'] .= $this->calculateHourMinute($adjustmentHour);
+                            $pattern['adjustmentMinutes'] = $adjustmentHour;
+                            $pattern['adjustmentOperator'] = $adjustmentOpt;
 
                             $totalHolidayEntitlement = ($adjustmentOpt == 2 ? ($holidayEntitlement - $adjustmentHour) : ($holidayEntitlement + $adjustmentHour));
                             $pattern['totalHolidayEntitlement'] = $this->calculateHourMinute($totalHolidayEntitlement);
+                            $pattern['totalHolidayEntitlementMinutes'] = $totalHolidayEntitlement;
 
                             $autoBookedBankHoliday = $this->employeeAutoBookedBankHoliday($employee_id, $year->id, $pattern->id, $psd, $ped);
                             $pattern['autoBookedBankHoliday'] = (isset($autoBookedBankHoliday['bank_holiday_total']) ? $this->calculateHourMinute($autoBookedBankHoliday['bank_holiday_total']) : '00:00');
+                            $pattern['autoBookedBankHolidayMinutes'] = (isset($autoBookedBankHoliday['bank_holiday_total']) ? $autoBookedBankHoliday['bank_holiday_total'] : 0);
                             $pattern['bankHolidays'] = (isset($autoBookedBankHoliday['bank_holidays']) && !empty($autoBookedBankHoliday['bank_holidays']) ? $autoBookedBankHoliday['bank_holidays'] : []);
                             $pattern['requestedLeaves'] = EmployeeLeave::where('employee_id', $employee_id)->where('hr_holiday_year_id', $year->id)
                                                           ->where('employee_working_pattern_id', $pattern->id)
@@ -148,6 +153,16 @@ class EmployeeHolidayController extends Controller
                             $calculations['balance_html'] = ($balance >= 0 ? $this->calculateHourMinute($balance) : $this->calculateHourMinute(str_replace('-', '', $balance)));
 
                             $pattern['existingLeaveHours'] = $calculations;
+                            $pattern['usedMinutes'] = $totalTaken;
+                            $pattern['workingDays'] = ((new DateTime($psd))->diff(new DateTime($ped))->format('%a')) + 1;
+                            $pattern['activityRows'] = $this->buildHolidayActivityRows(
+                                $pattern['bankHolidays'],
+                                $pattern['approvedLeaves'],
+                                $pattern['takenLeaves'],
+                                $pattern['requestedLeaves'],
+                                $pattern['rejectedLeaves']
+                            );
+                            $pattern['activityCounts'] = $this->buildHolidayActivityCounts($pattern['activityRows']);
                             $empPatterms[] = $pattern;
                         endif;
                     endforeach;
@@ -163,6 +178,282 @@ class EmployeeHolidayController extends Controller
         endif;
         
         return $response;
+    }
+
+    protected function buildHolidayActivityRows($bankHolidays = [], $approvedLeaves = [], $takenLeaves = [], $requestedLeaves = [], $rejectedLeaves = [])
+    {
+        $rows = [];
+
+        if(!empty($bankHolidays)):
+            foreach($bankHolidays as $bhd):
+                $startDate = (isset($bhd['start_date']) && !empty($bhd['start_date']) ? date('D jS F, Y', strtotime($bhd['start_date'])) : '');
+                $endDate = (isset($bhd['end_date']) && !empty($bhd['end_date']) ? date('D jS F, Y', strtotime($bhd['end_date'])) : $startDate);
+
+                $rows[] = [
+                    'status' => 'bank',
+                    'status_label' => 'Bank Holiday',
+                    'status_meta' => 'Auto Booked',
+                    'title' => (isset($bhd['name']) && !empty($bhd['name']) ? $bhd['name'] : 'Bank holiday'),
+                    'date_range' => ($startDate == $endDate ? $startDate : $startDate.' - '.$endDate),
+                    'hour' => (isset($bhd['hour']) && !empty($bhd['hour']) ? $bhd['hour'] : '00:00'),
+                    'sort_date' => (isset($bhd['start_date']) && !empty($bhd['start_date']) ? strtotime($bhd['start_date']) : 0),
+                    'action' => 'none',
+                    'data_id' => 0,
+                    'has_supervised_days' => false,
+                ];
+            endforeach;
+        endif;
+
+        if(!empty($approvedLeaves)):
+            foreach($approvedLeaves as $leaveDay):
+                $rows[] = [
+                    'status' => 'approved',
+                    'status_label' => 'Approved',
+                    'status_meta' => $this->leaveTypeLabel(isset($leaveDay->leave->leave_type) ? $leaveDay->leave->leave_type : 1),
+                    'title' => (isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : 'Holiday request'),
+                    'date_range' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : ''),
+                    'hour' => $this->calculateHourMinute(isset($leaveDay->hour) ? $leaveDay->hour : 0),
+                    'sort_date' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? strtotime($leaveDay->leave_date) : 0),
+                    'action' => 'approved-day',
+                    'data_id' => (isset($leaveDay->id) ? $leaveDay->id : 0),
+                    'has_supervised_days' => false,
+                ];
+            endforeach;
+        endif;
+
+        if(!empty($takenLeaves)):
+            foreach($takenLeaves as $leaveDay):
+                $rows[] = [
+                    'status' => 'taken',
+                    'status_label' => 'Taken',
+                    'status_meta' => $this->leaveTypeLabel(isset($leaveDay->leave->leave_type) ? $leaveDay->leave->leave_type : 1),
+                    'title' => (isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : 'Holiday request'),
+                    'date_range' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : ''),
+                    'hour' => $this->calculateHourMinute(isset($leaveDay->hour) ? $leaveDay->hour : 0),
+                    'sort_date' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? strtotime($leaveDay->leave_date) : 0),
+                    'action' => 'taken-day',
+                    'data_id' => (isset($leaveDay->id) ? $leaveDay->id : 0),
+                    'has_supervised_days' => false,
+                ];
+            endforeach;
+        endif;
+
+        if(!empty($requestedLeaves)):
+            foreach($requestedLeaves as $leave):
+                $leaveHours = 0;
+                $leaveDays = 0;
+                if(isset($leave->leaveDays) && $leave->leaveDays->count() > 0):
+                    foreach($leave->leaveDays as $day):
+                        $leaveHours += $day->hour;
+                        $leaveDays++;
+                    endforeach;
+                endif;
+
+                $startDate = (isset($leave->from_date) && !empty($leave->from_date) ? date('D jS F, Y', strtotime($leave->from_date)) : '');
+                $endDate = (isset($leave->to_date) && !empty($leave->to_date) ? date('D jS F, Y', strtotime($leave->to_date)) : $startDate);
+                $title = (isset($leave->note) && !empty($leave->note) ? $leave->note : 'Request for approval');
+                $title .= ($leaveDays > 0 ? ' ('.($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day').')' : '');
+
+                $rows[] = [
+                    'status' => 'pending',
+                    'status_label' => 'Pending',
+                    'status_meta' => 'Awaiting Approval',
+                    'title' => $title,
+                    'date_range' => ($startDate == $endDate ? $startDate : $startDate.' - '.$endDate),
+                    'hour' => $this->calculateHourMinute($leaveHours),
+                    'sort_date' => (isset($leave->to_date) && !empty($leave->to_date) ? strtotime($leave->to_date) : 0),
+                    'action' => 'new-request',
+                    'data_id' => (isset($leave->id) ? $leave->id : 0),
+                    'has_supervised_days' => (isset($leave->supervisedDays) && $leave->supervisedDays->count() > 0),
+                ];
+            endforeach;
+        endif;
+
+        if(!empty($rejectedLeaves)):
+            foreach($rejectedLeaves as $leaveDay):
+                $rows[] = [
+                    'status' => 'rejected',
+                    'status_label' => 'Rejected',
+                    'status_meta' => $this->leaveTypeLabel(isset($leaveDay->leave->leave_type) ? $leaveDay->leave->leave_type : 1),
+                    'title' => (isset($leaveDay->leave->note) && !empty($leaveDay->leave->note) ? $leaveDay->leave->note : 'Holiday request'),
+                    'date_range' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? date('D jS F, Y', strtotime($leaveDay->leave_date)) : ''),
+                    'hour' => $this->calculateHourMinute(isset($leaveDay->hour) ? $leaveDay->hour : 0),
+                    'sort_date' => (isset($leaveDay->leave_date) && !empty($leaveDay->leave_date) ? strtotime($leaveDay->leave_date) : 0),
+                    'action' => 'rejected-day',
+                    'data_id' => (isset($leaveDay->id) ? $leaveDay->id : 0),
+                    'has_supervised_days' => false,
+                ];
+            endforeach;
+        endif;
+
+        usort($rows, function($a, $b){
+            return ($b['sort_date'] <=> $a['sort_date']);
+        });
+
+        return $rows;
+    }
+
+    protected function buildHolidayActivityCounts($rows = [])
+    {
+        $counts = [
+            'all' => 0,
+            'bank' => 0,
+            'approved' => 0,
+            'pending' => 0,
+            'taken' => 0,
+            'rejected' => 0,
+        ];
+
+        if(!empty($rows)):
+            foreach($rows as $row):
+                $status = (isset($row['status']) ? $row['status'] : '');
+                $counts['all']++;
+                if(isset($counts[$status])):
+                    $counts[$status]++;
+                endif;
+            endforeach;
+        endif;
+
+        return $counts;
+    }
+
+    protected function leaveTypeLabel($type)
+    {
+        $labels = [
+            1 => 'Holiday / Vacation',
+            2 => 'Unauthorised Absent',
+            3 => 'Sick Leave',
+            4 => 'Authorised Unpaid',
+            5 => 'Authorised Paid',
+            6 => 'Maternity Leave',
+            7 => 'Paternity Leave',
+        ];
+
+        return (isset($labels[$type]) ? $labels[$type] : 'Holiday / Vacation');
+    }
+
+    protected function formatSignedHourMinute($minutes)
+    {
+        $minutes = (int) $minutes;
+        return ($minutes < 0 ? '-' : '').$this->calculateHourMinute(abs($minutes));
+    }
+
+    protected function resolveHolidayStatisticsData($employee_id, $year_id = 0, $pattern_id = 0)
+    {
+        $today = date('Y-m-d');
+
+        if($year_id > 0):
+            $holidayYear = HrHolidayYear::find($year_id);
+        else:
+            $holidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
+        endif;
+        $year_id = (isset($holidayYear->id) && $holidayYear->id > 0 ? $holidayYear->id : $year_id);
+        $year_start = (isset($holidayYear->start_date) && !empty($holidayYear->start_date) ? date('Y-m-d', strtotime($holidayYear->start_date)) : '');
+        $year_end = (isset($holidayYear->end_date) && !empty($holidayYear->end_date) ? date('Y-m-d', strtotime($holidayYear->end_date)) : '');
+
+        if($pattern_id == 0):
+            $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
+            if(!empty($patternRes) && $patternRes->count() > 0):
+                foreach($patternRes as $ptr):
+                    $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
+                    $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? date('Y-m-d', strtotime($ptr->end_to)) : '');
+                    if(
+                        (($end_to != '' && $end_to > $year_start && ($end_to <= $year_end || $end_to >= $year_end)) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
+                        || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
+                        || ($end_to == '' && $effective_from < $year_end)
+                    ):
+                        $pattern_id = $ptr->id;
+                    endif;
+                endforeach;
+            endif;
+        endif;
+
+        if($pattern_id <= 0):
+            return [
+                'state' => 'error',
+                'message' => 'Working pattern not found!',
+            ];
+        endif;
+
+        $pattern = EmployeeWorkingPattern::find($pattern_id);
+        $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
+        $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
+
+        $sd = ($effective_from != '' && $year_start < $effective_from && ($effective_from <= date('Y-m-d') || $effective_from <= $year_end) ? $effective_from : $year_start);
+        $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
+
+        $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
+        $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
+        $adjustmentOpt = (isset($adjustmentArr['opt']) && !empty($adjustmentArr['opt']) && $adjustmentArr['opt'] > 0 ? $adjustmentArr['opt'] : 1);
+        $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
+        $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $sd, $ed);
+        $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
+
+        $taken_holiday = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $sd, $ed);
+        $leaveTaken = $taken_holiday['taken'];
+        $leaveBooked = $taken_holiday['booked'];
+        $leaveRequested = $taken_holiday['requested'];
+        $totalTaken = $taken_holiday['totalTaken'];
+
+        $openingBalance = $holiday_entitlement;
+        $balance = ($holiday_entitlement - $totalTaken);
+        if($adjustmentOpt == 1):
+            $balance = $balance + $adjustmentHour;
+            $openingBalance = $holiday_entitlement + $adjustmentHour;
+        elseif($adjustmentOpt == 2):
+            $balance = $balance - $adjustmentHour;
+            $openingBalance = $holiday_entitlement - $adjustmentHour;
+        endif;
+
+        if($bank_holiday > $balance){
+            $balance_left = ($bank_holiday - $balance) * -1;
+        }else{
+            $balance_left = ($balance - $bank_holiday);
+        }
+
+        $usedMinutes = $leaveTaken + $leaveBooked + $leaveRequested;
+        $leftPositiveMinutes = max(0, $balance_left);
+        $totalScale = max(1, ($openingBalance > 0 ? $openingBalance : ($bank_holiday + $usedMinutes + $leftPositiveMinutes)));
+
+        return [
+            'state' => 'ready',
+            'left_minutes' => $balance_left,
+            'left_display' => $this->formatSignedHourMinute($balance_left),
+            'left_positive_minutes' => $leftPositiveMinutes,
+            'opening_minutes' => $openingBalance,
+            'opening_display' => $this->calculateHourMinute($openingBalance),
+            'bank_minutes' => $bank_holiday,
+            'bank_display' => $this->calculateHourMinute($bank_holiday),
+            'taken_minutes' => $leaveTaken,
+            'taken_display' => $this->calculateHourMinute($leaveTaken),
+            'booked_minutes' => $leaveBooked,
+            'booked_display' => $this->calculateHourMinute($leaveBooked),
+            'requested_minutes' => $leaveRequested,
+            'requested_display' => $this->calculateHourMinute($leaveRequested),
+            'used_minutes' => $usedMinutes,
+            'used_display' => $this->calculateHourMinute($usedMinutes),
+            'is_overbooked' => ($balance_left < 0),
+            'segments' => [
+                [
+                    'label' => 'Bank',
+                    'value' => $this->calculateHourMinute($bank_holiday),
+                    'percent' => min(100, round((($bank_holiday > 0 ? $bank_holiday : 0) / $totalScale) * 100, 2)),
+                    'tone' => 'bank',
+                ],
+                [
+                    'label' => 'Used',
+                    'value' => $this->calculateHourMinute($usedMinutes),
+                    'percent' => min(100, round((($usedMinutes > 0 ? $usedMinutes : 0) / $totalScale) * 100, 2)),
+                    'tone' => 'used',
+                ],
+                [
+                    'label' => 'Left',
+                    'value' => $this->calculateHourMinute($leftPositiveMinutes),
+                    'percent' => min(100, round((($leftPositiveMinutes > 0 ? $leftPositiveMinutes : 0) / $totalScale) * 100, 2)),
+                    'tone' => 'left',
+                ],
+            ],
+        ];
     }
 
     public function employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $psd, $ped){
@@ -308,113 +599,11 @@ class EmployeeHolidayController extends Controller
     }
 
     public function employeeLeaveStatistics($employee_id, $year_id = 0, $pattern_id = 0){
-        $today = date('Y-m-d');
+        $stats = $this->resolveHolidayStatisticsData($employee_id, $year_id, $pattern_id);
 
-        if($year_id > 0):
-            $holidayYear = HrHolidayYear::find($year_id);
-        else:
-            $holidayYear = HrHolidayYear::where('start_date', '<=', $today)->where('end_date', '>=', $today)->where('active', 1)->get()->first();
-        endif;
-        $year_id = (isset($holidayYear->id) && $holidayYear->id > 0 ? $holidayYear->id : $year_id);
-        $year_start = (isset($holidayYear->start_date) && !empty($holidayYear->start_date) ? date('Y-m-d', strtotime($holidayYear->start_date)) : '');
-        $year_end = (isset($holidayYear->end_date) && !empty($holidayYear->end_date) ? date('Y-m-d', strtotime($holidayYear->end_date)) : '');
-
-        if($pattern_id == 0):
-            $patternRes = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)->orderBy('id', 'DESC')->get();
-            if(!empty($patternRes) && $patternRes->count() > 0):
-                foreach($patternRes as $ptr):
-                    $effective_from = (isset($ptr->effective_from) && !empty($ptr->effective_from) ? date('Y-m-d', strtotime($ptr->effective_from)) : '');
-                    $end_to = (isset($ptr->end_to) && !empty($ptr->end_to) ? date('Y-m-d', strtotime($ptr->end_to)) : '');
-                    if(
-                        (($end_to != '' && $end_to > $year_start && ($end_to <= $year_end || $end_to >= $year_end)) && ($effective_from < $year_start || ($effective_from > $year_start && $effective_from < $year_end)))
-                        || ($end_to != '' && $effective_from < $year_start && $end_to > $year_end)
-                        || ($end_to == '' && $effective_from < $year_end)
-                    ):
-                        $pattern_id = $ptr->id;
-                    endif;
-                endforeach;
-            endif;
-        endif;
-
-        if($pattern_id > 0):
-            $pattern = EmployeeWorkingPattern::find($pattern_id);
-            $effective_from = (isset($pattern->effective_from) && ($pattern->effective_from != '' && $pattern->effective_from != '0000-00-00') ? date('Y-m-d', strtotime($pattern->effective_from)) : '');
-            $end_to = (isset($pattern->end_to) && ($pattern->end_to != '' && $pattern->end_to != '0000-00-00') ? date('Y-m-d', strtotime($pattern->end_to)) : '');
-
-            //$sd = ($effective_from != '' && $year_start < $effective_from && $effective_from <= date('Y-m-d') ? $effective_from : $year_start);
-            $sd = ($effective_from != '' && $year_start < $effective_from && ($effective_from <= date('Y-m-d') || $effective_from <= $year_end) ? $effective_from : $year_start);
-            $ed = ($end_to != '' && $end_to < $year_end ? $end_to : $year_end);
-
-            $holiday_entitlement = $this->employeeHolidayEntitlement($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $adjustmentArr = $this->employeeHolidayAdjustment($employee_id, $year_id, $pattern_id);
-            $adjustmentOpt = (isset($adjustmentArr['opt']) && !empty($adjustmentArr['opt']) && $adjustmentArr['opt'] > 0 ? $adjustmentArr['opt'] : 1);
-            $adjustmentHour = (isset($adjustmentArr['hours']) && !empty($adjustmentArr['hours']) && $adjustmentArr['hours'] > 0 ? $adjustmentArr['hours'] : 0);
-            $bankHolidayArr = $this->employeeAutoBookedBankHoliday($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $bank_holiday = (isset($bankHolidayArr['bank_holiday_total']) && !empty($bankHolidayArr['bank_holiday_total']) ? $bankHolidayArr['bank_holiday_total'] : 0);
-            
-            $taken_holiday = $this->employeeExistingLeaveHours($employee_id, $year_id, $pattern_id, $sd, $ed);
-            $leaveTaken = $taken_holiday['taken'];
-            $leaveBooked = $taken_holiday['booked'];
-            $leaveRequested = $taken_holiday['requested'];
-            $totalTaken = $taken_holiday['totalTaken'];
-
-
-            $openingBalance = $holiday_entitlement;
-            $balance = (($holiday_entitlement - $totalTaken) > 0 ? ($holiday_entitlement - $totalTaken) : ($holiday_entitlement - $totalTaken));
-            if($adjustmentOpt == 1):
-                $balance = $balance + $adjustmentHour;
-                $openingBalance = $holiday_entitlement + $adjustmentHour;
-            elseif($adjustmentOpt == 2):
-                $balance = $balance - $adjustmentHour;
-                $openingBalance = $holiday_entitlement - $adjustmentHour;
-            endif;
-
-            $html = '';
-            if($bank_holiday > $balance){
-                $balance_left = ($bank_holiday - $balance);
-                $balance_left = '-'.$this->calculateHourMinute($balance_left);
-            }else{
-                $balance_left = ($balance - $bank_holiday);
-                $balance_left = $this->calculateHourMinute($balance_left);
-            }
-
-            
-            $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Opening This Year</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$this->calculateHourMinute($openingBalance).'</div>';
-            $html .= '</div>';
-            $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Bank holiday auto book</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$this->calculateHourMinute($bank_holiday).'</div>';
-            $html .= '</div>';
-            $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Taken</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$this->calculateHourMinute($leaveTaken).'</div>';
-            $html .= '</div>';
-            $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Booked</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$this->calculateHourMinute($leaveBooked).'</div>';
-            $html .= '</div>';
-            $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Requested</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$this->calculateHourMinute($leaveRequested).'</div>';
-            $html .= '</div>';
-            $html .= '<div class="grid grid-cols-12 gap-4">';
-                $html .= '<div class="col-span-6 text-slate-500 font-medium">Left This Year</div>';
-                $html .= '<div class="col-span-6 text-right font-medium">'.$balance_left.'</div>';
-            $html .= '</div>';
-        else:
-            $html = '';
-            $html .= '<div class="grid grid-cols-12 gap-4">';
-                $html .= '<div class="col-span-12">';
-                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
-                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Working pattern not found!';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-        endif;
-
-        return $html;
+        return view('pages.employee.profile.partials.holiday-statistics', [
+            'stats' => $stats,
+        ])->render();
     }
 
     public function employeePossibleActivePattern($employee_id, $year_id = 0){
@@ -844,12 +1033,10 @@ class EmployeeHolidayController extends Controller
         if($balance_left > 0 || $LeaveType != 1):
             $bookedHours = 0;
             $fractionFound = false;
-            $leaveDayHtml = '';
             $i = 1;
             $dayCount = 0;
             foreach($Dates as $theDate):
                 $day = date('N', strtotime($theDate));
-                $day_name = ucfirst(date('D', strtotime($theDate)));
 
                 $empPatternDetail = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $pattern_id)->where('day', $day)->get()->first();
                 $todayHours = (isset($empPatternDetail->total) && !empty($empPatternDetail->total) ? $this->convertStringToMinute($empPatternDetail->total) : 0);
@@ -861,27 +1048,6 @@ class EmployeeHolidayController extends Controller
                     $todaysFractionHour = ($balance_left - $bookedHours);
                 endif;
 
-                $leaveDayHtml .= '<tr class="'.($todayIsFraction ? 'defaultFractionRow' : '').'">';
-                    $leaveDayHtml .= '<td>';
-                        $leaveDayHtml .= date('d-m-Y', strtotime($theDate));
-                        $leaveDayHtml .= '<input type="hidden" name="leave['.$i.'][date]" value="'.date('Y-m-d', strtotime($theDate)).'"/>';
-                    $leaveDayHtml .= '</td>';
-                    $leaveDayHtml .= '<td>';
-                        $leaveDayHtml .= '<div class="form-check m-0 justify-center">';
-                            $leaveDayHtml .= '<input '.($LeaveType != 1 && $LeaveType != 5 ? 'disabled' : '').' '.($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5) ? 'checked' : '').' name="leave['.$i.'][fraction]" id="live_fraction_'.strtotime($theDate).'" class="form-check-input m-0 fractionIndicator" type="checkbox" value="1">';
-                        $leaveDayHtml .= '</div>';
-                    $leaveDayHtml .= '</td>';
-                    $leaveDayHtml .= '<td>';
-                        $leaveDayHtml .= '<input type="text" 
-                                            class="form-control w-full leaveDatesHours timeMask" 
-                                            name="leave['.$i.'][hours]"
-                                            '.($todayIsFraction  && ($LeaveType == 1 || $LeaveType == 5) ? '' : 'readonly').'
-                                            data-daymax="'.$todayHours.'"
-                                            data-maxhour="'.($todayIsFraction ? $todaysFractionHour : $todayHours).'" 
-                                            value="'.($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5) ? $this->calculateHourMinute($todaysFractionHour) : ($LeaveType == 1 || $LeaveType == 5 ? $this->calculateHourMinute($todayHours) : '00:00')).'"/>';
-                    $leaveDayHtml .= '</td>';
-                $leaveDayHtml .= '</tr>';
-
                 $bookedHours += ($LeaveType == 1 || $LeaveType == 5 ? ($todayIsFraction ? $todaysFractionHour : $todayHours) : 0);
                 $dayCount += 1;
                 $i++;
@@ -890,78 +1056,68 @@ class EmployeeHolidayController extends Controller
             $res = [];
             if($bookedHours > $balance_left && $LeaveType == 1):
                 $res['suc'] = 2;
-                $res['html'] = '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong> You do not have sufficient allowance to book holidays.</span></div>';
+                $res['html'] = view('pages.employee.profile.partials.holiday-request-step', [
+                    'mode' => 'error',
+                    'message' => 'You do not have sufficient allowance to book holidays.',
+                ])->render();
             else:
                 $res['suc'] = 1;
-                $html = '';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12">';
-                        $html .= '<div class="notes p-5 border"><strong>Please check and confirm the following:</strong><br>';
-                            if($LeaveType == 1):
-                                $html .= $this->calculateHourMinute($bookedHours).' HOURS will be removed from the staff members account.';
-                            elseif($LeaveType == 5):
-                                $html .= $this->calculateHourMinute($bookedHours).' HOURS will be counted as Authorised Paid.';
-                            else:
-                                $html .= '00:00 Hours will be counted as '.$LeaveTypeName;
-                            endif;
-                        $html .= '</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Dates</label>';
-                    $html .= '</div>';
-                    $html .= '<div class="col-span-12 sm:col-span-8">';
-                        $html .= '<table class="leaveDayTable">';
-                            $html .= '<tbody>';
-                                $html .= $leaveDayHtml;
-                            $html .= '</tbody>';
-                        $html .= '</table>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Days</label>';
-                    $html .= '</div>';
-                    $html .= '<div class="col-span-12 sm:col-span-8">';
-                        $html .= '<div class="font-medium text-right">'.$dayCount.'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Requested</label>';
-                    $html .= '</div>';
-                    $html .= '<div class="col-span-12 sm:col-span-8">';
-                        $html .= '<div class="font-medium text-right requestedHours">'.$this->calculateHourMinute($bookedHours).'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12 sm:col-span-4">';
-                        $html .= '<label class="font-medium block pt-2">Allowance Left</label>';
-                    $html .= '</div>';
-                    $html .= '<div class="col-span-12 sm:col-span-8">';
-                        $html .= '<div class="font-medium text-right balanceLeft">'.($LeaveType == 1 ? $this->calculateHourMinute(($balance_left - $bookedHours)) : $this->calculateHourMinute($balance_left)).'</div>';
-                    $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="grid grid-cols-12 gap-0 mt-5">';
-                    $html .= '<div class="col-span-12">';
-                        $html .= '<label class="font-medium block mb-2">Note <span class="text-danger">*</span></label>';
-                    $html .= '</div>';
-                    $html .= '<div class="col-span-12">';
-                        $html .= '<textarea class="form-control w-full" rows="3" name="note"></textarea>';
-                    $html .= '</div>';
-                $html .= '</div>';
+                $leaveDays = [];
+                $i = 1;
+                foreach($Dates as $theDate):
+                    $day = date('N', strtotime($theDate));
+                    $empPatternDetail = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $pattern_id)->where('day', $day)->get()->first();
+                    $todayHours = (isset($empPatternDetail->total) && !empty($empPatternDetail->total) ? $this->convertStringToMinute($empPatternDetail->total) : 0);
 
-                $html .= '<input type="hidden" name="booked_hours" value="'.($LeaveType == 1 || $LeaveType == 5 ? $bookedHours : 0).'"/>';
-                $html .= '<input type="hidden" name="booked_days" value="'.$dayCount.'"/>';
-                $html .= '<input type="hidden" name="is_fraction_found" value="'.($fractionFound && ($LeaveType == 1 || $LeaveType) ? 1 : 0).'"/>';
-                $html .= '<input type="hidden" name="balance_left" value="'.$balance_left.'"/>';
+                    $todayIsFraction = false;
+                    $todaysFractionHour = 0;
+                    $runningBookedHours = 0;
+                    for($j = 0; $j < ($i - 1); $j++):
+                        $runningBookedHours += (isset($leaveDays[$j]['minutes']) ? $leaveDays[$j]['minutes'] : 0);
+                    endfor;
+                    if(($runningBookedHours + $todayHours) > $balance_left && $runningBookedHours < $balance_left ):
+                        $todayIsFraction = true;
+                        $todaysFractionHour = ($balance_left - $runningBookedHours);
+                    endif;
 
-                $res['html'] = $html;
+                    $minutes = ($LeaveType == 1 || $LeaveType == 5 ? ($todayIsFraction ? $todaysFractionHour : $todayHours) : 0);
+                    $leaveDays[] = [
+                        'display_date' => date('D jS F, Y', strtotime($theDate)),
+                        'date_value' => date('Y-m-d', strtotime($theDate)),
+                        'fraction_name' => 'leave['.$i.'][fraction]',
+                        'fraction_id' => 'live_fraction_'.strtotime($theDate),
+                        'hours_name' => 'leave['.$i.'][hours]',
+                        'is_fraction' => ($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5)),
+                        'fraction_disabled' => !($LeaveType == 1 || $LeaveType == 5),
+                        'hours_readonly' => !($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5)),
+                        'daymax' => $todayHours,
+                        'maxhour' => ($todayIsFraction ? $todaysFractionHour : $todayHours),
+                        'hours_value' => ($todayIsFraction && ($LeaveType == 1 || $LeaveType == 5) ? $this->calculateHourMinute($todaysFractionHour) : ($LeaveType == 1 || $LeaveType == 5 ? $this->calculateHourMinute($todayHours) : '00:00')),
+                        'minutes' => $minutes,
+                        'is_default_fraction' => $todayIsFraction,
+                    ];
+                    $i++;
+                endforeach;
+
+                $res['html'] = view('pages.employee.profile.partials.holiday-request-step', [
+                    'mode' => 'ready',
+                    'leaveType' => $LeaveType,
+                    'leaveTypeName' => $LeaveTypeName,
+                    'bookedHours' => ($LeaveType == 1 || $LeaveType == 5 ? $bookedHours : 0),
+                    'bookedHoursDisplay' => $this->calculateHourMinute($bookedHours),
+                    'dayCount' => $dayCount,
+                    'balanceLeft' => $balance_left,
+                    'balanceLeftDisplay' => ($LeaveType == 1 ? $this->calculateHourMinute(($balance_left - $bookedHours)) : $this->calculateHourMinute($balance_left)),
+                    'fractionFound' => ($fractionFound && ($LeaveType == 1 || $LeaveType == 5)),
+                    'leaveDays' => $leaveDays,
+                ])->render();
             endif;
         else:
             $res['suc'] = 2;
-            $res['html'] = '<div class="alert alert-danger-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> <span><strong>Oops</strong> You do not have sufficient allowance to book holidays.</span></div>';
+            $res['html'] = view('pages.employee.profile.partials.holiday-request-step', [
+                'mode' => 'error',
+                'message' => 'You do not have sufficient allowance to book holidays.',
+            ])->render();
         endif;
 
         return response()->json(['res' => $res], 200);
@@ -1417,39 +1573,14 @@ class EmployeeHolidayController extends Controller
     public function getEmployeeLeave(Request $request){
         $employee_leave_id = $request->employee_leave_id;
 
-        $html = '';
-        $employeeLeave = EmployeeLeave::find($employee_leave_id);
-        
-        $html .= '<table class="table table-bordered table-hover leaveRequestDaysTable">';
-            $html .= '<thead>';
-                $html .= '<tr>';
-                    $html .= '<th class="whitespace-nowrap">Date</th>';
-                    $html .= '<th class="whitespace-nowrap">Hour</th>';
-                    $html .= '<th class="whitespace-nowrap text-center">Approve</th>';
-                    $html .= '<th class="whitespace-nowrap text-center">Deny</th>';
-                $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-                if(isset($employeeLeave->leaveDays) && $employeeLeave->leaveDays->count() > 0):
-                    foreach($employeeLeave->leaveDays as $leaveDay):
-                        $html .= '<tr>';
-                            $html .= '<td>'.date('D jS F, Y', strtotime($leaveDay->leave_date)).'</td>';
-                            $html .= '<td>'.$this->calculateHourMinute($leaveDay->hour).'</td>';
-                            $html .= '<td>';
-                                $html .= '<div class="form-check m-0 justify-center">';
-                                    $html .= '<input '.(isset($leaveDay->supervision_status) && $leaveDay->supervision_status == 1 ? 'checked' : '').' class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="Active">';
-                                $html .= '</div>';
-                            $html .= '</td>';
-                            $html .= '<td>';
-                                $html .= '<div class="form-check m-0 justify-center">';
-                                    $html .= '<input '.(isset($leaveDay->supervision_status) && $leaveDay->supervision_status == 2 ? 'checked' : '').' class="form-check-input m-0" name="leaveDay['.$leaveDay->id.']" type="radio" value="In Active">';
-                                $html .= '</div>';
-                            $html .= '</td>';
-                        $html .= '</tr>';
-                    endforeach;
-                endif;
-            $html .= '</tbody>';
-        $html .= '</table>';
+        $employeeLeave = EmployeeLeave::with(['leaveDays' => function($query){
+            $query->orderBy('leave_date', 'ASC');
+        }])->find($employee_leave_id);
+
+        $html = view('pages.employee.profile.partials.holiday-leave-request-modal', [
+            'employeeLeave' => $employeeLeave,
+            'controller' => $this,
+        ])->render();
 
         return response()->json(['res' => $html], 200);
     }

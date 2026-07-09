@@ -264,6 +264,7 @@ class DatafutureController extends Controller
         if($instances->count() > 0):
             foreach($instances as $instance):
                 $existInstance = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('course_creation_instance_id', $instance->id)->withTrashed()->get();
+                
                 if($existInstance->count() == 0):
                     $existingRowCount = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->get()->count();
                     $lastRow = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'DESC')->get();
@@ -778,7 +779,7 @@ class DatafutureController extends Controller
     }
 
     public function destroyStuloadInformation(Student $student, Request $request){
-        $id = $request->recordid;
+        $id = $request->hesa_status;
         StudentStuloadInformation::where('student_id', $student->id)->where('id', $id)->delete();
 
         return response()->json(['message' => 'Student course session successfully deleted.'], 200);
@@ -786,11 +787,12 @@ class DatafutureController extends Controller
 
     public function resetCourseSessions(Student $student, Request $request){
         $student_crel_id = $request->student_crel_id;
-        $stuload_ids = StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->pluck('id')->unique()->toArray();
+        $stuload_ids = StudentStuloadInformation::withTrashed()->where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->pluck('id')->unique()->toArray();
 
-        StudentCourseSessionDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
-        StudentModuleInstanceDatafuture::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
-        StudentTermStuload::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentCourseSessionDatafuture::withTrashed()->where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentModuleInstanceDatafuture::withTrashed()->where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentTermStuload::withTrashed()->where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        
         
         StudentStuloadInformation::where('student_id', $student->id)->where('student_course_relation_id', $student_crel_id)->whereIn('id', $stuload_ids)->forceDelete();
 

@@ -68,6 +68,7 @@ export default defineConfig({
                 'resources/js/student-letter.js',
                 'resources/js/student-email.js',
                 'resources/js/student-sms.js',
+                'resources/js/student-quick-communication.js',
                 'resources/js/student-note.js',
                 'resources/js/student-upload.js',
                 'resources/js/student-process.js',
@@ -431,7 +432,7 @@ export default defineConfig({
 
                 'resources/js/login-log.js',
                 'resources/js/login-log_users.js',
-
+                
                 'resources/js/hesa-my-downloads.js',
 
             ],

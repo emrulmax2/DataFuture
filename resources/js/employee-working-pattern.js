@@ -184,11 +184,13 @@ var employeeWorkingPatternDaysListTable = (function () {
 
 var employeePatternListTable = (function () {
     let tableContent = null;
+    let currentTotalRows = 0;
 
     const ensureFooterCount = function (table, totalRows = 0) {
         if (!table) return;
 
-        const footerEl = table.element ? table.element.querySelector(".tabulator-footer .tabulator-footer-contents") : null;
+        const tableEl = typeof table.getElement === "function" ? table.getElement() : null;
+        const footerEl = tableEl ? tableEl.querySelector(".tabulator-footer .tabulator-footer-contents") : null;
         if (!footerEl) return;
 
         let counterEl = footerEl.querySelector(".tabulator-page-counter");
@@ -269,6 +271,7 @@ var employeePatternListTable = (function () {
             tableContent.destroy();
             document.getElementById("employeePatternListTable").innerHTML = "";
         }
+        currentTotalRows = 0;
 
         tableContent = new Tabulator("#employeePatternListTable", {
             ajaxURL: route("employee.pattern.list"),
@@ -278,7 +281,7 @@ var employeePatternListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             ajaxResponse: function (url, params, response) {
-                this._epTotalRows = response && response.total_rows ? Number(response.total_rows) : 0;
+                currentTotalRows = response && response.total_rows ? Number(response.total_rows) : 0;
                 return response;
             },
             pagination: "remote",
@@ -356,7 +359,7 @@ var employeePatternListTable = (function () {
                     const currentWidth = lastColumn.getWidth();
                     lastColumn.setWidth(currentWidth - 1);
                 }
-                ensureFooterCount(this, this._epTotalRows || 0);
+                ensureFooterCount(tableContent, currentTotalRows);
             },
             rowFormatter: function(row, e) {
                 const employeeWorkingPatternId = row.getData().id;

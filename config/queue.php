@@ -66,7 +66,9 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
+            // Must be GREATER than the longest job timeout (GenerateDatafutureReportJob uses 7200s)
+            // otherwise Redis releases the still-running job and it fails with MaxAttemptsExceededException.
+            'retry_after' => 7800,
             'block_for' => null,
             'after_commit' => false,
         ],

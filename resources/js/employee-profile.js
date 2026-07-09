@@ -9,6 +9,9 @@ import { createIcons, icons } from 'lucide';
         },
         placeholder: 'Search Here...',
         maxOptions: null,
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown employee-profile-tom-dropdown',
+        copyClassesToDropdown: false,
         //persist: false,
         create: true,
         allowEmptyOption: true,
@@ -34,22 +37,22 @@ import { createIcons, icons } from 'lucide';
         tomOptions
     );
 
-    let multiTomOption = tomOptions;
     $('.lccTom').each(function () {
-        if ($(this).attr('multiple') !== undefined) {
-            multiTomOption = {
-                ...multiTomOption,
-                plugins: {
-                    ...multiTomOption.plugins,
-                    remove_button: {
-                        title: 'Remove this item',
-                    },
-                },
-            };
-            new TomSelect(this, multiTomOption);
-        } else {
-            new TomSelect(this, tomOptions);
-        }
+        const isMultiple = $(this).attr('multiple') !== undefined;
+        const options =
+            isMultiple
+                ? {
+                      ...tomOptions,
+                      plugins: {
+                          ...tomOptions.plugins,
+                          remove_button: {
+                              title: 'Remove this item',
+                          },
+                      },
+                  }
+                : tomOptions;
+
+        new TomSelect(this, options);
     });
 
     $('.date-picker').each(function () {

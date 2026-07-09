@@ -98,7 +98,9 @@ if($("#addStudentPhotoModal").length > 0){
 /* End Dropzone */
 
 if($('#profileSettingsForm').length > 0){
-    const profileSettingsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#profileSettingsDropdown"));
+    const tailwindDropdown = window.tailwind && window.tailwind.Dropdown ? window.tailwind.Dropdown : null;
+    const profileSettingsDropdownEl = document.querySelector("#profileSettingsDropdown");
+    const profileSettingsDropdown = (tailwindDropdown && profileSettingsDropdownEl ? tailwindDropdown.getOrCreateInstance(profileSettingsDropdownEl) : { hide(){} });
 
     $(document).on('click', '.dismisProfSetDropdown', function(e){
         e.preventDefault();
@@ -136,4 +138,3 @@ if($('#profileSettingsForm').length > 0){
 }
     
 })();
-

@@ -20,6 +20,7 @@ use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAward;
 use App\Models\StudentCourseRelation;
+use App\Models\StudentCourseSessionDatafuture;
 use App\Models\StudentDisability;
 use App\Models\StudentModuleInstanceDatafuture;
 use App\Models\StudentProposedCourse;
@@ -1336,6 +1337,7 @@ class DatafutureReportController extends Controller
             if($stuloads->count() > 0):
                 foreach($stuloads as $student_id => $courseRelations):
                     foreach($courseRelations as $student_course_relation_id => $rows):
+                        $this->resetCourseSessions($student_id, $student_course_relation_id);
                         $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
 
                         $studentCounts += 1;
@@ -1345,6 +1347,19 @@ class DatafutureReportController extends Controller
         endif;
 
         return response()->json(['message' => '<strong>'.$studentCounts.'</strong> students data successfull autoloaded.'], 200);
+    }
+
+    public function resetCourseSessions($student_id, $student_crel_id){
+        $stuload_ids = StudentStuloadInformation::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->pluck('id')->unique()->toArray();
+
+        StudentCourseSessionDatafuture::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentModuleInstanceDatafuture::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        StudentTermStuload::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
+        
+        
+        StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('id', $stuload_ids)->forceDelete();
+
+        return true;
     }
 
     public function autoLoadStudentStuloads($student_id, $student_course_relation_id){

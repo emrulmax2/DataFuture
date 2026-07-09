@@ -6,6 +6,10 @@
 
 @section('subcontent')
 
+    {{-- This page ships its own #sendEmailModal / #smsSMSModal (+ student-email.js /
+         student-sms.js), so skip the shared quick-comm popups to avoid duplicate IDs. --}}
+    @php($skipQuickComm = true)
+
     <!-- BEGIN: Profile Info -->
     @include('pages.students.live.show-info')
     <!-- END: Profile Info -->

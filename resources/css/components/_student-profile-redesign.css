@@ -673,6 +673,19 @@ body.student-profile-body:not(.student-profile-attendance-page) {
     color: #e5b94e;
 }
 
+.student-profile-contact-trigger {
+    cursor: pointer;
+    transition: opacity 0.15s ease, text-decoration-color 0.15s ease;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+}
+
+.student-profile-contact-trigger:hover {
+    opacity: 0.85;
+    text-decoration-color: currentColor;
+}
+
 .student-profile-actions {
     align-items: center;
     display: flex;
