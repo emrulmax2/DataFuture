@@ -490,7 +490,7 @@ class AdmissionController extends Controller
             'ethnicity' => Ethnicity::where('active', 1)->get(),
             'disability' => Disability::where('active', 1)->get(),
             'relations' => KinsRelation::where('active', 1)->get(),
-            'bodies' => AwardingBody::where('active', 1)->get(),
+            'bodies' => AwardingBody::all(),
             'sexid' => SexIdentifier::where('active', 1)->get(),
             'venues' => Venue::where('active', 1)->get(),
             'users' => User::where('active', 1)->orderBy('name', 'ASC')->get(),
