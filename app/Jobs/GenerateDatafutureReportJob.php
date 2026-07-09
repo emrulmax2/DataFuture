@@ -19,9 +19,28 @@ class GenerateDatafutureReportJob implements ShouldQueue
 
     public $timeout = 7200;
 
+    // Don't silently re-run this expensive report on transient release/failure.
+    public $tries = 1;
+
     public function __construct($export_id)
     {
         $this->export_id = $export_id;
+    }
+
+    /**
+     * Ensures the export row isn't left stuck on "processing" if the job
+     * fails terminally (timeout, MaxAttemptsExceeded, uncaught error, etc.).
+     */
+    public function failed(\Throwable $e): void
+    {
+        $export = DatafutureReportExport::find($this->export_id);
+
+        if ($export && $export->status !== 'completed') {
+            $export->update([
+                'status' => 'failed',
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function handle(): void
