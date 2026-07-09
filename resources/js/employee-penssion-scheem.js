@@ -6,8 +6,8 @@ import Tabulator from "tabulator-tables";
 var employeePenssionListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
-        let querystr = $("#query-PNS").val() != "" ? $("#query-PNS").val() : "";
-        let status = $("#status-PNS").val() != "" ? $("#status-PNS").val() : "";
+        let querystr = $("#query-PNS").val() ? $("#query-PNS").val() : "";
+        let status = $("#status-PNS").val() ? $("#status-PNS").val() : "1";
         let employee_id = $("#employeePenssionListTable").attr('data-employee');
 
         let tableContent = new Tabulator("#employeePenssionListTable", {
@@ -17,9 +17,9 @@ var employeePenssionListTable = (function () {
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            ajaxResponse: function (url, params, response) {
+                return response && response.data ? response.data : response;
+            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -27,12 +27,25 @@ var employeePenssionListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 92,
+                    headerHozAlign: "left",
                 },
                 {
                     title: "Scheme",
                     field: "penssion",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        var name = cell.getValue() ? String(cell.getValue()) : "";
+                        var initial = name.trim().charAt(0).toUpperCase() || "?";
+                        return (
+                            '<div class="ep-scheme-cell">' +
+                            '<span class="ep-scheme-cell__tile">' + initial + "</span>" +
+                            '<span class="ep-scheme-cell__meta">' +
+                            '<span class="ep-scheme-cell__name">' + name + "</span>" +
+                            '<span class="ep-scheme-cell__sub">Workplace pension</span>' +
+                            "</span></div>"
+                        );
+                    },
                 },
                 {
                     title: "Date Joined",
@@ -43,28 +56,41 @@ var employeePenssionListTable = (function () {
                     title: "Date Left",
                     field: "date_left",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        var v = cell.getValue();
+                        return v !== null && v !== undefined && v !== ""
+                            ? v
+                            : '<span class="ep-date-empty">&mdash;</span>';
+                    },
                 },
                 {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 150,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmpPenssionModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmpPenssionModal" type="button" class="edit_btn ep-table-icon-btn ep-table-icon-btn--edit ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn ep-table-icon-btn ep-table-icon-btn--danger ml-1"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn ep-table-icon-btn ep-table-icon-btn--restore ml-1"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
             ],
+            dataLoaded(data) {
+                var n = data ? data.length : 0;
+                var txt =
+                    "Showing " + n + " of " + n + " scheme" + (n === 1 ? "" : "s") +
+                    (n > 0 ? " · currently enrolled" : "");
+                $("#employeePenssionTableCount").text(txt);
+            },
             renderComplete() {
                 createIcons({
                     icons,
@@ -135,17 +161,19 @@ var employeePenssionListTable = (function () {
             employeePenssionListTable.init();
         }
 
-        // On submit filter form
-        $("#tabulatorFilterForm-PNS")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLFormPNS();
+        // On submit filter form (filter row is optional on the redesigned page)
+        if ($("#tabulatorFilterForm-PNS").length) {
+            $("#tabulatorFilterForm-PNS")[0].addEventListener(
+                "keypress",
+                function (event) {
+                    let keycode = event.keyCode ? event.keyCode : event.which;
+                    if (keycode == "13") {
+                        event.preventDefault();
+                        filterHTMLFormPNS();
+                    }
                 }
-            }
-        );
+            );
+        }
 
         // On click go button
         $("#tabulator-html-filter-go-PNS").on("click", function (event) {

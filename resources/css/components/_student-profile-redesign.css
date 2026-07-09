@@ -66,7 +66,7 @@ body.student-profile-body:not(.student-profile-attendance-page) {
     height: 48px;
     margin: 0 auto;
     max-width: var(--student-profile-container);
-    padding: 0 28px;
+    padding: 2px 28px;
 }
 
 .student-profile-brand {
@@ -91,7 +91,7 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 .student-profile-brand--logo {
     color: #ffffff;
     flex: 0 0 auto;
-    height: 32px;
+    height: 35px;
     max-width: 168px;
 }
 
@@ -134,7 +134,8 @@ body.student-profile-body:not(.student-profile-attendance-page) {
     align-items: center;
     color: rgba(255, 255, 255, 0.62);
     display: inline-flex;
-    font-size: 12.5px;
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 14px;
     font-weight: 500;
     gap: 5px;
     height: 48px;
@@ -578,9 +579,9 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 
 .student-profile-reg {
     color: var(--student-profile-gold);
-    font-size: 10.5px;
+    font-size: 12.5px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.07em;
 }
 
 .student-profile-status-badge,
@@ -595,10 +596,10 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 }
 
 .student-profile-status-badge {
-    background: rgba(var(--student-profile-accent-rgb), 0.22) !important;
+    background: var(--student-profile-warning-soft) !important;
     border-color: transparent !important;
     border-radius: 999px;
-    color: var(--student-profile-accent) !important;
+    color: var(--student-profile-warning) !important;
 }
 
 .student-profile-status-badge::before {
@@ -607,10 +608,10 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 }
 
 .student-profile-country {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--student-profile-warning-soft);
+    border: 1px solid transparent;
     border-radius: 999px;
-    color: #8fa6ac;
+    color: var(--student-profile-warning) !important;
 }
 
 .student-profile-summary h1 {
@@ -638,20 +639,24 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 
 .student-profile-course {
     color: #8fa6ac;
-    font-size: 12.5px;
+    font-size: 14px;
     font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 2px;
 }
 
 .student-profile-contact-line {
     color: #b7c8cc;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
-    gap: 6px 20px;
+    line-height: 1.5;
+    gap: 2px 20px;
     margin-top: 0;
 }
 
 .student-profile-contact-line .student-profile-contactline-address {
     flex-basis: 100%;
+    text-transform: capitalize;
 }
 
 .student-profile-contact-line span {
@@ -845,7 +850,8 @@ body.student-profile-body:not(.student-profile-attendance-page) {
 .student-profile-tabs-wrap .nav.nav-link-tabs .nav-link {
     border-bottom: 2px solid transparent;
     color: var(--student-profile-muted);
-    font-size: 12.5px;
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 13px;
     font-weight: 800;
     margin: 0;
     padding: 14px 13px 13px;
@@ -876,7 +882,8 @@ body.student-profile-body:not(.student-profile-attendance-page) {
     border-bottom: 0;
     border-radius: 7px;
     color: #43585d;
-    font-size: 12.5px;
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 13px;
     font-weight: 600;
     padding: 4px 12px;
 }

@@ -18,7 +18,9 @@ var employeeAppraisalListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
+                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
+            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",

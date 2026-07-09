@@ -34,21 +34,19 @@
                             <div class="acc__input-error error-last_name text-danger mt-2"></div>
                         </div>
                                  
-                        <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="employee_telephone" class="form-label inline-flex">Telephone </label>
-                            <input id="employee_telephone" type="text" value="{{ isset($employee->telephone) ? $employee->telephone : '' }}" class="form-control rounded-none form-control-lg" name="telephone" aria-label="default input example">
-                                            
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="employee_telephone" class="form-label">Telephone </label>
+                            <input id="employee_telephone" type="text" value="{{ isset($employee->telephone) ? $employee->telephone : '' }}" class="form-control" name="telephone" aria-label="default input example">
                         </div>
-                        <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="employee_mobile" class="form-label inline-flex">Mobile <span class="text-danger"> *</span></label>
-                            <input id="employee_mobile" type="text" value="{{ isset($employee->mobile) ? $employee->mobile : '' }}" class="form-control rounded-none form-control-lg" name="mobile" aria-label="default input example">
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="employee_mobile" class="form-label">Mobile <span class="text-danger"> *</span></label>
+                            <input id="employee_mobile" type="text" value="{{ isset($employee->mobile) ? $employee->mobile : '' }}" class="form-control" name="mobile" aria-label="default input example">
                             <div class="acc__input-error error-mobile text-danger mt-2"></div>
                         </div>
         
-                        <div class="intro-y col-span-12 sm:col-span-4">
-                            <label for="employee_email" class="form-label inline-flex">Email </label>
-                            <input id="employee_email" type="text" value="{{ isset($employee->email) ? $employee->email : '' }}" name="email" class="form-control rounded-none form-control-lg" aria-label="default input example">
-                            
+                        <div class="col-span-12 sm:col-span-4">
+                            <label for="employee_email" class="form-label">Email </label>
+                            <input id="employee_email" type="text" value="{{ isset($employee->email) ? $employee->email : '' }}" name="email" class="form-control" aria-label="default input example">
                         </div>   
                         <div class="col-span-12 sm:col-span-4">
                             <label for="date_of_birth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
