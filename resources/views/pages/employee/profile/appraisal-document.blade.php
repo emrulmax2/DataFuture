@@ -65,7 +65,7 @@
                 <div class="col-span-12 sm:col-span-3">
                     <div class="grid grid-cols-12 gap-0">
                         <div class="col-span-4 text-slate-500 font-medium">Promotion Consideration</div>
-                        <div class="col-span-8 font-medium uppercase">{!! ($appraisal->promotion_consideration == 1 ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
+                        <div class="col-span-8 font-medium">{!! ($appraisal->promotion_consideration == 1 ? '<span class="ep-status-badge ep-status-badge--yes"><i data-lucide="check"></i><span>Yes</span></span>' : '<span class="ep-status-badge ep-status-badge--no"><i data-lucide="x"></i><span>No</span></span>') !!}</div>
                     </div>
                 </div>
                 <div class="col-span-12 sm:col-span-3">

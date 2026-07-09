@@ -17,9 +17,15 @@ var employeeBankListTable = (function () {
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
-            pagination: "remote",
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            ajaxResponse: function (url, params, response) {
+                return response && response.data ? response.data : response;
+            },
+            dataLoaded(data) {
+                var n = data ? data.length : 0;
+                $("#employeeBankTableCount").text(
+                    "Showing " + n + " of " + n + " account" + (n === 1 ? "" : "s")
+                );
+            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -27,12 +33,22 @@ var employeeBankListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "90",
                 },
                 {
                     title: "Beneficiary Name",
                     field: "beneficiary",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        const beneficiary = cell.getValue() ? String(cell.getValue()) : "Unknown";
+
+                        return (
+                            '<div class="ep-bank-cell">' +
+                                '<span class="ep-bank-cell__tile"><i data-lucide="landmark" class="w-4 h-4"></i></span>' +
+                                '<span class="ep-bank-cell__name">' + beneficiary + "</span>" +
+                            "</div>"
+                        );
+                    },
                 },
                 {
                     title: "Sort Code",
@@ -49,7 +65,11 @@ var employeeBankListTable = (function () {
                     field: "active",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                        return '' +
+                            '<label class="ep-table-toggle">' +
+                                '<input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater ep-table-toggle__input">' +
+                                '<span class="ep-table-toggle__track"><span class="ep-table-toggle__thumb"></span></span>' +
+                            '</label>';
                     }
                 },
                 {
@@ -58,18 +78,18 @@ var employeeBankListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: "160",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn ep-table-icon-btn ep-table-icon-btn--edit ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn ep-table-icon-btn ep-table-icon-btn--danger ml-1"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
                             if(cell.getData().active == 1){
-                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></button>';
+                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="ep-table-icon-btn ep-table-icon-btn--restore ml-1"><i data-lucide="refresh-ccw" class="w-4 h-4"></i></button>';
                             }
                         }  else if (cell.getData().deleted_at != null) {
-                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn ep-table-icon-btn ep-table-icon-btn--restore ml-1"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
                         return btns;

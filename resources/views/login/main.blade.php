@@ -63,7 +63,12 @@
         (function () {
             if ($('#login-form').length === 0) return;
 
+            let submitting = false;
+
             async function login() {
+                if (submitting) return;            // guard against double submit (Enter + click) -> /undefined
+                submitting = true;
+
                 $('#login-form').find('.login__input').removeClass('border-danger')
                 $('#login-form').find('.login__input-error').html('')
 
@@ -74,9 +79,11 @@
                 tailwind.svgLoader()
                 await helper.delay(1000)
 
-                axios.post(`login`, { email: email, password: password }).then(res => {
-                    location.href = res.data.redirect;
+                axios.post(`/login`, { email: email, password: password }).then(res => {
+                    // Fall back to /dashboard so a missing redirect can never send us to /undefined.
+                    location.href = (res.data && res.data.redirect) ? res.data.redirect : '/dashboard';
                 }).catch(err => {
+                    submitting = false;            // allow retry after an error
                     $('#btn-login').html('Staff sign in')
                     if (err.response.data.message != 'Wrong email or password.') {
                         for (const [key, val] of Object.entries(err.response.data.errors)) {
@@ -90,8 +97,9 @@
                 })
             }
 
-            $('#login-form').on('keyup', function (e) { if (e.keyCode === 13) login() })
-            $('#btn-login').on('click', function () { login() })
+            // The submit button (type=submit) already fires "submit" on both Enter and
+            // click, so a single handler avoids invoking login() twice.
+            $('#login-form').on('submit', function (e) { e.preventDefault(); login() })
         })()
     </script>
 @endsection

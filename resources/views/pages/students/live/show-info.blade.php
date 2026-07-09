@@ -266,7 +266,7 @@
                         <span><i data-lucide="phone" class="w-3.5 h-3.5"></i>{{ $student->contact->mobile }}</span>
                     @endif
                     @if(!empty($termAddress))
-                        <span class="student-profile-contactline-address"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ $termAddress }}</span>
+                        <span class="student-profile-contactline-address"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ \Illuminate\Support\Str::lower($termAddress) }}</span>
                     @endif
                 </div>
             </div>

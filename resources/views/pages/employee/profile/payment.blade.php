@@ -5,307 +5,372 @@
 @endsection
 
 @section('subcontent')
+<style type="text/css">
+    body{
+        background-color: #eff1f2 !important;
+    }
+</style>
 
-    
 @include('pages.employee.profile.partials.cover-header')
-
 @include('pages.employee.profile.partials.side-tabs')
 
-<div class="ep-grid">
+<div class="ep-grid ep-payment-page">
     <div class="ep-col">
+        @php
+            $tableBtn = 'btn btn-outline-secondary w-full sm:w-auto ep-table-toolbar__btn';
+            $tablePrimaryBtn = 'btn btn-primary w-full sm:w-auto ep-table-toolbar__btn ep-table-toolbar__btn--primary';
+            $tableSecondaryBtn = 'btn btn-secondary w-full sm:w-auto ep-table-toolbar__btn';
+            $payment = $employee->payment;
+            $hasPayment = isset($payment->id) && $payment->id > 0;
+            $hasBankTransfer = isset($payment->payment_method) && $payment->payment_method === 'Bank Transfer';
+            $hasClockin = isset($payment->subject_to_clockin) && $payment->subject_to_clockin === 'Yes';
+            $hasHoliday = isset($payment->holiday_entitled) && $payment->holiday_entitled === 'Yes';
+            $hasPension = isset($payment->pension_enrolled) && $payment->pension_enrolled === 'Yes';
+            $yesBadge = '<span class="ep-status-badge ep-status-badge--yes"><i data-lucide="check"></i><span>Yes</span></span>';
+            $noBadge = '<span class="ep-status-badge ep-status-badge--no"><i data-lucide="x"></i><span>No</span></span>';
+            $personName = function ($rel) {
+                if (isset($rel->user->employee->full_name) && !empty($rel->user->employee->full_name)) return $rel->user->employee->full_name;
+                if (isset($rel->user->name) && !empty($rel->user->name)) return $rel->user->name;
+                return 'Unknown';
+            };
+            $personInitials = function ($name) {
+                $name = trim((string) $name);
+                if ($name === '') return 'NA';
+                $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+                $initials = '';
+                foreach (array_slice($parts, 0, 2) as $part) {
+                    $initials .= strtoupper(substr($part, 0, 1));
+                }
+                if ($initials !== '') return $initials;
+                return strtoupper(substr($name, 0, 2));
+            };
+            $personPillTone = function ($name) {
+                $tones = [
+                    ['bg' => '#1d8b84', 'ring' => '#d7eeeb'],
+                    ['bg' => '#3f63c8', 'ring' => '#dde4fb'],
+                    ['bg' => '#d15436', 'ring' => '#f9e0da'],
+                    ['bg' => '#c68f10', 'ring' => '#f7ebc9'],
+                ];
+                $name = trim((string) $name);
+                $sum = 0;
+                for ($i = 0; $i < strlen($name); $i++) {
+                    $sum += ord($name[$i]);
+                }
+                return $tones[$sum % count($tones)];
+            };
+        @endphp
 
+        <div class="flex flex-col gap-5 mt-5">
 
-    <!-- BEGIN: Profile Info -->
-    <!-- END: Profile Info -->
-
-    <div class="intro-y mt-5">
-        <div class="intro-y box p-5 pb-7">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Payment Settings</div>
+            {{-- ============================ Payment Settings ============================ --}}
+            <div class="intro-y ep-pcard ep-pcard--teal">
+                <div class="ep-pcard__head">
+                    <span class="ep-pcard__icon ep-pcard__icon--teal">
+                        <i data-lucide="credit-card"></i>
+                    </span>
+                    <h2 class="ep-pcard__title">Payment Settings</h2>
+                    <div class="ep-pcard__actions">
+                        @if($hasPayment)
+                            <button data-tw-toggle="modal" data-tw-target="#editEmployeePaymentSettingModal" type="button" class="ep-pbtn">
+                                <i data-lucide="pencil"></i> Edit Payment Settings
+                            </button>
+                        @else
+                            <button data-tw-toggle="modal" data-tw-target="#addEmployeePaymentSettingModal" type="button" class="ep-pbtn">
+                                <i data-lucide="plus"></i> Add Payment Settings
+                            </button>
+                        @endif
+                    </div>
                 </div>
-                <div class="col-span-6 text-right">
-                    @if(isset($employee->payment->id) && $employee->payment->id > 0)
-                        <button data-applicant="" data-tw-toggle="modal" data-tw-target="#editEmployeePaymentSettingModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                            <i data-lucide="Pencil" class="w-4 h-4 mr-2"></i> Edit Payment Settings
-                        </button>
+
+                @if($hasPayment)
+                    {{-- key facts strip --}}
+                    <div class="ep-keyfacts">
+                        <div class="ep-keyfacts__cell">
+                            <span class="ep-keyfacts__icon"><i data-lucide="calendar-clock"></i></span>
+                            <div>
+                                <div class="ep-plabel">Pay Frequency</div>
+                                <div class="ep-pvalue">{{ $payment->pay_frequency ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+                        <div class="ep-keyfacts__cell">
+                            <span class="ep-keyfacts__icon"><i data-lucide="file-text"></i></span>
+                            <div>
+                                <div class="ep-plabel">Tax Code</div>
+                                <div class="ep-pvalue">{{ $payment->tax_code ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+                        <div class="ep-keyfacts__cell">
+                            <span class="ep-keyfacts__icon"><i data-lucide="landmark"></i></span>
+                            <div>
+                                <div class="ep-plabel">Payment Method</div>
+                                <div class="ep-pvalue">{{ $payment->payment_method ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- bank accounts --}}
+                    @if($hasBankTransfer)
+                        <div class="ep-psub">
+                            <div class="ep-psub__head">
+                                <h3 class="ep-psub__title">Bank Accounts</h3>
+                                @if(isset($employee->banks) && $employee->banks->count() == 0)
+                                    <button data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="ep-pbtn">
+                                        <i data-lucide="plus"></i> Add Account
+                                    </button>
+                                @endif
+                            </div>
+
+                            <div class="ep-table-toolbar flex flex-col xl:flex-row xl:items-end gap-4">
+                                <form id="tabulatorFilterForm-BNK" class="ep-table-toolbar__form xl:flex xl:flex-wrap xl:items-end gap-3 xl:mr-auto">
+                                    <div class="sm:flex items-center gap-2">
+                                        <label class="w-12 flex-none text-sm font-medium text-slate-600">Query</label>
+                                        <input id="query-BNK" name="query" type="text" class="form-control sm:w-48" placeholder="Search...">
+                                    </div>
+                                    <div class="sm:flex items-center gap-2">
+                                        <label class="w-12 flex-none text-sm font-medium text-slate-600">Status</label>
+                                        <select id="status-BNK" name="status" class="form-select sm:w-auto">
+                                            <option value="3">All</option>
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                            <option value="2">Archived</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button id="tabulator-html-filter-go-BNK" type="button" class="{{ $tablePrimaryBtn }}">Go</button>
+                                        <button id="tabulator-html-filter-reset-BNK" type="button" class="{{ $tableSecondaryBtn }}">Reset</button>
+                                    </div>
+                                </form>
+
+                                <div class="ep-table-toolbar__actions flex flex-col sm:flex-row gap-2">
+                                    <button id="tabulator-print-BNK" class="{{ $tableBtn }}">
+                                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                                    </button>
+                                    <div class="dropdown w-full sm:w-auto">
+                                        <button class="dropdown-toggle {{ $tableBtn }}" aria-expanded="false" data-tw-toggle="dropdown">
+                                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                                        </button>
+                                        <div class="dropdown-menu w-40">
+                                            <ul class="dropdown-content">
+                                                <li>
+                                                    <a id="tabulator-export-csv-BNK" href="javascript:;" class="dropdown-item">
+                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a id="tabulator-export-xlsx-BNK" href="javascript:;" class="dropdown-item">
+                                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto scrollbar-hidden">
+                                <div id="employeeBankListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                            </div>
+                            <div class="ep-tab-foot">
+                                <span id="employeeBankTableCount" class="ep-tab-foot__count"></span>
+                                <span class="ep-tab-foot__note">
+                                    <i data-lucide="lock"></i> Account details are visible to payroll administrators only
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <div class="ep-pempty">
+                        <i data-lucide="info" class="w-4 h-4 flex-none"></i> Payment settings have not been configured for this employee yet.
+                    </div>
+                @endif
+            </div>
+
+            @if($hasPayment)
+                {{-- ==================== Time, Holiday & Approvals ==================== --}}
+                <div class="intro-y ep-pcard ep-pcard--teal">
+                    <div class="ep-pcard__head">
+                        <span class="ep-pcard__icon ep-pcard__icon--teal">
+                            <i data-lucide="clock"></i>
+                        </span>
+                        <h2 class="ep-pcard__title">Time, Holiday &amp; Approvals</h2>
+                    </div>
+
+                    <div class="ep-pbody">
+                        <div class="ep-prow ep-prow--4">
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Subject to Clocking</div>
+                                {!! $hasClockin ? $yesBadge : $noBadge !!}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Holiday Entitlement</div>
+                                {!! $hasHoliday ? $yesBadge : $noBadge !!}
+                            </div>
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Holiday Base</div>
+                                <div class="ep-pvalue">{{ ($hasHoliday && isset($payment->holiday_base) && $payment->holiday_base !== null && $payment->holiday_base !== '') ? $payment->holiday_base : 'N/A' }}@if($hasHoliday && isset($payment->holiday_base) && $payment->holiday_base !== null && $payment->holiday_base !== '')<span class="ep-pvalue__unit"> weeks</span>@endif</div>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Bank Holiday Auto Book</div>
+                                {!! (isset($payment->bank_holiday_auto_book) && $payment->bank_holiday_auto_book === 'Yes') ? $yesBadge : $noBadge !!}
+                            </div>
+                        </div>
+
+                        <div class="ep-prow ep-prow--2">
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Hours Authorised By</div>
+                                @if($hasClockin && isset($employee->hourauth) && $employee->hourauth->count() > 0)
+                                    <div class="ep-pill-row">
+                                        @foreach($employee->hourauth as $ha)
+                                            @php($person = $ha->user->name ?? 'Unknown')
+                                            @php($tone = $personPillTone($person))
+                                            <span class="ep-person-pill" style="--ep-person-accent: {{ $tone['bg'] }}; --ep-person-ring: {{ $tone['ring'] }};">
+                                                <span class="ep-person-pill__avatar">{{ $personInitials($person) }}</span>
+                                                <span class="ep-person-pill__name">{{ $person }}</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-sm font-semibold italic text-slate-400">N/A</span>
+                                @endif
+                            </div>
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">Holiday Authorised By</div>
+                                @if($hasHoliday && isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0)
+                                    <div class="ep-pill-row">
+                                        @foreach($employee->holidayAuth as $ha)
+                                            @php($person = $personName($ha))
+                                            @php($tone = $personPillTone($person))
+                                            <span class="ep-person-pill" style="--ep-person-accent: {{ $tone['bg'] }}; --ep-person-ring: {{ $tone['ring'] }};">
+                                                <span class="ep-person-pill__avatar">{{ $personInitials($person) }}</span>
+                                                <span class="ep-person-pill__name">{{ $person }}</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-sm font-semibold italic text-slate-400">N/A</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="ep-prow ep-prow--2">
+                            <div class="min-w-0">
+                                <div class="ep-pfield-label">HR Approver</div>
+                                @if(isset($employee->approvers) && $employee->approvers->count() > 0)
+                                    <div class="ep-pill-row">
+                                        @foreach($employee->approvers as $ap)
+                                            @php($person = $personName($ap))
+                                            @php($tone = $personPillTone($person))
+                                            <span class="ep-person-pill" style="--ep-person-accent: {{ $tone['bg'] }}; --ep-person-ring: {{ $tone['ring'] }};">
+                                                <span class="ep-person-pill__avatar">{{ $personInitials($person) }}</span>
+                                                <span class="ep-person-pill__name">{{ $person }}</span>
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <span class="text-sm font-semibold italic text-slate-400">N/A</span>
+                                @endif
+                            </div>
+                            <div class="min-w-0" style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                                <div class="min-w-0">
+                                    <div class="ep-pfield-label">Line Manager</div>
+                                    @if(isset($employee->lineManagers) && $employee->lineManagers->count() > 0)
+                                        <div class="ep-pill-row">
+                                            @foreach($employee->lineManagers as $lm)
+                                                @php($person = $personName($lm))
+                                                @php($tone = $personPillTone($person))
+                                                <span class="ep-person-pill" style="--ep-person-accent: {{ $tone['bg'] }}; --ep-person-ring: {{ $tone['ring'] }};">
+                                                    <span class="ep-person-pill__avatar">{{ $personInitials($person) }}</span>
+                                                    <span class="ep-person-pill__name">{{ $person }}</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-sm font-semibold italic text-slate-400">N/A</span>
+                                    @endif
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="ep-pfield-label">Pension Enrolled</div>
+                                    {!! $hasPension ? $yesBadge : $noBadge !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ============================ Pension Schemes ============================ --}}
+                <div class="intro-y ep-pcard ep-pcard--gold">
+                    <div class="ep-pcard__head">
+                        <span class="ep-pcard__icon ep-pcard__icon--gold">
+                            <i data-lucide="shield"></i>
+                        </span>
+                        <h2 class="ep-pcard__title">Pension Schemes</h2>
+                        <div class="ep-pcard__actions">
+                            @if($hasPension)
+                                <button id="tabulator-print-PNS" type="button" class="ep-pbtn ep-pbtn--ghost">
+                                    <i data-lucide="printer"></i> Print
+                                </button>
+                                <div class="dropdown">
+                                    <button class="dropdown-toggle ep-pbtn ep-pbtn--ghost" aria-expanded="false" data-tw-toggle="dropdown">
+                                        <i data-lucide="download"></i> Export <i data-lucide="chevron-down" style="width:13px;height:13px;"></i>
+                                    </button>
+                                    <div class="dropdown-menu w-40">
+                                        <ul class="dropdown-content">
+                                            <li>
+                                                <a id="tabulator-export-csv-PNS" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a id="tabulator-export-xlsx-PNS" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button data-tw-toggle="modal" data-tw-target="#addEmpPenssionModal" type="button" class="ep-pbtn">
+                                    <i data-lucide="plus"></i> Add New Pension
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($hasPension)
+                        <div class="ep-psub">
+                            <div class="overflow-x-auto scrollbar-hidden">
+                                <div id="employeePenssionListTable" data-employee="{{ $employee->id }}" class="table-report table-report--tabulator"></div>
+                            </div>
+                            <div class="ep-tab-foot">
+                                <span id="employeePenssionTableCount" class="ep-tab-foot__count"></span>
+                            </div>
+                        </div>
                     @else
-                        <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeePaymentSettingModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Payment Settings
-                        </button>
-                    @endif
-                </div>
-            </div>
-            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Pay Frequency</div>
-                        <div class="col-span-8 font-medium">{{ (isset($employee->payment->pay_frequency) ? $employee->payment->pay_frequency : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Tax Code</div>
-                        <div class="col-span-8 font-medium">{{ (isset($employee->payment->tax_code) ? $employee->payment->tax_code : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Payment Method</div>
-                        <div class="col-span-8 font-medium">{{ (isset($employee->payment->payment_method) ? $employee->payment->payment_method : '') }}</div>
-                    </div>
-                </div>
-                @if(isset($employee->payment->payment_method) && $employee->payment->payment_method == 'Bank Transfer')
-                <div class="col-span-12">
-                    <div class="pt-2 mb-5 border-b border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm-BNK" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query-BNK" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                            </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status-BNK" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="3">All</option>
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go-BNK" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset-BNK" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-BNK" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                            </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="tabulator-export-csv-BNK" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="tabulator-export-xlsx-BNK" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                            </a>
-                                        </li>
-                                    </ul>
+                        <div class="ep-pbody">
+                            <div class="ep-prow" style="grid-template-columns:1fr;">
+                                <div class="min-w-0">
+                                    <div class="ep-pfield-label">Pension Enrolled</div>
+                                    {!! $noBadge !!}
                                 </div>
                             </div>
-                            @if(isset($employee->banks) && $employee->banks->count() == 0)
-                                <button data-tw-toggle="modal" data-tw-target="#addBankModal" type="button" class="btn btn-primary text-white ml-2"><i data-lucide="plus-circle" class="w-4 h-4"></i> Add Bank Details</button>
-                            @endif
+                            <p class="ep-pnote">This employee is not currently enrolled in a pension scheme.</p>
                         </div>
-                    </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="employeeBankListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-                @endif
-
-                <div class="col-span-12"><div class="pt-5 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div></div>
-                
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Subject To Clockin</div>
-                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes' ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>
-                <div class="col-span-6 sm:col-span-8">
-                    @if(isset($employee->payment->subject_to_clockin) && $employee->payment->subject_to_clockin == 'Yes')
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-3 text-slate-500 font-medium">Hour Authorised By</div>
-                        <div class="col-span-9 font-medium">
-                            @if(isset($employee->hourauth) && $employee->hourauth->count() > 0)
-                                @foreach($employee->hourauth as $ha)
-                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ $ha->user->name }}</span>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
                     @endif
                 </div>
-                <div class="col-span-12">
-                    <div class="pt-2 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div>
-                </div>
 
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Holiday Entitlement</div>
-                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes' ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>
-                @if(isset($employee->payment->holiday_entitled) && $employee->payment->holiday_entitled == 'Yes')
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Holiday Base</div>
-                        <div class="col-span-8 font-medium">{{ (isset($employee->payment->holiday_base) && !empty($employee->payment->holiday_base) ? $employee->payment->holiday_base : '') }}</div>
-                    </div>
-                </div>
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Bank Holiday Auto Book</div>
-                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Holiday Authorised By</div>
-                        <div class="col-span-8 font-medium">
-                            @if(isset($employee->holidayAuth) && $employee->holidayAuth->count() > 0)
-                                @foreach($employee->holidayAuth as $ha)
-                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ (isset($ha->user->employee->full_name) && !empty($ha->user->employee->full_name) ? $ha->user->employee->full_name : (isset($ha->user->name) && !empty($ha->user->name) ? $ha->user->name : 'Unknown')) }}</span>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">HR Approver</div>
-                        <div class="col-span-8 font-medium">
-                            @if(isset($employee->approvers) && $employee->approvers->count() > 0)
-                                @foreach($employee->approvers as $lm)
-                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ (isset($lm->user->employee->full_name) && !empty($lm->user->employee->full_name) ? $lm->user->employee->full_name : (isset($lm->user->name) && !empty($lm->user->name) ? $lm->user->name : 'Unknown')) }}</span>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12">
-                    <div class="pt-2 mb-2 border-b border-slate-200/60 dark:border-darkmode-400"></div>
-                </div>
-                @endif
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Line Manager</div>
-                        <div class="col-span-8 font-medium">
-                            @if(isset($employee->lineManagers) && $employee->lineManagers->count() > 0)
-                                @foreach($employee->lineManagers as $lm)
-                                    <span class="btn inline-flex btn-secondary w-auto text-left px-1 ml-0 mr-1 py-0 mb-1 rounded-0">{{ (isset($lm->user->employee->full_name) && !empty($lm->user->employee->full_name) ? $lm->user->employee->full_name : (isset($lm->user->name) && !empty($lm->user->name) ? $lm->user->name : 'Unknown')) }}</span>
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-6 sm:col-span-4"></div>
-
-                <div class="col-span-6 sm:col-span-4">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Pension Enrolled</div>
-                        <div class="col-span-8 font-medium">{!! (isset($employee->payment->pension_enrolled) && $employee->payment->pension_enrolled == 'Yes' ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>') !!}</div>
-                    </div>
-                </div>
-                @if(isset($employee->payment->pension_enrolled) && $employee->payment->pension_enrolled == 'Yes')
-                <div class="col-span-12">
-                    <div class="pt-2 mb-5 border-b border-slate-200/60 dark:border-darkmode-400"></div>
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm-PNS" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query-PNS" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                            </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status-PNS" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go-PNS" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset-PNS" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-PNS" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                {{-- ============================ Working Pattern ============================ --}}
+                <div class="intro-y ep-pcard ep-pcard--blue">
+                    <div class="ep-pcard__head">
+                        <span class="ep-pcard__icon ep-pcard__icon--blue">
+                            <i data-lucide="calendar-range"></i>
+                        </span>
+                        <h2 class="ep-pcard__title">Working Pattern</h2>
+                        <div class="ep-pcard__actions">
+                            <button id="tabulator-print-EWP" type="button" class="ep-pbtn ep-pbtn--ghost">
+                                <i data-lucide="printer"></i> Print
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto mr-2">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="tabulator-export-csv-PNS" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="tabulator-export-xlsx-PNS" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <button data-tw-toggle="modal" data-tw-target="#addEmpPenssionModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                                <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add New Pension
-                            </button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="employeePenssionListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-                @endif
-
-            </div>
-        </div>
-    </div>
-
-    @if(isset($employee->payment->id) && $employee->payment->id > 0)
-    <div class="intro-y mt-5">
-        <div class="intro-y box p-5 pb-7">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Working Pattern</div>
-                </div>
-                <div class="col-span-6 text-right">
-                    @if($numOfActivePattern == 0)
-                        <button data-applicant="" data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="btn btn-primary w-auto mr-0 mb-0">
-                            <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> Add Working Pattern
-                        </button>
-                    @endif
-                </div>
-            </div>
-            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm-EWP" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status-EWP" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go-EWP" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset-EWP" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print-EWP" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                            </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle ep-pbtn ep-pbtn--ghost" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="download"></i> Export <i data-lucide="chevron-down" style="width:13px;height:13px;"></i>
                                 </button>
                                 <div class="dropdown-menu w-40">
                                     <ul class="dropdown-content">
@@ -322,21 +387,41 @@
                                     </ul>
                                 </div>
                             </div>
+                            <button data-tw-toggle="modal" data-tw-target="#addEmployeeWorkingPatternModal" type="button" class="ep-pbtn">
+                                <i data-lucide="plus"></i> Add Working Pattern
+                            </button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="employeePatternListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
+
+                    <div class="ep-psub">
+                        <div class="ep-table-toolbar flex flex-col xl:flex-row xl:items-end gap-4">
+                            <form id="tabulatorFilterForm-EWP" class="ep-table-toolbar__form xl:flex xl:flex-wrap xl:items-end gap-3 xl:mr-auto">
+                                <div class="sm:flex items-center gap-2">
+                                    <label class="w-12 flex-none text-sm font-medium text-slate-600">Status</label>
+                                    <select id="status-EWP" name="status" class="form-select sm:w-auto">
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                        <option value="2">Archived</option>
+                                    </select>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button id="tabulator-html-filter-go-EWP" type="button" class="{{ $tablePrimaryBtn }}">Go</button>
+                                    <button id="tabulator-html-filter-reset-EWP" type="button" class="{{ $tableSecondaryBtn }}">Reset</button>
+                                </div>
+                            </form>
+
+                        </div>
+
+                        <div class="overflow-x-auto scrollbar-hidden">
+                            <div id="employeePatternListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
+
+            @include('pages.employee.profile.payment-modal')
         </div>
     </div>
-    @endif
-
-    <!-- BEGIN: Payment Modals -->
-    @include('pages.employee.profile.payment-modal');
-    <!-- END: Payment Modals -->
-</div>
 </div>
 @endsection
 

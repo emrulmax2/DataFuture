@@ -21,8 +21,10 @@ var employeeWorkingPatternPaysListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
+            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
+                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
+            },
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -43,29 +45,21 @@ var employeeWorkingPatternPaysListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Hourly Rate",
+                    title: "£/hr",
                     field: "hourly_rate",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Status",
-                    field: "active",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return cell.getData().active == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>';
-                    }
-                },
-                {
-                    title: "Actions",
+                    title: "Edit",
                     field: "id",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "120",
+                    width: "84",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
-                        btns +='<button data-patternid="'+cell.getData().employee_working_pattern_id +'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployeePatternPayModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
+                        btns +='<button data-patternid="'+cell.getData().employee_working_pattern_id +'" data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployeePatternPayModal" type="button" class="edit_btn ep-table-icon-btn ep-table-icon-btn--edit ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
                         
                         return btns;
                     },
@@ -115,42 +109,45 @@ var employeeWorkingPatternDaysListTable = (function () {
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
+            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
+                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
+            },
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "Day Name",
+                    title: "Day",
                     field: "day_name",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Start Time",
+                    title: "Start",
                     field: "start",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "End Time",
+                    title: "End",
                     field: "end",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Paid Break",
+                    title: "Paid",
                     field: "paid_br",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Unpaid Break",
+                    title: "Unpaid",
                     field: "unpaid_br",
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Day Hour",
+                    title: "Hours",
                     field: "total",
-                    headerHozAlign: "left",
-                    width: "150"
+                    headerHozAlign: "right",
+                    hozAlign: "right",
+                    width: "120"
                 }
             ],
             renderComplete() {
@@ -185,64 +182,115 @@ var employeeWorkingPatternDaysListTable = (function () {
     };
 })();
 
-var hideCollapsibleIcon = function(cell, formatterParams, onRendered){ 
-    return '<span class="chellIconWrapper inline-flex">+</span>';
-};
-
 var employeePatternListTable = (function () {
+    let tableContent = null;
+
+    const ensureFooterCount = function (table, totalRows = 0) {
+        if (!table) return;
+
+        const footerEl = table.element ? table.element.querySelector(".tabulator-footer .tabulator-footer-contents") : null;
+        if (!footerEl) return;
+
+        let counterEl = footerEl.querySelector(".tabulator-page-counter");
+        if (!counterEl) {
+            counterEl = document.createElement("div");
+            counterEl.className = "tabulator-page-counter";
+            footerEl.prepend(counterEl);
+        }
+
+        counterEl.textContent =
+            "Showing " + totalRows + " of " + totalRows + " pattern" + (totalRows === 1 ? "" : "s");
+    };
+
+    const collapsePatternRow = function (row) {
+        if (!row) return;
+
+        const rowEl = row.getElement();
+        const patternId = row.getData().id;
+        const holderWrapEl = rowEl.querySelector("#subTableWrap_" + patternId);
+        const toggleBtn = rowEl.querySelector(".toggle_pattern_details");
+
+        rowEl.classList.remove("active", "is-expanded");
+        if (holderWrapEl) {
+            holderWrapEl.style.display = "none";
+        }
+        if (toggleBtn) {
+            toggleBtn.classList.remove("is-open");
+            toggleBtn.setAttribute("aria-expanded", "false");
+            toggleBtn.setAttribute("title", "Expand");
+        }
+    };
+
+    const expandPatternRow = function (row) {
+        if (!row) return;
+
+        const rowEl = row.getElement();
+        const patternId = row.getData().id;
+        const holderWrapEl = rowEl.querySelector("#subTableWrap_" + patternId);
+        const toggleBtn = rowEl.querySelector(".toggle_pattern_details");
+        const patternDetailsTableEl = rowEl.querySelector("#patternDetailsTable_" + patternId);
+        const patternPayDetailsTableEl = rowEl.querySelector("#patternPayDetailsTable_" + patternId);
+
+        if (tableContent) {
+            tableContent.getRows().forEach((candidate) => {
+                if (candidate.getData().id !== patternId) {
+                    collapsePatternRow(candidate);
+                }
+            });
+        }
+
+        rowEl.classList.add("active", "is-expanded");
+        if (holderWrapEl) {
+            holderWrapEl.style.display = "block";
+            holderWrapEl.style.width = "100%";
+        }
+        if (toggleBtn) {
+            toggleBtn.classList.add("is-open");
+            toggleBtn.setAttribute("aria-expanded", "true");
+            toggleBtn.setAttribute("title", "Collapse");
+        }
+
+        if (patternDetailsTableEl && !patternDetailsTableEl.dataset.initialized) {
+            patternDetailsTableEl.dataset.initialized = "true";
+            employeeWorkingPatternDaysListTable.init(patternId);
+        }
+
+        if (patternPayDetailsTableEl && !patternPayDetailsTableEl.dataset.initialized) {
+            patternPayDetailsTableEl.dataset.initialized = "true";
+            employeeWorkingPatternPaysListTable.init(patternId);
+        }
+    };
+
     var _tableGen = function () {
         // Setup Tabulator
         let status = $("#status-EWP").val() != "" ? $("#status-EWP").val() : "";
         let employee_id = $("#employeePatternListTable").attr('data-employee');
+        if (tableContent) {
+            tableContent.destroy();
+            document.getElementById("employeePatternListTable").innerHTML = "";
+        }
 
-        let tableContent = new Tabulator("#employeePatternListTable", {
+        tableContent = new Tabulator("#employeePatternListTable", {
             ajaxURL: route("employee.pattern.list"),
             ajaxParams: { employee_id: employee_id, status: status },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
+            ajaxResponse: function (url, params, response) {
+                this._epTotalRows = response && response.total_rows ? Number(response.total_rows) : 0;
+                return response;
+            },
             pagination: "remote",
+            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
+                return "Showing " + totalRows + " of " + totalRows + " pattern" + (totalRows === 1 ? "" : "s");
+            },
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             height:"auto",
             columns: [
-                {
-                    formatter: hideCollapsibleIcon, 
-                    align: "left", 
-                    title: "&nbsp;", 
-                    width: "100",
-                    headerSort: false, 
-                    download: false,
-                    cellClick:function(e, row, formatterParams){
-                        const employeeWorkingPatternId = row.getData().id;
-                        let holderWrapEl = document.getElementById('subTableWrap_'+employeeWorkingPatternId);
-                        let patternDetailsTableID = 'patternDetailsTable_'+employeeWorkingPatternId;
-                        let patternPayDetailsTableID = 'patternPayDetailsTable_'+employeeWorkingPatternId;
-
-                        if(row.getElement().classList.contains('active')){
-                            row.getElement().classList.remove('active');
-                            row.getElement().querySelector('.chellIconWrapper').innerHTML = '+';
-                            holderWrapEl.style.display = 'none';
-                        }else{
-                            row.getElement().classList.add('active');
-                            row.getElement().querySelector('.chellIconWrapper').innerHTML = '-';
-                            holderWrapEl.style.display = 'block';
-                            holderWrapEl.style.width = '100%';
-
-                            if($('#'+patternDetailsTableID).length > 0){
-                                employeeWorkingPatternDaysListTable.init(employeeWorkingPatternId)
-                            }
-
-                            if($('#'+patternPayDetailsTableID).length > 0){
-                                employeeWorkingPatternPaysListTable.init(employeeWorkingPatternId)
-                            }
-                        }     
-                    }
-                },
                 {
                     title: "Effective From",
                     field: "effective_from",
@@ -263,7 +311,9 @@ var employeePatternListTable = (function () {
                     field: "active",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return cell.getData().active == 1 ? '<span class="btn btn-success px-2 py-0 text-white rounded-0">Yes</span>' : '<span class="btn btn-danger px-2 py-0 text-white rounded-0">No</span>';
+                        return cell.getData().active == 1
+                            ? '<span class="ep-table-status ep-table-status--active">Active</span>'
+                            : '<span class="ep-table-status ep-table-status--ended">Ended</span>';
                     }
                 },
                 {
@@ -272,20 +322,22 @@ var employeePatternListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "280",
+                    width: "300",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
+                        const patternId = cell.getData().id;
                         if (cell.getData().deleted_at == null) {
                             if(cell.getData().has_days == 0){
-                                btns += '<button data-id="' +cell.getData().id +'" data-contracted="'+cell.getData().contracted_hour+'" data-tw-toggle="modal"  data-tw-target="#addCalendarModal" class="addPatternDayInfo btn btn-linkedin text-white btn-rounded ml-1 p-0 px-4 w-auto h-9"><i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Calendar</button>';
+                                btns += '<button data-id="' +cell.getData().id +'" data-contracted="'+cell.getData().contracted_hour+'" data-tw-toggle="modal"  data-tw-target="#addCalendarModal" class="addPatternDayInfo ep-table-inline-btn ml-1"><i data-lucide="plus" class="w-4 h-4 mr-1"></i> Add Calendar</button>';
                             }else{
-                                btns += '<button data-id="' +cell.getData().id +'" data-contracted="'+cell.getData().contracted_hour+'" data-tw-toggle="modal"  data-tw-target="#editCalendarModal" class="editPatternDayInfo btn btn-success text-white btn-rounded ml-1 p-0 px-4 w-auto h-9"><i data-lucide="pencil" class="w-4 h-4 mr-2"></i> Edit Calendar</button>';
+                                btns += '<button data-id="' +cell.getData().id +'" data-contracted="'+cell.getData().contracted_hour+'" data-tw-toggle="modal"  data-tw-target="#editCalendarModal" class="editPatternDayInfo ep-table-inline-btn ml-1"><i data-lucide="pencil" class="w-4 h-4 mr-1"></i> Edit Calendar</button>';
                             }
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployeeWorkingPatternModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmployeeWorkingPatternModal" type="button" class="edit_btn ep-table-icon-btn ep-table-icon-btn--edit ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn ep-table-icon-btn ep-table-icon-btn--danger ml-1"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns +='<button data-patternid="' +patternId +'" type="button" class="toggle_pattern_details ep-table-icon-btn ep-table-icon-btn--toggle ml-1" aria-expanded="false" title="Expand"><i data-lucide="chevron-down" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns +='<button data-id="' +cell.getData().id +'"  class="restore_btn ep-table-icon-btn ep-table-icon-btn--restore ml-1"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
                         return btns;
@@ -304,6 +356,7 @@ var employeePatternListTable = (function () {
                     const currentWidth = lastColumn.getWidth();
                     lastColumn.setWidth(currentWidth - 1);
                 }
+                ensureFooterCount(this, this._epTotalRows || 0);
             },
             rowFormatter: function(row, e) {
                 const employeeWorkingPatternId = row.getData().id;
@@ -311,48 +364,38 @@ var employeePatternListTable = (function () {
                 const has_pays = row.getData().has_pays;
 
                 var holderEl = document.createElement("div");
-                holderEl.setAttribute('class', "pt-3 px-5 pb-5 overflow-x-auto scrollbar-hidden subTableWrap_"+employeeWorkingPatternId);
+                holderEl.setAttribute('class', "ep-pattern-detail overflow-x-auto scrollbar-hidden subTableWrap_"+employeeWorkingPatternId);
                 holderEl.setAttribute('id', "subTableWrap_"+employeeWorkingPatternId);
                 holderEl.style.display = "none";
                 holderEl.style.boxSizing = "border-box";
 
-                var gridEl = document.createElement('div');
-                gridEl.setAttribute('class', 'grid grid-cols-12 gap-0 gap-x-4');
-                holderEl.appendChild(gridEl);
-
-                var leftColEl = document.createElement('div');
-                leftColEl.setAttribute('class', 'col-span-12 sm:col-span-6 bg-white');
-                leftColEl.style.padding = "0 10px";
-                gridEl.appendChild(leftColEl)
-
-                var rightColEl = document.createElement('div');
-                rightColEl.setAttribute('class', 'col-span-12 sm:col-span-6 bg-white');
-                rightColEl.style.padding = "0 10px";
-                gridEl.appendChild(rightColEl);
-
-                if(has_days > 0){
-                    var tableEl = document.createElement("div");
-                    tableEl.setAttribute('class', "table-report table-report--tabulator subTable"+employeeWorkingPatternId);
-                    tableEl.setAttribute('id', "patternDetailsTable_"+employeeWorkingPatternId);
-                    tableEl.setAttribute('data-employeeWorkingPatternId', employeeWorkingPatternId);
-                    tableEl.style.background = "#FFFFFF";
-
-                    leftColEl.appendChild(tableEl);
-                }else{
-                    leftColEl.innerHTML = '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp;No details found under this pattern.</div>';
-                }
-
-                if(has_pays > 0){
-                    var payTableEl = document.createElement("div");
-                    payTableEl.setAttribute('class', "table-report table-report--tabulator empWorkingPayTable subPayTable"+employeeWorkingPatternId);
-                    payTableEl.setAttribute('id', "patternPayDetailsTable_"+employeeWorkingPatternId);
-                    payTableEl.setAttribute('data-employeeWorkingPatternId', employeeWorkingPatternId);
-                    payTableEl.style.background = "#FFFFFF";
-
-                    rightColEl.appendChild(payTableEl);
-                }else{
-                    rightColEl.innerHTML = '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> &nbsp;No active pay info found under this pattern.</div>';
-                }
+                holderEl.innerHTML = '' +
+                    '<div class="ep-pattern-detail__grid">' +
+                        '<div class="ep-pattern-detail__panel ep-pattern-detail__panel--schedule">' +
+                            '<div class="ep-pattern-detail__head">' +
+                                '<span class="ep-pattern-detail__icon ep-pattern-detail__icon--blue"><i data-lucide="calendar-range" class="w-4 h-4"></i></span>' +
+                                '<div>' +
+                                    '<h4 class="ep-pattern-detail__title">Weekly Schedule</h4>' +
+                                    '<p class="ep-pattern-detail__meta">Single entry per pattern</p>' +
+                                '</div>' +
+                            '</div>' +
+                            (has_days > 0
+                                ? '<div class="table-report table-report--tabulator ep-pattern-subtable ep-pattern-subtable--schedule subTable'+employeeWorkingPatternId+'" id="patternDetailsTable_'+employeeWorkingPatternId+'" data-employeeWorkingPatternId="'+employeeWorkingPatternId+'"></div>'
+                                : '<div class="ep-pattern-detail__empty"><i data-lucide="calendar-off" class="w-4 h-4"></i><span>No weekly schedule has been added to this pattern yet.</span></div>') +
+                        '</div>' +
+                        '<div class="ep-pattern-detail__panel ep-pattern-detail__panel--pay">' +
+                            '<div class="ep-pattern-detail__head">' +
+                                '<span class="ep-pattern-detail__icon ep-pattern-detail__icon--teal"><i data-lucide="credit-card" class="w-4 h-4"></i></span>' +
+                                '<div>' +
+                                    '<h4 class="ep-pattern-detail__title">Pay History</h4>' +
+                                    '<p class="ep-pattern-detail__meta">Multiple entries per pattern</p>' +
+                                '</div>' +
+                            '</div>' +
+                            (has_pays > 0
+                                ? '<div class="table-report table-report--tabulator ep-pattern-subtable ep-pattern-subtable--pay empWorkingPayTable subPayTable'+employeeWorkingPatternId+'" id="patternPayDetailsTable_'+employeeWorkingPatternId+'" data-employeeWorkingPatternId="'+employeeWorkingPatternId+'"></div>'
+                                : '<div class="ep-pattern-detail__empty"><i data-lucide="circle-alert" class="w-4 h-4"></i><span>No pay history has been linked to this pattern yet.</span></div>') +
+                        '</div>' +
+                    '</div>';
 
                 row.getElement().appendChild(holderEl);
             }
@@ -399,6 +442,18 @@ var employeePatternListTable = (function () {
         init: function () {
             _tableGen();
         },
+        toggleDetails: function (patternId) {
+            if (!tableContent) return;
+
+            const row = tableContent.getRow(patternId);
+            if (!row) return;
+
+            if (row.getElement().classList.contains("is-expanded")) {
+                collapsePatternRow(row);
+            } else {
+                expandPatternRow(row);
+            }
+        },
     };
 })();
 
@@ -434,6 +489,13 @@ var employeePatternListTable = (function () {
             $("#query-EWP").val("");
             $("#status-EWP").val("1");
             filterHTMLFormEWP();
+        });
+
+        $('#employeePatternListTable').on('click', '.toggle_pattern_details', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+
+            employeePatternListTable.toggleDetails($(this).attr('data-patternid'));
         });
     }
 
