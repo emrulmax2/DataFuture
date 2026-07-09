@@ -100,7 +100,13 @@ class EmployeeDocumentsController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json([
+            'current_page' => $page,
+            'last_page' => $last_page,
+            'per_page' => $perpage,
+            'total_rows' => $total_rows,
+            'data' => $data
+        ]);
     }
 
     public function communicationList(Request $request){
@@ -158,7 +164,13 @@ class EmployeeDocumentsController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json([
+            'current_page' => $page,
+            'last_page' => $last_page,
+            'per_page' => $perpage,
+            'total_rows' => $total_rows,
+            'data' => $data
+        ]);
     }
 
     public function employeeUploadDocument(Request $request){
@@ -209,7 +221,7 @@ class EmployeeDocumentsController extends Controller
         $recordid = $request->recordid;
         $data = EmployeeDocuments::where('id', $recordid)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 
     public function downloadUrl(Request $request){

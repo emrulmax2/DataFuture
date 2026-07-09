@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AutoloadDatafutureDataJob;
 use App\Jobs\GenerateDatafutureReportJob;
 use App\Models\Assign;
 use App\Models\Attendance;
@@ -10,6 +11,7 @@ use App\Models\Course;
 use App\Models\CourseBaseDatafutures;
 use App\Models\CourseCreationInstance;
 use App\Models\CourseModule;
+use App\Models\DatafutureAutoloadJob;
 use App\Models\DatafutureReportExport;
 use App\Models\InstanceTerm;
 use App\Models\ModuleCreation;
@@ -1293,9 +1295,61 @@ class DatafutureReportController extends Controller
     }
 
     public function autoloadData(Request $request){
-        $term_declaration_ids = $request->term_declaration_id ?? [];
-        $from_date = (!empty($request->from_date) ? date('Y-m-d', strtotime($request->from_date)) : '');
-        $to_date = (!empty($request->to_date) ? date('Y-m-d', strtotime($request->to_date)) : '');
+        // Heavy reset + reload over every matching student times out on the request
+        // thread (504). Queue it and let the client poll checkAutoloadStatus().
+        $autoload = DatafutureAutoloadJob::create([
+            'status'     => 'pending',
+            'progress'   => 0,
+            'total'      => 0,
+            'processed'  => 0,
+            'payload'    => $request->all(),
+            'created_by' => auth()->user()->id,
+            'updated_by' => auth()->user()->id,
+        ]);
+
+        AutoloadDatafutureDataJob::dispatch($autoload->id);
+
+        return response()->json([
+            'success'     => true,
+            'autoload_id' => $autoload->id,
+        ], 200);
+    }
+
+    /**
+     * Poll target for the queued autoload job.
+     */
+    public function checkAutoloadStatus($id){
+        $autoload = DatafutureAutoloadJob::findOrFail($id);
+
+        return response()->json([
+            'status'    => $autoload->status,
+            'progress'  => $autoload->progress,
+            'processed' => $autoload->processed,
+            'total'     => $autoload->total,
+            'message'   => $autoload->message,
+            'error'     => $autoload->error,
+        ]);
+    }
+
+    /**
+     * The actual reset + reload loop. Runs inside AutoloadDatafutureDataJob and
+     * updates progress on the tracking record as it goes. Returns the number of
+     * student/course-relation combinations processed.
+     */
+    public function processAutoload(DatafutureAutoloadJob $autoload){
+        // Runs inside a queued job (no request auth). Re-establish the acting user
+        // so downstream created_by/updated_by (which read auth()->user()->id) resolve.
+        if(!auth()->check() && !empty($autoload->created_by)):
+            $actor = \App\Models\User::find($autoload->created_by);
+            if($actor):
+                auth()->setUser($actor);
+            endif;
+        endif;
+
+        $payload = $autoload->payload ?? [];
+        $term_declaration_ids = $payload['term_declaration_id'] ?? [];
+        $from_date = (!empty($payload['from_date']) ? date('Y-m-d', strtotime($payload['from_date'])) : '');
+        $to_date = (!empty($payload['to_date']) ? date('Y-m-d', strtotime($payload['to_date'])) : '');
 
         $dateRanges = [];
         if(!empty($term_declaration_ids)):
@@ -1321,8 +1375,8 @@ class DatafutureReportController extends Controller
                 $TO_DATE = $date['end'];
                 $whereRaw .= (!empty($whereRaw) ? " OR " : '');
                 $whereRaw .= " (
-                    (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend)) 
-                    OR 
+                    (('$FROM_DATE' BETWEEN periodstart AND periodend) OR ('$TO_DATE' BETWEEN periodstart AND periodend))
+                    OR
                     ((periodstart BETWEEN '$FROM_DATE' AND '$TO_DATE') OR (periodend BETWEEN '$FROM_DATE' AND '$TO_DATE'))
                 ) ";
             endforeach;
@@ -1335,29 +1389,65 @@ class DatafutureReportController extends Controller
                         ->groupBy(['student_id', 'student_course_relation_id']);
 
             if($stuloads->count() > 0):
+                // Total = number of student/course-relation combinations to process.
+                $total = $stuloads->reduce(function($carry, $courseRelations){
+                    return $carry + $courseRelations->count();
+                }, 0);
+                $autoload->update(['total' => $total, 'progress' => 0, 'processed' => 0]);
+
                 foreach($stuloads as $student_id => $courseRelations):
                     foreach($courseRelations as $student_course_relation_id => $rows):
                         $this->resetCourseSessions($student_id, $student_course_relation_id);
                         $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
 
                         $studentCounts += 1;
+                        $autoload->update([
+                            'processed' => $studentCounts,
+                            'progress'  => $total > 0 ? (int) floor(($studentCounts / $total) * 100) : 100,
+                        ]);
                     endforeach;
                 endforeach;
             endif;
         endif;
 
-        return response()->json(['message' => '<strong>'.$studentCounts.'</strong> students data successfull autoloaded.'], 200);
+        return $studentCounts;
     }
 
     public function resetCourseSessions($student_id, $student_crel_id){
-        $stuload_ids = StudentStuloadInformation::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->pluck('id')->unique()->toArray();
+        // 1. Pluck IDs directly using base query builder to avoid model hydration overhead
+        $stuload_ids = DB::table('student_stuload_information') // assuming your table name
+            ->where('student_id', $student_id)
+            ->where('student_course_relation_id', $student_crel_id)
+            ->pluck('id')
+            ->unique()
+            ->toArray();
 
-        StudentCourseSessionDatafuture::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
-        StudentModuleInstanceDatafuture::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
-        StudentTermStuload::withTrashed()->where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('student_stuload_information_id', $stuload_ids)->forceDelete();
-        
-        
-        StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_crel_id)->whereIn('id', $stuload_ids)->forceDelete();
+        if (empty($stuload_ids)) {
+            return true;
+        }
+
+        // 2. Use toBase() to execute raw database deletes instantly, ignoring SoftDelete global scopes
+        DB::table('student_course_session_datafutures')
+            ->where('student_id', $student_id)
+            ->where('student_course_relation_id', $student_crel_id)
+            ->whereIn('student_stuload_information_id', $stuload_ids)
+            ->delete();
+
+        DB::table('student_module_instance_datafutures')
+            ->where('student_id', $student_id)
+            ->where('student_course_relation_id', $student_crel_id)
+            ->whereIn('student_stuload_information_id', $stuload_ids)
+            ->delete();
+
+        DB::table('student_term_stuloads')
+            ->where('student_id', $student_id)
+            ->where('student_course_relation_id', $student_crel_id)
+            ->whereIn('student_stuload_information_id', $stuload_ids)
+            ->delete();
+            
+        DB::table('student_stuload_information')
+            ->whereIn('id', $stuload_ids)
+            ->delete();
 
         return true;
     }
