@@ -9,32 +9,47 @@ import Litepicker from "litepicker";
 import 'litepicker/dist/plugins/multiselect';
 
 (function(){
-    const empHolidayAdjustmentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empHolidayAdjustmentModal"));
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
+    const tailwindModal = window.tailwind && window.tailwind.Modal ? window.tailwind.Modal : null;
+    const createNullModal = () => ({
+        show(){},
+        hide(){},
+    });
+    const getModalInstance = (selector) => {
+        const modalElement = document.querySelector(selector);
+        return (tailwindModal && modalElement ? tailwindModal.getOrCreateInstance(modalElement) : createNullModal());
+    };
+    const empHolidayAdjustmentModal = getModalInstance("#empHolidayAdjustmentModal");
+    const successModal = getModalInstance("#successModal");
+    const warningModal = getModalInstance("#warningModal");
+    const confirmModal = getModalInstance("#confirmModal");
+    const empNewLeaveRequestModal = getModalInstance("#empNewLeaveRequestModal");
 
     const empHolidayAdjustmentModalEl = document.getElementById('empHolidayAdjustmentModal')
-    empHolidayAdjustmentModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#empHolidayAdjustmentModal [name="adjustmentOpt"]').prop('checked', false);
-        $('#empHolidayAdjustmentModal [name="adjustment"]').val('');
-        $('#empHolidayAdjustmentModal [name="hr_holiday_year_id"]').val('0');
-        $('#empHolidayAdjustmentModal [name="employee_working_pattern_id"]').val('0');
-    });
+    if(empHolidayAdjustmentModalEl){
+        empHolidayAdjustmentModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#empHolidayAdjustmentModal [name="adjustmentOpt"]').prop('checked', false);
+            $('#empHolidayAdjustmentModal [name="adjustment"]').val('');
+            $('#empHolidayAdjustmentModal [name="hr_holiday_year_id"]').val('0');
+            $('#empHolidayAdjustmentModal [name="employee_working_pattern_id"]').val('0');
+        });
+    }
 
     const empNewLeaveRequestModalEl = document.getElementById('empNewLeaveRequestModal')
-    empNewLeaveRequestModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#empNewLeaveRequestModal .modal-body').html('');
-        $('#empNewLeaveRequestModal [name="employee_leave_id"]').val('0');
-    });
+    if(empNewLeaveRequestModalEl){
+        empNewLeaveRequestModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#empNewLeaveRequestModal .modal-body').html('');
+            $('#empNewLeaveRequestModal [name="employee_leave_id"]').val('0');
+        });
+    }
 
     const confirmModalEl = document.getElementById('confirmModal')
-    confirmModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#confirmModal .confModTitle').html('');
-        $('#confirmModal .confModDesc').html('');
-        $('#confirmModal .agreeWith').attr('data-id', '0').attr('data-action', 'NONE');
-    });
+    if(confirmModalEl){
+        confirmModalEl.addEventListener('hide.tw.modal', function(event) {
+            $('#confirmModal .confModTitle').html('');
+            $('#confirmModal .confModDesc').html('');
+            $('#confirmModal .agreeWith').attr('data-id', '0').attr('data-action', 'NONE');
+        });
+    }
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -46,8 +61,66 @@ import 'litepicker/dist/plugins/multiselect';
         }
     });
 
+    const renderLucideIcons = () => {
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    };
+
+    const initHolidayAccordions = () => {
+        const setCollapseState = ($button, $target, shouldOpen) => {
+            $button.toggleClass('collapsed', !shouldOpen).attr('aria-expanded', (shouldOpen ? 'true' : 'false'));
+            $target.stop(true, true);
+
+            if(shouldOpen){
+                $target.addClass('is-open').slideDown(220);
+            }else{
+                $target.slideUp(220, function(){
+                    $target.removeClass('is-open');
+                });
+            }
+        };
+
+        $(document).off('click.holidayAccordion', '[data-holiday-toggle="collapse"]').on('click.holidayAccordion', '[data-holiday-toggle="collapse"]', function(e){
+            e.preventDefault();
+
+            const $button = $(this);
+            const targetSelector = $button.attr('data-holiday-target');
+            const parentSelector = $button.attr('data-holiday-parent');
+            const $target = (targetSelector ? $(targetSelector) : $());
+
+            if($target.length === 0){
+                return;
+            }
+
+            const shouldOpen = ($button.attr('aria-expanded') !== 'true');
+
+            if(parentSelector){
+                const $parent = $(parentSelector);
+                if($parent.length > 0){
+                    $parent.find(`[data-holiday-parent="${parentSelector}"]`).not($button).each(function(){
+                        const $siblingButton = $(this);
+                        const siblingTargetSelector = $siblingButton.attr('data-holiday-target');
+                        const $siblingTarget = (siblingTargetSelector ? $(siblingTargetSelector) : $());
+
+                        if($siblingTarget.length > 0){
+                            setCollapseState($siblingButton, $siblingTarget, false);
+                        }
+                    });
+                }
+            }
+
+            setCollapseState($button, $target, shouldOpen);
+        });
+    };
+
+    initHolidayAccordions();
+
 
     /* Leave Form Start */
+    let leaveCalendar = null;
     let dateOption = {
         autoApply: true,
         singleMode: true,
@@ -62,6 +135,91 @@ import 'litepicker/dist/plugins/multiselect';
             months: false,
             years: false,
         },
+    };
+
+    const getLeaveDatesFromCalendar = () => {
+        const leaveDates = [];
+        if(!leaveCalendar){
+            return leaveDates;
+        }
+
+        const leaveDateStamps = [...leaveCalendar.preMultipleDates].sort((a, b) => a - b);
+        if(leaveDateStamps.length > 0){
+            for(let i = 0; i < leaveDateStamps.length; i++){
+                leaveDates.push(dayjs(leaveDateStamps[i]).format('DD/MM/YYYY'));
+            }
+        }
+
+        return leaveDates;
+    };
+
+    const hydrateLeaveReviewStep = () => {
+        renderLucideIcons();
+
+        const maskOptionsNew = {
+            mask: '00:00'
+        };
+
+        $('.leaveFormStep2 .timeMask').each(function(){
+            IMask(this, maskOptionsNew);
+        });
+    };
+
+    const refreshLeaveLimitStep = () => {
+        const $form = $('#employeeLeaveForm');
+        const LeaveYear = $form.find('[name="leave_holiday_years"]').val();
+        const LeavePattern = $form.find('[name="leave_pattern"]').val();
+        const LeaveType = $form.find('[name="leave_type"]').val();
+        const EmployeeId = $('[name="employee_id"]', $form).val();
+        const LeaveDates = getLeaveDatesFromCalendar();
+
+        if(LeaveDates.length === 0){
+            $('.leaveFormStep2').fadeOut('fast').html('');
+            $('#confirmRequest').attr('disabled', 'disabled');
+            return;
+        }
+
+        if(LeaveYear === '' || LeavePattern === '' || LeaveType === ''){
+            $('.leaveFormStep2').fadeOut('fast').html('');
+            $('#confirmRequest').attr('disabled', 'disabled');
+            return;
+        }
+
+        axios({
+            method: "POST",
+            url: route('employee.holiday.ajax.limit'),
+            data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType, LeaveDates : LeaveDates},
+            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+        }).then(response => {
+            if (response.status == 200) {
+                let dataset = response.data.res;
+                $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
+                if(dataset.suc == 2){
+                    $('#confirmRequest').attr('disabled', 'disabled');
+                }else{
+                    $('#confirmRequest').removeAttr('disabled');
+                }
+                hydrateLeaveReviewStep();
+            }
+        }).catch(error => {
+            if (error.response) {
+                console.log('error');
+            }
+        });
+    };
+
+    const removeLeaveDateFromPreview = (isoDate) => {
+        if(!leaveCalendar || !isoDate){
+            return;
+        }
+
+        const [year, month, day] = isoDate.split('-').map((val) => parseInt(val, 10));
+        const targetStamp = new Date(year, month - 1, day).getTime();
+
+        leaveCalendar.preMultipleDates = leaveCalendar.preMultipleDates.filter((stamp) => stamp !== targetStamp);
+        leaveCalendar.emit("button:apply");
+        leaveCalendar.render();
+        refreshLeaveLimitStep();
     };
 
     if($('#leaveCalendar').length > 0){
@@ -79,7 +237,7 @@ import 'litepicker/dist/plugins/multiselect';
             dateOption.lockDays = leaveDisableDates;
         }
 
-        const leaveCalendar = new Litepicker({
+        leaveCalendar = new Litepicker({
             element: document.getElementById('leaveCalendar'),
             ...dateOption,
             autoRefresh: true,
@@ -103,126 +261,8 @@ import 'litepicker/dist/plugins/multiselect';
                 }
              },
         });
-        leaveCalendar.on('multiselect.select', (date) => {
-            var $form = $('#employeeLeaveForm');
-            var $LeaveYear = $form.find('[name="leave_holiday_years"]');
-            var $LeavePattern = $form.find('[name="leave_pattern"]');
-            var $LeaveType = $form.find('[name="leave_type"]');
-
-            var LeaveYear = $LeaveYear.val();
-            var LeavePattern = $LeavePattern.val();
-            var LeaveType = $LeaveType.val();
-            var EmployeeId = $('[name="employee_id"]', $form).val();
-
-            var LeaveDates = [];
-            var LeaveDatesStamps = leaveCalendar.preMultipleDates;
-            LeaveDatesStamps.sort(function(a, b){return a - b});
-            if(LeaveDatesStamps.length > 0){
-                for(var i = 0; i < LeaveDatesStamps.length; i++){
-                    let theDate = new Date(LeaveDatesStamps[i]);
-                    LeaveDates.push(theDate.toLocaleDateString('en-GB'));
-                }
-            }
-
-            if(LeaveDates.length > 0){
-                axios({
-                    method: "POST",
-                    url: route('employee.holiday.ajax.limit'),
-                    data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType, LeaveDates : LeaveDates},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        let dataset = response.data.res;
-                        if(dataset.suc == 2){
-                            $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').attr('disabled', 'disabled');
-                        }else{
-                            $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').removeAttr('disabled');
-                        }
-                        createIcons({
-                            icons,
-                            "stroke-width": 1.5,
-                            nameAttr: "data-lucide",
-                        });
-
-                        var maskOptionsNew = {
-                            mask: '00:00'
-                        };
-                        $('.leaveFormStep2 .timeMask').each(function(){
-                            var mask = IMask(this, maskOptionsNew);
-                        });
-                    }
-                }).catch(error => {
-                    if (error.response) {
-                        console.log('error');
-                    }
-                });
-            }else{
-                $('.leaveFormStep2').fadeOut('fast').html('');
-                $('#confirmRequest').attr('disabled', 'disabled');
-            }
-        });
-        leaveCalendar.on('multiselect.deselect', (date) => {
-            var $form = $('#employeeLeaveForm');
-            var $LeaveYear = $form.find('[name="leave_holiday_years"]');
-            var $LeavePattern = $form.find('[name="leave_pattern"]');
-            var $LeaveType = $form.find('[name="leave_type"]');
-
-            var LeaveYear = $LeaveYear.val();
-            var LeavePattern = $LeavePattern.val();
-            var LeaveType = $LeaveType.val();
-            var EmployeeId = $('[name="employee_id"]', $form).val();
-
-            var LeaveDates = [];
-            var LeaveDatesStamps = leaveCalendar.preMultipleDates;
-            LeaveDatesStamps.sort(function(a, b){return a - b});
-            if(LeaveDatesStamps.length > 0){
-                for(var i = 0; i < LeaveDatesStamps.length; i++){
-                    let theDate = new Date(LeaveDatesStamps[i]);
-                    LeaveDates.push(theDate.toLocaleDateString('en-GB'));
-                }
-            }
-
-            if(LeaveDates.length > 0){
-                axios({
-                    method: "POST",
-                    url: route('employee.holiday.ajax.limit'),
-                    data: {EmployeeId : EmployeeId, LeaveYear : LeaveYear, LeavePattern : LeavePattern, LeaveType : LeaveType, LeaveDates : LeaveDates},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        let dataset = response.data.res;
-                        if(dataset.suc == 2){
-                            $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').attr('disabled', 'disabled');
-                        }else{
-                            $('.leaveFormStep2').fadeIn('fast').html(dataset.html);
-                            $('#confirmRequest').removeAttr('disabled');
-                        }
-                        createIcons({
-                            icons,
-                            "stroke-width": 1.5,
-                            nameAttr: "data-lucide",
-                        });
-
-                        var maskOptionsNew = {
-                            mask: '00:00'
-                        };
-                        $('.leaveFormStep2 .timeMask').each(function(){
-                            var mask = IMask(this, maskOptionsNew);
-                        });
-                    }
-                }).catch(error => {
-                    if (error.response) {
-                        console.log('error');
-                    }
-                });
-            }else{
-                $('.leaveFormStep2').fadeOut('fast').html('');
-                $('#confirmRequest').attr('disabled', 'disabled');
-            }
-        });
+        leaveCalendar.on('multiselect.select', refreshLeaveLimitStep);
+        leaveCalendar.on('multiselect.deselect', refreshLeaveLimitStep);
 
         $('#employeeLeaveForm [name="leave_holiday_years"], #employeeLeaveForm [name="leave_pattern"], #employeeLeaveForm [name="leave_type"]').on('change', function(){
             var $form = $('#employeeLeaveForm');
@@ -257,6 +297,7 @@ import 'litepicker/dist/plugins/multiselect';
                         let dataset = response.data.res;
                         
                         $('.holidayStatistics').html(dataset.statistics);
+                        renderLucideIcons();
                         $('#leaveCalendar').attr('data-start', dataset.startDate);
                         $('#leaveCalendar').attr('data-end', dataset.endDate);
                         $('#leaveCalendar').attr('data-end', dataset.endDate);
@@ -302,9 +343,14 @@ import 'litepicker/dist/plugins/multiselect';
         });
     }
 
+    $('#employeeLeaveForm').on('click', '.leave-request-remove-date', function(e){
+        e.preventDefault();
+        removeLeaveDateFromPreview($(this).attr('data-date'));
+    });
+
     $('#employeeLeaveForm').on('keyup paste', '.leaveDatesHours', function(){
         var $theInput = $(this);
-        var $theTr = $theInput.parents('tr');
+        var $theRow = $theInput.closest('.leave-request-date-item');
 
         var availableBalance = parseInt($('#employeeLeaveForm [name="balance_left"]').val(), 10);
         var inputDayMax = parseInt($theInput.attr('data-daymax'), 10);
@@ -313,10 +359,10 @@ import 'litepicker/dist/plugins/multiselect';
         var inputVal = $theInput.val();
         if(inputVal != '' && inputVal.length == 5){
             var inputMinute = string_to_minute(inputVal);
-            if(inputMinute > inputDayMax && !$theTr.hasClass('defaultFractionRow')){
+            if(inputMinute > inputDayMax && !$theRow.hasClass('defaultFractionRow')){
                 // Can not insert more than input day max hour for normal row.
                 $theInput.val(hour_minute_formate(inputDayMax));
-            }else if($theTr.hasClass('defaultFractionRow') && inputMinute > inputMaxHour){
+            }else if($theRow.hasClass('defaultFractionRow') && inputMinute > inputMaxHour){
                 // Can not insert more than input max hour for default fraction row row.
                 $theInput.val(hour_minute_formate(inputMaxHour));
             }
@@ -334,8 +380,8 @@ import 'litepicker/dist/plugins/multiselect';
 
     $('#employeeLeaveForm').on('change', '.fractionIndicator', function(e){
         var $theCheckbox = $(this);
-        var $theTr = $theCheckbox.parents('tr');
-        var $theInput = $theTr.find('.leaveDatesHours');
+        var $theRow = $theCheckbox.closest('.leave-request-date-item');
+        var $theInput = $theRow.find('.leaveDatesHours');
         var maxHour = parseInt($theInput.attr('data-maxhour'), 10);
         if($theCheckbox.prop('checked')){
             $theInput.removeAttr('readonly');
@@ -785,5 +831,28 @@ import 'litepicker/dist/plugins/multiselect';
     $('.bankHolidayTable thead').on('click', function(){
         $('.bankHolidayTable tbody').fadeToggle();
     })
+
+    $(document).on('click', '.holiday-filter-chip', function(e){
+        e.preventDefault();
+        const $button = $(this);
+        const filter = $button.attr('data-filter');
+        const $patternCard = $button.closest('.ep-holiday-pattern-card');
+
+        $patternCard.find('.holiday-filter-chip').removeClass('is-active');
+        $button.addClass('is-active');
+
+        let visibleRows = 0;
+        $patternCard.find('.ep-holiday-record').each(function(){
+            const $row = $(this);
+            const rowStatus = $row.attr('data-status');
+            const shouldShow = (filter === 'all' || rowStatus === filter);
+            $row.toggle(shouldShow);
+            if(shouldShow){
+                visibleRows++;
+            }
+        });
+
+        $patternCard.find('.js-holiday-record-empty').toggle(visibleRows === 0);
+    });
 
 })();

@@ -63,12 +63,12 @@
     $termAddress = '';
     if(isset($student->contact->term_time_address_id) && $student->contact->term_time_address_id > 0):
         $addressParts = [];
-        if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)): $addressParts[] = $student->contact->termaddress->address_line_1; endif;
-        if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)): $addressParts[] = $student->contact->termaddress->address_line_2; endif;
-        if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)): $addressParts[] = $student->contact->termaddress->city; endif;
-        if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)): $addressParts[] = $student->contact->termaddress->state; endif;
-        if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)): $addressParts[] = $student->contact->termaddress->post_code; endif;
-        if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)): $addressParts[] = $student->contact->termaddress->country; endif;
+        if(isset($student->contact->termaddress->address_line_1) && !empty($student->contact->termaddress->address_line_1)): $addressParts[] = \Illuminate\Support\Str::lower($student->contact->termaddress->address_line_1); endif;
+        if(isset($student->contact->termaddress->address_line_2) && !empty($student->contact->termaddress->address_line_2)): $addressParts[] = \Illuminate\Support\Str::lower($student->contact->termaddress->address_line_2); endif;
+        if(isset($student->contact->termaddress->city) && !empty($student->contact->termaddress->city)): $addressParts[] = \Illuminate\Support\Str::lower($student->contact->termaddress->city); endif;
+        if(isset($student->contact->termaddress->state) && !empty($student->contact->termaddress->state)): $addressParts[] = \Illuminate\Support\Str::lower($student->contact->termaddress->state); endif;
+        if(isset($student->contact->termaddress->post_code) && !empty($student->contact->termaddress->post_code)): $addressParts[] = \Illuminate\Support\Str::upper($student->contact->termaddress->post_code); endif;
+        if(isset($student->contact->termaddress->country) && !empty($student->contact->termaddress->country)): $addressParts[] = \Illuminate\Support\Str::lower($student->contact->termaddress->country); endif;
         $termAddress = implode(', ', $addressParts);
     endif;
 
@@ -258,15 +258,15 @@
                 </div>
                 <div class="student-profile-contact-line">
                     @if(isset($student->contact->institutional_email) && !empty($student->contact->institutional_email))
-                        <span class="student-profile-email"><i data-lucide="mail" class="w-3.5 h-3.5"></i>{{ $student->contact->institutional_email }}</span>
+                        <span class="student-profile-email student-profile-contact-trigger" data-tw-toggle="modal" data-tw-target="#sendEmailModal" role="button" title="Send email"><i data-lucide="mail" class="w-3.5 h-3.5"></i>{{ $student->contact->institutional_email }}</span>
                     @elseif(isset($student->users->email))
-                        <span class="student-profile-email"><i data-lucide="mail" class="w-3.5 h-3.5"></i>{{ $student->users->email }}</span>
+                        <span class="student-profile-email student-profile-contact-trigger" data-tw-toggle="modal" data-tw-target="#sendEmailModal" role="button" title="Send email"><i data-lucide="mail" class="w-3.5 h-3.5"></i>{{ $student->users->email }}</span>
                     @endif
                     @if(isset($student->contact->mobile) && !empty($student->contact->mobile))
-                        <span><i data-lucide="phone" class="w-3.5 h-3.5"></i>{{ $student->contact->mobile }}</span>
+                        <span class="student-profile-contact-trigger" data-tw-toggle="modal" data-tw-target="#smsSMSModal" role="button" title="Send SMS"><i data-lucide="phone" class="w-3.5 h-3.5"></i>{{ $student->contact->mobile }}</span>
                     @endif
                     @if(!empty($termAddress))
-                        <span class="student-profile-contactline-address"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ \Illuminate\Support\Str::lower($termAddress) }}</span>
+                        <span class="student-profile-contactline-address"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i>{{ $termAddress }}</span>
                     @endif
                 </div>
             </div>
@@ -544,3 +544,9 @@
         </div>
     </div>
     <!-- END: Success Modal Content -->
+
+    {{-- Global quick Send-Email / Send-SMS popups (header email/phone triggers).
+         Skipped on the Communication page, which ships its own copies + JS. --}}
+    @if(empty($skipQuickComm))
+        @include('pages.students.live.partials.quick-communication-modals')
+    @endif

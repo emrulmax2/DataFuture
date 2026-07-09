@@ -20,6 +20,10 @@
         @vite('resources/js/app.js')
         <!-- END: JS Assets-->
 
+        {{-- Global quick Send-Email / Send-SMS popups. No-ops unless the page renders
+             the shared #quickCommModals partial (i.e. skips the Communication page). --}}
+        @vite('resources/js/student-quick-communication.js')
+
         @yield('script')
     </body>
 @endsection
