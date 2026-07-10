@@ -3,7 +3,22 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
+
+const renderLucideIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
+const archiveValue = (value) => {
+    return (value !== null && value !== undefined && String(value).trim() !== "") ? value : "&mdash;";
+};
+
 var employeeArchiveListTable = (function () {
+    let currentTotalRows = 0;
+
     var _tableGen = function () {
         // Setup Tabulator
         let employeeId = $("#employeeArchiveListTable").attr('data-employee') != "" ? $("#employeeArchiveListTable").attr('data-employee') : "0";
@@ -18,78 +33,80 @@ var employeeArchiveListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
-                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
-            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            ajaxResponse(url, params, response) {
+                currentTotalRows = Number(response.total_rows || 0);
+                const summaryEl = document.querySelector("#employeeArchiveSummary");
+                if (summaryEl) {
+                    summaryEl.textContent = currentTotalRows > 0
+                        ? `${currentTotalRows} change${currentTotalRows === 1 ? "" : "s"} on record`
+                        : "Audit trail of changes recorded against this employee.";
+                }
+                return response;
+            },
             columns: [
                 {
                     title: "#ID",
                     field: "id",
                     headerHozAlign: "left",
-                    width: "120",
+                    width: 92,
                 },
                 {
                     title: "Table Name",
                     field: "table",
                     headerHozAlign: "left",
+                    width: 220,
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += cell.getData().table;
-                            if(cell.getData().row_id != ''){
-                                html += '&nbsp;'+cell.getData().row_id;
-                            }
-                        html += '</div>';
-
-                        return html;
+                        const data = cell.getData();
+                        const rowId = (data.row_id !== null && data.row_id !== undefined && String(data.row_id).trim() !== "")
+                            ? `<span class="ep-doc-arccell__row">#${data.row_id}</span>` : "";
+                        return `<div class="ep-doc-arccell"><span class="ep-doc-arccell__table">${data.table}</span>${rowId}</div>`;
                     }
                 },
                 {
                     title: "Field Name",
                     field: "field_name",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="ep-doc-arccell__field">${archiveValue(cell.getData().field_name)}</span>`;
+                    }
                 },
                 {
                     title: "Previous Value",
                     field: "field_value",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="ep-doc-arcval ep-doc-arcval--old">${archiveValue(cell.getData().field_value)}</span>`;
+                    }
                 },
                 {
                     title: "New Value",
                     field: "field_new_value",
                     headerHozAlign: "left",
+                    formatter(cell) {
+                        return `<span class="ep-doc-arcval ep-doc-arcval--new">${archiveValue(cell.getData().field_new_value)}</span>`;
+                    }
                 },
                 {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
-                    width: "200",
+                    width: 200,
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                        const data = cell.getData();
+                        return `
+                            <div class="ep-doc-usercell">
+                                <div class="ep-doc-usercell__name">${data.created_by}</div>
+                                <div class="ep-doc-usercell__meta">${data.created_at}</div>
+                            </div>
+                        `;
                     }
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                renderLucideIcons();
             }
         });
 

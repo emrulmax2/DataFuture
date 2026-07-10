@@ -180,9 +180,9 @@
                         <div class="float-left hidden" id="xmlDownloadWrap">
                             <a href="#"
                             target="_blank"
-                            id="xmlDownloadBtn" 
-                            download 
-                            class="btn btn-primary text-white">
+                            id="xmlDownloadBtn"
+                            download
+                            class="btn-sm btn btn-primary text-white w-auto inline-flex items-center">
                                 <i data-lucide="download-cloud" class="w-4 h-4 mr-2"></i> XML
                             </a>
                         </div>

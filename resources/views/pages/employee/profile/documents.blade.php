@@ -29,18 +29,15 @@
                         </div>
                         <div class="ep-doc-card__head-actions">
                             <div class="dropdown ep-doc-dropdown" id="uploadsDropdown">
-                                <button class="dropdown-toggle ep-doc-btn ep-doc-btn--soft" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="plus" class="w-4 h-4"></i>
-                                    Add Document
-                                    <i data-lucide="chevron-down" class="w-4 h-4 opacity-70"></i>
+                                <button class="dropdown-toggle ep-doc-btn ep-doc-btn--soft ep-doc-dropdown__toggle" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="plus" class="w-4 h-4 ep-doc-dropdown__toggle-icon"></i>
+                                    <span>Add Document List</span>
+                                    <i data-lucide="chevron-down" class="w-4 h-4 ep-doc-dropdown__caret"></i>
                                 </button>
-                                <div class="dropdown-menu ep-doc-dropdown__menu w-96 max-w-full">
+                                <div class="dropdown-menu ep-doc-dropdown__menu">
                                     <div class="dropdown-content ep-doc-dropdown__content">
                                         <div class="ep-doc-dropdown__header">
-                                            <div>
-                                                <div class="ep-doc-dropdown__eyebrow">Document Types</div>
-                                                <div class="ep-doc-dropdown__title">Choose a document category</div>
-                                            </div>
+                                            <div class="ep-doc-dropdown__title">Document List</div>
                                         </div>
                                         @if(isset($docSettings) && !empty($docSettings) && $docSettings->count() > 0)
                                             <div class="ep-doc-dropdown__list">
@@ -64,12 +61,12 @@
                                             </div>
                                         @endif
                                         <div class="ep-doc-dropdown__footer">
-                                            <button type="button" id="closeUploadsDropdown" class="ep-doc-btn ep-doc-btn--ghost">
-                                                Cancel
-                                            </button>
                                             <button type="button" id="employeeDocumentUploaders" class="ep-doc-btn ep-doc-btn--soft">
                                                 <i data-lucide="upload" class="w-4 h-4"></i>
-                                                Continue to Upload
+                                                Upload Documents
+                                            </button>
+                                            <button type="button" id="closeUploadsDropdown" class="ep-doc-btn ep-doc-btn--ghost">
+                                                Close
                                             </button>
                                         </div>
                                     </div>
@@ -320,18 +317,18 @@
             <div id="uploadEmployeeDocumentModal" class="modal ep-doc-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <div class="modal-header ep-doc-modal__header ep-doc-modal__header--dark">
+                        <div class="modal-header ep-doc-modal__header">
                             <div class="ep-doc-modal__intro">
                                 <span class="ep-doc-modal__icon">
                                     <i data-lucide="upload" class="w-4 h-4"></i>
                                 </span>
                                 <div>
                                     <h2>Upload Documents</h2>
-                                    <p>Add files, name the document and record whether a hard copy exists.</p>
+                                    <p>Add employee records and mark whether the physical copy has been checked.</p>
                                 </div>
                             </div>
-                            <a data-tw-dismiss="modal" href="javascript:;">
-                                <i data-lucide="x" class="w-5 h-5 text-white opacity-80"></i>
+                            <a data-tw-dismiss="modal" href="javascript:;" class="ep-doc-modal__close">
+                                <i data-lucide="x" class="w-5 h-5"></i>
                             </a>
                         </div>
                         <div class="modal-body">
@@ -354,16 +351,18 @@
                             </form>
 
                             <div class="ep-doc-upload-meta">
-                                <div>
-                                    <label class="form-label">Document Name</label>
-                                    <div class="ep-doc-upload-name">
-                                        <span id="documentNameDisplay" class="ep-doc-upload-name__prefix">Selected document type</span>
-                                        <input type="text" name="doc_name" class="displayNameInput form-control w-full" placeholder="Add a suffix if needed"/>
-                                    </div>
+                                <div class="ep-doc-upload-name">
+                                    <div class="ep-doc-upload-name__prefix">Document Type</div>
+                                    <div id="documentNameDisplay" class="ep-doc-upload-name__value">Selected document type</div>
                                 </div>
 
                                 <div>
-                                    <label class="form-label">Hard Copy Checked?</label>
+                                    <label class="form-label ep-doc-upload-label">Document Name</label>
+                                    <input type="text" name="doc_name" class="displayNameInput form-control w-full" placeholder="Document name"/>
+                                </div>
+
+                                <div>
+                                    <label class="form-label ep-doc-upload-label">Hard Copy Checked?</label>
                                     <div class="ep-doc-choice-group">
                                         <label class="ep-doc-choice" for="hard_copy_check-1">
                                             <input id="hard_copy_check-1" class="ep-doc-choice__input" type="radio" value="1" name="hard_copy_check_status">

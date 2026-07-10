@@ -6,32 +6,45 @@ import Tabulator from "tabulator-tables";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+const renderLucideIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
+const logValue = (value) => {
+    return (value !== null && value !== undefined && String(value).trim() !== "") ? value : "&mdash;";
+};
+
 function actorTypeBadge(type) {
     if (type === "user") {
-        return '<span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">Staff</span>';
+        return '<span class="ep-doc-badge ep-doc-badge--blue">Staff</span>';
     }
     if (type === "student_user") {
-        return '<span class="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">Student</span>';
+        return '<span class="ep-doc-badge ep-doc-badge--gold">Student</span>';
     }
-    return type;
+    return logValue(type);
 }
 
 function reasonBadge(reason) {
     if (!reason) {
-        return '<span class="px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">Active</span>';
+        return '<span class="ep-doc-badge ep-doc-badge--green">Active</span>';
     }
     const map = {
-        manual_logout:        ['bg-gray-100 text-gray-700', 'Manual Logout'],
-        session_timeout:      ['bg-yellow-100 text-yellow-700', 'Timeout'],
-        session_invalidated:  ['bg-red-100 text-red-700', 'Invalidated'],
+        manual_logout:       ["ep-doc-badge--slate", "Manual Logout"],
+        session_timeout:     ["ep-doc-badge--amber", "Timeout"],
+        session_invalidated: ["ep-doc-badge--red", "Invalidated"],
     };
-    const [cls, label] = map[reason] || ['bg-gray-100 text-gray-600', reason];
-    return `<span class="px-2 py-0.5 rounded text-xs font-medium ${cls}">${label}</span>`;
+    const [cls, label] = map[reason] || ["ep-doc-badge--slate", reason];
+    return `<span class="ep-doc-badge ${cls}">${label}</span>`;
 }
 
 // ── Table ────────────────────────────────────────────────────────────────────
 
 var loginLogTable = (function () {
+    let currentTotalRows = 0;
     var tableContent;
 
     var _tableGen = function () {
@@ -58,34 +71,48 @@ var loginLogTable = (function () {
             paginationSize:      20,
             paginationSizeSelector: [true, 10, 20, 50, 100],
             layout:              "fitColumns",
-            responsiveLayout:    "collapse",
-            placeholder:         "No records found",
+            responsiveLayout:    false,
+            placeholder:         "No matching records found",
+            ajaxResponse(url, params, response) {
+                currentTotalRows = Number(response.total_rows || 0);
+                const summaryEl = document.querySelector("#loginLogSummary");
+                if (summaryEl) {
+                    summaryEl.textContent = currentTotalRows > 0
+                        ? `${currentTotalRows} session${currentTotalRows === 1 ? "" : "s"} on record`
+                        : "Sign-in history and active sessions recorded for this employee.";
+                }
+                return response;
+            },
             columns: [
                 {
                     title: "#",
                     field: "sl",
-                    width: 55,
+                    width: 48,
                     headerSort: false,
+                    headerHozAlign: "left",
                 },
                 {
                     title: "Actor",
                     field: "actor_name",
                     headerHozAlign: "left",
-                    width: 250,
+                    minWidth: 160,
                     formatter(cell) {
                         var d = cell.getData();
-                        return (
-                            '<div class="font-medium whitespace-nowrap">' + d.actor_name + '</div>' +
-                            '<div class="text-slate-400 text-xs">' + d.actor_email + '</div>'
-                        );
+                        return `
+                            <div class="ep-doc-usercell">
+                                <div class="ep-doc-usercell__name">${logValue(d.actor_name)}</div>
+                                <div class="ep-doc-usercell__meta">${logValue(d.actor_email)}</div>
+                            </div>
+                        `;
                     },
                 },
                 {
                     title: "Type",
                     field: "actor_type",
-                    width: 100,
+                    width: 92,
                     headerHozAlign: "center",
                     hozAlign: "center",
+                    headerSort: false,
                     formatter(cell) {
                         return actorTypeBadge(cell.getValue());
                     },
@@ -94,33 +121,39 @@ var loginLogTable = (function () {
                     title: "Login Time",
                     field: "login_at",
                     headerHozAlign: "left",
-                    width: 160,
+                    width: 145,
+                    formatter(cell) {
+                        return `<span class="ep-doc-arccell__field">${logValue(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Logout Time",
                     field: "logout_at",
                     headerHozAlign: "left",
-                    width: 160,
+                    width: 145,
                     formatter(cell) {
-                        return cell.getValue() || '<span class="text-green-600 font-medium">Online</span>';
+                        var v = cell.getValue();
+                        return v
+                            ? `<span class="ep-doc-arccell__field">${v}</span>`
+                            : '<span class="ep-doc-badge ep-doc-badge--green">Online</span>';
                     },
                 },
                 {
                     title: "Duration",
                     field: "duration",
                     headerSort: false,
-                    width: 90,
+                    width: 84,
                     hozAlign: "center",
                     headerHozAlign: "center",
                     formatter(cell) {
-                        return cell.getValue() || "—";
+                        return `<span class="ep-doc-usercell__meta">${logValue(cell.getValue())}</span>`;
                     },
                 },
                 {
                     title: "Status / Reason",
                     field: "logout_reason",
                     headerSort: false,
-                    width: 150,
+                    width: 130,
                     hozAlign: "center",
                     headerHozAlign: "center",
                     formatter(cell) {
@@ -131,43 +164,42 @@ var loginLogTable = (function () {
                     title: "IP Address",
                     field: "ip_address",
                     headerHozAlign: "left",
-                    width: 130,
+                    width: 118,
+                    formatter(cell) {
+                        return `<span class="ep-doc-arccell__field">${logValue(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Device & Browser",
                     field: "device",
                     headerHozAlign: "left",
-                    minWidth: 160,
+                    minWidth: 150,
                     headerSort: false,
                     formatter(cell) {
                         var d = cell.getData();
-                        var lines = [];
-                        if (d.device)   lines.push('<div class="font-medium">'   + d.device   + '</div>');
-                        if (d.platform) lines.push('<div class="text-xs text-slate-500">' + d.platform + '</div>');
-                        if (d.browser)  lines.push('<div class="text-xs text-slate-400">' + d.browser  + '</div>');
-                        return lines.length ? lines.join('') : '—';
+                        if (!d.device && !d.platform && !d.browser) return '<span class="ep-doc-usercell__meta">&mdash;</span>';
+                        var main = d.device ? `<div class="ep-doc-usercell__name">${d.device}</div>` : "";
+                        var subParts = [d.platform, d.browser].filter(Boolean).join(" &middot; ");
+                        var sub = subParts ? `<div class="ep-doc-usercell__meta">${subParts}</div>` : "";
+                        return `<div class="ep-doc-usercell">${main}${sub}</div>`;
                     },
                 },
                 {
                     title: "Location",
                     field: "country",
                     headerHozAlign: "left",
-                    minWidth: 130,
+                    minWidth: 120,
                     headerSort: false,
                     formatter(cell) {
                         var d = cell.getData();
-                        if (!d.country && !d.city) return '—';
-                        var parts = [d.city, d.country].filter(Boolean);
-                        return '<div class="whitespace-nowrap">' + parts.join(', ') + '</div>';
+                        if (!d.country && !d.city) return '<span class="ep-doc-usercell__meta">&mdash;</span>';
+                        var parts = [d.city, d.country].filter(Boolean).join(", ");
+                        return `<span class="ep-doc-arccell__field">${parts}</span>`;
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                renderLucideIcons();
             },
         });
 
@@ -222,7 +254,6 @@ var loginLogTable = (function () {
         // Reset button
         $("#tabulator-html-filter-reset").on("click", function () {
             $("#querystr").val("");
-            $("#actor_type").val("");
             $("#logout_reason").val("");
             $("#date_from").val("");
             $("#date_to").val("");

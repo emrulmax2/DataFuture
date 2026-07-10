@@ -47,6 +47,12 @@ var myDownloadsListTable = (function () {
                     }
                 },
                 {
+                    title: "Created At",
+                    field: "created_at",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                },
+                {
                     title: "Actions",
                     field: "id",
                     headerSort: false,

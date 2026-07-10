@@ -10,15 +10,141 @@
 
 @include('pages.employee.profile.partials.side-tabs')
 
-<div class="ep-grid">
-    <div class="ep-col">
+@php
+    $privilegeEmployeeName = trim(implode(' ', array_filter([
+        optional($employee->title)->name ?? null,
+        $employee->first_name ?? null,
+        $employee->last_name ?? null,
+    ])));
+    $privilegeEmployeeName = $privilegeEmployeeName ?: ($employee->full_name ?? 'Employee');
+    $privilegeWorksNumber = $employment->works_number ?? null;
+    $privilegeStatus = isset($employee->status) && $employee->status == 1 ? 'Active' : 'Inactive';
+    $privilegeStatusClass = $privilegeStatus === 'Active' ? 'is-active' : 'is-inactive';
+    $privilegeJobTitle = ($employment && $employment->employeeJobTitle) ? $employment->employeeJobTitle->name : null;
+    $privilegeDepartment = ($employment && $employment->department) ? $employment->department->name : null;
+    $privilegeLogo = App\Models\Option::where('category', 'SITE_SETTINGS')->where('name', 'site_logo')->pluck('value', 'name')->toArray();
+    $privilegeLogoUrl = (isset($privilegeLogo['site_logo']) && !empty($privilegeLogo['site_logo']) && Storage::disk('local')->exists('public/'.$privilegeLogo['site_logo']))
+        ? Storage::disk('local')->url('public/'.$privilegeLogo['site_logo'])
+        : asset('build/assets/images/L1_logo.svg');
+    $privilegeAddressBits = [];
+    if(isset($employee->address) && $employee->address) {
+        foreach(['address_line_1', 'address_line_2', 'city', 'post_code', 'country'] as $addressKey) {
+            if(!empty($employee->address->{$addressKey})) {
+                $privilegeAddressBits[] = $employee->address->{$addressKey};
+            }
+        }
+    }
+    $privilegeAddress = implode(', ', $privilegeAddressBits);
+@endphp
+
+<div class="ep-grid ep-privilege-page">
+    <div class="ep-col ep-privilege-shell">
 
 
     <!-- BEGIN: Profile Info -->
     <!-- END: Profile Info -->
+
+    <div class="ep-privilege-print-root print-root" id="privilegePrintRoot" aria-hidden="true">
+        <div class="ep-privilege-print-sheet a4">
+            <div class="ep-privilege-print-header print-only">
+                <div class="ep-privilege-print-header__top">
+                    <span><strong>London Churchill College</strong> · Access Privileges Report</span>
+                    <span>{{ $privilegeEmployeeName }}{{ $privilegeWorksNumber ? ' · Employee No. '.$privilegeWorksNumber : '' }}</span>
+                </div>
+                <div class="ep-privilege-print-header__brand-row">
+                    <div class="ep-privilege-print-header__brand">
+                        <div class="ep-privilege-print-header__logo-wrap">
+                            <img src="{{ $privilegeLogoUrl }}" alt="London Churchill College crest" class="ep-privilege-print-header__logo">
+                        </div>
+                        <div class="ep-privilege-print-header__college">London<br>Churchill College</div>
+                    </div>
+                    <div class="ep-privilege-print-header__title-wrap">
+                        <div class="ep-privilege-print-header__title">{{ $privilegeEmployeeName }}'s<br>Access Privileges</div>
+                        <div class="ep-privilege-print-header__date">Date of issue: {{ now()->format('jS F, Y') }}</div>
+                    </div>
+                </div>
+                <div class="ep-privilege-print-header__rule"></div>
+                <div class="ep-privilege-print-info print-info">
+                    <div class="ep-privilege-print-info__item">
+                        <span>Employee</span>
+                        <strong>{{ $privilegeEmployeeName }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Employee No.</span>
+                        <strong>{{ $privilegeWorksNumber ?: '-' }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Status</span>
+                        <strong class="{{ $privilegeStatusClass }}">{{ $privilegeStatus }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Job Title</span>
+                        <strong>{{ $privilegeJobTitle ?: '-' }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Email</span>
+                        <strong>{{ $employee->email ?: '-' }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Address</span>
+                        <strong>{{ $privilegeAddress ?: '-' }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Department</span>
+                        <strong>{{ $privilegeDepartment ?: '-' }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Mobile</span>
+                        <strong>{{ $employee->mobile ?: ($employee->telephone ?: '-') }}</strong>
+                    </div>
+                    <div class="ep-privilege-print-info__item">
+                        <span>Permissions Enabled</span>
+                        <strong id="privilegePrintSummary">Loading privilege summary...</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="ep-privilege-print-body priv-body">
+                <div class="ep-privilege-print-cards cards-col" id="privilegePrintCards"></div>
+            </div>
+        </div>
+    </div>
     
-    <form method="post" action="#" id="employeePrivilegeForm">
+    <div class="ep-privilege-toolbar" aria-label="Privilege actions">
+        <div class="ep-privilege-toolbar__summary">
+            <div class="ep-privilege-toolbar__icon">
+                <i data-lucide="lock-keyhole" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <div class="ep-privilege-toolbar__title">Access Privileges</div>
+                <div class="ep-privilege-toolbar__meta" id="privilegeGlobalSummary">Loading privilege summary...</div>
+            </div>
+        </div>
+        <div class="ep-privilege-toolbar__search">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <input type="search" id="privilegeSearchInput" placeholder="Filter privileges..." autocomplete="off">
+        </div>
+        <div class="ep-privilege-toolbar__actions">
+            <button type="button" class="ep-privilege-btn ep-privilege-btn--ghost" id="privilegeExpandAll">Expand all</button>
+            <button type="button" class="ep-privilege-btn ep-privilege-btn--ghost" id="privilegeCollapseAll">Collapse all</button>
+            <button type="button" class="ep-privilege-btn ep-privilege-btn--ghost" id="privilegePrint">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                Print
+            </button>
+            <button type="submit" form="employeePrivilegeForm" class="ep-privilege-btn ep-privilege-btn--primary">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Save All Changes
+            </button>
+        </div>
+    </div>
+    
+    <form method="post" action="#" id="employeePrivilegeForm" class="ep-privilege-form">
         <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+        <div class="ep-privilege-layout">
+            <nav class="ep-privilege-rail" id="employeePrivilegeRail" aria-label="Privilege groups">
+                <div class="ep-privilege-rail__label">Privilege Groups</div>
+                <div class="ep-privilege-rail__list"></div>
+            </nav>
+            <div class="ep-privilege-sections">
         <div class="intro-y box p-5 mt-5">
             <div class="grid grid-cols-12 gap-0 items-center">
                 <div class="col-span-6">
@@ -66,7 +192,7 @@
                             <input {{ (isset($priv['remote_access']['all_services']) && $priv['remote_access']['all_services'] == 1 ? 'checked' : '') }} id="permission_remote_access_6" class="form-check-input" type="checkbox" value="1" name="permission[remote_access][all_services]">
                             <label class="form-check-label ml-4" for="permission_remote_access_6">Allowe All Services</label>
                         </div>
-                    </div>
+                    </div> 
                 </div>
             </div>
         </div>
@@ -1068,20 +1194,24 @@
         </div>
 
 
+            </div>
+        </div>
     </form>
 
     <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="successModal" class="modal ep-holiday-state-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+                    <div class="ep-holiday-state-modal__body">
+                        <div class="ep-holiday-state-modal__icon">
+                            <i data-lucide="check" class="w-10 h-10"></i>
+                        </div>
+                        <div class="ep-holiday-state-modal__title successModalTitle"></div>
+                        <div class="ep-holiday-state-modal__desc successModalDesc"></div>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    <div class="ep-holiday-state-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary">Ok</button>
                     </div>
                 </div>
             </div>
@@ -1090,17 +1220,19 @@
     <!-- END: Success Modal Content -->
 
     <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="warningModal" class="modal ep-holiday-state-modal ep-holiday-state-modal--warning" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
+                    <div class="ep-holiday-state-modal__body">
+                        <div class="ep-holiday-state-modal__icon">
+                            <i data-lucide="alert-octagon" class="w-10 h-10"></i>
+                        </div>
+                        <div class="ep-holiday-state-modal__title warningModalTitle"></div>
+                        <div class="ep-holiday-state-modal__desc warningModalDesc"></div>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                    <div class="ep-holiday-state-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary">Ok</button>
                     </div>
                 </div>
             </div>

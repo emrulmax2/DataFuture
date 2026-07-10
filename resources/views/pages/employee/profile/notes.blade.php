@@ -5,316 +5,389 @@
 @endsection
 
 @section('subcontent')
-    
+
 @include('pages.employee.profile.partials.cover-header')
 
 @include('pages.employee.profile.partials.side-tabs')
 
-<div class="ep-grid">
+<div class="ep-grid ep-doc-page">
     <div class="ep-col">
+        <div class="ep-doc-shell">
+            <section class="ep-doc-card">
+                <div class="ep-doc-card__head">
+                    <div class="ep-doc-card__head-main">
+                        <span class="ep-doc-card__icon ep-doc-card__icon--gold">
+                            <i data-lucide="sticky-note" class="w-4 h-4"></i>
+                        </span>
+                        <div>
+                            <h2 class="ep-doc-card__title">Notes</h2>
+                            <p id="employeeNotesSummary" class="ep-doc-card__meta">Record, manage and archive notes for this employee.</p>
+                        </div>
+                    </div>
+                    <div class="ep-doc-card__head-actions">
+                        <button data-tw-toggle="modal" data-tw-target="#addEmpNoteModal" type="button" class="ep-doc-btn ep-doc-btn--soft">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Add Notes
+                        </button>
+                    </div>
+                </div>
 
+                <div class="ep-doc-card__body">
+                    <div class="ep-doc-toolbar">
+                        <form id="tabulatorFilterForm-AN" class="ep-doc-toolbar__form">
+                            <div class="ep-doc-field ep-doc-field--query">
+                                <label for="query-EN">Query</label>
+                                <input id="query-EN" name="query" type="text" class="form-control" placeholder="Search by note...">
+                            </div>
+                            <div class="ep-doc-field ep-doc-field--status">
+                                <label for="status-EN">Status</label>
+                                <select id="status-EN" name="status" class="form-select">
+                                    <option selected value="1">Active</option>
+                                    <option value="2">Archived</option>
+                                </select>
+                            </div>
+                            <div class="ep-doc-toolbar__filters">
+                                <button id="tabulator-html-filter-go-EN" type="button" class="ep-doc-btn ep-doc-btn--primary">Go</button>
+                                <button id="tabulator-html-filter-reset-EN" type="button" class="ep-doc-btn ep-doc-btn--ghost">Reset</button>
+                            </div>
+                        </form>
 
-    <!-- BEGIN: Profile Info -->
-    <!-- END: Profile Info -->
+                        <div class="ep-doc-toolbar__actions">
+                            <button id="tabulator-print-EN" type="button" class="ep-doc-btn ep-doc-btn--ghost">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                Print
+                            </button>
+                            <div class="dropdown ep-doc-export">
+                                <button class="dropdown-toggle ep-doc-btn ep-doc-btn--ghost" aria-expanded="false" data-tw-toggle="dropdown">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    Export
+                                    <i data-lucide="chevron-down" class="w-4 h-4 opacity-70"></i>
+                                </button>
+                                <div class="dropdown-menu ep-doc-export__dropdown w-44">
+                                    <ul class="dropdown-content ep-doc-export__menu">
+                                        <li>
+                                            <a id="tabulator-export-csv-EN" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                                Export CSV
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a id="tabulator-export-xlsx-EN" href="javascript:;" class="dropdown-item">
+                                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                                Export XLSX
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Notes</div>
-            </div>
-            <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addEmpNoteModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Add Notes</button>
+                    <div class="ep-doc-table-wrap">
+                        <div id="employeeNotesListTable" data-employee="{{ $employee->id }}" class="table-report table-report--tabulator ep-doc-table"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- BEGIN: View Modal -->
+        <div id="viewEmpNoteModal" class="modal ep-doc-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header ep-doc-modal__header">
+                        <div class="ep-doc-modal__intro">
+                            <span class="ep-doc-modal__icon">
+                                <i data-lucide="sticky-note" class="w-4 h-4"></i>
+                            </span>
+                            <div>
+                                <h2>Note</h2>
+                                <p>Full note content and attachment for this employee.</p>
+                            </div>
+                        </div>
+                        <a data-tw-dismiss="modal" href="javascript:;">
+                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                        </a>
+                    </div>
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <div class="footerBtns" style="margin-right: auto;"></div>
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">Cancel</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-AN" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-EN" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-EN" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option selected value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-EN" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-EN" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
+        <!-- END: View Modal -->
+
+        <!-- BEGIN: Add Modal -->
+        <div id="addEmpNoteModal" class="modal ep-doc-modal ep-doc-modal--note" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="POST" action="#" id="addEmpNoteForm" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header ep-doc-modal__header">
+                            <div class="ep-doc-modal__intro">
+                                <span class="ep-doc-modal__icon">
+                                    <i data-lucide="sticky-note" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h2>Add Note</h2>
+                                    <p>Create a new note and optionally attach a supporting document.</p>
+                                </div>
+                            </div>
+                            <a data-tw-dismiss="modal" href="javascript:;" class="ep-doc-modal__close">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <div class="ep-note-modal__surface">
+                                <div class="ep-doc-form-grid">
+                                    <div class="ep-note-modal__field">
+                                        <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                        <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                                    </div>
+
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__editor-block">
+                                        <div class="ep-note-modal__section-head">
+                                            <label for="addEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
+                                            <p class="ep-note-modal__hint">Write the note content and keep the important details together.</p>
+                                        </div>
+                                        <div class="editor document-editor">
+                                            <div class="document-editor__toolbar"></div>
+                                            <div class="document-editor__editable-container">
+                                                <div class="document-editor__editable" id="addEmpNoteEditor"></div>
+                                            </div>
+                                        </div>
+                                        <div class="acc__input-error error-content text-danger mt-2"></div>
+                                    </div>
+
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__attachment-block">
+                                        <div class="ep-note-modal__section-head">
+                                            <label class="form-label">Attachment</label>
+                                        </div>
+                                        <div class="ep-doc-file-picker">
+                                            <label for="addEmpNoteDocument" class="ep-doc-btn ep-doc-btn--soft ep-doc-file-picker__trigger">
+                                                <i data-lucide="paperclip" class="w-4 h-4"></i>
+                                                Upload Document
+                                            </label>
+                                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addEmpNoteDocument"/>
+                                            <span id="addEmpNoteDocumentName" class="ep-doc-file-chip" style="display: none;"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__reminder-block">
+                                        <div class="ep-doc-reminder-row">
+                                            <div class="ep-doc-switch">
+                                                <label class="form-check form-switch mb-0">
+                                                    <input id="reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
+                                                    <span class="ep-doc-switch__label">Reminder</span>
+                                                </label>
+                                            </div>
+                                            <div class="ep-doc-reminder-date reminderDateWrap" style="display: none;">
+                                                <label for="reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" data-tw-dismiss="modal" class="btn ep-doc-modal__cancel">
+                                <i data-lucide="x" class="w-4 h-4 mr-1"></i>Cancel
+                            </button>
+                            <button type="submit" id="saveEmpNote" class="btn btn-primary">
+                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>Save Note
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </button>
+                            <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                        </div>
                     </div>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-EN" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv-EN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-json-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                                    </a>
-                                </li> --}}
-                                <li>
-                                    <a id="tabulator-export-xlsx-EN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                                {{-- <li>
-                                    <a id="tabulator-export-html-AN" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                                    </a>
-                                </li> --}}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="employeeNotesListTable" data-employee="{{ $employee->id }}" class="mt-5 table-report table-report--tabulator"></div>
             </div>
         </div>
-    </div>
-    <!-- BEGIN: View Modal -->
-    <div id="viewEmpNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Note</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    
-                </div>
-                <div class="modal-footer">
-                    <div class="footerBtns" style="float: left"></div>
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: View Modal -->
-    <!-- BEGIN: Edit Modal -->
-    <div id="editEmpNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="editEmpNoteForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Note</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="edit_opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="edit_opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="editEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="editEmpNoteEditor"></div>
+        <!-- END: Add Modal -->
+
+        <!-- BEGIN: Edit Modal -->
+        <div id="editEmpNoteModal" class="modal ep-doc-modal ep-doc-modal--note" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="POST" action="#" id="editEmpNoteForm" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header ep-doc-modal__header">
+                            <div class="ep-doc-modal__intro">
+                                <span class="ep-doc-modal__icon">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </span>
+                                <div>
+                                    <h2>Edit Note</h2>
+                                    <p>Update the note content, attachment or reminder.</p>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-content text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 flex justify-start items-center relative">
-                            <a href="#" download class="btn btn-success text-white downloadExistAttachment mr-1 inline-flex" style="display: none;">
-                                <i data-lucide="download" class="w-5 h-5"></i>
+                            <a data-tw-dismiss="modal" href="javascript:;" class="ep-doc-modal__close">
+                                <i data-lucide="x" class="w-5 h-5"></i>
                             </a>
-                            <div class="flex justify-start items-center relative">
-                                <label for="editEmpNoteDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                    <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Document
-                                </label>
-                                <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editEmpNoteDocument"/>
-                                <span id="editEmpNoteDocumentName" class="documentNoteName ml-5"></span>
-                            </div>
                         </div>
-                        <div class="mt-4 flex justify-start items-start relative">
-                            <div class="form-check form-switch mt-0 w-[50%]">
-                                <label class="form-check-label ml-0 mr-3" for="edit_reminder">Reminder: </label>
-                                <input id="edit_reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
-                            </div>
-                            <div class="w-[50%] ml-auto reminderDateWrap" style="display: none;">
-                                <label for="reminder_end" class="form-label">Reminder Date <span class="text-danger">*</span></label>
-                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateEmpNote" class="btn btn-primary w-auto">     
-                            Update                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
-                        <input type="hidden" name="id" value="0"/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Edit Modal -->
+                        <div class="modal-body">
+                            <div class="ep-note-modal__surface">
+                                <div class="ep-doc-form-grid">
+                                    <div class="ep-note-modal__field">
+                                        <label for="edit_opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
+                                        <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="edit_opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                        <div class="acc__input-error error-opening_date text-danger mt-2"></div>
+                                    </div>
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addEmpNoteModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="addEmpNoteForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Note</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="opening_date" class="form-label">Opening Date <span class="text-danger">*</span></label>
-                            <input type="text" value="{{ date('d-m-Y') }}" placeholder="DD-MM-YYYY" id="opening_date" class="form-control datepicker" name="opening_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                            <div class="acc__input-error error-opening_date text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="addEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="addEmpNoteEditor"></div>
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__editor-block">
+                                        <div class="ep-note-modal__section-head">
+                                            <label for="editEmpNoteEditor" class="form-label">Note <span class="text-danger">*</span></label>
+                                            <p class="ep-note-modal__hint">Revise the note body, formatting and attached context.</p>
+                                        </div>
+                                        <div class="editor document-editor">
+                                            <div class="document-editor__toolbar"></div>
+                                            <div class="document-editor__editable-container">
+                                                <div class="document-editor__editable" id="editEmpNoteEditor"></div>
+                                            </div>
+                                        </div>
+                                        <div class="acc__input-error error-content text-danger mt-2"></div>
+                                    </div>
+
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__attachment-block">
+                                        <div class="ep-note-modal__section-head">
+                                            <label class="form-label">Attachment</label>
+                                        </div>
+                                        <div class="ep-doc-file-picker">
+                                            <a href="#" download class="ep-doc-btn ep-doc-btn--soft downloadExistAttachment inline-flex" style="display: none;">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                                Current file
+                                            </a>
+                                            <label for="editEmpNoteDocument" class="ep-doc-btn ep-doc-btn--soft ep-doc-file-picker__trigger">
+                                                <i data-lucide="paperclip" class="w-4 h-4"></i>
+                                                Upload Document
+                                            </label>
+                                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="editEmpNoteDocument"/>
+                                            <span id="editEmpNoteDocumentName" class="ep-doc-file-chip" style="display: none;"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="ep-doc-form-grid__full ep-note-modal__section ep-note-modal__reminder-block">
+                                        <div class="ep-doc-reminder-row">
+                                            <div class="ep-doc-switch">
+                                                <label class="form-check form-switch mb-0">
+                                                    <input id="edit_reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
+                                                    <span class="ep-doc-switch__label">Reminder</span>
+                                                </label>
+                                            </div>
+                                            <div class="ep-doc-reminder-date reminderDateWrap" style="display: none;">
+                                                <label for="edit_reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
+                                                <input type="text" value="" placeholder="DD-MM-YYYY" id="edit_reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
+                                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-content text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3 flex justify-start items-center relative">
-                            <label for="addEmpNoteDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Document
-                            </label>
-                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" name="document" class="absolute w-0 h-0 overflow-hidden opacity-0" id="addEmpNoteDocument"/>
-                            <span id="addEmpNoteDocumentName" class="documentNoteName ml-5"></span>
-                        </div>
-                        <div class="mt-4 flex justify-start items-start relative">
-                            <div class="form-check form-switch mt-0 w-[50%]">
-                                <label class="form-check-label ml-0 mr-3" for="reminder">Reminder: </label>
-                                <input id="reminder" class="form-check-input" type="checkbox" name="reminder" value="1">
-                            </div>
-                            <div class="w-[50%] ml-auto reminderDateWrap" style="display: none;">
-                                <label for="reminder_date" class="form-label">Reminder Date <span class="text-danger">*</span></label>
-                                <input type="text" value="" placeholder="DD-MM-YYYY" id="reminder_date" class="form-control datepicker" name="reminder_date" data-format="DD-MM-YYYY" data-single-mode="true">
-                                <div class="acc__input-error error-reminder_date text-danger mt-2"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveEmpNote" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
+                        <div class="modal-footer">
+                            <button type="button" data-tw-dismiss="modal" class="btn ep-doc-modal__cancel">
+                                <i data-lucide="x" class="w-4 h-4 mr-1"></i>Cancel
+                            </button>
+                            <button type="submit" id="updateEmpNote" class="btn btn-primary">
+                                <i data-lucide="save" class="w-4 h-4 mr-2"></i>Update
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="w-4 h-4 ml-2">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
                                     </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                                </svg>
+                            </button>
+                            <input type="hidden" name="employee_id" value="{{ $employee->id }}"/>
+                            <input type="hidden" name="id" value="0"/>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    <!-- END: Add Modal -->
+        <!-- END: Edit Modal -->
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
+        <!-- BEGIN: Success Modal Content -->
+        <div id="successModal" class="modal ep-holiday-state-modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="ep-holiday-state-modal__body">
+                            <div class="ep-holiday-state-modal__icon">
+                                <i data-lucide="check" class="w-10 h-10"></i>
+                            </div>
+                            <div class="ep-holiday-state-modal__title successModalTitle"></div>
+                            <div class="ep-holiday-state-modal__desc successModalDesc"></div>
+                        </div>
+                        <div class="ep-holiday-state-modal__actions">
+                            <button type="button" data-action="DISMISS" class="successCloser btn btn-primary">Ok</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- END: Success Modal Content -->
+        <!-- END: Success Modal Content -->
 
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary w-24">Ok</button>
+        <!-- BEGIN: Warning Modal Content -->
+        <div id="warningModal" class="modal ep-holiday-state-modal ep-holiday-state-modal--warning" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="ep-holiday-state-modal__body">
+                            <div class="ep-holiday-state-modal__icon">
+                                <i data-lucide="alert-octagon" class="w-10 h-10"></i>
+                            </div>
+                            <div class="ep-holiday-state-modal__title warningModalTitle"></div>
+                            <div class="ep-holiday-state-modal__desc warningModalDesc"></div>
+                        </div>
+                        <div class="ep-holiday-state-modal__actions">
+                            <button type="button" data-action="DISMISS" class="warningCloser btn btn-primary">Ok</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!-- END: Warning Modal Content -->
+        <!-- END: Warning Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" class="disAgreeWith btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-recordid="0" data-status="none" data-employee="{{ $employee->id }}" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+        <!-- BEGIN: Delete Confirm Modal Content -->
+        <div id="confirmModal" class="modal ep-holiday-state-modal ep-holiday-state-modal--danger" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="ep-holiday-state-modal__body">
+                            <div class="ep-holiday-state-modal__icon">
+                                <i data-lucide="x" class="w-10 h-10"></i>
+                            </div>
+                            <div class="ep-holiday-state-modal__title confModTitle">Are you sure?</div>
+                            <div class="ep-holiday-state-modal__desc confModDesc"></div>
+                        </div>
+                        <div class="ep-holiday-state-modal__actions">
+                            <button type="button" class="disAgreeWith btn btn-outline-secondary">No, Cancel</button>
+                            <button type="button" data-recordid="0" data-status="none" data-employee="{{ $employee->id }}" class="agreeWith btn btn-danger">Yes, I agree</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- END: Delete Confirm Modal Content -->
     </div>
-    <!-- END: Delete Confirm Modal Content -->
 </div>
-    </div>
 @endsection
-    @section('script')
-    {{-- @vite('resources/js/employee-global.js') --}}
+
+@section('script')
     @vite('resources/js/employee-note.js')
 @endsection

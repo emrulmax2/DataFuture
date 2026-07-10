@@ -4,7 +4,18 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+const renderLucideIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
 var employeeAppraisalListTable = (function () {
+    let currentTotalRows = 0;
+
     var _tableGen = function () {
         // Setup Tabulator
         let employee = $('#employeeAppraisalListTable').attr('data-employee');
@@ -18,12 +29,19 @@ var employeeAppraisalListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
-                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
-            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            ajaxResponse(url, params, response) {
+                currentTotalRows = Number(response.total_rows || 0);
+                const summaryEl = document.querySelector("#employeeAppraisalSummary");
+                if (summaryEl) {
+                    summaryEl.textContent = currentTotalRows > 0
+                        ? `${currentTotalRows} appraisal${currentTotalRows === 1 ? "" : "s"} on file`
+                        : "Track appraisal cycles, scores and promotion outcomes.";
+                }
+                return response;
+            },
             columns: [
                 {
                     title: "#ID",
@@ -64,19 +82,25 @@ var employeeAppraisalListTable = (function () {
                     title: "Promotion",
                     field: "promotion_consideration",
                     headerHozAlign: "left",
+                    width: 116,
                     formatter(cell, formatterParams){
-                        return (cell.getData().promotion_consideration == 1 ? '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">No</span>');
+                        return (cell.getData().promotion_consideration == 1
+                            ? '<span class="ep-doc-tag ep-doc-tag--teal">Yes</span>'
+                            : '<span class="ep-doc-tag ep-doc-tag--red">No</span>');
                     }
                 },
                 {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    width: 128,
                     formatter(cell, formatterParams){
                         if(cell.getData().status == 3){
-                            return '<span class="btn inline-flex btn-success w-auto px-1 text-white py-0 rounded-0">Completed</span>';
+                            return '<span class="ep-doc-tag ep-doc-tag--teal">Completed</span>';
                         }else{
-                            return (cell.getData().status == 2 ? '<span class="btn inline-flex btn-danger w-auto px-1 text-white py-0 rounded-0">Overdue</span>' : '<span class="btn inline-flex btn-warning w-auto px-1 text-white py-0 rounded-0">Due</span>');
+                            return (cell.getData().status == 2
+                                ? '<span class="ep-doc-tag ep-doc-tag--red">Overdue</span>'
+                                : '<span class="ep-doc-tag ep-doc-tag--amber">Due</span>');
                         }
                     }
                 },
@@ -86,37 +110,27 @@ var employeeAppraisalListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "220",
+                    width: 208,
                     download:false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            if(cell.getData().notes != null){
-                                btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#viewAppraisalNoteModal" type="button" class="view_note btn-rounded btn btn-twitter text-white p-0 w-9 h-9 ml-1"><i data-lucide="sticky-note" class="w-4 h-4"></i></button>';
+                    formatter(cell, formatterParams) {
+                        const data = cell.getData();
+                        const actions = [];
+                        if (data.deleted_at == null) {
+                            if(data.notes != null){
+                                actions.push('<button data-id="' +data.id +'" data-tw-toggle="modal" data-tw-target="#viewAppraisalNoteModal" type="button" class="view_note ep-doc-action-btn ep-doc-action-btn--view" title="View note"><i data-lucide="sticky-note" class="w-4 h-4"></i></button>');
                             }
-                            btns +='<a href="'+route('employee.appraisal.documents', [cell.getData().employee_id, cell.getData().id])+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="folder-up" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editAppraisalModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            actions.push('<a href="'+route('employee.appraisal.documents', [data.employee_id, data.id])+'" class="ep-doc-action-btn ep-doc-action-btn--docs" title="Documents"><i data-lucide="folder-up" class="w-4 h-4"></i></a>');
+                            actions.push('<button data-id="' +data.id +'" data-tw-toggle="modal" data-tw-target="#editAppraisalModal" type="button" class="edit_btn ep-doc-action-btn ep-doc-action-btn--edit" title="Edit appraisal"><i data-lucide="pencil" class="w-4 h-4"></i></button>');
+                            actions.push('<button data-id="' +data.id +'" class="delete_btn ep-doc-action-btn ep-doc-action-btn--danger" title="Delete appraisal"><i data-lucide="trash-2" class="w-4 h-4"></i></button>');
+                        } else if (data.deleted_at != null) {
+                            actions.push('<button data-id="' +data.id +'" class="restore_btn ep-doc-action-btn ep-doc-action-btn--restore" title="Restore appraisal"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>');
                         }
-                        
-                        return btns;
+                        return `<div class="ep-doc-action-group">${actions.join("")}</div>`;
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                renderLucideIcons();
             },
         });
 
@@ -236,7 +250,7 @@ var employeeAppraisalListTable = (function () {
 
     const viewAppraisalNoteModalEl = document.getElementById('viewAppraisalNoteModal')
     viewAppraisalNoteModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#viewAppraisalNoteModal .modal-body').html('');
+        $('#viewAppraisalNoteModal .ep-doc-note-view').html('');
     });
 
     $('#addAppraisalForm').on('submit', function(e){
@@ -388,7 +402,7 @@ var employeeAppraisalListTable = (function () {
         }).then((response) => {
             if (response.status == 200) {
                 let note = response.data.notes;
-                $('#viewAppraisalNoteModal .modal-body').html(note);
+                $('#viewAppraisalNoteModal .ep-doc-note-view').html(note);
             }
         }).catch((error) => {
             console.log(error);

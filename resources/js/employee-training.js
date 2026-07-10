@@ -4,7 +4,18 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+const renderTrainingIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
 var employeeTrainingListTable = (function () {
+    let currentTotalRows = 0;
+
     var _tableGen = function () {
         // Setup Tabulator
         let employee = $('#employeeTrainingListTable').attr('data-employee');
@@ -18,12 +29,19 @@ var employeeTrainingListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationCounter: function (pageSize, currentRow, currentPage, totalRows) {
-                return "Showing " + totalRows + " of " + totalRows + " record" + (totalRows === 1 ? "" : "s");
-            },
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            ajaxResponse(url, params, response) {
+                currentTotalRows = Number(response.total_rows || 0);
+                const summaryEl = document.querySelector("#employeeTrainingSummary");
+                if (summaryEl) {
+                    summaryEl.textContent = currentTotalRows > 0
+                        ? `${currentTotalRows} training record${currentTotalRows === 1 ? "" : "s"} on file`
+                        : "Record training, providers, costs and expiry dates.";
+                }
+                return response;
+            },
             columns: [
                 {
                     title: "#ID",
@@ -69,36 +87,26 @@ var employeeTrainingListTable = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "220",
+                    width: 168,
                     download:false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if(cell.getData().employee_document_id > 0){
-                            btns +='<a data-id="'+cell.getData().employee_document_id+'" href="javascript:void(0);" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                    formatter(cell, formatterParams) {
+                        const data = cell.getData();
+                        const actions = [];
+                        if(data.employee_document_id > 0){
+                            actions.push('<a data-id="'+data.employee_document_id+'" href="javascript:void(0);" class="downloadDoc ep-doc-action-btn ep-doc-action-btn--download" title="Download attachment"><i data-lucide="download" class="w-4 h-4"></i></a>');
                         }
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editTraininglModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                        if (data.deleted_at == null) {
+                            actions.push('<button data-id="' +data.id +'" data-tw-toggle="modal" data-tw-target="#editTraininglModal" type="button" class="edit_btn ep-doc-action-btn ep-doc-action-btn--edit" title="Edit training"><i data-lucide="pencil" class="w-4 h-4"></i></button>');
+                            actions.push('<button data-id="' +data.id +'" class="delete_btn ep-doc-action-btn ep-doc-action-btn--danger" title="Delete training"><i data-lucide="trash-2" class="w-4 h-4"></i></button>');
+                        } else if (data.deleted_at != null) {
+                            actions.push('<button data-id="' +data.id +'" class="restore_btn ep-doc-action-btn ep-doc-action-btn--restore" title="Restore training"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>');
                         }
-                        
-                        return btns;
+                        return `<div class="ep-doc-action-group">${actions.join("")}</div>`;
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                renderTrainingIcons();
             },
         });
 
@@ -169,30 +177,54 @@ var employeeTrainingListTable = (function () {
     const addTraininglModalEl = document.getElementById('addTraininglModal')
     addTraininglModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addTraininglModal .acc__input-error').html('');
+        $('#addTraininglModal .border-danger').removeClass('border-danger');
         $('#addTraininglModal .modal-body input:not([type="checkbox"])').val('');
+        $('#addTraininglModal #addTraiDocumentName').html('').hide();
     });
     const editTraininglModalEl = document.getElementById('editTraininglModal')
-    addTraininglModalEl.addEventListener('hide.tw.modal', function(event) {
+    editTraininglModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editTraininglModal .acc__input-error').html('');
+        $('#editTraininglModal .border-danger').removeClass('border-danger');
         $('#editTraininglModal .modal-body input:not([type="checkbox"])').val('');
+        $('#editTraininglModal #editTraiDocumentName').html('').hide();
         $('#editTraininglModal .modal-footer [name="id"]').val('0');
     });
 
     $('#addTraininglModal').on('change', '#addTraiDocument', function(){
-        showFileName('addTraiDocument', 'addTraiDocumentName');
+        renderFileChip('addTraiDocument', 'addTraiDocumentName');
     });
 
     $('#editTraininglModal').on('change', '#editTraiDocument', function(){
-        showFileName('editTraiDocument', 'editTraiDocumentName');
+        renderFileChip('editTraiDocument', 'editTraiDocumentName');
     });
 
-    function showFileName(inputId, targetPreviewId) {
+    function renderFileChip(inputId, targetId) {
         let fileInput = document.getElementById(inputId);
-        let namePreview = document.getElementById(targetPreviewId);
-        let fileName = fileInput.files[0].name;
-        namePreview.innerText = fileName;
+        let target = document.getElementById(targetId);
+        if (!target) return false;
+        let file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+        if (file) {
+            target.innerHTML = ''
+                + '<i data-lucide="file-text" class="w-4 h-4 ep-doc-file-chip__icon"></i>'
+                + '<span class="ep-doc-file-chip__name">' + file.name + '</span>'
+                + '<button type="button" class="ep-doc-file-chip__remove" data-input="' + inputId + '" title="Remove"><i data-lucide="x" class="w-3 h-3"></i></button>';
+            target.style.display = "inline-flex";
+            renderTrainingIcons();
+        } else {
+            target.innerHTML = "";
+            target.style.display = "none";
+        }
         return false;
-    };
+    }
+
+    $(document).on("click", ".ep-doc-file-chip__remove", function (e) {
+        e.preventDefault();
+        let inputId = $(this).attr("data-input");
+        let fileInput = document.getElementById(inputId);
+        if (fileInput) { fileInput.value = ""; }
+        let chip = $(this).closest(".ep-doc-file-chip");
+        chip.html("").hide();
+    });
 
     $('#addTraininglForm').on('submit', function(e){
         e.preventDefault();
