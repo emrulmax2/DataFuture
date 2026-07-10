@@ -42,8 +42,17 @@ import { saveAs } from 'file-saver';
         }
     };
 
+    // Accordion selects: append the dropdown to <body> so it escapes the
+    // accordion box's stacking context (otherwise a later accordion paints
+    // over the open dropdown, making it appear to go "under the body").
+    let tomOptionsSDFAccordion = {
+        ...tomOptionsSDF,
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown df-tom-dropdown',
+    };
+
     $('.dfReportWrap .df-tom-selects').each(function(){
-        new TomSelect(this, tomOptionsSDF);
+        new TomSelect(this, tomOptionsSDFAccordion);
     });
 
     let semester_id = new TomSelect('#semester_id', tomOptionsSDF);

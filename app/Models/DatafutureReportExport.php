@@ -18,7 +18,9 @@ class DatafutureReportExport extends Model
         'progress',
         'status',
         'payload',
-        'error'
+        'error',
+        'created_by',
+        'updated_by'
     ];
 
     protected $casts = [

@@ -10,7 +10,7 @@
             <h2 class="font-display text-2xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Leave Calendar</h2>
             <p class="text-sm text-slate-400 mt-1">Monthly leave overview &middot; London Churchill College</p>
         </div>
-        <a href="{{ route('hr.portal') }}" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors">
             <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Portal
         </a>
     </div>

@@ -83,7 +83,7 @@ class EmployeeAppraisalDocumentController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     public function uploadDocuments(Request $request){
@@ -136,6 +136,6 @@ class EmployeeAppraisalDocumentController extends Controller
 
         $data = EmployeeApprisalDocument::where('id', $recordid)->withTrashed()->restore();
         
-        response()->json($data);
+        return response()->json($data);
     }
 }

@@ -107,7 +107,7 @@ class EmployeeTrainingController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total_rows' => $total_rows, 'data' => $data]);
     }
 
     public function update(EmployeeTrainingRequest $request){

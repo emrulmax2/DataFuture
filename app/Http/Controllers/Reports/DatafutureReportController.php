@@ -18,6 +18,7 @@ use App\Models\ModuleCreation;
 use App\Models\Plan;
 use App\Models\ReasonForEndingCourseSession;
 use App\Models\SessionStatus;
+use App\Models\SlcAttendance;
 use App\Models\Student;
 use App\Models\StudentAttendanceTermStatus;
 use App\Models\StudentAward;
@@ -1405,6 +1406,7 @@ class DatafutureReportController extends Controller
 
                     $this->resetCourseSessions($student_id, $student_course_relation_id);
                     $this->autoLoadStudentStuloads($student_id, $student_course_relation_id);
+                    $this->getStuloadModuleInstance($student_id, $student_course_relation_id);
 
                     $studentCounts += 1;
                     // Only write the tracking row when the whole-number percent
@@ -1584,6 +1586,60 @@ class DatafutureReportController extends Controller
         endif;
 
         return $counts;
+    }
+
+    public function getStuloadModuleInstance($student_id, $student_course_relation_id){
+        $stuloads = StudentStuloadInformation::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->orderBy('id', 'ASC')->get();
+        if($stuloads->count() > 0):
+            foreach($stuloads as $stu):
+                $instance_id = $stu->course_creation_instance_id;
+                $instance = CourseCreationInstance::find($instance_id);
+                $stuLoadTotal = 0;
+                if(isset($instance->terms) && $instance->terms->count() > 0):
+                    $suspendedFound = false;
+                    foreach($instance->terms as $term):
+                        $term_declaration_id = $term->term_declaration_id;
+                        $termDeclaration = (isset($term->termDeclaration) && !empty($term->termDeclaration) ? $term->termDeclaration : []);
+                        $termDecStuload = (isset($termDeclaration->stuload) && !empty($termDeclaration->stuload) ? $termDeclaration->stuload : 0);
+
+                        $termStart = (isset($term->start_date) && !empty($term->start_date) ? date('Y-m-d', strtotime($term->start_date)) : '');
+                        $termEnd = (isset($term->end_date) && !empty($term->end_date) ? date('Y-m-d', strtotime($term->end_date)) : '');
+
+                        $existLoad = StudentTermStuload::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)
+                                    ->where('student_stuload_information_id', $stu->id)->where('instance_term_id', $term->id)->get()->first();
+                        $autoLoad = (isset($existLoad->id) && $existLoad->id > 0 ? $existLoad->auto_stuload : 1);
+                        $stuload = (isset($existLoad->id) && $existLoad->id > 0 ? $existLoad->student_load : 0);
+                        if($autoLoad == 1):
+                            $attendanceCodes = SlcAttendance::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)->where('term_declaration_id', $term_declaration_id)->pluck('attendance_code_id')->unique()->toArray();
+                            $stuload = (!empty($attendanceCodes) && in_array(1, $attendanceCodes) && !in_array(6, $attendanceCodes) ? $termDecStuload : 0);
+                            $stuLoadTotal += $stuload;
+
+                            $loadData = [
+                                'student_id' => $student_id,
+                                'student_course_relation_id' => $student_course_relation_id,
+                                'student_stuload_information_id' => $stu->id,
+                                'instance_term_id' => $term->id,
+                                'auto_stuload' => $autoLoad,
+                                'student_load' => $stuload,
+                            ];
+                            if(isset($existLoad->id) && $existLoad->id > 0):
+                                $loadData['updated_by'] = auth()->user()->id;
+                                StudentTermStuload::where('student_id', $student_id)->where('student_course_relation_id', $student_course_relation_id)
+                                    ->where('student_stuload_information_id', $stu->id)->where('instance_term_id', $term->id)->update($loadData);
+                            else:
+                                $loadData['created_by'] = auth()->user()->id;
+                                StudentTermStuload::create($loadData);
+                            endif;
+                        endif;
+                    endforeach;
+                endif;
+                $stuLoadTotal = ($stuLoadTotal == 99 ? 100 : $stuLoadTotal);
+                StudentStuloadInformation::where('id', $stu->id)->update(['student_load' => $stuLoadTotal]);
+            endforeach;
+        endif;
+
+        //dd($res);
+        return true;
     }
 
     function calculateSidNumber($student_reg_no){

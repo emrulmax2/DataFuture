@@ -407,6 +407,9 @@ var employeeCommunicationDocumentListTable = (function () {
     const uploadsDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadsDropdown"));
     const uploadEmployeeDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModal"));
     const addCommunicationModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addCommunicationModal"));
+    const uploadDocTypeDisplay = $("#documentNameDisplay");
+    const uploadDocNameInput = $('#uploadEmployeeDocumentModal [name="doc_name"]');
+    const uploadDisplayNameInput = $('#uploadEmployeeDocumentModal [name="display_file_name"]');
 
     const showSuccessModal = (title, description, action = "DISMISS") => {
         $("#successModal .successModalTitle").html(title);
@@ -471,11 +474,11 @@ var employeeCommunicationDocumentListTable = (function () {
 
     const uploadEmployeeDocumentModalEl = document.getElementById("uploadEmployeeDocumentModal");
     uploadEmployeeDocumentModalEl.addEventListener("hide.tw.modal", function () {
-        $('#uploadEmployeeDocumentModal input[name="display_file_name"]').val("");
+        uploadDisplayNameInput.val("");
         $('#uploadEmployeeDocumentModal input[name="document_setting_id"]').val("0");
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check"]').val("0");
-        $('#uploadEmployeeDocumentModal input[name="doc_name"]').val("");
-        $("#documentNameDisplay").text("Selected document type");
+        uploadDocNameInput.val("");
+        uploadDocTypeDisplay.text("Selected document type");
         $('#uploadEmployeeDocumentModal input[name="hard_copy_check_status"][value="0"]').prop("checked", true);
         document.querySelector("#uploadEmpDocBtn").removeAttribute("disabled");
         document.querySelector("#uploadEmpDocBtn svg").style.cssText = "display: none;";
@@ -524,8 +527,8 @@ var employeeCommunicationDocumentListTable = (function () {
         }
     });
 
-    $('#uploadEmployeeDocumentModal [name="doc_name"]').on("keyup", function () {
-        $('#uploadEmployeeDocumentModal [name="display_file_name"]').val($(this).val());
+    uploadDocNameInput.on("input", function () {
+        uploadDisplayNameInput.val($(this).val());
     });
 
     if ($("#uploadDocumentForm").length > 0) {
@@ -624,13 +627,9 @@ var employeeCommunicationDocumentListTable = (function () {
             let selectedDocumentID = $(".employee_doc_ids:checked");
             let documentLabelText = selectedDocumentID.attr("data-label").trim();
 
-            $("#documentNameDisplay").text(documentLabelText);
-
-            $(".displayNameInput").off("keyup.epdocname").on("keyup.epdocname", function () {
-                let displayName = $(this).val();
-                let separator = displayName.length > 0 ? " - " : "";
-                $("#documentNameDisplay").text(documentLabelText + separator + displayName);
-            });
+            uploadDocTypeDisplay.text(documentLabelText);
+            uploadDocNameInput.val(documentLabelText);
+            uploadDisplayNameInput.val(documentLabelText);
 
             uploadsDropdown.hide();
             $(".employee_doc_ids").prop("checked", false);
