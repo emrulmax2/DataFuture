@@ -34,17 +34,19 @@ class EmployeePortalController extends Controller
 {
     public function index(){
         $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+        $absentToday = $this->getAbsentEmployees(date('Y-m-d'));
 
         return view('pages.hr.portal.index', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => 'javascript:void(0);']
             ],
+            'employeeCount' => Employee::whereIn('status', [1, 2, 4])->count(),
             'pendingLeaves' => EmployeeLeave::where('status', 'Pending')->orderBy('id', 'DESC')->get(),//->skip(0)->take(5)
-            'absentToday' => $this->getAbsentEmployees(date('Y-m-d')),
+            'absentToday' => $absentToday,
             'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query){
                               $query->where('status', 'Approved')->where('leave_type', 1);
-                          })->get(),//->skip(0)->limit(5)
+                          })->orderBy('id', 'DESC')->get(),//->skip(0)->limit(5)
             'passExpiry' => EmployeeEligibilites::where('document_type', 1)->where('doc_expire', '<=', $expireDate)
                             ->whereHas('employee', function($q){
                                 $q->where('status', 1);
@@ -58,6 +60,213 @@ class EmployeePortalController extends Controller
                            ->whereHas('employee', function($q){
                                 $q->where('status', 1);
                            })->orderBy('due_on', 'ASC')->get()//->skip(0)->limit(5)
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Pending Holiday Request" dashboard box.
+     * Keeps the same order as the initial render (status Pending, id DESC).
+     */
+    public function pendingLeaveRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $total = EmployeeLeave::where('status', 'Pending')->count();
+        $leaves = EmployeeLeave::where('status', 'Pending')
+                    ->orderBy('id', 'DESC')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+        $html = view('pages.hr.portal.partials.pending-leave-rows', [
+            'pendingLeaves' => $leaves,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + $leaves->count()) < $total,
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Absent Today" dashboard box.
+     * Keeps the same order as the initial render (getAbsentEmployees for today).
+     */
+    public function absentRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $all = $this->getAbsentEmployees(date('Y-m-d'));
+        $total = count($all);
+        $slice = array_slice($all, $offset, $perPage, true);
+
+        $html = view('pages.hr.portal.partials.absent-rows', [
+            'absentToday' => $slice,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + count($slice)) < $total,
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Holiday Today" dashboard box.
+     * Keeps the same order/filters as the initial render (today, Active, id DESC).
+     */
+    public function holidayRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $base = EmployeeLeaveDay::where('leave_date', date('Y-m-d'))
+                    ->where('status', 'Active')
+                    ->whereHas('leave', function($query){
+                        $query->where('status', 'Approved')->where('leave_type', 1);
+                    });
+
+        $total = (clone $base)->count();
+        $holidays = $base->orderBy('id', 'DESC')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+        $html = view('pages.hr.portal.partials.holiday-rows', [
+            'holidays' => $holidays,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + $holidays->count()) < $total,
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Appraisal · 60 Days" dashboard box.
+     * Keeps the same order/filters as the initial render (due within 60 days, due_on ASC).
+     */
+    public function appraisalRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+        $base = EmployeeAppraisal::where('due_on', '<=', $expireDate)
+                    ->whereNull('completed_on')
+                    ->whereHas('employee', function($q){
+                        $q->where('status', 1);
+                    });
+
+        $total = (clone $base)->count();
+        $appraisal = $base->orderBy('due_on', 'ASC')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+        $html = view('pages.hr.portal.partials.appraisal-rows', [
+            'appraisal' => $appraisal,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + $appraisal->count()) < $total,
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Visa Expiry" dashboard box.
+     * Keeps the same order/filters as the initial render (workpermit_expire ASC).
+     */
+    public function visaRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+        $base = EmployeeEligibilites::where('eligible_to_work', 'Yes')
+                    ->where('employee_work_permit_type_id', 3)
+                    ->whereDate('workpermit_expire', '<=', $expireDate)
+                    ->whereHas('employee', function($q){
+                        $q->where('status', 1);
+                    });
+
+        $total = (clone $base)->count();
+        $visaExpiry = $base->orderBy('workpermit_expire', 'ASC')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+        $html = view('pages.hr.portal.partials.visa-rows', [
+            'visaExpiry' => $visaExpiry,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + $visaExpiry->count()) < $total,
+        ]);
+    }
+
+    /**
+     * Infinite-scroll rows for the "Passport Expiry" dashboard box.
+     * Keeps the same order/filters as the initial render (doc_expire ASC).
+     */
+    public function passportRows(Request $request){
+        $perPage = 10;
+        $page = (int) $request->query('page', 1);
+        if($page < 1){
+            $page = 1;
+        }
+        $offset = ($page - 1) * $perPage;
+
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+        $base = EmployeeEligibilites::where('document_type', 1)
+                    ->where('doc_expire', '<=', $expireDate)
+                    ->whereHas('employee', function($q){
+                        $q->where('status', 1);
+                    });
+
+        $total = (clone $base)->count();
+        $passExpiry = $base->orderBy('doc_expire', 'ASC')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+        $html = view('pages.hr.portal.partials.passport-rows', [
+            'passExpiry' => $passExpiry,
+            'showEmpty' => false,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'page' => $page,
+            'hasMore' => ($offset + $passExpiry->count()) < $total,
         ]);
     }
 
