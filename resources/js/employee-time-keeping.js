@@ -1,6 +1,51 @@
 
 
 (function(){
+    const loadMonth = ($theBtn) => {
+        if($theBtn.hasClass('dataLoaded') || $theBtn.hasClass('dataLoading')){
+            return;
+        }
+
+        let target = $theBtn.attr('data-target');
+        let theDate = $theBtn.attr('data-date');
+        let theEmployee = $theBtn.attr('data-employee');
+        let theYear = $theBtn.attr('data-year');
+        let $monthItem = $theBtn.closest('.lcc_month_accordion_item');
+        let $monthBadge = $monthItem.find('.js-month-worked-total').first();
+
+        $theBtn.addClass('dataLoading');
+        $monthBadge.text('Loading...');
+
+        axios({
+            method: "post",
+            url: route("employee.time.keeper.generate.recored"),
+            data: {employee_id : theEmployee, the_date : theDate, holiday_year : theYear},
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            if (response.status == 200) {
+                $theBtn.addClass('dataLoaded');
+                let res = response.data.res;
+
+                $(target+' .ep-tk-table tbody').html(res.html);
+                $(target+' .ep-tk-table tfoot .tfootTotalWorkingHour').html(res.workingHourTotal);
+                $(target+' .ep-tk-table tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
+                $(target+' .ep-tk-table tfoot .tfootTotalPay').html(res.monthTotalPay);
+                $monthBadge.text(res.workingHourTotal + ' worked').addClass('is-loaded');
+            }
+        })
+        .catch((error) => {
+            $monthBadge.text('Try again');
+            if (error.response) {
+                console.log("error");
+            }
+        })
+        .finally(() => {
+            $theBtn.removeClass('dataLoading');
+        });
+    };
+
     $('.lcc_accordion_button').on('click', function(){
         let $theBtn = $(this);
         let $lcc_custom_accordion = $theBtn.parent('.lcc_accordion_item').parent('.lcc_custom_accordion');
@@ -19,7 +64,6 @@
         }
     });
 
-
     $('.lcc_month_accordion_button').on('click', function(){
         let $theMonthBtn = $(this);
         let $employee_month_attendance_accordion = $theMonthBtn.parent('.lcc_month_accordion_item').parent('.employee_month_attendance_accordion');
@@ -35,40 +79,11 @@
 
             $theMonthBtn.toggleClass('active');
             $lcc_month_accordion_body.slideDown();
+            loadMonth($theMonthBtn);
         }
     });
 
-    $('.lccEmpTimeKeepingBtn').on('click', function(e){
-        let $theBtn = $(this);
-        if(!$theBtn.hasClass('dataLoaded')){
-            let target = $theBtn.attr('data-target');
-            let theDate = $theBtn.attr('data-date');
-            let theEmployee = $theBtn.attr('data-employee');
-            let theYear = $theBtn.attr('data-year');
-
-            axios({
-                method: "post",
-                url: route("employee.time.keeper.generate.recored"),
-                data: {employee_id : theEmployee, the_date : theDate, holiday_year : theYear},
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
-            }).then((response) => {
-                if (response.status == 200) {
-                    $theBtn.addClass('dataLoaded');
-                    let res = response.data.res;
-                    
-                    $(target+' .ep-tk-table tbody').html(res.html);
-                    $(target+' .ep-tk-table tfoot .tfootTotalWorkingHour').html(res.workingHourTotal);
-                    $(target+' .ep-tk-table tfoot .tfootTotalHolidayHour').html(res.holidayHourTotal);
-                    $(target+' .ep-tk-table tfoot .tfootTotalPay').html(res.monthTotalPay);
-                }
-            })
-            .catch((error) => {
-                if (error.response) {
-                    console.log("error");
-                }
-            });
-        }
-    })
+    $('.lccEmpTimeKeepingBtn.active').each(function(){
+        loadMonth($(this));
+    });
 })();

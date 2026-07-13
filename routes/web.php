@@ -1680,6 +1680,13 @@ Route::middleware('auth')->group(function() {
 
         Route::post('hr/portal/absent-employe-pending-leave', 'checkIfisPendingLeaveExist')->name('hr.portal.check.pending.leave');
 
+        Route::get('hr/portal/pending-leave-rows', 'pendingLeaveRows')->name('hr.portal.pending.leave.rows');
+        Route::get('hr/portal/absent-rows', 'absentRows')->name('hr.portal.absent.rows');
+        Route::get('hr/portal/holiday-rows', 'holidayRows')->name('hr.portal.holiday.rows');
+        Route::get('hr/portal/appraisal-rows', 'appraisalRows')->name('hr.portal.appraisal.rows');
+        Route::get('hr/portal/visa-rows', 'visaRows')->name('hr.portal.visa.rows');
+        Route::get('hr/portal/passport-rows', 'passportRows')->name('hr.portal.passport.rows');
+
         Route::post('hr/portal/create-temporary-employee', 'createTemporaryEmployee')->name('hr.portal.create.temporary.employee');
         
     });     

@@ -21,7 +21,7 @@ var employeeListTable = (function () {
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
@@ -29,13 +29,17 @@ var employeeListTable = (function () {
                     field: "first_name",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams) { 
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photourl+'">';
+                        let name = cell.getData().first_name || '';
+                        let cleanName = name.replace(/^(Mrs|Mr|Miss|Ms|Dr)\.?\s+/i, '').trim();
+                        let parts = cleanName.split(/\s+/);
+                        let initials = ((parts[0] || '').charAt(0) + (parts[1] || '').charAt(0)).toUpperCase() || 'LC';
+                        var html = '<div class="hrd-employee-identity">';
+                                html += '<div class="hrd-table-avatar intro-x">';
+                                    html += initials;
                                 html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().first_name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
+                                html += '<div class="hrd-table-copy">';
+                                    html += '<div class="hrd-table-name">'+name+'</div>';
+                                    html += '<div class="hrd-table-role">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;
@@ -47,12 +51,7 @@ var employeeListTable = (function () {
                     headerHozAlign: "left",
                 },
                 {
-                    title: "Work Type",
-                    field: "ewt_name",
-                    headerHozAlign: "left",
-                },
-                {
-                    title: "Work Number",
+                    title: "Work No.",
                     field: "empt_works_number",
                     headerHozAlign: "left",
                 },
@@ -214,13 +213,17 @@ var employeeListTable = (function () {
     }
 
 
-    $('.absentToday').on('click', function(e){
+    $(document).on('click', '.absentToday', function(e){
         e.preventDefault();
         var $this = $(this);
         var employee = $this.attr('data-emloyee');
         var minute = $this.attr('data-minute');
         var hourminute = $this.attr('data-hour-min');
         var the_date = $this.attr('data-date');
+
+        // Rows carry no data-tw-toggle (so scroll-loaded rows behave the same),
+        // so open the modal explicitly here.
+        absentUpdateModal.show();
 
         axios({
             method: "post",
@@ -319,8 +322,66 @@ var employeeListTable = (function () {
         });
     });
 
+    /* Dashboard infinite-scroll lists (Pending Holiday Request, Absent Today).
+       Each list holds data-url / data-page / data-has-more and a loader element;
+       on scroll to the bottom it fetches the next page and appends the rows. */
+    function hrdInitInfiniteList(listId, loaderId){
+        var $list = $("#" + listId);
+        if(!$list.length){ return; }
+
+        var loading = false;
+        var $loader = $("#" + loaderId);
+
+        function stop(){
+            loading = false;
+            $loader.attr("hidden", "hidden");
+        }
+
+        function loadMore(){
+            if(loading || $list.attr("data-has-more") !== "1"){ return; }
+
+            loading = true;
+            $loader.removeAttr("hidden");
+            var nextPage = parseInt($list.attr("data-page"), 10) + 1;
+
+            axios({
+                method: "get",
+                url: $list.attr("data-url"),
+                params: { page: nextPage },
+                headers: {'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')},
+            }).then(function(response){
+                var data = response.data || {};
+                if(data.html){
+                    $loader.before(data.html);
+                }
+                $list.attr("data-page", data.page || nextPage);
+                $list.attr("data-has-more", data.hasMore ? "1" : "0");
+
+                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
+                stop();
+            }).catch(function(){
+                // Stop retrying on error so we don't spam the endpoint while scrolling.
+                $list.attr("data-has-more", "0");
+                stop();
+            });
+        }
+
+        $list.on("scroll", function(){
+            var el = $list[0];
+            if(el.scrollTop + el.clientHeight >= el.scrollHeight - 40){
+                loadMore();
+            }
+        });
+    }
+    hrdInitInfiniteList("pendingLeaveList", "pendingLeaveLoader");
+    hrdInitInfiniteList("absentTodayList", "absentTodayLoader");
+    hrdInitInfiniteList("holidayTodayList", "holidayTodayLoader");
+    hrdInitInfiniteList("appraisalList", "appraisalLoader");
+    hrdInitInfiniteList("visaExpiryList", "visaExpiryLoader");
+    hrdInitInfiniteList("passportExpiryList", "passportExpiryLoader");
+
     /* Pending Leave Request Action Start */
-    $('.actPendingHoliday').on('click', function(e){
+    $(document).on('click', '.actPendingHoliday', function(e){
         e.preventDefault();
         var employee_leave_id = $(this).attr('data-leave');
 

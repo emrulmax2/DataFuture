@@ -12,13 +12,10 @@ use App\Models\Employment;
 use App\Models\HrBankHoliday;
 use App\Models\HrCondition;
 use App\Models\HrHolidayYear;
-use App\Models\LetterHeaderFooter;
 use App\Models\Option;
 use Illuminate\Http\Request;
 
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class EmployeeTimeKeepingController extends Controller
 {
@@ -342,41 +339,57 @@ class EmployeeTimeKeepingController extends Controller
                     $html .= '<td class="ep-tk-td ep-tk-notes">'.$noteCell.'</td>';
                 $html .= '</tr>';
             else:
-                $html .= '<tr class="'.$dayClass.'">';
-                    $html .= '<td class="font-medium whitespace-nowrap">';
-                        $html .= date('l, jS F', strtotime($today));
-                        if($isWorkingDay && !$isLeaveDay && !$isBankHoliday && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
-                            $html .= $isWorkStarted ? '<br/>('.$todayPattern->start.' - '.$todayPattern->end.')' : '';
-                        endif;
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= ($isWorkingDay && $isWorkStarted ? $todayPattern->total : '&nbsp;');
-                    $html .= '</td>';
-                    $html .= '<td>'.$dayStatus.'</td>';
-                    $html .= '<td>';
-                        $html .= ($dayHour > 0 || $holidayHour > 0 ? '£'.number_format($payRate, 2) : '');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= ($dayHour > 0 ? $this->calculateHourMinute($dayHour) : '');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= ($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= ($todaysPay > 0 ? '£'.number_format($todaysPay, 2) : '');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        if(isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 && $isClockedIn):
-                            $html .= 'A: '.$todayAttendance->clockin_punch.' - '.$todayAttendance->clockout_punch.'<br/>';
-                            $html .= 'S: '.$todayAttendance->clockin_system.' - '.$todayAttendance->clockout_system;
-                        endif;
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= ($isClockedIn && (isset($todayAttendance->break_time) && !empty($todayAttendance->break_time)) ? $todayAttendance->break_time : '');
-                    $html .= '</td>';
-                    $html .= '<td>';
-                        $html .= implode(', ', $note);
-                    $html .= '</td>';
+                if(isset($pillMap[$dayStatus])):
+                    $pillMod = $pillMap[$dayStatus][0]; $pillLabel = $pillMap[$dayStatus][1];
+                else:
+                    $pillMod = 'nt'; $pillLabel = ($dayStatus === '' ? 'Scheduled' : $dayStatus);
+                endif;
+
+                $dateCell = '<span class="pdf-date-main">'.date('D j', strtotime($today)).'</span>';
+                if($isWorkingDay && $isWorkStarted && isset($todayPattern->start) && !empty($todayPattern->start) && isset($todayPattern->end) && !empty($todayPattern->end)):
+                    $dateCell .= '<span class="pdf-date-sub">'.htmlspecialchars($todayPattern->start, ENT_QUOTES).' &ndash; '.htmlspecialchars($todayPattern->end, ENT_QUOTES).'</span>';
+                endif;
+
+                if(isset($todayAttendance->total_work_hour) && $todayAttendance->total_work_hour > 0 && $isClockedIn):
+                    $clockCell  = '<span class="pdf-clock-main">'.htmlspecialchars($todayAttendance->clockin_punch ?? '', ENT_QUOTES).' &ndash; '.htmlspecialchars($todayAttendance->clockout_punch ?? '', ENT_QUOTES).'</span>';
+                    $clockCell .= '<span class="pdf-clock-sub">Sched '.htmlspecialchars($todayAttendance->clockin_system ?? '', ENT_QUOTES).' &ndash; '.htmlspecialchars($todayAttendance->clockout_system ?? '', ENT_QUOTES).'</span>';
+                else:
+                    $clockCell = '<span class="pdf-muted">&ndash;</span>';
+                endif;
+
+                $breakCell      = ($isClockedIn && isset($todayAttendance->break_time) && !empty($todayAttendance->break_time)) ? htmlspecialchars($todayAttendance->break_time, ENT_QUOTES) : '<span class="pdf-muted">&ndash;</span>';
+                $contractedCell = ($isWorkingDay && $isWorkStarted && isset($todayPattern->total) && !empty($todayPattern->total)) ? htmlspecialchars($todayPattern->total, ENT_QUOTES) : '<span class="pdf-muted">&ndash;</span>';
+                $workedCell     = ($dayHour > 0) ? '<span class="pdf-strong">'.$this->calculateHourMinute($dayHour).'</span>' : '<span class="pdf-muted">&ndash;</span>';
+                $holCell        = ($holidayHour > 0) ? '<span class="pdf-muted-strong">'.$this->calculateHourMinute($holidayHour).'</span>' : '<span class="pdf-muted">&ndash;</span>';
+
+                if($todaysPay > 0):
+                    $payCell = '<span class="pdf-pay-main">&pound;'.number_format($todaysPay, 2).'</span>';
+                    if($dayHour > 0 || $holidayHour > 0):
+                        $payCell .= '<span class="pdf-pay-sub">&pound;'.number_format($payRate, 2).' / hr</span>';
+                    endif;
+                else:
+                    $payCell = '<span class="pdf-muted">&ndash;</span>';
+                endif;
+
+                $noteCell = '';
+                foreach($note as $n):
+                    $n = trim($n, " \t\n\r\0\x0B:");
+                    if($n === ''){ continue; }
+                    $noteClass = in_array($n, $noteWarnings) ? ' pdf-note--warn' : '';
+                    $noteCell .= '<span class="pdf-note'.$noteClass.'">'.htmlspecialchars($n, ENT_QUOTES).'</span>';
+                endforeach;
+                if($noteCell === ''){ $noteCell = '<span class="pdf-muted">&ndash;</span>'; }
+
+                $html .= '<tr class="pdf-tk-row '.trim($dayClass).'">';
+                    $html .= '<td class="pdf-date">'.$dateCell.'</td>';
+                    $html .= '<td><span class="pdf-status pdf-status--'.$pillMod.'"><span class="pdf-status-dot"></span>'.htmlspecialchars($pillLabel, ENT_QUOTES).'</span></td>';
+                    $html .= '<td>'.$clockCell.'</td>';
+                    $html .= '<td class="pdf-center">'.$breakCell.'</td>';
+                    $html .= '<td class="pdf-center">'.$contractedCell.'</td>';
+                    $html .= '<td class="pdf-center">'.$workedCell.'</td>';
+                    $html .= '<td class="pdf-center">'.$holCell.'</td>';
+                    $html .= '<td class="pdf-left">'.$payCell.'</td>';
+                    $html .= '<td class="pdf-notes">'.$noteCell.'</td>';
                 $html .= '</tr>';
             endif;
         endfor;
@@ -456,131 +469,325 @@ class EmployeeTimeKeepingController extends Controller
 
     public function downloadPdf($employee_id, $the_date, $holiday_year){
         $employee = Employee::find($employee_id);
+        if(!$employee):
+            abort(404);
+        endif;
 
+        $the_date = date('Y-m-d', strtotime($the_date));
         $res = $this->getEmployeeMonthlyAttendanceDetails($employee_id, $the_date, $holiday_year);
 
         $companyReg = Option::where('category', 'SITE_SETTINGS')->where('name', 'company_registration')->get()->first();
-        $LetterHeader = LetterHeaderFooter::where('for_staff', 'Yes')->where('type', 'Header')->orderBy('id', 'DESC')->get()->first();
-        $LetterFooter = LetterHeaderFooter::where('for_staff', 'Yes')->where('type', 'Footer')->orderBy('id', 'DESC')->get()->first();
-        $PDF_title = $employee->full_name.' Time Recored for the Month '.date('F Y', strtotime($the_date));
+        $employment = Employment::where("employee_id", $employee_id)->orderBy('id', 'DESC')->get()->first();
+        $activePattern = EmployeeWorkingPattern::where('employee_id', $employee_id)->where('active', 1)
+                         ->orderBy('id', 'DESC')->get()->first();
+        $patternID = (isset($activePattern->id) && $activePattern->id > 0 ? $activePattern->id : 0);
+        $payRate = $this->getEmployeeActivePatternsActivePayRate($employee_id, $patternID, $the_date);
 
-        $PDFHTML = '';
-        $PDFHTML .= '<html>';
-            $PDFHTML .= '<head>';
-                $PDFHTML .= '<title>'.$PDF_title.'</title>';
-                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                $PDFHTML .= '<style>
-                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: rgb(30, 41, 59);}
-                                table{margin-left: 0px;}
-                                figure{margin: 0;}
-                                @page{margin-top: 125px;margin-left: 30px;margin-right: 30px;margin-bottom: 90px;}
-                                header{position: fixed;left: 0px;right: 0px;height: 90px;margin-top: -100px;}
-                                footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px; margin-bottom: -120px;}
-                                .regInfoRow td{border-top: 1px solid gray;}
-                                .text-center{text-align: center;}
-                                .text-left{text-align: left;}
-                                .text-right{text-align: right;}
+        $monthTitle = date('F Y', strtotime($the_date));
+        $employeeName = htmlspecialchars($employee->full_name ?? '', ENT_QUOTES);
+        $employeeNo = htmlspecialchars($employment->works_number ?? $employment->punch_number ?? 'N/A', ENT_QUOTES);
+        $companyRegText = htmlspecialchars($companyReg->value ?? 'Company Reg. No. 5995926, Companies House, England and Wales', ENT_QUOTES);
+        $generatedDate = date('jS F, Y');
+        $payRateText = number_format($payRate, 2);
+        $workedTotal = $res['workingHourTotal'] ?? '00:00';
+        $holidayTotal = $res['holidayHourTotal'] ?? '00:00';
+        $monthTotalPay = $res['monthTotalPay'] ?? '&pound;0.00';
+        $rowsHtml = $res['html'] ?? '';
 
-                                .bodyContainer{font-size: 13px; line-height: normal; padding: 0 15px;}
-                                .tableTitle{font-size: 22px; font-weight: bold; color: #000; line-height: 22px; margin: 0;}
-                                .employeeInfo{line-height: normal;}
-                                .mb-30{margin-bottom: 30px;}
-                                .mb-20{margin-bottom: 20px;}
-                                .mb-15{margin-bottom: 15px;}
-                                .text-justify{text-align: justify;}
-                                .font-medium{ font-weight: bold; }
-                            
-                                .table {width: 100%; text-align: left; text-indent: 0; border-color: inherit; border-collapse: collapse;}
-                                .table th {font-family: Tahoma, sans-serif; border-style: solid;border-color: #e5e7eb;border-bottom-width: 2px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;font-weight: bold;}
-                                .table td {border-style: solid;border-color: #e5e7eb; border-bottom-width: 1px;padding-left: 1.25rem;padding-right: 1.25rem;padding-top: 0.75rem;padding-bottom: 0.75rem;}
+        $logoPath = public_path('build/assets/images/LCC-logo.png');
+        if(!file_exists($logoPath)):
+            $logoPath = storage_path('app/public/company_logo.png');
+        endif;
+        $logoHtml = file_exists($logoPath)
+            ? '<img class="brand-logo" src="'.$logoPath.'" alt="London Churchill College">'
+            : '<div class="brand-fallback">LC</div><div class="brand-name">LONDON<br>CHURCHILL COLLEGE</div>';
 
-                                .table.table-bordered th, .table.table-bordered td {border-left-width: 1px;border-right-width: 1px;border-top-width: 1px;}
+        $PDF_title = $employee->full_name.' Time Recorded for the Month '.$monthTitle;
 
-                                .table.table-sm th {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
-                                .table.table-sm td {padding-left: 1rem;padding-right: 1rem;padding-top: 0.5rem;padding-bottom: 0.5rem;}
+        $PDFHTML = <<<HTML
+<!doctype html>
+<html>
+<head>
+    <title>{$PDF_title}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style>
+        @page { margin: 10mm; size: A4 landscape; }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #ffffff;
+            color: #17312f;
+            font-family: "Public Sans", "DejaVu Sans", Arial, sans-serif;
+            font-size: 10.5px;
+            line-height: 1.3;
+        }
+        table { border-collapse: collapse; border-spacing: 0; }
+        .report-header {
+            width: 100%;
+            border-bottom: 2px solid #0b2b28;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+        }
+        .report-header td { vertical-align: top; }
+        .brand-cell { width: 36%; }
+        .brand-logo { width: 155px; height: auto; display: block; }
+        .brand-fallback {
+            display: inline-block;
+            width: 34px;
+            height: 34px;
+            line-height: 34px;
+            border-radius: 9px;
+            background: #e4b33c;
+            color: #0a2724;
+            text-align: center;
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .brand-name {
+            display: inline-block;
+            margin-left: 10px;
+            color: #12302d;
+            font-family: Georgia, serif;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.04em;
+        }
+        .title-cell { text-align: right; }
+        .report-title {
+            color: #12302d;
+            font-size: 19px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin: 0;
+        }
+        .report-meta {
+            margin-top: 3px;
+            color: #5c7977;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .report-generated {
+            margin-top: 2px;
+            color: #8aa3a0;
+            font-size: 11px;
+        }
+        .timesheet-wrap {
+            border: 1px solid #eaf0ef;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .timesheet {
+            width: 100%;
+            table-layout: fixed;
+        }
+        .timesheet thead { display: table-header-group; }
+        .timesheet th {
+            background: #f5f8f8;
+            border-bottom: 1px solid #e7eeed;
+            color: #7a938f;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            line-height: 1.2;
+            padding: 8px 7px;
+            text-align: left;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        .timesheet td {
+            border-bottom: 1px solid #f1f5f4;
+            color: #43605d;
+            font-size: 10px;
+            padding: 7px;
+            vertical-align: middle;
+        }
+        .timesheet tbody tr:nth-child(even) td { background: #fbfcfc; }
+        .timesheet tbody tr.nwRow td { background: #f7f9f9; color: #8aa3a0; }
+        .timesheet tbody tr.hvRow td,
+        .timesheet tbody tr.apRow td { background: #f7fbfa; }
+        .timesheet tbody tr.mtRow td,
+        .timesheet tbody tr.slRow td { background: #fff8f7; }
+        .timesheet tbody tr.auRow td { background: #fbf9ff; }
+        .timesheet tbody tr.bhRow td,
+        .timesheet tbody tr.ovRow td { background: #fffaf2; }
+        .pdf-date-main {
+            display: block;
+            color: #17312f;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .pdf-date-sub,
+        .pdf-clock-sub,
+        .pdf-pay-sub {
+            display: block;
+            color: #8aa3a0;
+            font-size: 9px;
+            margin-top: 1px;
+        }
+        .pdf-clock-main {
+            display: block;
+            color: #17312f;
+            font-size: 10.5px;
+            font-weight: 600;
+        }
+        .pdf-status {
+            color: #5c7977;
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+        }
+        .pdf-status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin-right: 5px;
+            border-radius: 6px;
+            background: currentColor;
+            vertical-align: 1px;
+        }
+        .pdf-status--wk,
+        .pdf-status--ap { color: #187a45; }
+        .pdf-status--ov { color: #a35f00; }
+        .pdf-status--bh { color: #b35418; }
+        .pdf-status--hv { color: #1f689c; }
+        .pdf-status--mt,
+        .pdf-status--sl { color: #b42318; }
+        .pdf-status--au { color: #6f4aa3; }
+        .timesheet th.pdf-center,
+        .timesheet td.pdf-center { text-align: center; }
+        .timesheet th.pdf-left,
+        .timesheet td.pdf-left { text-align: left; }
+        .timesheet th.pdf-right,
+        .timesheet td.pdf-right,
+        .timesheet td.pdf-notes { text-align: right; }
+        .pdf-strong,
+        .pdf-pay-main {
+            color: #12302d;
+            font-weight: 800;
+        }
+        .pdf-muted,
+        .pdf-muted-strong {
+            color: #b8c6c4;
+        }
+        .pdf-muted-strong { font-weight: 700; }
+        .pdf-note {
+            display: inline-block;
+            color: #5c7977;
+            font-size: 9.5px;
+            font-weight: 600;
+            margin: 0 0 3px 3px;
+        }
+        .pdf-notes {
+            text-align: right;
+        }
+        .pdf-note--warn {
+            background: #fbf1dc;
+            border: 1px solid #f0e2be;
+            border-radius: 7px;
+            color: #96690a;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+        }
+        .timesheet tfoot td {
+            background: #0b2b28;
+            border-bottom: 0;
+            color: #ffffff;
+            padding: 10px 8px;
+        }
+        .total-title {
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+        .total-label {
+            color: #8fb0ac;
+            display: block;
+            font-size: 8.5px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .total-value {
+            color: #ffffff;
+            display: block;
+            font-size: 13px;
+            font-weight: 800;
+            margin-top: 1px;
+        }
+        .total-pay { color: #e4b33c; font-size: 15px; }
+        .report-footer {
+            border-top: 1px solid #e1eae9;
+            color: #8aa3a0;
+            font-size: 10px;
+            margin-top: 12px;
+            padding-top: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <table class="report-header">
+        <tr>
+            <td class="brand-cell">{$logoHtml}</td>
+            <td class="title-cell">
+                <div class="report-title">Time Recorded &mdash; {$monthTitle}</div>
+                <div class="report-meta">{$employeeName} &middot; Employee No. {$employeeNo} &middot; Rate &pound;{$payRateText} / hr</div>
+                <div class="report-generated">Generated {$generatedDate}</div>
+            </td>
+        </tr>
+    </table>
 
-                                .attendanceDetailsTable tbody tr.hvRow td{background: rgb(0 119 181);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.mtRow td{background: rgb(98, 23, 8);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.slRow td{background: rgb(185 28 28);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.auRow td{background: rgb(132, 71, 255);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.apRow td{background: rgb(13 148 136);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.bhRow td{background: rgb(243, 110, 38);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.ovRow td{background: rgb(244, 169, 113);color: #FFF;}
-                                .attendanceDetailsTable tbody tr.nwRow td{background: rgba(22, 78, 99, .05);}
-                            </style>';
-            $PDFHTML .= '</head>';
-            $PDFHTML .= '<body>';
-                if(isset($LetterHeader->current_file_name) && !empty($LetterHeader->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/header/'.$LetterHeader->current_file_name)):
-                    $PDFHTML .= '<header>';
-                        $PDFHTML .= '<img style="width: 100%; height: auto;" src="'.url('storage/letterheaderfooter/header/'.$LetterHeader->current_file_name).'"/>';
-                    $PDFHTML .= '</header>';
-                endif;
+    <div class="timesheet-wrap">
+        <table class="timesheet">
+            <colgroup>
+                <col style="width: 10%;">
+                <col style="width: 11%;">
+                <col style="width: 14%;">
+                <col style="width: 7%;">
+                <col style="width: 9%;">
+                <col style="width: 8%;">
+                <col style="width: 8%;">
+                <col style="width: 10%;">
+                <col style="width: 23%;">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Clock In - Out</th>
+                    <th class="pdf-center">Break</th>
+                    <th class="pdf-center">Contracted</th>
+                    <th class="pdf-center">Worked</th>
+                    <th class="pdf-center">Holiday</th>
+                    <th class="pdf-left">Pay</th>
+                    <th class="pdf-right">Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {$rowsHtml}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="5"><span class="total-title">{$monthTitle} totals</span></td>
+                    <td class="pdf-center"><span class="total-label">Worked</span><span class="total-value">{$workedTotal}</span></td>
+                    <td class="pdf-center"><span class="total-label">Holiday</span><span class="total-value">{$holidayTotal}</span></td>
+                    <td colspan="2" class="pdf-right"><span class="total-label">Gross Pay</span><span class="total-value total-pay">{$monthTotalPay}</span></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
-                $PDFHTML .= '<footer>';
-                    $PDFHTML .= '<table style="width: 100%; border: none; margin: 0; vertical-align: middle !important; 
-                                font-size: 8pt; color: #000000; font-weight: bold; font-style: italic;border-spacing: 0;border-collapse: collapse;">';
-                        if(isset($LetterFooter->current_file_name) && !empty($LetterFooter->current_file_name) && Storage::disk('local')->exists('public/letterheaderfooter/footer/'.$LetterFooter->current_file_name)):
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="footerPartners" style="text-align: center; vertical-align: middle; padding-bottom: 5px;">';
-                                    $PDFHTML .= '<img style=" max-width: 100%; height: auto;" src="'.Storage::disk('local')->url('public/letterheaderfooter/footer/'.$LetterFooter->current_file_name).'" alt="'.$LetterFooter->name.'"/>';
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-                        endif;
-
-                        if(!empty($companyReg) && isset($companyReg->value) && !empty($companyReg->value)):
-                        $PDFHTML .= '<tr class="regInfoRow">';
-                            $PDFHTML .= '<td class="text-center" style="padding-top: 10px;">';
-                                $PDFHTML .= $companyReg->value;
-                            $PDFHTML .= '</td>';
-                        $PDFHTML .= '</tr>';
-                        endif;
-                    $PDFHTML .= '</table>';
-                $PDFHTML .= '</footer>';
-
-                /*PDF BODY START*/
-                $PDFHTML .= '<div class="bodyContainer">';
-                    $PDFHTML .= '<table class="mb-15" style="width: 100%;">';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td><span class="tableTitle">'.$employee->full_name.'</span></td>';
-                            $PDFHTML .= '<td class="text-right"><span class="tableTitle">'.date('F Y', strtotime($the_date)).'</span></td>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</table>';
-                    $PDFHTML .= '<table class="table table-sm table-bordered attendanceDetailsTable">';
-                        $PDFHTML .= '<thead>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<th>Date</th>';
-                                $PDFHTML .= '<th>Contracted Hour</th>';
-                                $PDFHTML .= '<th>Status</th>';
-                                $PDFHTML .= '<th>Rate</th>';
-                                $PDFHTML .= '<th>Working Hour</th>';
-                                $PDFHTML .= '<th>Holiday Hour</th>';
-                                $PDFHTML .= '<th>Pay</th>';
-                                $PDFHTML .= '<th>Clock In - Out</th>';
-                                $PDFHTML .= '<th>Break</th>';
-                                $PDFHTML .= '<th>Note</th>';
-                            $PDFHTML .= '</tr>';
-                        $PDFHTML .= '</thead>';
-                        $PDFHTML .= '<tbody>';
-                            $PDFHTML .= (isset($res['html']) && !empty($res['html']) ? $res['html'] : '');
-                        $PDFHTML .= '</tbody>';
-                        $PDFHTML .= '<tfoot>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<th colspan="4"></th>';
-                                $PDFHTML .= '<th>'.(isset($res['workingHourTotal']) ? $res['workingHourTotal'] : '00:00').'</th>';
-                                $PDFHTML .= '<th>'.(isset($res['holidayHourTotal']) ? $res['holidayHourTotal'] : '00:00').'</th>';
-                                $PDFHTML .= '<th>'.(isset($res['monthTotalPay']) ? $res['monthTotalPay'] : '£0.00').'</th>';
-                                $PDFHTML .= '<th colspan="3"></th>';
-                            $PDFHTML .= '</tr>';
-                        $PDFHTML .= '</tfoot>';
-                    $PDFHTML .= '</table>';
-                $PDFHTML .= '</div>';
-                /*PDF BODY END*/
-
-            $PDFHTML .= '</body>';
-        $PDFHTML .= '</html>';
+    <div class="report-footer">{$companyRegText}</div>
+</body>
+</html>
+HTML;
 
         $fileName = str_replace(' ', '_', $PDF_title).'.pdf';
-        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
+        $pdf = Pdf::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])
             ->setPaper('a4', 'landscape')//portrait
             ->setWarnings(false);
         return $pdf->download($fileName);
