@@ -4,13 +4,172 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 import IMask from 'imask';
 
-import dayjs from "dayjs";
 import Litepicker from "litepicker";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const queryDateInput = document.getElementById('queryDate');
+    const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
+
+    const parseMonthValue = function(value) {
+        let cleanValue = (value || '').toString().trim();
+        let numericMatch = cleanValue.match(/^(\d{1,2})-(\d{4})$/);
+
+        if (numericMatch) {
+            let month = Math.min(Math.max(parseInt(numericMatch[1], 10), 1), 12);
+
+            return {
+                month: month - 1,
+                year: parseInt(numericMatch[2], 10),
+            };
+        }
+
+        let longMonthMatch = cleanValue.match(/^([A-Za-z]+)\s+(\d{4})$/);
+        if (longMonthMatch) {
+            let month = monthNames.findIndex(function(monthName) {
+                return monthName.toLowerCase() === longMonthMatch[1].toLowerCase();
+            });
+
+            if (month >= 0) {
+                return {
+                    month: month,
+                    year: parseInt(longMonthMatch[2], 10),
+                };
+            }
+        }
+
+        let fallbackDate = new Date();
+
+        return {
+            month: fallbackDate.getMonth(),
+            year: fallbackDate.getFullYear(),
+        };
+    };
+
+    const formatDisplayMonth = function(dateParts) {
+        return monthNames[dateParts.month] + ' ' + dateParts.year;
+    };
+
+    const formatPayloadMonth = function(dateParts) {
+        return String(dateParts.month + 1).padStart(2, '0') + '-' + dateParts.year;
+    };
+
+    const getSelectedMonthParts = function(picker) {
+        let selectedDate = picker.getDate();
+
+        if (selectedDate) {
+            return {
+                month: selectedDate.getMonth(),
+                year: selectedDate.getFullYear(),
+            };
+        }
+
+        return parseMonthValue(queryDateInput.value);
+    };
+
+    const getQueryMonthParam = function() {
+        let dateParts = parseMonthValue(queryDateInput.value);
+
+        queryDateInput.dataset.org = formatPayloadMonth(dateParts);
+
+        return queryDateInput.dataset.org;
+    };
+
+    const renderQueryMonthCalendar = function(picker) {
+        if (!picker.ui) {
+            return;
+        }
+
+        picker.ui.classList.add('attendance-month-litepicker');
+
+        let monthItem = picker.ui.querySelector('.month-item');
+        if (!monthItem) {
+            return;
+        }
+
+        let weekdaysRow = monthItem.querySelector('.month-item-weekdays-row');
+        let daysGrid = monthItem.querySelector('.container__days');
+
+        if (weekdaysRow) {
+            weekdaysRow.style.display = 'none';
+        }
+        if (daysGrid) {
+            daysGrid.style.display = 'none';
+        }
+
+        let calendarDate = picker.calendars && picker.calendars[0]
+            ? picker.calendars[0]
+            : null;
+        let activeYear = calendarDate ? calendarDate.getFullYear() : getSelectedMonthParts(picker).year;
+        let selectedMonth = getSelectedMonthParts(picker);
+        let monthGrid = monthItem.querySelector('.attendance-month-grid');
+
+        if (!monthGrid) {
+            monthGrid = document.createElement('div');
+            monthGrid.className = 'attendance-month-grid';
+            monthItem.appendChild(monthGrid);
+        }
+
+        monthGrid.innerHTML = '';
+
+        monthNames.forEach(function(monthName, monthIndex) {
+            let monthButton = document.createElement('button');
+            monthButton.type = 'button';
+            monthButton.className = 'attendance-month-option';
+            monthButton.textContent = monthName;
+
+            if (selectedMonth.month === monthIndex && selectedMonth.year === activeYear) {
+                monthButton.classList.add('is-active');
+            }
+
+            monthButton.addEventListener('click', function() {
+                let date = new Date(activeYear, monthIndex, 1);
+                picker.setDate(date);
+                queryDateInput.value = formatDisplayMonth({
+                    month: monthIndex,
+                    year: activeYear,
+                });
+                queryDateInput.dataset.org = formatPayloadMonth({
+                    month: monthIndex,
+                    year: activeYear,
+                });
+                picker.hide();
+            });
+
+            monthGrid.appendChild(monthButton);
+        });
+
+        let yearField = picker.ui.querySelector('.month-item-year');
+        if (yearField && !yearField.dataset.attendanceMonthBound) {
+            yearField.dataset.attendanceMonthBound = 'true';
+            yearField.addEventListener('change', function() {
+                let year = parseInt(yearField.value, 10);
+                let currentMonth = picker.calendars && picker.calendars[0]
+                    ? picker.calendars[0].getMonth()
+                    : getSelectedMonthParts(picker).month;
+
+                if (!Number.isNaN(year)) {
+                    picker.gotoDate(new Date(year, currentMonth, 1));
+                    renderQueryMonthCalendar(picker);
+                }
+            });
+        }
+    };
 
     const confirmModalEl = document.getElementById('confirmModal')
     confirmModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -25,29 +184,39 @@ import Litepicker from "litepicker";
         numberOfColumns: 1,
         numberOfMonths: 1,
         showWeekNumbers: false,
-        format: "MM-YYYY",
+        format: "MMMM YYYY",
+        startDate: queryDateInput.dataset.date,
+        switchingMonths: 12,
         dropdowns: {
             minYear: 1900,
             maxYear: 2050,
-            months: true,
+            months: false,
             years: true,
+        },
+        setup: function(picker) {
+            picker.on('show', function() {
+                renderQueryMonthCalendar(picker);
+            });
+            picker.on('change:month', function() {
+                renderQueryMonthCalendar(picker);
+            });
         },
     };
 
     const queryDate = new Litepicker({
-        element: document.getElementById('queryDate'),
+        element: queryDateInput,
         ...dateOption
     });
 
     $('#generateReport').on('click', function(e){
         e.preventDefault();
-        var $theBtn = $(this);
-        var $theSiblings = $('#filterMonthAtten');
-        var $theDate = $('#filterMonthAttenForm #queryDate');
-
-        var theDate = $theDate.val();
+        var theDate = getQueryMonthParam();
         window.location.href = route('hr.portal.reports.attendance', theDate);
     })
+
+    $('#filterMonthAtten').on('click', function() {
+        getQueryMonthParam();
+    });
 
     $('#filterMonthAttenForm').on('submit', function(e){
         e.preventDefault();
@@ -58,6 +227,7 @@ import Litepicker from "litepicker";
         document.querySelector('.leaveTableLoader').classList.add('active');
 
         let form_data = new FormData(form);
+        form_data.set('queryDate', getQueryMonthParam());
         axios({
             method: "POST",
             url: route('hr.attendance.sync.listhtml'),

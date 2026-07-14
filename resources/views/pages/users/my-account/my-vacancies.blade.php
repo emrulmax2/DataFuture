@@ -1,69 +1,66 @@
-@extends('../layout/' . $layout)
+@extends('../layout/my-account')
 
 @section('subhead')
     <title>{{ $title }}- </title>
 @endsection
 
+@section('body_class', 'my-account-vacancies-body')
+
 @section('subcontent')
-
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">My Holidays</strong></u></h2>
-    </div>
-
-    <!-- BEGIN: Profile Info -->
     @include('pages.users.my-account.show-info')
-    <!-- END: Profile Info -->
- 
-    <div class="intro-y box lg:mt-5">
-        <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-            <h2 class="font-medium text-base mr-auto">Vacancies</h2>
-            {{--<button data-tw-toggle="modal" data-tw-target="#addGroupModal" type="button" class="btn btn-primary shadow-md ml-auto">Add Group</button>--}}
-        </div>
-        <div class="p-5">
-            {{--<div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+
+    <section class="myhr-groups myhr-vacancies" data-screen-label="My Vacancies">
+        <header class="myhr-groups__header">
+            <span class="myhr-groups__header-icon">
+                <i data-lucide="briefcase"></i>
+            </span>
+            <h2>My Vacancies</h2>
+        </header>
+
+        <div class="myhr-groups__toolbar">
+            <form id="tabulatorFilterForm" class="myhr-groups-filter myhr-vacancies-filter">
+                <span class="myhr-groups-filter__label">Query</span>
+                <label class="myhr-groups-search">
+                    <i data-lucide="search"></i>
+                    <input id="query" name="query" type="text" placeholder="Search vacancies...">
+                </label>
+                <button id="tabulator-html-filter-go" type="button" class="myhr-groups-btn myhr-groups-btn--filter">Go</button>
+                <button id="tabulator-html-filter-reset" type="button" class="myhr-groups-btn myhr-groups-btn--muted">Reset</button>
+            </form>
+
+            <div class="myhr-groups-actions">
+                <button id="tabulator-print" type="button" class="myhr-groups-btn myhr-groups-btn--outline">
+                    <i data-lucide="printer"></i>
+                    Print
+                </button>
+                <div class="dropdown">
+                    <button class="dropdown-toggle myhr-groups-btn myhr-groups-btn--outline" aria-expanded="false" data-tw-toggle="dropdown" type="button">
+                        <i data-lucide="download"></i>
+                        Export
+                        <i data-lucide="chevron-down" class="myhr-groups-btn__caret"></i>
                     </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="dropdown-menu w-40">
+                        <ul class="dropdown-content">
+                            <li>
+                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                </a>
+                            </li>
+                            <li>
+                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Export XLSX
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>--}}
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="myVacancyListTable" class="table-report table-report--tabulator"></div>
             </div>
         </div>
-    </div>
+
+        <div class="myhr-groups__table-wrap">
+            <div id="myVacancyListTable" class="myhr-groups-table table-report table-report--tabulator"></div>
+        </div>
+    </section>
 
 
     <!-- BEGIN: Warning Modal Content -->

@@ -25,6 +25,8 @@ use Illuminate\Support\Carbon;
 
 class MyStaffController extends Controller
 {
+    private const STAFF_CARD_PAGE_SIZE = 5;
+
     public function index(){
         $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
         $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
@@ -32,9 +34,11 @@ class MyStaffController extends Controller
         $userData = User::find($employee->user_id);
         $employment = Employment::where("employee_id", $employeeId)->get()->first();
 
-        $hour_auth_ids = EmployeeHourAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
-        $holiday_auth_ids = EmployeeHolidayAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
-        $auth_emp_ids = array_unique(array_merge($hour_auth_ids, $holiday_auth_ids));
+        $auth_emp_ids = $this->authorisedStaffEmployeeIds($employee);
+        $pendingLeavesQuery = $this->myStaffPendingLeavesQuery($auth_emp_ids);
+        $holidayTodayQuery = $this->myStaffHolidayTodayQuery($auth_emp_ids);
+        $appraisalQuery = $this->myStaffAppraisalQuery($auth_emp_ids, $expireDate);
+        $absentToday = $this->getAbsentEmployees(date('Y-m-d'), $auth_emp_ids);
 
         return view('pages.users.my-account.my-staff',[
             'title' => 'Welcome - London Churchill College',
@@ -42,20 +46,139 @@ class MyStaffController extends Controller
             'user' => $userData,
             'employee' => $employee,
             'employment' => $employment,
-            'pendingLeaves' => EmployeeLeave::whereIn('employee_id', $auth_emp_ids)->where('status', 'Pending')->orderBy('id', 'ASC')->get(),
-            'absentToday' => $this->getAbsentEmployees(date('Y-m-d'), $auth_emp_ids),
-            'holidays' => EmployeeLeaveDay::where('leave_date', date('Y-m-d'))->where('status', 'Active')->whereHas('leave', function($query) use($auth_emp_ids){
-                              $query->whereIn('employee_id', $auth_emp_ids)->where('status', 'Approved')->where('leave_type', 1);
-                          })->get(),
-            'appraisal' => EmployeeAppraisal::whereIn('employee_id', $auth_emp_ids)->where('due_on', '<=', $expireDate)->whereNull('completed_on')
-                          ->whereHas('employee', function($q){
-                               $q->where('status', 1);
-                          })->orderBy('due_on', 'ASC')->get(),
+            'staffCardPageSize' => self::STAFF_CARD_PAGE_SIZE,
+            'pendingTotal' => (clone $pendingLeavesQuery)->count(),
+            'pendingLeaves' => $pendingLeavesQuery->take(self::STAFF_CARD_PAGE_SIZE)->get(),
+            'absentTotal' => count($absentToday),
+            'absentToday' => array_slice($absentToday, 0, self::STAFF_CARD_PAGE_SIZE, true),
+            'holidayTotal' => (clone $holidayTodayQuery)->count(),
+            'holidays' => $holidayTodayQuery->take(self::STAFF_CARD_PAGE_SIZE)->get(),
+            'appraisalTotal' => (clone $appraisalQuery)->count(),
+            'appraisal' => $appraisalQuery->take(self::STAFF_CARD_PAGE_SIZE)->get(),
             'vacanties' => HrVacancy::where('active', 1)->get()->count()
         ]);
     }
 
-    public function getAbsentEmployees($date = '', $auth_emp_ids = [0]){
+    private function authorisedStaffEmployeeIds($employee = null){
+        $employee = $employee ?: Employee::where('user_id', auth()->user()->id)->get()->first();
+        if(!$employee):
+            return [];
+        endif;
+
+        $hour_auth_ids = EmployeeHourAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+        $holiday_auth_ids = EmployeeHolidayAuthorisedBy::where('user_id', $employee->user_id)->pluck('employee_id')->unique()->toArray();
+
+        return array_values(array_unique(array_merge($hour_auth_ids, $holiday_auth_ids)));
+    }
+
+    private function myStaffPendingLeavesQuery($auth_emp_ids){
+        return EmployeeLeave::whereIn('employee_id', $auth_emp_ids)
+            ->where('status', 'Pending')
+            ->orderBy('id', 'ASC');
+    }
+
+    private function myStaffHolidayTodayQuery($auth_emp_ids){
+        return EmployeeLeaveDay::where('leave_date', date('Y-m-d'))
+            ->where('status', 'Active')
+            ->whereHas('leave', function($query) use($auth_emp_ids){
+                $query->whereIn('employee_id', $auth_emp_ids)->where('status', 'Approved')->where('leave_type', 1);
+            })
+            ->orderBy('id', 'DESC');
+    }
+
+    private function myStaffAppraisalQuery($auth_emp_ids, $expireDate){
+        return EmployeeAppraisal::whereIn('employee_id', $auth_emp_ids)
+            ->where('due_on', '<=', $expireDate)
+            ->whereNull('completed_on')
+            ->whereHas('employee', function($q){
+                $q->where('status', 1);
+            })
+            ->orderBy('due_on', 'ASC');
+    }
+
+    private function requestedStaffPage(Request $request){
+        $page = (int) $request->query('page', 1);
+        return $page > 0 ? $page : 1;
+    }
+
+    public function myStaffPendingLeaveRows(Request $request){
+        $auth_emp_ids = $this->authorisedStaffEmployeeIds();
+        $page = $this->requestedStaffPage($request);
+        $perPage = self::STAFF_CARD_PAGE_SIZE;
+        $offset = ($page - 1) * $perPage;
+        $base = $this->myStaffPendingLeavesQuery($auth_emp_ids);
+        $total = (clone $base)->count();
+        $pendingLeaves = $base->skip($offset)->take($perPage)->get();
+
+        return response()->json([
+            'html' => view('pages.users.my-account.partials.staff-pending-rows', [
+                'pendingLeaves' => $pendingLeaves,
+                'showEmpty' => false,
+            ])->render(),
+            'page' => $page,
+            'hasMore' => ($offset + $pendingLeaves->count()) < $total,
+        ]);
+    }
+
+    public function myStaffAbsentRows(Request $request){
+        $auth_emp_ids = $this->authorisedStaffEmployeeIds();
+        $page = $this->requestedStaffPage($request);
+        $perPage = self::STAFF_CARD_PAGE_SIZE;
+        $offset = ($page - 1) * $perPage;
+        $all = $this->getAbsentEmployees(date('Y-m-d'), $auth_emp_ids);
+        $total = count($all);
+        $absentToday = array_slice($all, $offset, $perPage, true);
+
+        return response()->json([
+            'html' => view('pages.users.my-account.partials.staff-absent-rows', [
+                'absentToday' => $absentToday,
+                'showEmpty' => false,
+            ])->render(),
+            'page' => $page,
+            'hasMore' => ($offset + count($absentToday)) < $total,
+        ]);
+    }
+
+    public function myStaffHolidayRows(Request $request){
+        $auth_emp_ids = $this->authorisedStaffEmployeeIds();
+        $page = $this->requestedStaffPage($request);
+        $perPage = self::STAFF_CARD_PAGE_SIZE;
+        $offset = ($page - 1) * $perPage;
+        $base = $this->myStaffHolidayTodayQuery($auth_emp_ids);
+        $total = (clone $base)->count();
+        $holidays = $base->skip($offset)->take($perPage)->get();
+
+        return response()->json([
+            'html' => view('pages.users.my-account.partials.staff-holiday-rows', [
+                'holidays' => $holidays,
+                'showEmpty' => false,
+            ])->render(),
+            'page' => $page,
+            'hasMore' => ($offset + $holidays->count()) < $total,
+        ]);
+    }
+
+    public function myStaffAppraisalRows(Request $request){
+        $auth_emp_ids = $this->authorisedStaffEmployeeIds();
+        $page = $this->requestedStaffPage($request);
+        $perPage = self::STAFF_CARD_PAGE_SIZE;
+        $offset = ($page - 1) * $perPage;
+        $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
+        $base = $this->myStaffAppraisalQuery($auth_emp_ids, $expireDate);
+        $total = (clone $base)->count();
+        $appraisal = $base->skip($offset)->take($perPage)->get();
+
+        return response()->json([
+            'html' => view('pages.users.my-account.partials.staff-appraisal-rows', [
+                'appraisal' => $appraisal,
+                'showEmpty' => false,
+            ])->render(),
+            'page' => $page,
+            'hasMore' => ($offset + $appraisal->count()) < $total,
+        ]);
+    }
+
+    public function getAbsentEmployees($date = '', $auth_emp_ids = [0], $limit = null){
         $theDate = (empty($date) ? date('Y-m-d') : $date);
         $theDay = date('D', strtotime($theDate));
         $theDayNum = date('N', strtotime($theDate));
@@ -65,7 +188,7 @@ class MyStaffController extends Controller
         $row = 0;
         $res = [];
         foreach($employees as $employee):
-            if($row > 5): 
+            if($limit !== null && $row >= $limit): 
                 break; 
             endif;
 
@@ -93,6 +216,9 @@ class MyStaffController extends Controller
                         $res[$employee_id]['photo_url'] = $employee->photo_url;
                         $res[$employee_id]['full_name'] = $employee->full_name;
                         $res[$employee_id]['date'] =  date('jS M, Y', strtotime($theDate));
+                        $res[$employee_id]['the_date'] =  date('Y-m-d', strtotime($theDate));
+                        $res[$employee_id]['start'] =  $patternDay->start;
+                        $res[$employee_id]['end'] =  $patternDay->end;
                         $res[$employee_id]['hourMinute'] =  $patternDay->total;
                         $res[$employee_id]['minute'] =  $this->convertStringToMinute($patternDay->total);
 

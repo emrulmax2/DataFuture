@@ -5,11 +5,16 @@ import TomSelect from "tom-select";
 
 ("use strict");
 var myGroupListTable = (function () {
+    var tableContent = null;
     var _tableGen = function () {
+        if (tableContent) {
+            tableContent.destroy();
+        }
+
         // Setup Tabulator
         let status = $("#status").val() != "" ? $("#status").val() : "";
 
-        let tableContent = new Tabulator("#myGroupListTable", {
+        tableContent = new Tabulator("#myGroupListTable", {
             ajaxURL: route("user.account.group.list"),
             ajaxParams: { status: status },
             ajaxFiltering: true,
@@ -18,7 +23,8 @@ var myGroupListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, true],
+            paginationCounter: "rows",
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -38,7 +44,8 @@ var myGroupListTable = (function () {
                     field: "type",
                     headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return (cell.getData().type == 1 ? '<span class="btn btn-danger text-white w-auto px-2 py-0 rounded-0">Private</span>' : '<span class="btn btn-success text-white w-auto px-2 py-0 rounded-0">Public</span>');
+                        var label = cell.getData().type == 1 ? "Private" : "Public";
+                        return '<span class="myhr-groups-type-pill">'+label+'</span>';
                     }
                 },
                 {
@@ -48,7 +55,7 @@ var myGroupListTable = (function () {
                     hozAlign: "center",
                     headerHozAlign: "center",
                     formatter(cell, formatterParams){
-                        return '<a data-id="'+cell.getData().id +'" href="javascript:void(0);" class="viewGroupMembers font-medium underline text-primary">'+cell.getData().members+'</a>';
+                        return '<a data-id="'+cell.getData().id +'" href="javascript:void(0);" class="viewGroupMembers myhr-groups-member-count">'+cell.getData().members+'</a>';
                     }
                 },
                 {
@@ -62,10 +69,10 @@ var myGroupListTable = (function () {
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editGroupModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editGroupModal" type="button" class="edit_btn myhr-groups-action-btn myhr-groups-action-btn--edit" title="Edit"><i data-lucide="pencil" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="delete_btn myhr-groups-action-btn myhr-groups-action-btn--delete" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" class="restore_btn myhr-groups-action-btn myhr-groups-action-btn--restore" title="Restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
                         
                         return btns;
@@ -98,19 +105,19 @@ var myGroupListTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-TITLE").on("click", function (event) {
+        $("#tabulator-export-csv").off("click.myGroupsExport").on("click.myGroupsExport", function (event) {
             tableContent.download("csv", "data.csv");
         });
 
-        $("#tabulator-export-xlsx-TITLE").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.myGroupsExport").on("click.myGroupsExport", function (event) {
             window.XLSX = xlsx;
             tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Title Details",
+                sheetName: "My Groups",
             });
         });
 
         // Print
-        $("#tabulator-print-TITLE").on("click", function (event) {
+        $("#tabulator-print").off("click.myGroupsPrint").on("click.myGroupsPrint", function (event) {
             tableContent.print();
         });
     };
@@ -149,6 +156,7 @@ var myGroupListTable = (function () {
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const addGroupModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addGroupModal"));
     const editGroupModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editGroupModal"));
+    const groupMembersModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#groupMembersModal"));
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
         if($(this).attr('data-action') == 'RELOAD'){
@@ -166,6 +174,7 @@ var myGroupListTable = (function () {
                 title: "Remove this item",
             },
         },
+        dropdownParent: 'body',
         placeholder: 'Search Here...',
         //persist: false,
         create: true,
@@ -195,6 +204,40 @@ var myGroupListTable = (function () {
         $('#editGroupModal #edit_group_type_2').prop('checked', false);
 
         edit_employee_ids.clear(true);
+    });
+
+    $("#myGroupListTable").on("click", ".viewGroupMembers", function (e) {
+        e.preventDefault();
+        var rowId = $(this).attr("data-id");
+        var $modalBody = $("#groupMembersModal .modal-body");
+
+        $modalBody.html(
+            '<div class="myhr-group-members-loading"><svg width="28" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="#0f7b76"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".25" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg></div>'
+        );
+        groupMembersModal.show();
+
+        axios({
+            method: "post",
+            url: route("user.account.group.members"),
+            data: { row_id: rowId },
+            headers: {
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
+            },
+        }).then((response) => {
+            $modalBody.html(response.data.html || "");
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        }).catch(() => {
+            $modalBody.html('<div class="myhr-group-members__empty"><i data-lucide="alert-octagon"></i><p>Unable to load group members.</p></div>');
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+        });
     });
 
     $('#addGroupForm').on('submit', function(e){
@@ -236,8 +279,8 @@ var myGroupListTable = (function () {
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#createGroup .${key}`).addClass('border-danger');
-                        $(`#createGroup  .error-${key}`).html(val);
+                        $form.find(`[name="${key}"], [name="${key}[]"]`).addClass('border-danger');
+                        $form.find(`.error-${key}`).html(val);
                     }
                 } else {
                     console.log('error');
@@ -317,13 +360,13 @@ var myGroupListTable = (function () {
             }
             myGroupListTable.init();
         }).catch(error => {
-            document.querySelector('#editGroupForm').removeAttribute('disabled');
-            document.querySelector("#editGroupForm svg").style.cssText = "display: none;";
+            document.querySelector('#updateGroup').removeAttribute('disabled');
+            document.querySelector("#updateGroup svg").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#updateGroup .${key}`).addClass('border-danger');
-                        $(`#updateGroup  .error-${key}`).html(val);
+                        $form.find(`[name="${key}"], [name="${key}[]"]`).addClass('border-danger');
+                        $form.find(`.error-${key}`).html(val);
                     }
                 } else {
                     console.log('error');

@@ -59,26 +59,35 @@ class TopMenu
                 ];
             endif;
             if($remoteAccess && isset($priv['student_manage']) && $priv['student_manage'] == 1):
+                $studentSubMenu = [
+                    'admission' => [
+                        'route_name' => 'admission',
+                        'params' => [],
+                        'title' => 'Admission'
+                    ],
+                ];
+
+                // The Live Student privilege used to hide only the dashboard tile,
+                // leaving this menu entry (and the URL behind it) open to anyone
+                // with student_manage. It now gates the entry too.
+                if(isset($priv['live']) && $priv['live'] == 1):
+                    $studentSubMenu['student'] = [
+                        'route_name' => 'student',
+                        'params' => [],
+                        'title' => 'Live'
+                    ];
+                endif;
+
+                $studentSubMenu['agent_management'] = [
+                    'route_name' => 'agent.management',
+                    'params' => [],
+                    'title' => 'Agent Management'
+                ];
+
                 $menu['students'] = [
                     'icon' => 'users',
                     'title' => 'Student Management',
-                    'sub_menu' => [
-                        'admission' => [
-                            'route_name' => 'admission',
-                            'params' => [],
-                            'title' => 'Admission'
-                        ],
-                        'student' => [
-                            'route_name' => 'student',
-                            'params' => [],
-                            'title' => 'Live'
-                        ],
-                        'agent_management' => [
-                            'route_name' => 'agent.management',
-                            'params' => [],
-                            'title' => 'Agent Management'
-                        ]
-                    ]
+                    'sub_menu' => $studentSubMenu
                 ];
             endif;
             if($remoteAccess && isset($priv['settings']) && $priv['settings'] == 1):

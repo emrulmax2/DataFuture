@@ -228,7 +228,7 @@ use App\Http\Controllers\Forms\EmployeeFormController;
 use App\Http\Controllers\HR\EmployeeArchiveController;
 use App\Http\Controllers\HR\EmployeeAttendancePunchController;
 use App\Http\Controllers\HR\EmployeeEducationalQualificationController;
-//use App\Http\Controllers\HR\EmployeePrivilegeNewController;
+use App\Http\Controllers\HR\EmployeePrivilegeNewController;
 use App\Http\Controllers\HR\EmployeeTrainingController;
 use App\Http\Controllers\HR\portal\reports\DataReportController;
 use App\Http\Controllers\HR\portal\VacancyController;
@@ -296,7 +296,7 @@ use App\Http\Controllers\Settings\AccMethodController;
 use App\Http\Controllers\Settings\AccSettingController;
 use App\Http\Controllers\Settings\CommunicationTemplateController;
 use App\Http\Controllers\Settings\DocumentRoleAndPermissionController;
-//use App\Http\Controllers\Settings\PermissionSettingController;
+use App\Http\Controllers\Settings\PermissionSettingController;
 use App\Http\Controllers\Settings\StudentFlagController;
 use App\Http\Controllers\Settings\Studentoptions\CareleaverController;
 use App\Http\Controllers\Settings\Studentoptions\DisableAllowanceController;
@@ -1625,11 +1625,12 @@ Route::middleware('auth')->group(function() {
         Route::post('employee-profile/store-privilege', 'store')->name('employee.privilege.store');
     });
 
-    // Route::controller(EmployeePrivilegeNewController::class)->group(function(){
-    //     Route::get('employee-profile/privilege-new/{id}', 'index')->name('employee.privilege.new'); 
-    //     Route::post('employee-profile/privilege-new/template', 'getDepartmentPermissionTemplate')->name('employee.privilege.new.template');
-    //     Route::post('employee-profile/store-privilege-new', 'store')->name('employee.privilege.new.store');
-    // });
+    Route::controller(EmployeePrivilegeNewController::class)->group(function(){
+        Route::get('employee-profile/privilege-new/{id}', 'index')->name('employee.privilege.new');
+        Route::post('employee-profile/privilege-new/template', 'getDepartmentPermissionTemplate')->name('employee.privilege.new.template');
+        Route::post('employee-profile/store-privilege-new', 'store')->name('employee.privilege.new.store');
+        Route::post('employee-profile/privilege-new/reset', 'reset')->name('employee.privilege.new.reset');
+    });
 
     Route::controller(EmployeeAttendanceController::class)->group(function(){
         Route::get('hr/attendance', 'index')->name('hr.attendance');
@@ -1981,10 +1982,10 @@ Route::middleware('auth')->group(function() {
         Route::post('site-settings/department/restore/{id}', 'restore')->name('department.restore');
     });
 
-    // Route::controller(PermissionSettingController::class)->group(function() {
-    //     Route::get('site-settings/permissions', 'index')->name('permissions'); 
-    //     Route::post('site-settings/permissions/store', 'store')->name('permissions.store'); 
-    // });
+    Route::controller(PermissionSettingController::class)->group(function() {
+        Route::get('site-settings/permissions', 'index')->name('permissions');
+        Route::post('site-settings/permissions/store', 'store')->name('permissions.store');
+    });
 
 
     Route::controller(PermissionCategoryController::class)->group(function() {
@@ -3320,6 +3321,10 @@ Route::middleware('auth')->group(function() {
     Route::controller(MyStaffController::class)->group(function(){
         Route::get('my-account/staffs', 'index')->name('user.account.staff'); 
         Route::post('my-account/staffs/update-leave', 'staffsUpdateLeave')->name('user.account.staff.update.leave'); 
+        Route::get('my-account/staffs/pending-leave-rows', 'myStaffPendingLeaveRows')->name('user.account.staff.pending.leave.rows');
+        Route::get('my-account/staffs/absent-rows', 'myStaffAbsentRows')->name('user.account.staff.absent.rows');
+        Route::get('my-account/staffs/holiday-rows', 'myStaffHolidayRows')->name('user.account.staff.holiday.rows');
+        Route::get('my-account/staffs/appraisal-rows', 'myStaffAppraisalRows')->name('user.account.staff.appraisal.rows');
         Route::get('my-account/staffs/team-holiday', 'myTeamHoliday')->name('user.account.staff.team.holiday'); 
         Route::post('my-account/staffs/ajax-team-holiday', 'ajaxTeamHoliday')->name('user.account.staff.team.holiday.ajax'); 
     });
@@ -3481,6 +3486,7 @@ Route::middleware('auth')->group(function() {
         Route::get('my-account/groups', 'index')->name('user.account.group'); 
         Route::post('my-account/groups/store', 'store')->name('user.account.group.store'); 
         Route::get('my-account/groups/list', 'list')->name('user.account.group.list'); 
+        Route::post('my-account/groups/members', 'members')->name('user.account.group.members');
         Route::post('my-account/groups/edit', 'edit')->name('user.account.group.edit'); 
         Route::post('my-account/groups/update', 'update')->name('user.account.group.update'); 
 

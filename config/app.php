@@ -203,6 +203,8 @@ return [
         //Impersonate
         Lab404\Impersonate\ImpersonateServiceProvider::class,
 
+        App\Providers\RolePermissionServiceProvider::class,
+
     ],
 
     /*

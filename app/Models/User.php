@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Lab404\Impersonate\Models\Impersonate;
+use App\Services\RemoteAccessService;
+use App\Support\LegacyPrivilegeMap;
 
 class User extends Authenticatable
 {
@@ -97,47 +99,196 @@ class User extends Authenticatable
         return $this->hasOne(Employee::class, 'user_id', 'id')->withTrashed()->latestOfMany();
     }
     
+    /**
+     * Per-request caches. priv() is read dozens of times per page (90+ times for
+     * access_account_type alone), and every call used to issue its own query.
+     */
+    private ?array $privCache = null;
+    private ?array $permsCache = null;
+
+    /**
+     * The employee's permissions from the new system, keyed by the new flat key.
+     */
+    public function perms(): array
+    {
+        if ($this->permsCache === null) {
+            $this->permsCache = EmployeePermission::where('user_id', $this->id)
+                ->pluck('value', 'key')
+                ->toArray();
+        }
+
+        return $this->permsCache;
+    }
+
+    public function hasPerm(string $key): bool
+    {
+        $value = $this->perms()[$key] ?? null;
+
+        return !empty($value) && $value !== '0';
+    }
+
+    public function permValue(string $key): ?string
+    {
+        $value = $this->perms()[$key] ?? null;
+
+        return ($value === null || $value === '') ? null : (string) $value;
+    }
+
+    /**
+     * Flat "legacy name => access" map that the whole application gates on.
+     *
+     * Which table this reads is controlled by config('privileges.source'), so the
+     * cutover to employee_permissions is one env var and is instantly revertible.
+     * The new system is reverse-mapped back onto the legacy names, so the 60+
+     * existing priv()['x'] checks keep working untouched.
+     */
     public function priv(){
+        if ($this->privCache !== null) {
+            return $this->privCache;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return $this->privCache = $this->privForSuperAdmin();
+        }
+
+        return $this->privCache = config('privileges.source') === 'new'
+            ? $this->privFromNewSystem()
+            : $this->privFromLegacySystem();
+    }
+
+    /**
+     * Super admins are never gated: not by priv(), not by the route middleware,
+     * and not by the remote-access check. Without this, one wrong rule could lock
+     * every administrator out of the screens needed to fix that rule.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return in_array((int) $this->id, self::bypassUserIds(), true);
+    }
+
+    /**
+     * The bypass employee ids resolved to user ids, once per process.
+     *
+     * Resolving them per user would lazy-load the employee relation on every
+     * User, which is an N+1 on any page that lists users (remote_access is an
+     * appended attribute, so merely serialising a User triggers this).
+     */
+    private static ?array $bypassUserIds = null;
+
+    public static function bypassUserIds(): array
+    {
+        if (self::$bypassUserIds !== null) {
+            return self::$bypassUserIds;
+        }
+
+        $ids = array_map('intval', config('privileges.bypass_user_ids', []));
+        $employeeIds = config('privileges.bypass_employee_ids', []);
+
+        if (!empty($employeeIds)) {
+            $ids = array_merge($ids, Employee::whereIn('id', $employeeIds)
+                ->whereNotNull('user_id')
+                ->pluck('user_id')
+                ->map(fn($id) => (int) $id)
+                ->all());
+        }
+
+        return self::$bypassUserIds = array_values(array_unique($ids));
+    }
+
+    /**
+     * Every permission there is, granted.
+     *
+     * Built from the key map rather than the user's rows, so a super admin
+     * automatically holds any permission added in future.
+     */
+    private function privForSuperAdmin(): array
+    {
+        $priv = [];
+
+        foreach (array_keys(LegacyPrivilegeMap::MAP) as $categoryAndName) {
+            $priv[explode('.', $categoryAndName, 2)[1]] = '1';
+        }
+
+        // Internal links are per-link rows, so grant each one that exists.
+        foreach (InternalLink::pluck('id') as $linkId) {
+            $priv[(string) $linkId] = '1';
+        }
+
+        // Valued keys are not flags. Keep whatever the user actually has, and
+        // fall back to Admin for the accounts role rather than inventing "1"
+        // for every valued key.
+        $actual = config('privileges.source') === 'new'
+            ? $this->privFromNewSystem()
+            : $this->privFromLegacySystem();
+
+        $priv['access_account_type'] = $actual['access_account_type'] ?? '1';
+        $priv['date_range'] = $actual['date_range'] ?? '';
+
+        return $priv;
+    }
+
+    private function privFromLegacySystem(): array
+    {
         return $this->hasMany(UserPrivilege::class, 'user_id', 'id')
             ->select('access', 'name')->pluck('access', 'name')->toArray();
     }
-    
+
+    private function privFromNewSystem(): array
+    {
+        $priv = [];
+
+        foreach ($this->perms() as $key => $value) {
+            $legacyName = LegacyPrivilegeMap::toLegacyName($key);
+
+            if ($legacyName !== null) {
+                $priv[$legacyName] = $value;
+            }
+        }
+
+        return $priv;
+    }
+
+    /**
+     * Ids of the internal links this user may see.
+     *
+     * In the flat priv() map an internal link appears under its numeric link id
+     * (legacy stored the id in `name`; the new system reverse-maps
+     * internal_link_<id> back to it), and no other privilege uses a numeric key.
+     * Reading it from priv() keeps this following config('privileges.source')
+     * instead of querying user_privileges directly.
+     */
+    public function permittedInternalLinkIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->priv() as $key => $value) {
+            if (ctype_digit((string) $key) && !empty($value) && $value != '0') {
+                $ids[] = (int) $key;
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Drops the per-request caches. Only needed after writing this user's
+     * permissions and then re-reading them in the same request.
+     */
+    public function forgetPrivileges(): void
+    {
+        $this->privCache = null;
+        $this->permsCache = null;
+    }
+
+    /**
+     * May this user use the portal from where they are right now?
+     *
+     * Answers the "can they be here at all" question: either they hold remote
+     * access, or they are on a college network. Delegates to RemoteAccessService,
+     * which reads whichever privilege source is configured.
+     */
     public function getRemoteAccessAttribute(){
-        $userip = auth()->user()->last_login_ip;
-        $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
-        $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
-        $remoteAccess = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'ra_status')->get()->first();
-        if(isset($remoteAccess->access) && $remoteAccess->access == 1):
-            $range = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'in_range')->get()->first();
-            $dateRange = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'date_range')->get()->first();
-            if((isset($range->access) && $range->access == 1) && isset($dateRange->access) && !empty($dateRange->access)):
-                $dates = explode(' - ', $dateRange->access);
-                $startDate = (isset($dates[0]) && !empty($dates[0]) ? date('Y-m-d', strtotime($dates[0])) : '');
-                $endDate = (isset($dates[1]) && !empty($dates[1]) ? date('Y-m-d', strtotime($dates[1])) : '');
-                if(!empty($startDate) && !empty($endDate)):
-                    $today = date('Y-m-d');
-                    if($today >= $startDate && $today <= $endDate):
-                        return true;
-                    else:
-                        if(is_array($ips) && in_array($userip, $ips)):
-                            return true;
-                        else:
-                            return false;
-                        endif;
-                    endif;
-                else:
-                    return true;
-                endif;
-            else:
-                return true;
-            endif;
-        else:
-            if(is_array($ips) && in_array($userip, $ips)):
-                return 'true';
-            else:
-                return false;
-            endif;
-        endif;
+        return app(RemoteAccessService::class)->allows($this);
     }
 
     public function hourauth(){

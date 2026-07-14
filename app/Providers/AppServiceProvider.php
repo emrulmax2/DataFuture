@@ -32,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        // Singleton so its per-request caches (venue IPs, per-user decision) are
+        // actually reused. remote_access is an appended attribute, so it is read
+        // on every User serialisation.
+        $this->app->singleton(\App\Services\RemoteAccessService::class);
+
         $this->app->bind('user.mailer', function ($app, $parameters) {
             $smtp_host = Arr::get ($parameters, 'smtp_host');
             $smtp_port = Arr::get($parameters, 'smtp_port');
@@ -97,20 +102,13 @@ class AppServiceProvider extends ServiceProvider
             ];
 
             if (Auth::check() && isset(Auth::user()->id)) {
-                $workHome = UserPrivilege::where('user_id', Auth::user()->id)
-                    ->where('category', 'remote_access')
-                    ->where('name', 'work_home')
-                    ->first();
-
-                $desktopLogin = UserPrivilege::where('user_id', Auth::user()->id)
-                    ->where('category', 'remote_access')
-                    ->where('name', 'desktop_login')
-                    ->first();
-
+                // Read through priv() so the top menu follows
+                // config('privileges.source') rather than the legacy table.
+                $priv = Auth::user()->priv();
                 $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
 
-                $shared['home_work'] = isset($workHome->access) && (int) $workHome->access === 1;
-                $shared['desktop_login'] = isset($desktopLogin->access) && (int) $desktopLogin->access === 1;
+                $shared['home_work'] = isset($priv['work_home']) && (int) $priv['work_home'] === 1;
+                $shared['desktop_login'] = isset($priv['desktop_login']) && (int) $priv['desktop_login'] === 1;
                 $shared['home_work_statistics'] = app(AttendanceLiveStatsService::class)->getUserAttendanceLiveStatistics();
                 $shared['venue_ips'] = !empty($ips) ? $ips : $shared['venue_ips'];
             }

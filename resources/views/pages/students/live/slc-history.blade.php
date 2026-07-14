@@ -426,7 +426,7 @@
                             <div class="col-span-12 linkedRegistrationWrap bg-warning-soft rounded pb-2" style="display: none;">
                                 <div class="alert alert-warning-soft show flex items-center mb-2 text-dark" role="alert">
                                     <i data-lucide="alert-octagon" class="w-6 h-6 mr-2 text-warning"></i>
-                                    There are a Agreement found for the selected year. Do you want to linked with this registration?
+                                    An agreement already exists for the selected year. Would you like to link it to this registration?
                                 </div>
                                 <div class="flex flex-col sm:flex-row mt-2 px-5">
                                     <div class="form-check mr-4">

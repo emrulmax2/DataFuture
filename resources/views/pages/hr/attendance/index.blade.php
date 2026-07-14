@@ -28,7 +28,7 @@
             <form id="filterMonthAttenForm" class="flex flex-wrap xl:flex-nowrap gap-3 items-end mr-auto">
                 <div class="flex items-center gap-2.5">
                     <label class="text-[13px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">Query</label>
-                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" value="{{ date('m-Y') }}" name="queryDate" type="text" class="form-control h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-40" placeholder="MM-YYYY">
+                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" data-date="{{ date('Y-m-01') }}" value="{{ date('F Y') }}" name="queryDate" type="text" class="form-control h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-44" placeholder="Month YYYY">
                 </div>
                 <div class="flex gap-2">
                     <button type="submit" id="filterMonthAtten" class="btn btn-primary text-white h-[42px] px-5 text-sm syncroniseAttendance">

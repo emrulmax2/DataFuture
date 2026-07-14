@@ -1,7 +1,7 @@
 @extends('../layout/base')
 
 @section('body')
-    <body class="py-5 md:py-0">
+    <body class="py-5 md:py-0 @yield('body_class')">
         @include('../layout/components/preloader')
         @yield('content')
 

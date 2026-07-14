@@ -136,5 +136,29 @@ if($('#profileSettingsForm').length > 0){
         });
     });
 }
+
+$(document).off('click.myhrPayslip', '[data-myhr-payslip-toggle="collapse"]').on('click.myhrPayslip', '[data-myhr-payslip-toggle="collapse"]', function(e){
+    e.preventDefault();
+
+    const $button = $(this);
+    const targetSelector = $button.attr('data-myhr-payslip-target');
+    const $target = targetSelector ? $(targetSelector) : $();
+
+    if($target.length === 0){
+        return;
+    }
+
+    const shouldOpen = $button.attr('aria-expanded') !== 'true';
+    $button.toggleClass('collapsed', !shouldOpen).attr('aria-expanded', shouldOpen ? 'true' : 'false');
+    $target.stop(true, true);
+
+    if(shouldOpen){
+        $target.addClass('is-open').slideDown(180);
+    }else{
+        $target.slideUp(180, function(){
+            $target.removeClass('is-open');
+        });
+    }
+});
     
 })();

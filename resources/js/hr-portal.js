@@ -5,6 +5,18 @@ import IMask from 'imask';
 
 ("use strict");
 var employeeListTable = (function () {
+    var escapeHtml = function (value) {
+        return String(value || '').replace(/[&<>"']/g, function (char) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;',
+            }[char];
+        });
+    };
+
     var _tableGen = function () {
         
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
@@ -33,13 +45,19 @@ var employeeListTable = (function () {
                         let cleanName = name.replace(/^(Mrs|Mr|Miss|Ms|Dr)\.?\s+/i, '').trim();
                         let parts = cleanName.split(/\s+/);
                         let initials = ((parts[0] || '').charAt(0) + (parts[1] || '').charAt(0)).toUpperCase() || 'LC';
+                        let photoUrl = cell.getData().photourl || '';
+                        let hasPhoto = photoUrl != '' && !photoUrl.startsWith('data:');
                         var html = '<div class="hrd-employee-identity">';
                                 html += '<div class="hrd-table-avatar intro-x">';
-                                    html += initials;
+                                    if (hasPhoto) {
+                                        html += '<img alt="'+escapeHtml(name)+'" src="'+escapeHtml(photoUrl)+'" style="width:100%;height:100%;object-fit:cover;border-radius:9999px;">';
+                                    } else {
+                                        html += initials;
+                                    }
                                 html += '</div>';
                                 html += '<div class="hrd-table-copy">';
-                                    html += '<div class="hrd-table-name">'+name+'</div>';
-                                    html += '<div class="hrd-table-role">'+(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
+                                    html += '<div class="hrd-table-name">'+escapeHtml(name)+'</div>';
+                                    html += '<div class="hrd-table-role">'+escapeHtml(cell.getData().ejt_name != '' ? cell.getData().ejt_name : 'Unknown')+'</div>';
                                 html += '</div>';
                             html += '</div>';
                         return html;

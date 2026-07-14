@@ -25,6 +25,97 @@ import 'litepicker/dist/plugins/multiselect';
         }
     });
 
+    const initHolidayAccordions = () => {
+        const setCollapseState = ($button, $target, shouldOpen) => {
+            $button.toggleClass('collapsed', !shouldOpen).attr('aria-expanded', (shouldOpen ? 'true' : 'false'));
+            $target.stop(true, true);
+
+            if(shouldOpen){
+                $target.addClass('is-open').slideDown(220);
+            }else{
+                $target.slideUp(220, function(){
+                    $target.removeClass('is-open');
+                });
+            }
+        };
+
+        $(document).off('click.holidayAccordion', '[data-holiday-toggle="collapse"]').on('click.holidayAccordion', '[data-holiday-toggle="collapse"]', function(e){
+            e.preventDefault();
+
+            const $button = $(this);
+            const targetSelector = $button.attr('data-holiday-target');
+            const parentSelector = $button.attr('data-holiday-parent');
+            const $target = (targetSelector ? $(targetSelector) : $());
+
+            if($target.length === 0){
+                return;
+            }
+
+            const shouldOpen = ($button.attr('aria-expanded') !== 'true');
+
+            if(parentSelector){
+                const $parent = $(parentSelector);
+                if($parent.length > 0){
+                    $parent.find(`[data-holiday-parent="${parentSelector}"]`).not($button).each(function(){
+                        const $siblingButton = $(this);
+                        const siblingTargetSelector = $siblingButton.attr('data-holiday-target');
+                        const $siblingTarget = (siblingTargetSelector ? $(siblingTargetSelector) : $());
+
+                        if($siblingTarget.length > 0){
+                            setCollapseState($siblingButton, $siblingTarget, false);
+                        }
+                    });
+                }
+            }
+
+            setCollapseState($button, $target, shouldOpen);
+        });
+    };
+
+    initHolidayAccordions();
+
+    $(document).on('click', '.holiday-filter-chip', function(e){
+        e.preventDefault();
+
+        var $button = $(this);
+        var filter = $button.attr('data-filter');
+        var $patternCard = $button.closest('.ep-holiday-pattern-card');
+
+        $patternCard.find('.holiday-filter-chip').removeClass('is-active');
+        $button.addClass('is-active');
+
+        var visibleRows = 0;
+        $patternCard.find('.ep-holiday-record').each(function(){
+            var $row = $(this);
+            var matches = (filter == 'all' || $row.attr('data-status') == filter);
+            $row.toggle(matches);
+            if(matches){
+                visibleRows += 1;
+            }
+        });
+
+        $patternCard.find('.js-holiday-record-empty').toggle(visibleRows == 0);
+    });
+
+    $('.my-account-holidays').on('click', '.my-account-holiday-filter', function(e){
+        e.preventDefault();
+
+        var $button = $(this);
+        var filter = $button.attr('data-filter');
+        var $ledger = $button.closest('.my-account-holiday-ledger');
+
+        $button.addClass('is-active').siblings('.my-account-holiday-filter').removeClass('is-active');
+
+        var $rows = $ledger.find('.my-account-holiday-activity-row').not('.is-empty');
+
+        $rows.each(function(){
+            var status = $(this).attr('data-holiday-status');
+            $(this).toggle(filter == 'all' || status == filter);
+        });
+
+        $ledger.find('.my-account-holiday-activity-row.is-empty').toggle($rows.filter(':visible').length == 0);
+    });
+
     let dateOption = {
         autoApply: true,
         singleMode: true,
@@ -233,6 +324,12 @@ import 'litepicker/dist/plugins/multiselect';
                         let dataset = response.data.res;
                         
                         $('.holidayStatistics').html(dataset.statistics);
+                        createIcons({
+                            icons,
+                            "stroke-width": 1.5,
+                            nameAttr: "data-lucide",
+                        });
+
                         $('#leaveCalendar').attr('data-start', dataset.startDate);
                         $('#leaveCalendar').attr('data-end', dataset.endDate);
                         $('#leaveCalendar').attr('data-end', dataset.endDate);
@@ -244,9 +341,12 @@ import 'litepicker/dist/plugins/multiselect';
                             maxDate: (dataset.endDate != '' && dataset.endDate != 'unknown' ? dataset.endDate : ''),
                             lockDaysFilter: (day) => {
                                 let leaveDisableDays = dataset.disableDays;
+                                if(Array.isArray(leaveDisableDays)){
+                                    leaveDisableDays = leaveDisableDays.join(',');
+                                }
                                 
                                 if (leaveDisableDays != ''){
-                                    leaveDisableDays = leaveDisableDays.split(',');
+                                    leaveDisableDays = leaveDisableDays.toString().split(',');
                                     if(leaveDisableDays.length > 0){
                                         var ldd = [];
                                         for(var i = 0; i < leaveDisableDays.length; i++){
@@ -280,7 +380,7 @@ import 'litepicker/dist/plugins/multiselect';
 
     $('#employeeLeaveForm').on('keyup paste', '.leaveDatesHours', function(){
         var $theInput = $(this);
-        var $theTr = $theInput.parents('tr');
+        var $theTr = $theInput.closest('tr, .ep-leave-selected-item');
 
         var availableBalance = parseInt($('#employeeLeaveForm [name="balance_left"]').val(), 10);
         var inputDayMax = parseInt($theInput.attr('data-daymax'), 10);
@@ -310,7 +410,7 @@ import 'litepicker/dist/plugins/multiselect';
 
     $('#employeeLeaveForm').on('change', '.fractionIndicator', function(e){
         var $theCheckbox = $(this);
-        var $theTr = $theCheckbox.parents('tr');
+        var $theTr = $theCheckbox.closest('tr, .ep-leave-selected-item');
         var $theInput = $theTr.find('.leaveDatesHours');
         var maxHour = parseInt($theInput.attr('data-maxhour'), 10);
         if($theCheckbox.prop('checked')){
@@ -441,6 +541,71 @@ import 'litepicker/dist/plugins/multiselect';
         }
     });
 
+    /* My Staff dashboard infinite-scroll lists. */
+    function initMyStaffInfiniteList(listId, loaderId){
+        var $list = $("#" + listId);
+        if(!$list.length){
+            return;
+        }
+
+        var loading = false;
+        var $loader = $("#" + loaderId);
+        $loader.attr("hidden", "hidden");
+
+        function stop(){
+            loading = false;
+            $loader.attr("hidden", "hidden");
+        }
+
+        function loadMore(){
+            if(loading || $list.attr("data-has-more") !== "1"){
+                return;
+            }
+
+            loading = true;
+            $loader.removeAttr("hidden");
+
+            var nextPage = parseInt($list.attr("data-page"), 10) + 1;
+
+            axios({
+                method: "get",
+                url: $list.attr("data-url"),
+                params: { page: nextPage },
+                headers: {'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')},
+            }).then(function(response){
+                var data = response.data || {};
+                if(data.html){
+                    $loader.before(data.html);
+                }
+
+                $list.attr("data-page", data.page || nextPage);
+                $list.attr("data-has-more", data.hasMore ? "1" : "0");
+
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
+                stop();
+            }).catch(function(){
+                $list.attr("data-has-more", "0");
+                stop();
+            });
+        }
+
+        $list.off("scroll.myStaffInfinite").on("scroll.myStaffInfinite", function(){
+            var el = $list[0];
+            if(el.scrollTop + el.clientHeight >= el.scrollHeight - 40){
+                loadMore();
+            }
+        });
+    }
+
+    initMyStaffInfiniteList("myStaffPendingList", "myStaffPendingLoader");
+    initMyStaffInfiniteList("myStaffAbsentList", "myStaffAbsentLoader");
+    initMyStaffInfiniteList("myStaffHolidayList", "myStaffHolidayLoader");
+    initMyStaffInfiniteList("myStaffAppraisalList", "myStaffAppraisalLoader");
+
     /* Pending Leave Request Action Start */
     if($('#empNewLeaveRequestModal').length > 0){
         const empNewLeaveRequestModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#empNewLeaveRequestModal"));
@@ -450,7 +615,7 @@ import 'litepicker/dist/plugins/multiselect';
             $('#empNewLeaveRequestModal [name="employee_leave_id"]').html('0');
         });
 
-        $('.actPendingHoliday').on('click', function(e){
+        $(document).off('click.myStaffPendingHoliday', '.actPendingHoliday').on('click.myStaffPendingHoliday', '.actPendingHoliday', function(e){
             e.preventDefault();
             var employee_leave_id = $(this).attr('data-leave');
 
@@ -473,7 +638,7 @@ import 'litepicker/dist/plugins/multiselect';
                     }
                 }
             });
-        })
+        });
 
         
         $('#empNewLeaveRequestForm').on('submit', function(e){

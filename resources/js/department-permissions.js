@@ -1,5 +1,10 @@
+import { initPermissionPickers, bindPermissionToggles } from "./permission-form";
+
 (function(){
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+
+    initPermissionPickers();
+    bindPermissionToggles();
 
     $('#permissionUpdateForm').on('submit', function(e){
         e.preventDefault();

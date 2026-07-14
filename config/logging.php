@@ -57,6 +57,19 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        /*
+         | Every privilege decision the guard takes, on its own file so the
+         | evidence for the cutover is not buried in the application log.
+         | Read it with: php artisan privileges:audit-report
+         */
+        'privileges' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/privileges.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

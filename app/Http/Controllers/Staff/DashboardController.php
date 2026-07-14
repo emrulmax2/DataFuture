@@ -63,8 +63,11 @@ class DashboardController extends Controller
         }
         
         
-        $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
-        $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
+        // Read through priv() so this follows config('privileges.source') instead of
+        // querying the legacy table directly.
+        $priv = auth()->user()->priv();
+        $work_home = !empty($priv['work_home']) && $priv['work_home'] == 1;
+        $desktop_login = !empty($priv['desktop_login']) && $priv['desktop_login'] == 1;
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
         $workHistory = $this->getUserAttendanceLiveBtns();
@@ -109,8 +112,8 @@ class DashboardController extends Controller
             'student' => Student::all()->count(),
             'myPendingTask' => $this->getUserPendingTask(),
             'reportItAll' => isset($reportItAlls) ? $reportItAlls : $reportItAll = collect(),
-            'home_work' => (isset($work_home->access) && $work_home->access == 1 ? true : false),
-            'desktop_login' => (isset($desktop_login->access) && $desktop_login->access == 1 ? true : false),
+            'home_work' => $work_home,
+            'desktop_login' => $desktop_login,
             'home_work_statistics' => $this->getUserAttendanceLiveStatistics(),
             'home_work_history_btns' => (isset($workHistory['html']) && !empty($workHistory['html']) ? $workHistory['html'] : ''),
             'work_history_lock' => (isset($workHistory['loc']) ? $workHistory['loc'] : false),
@@ -159,8 +162,11 @@ class DashboardController extends Controller
     {
         $userData = \Auth::guard('web')->user();
 
-        $work_home = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'work_home')->get()->first();
-        $desktop_login = UserPrivilege::where('user_id', auth()->user()->id)->where('category', 'remote_access')->where('name', 'desktop_login')->get()->first();
+        // Read through priv() so this follows config('privileges.source') instead of
+        // querying the legacy table directly.
+        $priv = auth()->user()->priv();
+        $work_home = !empty($priv['work_home']) && $priv['work_home'] == 1;
+        $desktop_login = !empty($priv['desktop_login']) && $priv['desktop_login'] == 1;
         $ips = VenueIpAddress::pluck('ip')->unique()->toArray();
         $ips = (!empty($ips) ? $ips : ['62.31.168.43', '79.171.153.100', '149.34.178.243']);
 
@@ -302,7 +308,10 @@ class DashboardController extends Controller
         $user_id = auth()->user()->id;
         $employee_id = auth()->user()->employee->id;
         $today = date('Y-m-d');
-        $parentLinkIds = UserPrivilege::where('user_id', $user_id)->where('employee_id', $employee_id)->where('category', 'parent_internal_links')->pluck('name')->unique()->toArray();
+        // Permitted link ids come from priv(), so this follows the configured source.
+        // Top-level links are the permitted ids that have no parent.
+        $parentLinkIds = InternalLink::whereIn('id', auth()->user()->permittedInternalLinkIds())
+            ->whereNull('parent_id')->pluck('id')->toArray();
         
         $html = '';
         if(!empty($parentLinkIds)):
@@ -332,8 +341,8 @@ class DashboardController extends Controller
         $user_id = auth()->user()->id;
         $employee_id = auth()->user()->employee->id;
         $today = date('Y-m-d');
-        $category = 'parent_child_'.$parent.'_links';
-        $childLinkIds = UserPrivilege::where('user_id', $user_id)->where('employee_id', $employee_id)->where('category', $category)->pluck('name')->unique()->toArray();
+        $childLinkIds = InternalLink::whereIn('id', auth()->user()->permittedInternalLinkIds())
+            ->where('parent_id', $parent)->pluck('id')->toArray();
         
         $html = '';
         if(!empty($childLinkIds)):

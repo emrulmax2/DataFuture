@@ -230,7 +230,7 @@
                     </a>
                 </li>
             @endif
-            {{-- @if(isset(auth()->user()->priv()['user_privilege']) && auth()->user()->priv()['user_privilege'] == 1)
+            @if((isset(auth()->user()->priv()['user_privilege']) && auth()->user()->priv()['user_privilege'] == 1) || in_array(auth()->user()->id, [1, 7]))
                 <li class="hasChild">
                     <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'roles.show' || Route::currentRouteName() == 'permissioncategory' || Route::currentRouteName() == 'roles' || Route::currentRouteName() == 'permissions' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">
                         <i data-lucide="user-cog-2" class="w-4 h-4 mr-2"></i> User Privilege <i data-lucide="chevron-down" class="w-4 h-4 ml-auto menuAgnle"></i>
@@ -253,7 +253,7 @@
                         </li>
                     </ul>
                 </li>
-            @endif --}}
+            @endif
             @if(isset(auth()->user()->priv()['hr_settings']) && auth()->user()->priv()['hr_settings'] == 1)
                 <li class="hasChild">
                     <a class="flex items-center mt-5 {{ Route::currentRouteName() == 'department' || Route::currentRouteName() == 'hr.condition' || Route::currentRouteName() == 'holiday.year.leave.option' || Route::currentRouteName() == 'hr.bank.holiday' || Route::currentRouteName() == 'holiday.year' ? 'active text-primary font-medium' : '' }}" href="javascript:void(0);">

@@ -72,6 +72,8 @@ class MyGroupController extends Controller
         $query = EmployeeGroup::where('employee_id', $employee->id)->orderByRaw(implode(',', $sorts));
         if($status == 2):
             $query->onlyTrashed();
+        elseif($status == 3):
+            $query->withTrashed();
         endif;
 
         $total_rows = $query->count();
@@ -107,9 +109,27 @@ class MyGroupController extends Controller
 
     public function edit(Request $request){
         $row_id = $request->row_id;
-        $employeeGroup = EmployeeGroup::find($row_id);
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $employeeGroup = EmployeeGroup::where('employee_id', $employee->id)->withTrashed()->findOrFail($row_id);
         
         return response()->json(['res' => $employeeGroup], 200);
+    }
+
+    public function members(Request $request){
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $group = EmployeeGroup::where('employee_id', $employee->id)->withTrashed()->findOrFail($request->row_id);
+        $memberIds = EmployeeGroupMember::where('employee_group_id', $group->id)->pluck('employee_id')->unique()->toArray();
+        $members = Employee::with(['employment.employeeJobTitle', 'employment.department'])
+            ->whereIn('id', $memberIds)
+            ->orderBy('first_name', 'ASC')
+            ->get();
+
+        return response()->json([
+            'html' => view('pages.users.my-account.partials.group-members', [
+                'group' => $group,
+                'members' => $members,
+            ])->render(),
+        ], 200);
     }
 
     public function update(EmployeeGroupRequest $request){
@@ -125,14 +145,15 @@ class MyGroupController extends Controller
         $data['type'] = (isset($request->type) && $request->type > 0 ? $request->type : 2);
         $data['updated_by'] = auth()->user()->id;
 
-        $group = EmployeeGroup::where('id', $employee_group_id)->update($data);
+        $group = EmployeeGroup::where('employee_id', $employee->id)->findOrFail($employee_group_id);
+        $group->update($data);
 
         if(!empty($member_ids)):
             foreach($member_ids as $mem):
                 $row = EmployeeGroupMember::where('employee_group_id', $employee_group_id)->where('employee_id', $mem)->get()->count();
                 if($row == 0):
                     $data = [];
-                    $data['employee_group_id'] = $group->id;
+                    $data['employee_group_id'] = $employee_group_id;
                     $data['employee_id'] = $mem;
                     $data['created_by'] = auth()->user()->id;
 
@@ -147,12 +168,14 @@ class MyGroupController extends Controller
     }
 
     public function destroy($id){
-        $data = EmployeeGroup::find($id)->delete();
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $data = EmployeeGroup::where('employee_id', $employee->id)->findOrFail($id)->delete();
         return response()->json($data);
     }
 
     public function restore($id) {
-        $data = EmployeeGroup::where('id', $id)->withTrashed()->restore();
-        response()->json($data);
+        $employee = Employee::where('user_id', auth()->user()->id)->get()->first();
+        $data = EmployeeGroup::where('employee_id', $employee->id)->where('id', $id)->withTrashed()->restore();
+        return response()->json($data);
     }
 }
