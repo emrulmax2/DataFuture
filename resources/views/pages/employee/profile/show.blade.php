@@ -47,7 +47,7 @@
                 @include('pages.employee.profile.partials.field', ['label' => 'Ethnicity', 'value' => $employee->ethnicity->name ?? null])
                 @include('pages.employee.profile.partials.field', ['label' => 'Does this employee have a disability?', 'value' => $employee->disability_status ?? null])
                 @include('pages.employee.profile.partials.field', ['label' => 'Car Reg Number', 'value' => $employee->car_reg_number ?? null])
-                @include('pages.employee.profile.partials.field', ['label' => 'Driving License', 'value' => $employee->drive_license_number ?? null])
+                @include('pages.employee.profile.partials.field', ['label' => 'Driving Licence', 'value' => $employee->drive_license_number ?? null])
 
                 @if(isset($employee->disability_status) && $employee->disability_status == "Yes")
                     <div class="min-w-0 col-span-full">

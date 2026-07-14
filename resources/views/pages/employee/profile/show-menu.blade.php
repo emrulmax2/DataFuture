@@ -47,6 +47,9 @@
     <a href="{{ route('employee.privilege', $employee->id) }}" class="{{ $tab($current == 'employee.privilege') }}">
         Privilege
     </a>
+    <a href="{{ route('employee.privilege.new', $employee->id) }}" class="{{ $tab($current == 'employee.privilege.new') }}">
+        Privilege (New)
+    </a>
     @endif
 
     @if($hrPortal)

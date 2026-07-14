@@ -221,3 +221,70 @@
         }
     }
 }
+
+.litepicker.attendance-month-litepicker {
+    --litepicker-month-width: 252px;
+
+    .container__months {
+        @apply px-2 pb-2;
+    }
+
+    .container__months .month-item {
+        width: var(--litepicker-month-width);
+    }
+
+    .container__months .month-item-header {
+        @apply px-1 pb-2;
+    }
+
+    .container__months .month-item-header div {
+        @apply flex justify-center;
+    }
+
+    .container__months .month-item-header div > .month-item-name {
+        @apply hidden;
+    }
+
+    .container__months .month-item-header div > .month-item-year {
+        @apply min-w-[92px] text-center font-semibold;
+    }
+
+    .month-item-weekdays-row,
+    .container__days {
+        display: none !important;
+    }
+
+    .attendance-month-grid {
+        @apply grid grid-cols-3 gap-1.5 px-1 pb-1;
+    }
+
+    .attendance-month-option {
+        @apply h-9 rounded-md border border-slate-200 text-sm font-medium text-slate-600 transition-colors;
+    }
+
+    .attendance-month-option:hover {
+        @apply bg-slate-100 text-slate-800;
+    }
+
+    .attendance-month-option.is-active,
+    .attendance-month-option.is-active:hover {
+        @apply border-primary bg-primary text-white;
+    }
+}
+
+.dark {
+    .litepicker.attendance-month-litepicker {
+        .attendance-month-option {
+            @apply border-darkmode-400 text-slate-200;
+        }
+
+        .attendance-month-option:hover {
+            @apply bg-darkmode-400 text-slate-100;
+        }
+
+        .attendance-month-option.is-active,
+        .attendance-month-option.is-active:hover {
+            @apply border-primary bg-primary text-white;
+        }
+    }
+}

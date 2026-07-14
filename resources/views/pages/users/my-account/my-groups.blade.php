@@ -1,88 +1,96 @@
-@extends('../layout/' . $layout)
+@extends('../layout/my-account')
 
 @section('subhead')
     <title>{{ $title }}- </title>
 @endsection
 
+@section('body_class', 'my-account-groups-body')
+
 @section('subcontent')
-
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">My Holidays</strong></u></h2>
-    </div>
-
-    <!-- BEGIN: Profile Info -->
     @include('pages.users.my-account.show-info')
-    <!-- END: Profile Info -->
- 
-    <div class="intro-y box lg:mt-5">
-        <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-            <h2 class="font-medium text-base mr-auto">My Groups</h2>
-            <button data-tw-toggle="modal" data-tw-target="#addGroupModal" type="button" class="btn btn-primary shadow-md ml-auto">Add Group</button>
-        </div>
-        <div class="p-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                            <option value="1">Active</option>
-                            <option value="2">Archived</option>
-                        </select>
-                    </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
-                </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+
+    <section class="myhr-groups" data-screen-label="My Groups">
+        <header class="myhr-groups__header">
+            <span class="myhr-groups__header-icon">
+                <i data-lucide="users"></i>
+            </span>
+            <h2>My Groups</h2>
+            <button data-tw-toggle="modal" data-tw-target="#addGroupModal" type="button" class="myhr-groups-btn myhr-groups-btn--primary">
+                <i data-lucide="plus"></i>
+                Add Group
+            </button>
+        </header>
+
+        <div class="myhr-groups__toolbar">
+            <form id="tabulatorFilterForm" class="myhr-groups-filter">
+                <span class="myhr-groups-filter__label">Status</span>
+                <label class="myhr-groups-select">
+                    <select id="status" name="status">
+                        <option value="1">Active</option>
+                        <option value="2">Archived</option>
+                        <option value="3">All</option>
+                    </select>
+                    <i data-lucide="chevron-down"></i>
+                </label>
+                <button id="tabulator-html-filter-go" type="button" class="myhr-groups-btn myhr-groups-btn--filter">Go</button>
+                <button id="tabulator-html-filter-reset" type="button" class="myhr-groups-btn myhr-groups-btn--muted">Reset</button>
+            </form>
+
+            <div class="myhr-groups-actions">
+                <button id="tabulator-print" type="button" class="myhr-groups-btn myhr-groups-btn--outline">
+                    <i data-lucide="printer"></i>
+                    Print
+                </button>
+                <div class="dropdown">
+                    <button class="dropdown-toggle myhr-groups-btn myhr-groups-btn--outline" aria-expanded="false" data-tw-toggle="dropdown" type="button">
+                        <i data-lucide="download"></i>
+                        Export
+                        <i data-lucide="chevron-down" class="myhr-groups-btn__caret"></i>
                     </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
-                            <ul class="dropdown-content">
-                                <li>
-                                    <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
-                                </li>
-                                <li>
-                                    <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="dropdown-menu w-40">
+                        <ul class="dropdown-content">
+                            <li>
+                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                </a>
+                            </li>
+                            <li>
+                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Export XLSX
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="myGroupListTable" class="mt-5 table-report table-report--tabulator"></div>
-            </div>
         </div>
-    </div>
+
+        <div class="myhr-groups__table-wrap">
+            <div id="myGroupListTable" class="myhr-groups-table table-report table-report--tabulator"></div>
+        </div>
+    </section>
 
     <!-- BEGIN: Edit Modal -->
     <div id="editGroupModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="editGroupForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Group</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                <div class="modal-content myhr-groups-modal">
+                    <div class="modal-header myhr-groups-modal__header">
+                        <span class="myhr-groups-modal__icon">
+                            <i data-lucide="users"></i>
+                        </span>
+                        <h2>Edit Group</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;" class="myhr-groups-modal__close">
+                            <i data-lucide="x"></i>
                         </a>
                     </div>
-                    <div class="modal-body">
-                        <div>
+                    <div class="modal-body myhr-groups-modal__body">
+                        <div class="myhr-groups-field">
                             <label for="edit_name" class="form-label">Name <span class="text-danger">*</span></label>
                             <input id="edit_name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
+                        <div class="myhr-groups-field">
                             <label for="edit_employee_ids" class="form-label">Members <span class="text-danger">*</span></label>
                             <select id="edit_employee_ids" name="employee_ids[]" class="w-full tom-selects" multiple>
                                 @if($employees->count() > 0)
@@ -93,24 +101,28 @@
                             </select>
                             <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
+                        <div class="myhr-groups-field">
                             <label class="form-label">Type <span class="text-danger">*</span></label>
-                            <div class="flex flex-col sm:flex-row mt-2">
-                                <div class="form-check mr-3">
+                            <div class="myhr-groups-choice">
+                                <label class="form-check">
                                     <input checked id="edit_group_type_1" class="form-check-input" type="radio" name="type" value="1">
-                                    <label class="form-check-label" for="edit_group_type_1">Private</label>
-                                </div>
-                                <div class="form-check mr-2 mt-2 sm:mt-0">
-                                    <input id="group_type_2" class="form-check-input" type="radio" name="type" value="2">
-                                    <label class="form-check-label" for="edit_group_type_2">Public</label>
-                                </div>
+                                    <span class="form-check-label">Private</span>
+                                </label>
+                                <label class="form-check">
+                                    <input id="edit_group_type_2" class="form-check-input" type="radio" name="type" value="2">
+                                    <span class="form-check-label">Public</span>
+                                </label>
                             </div>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateGroup" class="btn btn-primary w-auto">     
+                    <div class="modal-footer myhr-groups-modal__footer">
+                        <button type="button" data-tw-dismiss="modal" class="myhr-groups-modal-btn myhr-groups-modal-btn--cancel">
+                            <i data-lucide="x"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" id="updateGroup" class="myhr-groups-modal-btn myhr-groups-modal-btn--save">     
+                            <i data-lucide="save"></i>
                             Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
@@ -137,20 +149,23 @@
     <div id="addGroupModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form method="POST" action="#" id="addGroupForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Group</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
+                <div class="modal-content myhr-groups-modal">
+                    <div class="modal-header myhr-groups-modal__header">
+                        <span class="myhr-groups-modal__icon">
+                            <i data-lucide="users"></i>
+                        </span>
+                        <h2>Add Group</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;" class="myhr-groups-modal__close">
+                            <i data-lucide="x"></i>
                         </a>
                     </div>
-                    <div class="modal-body">
-                        <div>
+                    <div class="modal-body myhr-groups-modal__body">
+                        <div class="myhr-groups-field">
                             <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                             <input id="name" type="text" name="name" class="form-control w-full">
                             <div class="acc__input-error error-name text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
+                        <div class="myhr-groups-field">
                             <label for="employee_ids" class="form-label">Members <span class="text-danger">*</span></label>
                             <select id="employee_ids" name="employee_ids[]" class="w-full tom-selects" multiple>
                                 @if($employees->count() > 0)
@@ -161,24 +176,28 @@
                             </select>
                             <div class="acc__input-error error-employee_ids text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="employee_ids" class="form-label">Type <span class="text-danger">*</span></label>
-                            <div class="flex flex-col sm:flex-row mt-2">
-                                <div class="form-check mr-3">
+                        <div class="myhr-groups-field">
+                            <label class="form-label">Type <span class="text-danger">*</span></label>
+                            <div class="myhr-groups-choice">
+                                <label class="form-check">
                                     <input checked id="group_type_1" class="form-check-input" type="radio" name="type" value="1">
-                                    <label class="form-check-label" for="group_type_1">Private</label>
-                                </div>
-                                <div class="form-check mr-2 mt-2 sm:mt-0">
+                                    <span class="form-check-label">Private</span>
+                                </label>
+                                <label class="form-check">
                                     <input id="group_type_2" class="form-check-input" type="radio" name="type" value="2">
-                                    <label class="form-check-label" for="group_type_2">Public</label>
-                                </div>
+                                    <span class="form-check-label">Public</span>
+                                </label>
                             </div>
                             <div class="acc__input-error error-type text-danger mt-2"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="createGroup" class="btn btn-primary w-auto">     
+                    <div class="modal-footer myhr-groups-modal__footer">
+                        <button type="button" data-tw-dismiss="modal" class="myhr-groups-modal-btn myhr-groups-modal-btn--cancel">
+                            <i data-lucide="x"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" id="createGroup" class="myhr-groups-modal-btn myhr-groups-modal-btn--save">     
+                            <i data-lucide="save"></i>
                             Save                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                                 stroke="white" class="w-4 h-4 ml-2">
@@ -199,6 +218,38 @@
         </div>
     </div>
     <!-- END: Add Modal -->
+
+    <!-- BEGIN: Group Members Modal -->
+    <div id="groupMembersModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content myhr-groups-modal myhr-groups-members-modal">
+                <div class="modal-header myhr-groups-modal__header">
+                    <span class="myhr-groups-modal__icon">
+                        <i data-lucide="users"></i>
+                    </span>
+                    <h2>Group Members</h2>
+                    <a data-tw-dismiss="modal" href="javascript:;" class="myhr-groups-modal__close">
+                        <i data-lucide="x"></i>
+                    </a>
+                </div>
+                <div class="modal-body myhr-groups-modal__body">
+                    <div class="myhr-group-members-loading">
+                        <svg width="28" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="#0f7b76">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".25" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END: Group Members Modal -->
 
 
     <!-- BEGIN: Warning Modal Content -->

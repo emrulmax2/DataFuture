@@ -4,12 +4,18 @@ import Tabulator from "tabulator-tables";
 
 ("use strict");
 var myVacancyListTable = (function () {
+    var tableContent = null;
+    var resizeBound = false;
     var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = ''; //$("#query").val() != "" ? $("#query").val() : "";
-        let status = 1; //$("#status").val() != "" ? $("#status").val() : "";
+        if (tableContent) {
+            tableContent.destroy();
+        }
 
-        let tableContent = new Tabulator("#myVacancyListTable", {
+        // Setup Tabulator
+        let querystr = $("#query").val() != "" ? $("#query").val() : "";
+        let status = 1;
+
+        tableContent = new Tabulator("#myVacancyListTable", {
             ajaxURL: route("user.account.vacancy.list"),
             ajaxParams: { querystr: querystr, status: status },
             ajaxFiltering: true,
@@ -18,7 +24,8 @@ var myVacancyListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, true],
+            paginationCounter: "rows",
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -26,41 +33,46 @@ var myVacancyListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: "90",
                 },
                 {
                     title: "Title",
                     field: "title",
                     headerHozAlign: "left",
+                    minWidth: 240,
+                    formatter(cell, formatterParams){
+                        return '<span class="myhr-vacancies-title">'+cell.getValue()+'</span>';
+                    },
                 },
                 {
                     title: "Type",
                     field: "type",
                     headerHozAlign: "left",
+                    headerSort: false,
+                    formatter(cell, formatterParams){
+                        let label = cell.getValue() ? cell.getValue() : "Not Set";
+                        return '<span class="myhr-groups-type-pill myhr-vacancies-type-pill">'+label+'</span>';
+                    },
                 },
                 {
                     title: "Date",
                     field: "date",
                     headerHozAlign: "left",
                     headerSort: false,
-                },
-                /*{
-                    title: "Status",
-                    field: "active",
-                    headerHozAlign: "left",
                     formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
-                    }
-                },*/
+                        return '<span class="myhr-vacancies-date-pill">'+(cell.getValue() ? cell.getValue() : '-')+'</span>';
+                    },
+                },
                 {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 180,
                     formatter(cell, formatterParams){
                         var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
+                        html += '<div class="myhr-vacancies-created">';
+                            html += '<strong>'+cell.getData().created_by+'</strong>';
+                            html += '<span>'+cell.getData().created_at+'</span>';
                         html += '</div>';
 
                         return html;
@@ -70,26 +82,22 @@ var myVacancyListTable = (function () {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
+                    hozAlign: "center",
+                    headerHozAlign: "center",
                     width: "180",
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
                             if(cell.getData().link != ''){
-                                btns +='<a href="'+cell.getData().link+'" target="_blank" class="btn-rounded btn btn-twitter text-white p-0 w-9 h-9 ml-1"><i data-lucide="link" class="w-4 h-4"></i></a>';
+                                btns +='<a href="'+cell.getData().link+'" target="_blank" rel="noopener" class="myhr-groups-action-btn myhr-vacancies-action-btn--link" title="Open link"><i data-lucide="external-link" class="w-4 h-4"></i></a>';
                             }
                             if(cell.getData().document_url != ''){
-                                btns +='<a href="'+cell.getData().document_url+'" target="_blank" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
+                                btns +='<a href="'+cell.getData().document_url+'" target="_blank" rel="noopener" class="myhr-groups-action-btn myhr-vacancies-action-btn--document" title="Open document"><i data-lucide="file-down" class="w-4 h-4"></i></a>';
                             }
-                            //btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editVacancyModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            //btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
-                        return btns;
+
+                        return btns != "" ? btns : '<span class="myhr-vacancies-empty-action">-</span>';
                     },
                 },
             ],
@@ -108,14 +116,36 @@ var myVacancyListTable = (function () {
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
+        // Redraw table on resize
+        if (!resizeBound) {
+            window.addEventListener("resize", () => {
+                if (tableContent) {
+                    tableContent.redraw();
+                }
+                createIcons({
+                    icons,
+                    "stroke-width": 1.5,
+                    nameAttr: "data-lucide",
+                });
             });
+            resizeBound = true;
+        }
+
+        // Export
+        $("#tabulator-export-csv").off("click.myVacanciesExport").on("click.myVacanciesExport", function (event) {
+            tableContent.download("csv", "my-vacancies.csv");
+        });
+
+        $("#tabulator-export-xlsx").off("click.myVacanciesExport").on("click.myVacanciesExport", function (event) {
+            window.XLSX = xlsx;
+            tableContent.download("xlsx", "my-vacancies.xlsx", {
+                sheetName: "My Vacancies",
+            });
+        });
+
+        // Print
+        $("#tabulator-print").off("click.myVacanciesPrint").on("click.myVacanciesPrint", function (event) {
+            tableContent.print();
         });
 
     };
@@ -127,7 +157,27 @@ var myVacancyListTable = (function () {
 })();
 
 (function(){
-    /* List Table INIT */
-    myVacancyListTable.init();
-    /* List Table INIT */
+    if ($("#myVacancyListTable").length) {
+        myVacancyListTable.init();
+
+        function filterTitleHTMLForm() {
+            myVacancyListTable.init();
+        }
+
+        $("#tabulator-html-filter-go").on("click", function (event) {
+            filterTitleHTMLForm();
+        });
+
+        $("#tabulator-html-filter-reset").on("click", function (event) {
+            $("#query").val("");
+            filterTitleHTMLForm();
+        });
+
+        $("#query").on("keypress", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                filterTitleHTMLForm();
+            }
+        });
+    }
 })()

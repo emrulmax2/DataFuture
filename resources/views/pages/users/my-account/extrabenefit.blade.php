@@ -1,14 +1,10 @@
-@extends('../layout/' . $layout)
+@extends('../layout/my-account')
 
 @section('subhead')
     <title>{{ $title }}- </title>
 @endsection
 
 @section('subcontent')
-
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">My HR</h2>
-    </div>
 
     <!-- BEGIN: Profile Info -->
     @include('pages.users.my-account.show-info')

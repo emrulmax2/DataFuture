@@ -7,7 +7,28 @@ import IMask from 'imask';
 ("use strict");
 (function(){
 
-    let tomOptions = {
+    function syncEmployeeCreateDropdownState(tomSelect, isOpen) {
+        const $panelBody = $(tomSelect.wrapper).closest('.employee-create-panel__body');
+        if (!$panelBody.length) {
+            return;
+        }
+
+        $('.employee-create-panel__body.has-open-dropdown').not($panelBody).removeClass('has-open-dropdown');
+        $panelBody.toggleClass('has-open-dropdown', isOpen);
+    }
+
+    const tomDeleteConfirmation = function (values) {
+        return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+    };
+    const tomDropdownHooks = {
+        onDropdownOpen: function() {
+            syncEmployeeCreateDropdownState(this, true);
+        },
+        onDropdownClose: function() {
+            syncEmployeeCreateDropdownState(this, false);
+        },
+    };
+    const tomOptions = {
         plugins: {
             dropdown_input: {}
         },
@@ -15,28 +36,87 @@ import IMask from 'imask';
         persist: false,
         create: true,
         allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
-        },
+        copyClassesToDropdown: false,
+        onDelete: tomDeleteConfirmation,
+        ...tomDropdownHooks,
     };
-    //var employment_status = new TomSelect('#employment_status', tomOptions);
-    var workpermit_type_tom = new TomSelect('#workpermit_type', tomOptions);
-    var employee_work_type_tom = new TomSelect('#employee_work_type', tomOptions);
+    const plainTomOptions = {
+        plugins: {},
+        placeholder: 'Please Select',
+        persist: false,
+        create: false,
+        allowEmptyOption: false,
+        copyClassesToDropdown: false,
+        onDelete: tomDeleteConfirmation,
+        ...tomDropdownHooks,
+    };
+    const plainTomSelectIds = ['notice-period', 'employment-period', 'ssp-term'];
+    const getTomOptions = function(select) {
+        const baseOptions = plainTomSelectIds.includes(select.id) ? plainTomOptions : tomOptions;
+        const options = {
+            ...baseOptions,
+            plugins: {
+                ...(baseOptions.plugins || {}),
+            },
+        };
 
-    $('.lccToms').each(function(){
-        if ($(this).attr("multiple") !== undefined) {
-            tomOptions = {
-                ...tomOptions,
-                plugins: {
-                    ...tomOptions.plugins,
-                    remove_button: {
-                        title: "Remove this item",
-                    },
-                }
+        if ($(select).attr("multiple") !== undefined) {
+            options.plugins.remove_button = {
+                title: "Remove this item",
             };
         }
-        new TomSelect(this, tomOptions);
+
+        return options;
+    };
+    //var employment_status = new TomSelect('#employment_status', tomOptions);
+    const workpermitTypeEl = document.querySelector('#workpermit_type');
+    const employeeWorkTypeEl = document.querySelector('#employee_work_type');
+    var workpermit_type_tom = workpermitTypeEl ? new TomSelect(workpermitTypeEl, getTomOptions(workpermitTypeEl)) : null;
+    var employee_work_type_tom = employeeWorkTypeEl ? new TomSelect(employeeWorkTypeEl, getTomOptions(employeeWorkTypeEl)) : null;
+    const addressRequiredFields = ['address_line_1', 'city', 'post_code', 'country'];
+    const addressModalValue = ($form, name) => $.trim(($form.find('[name="' + name + '"]').val() || '').toString());
+    const setAddressModalValue = ($form, name, value) => $form.find('[name="' + name + '"]').val(value || '');
+    const escapeAddressHtml = (value) => $('<div>').text(value || '').html();
+    const escapeAddressAttr = (value) => $('<div>').text(value || '').html().replace(/"/g, '&quot;');
+    const addressHiddenInput = (name, value) => '<input type="hidden" name="' + name + '" value="' + escapeAddressAttr(value) + '"/>';
+    const syncAddressDisplay = ($wrap) => {
+        const $addresses = $wrap.find('.addresses');
+        const hasAddress = $addresses.hasClass('active') || $.trim($addresses.text()) != '' || $addresses.find('input[type="hidden"]').length > 0;
+
+        if (hasAddress) {
+            $addresses.addClass('active addressSummaryToggler').attr({
+                role: 'button',
+                tabindex: '0',
+                'aria-label': 'Update Address',
+            }).show();
+            $wrap.find('button.addressPopupToggler').hide();
+        } else {
+            $addresses.removeClass('active addressSummaryToggler').removeAttr('role tabindex aria-label').hide();
+            $wrap.find('button.addressPopupToggler').show();
+        }
+    };
+
+    $('.lccToms').each(function(){
+        new TomSelect(this, getTomOptions(this));
     })
+
+    const updateCreateWizardStatus = function () {
+        const $wizard = $('.employee-create-wizard');
+        if (!$wizard.length) {
+            return;
+        }
+
+        const $steps = $wizard.find('.form-wizard-step-item');
+        const activeIndex = Math.max($steps.index($steps.filter('.active')), 0);
+        const step = activeIndex + 1;
+        const total = $steps.length || 4;
+        const progress = total > 1 ? ((step - 1) / (total - 1)) * 100 : 0;
+
+        $('#employeeCreateProgressFill').css('width', progress + '%');
+        $('#employeeCreateProgressText').text(step === total ? 'Final step' : step + ' of ' + total + ' steps');
+    };
+
+    updateCreateWizardStatus();
     
     $(".date-picker").each(function () {
         var maskOptions = {
@@ -129,11 +209,14 @@ import IMask from 'imask';
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 $('.acc__input-error').html('');
+                $('.border-danger', parentForm).removeClass('border-danger');
                 $('.form-wizard-next-btn, .form-wizard-previous-btn', parentForm).removeAttr('disabled');
                 $('.form-wizard-next-btn svg', parentForm).fadeOut();
                 if(jqXHR.status == 422){
                     for (const [key, val] of Object.entries(jqXHR.responseJSON.errors)) {
-                        $(`#${formID} .${key}`).addClass('border-danger');
+                        let $field = $(`#${formID} .${key}`);
+                        $field.addClass('border-danger');
+                        $field.next('.ts-wrapper').addClass('border-danger');
                         $(`#${formID}  .error-${key}`).html(val);
                     }
                 }else{
@@ -176,6 +259,8 @@ import IMask from 'imask';
                     }
                 }
             });
+
+            updateCreateWizardStatus();
         }
     });
     //click on previous button
@@ -208,6 +293,8 @@ import IMask from 'imask';
                 });
             }
         });
+
+        updateCreateWizardStatus();
     });
 
 
@@ -265,10 +352,14 @@ import IMask from 'imask';
         let $eligible_to_work_status = $(this);
 
         if($eligible_to_work_status.prop('checked')){
-            workpermit_type_tom.clear(true);
+            if (workpermit_type_tom) {
+                workpermit_type_tom.clear(true);
+            }
             $('.workPermitTypeFields').fadeIn();
         }else{
-            workpermit_type_tom.clear(true);
+            if (workpermit_type_tom) {
+                workpermit_type_tom.clear(true);
+            }
             $('.workPermitTypeFields').fadeOut();
 
             $('.workPermitFields').fadeOut('fast', function(){
@@ -317,17 +408,48 @@ import IMask from 'imask';
             $('#addressModal input[name="place"]').val('');
         });
 
-        $('.addressPopupToggler').on('click', function(e){
+        $('.employee-create-address-row.addressWrap').each(function() {
+            syncAddressDisplay($(this));
+        });
+
+        const openAddressModal = function(e) {
             e.preventDefault();
 
             var $btn = $(this);
             var $wrap = $btn.parents('.addressWrap');
+            if (!$wrap.length) {
+                return;
+            }
+
             var $addressFieldPrefix = $btn.siblings('.address_prfix_field').val();
 
             var wrap_id = '#'+$wrap.attr('id');
+            var $modalForm = $('#addressForm');
             $('#addressModal input[name="place"]').val(wrap_id);
             $('#addressModal .modal-body input').val('');
             $('#addressModal input[name="prfix"]').val($addressFieldPrefix);
+
+            if ($wrap.find('[name="' + $addressFieldPrefix + 'address_line_1"]').length > 0) {
+                setAddressModalValue($modalForm, 'address_line_1', $wrap.find('[name="' + $addressFieldPrefix + 'address_line_1"]').val());
+                setAddressModalValue($modalForm, 'address_line_2', $wrap.find('[name="' + $addressFieldPrefix + 'address_line_2"]').val());
+                setAddressModalValue($modalForm, 'city', $wrap.find('[name="' + $addressFieldPrefix + 'city"]').val());
+                setAddressModalValue($modalForm, 'post_code', $wrap.find('[name="' + $addressFieldPrefix + 'post_code"]').val());
+                setAddressModalValue($modalForm, 'country', $wrap.find('[name="' + $addressFieldPrefix + 'country"]').val());
+            }
+
+            if ($btn.hasClass('addressSummaryToggler')) {
+                addressModal.show();
+            }
+        };
+
+        $('.employee-create-address-row .addressPopupToggler').on('click', openAddressModal);
+        $(document).on('click', '.employee-create-address-row .addressSummaryToggler', openAddressModal);
+
+        $(document).on('keydown', '.employee-create-address-row .addressSummaryToggler', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $(this).trigger('click');
+            }
         });
 
         $('#addressForm').on('submit', function(e){
@@ -340,21 +462,16 @@ import IMask from 'imask';
             document.querySelector('#insertAddress').setAttribute('disabled', 'disabled');
             document.querySelector('#insertAddress svg').style.cssText = 'display: inline-block;';
 
-            var err = 0;
-            $('input', $form).each(function(){
-                var $input = $(this);
-                var name = $input.attr('name');
-                if(name != 'address_line_2' && $input.val() == ''){
-                    err += 1;
-                }
-            })
+            var err = addressRequiredFields.filter(function(name) {
+                return addressModalValue($form, name) == '';
+            }).length;
             
             if(err > 0){
                 document.querySelector('#insertAddress').removeAttribute('disabled');
                 document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
 
                 $form.find('.mod-error').remove();
-                $form.find('.modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Please fill out all required fields.</div>');
+                $form.find('.modal-content').prepend('<div class="alert mod-error smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Please fill out all required fields.</div>');
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
@@ -365,30 +482,38 @@ import IMask from 'imask';
                     $form.find('.mod-error').remove();
                 }, 2000);
             }else{
+                var addressLine1 = addressModalValue($form, 'address_line_1');
+                var addressLine2 = addressModalValue($form, 'address_line_2');
+                var city = addressModalValue($form, 'city');
+                var postCode = addressModalValue($form, 'post_code');
+                var country = addressModalValue($form, 'country');
+                var addressId = $(wrapid).find('[name="' + prfix + 'address_id"]').val() || '0';
                 var htmls = '';
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_1', $form).val()+'</span><br/>';
-                htmls += '<input type="hidden" name="'+prfix+'address_line_1" value="'+$('#student_address_address_line_1', $form).val()+'"/>';
-                if($('#student_address_address_line_2', $form).val() != ''){
-                    htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_address_line_2', $form).val()+'</span><br/>';
-                    htmls += '<input type="hidden" name="'+prfix+'address_line_2" value="'+$('#student_address_address_line_2', $form).val()+'"/>';
+                htmls += '<span class="text-slate-600 font-medium">'+escapeAddressHtml(addressLine1)+'</span><br/>';
+                htmls += addressHiddenInput(prfix+'address_line_1', addressLine1);
+                if(addressLine2 != ''){
+                    htmls += '<span class="text-slate-600 font-medium">'+escapeAddressHtml(addressLine2)+'</span><br/>';
+                    htmls += addressHiddenInput(prfix+'address_line_2', addressLine2);
                 }
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_city', $form).val()+'</span>, ';
-                htmls += '<input type="hidden" name="'+prfix+'city" value="'+$('#student_address_city', $form).val()+'"/>';
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_postal_zip_code', $form).val()+'</span>,<br/>';
-                htmls += '<input type="hidden" name="'+prfix+'post_code" value="'+$('#student_address_postal_zip_code', $form).val()+'"/>';
-                htmls += '<span class="text-slate-600 font-medium">'+$('#student_address_country', $form).val()+'</span><br/>';
-                htmls += '<input type="hidden" name="'+prfix+'country" value="'+$('#student_address_country', $form).val()+'"/>';
-                htmls += '<input type="hidden" name="'+prfix+'address_id" value="0"/>';
+                htmls += '<span class="text-slate-600 font-medium">'+escapeAddressHtml(city)+'</span>, ';
+                htmls += addressHiddenInput(prfix+'city', city);
+                htmls += '<span class="text-slate-600 font-medium">'+escapeAddressHtml(postCode)+'</span>,<br/>';
+                htmls += addressHiddenInput(prfix+'post_code', postCode);
+                htmls += '<span class="text-slate-600 font-medium">'+escapeAddressHtml(country)+'</span><br/>';
+                htmls += addressHiddenInput(prfix+'country', country);
+                htmls += addressHiddenInput(prfix+'address_id', addressId);
 
                 document.querySelector('#insertAddress').removeAttribute('disabled');
                 document.querySelector('#insertAddress svg').style.cssText = 'display: none;';
 
                 addressModal.hide();
-                $(wrapid+' .addresses').fadeIn().addClass('active').html(htmls);
-                $(wrapid +' button.addressPopupToggler span').html('Update Address');
+
+                var $wrap = $(wrapid);
+                $wrap.find('.addresses').addClass('active').html(htmls);
+                $wrap.find('button.addressPopupToggler span').html('Update Address');
+                syncAddressDisplay($wrap);
             }
         });
     }
 
 })();
-

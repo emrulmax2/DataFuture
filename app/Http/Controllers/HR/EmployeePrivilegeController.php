@@ -11,7 +11,27 @@ use Illuminate\Http\Request;
 
 class EmployeePrivilegeController extends Controller
 {
+    /**
+     * The legacy privilege screen reads and writes user_privileges. Once
+     * config('privileges.source') is "new", that table is no longer what governs
+     * access - so an edit made here would appear to save and then do nothing, and
+     * would silently drift away from the table that does govern access.
+     *
+     * Rather than leave that trap, the screen is retired at cutover.
+     */
+    private function guardLegacyScreenRetired(): void
+    {
+        if (config('privileges.source') === 'new') {
+            abort(410, 'This privilege screen has been retired. Use the Privilege tab, which is now the live one.');
+        }
+    }
+
     public function index($id){
+        // Send HR to the screen that actually governs access.
+        if (config('privileges.source') === 'new') {
+            return redirect()->route('employee.privilege.new', $id);
+        }
+
         $employee = Employee::find($id);
         $employment = Employment::where("employee_id",$id)->get()->first();
         $categories = UserPrivilege::where('employee_id', $id)->where('user_id', $employee->user_id)->pluck('category')->toArray();
@@ -34,6 +54,8 @@ class EmployeePrivilegeController extends Controller
     }
 
     public function store(Request $request) {
+        $this->guardLegacyScreenRetired();
+
         $employee_id = $request->employee_id;
         $employee = Employee::find($employee_id);
         $user_id = $employee->user_id;

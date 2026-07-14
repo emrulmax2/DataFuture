@@ -18,11 +18,12 @@
 
     $hrdActive = $active ?? 'dashboard';
     $hrdBreadcrumbs = $breadcrumbs ?? [];
+    $hrdDashboardUrl = url('/');
 
     $hrdSiteLogo = Option::where('category', 'SITE_SETTINGS')->where('name', 'site_logo')->value('value');
     $hrdLogoUrl = ($hrdSiteLogo && Storage::disk('local')->exists('public/'.$hrdSiteLogo))
         ? Storage::disk('local')->url('public/'.$hrdSiteLogo)
-        : asset('build/assets/images/placeholders/200x200.jpg');
+        : null;
 
     $hrdEmployeeProfile = optional(auth()->user())->employee;
     $hrdUserName = trim(
@@ -51,13 +52,17 @@
 
 <header class="hrd-topbar">
     <div class="hrd-topbar__inner">
-        <a href="{{ route('hr.portal') }}" class="hrd-brand">
-            <span class="hrd-brand__mark"><img src="{{ $hrdLogoUrl }}" alt="London Churchill College"></span>
-            <span class="hrd-brand__text">LONDON<br>CHURCHILL COLLEGE</span>
+        <a href="{{ route('hr.portal') }}" class="hrd-brand {{ $hrdLogoUrl ? 'hrd-brand--logo' : '' }}">
+            @if($hrdLogoUrl)
+                <img src="{{ $hrdLogoUrl }}" alt="London Churchill College" class="hrd-brand__logo">
+            @else
+                <span class="hrd-brand__mark">LC</span>
+                <span class="hrd-brand__text">LONDON<br>CHURCHILL COLLEGE</span>
+            @endif
         </a>
 
         <nav class="hrd-nav" aria-label="HR portal navigation">
-            <a href="{{ route('hr.portal') }}" class="hrd-nav__item {{ $hrdActive === 'dashboard' ? 'hrd-nav__item--active' : '' }}">
+            <a href="{{ $hrdDashboardUrl }}" class="hrd-nav__item {{ $hrdActive === 'dashboard' ? 'hrd-nav__item--active' : '' }}">
                 <i data-lucide="home"></i>
                 Dashboard
             </a>
@@ -108,7 +113,7 @@
 
 <nav class="hrd-breadcrumb" aria-label="Breadcrumb">
     <div class="hrd-breadcrumb__inner">
-        <a href="{{ route('hr.portal') }}">Dashboard</a>
+        <a href="{{ $hrdDashboardUrl }}">Dashboard</a>
         @foreach($hrdBreadcrumbs as $crumb)
             <i data-lucide="chevron-right" class="hrd-breadcrumb__sep"></i>
             @if(!$loop->last && !empty($crumb['href']) && $crumb['href'] !== 'javascript:void(0);')

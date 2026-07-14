@@ -38,6 +38,10 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\TrackLoginSession::class,
+            // Runs last, so the session and the resolved route are both available.
+            // Blocks nothing while config('privileges.enforce') is false - it only
+            // records the decision it would have taken.
+            \App\Http\Middleware\PrivilegeGuard::class,
         ],
 
         'api' => [

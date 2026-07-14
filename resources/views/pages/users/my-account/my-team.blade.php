@@ -1,4 +1,4 @@
-@extends('../layout/' . $layout)
+@extends('../layout/my-account')
 
 @section('subhead')
     <title>{{ $title }}- </title>

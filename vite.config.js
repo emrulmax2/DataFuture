@@ -409,8 +409,8 @@ export default defineConfig({
                 'resources/js/report-any-it-student.js',
                 'resources/js/report-it-show.js',
                 'resources/js/admission-offer-acceptance.js',
-                // 'resources/js/department-permissions.js',
-                // 'resources/js/employee-privilege-new.js',
+                'resources/js/department-permissions.js',
+                'resources/js/employee-privilege-new.js',
 
                 'resources/js/accounts-university-invoice.js',
                 'resources/js/accounts-university-invoice-details.js',

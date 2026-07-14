@@ -254,7 +254,7 @@
                         <a href="{{ route('hr.portal.holiday') }}">Manage &rsaquo;</a>
                     </div>
                     @php $pendingPageSize = 10; @endphp
-                    <div class="hrd-list hrd-list--padded hrd-list--scroll" id="pendingLeaveList"
+                    <div class="hrd-list hrd-list--scroll" id="pendingLeaveList"
                          data-url="{{ route('hr.portal.pending.leave.rows') }}"
                          data-page="1"
                          data-has-more="{{ $pendingTotal > $pendingPageSize ? '1' : '0' }}">
@@ -281,7 +281,7 @@
                         <a href="{{ route('hr.attendance') }}">Attendance &rsaquo;</a>
                     </div>
                     @php $absentPageSize = 10; @endphp
-                    <div class="hrd-list hrd-list--padded hrd-list--scroll" id="absentTodayList"
+                    <div class="hrd-list hrd-list--scroll" id="absentTodayList"
                          data-url="{{ route('hr.portal.absent.rows') }}"
                          data-page="1"
                          data-has-more="{{ $absentTotal > $absentPageSize ? '1' : '0' }}">

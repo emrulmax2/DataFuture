@@ -37,12 +37,7 @@ import { createIcons, icons } from "lucide";
         document.querySelector("#updateCINF svg").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
-        if($('#companySettingsForm input[name="site_logo"]').length > 0){
-            form_data.append('file', $('#companySettingsForm input[name="site_logo"]')[0].files[0]); 
-        }
-        if($('#companySettingsForm input[name="site_logo"]').length > 0){
-            form_data.append('file', $('#companySettingsForm input[name="site_favicon"]')[0].files[0]); 
-        }
+
         axios({
             method: "post",
             url: route('site.setting.update'),
