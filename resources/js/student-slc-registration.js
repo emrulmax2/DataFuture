@@ -36,10 +36,8 @@ import Tabulator from "tabulator-tables";
             });
         });
 
-        $('#addRegistrationForm .linkedRegistrationWrap').fadeOut(function(){
-            $('#addRegistrationForm [name="linked_agreement_id"]').val('0');
-            $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
-        });
+        // Synchronous, so reopening the modal can never inherit the previous agreement.
+        resetLinkedAgreement();
     });
 
     const editRegistrationModalEl = document.getElementById('editRegistrationModal')
@@ -239,70 +237,75 @@ import Tabulator from "tabulator-tables";
         }
     });
 
-    let regagreementCheck = false;
+    /* ---------------------------------------------------- linking an agreement ----
+     *
+     * Before a registration is stored we ask the server whether an UNLINKED agreement
+     * already exists for this student + course relation + registration year. If one
+     * does, HR is asked whether to link it, and the answer rides along in the save.
+     *
+     * The server is asked on EVERY submit, and a previous answer is reused only when
+     * it was given for the SAME agreement the server is handing back now. That makes
+     * the flow self-correcting: change the registration year and a different agreement
+     * (or none) comes back, so the question is re-asked on its own.
+     *
+     * It used to cache the answer in a `regagreementCheck` flag and clear that flag on
+     * a change to ANY input in the form - including the Yes/No radios, which ARE the
+     * answer. Answering the question therefore threw the answer away and sent the form
+     * back to the validate step, which found the same still-unlinked agreement and
+     * asked again. The registration could never be saved while an agreement existed.
+     */
 
-    $('#addRegistrationForm input, #addRegistrationForm select').on('change', function(){
-        regagreementCheck = false;
+    function setRegSaving(on){
+        $('#saveReg').prop('disabled', on);
+        $('#saveReg svg').css('display', on ? 'inline-block' : 'none');
+    }
+
+    function resetLinkedAgreement(){
+        // Cleared synchronously - the fade is cosmetic. These used to sit inside a
+        // fadeOut callback, so a re-submit fired ~400ms earlier still carried the
+        // previous agreement id and could link the wrong year's agreement.
+        $('#addRegistrationForm [name="linked_agreement_id"]').val('0');
+        $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
+        $('#addRegistrationForm .error-linked_agreement').html('');
+        $('#addRegistrationForm .linkedRegistrationWrap').fadeOut('fast');
+    }
+
+    // Cosmetic only - the submit path below is correct without it. But leaving a
+    // question about last year's agreement on screen is confusing.
+    $('#addRegistrationForm [name="registration_year"]').on('change', function(){
+        resetLinkedAgreement();
     });
 
-    $('#addRegistrationForm').on('submit', function(e){
-        e.preventDefault();
-        let $form = $(this);
+    function storeRegistration(){
         const form = document.getElementById('addRegistrationForm');
-
-        let form_data = new FormData(form);
-    
-        document.querySelector('#saveReg').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveReg svg").style.cssText ="display: inline-block;";
-        if(!regagreementCheck){
-            axios.post(route('student.validate.registration'), form_data).then(res => {
-                document.querySelector('#saveReg').removeAttribute('disabled');
-                document.querySelector("#saveReg svg").style.cssText = "display: none;";
-                if(res.data.success){
-                    regagreementCheck = true;
-                    $('#addRegistrationForm .linkedRegistrationWrap').fadeOut(function(){
-                        $('#addRegistrationForm [name="linked_agreement_id"]').val('0');
-                        $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
-                    });
-                    $('#addRegistrationForm').trigger('submit');
-                }else{
-                    regagreementCheck = true;
-                    $('#addRegistrationForm .linkedRegistrationWrap').fadeIn(function(){
-                        $('#addRegistrationForm [name="linked_agreement_id"]').val(res.data.slc_agreement_id);
-                        $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
-                    });
-                }
-            });
-            return;
-        }
+        const $form = $(form);
 
         axios({
             method: "post",
             url: route('student.store.registration'),
-            data: form_data,
+            // Rebuilt here, after the linked-agreement fields have settled.
+            data: new FormData(form),
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#saveReg').removeAttribute('disabled');
-            document.querySelector("#saveReg svg").style.cssText = "display: none;";
+            setRegSaving(false);
 
             if (response.status == 200) {
                 addRegistrationModal.hide();
 
-                successModal.show(); 
+                successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html("Congratulation!" );
                     $("#successModal .successModalDesc").html('Student SLC Registration successfully created.');
                     $("#successModal .successCloser").attr('data-action', 'RELOAD');
-                });  
-                
+                });
+
                 setTimeout(function(){
                     successModal.hide();
                     window.location.reload();
                 }, 2000);
             }
         }).catch(error => {
-            document.querySelector('#saveReg').removeAttribute('disabled');
-            document.querySelector("#saveReg svg").style.cssText = "display: none;";
+            setRegSaving(false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -313,7 +316,7 @@ import Tabulator from "tabulator-tables";
                     $('#addRegistrationModal').animate({ scrollTop: 0 });
                     $form.find('.alert.errorAlert').remove();
                     $('.modal-content', $form).prepend('<div class="alert errorAlert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Selected registration year already exist.</div>')
-                
+
                     createIcons({
                         icons,
                         "stroke-width": 1.5,
@@ -327,6 +330,77 @@ import Tabulator from "tabulator-tables";
                     console.log('error');
                 }
             }
+        });
+    }
+
+    $('#addRegistrationForm').on('submit', function(e){
+        e.preventDefault();
+        const form = document.getElementById('addRegistrationForm');
+        const $form = $(form);
+
+        setRegSaving(true);
+        $('#addRegistrationForm .acc__input-error').html('');
+        $('#addRegistrationForm .border-danger').removeClass('border-danger');
+
+        axios.post(route('student.validate.registration'), new FormData(form)).then(res => {
+            // success === true means there is nothing to link.
+            const agreementId = res.data.success ? 0 : (parseInt(res.data.slc_agreement_id, 10) || 0);
+
+            if(!agreementId){
+                resetLinkedAgreement();
+                storeRegistration();
+                return;
+            }
+
+            // .length, not .val() - "No" is the string "0" and would read as falsy.
+            const answered = $('#addRegistrationForm [name="linked_agreement"]:checked').length > 0;
+            const shownId  = parseInt($('#addRegistrationForm [name="linked_agreement_id"]').val(), 10) || 0;
+            const sameQuestion = shownId === agreementId;
+
+            if(answered && sameQuestion){
+                storeRegistration();
+                return;
+            }
+
+            setRegSaving(false);
+
+            if(sameQuestion){
+                // Already asked, still unanswered - say so rather than appear to do nothing.
+                $('#addRegistrationForm .error-linked_agreement').html('Please choose Yes or No to continue.');
+            }else{
+                // A different agreement than last time: ask afresh.
+                $('#addRegistrationForm [name="linked_agreement"]').prop('checked', false);
+                $('#addRegistrationForm [name="linked_agreement_id"]').val(agreementId);
+                $('#addRegistrationForm .error-linked_agreement').html('');
+            }
+
+            $('#addRegistrationForm .linkedRegistrationWrap').fadeIn('fast');
+        }).catch(error => {
+            // There was no catch here at all: a failed check left Save disabled and the
+            // spinner turning, with nothing on screen to say why.
+            setRegSaving(false);
+
+            if(error.response && error.response.status == 422 && error.response.data.errors){
+                for (const [key, val] of Object.entries(error.response.data.errors)) {
+                    $(`#addRegistrationForm .${key}`).addClass('border-danger');
+                    $(`#addRegistrationForm  .error-${key}`).html(val);
+                }
+                return;
+            }
+
+            $('#addRegistrationModal').animate({ scrollTop: 0 });
+            $form.find('.alert.errorAlert').remove();
+            $('.modal-content', $form).prepend('<div class="alert errorAlert alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Could not check for an existing agreement. Nothing has been saved - please try again.</div>');
+
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
+
+            setTimeout(function(){
+                $form.find('.alert.errorAlert').remove();
+            }, 4000);
         });
     });
 

@@ -39,7 +39,7 @@ class SlcRegistrationController extends Controller
 
         $slcAgreement = SlcAgreement::where('student_id', $studen_id)->where('student_course_relation_id', $student_course_relation_id)
                         ->where('year', $registration_year)->whereNull('slc_registration_id')->get();
-        //dd($request->all());
+        //dd($slcAgreement);
         
         return response()->json([
             'success' => $slcAgreement->count() > 0 ? false : true,
