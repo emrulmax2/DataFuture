@@ -18,10 +18,17 @@ import { createIcons, icons } from "lucide";
         showPreview('siteLogoUpload', 'siteLogoImg')
     });
 
+    $('#companySettingsForm').on('change', '#siteDarkLogoUpload', function(){
+        showPreview('siteDarkLogoUpload', 'siteDarkLogoImg')
+    });
+
     function showPreview(inputId, targetImageId) {
         var src = document.getElementById(inputId);
         var target = document.getElementById(targetImageId);
         var title = document.getElementById('selected_image_title');
+        if (!src.files || !src.files[0]) {
+            return;
+        }
         var fr = new FileReader();
         fr.onload = function () {
             target.src = fr.result;

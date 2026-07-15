@@ -55,7 +55,7 @@ class SettingController extends Controller
 
     public function update(Request $request){
         $category = $request->category;
-        $allFields = $request->except(['file', 'site_logo', 'site_favicon', 'category']);
+        $allFields = $request->except(['file', 'site_logo', 'site_dark_logo', 'site_favicon', 'category']);
 
         
         if($request->hasFile('site_logo')):
@@ -74,6 +74,24 @@ class SettingController extends Controller
             $site_logo_name = $imageName;
             $allFields['site_logo'] = $site_logo_name;
             Cache::forever('site_logo', $site_logo_name);
+        endif;
+
+        if($request->hasFile('site_dark_logo')):
+            $siteDarkLogoRow = Option::where('category', $category)->where('name', 'site_dark_logo')->first();
+            $site_dark_logo_name = (isset($siteDarkLogoRow->value) && !empty($siteDarkLogoRow->value) ? $siteDarkLogoRow->value : '');
+            if(isset($siteDarkLogoRow->value) && !empty($siteDarkLogoRow->value)):
+                if(Storage::disk('local')->exists('public/'.$siteDarkLogoRow->value)):
+                    Storage::disk('local')->delete('public/'.$siteDarkLogoRow->value);
+                endif;
+            endif;
+
+            $site_dark_logo = $request->file('site_dark_logo');
+            $imageName = 'company_dark_logo.' . $site_dark_logo->getClientOriginalExtension();
+            $site_dark_logo->storeAs('public/', $imageName);
+
+            $site_dark_logo_name = $imageName;
+            $allFields['site_dark_logo'] = $site_dark_logo_name;
+            Cache::forever('site_dark_logo', $site_dark_logo_name);
         endif;
 
         if($request->hasFile('site_favicon')):

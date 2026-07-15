@@ -17,6 +17,7 @@ use App\Models\EmployeeWorkingPatternPay;
 use App\Models\HrCondition;
 use App\Models\HrHolidayYear;
 use App\Models\PaySlipUploadSync;
+use App\Models\VenueIpAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -289,23 +290,515 @@ class EmployeeAttendanceController extends Controller
         return ($employeeAttendance > 0 ? 1 : 0);
     }
 
-    public function show($date){
+    /** Timeline runs 07:00 -> 21:00; every rostered shift we run falls inside it. */
+    private const TIMELINE_START = 420;
+    private const TIMELINE_SPAN  = 840;
+
+    /** Minutes a punch may drift from the contract time and still read as "on time". */
+    private const TOLERANCE = 5;
+
+    /**
+     * leave_status is a copy of the leave's leave_type.
+     *
+     * 1-5 match the leave-type picker and the leave calendar's colour legend. 6 and 7
+     * are real and in use (394 and 10 attendance rows) but the picker's switch only
+     * goes to 5, so nothing in the app ever named them - they rendered blank here and
+     * on the old screen. Identified from their leave records: every type 6 leave is a
+     * maternity leave, the single type 7 is a paternity leave.
+     */
+    private const LEAVE_NAMES = [
+        1 => 'Holiday / Vacation',
+        2 => 'Unauthorised Absent',
+        3 => 'Sick Leave',
+        4 => 'Authorised Unpaid',
+        5 => 'Authorised Paid',
+        6 => 'Maternity Leave',
+        7 => 'Paternity Leave',
+    ];
+
+    /**
+     * The daily attendance screen. $date arrives as a unix timestamp.
+     *
+     * The four buckets are still resolved by the four original queries, so every
+     * row lands in exactly the section(s) it always did - including the overlap
+     * where a leave row also carries issues. What changed is that the page now
+     * renders each attendance ONCE, tagged with every bucket it belongs to,
+     * instead of emitting a second copy of the same form fields in a second table.
+     */
+    public function show($date)
+    {
+        $timestamp = (int) $date;
+        $theDate   = date('Y-m-d', $timestamp);
+
+        $onDate = fn () => EmployeeAttendance::where('date', $theDate);
+
+        $bucketIds = [
+            'issues'   => $onDate()->where('user_issues', '>', 0)->where('overtime_status', '!=', 1)->pluck('id')->all(),
+            'absents'  => $onDate()->where('leave_status', '>', 1)->pluck('id')->all(),
+            'overtime' => $onDate()->where('overtime_status', 1)->pluck('id')->all(),
+            'noissues' => $onDate()->where('overtime_status', 0)->where('leave_status', '<', 2)->where('user_issues', 0)->pluck('id')->all(),
+        ];
+
+        $visibleIds = array_values(array_unique(array_merge(...array_values($bucketIds))));
+
+        // Eager loaded up front. The old page lazy-loaded employee, pay and leave
+        // per row, and each location badge ran two more queries - several hundred
+        // queries for a normal day.
+        $attendances = EmployeeAttendance::with([
+                'employee.title',
+                'employee.employment.employeeJobTitle',
+                'pay',
+                'leaveDay.leave',
+            ])
+            ->whereIn('id', $visibleIds)
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $venues = $this->punchVenues($attendances, $theDate);
+
+        $rows = $attendances->map(function ($atten) use ($bucketIds, $venues) {
+            $buckets = [];
+            foreach ($bucketIds as $bucket => $ids) {
+                if (in_array($atten->id, $ids)) {
+                    $buckets[] = $bucket;
+                }
+            }
+
+            return $this->presentAttendance($atten, $buckets, $venues);
+        });
+
+        $pending = $rows->where('is_reviewed', false);
+
         return view('pages.hr.attendance.show', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Monthly Attendance', 'href' => route('hr.attendance')],
                 ['label' => 'HR Daily Attendance', 'href' => 'javascript:void(0);']
             ],
-            'date' => $date,
-            'theDate' => date('D jS F, Y', $date),
-            'issues' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('user_issues', '>', 0)->where('overtime_status', '!=', 1)->orderBy('id', 'ASC')->get(),
-            'absents' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('leave_status', '>', 1)->orderBy('id', 'ASC')->get(),
-            'overtime' => EmployeeAttendance::where('date', date('Y-m-d', $date))->where('overtime_status', 1)->orderBy('id', 'ASC')->get(),
-            'noissues' => EmployeeAttendance::where('date', date('Y-m-d', $date))
-                          ->where('overtime_status', 0)->where('leave_status', '<', 2)
-                          ->where('user_issues', 0)
-                          ->orderBy('id', 'ASC')->get(),
+            'date' => $timestamp,
+            'theDate' => date('D jS F, Y', $timestamp),
+            'rows' => $rows,
+            'counts' => [
+                'all'      => $rows->count(),
+                'issues'   => count($bucketIds['issues']),
+                'absents'  => count($bucketIds['absents']),
+                'overtime' => count($bucketIds['overtime']),
+                'noissues' => count($bucketIds['noissues']),
+                'pending'  => $pending->count(),
+                'reviewed' => $rows->count() - $pending->count(),
+                'ontime'   => $pending->where('is_on_time', true)->count(),
+            ],
         ]);
+    }
+
+    /**
+     * Resolves the clock-in / clock-out venue for every row on the day in two
+     * queries instead of the two-per-row the model accessors would run.
+     *
+     * Mirrors EmployeeAttendance::getClockInLocationAttribute() exactly:
+     *   suc 1 = punched from a known venue IP, 0 = punched from somewhere else,
+     *   2 = no live punch at all.
+     */
+    private function punchVenues($attendances, string $theDate): array
+    {
+        $employeeIds = $attendances->pluck('employee_id')->filter()->unique()->values()->all();
+
+        if (empty($employeeIds)) {
+            return [];
+        }
+
+        $venueByIp = VenueIpAddress::with('venue')->get()->keyBy('ip');
+
+        // The accessors take the LAST punch of the day (orderBy id DESC, first()),
+        // so walking ASC and letting later rows overwrite lands on the same one.
+        $punches = EmployeeAttendanceLive::whereIn('employee_id', $employeeIds)
+            ->where('date', $theDate)
+            ->whereIn('attendance_type', [1, 4])
+            ->orderBy('id', 'ASC')
+            ->get();
+
+        $map = [];
+        foreach ($punches as $punch) {
+            $side = ((int) $punch->attendance_type === 1) ? 'in' : 'out';
+
+            if (empty($punch->ip)) {
+                $map[$punch->employee_id][$side] = ['suc' => 0, 'ip' => '', 'venue' => ''];
+                continue;
+            }
+
+            $venueIp = $venueByIp->get($punch->ip);
+            $venueName = $venueIp->venue->name ?? '';
+
+            $map[$punch->employee_id][$side] = !empty($venueName)
+                ? ['suc' => 1, 'ip' => $venueIp->ip, 'venue' => $venueName]
+                : ['suc' => 0, 'ip' => $punch->ip, 'venue' => ''];
+        }
+
+        return $map;
+    }
+
+    /**
+     * Flattens one attendance into everything the screen needs, so the Blade holds
+     * markup rather than payroll arithmetic.
+     */
+    private function presentAttendance(EmployeeAttendance $atten, array $buckets, array $venues): array
+    {
+        $issueFlags = !empty($atten->isses_field) ? @unserialize(base64_decode($atten->isses_field)) : [];
+        $issueFlags = is_array($issueFlags) ? $issueFlags : [];
+
+        // 00:00 on the CONTRACT means "not rostered at all", exactly as it does on a
+        // punch - the sync writes the pair 00:00/00:00 on 25,376 rows (every "not in
+        // schedule" row, and every leave day). It is never half of a real shift: no row
+        // anywhere has a 00:00 start with a real finish, or the reverse.
+        //
+        // Keeping it as a literal midnight compared a 09:04 punch against 00:00 and
+        // produced "9h 4m late", a red bar, a rostered stub drawn at the far left of
+        // the timeline, and a "7h 39m over rostered" verdict - on a shift nobody
+        // rostered.
+        $schedIn   = $this->attendanceClock($atten->clockin_contract);
+        $schedOut  = $this->attendanceClock($atten->clockout_contract);
+        $punchIn   = $this->attendanceClock($atten->clockin_punch);
+        $punchOut  = $this->attendanceClock($atten->clockout_punch);
+        $systemIn  = $this->attendanceClock($atten->clockin_system);
+        $systemOut = $this->attendanceClock($atten->clockout_system);
+
+        $unpaidBreak  = $this->convertStringToMinute((string) ($atten->unpadi_break ?: '00:00'));
+        $allowedBreak = (int) $atten->allowed_break;
+        $takenBreak   = (int) ($atten->total_break ?: 0);
+        $workedMin    = (int) ($atten->total_work_hour ?: 0);
+
+        $leaveStatus     = (int) ($atten->leave_status ?: 0);
+        $leaveHour       = (int) ($atten->leave_hour ?: 0);
+        $leaveAdjustment = (string) ($atten->leave_adjustment ?: '');
+
+        $hasPunch  = ($punchIn !== '' || $punchOut !== '');
+        $hasSystem = ($systemIn !== '' || $systemOut !== '');
+        $isOnlyLeave = ($punchIn === '' && $punchOut === '' && $workedMin === 0 && $leaveStatus > 0);
+
+        // A punch is compared against the contract, so these describe what actually
+        // happened and do not move when HR edits the recorded (system) time.
+        $inDelta = ($schedIn !== '' && $punchIn !== '')
+            ? $this->convertStringToMinute($punchIn) - $this->convertStringToMinute($schedIn)
+            : null;
+        $outDelta = ($schedOut !== '' && $punchOut !== '')
+            ? $this->convertStringToMinute($punchOut) - $this->convertStringToMinute($schedOut)
+            : null;
+
+        $notRostered = ($schedIn === '' && $schedOut === '');
+
+        $inState  = $this->clockState($inDelta, 'in', $schedIn !== '');
+        $outState = $this->clockState($outDelta, 'out', $schedOut !== '');
+
+        $isOnTime = $inDelta !== null && $outDelta !== null
+            && abs($inDelta) <= self::TOLERANCE && abs($outDelta) <= self::TOLERANCE;
+
+        $rosteredMin = ($schedIn !== '' && $schedOut !== '')
+            ? ($this->convertStringToMinute($schedOut) - $this->convertStringToMinute($schedIn)) - $unpaidBreak
+            : null;
+        $hourDelta = $rosteredMin !== null ? $workedMin - $rosteredMin : null;
+
+        $hasMissingPunch = $hasPunch && ($punchIn === '' || $punchOut === '');
+
+        // Someone worked a full day that nobody rostered. There is nothing to measure
+        // them against - which is precisely why it wants a look - so it is flagged
+        // rather than left neutral. Amber, not red: red on this page means the row is
+        // broken (a punch is missing, the hours are negative). This row is not broken,
+        // it is unexplained.
+        //
+        // The row's edge and avatar ring follow the bar, so they turn amber with it.
+        $barTone = $notRostered
+            ? 'warn'
+            : (($hasMissingPunch || $inState['tone'] === 'bad' || $outState['tone'] === 'bad') ? 'bad'
+                : (($inState['tone'] === 'warn' || $outState['tone'] === 'warn') ? 'warn' : 'good'));
+
+        $isReviewed = (int) ($atten->updated_by ?: 0) > 0;
+        $adjustment = (string) ($atten->adjustment ?: '');
+        // A leave adjustment only counts where there is leave; the column can hold a
+        // stale value on a row whose leave was later cleared.
+        $isAdjusted = $this->signedMinutes($adjustment) !== 0
+            || ($leaveStatus > 0 && $this->signedMinutes($leaveAdjustment) !== 0);
+
+        $rowFlags = [$isReviewed ? 'reviewed' : 'pending'];
+        if ($isOnTime) {
+            $rowFlags[] = 'on-time';
+        }
+        if ($inDelta !== null && $inDelta > self::TOLERANCE) {
+            $rowFlags[] = 'late-in';
+        }
+        if ($outDelta !== null && $outDelta < -self::TOLERANCE) {
+            $rowFlags[] = 'early-out';
+        }
+        if ($isAdjusted) {
+            $rowFlags[] = 'adjusted';
+        }
+
+        $first = trim((string) ($atten->employee->first_name ?? ''));
+        $last  = trim((string) ($atten->employee->last_name ?? ''));
+        $employeePhoto = $this->employeePhotoUrl($atten->employee);
+
+        return [
+            'id'          => (int) $atten->id,
+            'employee_id' => (int) $atten->employee_id,
+            'date'        => date('Y-m-d', strtotime((string) $atten->date)),
+
+            'name'      => trim(($atten->employee->title->name ?? '').' '.$first.' '.$last),
+            'job_title' => (string) ($atten->employee->employment->employeeJobTitle->name ?? ''),
+            'rate'      => $atten->pay->hourly_rate ?? null,
+            'initials'  => strtoupper(mb_substr($first, 0, 1).mb_substr($last, 0, 1)) ?: '?',
+            'photo_url' => $employeePhoto,
+
+            'buckets' => $buckets,
+            'flags'   => $rowFlags,
+
+            'sched_in'   => $schedIn,
+            'sched_out'  => $schedOut,
+            'punch_in'   => $punchIn,
+            'punch_out'  => $punchOut,
+            'system_in'  => $systemIn,
+            'system_out' => $systemOut,
+
+            'loc_in'  => $venues[$atten->employee_id]['in']  ?? ['suc' => 2, 'ip' => '', 'venue' => ''],
+            'loc_out' => $venues[$atten->employee_id]['out'] ?? ['suc' => 2, 'ip' => '', 'venue' => ''],
+
+            'in_state'  => $inState,
+            'out_state' => $outState,
+            'bar_tone'  => $barTone,
+
+            // The left edge and the avatar ring take the TIMELINE BAR's colour, so a
+            // row's accent always agrees with the bar sitting next to it. Deliberately
+            // NOT the recommendation's tone: the reco is about hours against the
+            // roster, the bar is about the punches, and the two can disagree - clock in
+            // 2h early and out 2h early and the bar is red while the hours still add up.
+            // Punches that both land on the roster carry no accent: nothing to flag.
+            'edge_tone' => $isReviewed
+                ? ($isAdjusted ? 'accent' : 'done')
+                : ($isOnTime ? 'none' : ($hasPunch ? $barTone : 'muted')),
+
+            'paid_break'    => (string) ($atten->paid_break ?: '00:00'),
+            'unpaid_break'  => (string) ($atten->unpadi_break ?: '00:00'),
+            'taken_break'   => $takenBreak,
+            'allowed_break' => $allowedBreak,
+            'break_taken'   => $atten->break_time,
+            'break_issue'   => !empty($issueFlags['break_issue']),
+            'break_over'    => $takenBreak > $allowedBreak,
+            'has_breaks'    => $takenBreak > 0,
+
+            'clockin_issue'  => !empty($issueFlags['clockin_system']),
+            'clockout_issue' => !empty($issueFlags['clockout_system']),
+
+            'adjustment'      => $adjustment,
+            'is_adjusted'     => $isAdjusted,
+            'total_work_hour' => $workedMin,
+            'work_hour'       => $atten->work_hour,
+            // The browser re-derives the "22m less than rostered" line as HR edits, so
+            // it needs the rostered figure in minutes, not just formatted.
+            'rostered_min'    => $rosteredMin,
+            'rostered_hour'   => $rosteredMin !== null ? $this->calculateHourMinute($rosteredMin) : null,
+            'hour_delta'      => $hourDelta,
+            'hour_delta_plain' => $hourDelta === null
+                ? 'No rostered shift'
+                : ($hourDelta === 0
+                    ? 'Same as rostered'
+                    : $this->humanDelta($hourDelta).($hourDelta > 0 ? ' more' : ' less')),
+
+            'reco'      => $this->recommendation($isOnTime, $hourDelta, $punchIn, $punchOut),
+            // "No rostered start - no rostered finish" says the same thing twice. When
+            // there is no roster at all, say it once.
+            'fact_line' => ($notRostered && $hasPunch)
+                ? 'Worked outside any rostered shift'
+                : $this->factLine($inDelta, $outDelta, $punchIn, $punchOut),
+
+            'timeline' => ($hasPunch || $hasSystem) ? [
+                'sched' => $this->timelineBar($schedIn, $schedOut),
+                'clock' => $this->timelineBar($systemIn ?: $punchIn, $systemOut ?: $punchOut),
+            ] : null,
+
+            'leave_status'     => $leaveStatus,
+            // Never fall back to an empty string: an unnamed type would render a blank
+            // band, which is how 6 and 7 went unnoticed in the first place.
+            'leave_name'       => self::LEAVE_NAMES[$leaveStatus]
+                ?? ($leaveStatus > 0 ? 'Leave (type '.$leaveStatus.')' : ''),
+            'leave_note'       => (string) ($atten->leaveDay->leave->note ?? ''),
+            'leave_day_hour'   => $this->calculateHourMinute((int) ($atten->leaveDay->hour ?? 0)),
+            'leave_locked'     => (int) ($atten->employee_leave_day_id ?: 0) > 0,
+            'leave_adjustment' => $leaveAdjustment,
+            'leave_hour'       => $leaveHour,
+            // leave_hour already has any saved adjustment folded into it, so the raw
+            // figure is recovered by reversing it. The editor recomputes from this
+            // base every keystroke; the old screen recomputed from the running total,
+            // which quietly re-applied the adjustment each time HR retyped it.
+            'leave_base'       => $leaveHour - $this->signedMinutes($leaveAdjustment),
+            'leave_hour_text'  => $atten->leaves_hour,
+
+            'note'        => (string) ($atten->note ?: ''),
+            'user_issues' => (int) ($atten->user_issues ?: 0),
+            'is_only_leave' => $isOnlyLeave,
+            'is_reviewed'   => $isReviewed,
+            'is_on_time'    => $isOnTime,
+            'has_punch'     => $hasPunch,
+        ];
+    }
+
+    private function employeePhotoUrl($employee): string
+    {
+        $photo = trim((string) ($employee->photo ?? ''));
+
+        if ($photo === '' || empty($employee->id)) {
+            return '';
+        }
+
+        $path = 'public/employees/'.$employee->id.'/'.$photo;
+
+        return Storage::disk('local')->exists($path)
+            ? Storage::disk('local')->url($path)
+            : '';
+    }
+
+    /**
+     * Old sync stores a missing in/out punch as 00:00. That is a placeholder, not
+     * a midnight shift, so normalise it before any timeline or issue arithmetic.
+     */
+    private function attendanceClock($value, bool $zeroMeansMissing = true): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        if (preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $value, $match)) {
+            $clock = sprintf('%02d:%02d', (int) $match[1], (int) $match[2]);
+
+            return $zeroMeansMissing && $clock === '00:00' ? '' : $clock;
+        }
+
+        return $value;
+    }
+
+    /** How far a punch sits from its contract time, in words. */
+    private function clockState(?int $delta, string $side, bool $rostered = true): array
+    {
+        if ($delta === null) {
+            // Two different absences: nobody rostered them, or they never punched.
+            return ['label' => $rostered ? 'Not punched' : 'Not rostered', 'tone' => 'muted'];
+        }
+
+        if (abs($delta) <= self::TOLERANCE) {
+            return ['label' => 'On time', 'tone' => 'good'];
+        }
+
+        if ($side === 'in') {
+            return $delta > 0
+                ? ['label' => $this->humanDelta($delta).' late', 'tone' => $delta >= 60 ? 'bad' : 'warn']
+                : ['label' => $this->humanDelta($delta).' early', 'tone' => 'good'];
+        }
+
+        return $delta < 0
+            ? ['label' => $this->humanDelta($delta).' early', 'tone' => $delta <= -60 ? 'bad' : 'warn']
+            : ['label' => $this->humanDelta($delta).' over', 'tone' => 'neutral'];
+    }
+
+    /** The single line HR reads to decide whether a row needs them at all. */
+    private function recommendation(bool $isOnTime, ?int $hourDelta, string $punchIn, string $punchOut): array
+    {
+        if ($punchIn === '' && $punchOut === '') {
+            return ['label' => 'No clocking recorded', 'tone' => 'muted'];
+        }
+
+        if ($punchIn === '') {
+            return ['label' => 'Clock-in missing', 'tone' => 'bad'];
+        }
+
+        if ($punchOut === '') {
+            return ['label' => 'Clock-out missing', 'tone' => 'bad'];
+        }
+
+        if ($hourDelta === null) {
+            return ['label' => 'No rostered shift to compare', 'tone' => 'neutral'];
+        }
+
+        if ($isOnTime) {
+            return ['label' => 'Matches schedule', 'tone' => 'good'];
+        }
+
+        if (abs($hourDelta) <= self::TOLERANCE) {
+            return ['label' => 'Hours match schedule', 'tone' => 'good'];
+        }
+
+        return $hourDelta < 0
+            ? ['label' => $this->humanDelta($hourDelta).' short — review', 'tone' => abs($hourDelta) >= 60 ? 'bad' : 'warn']
+            : ['label' => $this->humanDelta($hourDelta).' over rostered', 'tone' => 'neutral'];
+    }
+
+    private function factLine(?int $inDelta, ?int $outDelta, string $punchIn, string $punchOut): string
+    {
+        $parts = [];
+
+        if ($inDelta === null) {
+            $parts[] = $punchIn === '' ? 'No clock-in' : 'No rostered start';
+        } elseif (abs($inDelta) <= self::TOLERANCE) {
+            $parts[] = 'In on time';
+        } else {
+            $parts[] = 'In '.$this->humanDelta($inDelta).($inDelta > 0 ? ' late' : ' early');
+        }
+
+        if ($outDelta === null) {
+            $parts[] = $punchOut === '' ? 'no clock-out' : 'no rostered finish';
+        } elseif (abs($outDelta) <= self::TOLERANCE) {
+            $parts[] = 'out on time';
+        } else {
+            $parts[] = 'out '.$this->humanDelta($outDelta).($outDelta < 0 ? ' early' : ' over');
+        }
+
+        return implode(' · ', $parts);
+    }
+
+    /** Left / width of a bar on the 07:00-21:00 track, as percentages. */
+    private function timelineBar(string $from, string $to): ?array
+    {
+        if ($from === '' || $to === '') {
+            return null;
+        }
+
+        $pct = function (string $time) {
+            $at = ($this->convertStringToMinute($time) - self::TIMELINE_START) / self::TIMELINE_SPAN * 100;
+            return max(0, min(100, $at));
+        };
+
+        $left = $pct($from);
+
+        return [
+            'left'  => round($left, 3),
+            'width' => round(max(0.6, $pct($to) - $left), 3),
+        ];
+    }
+
+    /** 85 -> "1h 25m", 22 -> "22m". Sign is dropped; the caller supplies the word. */
+    private function humanDelta(int $minutes): string
+    {
+        $minutes = abs($minutes);
+        $hours = intdiv($minutes, 60);
+        $mins  = $minutes % 60;
+
+        if ($hours && $mins) {
+            return $hours.'h '.$mins.'m';
+        }
+
+        return $hours ? $hours.'h' : $mins.'m';
+    }
+
+    /** "-01:30" -> -90, "+00:30" -> 30, "" -> 0. */
+    private function signedMinutes(string $adjustment): int
+    {
+        $adjustment = trim($adjustment);
+
+        if ($adjustment === '') {
+            return 0;
+        }
+
+        $sign = str_starts_with($adjustment, '-') ? -1 : 1;
+
+        return $sign * $this->convertStringToMinute(ltrim($adjustment, '+-'));
     }
 
     public function syncronise(Request $request){
@@ -970,47 +1463,53 @@ class EmployeeAttendanceController extends Controller
         $attendance = EmployeeAttendance::find($rowID);
         $theDayTotal = 0;
 
-        $html = '';
-        $html .= '<div class="overflow-x-auto">';
-            $html .= '<table class="table table-bordered table-sm">';
-                $html .= '<thead>';
-                    $html .= '<tr>';
-                        $html .= '<th class="whitespace-nowrap">#</th>';
-                        $html .= '<th class="whitespace-nowrap">Start</th>';
-                        $html .= '<th class="whitespace-nowrap">End</th>';
-                        $html .= '<th class="whitespace-nowrap">Duration</th>';
-                    $html .= '</tr>';
-                $html .= '</thead>';
-                $html .= '<tbody>';
-                    if(isset($attendance->breaks) && $attendance->breaks->count() > 0):
-                        $i = 1;
-                        foreach($attendance->breaks as $brks):
-                            $html .= '<tr class="breakRow">';
-                                $html .= '<td>'.$i.'</td>';
-                                $html .= '<td><input value="'.$brks->start.'" type="text" class="form-control breakStart w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][start]"/></td>';
-                                $html .= '<td><input value="'.$brks->end.'" type="text" class="form-control breakEnd w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][end]"/></td>';
-                                $html .= '<td><input readonly value="'.$this->calculateHourMinute($brks->total).'" type="text" class="form-control breakRowTotal w-full timepicker" name="breaks['.$rowID.']['.$brks->id.'][total]"/></td>';
-                            $html .= '</tr>';
-                            $theDayTotal += $brks->total;
-                            $i++;
-                        endforeach;
-                    else:
-                        $html .= '<tr class="breakRow">';
-                            $html .= '<td>1</td>';
-                            $html .= '<td><input value="" type="text" class="form-control breakStart w-full timepicker" name="newBreaks['.$rowID.'][start]"/></td>';
-                            $html .= '<td><input value="" type="text" class="form-control breakEnd w-full timepicker" name="newBreaks['.$rowID.'][end]"/></td>';
-                            $html .= '<td><input readonly value="" type="text" class="form-control breakRowTotal w-full timepicker" name="newBreaks['.$rowID.'][total]"/></td>';
-                        $html .= '</tr>';
-                    endif;
-                $html .= '</tbody>';
-                $html .= '<tfoot>';
-                    $html .= '<tr>';
-                        $html .= '<td colspan="3"><strong>Day Total</strong></td>';
-                        $html .= '<td><input value="'.$this->calculateHourMinute($theDayTotal).'" type="text" class="form-control w-full breakGrandTotal" readonly name="total_break"/></td>';
-                    $html .= '</tr>';
-                $html .= '</tfoot>';
-            $html .= '</table>';
-        $html .= '</div>';
+        // One "card" per break, matching the drawer's field/readout language. The JS
+        // hooks (.breakRow / .breakStart / .breakEnd / .breakRowTotal / .breakGrandTotal)
+        // and the field names are unchanged, so edit + save keep working.
+        $breakCard = function($idx, $start, $end, $total, $nameStart, $nameEnd, $nameTotal){
+            return '<div class="att-brk breakRow">'
+                . '<div class="att-brk__num">Break '.$idx.'</div>'
+                . '<div class="att-brk__grid">'
+                    . '<label class="att-field"><span>Start</span>'
+                        . '<input value="'.$start.'" type="text" class="att-input att-input--time breakStart timepicker" name="'.$nameStart.'"/></label>'
+                    . '<i data-lucide="arrow-right" class="att-brk__arrow w-4 h-4"></i>'
+                    . '<label class="att-field"><span>End</span>'
+                        . '<input value="'.$end.'" type="text" class="att-input att-input--time breakEnd timepicker" name="'.$nameEnd.'"/></label>'
+                    . '<div class="att-field att-field--dur"><span>Duration</span>'
+                        . '<input readonly value="'.$total.'" type="text" class="att-input att-input--time att-input--readonly breakRowTotal timepicker" name="'.$nameTotal.'"/></div>'
+                . '</div>'
+            . '</div>';
+        };
+
+        $cards = '';
+        if(isset($attendance->breaks) && $attendance->breaks->count() > 0):
+            $i = 1;
+            foreach($attendance->breaks as $brks):
+                $cards .= $breakCard(
+                    $i, $brks->start, $brks->end, $this->calculateHourMinute($brks->total),
+                    'breaks['.$rowID.']['.$brks->id.'][start]',
+                    'breaks['.$rowID.']['.$brks->id.'][end]',
+                    'breaks['.$rowID.']['.$brks->id.'][total]'
+                );
+                $theDayTotal += $brks->total;
+                $i++;
+            endforeach;
+        else:
+            $cards .= $breakCard(
+                1, '', '', '',
+                'newBreaks['.$rowID.'][start]',
+                'newBreaks['.$rowID.'][end]',
+                'newBreaks['.$rowID.'][total]'
+            );
+        endif;
+
+        $html = '<div class="att-breaklist">'
+            . $cards
+            . '<div class="att-brk-total">'
+                . '<span class="att-brk-total__label">Day total</span>'
+                . '<input value="'.$this->calculateHourMinute($theDayTotal).'" type="text" class="att-input att-input--time att-input--readonly att-brk-total__value breakGrandTotal" readonly name="total_break"/>'
+            . '</div>'
+        . '</div>';
 
         return response()->json(['res' => $html], 200);
     }
@@ -1068,8 +1567,11 @@ class EmployeeAttendanceController extends Controller
         endif;
 
         $total_break = (isset($employeeAttendance->total_break) && $employeeAttendance->total_break > 0 ? $employeeAttendance->total_break : 0);
-        $total_work_hour = (isset($employeeAttendance->total_work_hour) && $employeeAttendance->total_work_hour > 0 ? $employeeAttendance->tottotal_work_hourl_break : 0);
-        
+        // Was $employeeAttendance->tottotal_work_hourl_break - a property that does not
+        // exist, so this always read null and the over-allowance branch below wrote the
+        // employee's hours down to 0.
+        $total_work_hour = (isset($employeeAttendance->total_work_hour) && $employeeAttendance->total_work_hour > 0 ? $employeeAttendance->total_work_hour : 0);
+
         $paid_break = (!empty($employeeAttendance->paid_break) ? $this->convertStringToMinute($employeeAttendance->paid_break) : 0);
         $unpaid_break = (!empty($employeeAttendance->unpadi_break) ? $this->convertStringToMinute($employeeAttendance->unpadi_break) : 0);
         $allowedBreak = ($paid_break + $unpaid_break);

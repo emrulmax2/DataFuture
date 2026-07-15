@@ -102,6 +102,15 @@
                                     </div>
                                     <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5 mt-4">
                                         <div class="h-20 relative imgUploadWrap flex justify-center items-center cursor-pointer zoom-in mx-auto">
+                                            <img class="rounded-0 siteDarkLogoImg" id="siteDarkLogoImg" data-placeholder="{{ asset('build/assets/images/lcc-header-sample-logo.png') }}" alt="Dark Logo" src="{{ (isset($opt['site_dark_logo']) && !empty($opt['site_dark_logo']) && Storage::disk('local')->exists('public/'.$opt['site_dark_logo']) ? Storage::disk('local')->url('public/'.$opt['site_dark_logo']) : asset('build/assets/images/lcc-header-sample-logo.png')) }}">
+                                        </div>
+                                        <div class="mx-auto cursor-pointer relative mt-5">
+                                            <button type="button" class="btn btn-linkedin w-full">Select Dark Logo</button>
+                                            <input type="file" accept=".jpg, .jpeg, .png, .gif, .svg" id="siteDarkLogoUpload" name="site_dark_logo" class="w-full h-full cursor-pointer top-0 left-0 absolute opacity-0">
+                                        </div>
+                                    </div>
+                                    <div class="border-2 border-dashed shadow-sm border-slate-200/60 dark:border-darkmode-400 rounded-md p-5 mt-4">
+                                        <div class="h-20 relative imgUploadWrap flex justify-center items-center cursor-pointer zoom-in mx-auto">
                                             <img class="rounded-0" alt="Site Favicon siteFaviconImg" id="siteFaviconImg" data-placeholder="{{ asset('build/assets/images/placeholders/200x200.jpg') }}" src="{{ (isset($opt['site_favicon']) && !empty($opt['site_favicon']) && Storage::disk('local')->exists('public/'.$opt['site_favicon']) ? Storage::disk('local')->url('public/'.$opt['site_favicon']) : asset('build/assets/images/placeholders/200x200.jpg')) }}">
                                         </div>
                                         <div class="mx-auto cursor-pointer relative mt-5">

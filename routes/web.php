@@ -125,6 +125,7 @@ use App\Http\Controllers\Communication\BulkCommunicationController;
 use App\Http\Controllers\ConsoleController;
 use App\Http\Controllers\CourseManagement\AssignController;
 use App\Http\Controllers\CourseManagement\CourseManagementController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\HR\EmployeeAbsentTodayController;
 use App\Http\Controllers\HR\EmployeeVisaExpiryController;
 use App\Http\Controllers\HR\EmployeeWorkingPatternDetailController;
@@ -814,6 +815,7 @@ Route::prefix('/students')->name('students.')->group(function() {
 Route::middleware('auth')->group(function() {
     
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+    Route::get('global-search', GlobalSearchController::class)->name('global.search');
 
     Route::controller(CoursCreationController::class)->group(function() {
         Route::get('course-management/course-creation', 'index')->name('course.creation'); 
@@ -1674,6 +1676,7 @@ Route::middleware('auth')->group(function() {
         Route::get('hr/portal/leave-calendar', 'leaveCalendar')->name('hr.portal.leave.calendar'); 
         Route::post('hr/portal/filter-leave-calendar', 'filterLeaveCalendar')->name('hr.portal.filter.leave.calendar'); 
         Route::post('hr/portal/navigate-leave-calendar', 'navigateLeaveCalendar')->name('hr.portal.navigate.leave.calendar'); 
+        Route::post('hr/portal/load-leave-calendar-rows', 'loadLeaveCalendarRows')->name('hr.portal.load.leave.calendar.rows');
         
         Route::get('hr/portal/reports', 'employmentReportShow')->name('hr.portal.employment.reports.show');
 

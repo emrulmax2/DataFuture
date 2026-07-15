@@ -52,6 +52,59 @@ import tippy, { roundArrow } from "tippy.js";
 
     var ccEmail = new TomSelect('#cc_email', tomOptions);
 
+    function initLiveAttendanceRows() {
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+
+        setTimeout(() => {
+            $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
+                if (this._tippy) {
+                    this._tippy.destroy();
+                }
+
+                let thTippyOptions = {
+                    content: $(this).attr("title"),
+                };
+                if ($(this).data("tooltip-content") !== undefined) {
+                    thTippyOptions.content = $($(this).data("tooltip-content"))[0];
+                }
+
+                $(this).removeAttr("title");
+
+                tippy(this, {
+                    arrow: roundArrow,
+                    animation: "shift-away",
+                    theme: 'light',
+                    placement: 'top-start',
+                    ...thTippyOptions,
+                });
+            })
+        }, 10);
+    }
+
+    function updateLiveAttendanceMeta(meta) {
+        if (!meta) {
+            return;
+        }
+
+        $('#liveCountWorking').text(meta.working ?? 0);
+        $('#liveCountAbsent').text(meta.absent ?? 0);
+        $('#liveCountOff').text(meta.off ?? 0);
+        $('#liveCountLeave').text(meta.leave ?? 0);
+        $('#liveShownCount').text(meta.shownCount ?? 0);
+        $('#liveTotalCount').text(meta.totalCount ?? 0);
+    }
+
+    function renderLiveAttendanceResponse(res) {
+        $('.theDateHolder').html(res.the_date);
+        $('#liveAttendanceTable tbody').html(res.htm);
+        updateLiveAttendanceMeta(res.meta);
+        initLiveAttendanceRows();
+    }
+
     const senMailModalEl = document.getElementById('senMailModal')
     senMailModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#senMailModal .acc__input-error').html('');
@@ -82,6 +135,7 @@ import tippy, { roundArrow } from "tippy.js";
         element: document.getElementById('liveAttendanceDate'),
         ...dateOption
     });
+    initLiveAttendanceRows();
 
     liveAttendanceDate.on('selected', (date) => {
         if($('#liveAttendanceTable').length > 0){
@@ -99,35 +153,7 @@ import tippy, { roundArrow } from "tippy.js";
                 $('.leaveTableLoader').removeClass('active');
                 if (response.status == 200) {
                     let res = response.data.res;
-                    $('.theDateHolder').html(res.the_date);
-                    $('#liveAttendanceTable tbody').html(res.htm);
-
-                    createIcons({
-                        icons,
-                        "stroke-width": 1.5,
-                        nameAttr: "data-lucide",
-                    });
-
-                    setTimeout(() => {
-                        $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
-                            let thTippyOptions = {
-                                content: $(this).attr("title"),
-                            };
-                            if ($(this).data("tooltip-content") !== undefined) {
-                                thTippyOptions.content = $($(this).data("tooltip-content"))[0];
-                            }
-                    
-                            $(this).removeAttr("title");
-                    
-                            tippy(this, {
-                                arrow: roundArrow,
-                                animation: "shift-away",
-                                theme: 'light',
-                                placement: 'top-start',
-                                ...thTippyOptions,
-                            });
-                        })
-                    }, 10);
+                    renderLiveAttendanceResponse(res);
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
@@ -154,35 +180,7 @@ import tippy, { roundArrow } from "tippy.js";
                 $('.leaveTableLoader').removeClass('active');
                 if (response.status == 200) {
                     let res = response.data.res;
-                    $('.theDateHolder').html(res.the_date);
-                    $('#liveAttendanceTable tbody').html(res.htm);
-
-                    createIcons({
-                        icons,
-                        "stroke-width": 1.5,
-                        nameAttr: "data-lucide",
-                    });
-
-                    setTimeout(() => {
-                        $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
-                            let thTippyOptions = {
-                                content: $(this).attr("title"),
-                            };
-                            if ($(this).data("tooltip-content") !== undefined) {
-                                thTippyOptions.content = $($(this).data("tooltip-content"))[0];
-                            }
-                    
-                            $(this).removeAttr("title");
-                    
-                            tippy(this, {
-                                arrow: roundArrow,
-                                animation: "shift-away",
-                                theme: 'light',
-                                placement: 'top-start',
-                                ...thTippyOptions,
-                            });
-                        })
-                    }, 10);
+                    renderLiveAttendanceResponse(res);
                 }
             }).catch(error => {
                 $('.leaveTableLoader').removeClass('active');
@@ -215,35 +213,7 @@ import tippy, { roundArrow } from "tippy.js";
                 $('.leaveTableLoader').removeClass('active');
 
                 let res = data.res;
-                $('.theDateHolder').html(res.the_date);
-                $('#liveAttendanceTable tbody').html(res.htm);
-
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-
-                setTimeout(() => {
-                    $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
-                        let thTippyOptions = {
-                            content: $(this).attr("title"),
-                        };
-                        if ($(this).data("tooltip-content") !== undefined) {
-                            thTippyOptions.content = $($(this).data("tooltip-content"))[0];
-                        }
-                
-                        $(this).removeAttr("title");
-                
-                        tippy(this, {
-                            arrow: roundArrow,
-                            animation: "shift-away",
-                            theme: 'light',
-                            placement: 'top-start',
-                            ...thTippyOptions,
-                        });
-                    })
-                }, 10);
+                renderLiveAttendanceResponse(res);
             },
             error:function(e){
                 $('.leaveTableLoader').removeClass('active');
