@@ -4,71 +4,106 @@
     <title>{{ $title }}</title>
 @endsection
 
+@section('body_class', 'hr-live-attendance-body')
+
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Live Attendance of <span class="theDateHolder underline">{{ date('jS M, Y') }}</span></h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
-                <i data-lucide="users" class="hidden sm:block w-4 h-4 mr-2"></i>
-                <input type="text" placeholder="Search..." name="employee_name" class="w-full form-control border-0 liveAttendanceEmp" id="liveAttendanceEmp" value="" style="max-width: 150px;"/>
-            </div>
-            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
-                <i data-lucide="tags" class="hidden sm:block w-4 h-4 mr-2"></i>
-                <select name="department" class="w-full form-control border-0 liveAttendanceDept" id="liveAttendanceDept">
-                    <option value="">All Department</option>
-                    @if($departments->count() > 0)
-                        @foreach($departments as $dep)
-                            <option value="{{ $dep->id }}">{{ $dep->name }}</option>
-                        @endforeach
-                    @endif
-                </select>
-            </div>
-            <div class="btn box flex items-center text-slate-600 dark:text-slate-300 p-0 pl-2 mr-2">
-                <i data-lucide="calendar-days" class="hidden sm:block w-4 h-4 mr-2"></i>
-                <input type="text" name="class_date" class="w-full form-control border-0 liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}" style="max-width: 110px;"/>
-            </div>
-            <a href="{{ route('hr.portal.leave.calendar') }}" class="add_btn btn btn-success text-white shadow-md mr-2">Planner</a>
-            @if(isset(auth()->user()->priv()['add_attendance']) && auth()->user()->priv()['add_attendance'] == 1)
-            <a href="{{ route('hr.portal.live.attedance.add') }}" class="btn btn-primary shadow-md mr-0">Add Attendance</a>
-            @endif
-            {{--<a href="{{ route('hr.portal') }}" class="add_btn btn btn-primary shadow-md mr-0">Back To Portal</a>--}}
-        </div>
-    </div>
-
-    <!-- BEGIN: Settings Page Content -->
-    <div class="intro-y box mt-5">
-        <div class="p-5">
-            <div class="overflow-x-auto scrollbar-hidden relative">
-                <table class="table table-striped" id="liveAttendanceTable">
-                    <thead>
-                        <tr>
-                            <th class="whitespace-nowrap">Name</th>
-                            <th class="whitespace-nowrap">&nbsp;</th>
-                            <th class="whitespace-nowrap">Status</th>
-                            <th class="whitespace-nowrap">&nbsp;</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {!! $live !!}
-                    </tbody>
-                </table>
-
-                <div class="leaveTableLoader">
-                    <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
-                        <g fill="none" fill-rule="evenodd">
-                            <g transform="translate(1 1)" stroke-width="4">
-                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                <path d="M36 18c0-9.94-8.06-18-18-18">
-                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                </path>
-                            </g>
-                        </g>
-                    </svg>
+    <div class="hr-live-page">
+        <div class="hr-live-page__inner">
+            <section class="hr-live-title-card">
+                <span class="hr-live-title-card__accent"></span>
+                <div class="hr-live-title-card__main">
+                    <span class="hr-live-title-icon">
+                        <i data-lucide="calendar-days"></i>
+                    </span>
+                    <div>
+                        <div class="hr-live-eyebrow">Attendance Overview</div>
+                        <h1>Live Attendance of <span class="theDateHolder">{{ date('jS M, Y') }}</span></h1>
+                    </div>
                 </div>
+                <div class="hr-live-stats" aria-label="Live attendance summary">
+                    <span class="hr-live-stat hr-live-stat--working"><span></span><strong id="liveCountWorking">{{ $liveMeta['working'] ?? 0 }}</strong> Working</span>
+                    <span class="hr-live-stat hr-live-stat--absent"><span></span><strong id="liveCountAbsent">{{ $liveMeta['absent'] ?? 0 }}</strong> Awaiting / Absent</span>
+                    <span class="hr-live-stat hr-live-stat--off"><span></span><strong id="liveCountOff">{{ $liveMeta['off'] ?? 0 }}</strong> Not working</span>
+                    <span class="hr-live-stat hr-live-stat--leave"><span></span><strong id="liveCountLeave">{{ $liveMeta['leave'] ?? 0 }}</strong> On leave</span>
+                </div>
+            </section>
+
+            <section class="hr-live-toolbar-card">
+                <span class="hr-live-toolbar-card__accent"></span>
+                <div class="hr-live-toolbar">
+                    <label class="hr-live-filter hr-live-filter--search" for="liveAttendanceEmp">
+                        <i data-lucide="search"></i>
+                        <input type="text" placeholder="Search..." name="employee_name" class="liveAttendanceEmp" id="liveAttendanceEmp" value=""/>
+                    </label>
+
+                    <label class="hr-live-filter hr-live-filter--select" for="liveAttendanceDept">
+                        <i data-lucide="package"></i>
+                        <select name="department" class="liveAttendanceDept" id="liveAttendanceDept">
+                            <option value="">All Department</option>
+                            @if($departments->count() > 0)
+                                @foreach($departments as $dep)
+                                    <option value="{{ $dep->id }}">{{ $dep->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <i data-lucide="chevron-down"></i>
+                    </label>
+
+                    <label class="hr-live-filter hr-live-filter--date" for="liveAttendanceDate">
+                        <i data-lucide="calendar-days"></i>
+                        <input type="text" name="class_date" class="liveAttendanceDate" id="liveAttendanceDate" value="{{ date('d-m-Y') }}"/>
+                    </label>
+
+                    <a href="{{ route('hr.portal.leave.calendar') }}" class="hr-live-tool-btn hr-live-tool-btn--planner">
+                        <i data-lucide="calendar-check"></i>
+                        <span>Planner</span>
+                    </a>
+                    @if(isset(auth()->user()->priv()['add_attendance']) && auth()->user()->priv()['add_attendance'] == 1)
+                        <a href="{{ route('hr.portal.live.attedance.add') }}" class="hr-live-tool-btn hr-live-tool-btn--primary">
+                            <i data-lucide="plus"></i>
+                            <span>Add Attendance</span>
+                        </a>
+                    @endif
+                </div>
+            </section>
+
+            <section class="hr-live-table-card">
+                <div class="hr-live-table-scroll relative">
+                    <table id="liveAttendanceTable" class="hr-live-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact &amp; Shift</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {!! $live !!}
+                        </tbody>
+                    </table>
+
+                    <div class="leaveTableLoader">
+                        <svg width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="rgb(255, 255, 255)" class="w-10 h-10 text-danger">
+                            <g fill="none" fill-rule="evenodd">
+                                <g transform="translate(1 1)" stroke-width="4">
+                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                    <path d="M36 18c0-9.94-8.06-18-18-18">
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                    </path>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <div class="hr-live-footer-note">
+                <span>Showing <strong id="liveShownCount">{{ $liveMeta['shownCount'] ?? 0 }}</strong> of <span id="liveTotalCount">{{ $liveMeta['totalCount'] ?? 0 }}</span> staff</span>
+                <span>Live feed &middot; updates automatically</span>
             </div>
         </div>
     </div>
-    <!-- END: Settings Page Content -->
 
     <!-- BEGIN: Send Mail Modal Modal -->
     <div id="senMailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

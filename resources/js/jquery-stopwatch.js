@@ -18,7 +18,7 @@
         var seconds = Math.floor(elapsedTime / 1000) % 60;
         var minutes = Math.floor(elapsedTime / 1000 / 60) % 60;
         var hours = Math.floor(elapsedTime / 1000 / 60 / 60);
-        var displayTime = hours+" hours "+minutes+' mins';
+        var displayTime = hours+"h "+minutes+'m';
         document.getElementById(elementid).innerHTML = displayTime;
     }
 

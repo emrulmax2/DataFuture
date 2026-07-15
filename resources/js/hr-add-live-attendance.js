@@ -4,12 +4,125 @@ import TomSelect from "tom-select";
 
 import IMask from 'imask';
 
-import dayjs from "dayjs";
 import Litepicker from "litepicker";
 
 (function(){
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const $saveButtons = $('.liveAttendanceSaveBtn');
+    const $rowsCard = $('#liveAttendanceRowsCard');
+    const $tableFooter = $('.hr-live-add-table-footer');
+    const $selectedCount = $('.hr-live-add-selected-count');
+    const $footerCount = $('#attendanceSelectedCountFooter');
+    const $recordWord = $('.hr-live-add-record-word');
+    let employeeIDS = null;
+
+    const getInitials = (name = '') => {
+        const parts = name.replace(/^(Mr|Mrs|Ms|Miss|Dr)\.?\s+/i, '').trim().split(/\s+/).filter(Boolean);
+        const first = parts[0] || 'L';
+        const last = parts.length > 1 ? parts[parts.length - 1] : first;
+
+        return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+    };
+
+    const getPaletteStyle = (seed = '') => {
+        const palette = [
+            ['#e4f1ee', '#0d7c73'],
+            ['#f3ecd8', '#a1802f'],
+            ['#e6ecf5', '#2f5fa1'],
+            ['#f4e6ec', '#a13f6b'],
+            ['#e9f0e4', '#4a7a2f'],
+            ['#ece4f5', '#7a4fa3'],
+            ['#fbe8df', '#b5602f'],
+            ['#dff0ef', '#137a70'],
+        ];
+        let hash = 0;
+        for (let i = 0; i < seed.length; i += 1) {
+            hash = ((hash * 31) + seed.charCodeAt(i)) >>> 0;
+        }
+        const color = palette[hash % palette.length];
+
+        return `background:${color[0]};color:${color[1]};`;
+    };
+
+    const hasUploadedPhoto = (photo = '') => {
+        const cleanPhoto = photo.trim();
+
+        return cleanPhoto !== '' && !cleanPhoto.startsWith('data:');
+    };
+
+    const renderAvatar = (name = '', photo = '', className = '', escape) => {
+        if (hasUploadedPhoto(photo)) {
+            return `<span class="${className} ${className}--photo"><img src="${escape(photo)}" alt="${escape(name)}"></span>`;
+        }
+
+        return `<span class="${className}" style="${getPaletteStyle(name)}">${escape(getInitials(name))}</span>`;
+    };
+
+    const formatLongDate = (value = '') => {
+        const parts = value.split('-');
+        if (parts.length !== 3) {
+            return '';
+        }
+        const date = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+
+        return date.toLocaleDateString('en-GB', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    };
+
+    const setButtonsVisible = (visible) => {
+        if (visible) {
+            $saveButtons.css('display', 'inline-flex');
+            $tableFooter.css('display', 'flex');
+        } else {
+            $saveButtons.hide();
+            $tableFooter.hide();
+        }
+    };
+
+    const updateDateNote = () => {
+        $('#liveAttendanceDateLong').text(formatLongDate($('#liveAttendanceDate').val()));
+    };
+
+    const refreshAttendanceState = () => {
+        const attendanceRows = $('#addLiveAttendanceTable tbody tr.employeeAttendanceRow').length;
+        const selectedRows = employeeIDS ? employeeIDS.items.length : attendanceRows;
+        const placeholder = selectedRows > 0 ? 'Add another...' : 'Search & select employees...';
+
+        if (employeeIDS) {
+            employeeIDS.settings.placeholder = placeholder;
+            employeeIDS.control_input.setAttribute('placeholder', placeholder);
+            employeeIDS.inputState();
+        }
+
+        $selectedCount.html(`&middot; ${selectedRows} selected`);
+        $footerCount.text(attendanceRows);
+        $recordWord.text(attendanceRows === 1 ? 'record' : 'records');
+        $rowsCard.toggleClass('has-rows', attendanceRows > 0);
+        setButtonsVisible(attendanceRows > 0);
+
+        if (attendanceRows > 0) {
+            $('#addLiveAttendanceTable tbody tr.noticeRow').hide();
+        } else {
+            $('#addLiveAttendanceTable tbody tr.noticeRow').show();
+        }
+    };
+
+    const maskClockInputs = () => {
+        $('#addLiveAttendanceTable').find('input.clockMask').each(function(){
+            if (!this.dataset.clockMaskReady) {
+                IMask(this, {mask: '00:00'});
+                this.dataset.clockMaskReady = '1';
+            }
+        });
+    };
 
     $('#successModal .successCloser').on('click', function(e){
         e.preventDefault();
@@ -32,21 +145,50 @@ import Litepicker from "litepicker";
 
     let tomOptions = {
         plugins: {
-            dropdown_input: {},
             remove_button: {
-                title: "Remove this item",
+                title: "Remove this employee",
             },
         },
-        placeholder: 'Search Here...',
-        //persist: false,
-        create: true,
-        allowEmptyOption: true,
-        onDelete: function (values) {
-            return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+        placeholder: 'Search & select employees...',
+        create: false,
+        persist: false,
+        hidePlaceholder: false,
+        maxOptions: null,
+        render: {
+            option: function(data, escape) {
+                const name = data.text || '';
+                const role = data.role || 'Employee';
+                const photo = data.photo || '';
+
+                return `
+                    <div class="hr-live-add-select-option">
+                        ${renderAvatar(name, photo, 'hr-live-add-select-avatar', escape)}
+                        <span class="hr-live-add-select-copy">
+                            <strong>${escape(name)}</strong>
+                            <small>${escape(role)}</small>
+                        </span>
+                        <span class="hr-live-add-select-plus">+</span>
+                    </div>
+                `;
+            },
+            item: function(data, escape) {
+                const name = data.text || '';
+                const photo = data.photo || '';
+
+                return `
+                    <div class="hr-live-add-select-item">
+                        ${renderAvatar(name, photo, 'hr-live-add-select-item__avatar', escape)}
+                        <span class="hr-live-add-select-item__name">${escape(name)}</span>
+                    </div>
+                `;
+            },
+            no_results: function(data, escape) {
+                return `<div class="hr-live-add-select-empty">No employees found for "${escape(data.input)}".</div>`;
+            },
         },
     };
 
-    var employeeIDS = new TomSelect('#employeeIDS', tomOptions);
+    employeeIDS = new TomSelect('#employeeIDS', tomOptions);
 
     let dateOption = {
         autoApply: true,
@@ -70,9 +212,9 @@ import Litepicker from "litepicker";
 
     liveAttendanceDate.on('selected', (date) => {
         $('#addLiveAttendanceTable tbody tr.employeeAttendanceRow').remove();
-        $('#addLiveAttendanceTable tbody tr.noticeRow').fadeIn('fast');
-        $('#saveLiveAttendance').fadeOut();
         employeeIDS.clear(true);
+        updateDateNote();
+        refreshAttendanceState();
     });
 
     $('#liveAttendanceDate').each(function(){
@@ -82,6 +224,9 @@ import Litepicker from "litepicker";
             }
         )
     });
+
+    $('#liveAttendanceDate').on('input', updateDateNote);
+
     if($('.timeMask').length > 0){
         $('.timeMask').each(function(){
             IMask(
@@ -94,6 +239,7 @@ import Litepicker from "litepicker";
 
     employeeIDS.on('item_add', function(employee_id, item){
         $('.leaveTableLoader').addClass('active');
+        refreshAttendanceState();
         let theDate = $('#liveAttendanceDate').val();
         axios({
             method: "post",
@@ -104,19 +250,13 @@ import Litepicker from "litepicker";
             $('.leaveTableLoader').removeClass('active');
             if (response.status == 200) {
                 let res = response.data.res;
-                $('#addLiveAttendanceTable tbody tr.noticeRow').fadeOut('fast', function(){
+                $('#addLiveAttendanceTable tbody tr.noticeRow').hide();
+                if(res){
                     $('#addLiveAttendanceTable > tbody').append(res);
-                });
-
-                $('#saveLiveAttendance').fadeIn();
-                
-                setTimeout(function(){
-                    $('#addLiveAttendanceTable').find('input.clockMask').each(function(){
-                        console.log('hi')
-                        IMask(this, {mask: '00:00'});
-                    });
-                    console.log('his '+$('#addLiveAttendanceTable').find('input').length)
-                }, 1000);
+                }
+                refreshAttendanceState();
+                maskClockInputs();
+                createIcons({ icons });
             }
         }).catch(error => {
             $('.leaveTableLoader').removeClass('active');
@@ -128,25 +268,17 @@ import Litepicker from "litepicker";
 
     employeeIDS.on('item_remove', function(employee_id, $item){
         $('#addLiveAttendanceTable tbody tr#employeeAttendanceRow_'+employee_id).remove();
-        var attendanceRows = $('#addLiveAttendanceTable tbody tr.employeeAttendanceRow').length;
-        if(attendanceRows == 0){
-            $('#addLiveAttendanceTable tbody tr.noticeRow').fadeIn('fast');
-            $('#saveLiveAttendance').fadeOut();
-        }else{
-            $('#addLiveAttendanceTable tbody tr.noticeRow').fadeOut('fast');
-            $('#saveLiveAttendance').fadeIn();
-        }
+        refreshAttendanceState();
     });
 
-    $('#saveLiveAttendance').on('click', function(e){
+    $('.liveAttendanceSaveBtn').on('click', function(e){
         e.preventDefault();
-        var $theBtn = $(this);
         var $form = $('#attendanceLiveForm');
         const form = document.getElementById('attendanceLiveForm');
     
         $('.leaveTableLoader').addClass('active');
-        $theBtn.attr('disabled', 'disabled');
-        $theBtn.find('svg').fadeIn();
+        $saveButtons.attr('disabled', 'disabled');
+        $saveButtons.find('.hr-live-add-btn__spinner').fadeIn();
 
         let form_data = new FormData(form);
         axios({
@@ -156,8 +288,8 @@ import Litepicker from "litepicker";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             $('.leaveTableLoader').removeClass('active');
-            $theBtn.removeAttr('disabled');
-            $theBtn.find('svg').fadeOut();
+            $saveButtons.removeAttr('disabled');
+            $saveButtons.find('.hr-live-add-btn__spinner').fadeOut();
             
             if (response.status == 200) {
                 var res = response.data.res;
@@ -190,11 +322,15 @@ import Litepicker from "litepicker";
             }
         }).catch(error => {
             $('.leaveTableLoader').removeClass('active');
-            $theBtn.removeAttr('disabled');
-            $theBtn.find('svg').fadeOut();
+            $saveButtons.removeAttr('disabled');
+            $saveButtons.find('.hr-live-add-btn__spinner').fadeOut();
             if (error.response) {
                 console.log('error');
             }
         });
-    })
+    });
+
+    updateDateNote();
+    refreshAttendanceState();
+    createIcons({ icons });
 })()

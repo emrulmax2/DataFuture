@@ -21,6 +21,8 @@ use Illuminate\Http\Request;
 class EmployeeAttendanceLiveController extends Controller
 {
     public function index(){
+        $liveData = $this->getEmployeeLiveAttendanceTableData();
+
         return view('pages.hr.portal.live', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
@@ -32,7 +34,8 @@ class EmployeeAttendanceLiveController extends Controller
                                     $sq->where('status', 1);
                                 });
                             })->where('available_for_all', 1)->orderBy('name', 'ASC')->get(),
-            'live' => $this->getEmployeeLiveAttendanceTableHtml(),
+            'live' => $liveData['html'],
+            'liveMeta' => $liveData['meta'],
             'smtps' => ComonSmtp::orderBy('smtp_user', 'ASC')->get(),
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'asc')->get()
         ]);
@@ -45,18 +48,20 @@ class EmployeeAttendanceLiveController extends Controller
 
         $res = [];
         $res['the_date'] = date('jS M, Y', strtotime($theDate));
-        $res['htm'] = $this->getEmployeeLiveAttendanceTableHtml($departement, $theDate, $emp);
+        $liveData = $this->getEmployeeLiveAttendanceTableData($departement, $theDate, $emp);
+        $res['htm'] = $liveData['html'];
+        $res['meta'] = $liveData['meta'];
 
         return response()->json(['res' => $res], 200);
     }
 
     public function getEmployeeLiveAttendanceTableHtml($department = 0, $theDate = '', $emp = ''){
+        return $this->getEmployeeLiveAttendanceTableData($department, $theDate, $emp)['html'];
+    }
+
+    public function getEmployeeLiveAttendanceTableData($department = 0, $theDate = '', $emp = ''){
         $theDate = (!empty($theDate) ? $theDate : date('Y-m-d'));
         $privateDepartments = Department::where('available_for_all', 0)->pluck('id')->unique()->toArray();
-
-        $theDay = date('D', strtotime($theDate));
-        $theDayNum = date('N', strtotime($theDate));
-        $time = date('H:i');
 
         /*$employeeHasPattern = EmployeeWorkingPattern::where('effective_from', '<=', $theDate)
                               ->where(function($query) use($theDate){
@@ -87,27 +92,38 @@ class EmployeeAttendanceLiveController extends Controller
         endif;
         $Query= $query->get();
 
-        $data = [];
+        $meta = [
+            'working' => 0,
+            'absent' => 0,
+            'off' => 0,
+            'leave' => 0,
+            'shownCount' => $Query->count(),
+            'totalCount' => $Query->count(),
+        ];
         $html = '';
         if(!empty($Query) && $Query->count() > 0):
-            $i = 1;
+            $i = 0;
             foreach($Query as $list):
                 $day = $this->getTheDayStatusWithSchedule($list->id, $theDate);
                 $department = (isset($list->employment->department->name) ? $list->employment->department->name : '');
                 $job_title = (isset($list->employment->employeeJobTitle->name) ? $list->employment->employeeJobTitle->name : '');
                 $hasTooltip = ($day['working_status'] && $day['attendances']->count() > 0  && !empty($day['tooltip']) ? true : false);
+                $statusKey = $this->getLiveAttendanceStatusKey($day);
+                $countKey = $this->getLiveAttendanceCountKey($statusKey);
+                $meta[$countKey]++;
+                $displayLabel = $this->getLiveAttendanceDisplayLabel($day['label'] ?? '');
+                $roleText = trim($job_title.(!empty($department) ? ' - '.$department : ''));
+                $schedule = (isset($day['schedule']) && !empty($day['schedule']) && $day['schedule'] != '---') ? $day['schedule'] : '—';
 
-                $html .= '<tr>';
+                $html .= '<tr class="hr-live-row hr-live-row--'.$statusKey.' '.($i % 2 === 0 ? 'hr-live-row--even' : 'hr-live-row--odd').'">';
 
-                    $html .= '<td class="w-2/6">';
-                        $html .= '<a href="javascript:void(0);" '.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'" ' : '').' class="block '.($hasTooltip ? 'tooltip' : '').'">';
-                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                $html .= '<img alt="'.$list->full_name.'" class="rounded-full shadow" src="'.$list->photo_url.'">';
-                            $html .= '</div>';
-                            $html .= '<div class="inline-block relative" style="top: -5px;">';
-                                $html .= '<div class="font-medium whitespace-nowrap">'.$list->full_name.'</div>';
-                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$job_title.(!empty($department) ? ' - '.$department : '').'</div>';
-                            $html .= '</div>';
+                    $html .= '<td class="hr-live-name-cell">';
+                        $html .= '<a href="javascript:void(0);" '.($hasTooltip ? ' title="Attendance Details" data-tooltip-content="#live-tooltip-'.$list->id.'" ' : '').' class="hr-live-person '.($hasTooltip ? 'tooltip' : '').'">';
+                            $html .= '<span class="hr-live-avatar" style="'.$this->getLiveAttendancePaletteStyle($list->full_name).'">'.$this->getLiveAttendanceInitials($list->full_name).'</span>';
+                            $html .= '<span class="hr-live-person__copy">';
+                                $html .= '<strong>'.e($list->full_name).'</strong>';
+                                $html .= '<small>'.e($roleText).'</small>';
+                            $html .= '</span>';
                         $html .= '</a>';
                         if($hasTooltip):
                             $html .= '<div class="tooltip-content">';
@@ -118,24 +134,26 @@ class EmployeeAttendanceLiveController extends Controller
                         endif;
                     $html .= '</td>';
 
-                    $html .= '<td class="text-center w-1/6">';
-                        $html .= (isset($list->employment->office_telephone) && !empty($list->employment->office_telephone) ? '<span class="bg-primary text-white font-medium px-3 py-1 inline-flex justify-center items-center rounded text-lg mb-2"><i data-lucide="phone" class="w-4 h-4 mr-2"></i>'.$list->employment->office_telephone.'</span>' : '');
-                        $html .= (isset($day['schedule']) && !empty($day['schedule']) ? '<div class="text-slate-500 whitespace-nowrap">'.$day['schedule'].'</div>' : '');
-                    $html .= '</td>';
-
-                    $html .= '<td class="text-left w-2/6">';
-                        $html .= '<div>';
-                            $html .= (isset($day['label']) && !empty($day['label']) ? '<span class="font-medium uppercase '.(isset($day['class']) ? $day['class'] : '').'">'.$day['label'].'</span>' : '');
-                            $html .= (isset($day['where']) && !empty($day['where']) ? ' - <span class="text-slate-500">'.$day['where'].'</span>' : '');
-                        $html .= '</div>';
-                        $html .= '<div>';
-                            $html .= (isset($day['since']) && !empty($day['since']) ? '<span>'.$day['since'].'</span>' : '');
+                    $html .= '<td class="hr-live-contact-cell">';
+                        $html .= '<div class="hr-live-contact">';
+                            if(isset($list->employment->office_telephone) && !empty($list->employment->office_telephone)):
+                                $html .= '<span class="hr-live-ext"><span><i data-lucide="phone"></i></span>'.e($list->employment->office_telephone).'</span>';
+                            endif;
+                            $html .= '<span class="hr-live-shift"><i data-lucide="clock"></i>'.e($schedule).'</span>';
                         $html .= '</div>';
                     $html .= '</td>';
 
-                    $html .= '<td class="text-left w-1/6">';
-                        $html .= '<div class="text-left">';
-                            $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn btn btn-success w-auto btn-sm text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>';
+                    $html .= '<td class="hr-live-status-cell">';
+                        $html .= '<div class="hr-live-status">';
+                            $html .= '<span class="hr-live-status-pill hr-live-status-pill--'.$statusKey.'"><span></span>'.e($displayLabel).'</span>';
+                            $html .= (isset($day['where']) && !empty($day['where']) ? '<span class="hr-live-status__detail">'.e($day['where']).'</span>' : '');
+                            $html .= (isset($day['since']) && !empty($day['since']) ? '<span class="hr-live-status__sub"><i data-lucide="clock"></i>'.e($day['since']).'</span>' : '');
+                        $html .= '</div>';
+                    $html .= '</td>';
+
+                    $html .= '<td class="hr-live-action-cell">';
+                        $html .= '<div>';
+                            $html .= '<button data-id="'.$list->id.'" data-tw-toggle="modal" data-tw-target="#senMailModal" type="button" class="sendMailBtn hr-live-email-btn"><i data-lucide="mail"></i>Send Email</button>';
                         $html .= '</div>';
                     $html .= '</td>';
 
@@ -144,10 +162,90 @@ class EmployeeAttendanceLiveController extends Controller
                 $i++;
             endforeach;
         else:
-            $html .= '<tr><td colspan="3" class="text-center">Attendance data not found for the day.</td></tr>';
+            $html .= '<tr class="hr-live-empty-row"><td colspan="4">No staff match the current filters.</td></tr>';
         endif;
 
-        return $html;
+        return [
+            'html' => $html,
+            'meta' => $meta,
+        ];
+    }
+
+    private function getLiveAttendanceStatusKey($day){
+        $label = strtolower($day['label'] ?? '');
+        if(!empty($day['leave_status'])):
+            return 'leave';
+        endif;
+        if(str_contains($label, 'not working')):
+            return 'off';
+        endif;
+        if(str_contains($label, 'awaiting') || str_contains($label, 'absent') || str_contains($label, 'no clock')):
+            return 'absent';
+        endif;
+        if(str_contains($label, 'break')):
+            return 'break';
+        endif;
+        if(str_contains($label, 'clock out')):
+            return 'clockout';
+        endif;
+        if(str_contains($label, 'working')):
+            return 'working';
+        endif;
+
+        return 'neutral';
+    }
+
+    private function getLiveAttendanceCountKey($statusKey){
+        return match ($statusKey) {
+            'leave' => 'leave',
+            'off' => 'off',
+            'absent' => 'absent',
+            default => 'working',
+        };
+    }
+
+    private function getLiveAttendanceDisplayLabel($label){
+        $normalised = trim((string) $label);
+        if($normalised === ''):
+            return 'Unknown';
+        endif;
+
+        return match (strtolower($normalised)) {
+            'clock out' => 'Clocked Out',
+            'not working today' => 'Not Working Today',
+            'awaiting clock in / absent' => 'Awaiting Clock-in / Absent',
+            default => $normalised,
+        };
+    }
+
+    private function getLiveAttendanceInitials($name){
+        $name = preg_replace('/^(Mr|Mrs|Ms|Miss|Dr)\.?\s+/i', '', trim((string) $name));
+        $parts = preg_split('/\s+/', $name);
+        $first = $parts[0] ?? 'L';
+        $last = count($parts) > 1 ? $parts[count($parts) - 1] : $first;
+
+        return strtoupper(substr($first, 0, 1).substr($last, 0, 1));
+    }
+
+    private function getLiveAttendancePaletteStyle($seed){
+        $palette = [
+            ['#e4f1ee', '#0d7c73'],
+            ['#f3ecd8', '#a1802f'],
+            ['#e6ecf5', '#2f5fa1'],
+            ['#f4e6ec', '#a13f6b'],
+            ['#e9f0e4', '#4a7a2f'],
+            ['#ece4f5', '#7a4fa3'],
+            ['#fbe8df', '#b5602f'],
+            ['#dff0ef', '#137a70'],
+        ];
+        $hash = 0;
+        $seed = (string) $seed;
+        for($i = 0; $i < strlen($seed); $i++):
+            $hash = (($hash * 31) + ord($seed[$i])) & 0xffffffff;
+        endfor;
+        $color = $palette[$hash % count($palette)];
+
+        return 'background: '.$color[0].'; color: '.$color[1].';';
     }
 
     public function getTheDayStatusWithSchedule($employee_id, $theDate){
@@ -263,6 +361,7 @@ class EmployeeAttendanceLiveController extends Controller
         $res['class'] = $statusClass;
         $res['since'] = $since;
         $res['working_status'] = ($dayStatus || $overtimeStatus ? true : false);
+        $res['leave_status'] = $leaveStatus;
         $res['attendances'] = $todaysAttendances;
 
         if($res['working_status'] && $todaysAttendances->count() > 0):
@@ -308,7 +407,10 @@ class EmployeeAttendanceLiveController extends Controller
                 ['label' => 'Live', 'href' => route('hr.portal.live.attedance')],
                 ['label' => 'Add Attendance', 'href' => 'javascript:void(0);']
             ],
-            'employee' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
+            'employee' => Employee::with(['employment.employeeJobTitle', 'employment.department'])
+                ->where('status', 1)
+                ->orderBy('first_name', 'ASC')
+                ->get()
         ]);
     }
 
@@ -318,7 +420,10 @@ class EmployeeAttendanceLiveController extends Controller
         $D = date('D', strtotime($theDate));
         $N = date('N', strtotime($theDate));
 
-        $employee = Employee::find($employee_id);
+        $employee = Employee::with(['employment.employeeJobTitle', 'employment.department'])->find($employee_id);
+        if(!$employee):
+            return response()->json(['res' => ''], 404);
+        endif;
         $bhAutoBook = (isset($employee->payment->bank_holiday_auto_book) && $employee->payment->bank_holiday_auto_book == 'Yes' ? true : false);
         $hrHolidayYear = HrHolidayYear::where('start_date', '<=', $theDate)->where('end_date', '>=', $theDate)->where('active', 1)
                          ->get()->first();
@@ -342,45 +447,48 @@ class EmployeeAttendanceLiveController extends Controller
         $todaysLastBreak = EmployeeAttendanceLive::where('employee_id', $employee_id)->where('attendance_type', 2)->where('date', $theDate)->orderBy('id', 'DESC')->get()->first();
         $lastBreak = (isset($todaysLastBreak->time) && !empty($todaysLastBreak->time) && ($todaysBreak->count() > $todaysReturn->count()) ? date('H:i', strtotime($todaysLastBreak->time)) : '');
 
+        $jobTitle = $employee->employment?->employeeJobTitle?->name ?? '';
+        $department = $employee->employment?->department?->name ?? '';
+        $roleText = trim($jobTitle.(!empty($department) ? ' - '.$department : ''));
+        $roleText = !empty($roleText) ? $roleText : 'Employee';
+        $avatarStyle = $this->getLiveAttendancePaletteStyle($employee->full_name);
+        $initials = $this->getLiveAttendanceInitials($employee->full_name);
+        $breakName = empty($lastBreak) ? 'break' : 'exist_break';
+        $scheduleStart = !empty($patternStart) ? $patternStart : 'NWD';
+        $scheduleEnd = !empty($patternEnd) ? $patternEnd : 'NWD';
+
         $html = '';
-        $html .= '<tr class="employeeAttendanceRow" id="employeeAttendanceRow_'.$employee_id.'">';
-            $html .= '<td>';
-                $html .= '<div class="font-medium text-primary whitespace-nowrap">'.$employee->full_name.'</div>';
-                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'; 
-                    $html .= (isset($employee->employment->employeeJobTitle->name) && !empty($employee->employment->employeeJobTitle->name) ? $employee->employment->employeeJobTitle->name : '');
+        $html .= '<tr class="employeeAttendanceRow hr-live-add-row" id="employeeAttendanceRow_'.$employee_id.'">';
+            $html .= '<td class="hr-live-add-person-cell">';
+                $html .= '<div class="hr-live-add-person">';
+                    $html .= '<span class="hr-live-add-avatar" style="'.$avatarStyle.'">'.$initials.'</span>';
+                    $html .= '<span class="hr-live-add-person__copy">';
+                        $html .= '<strong>'.e($employee->full_name).'</strong>';
+                        $html .= '<small>'.e($roleText).'</small>';
+                    $html .= '</span>';
                 $html .= '</div>';
             $html .= '</td>';
-            $html .= '<td>';
-                $html .= '<table class="table table-sm">';
-                    $html .= '<tr>';
-                        $html .= '<td class="font-medium text-primary whitespace-nowrap bg-slate-200 w-30">'.$patternStart.'</td>';
-                        $html .= '<td class="attendanceFormCtrlTd">';
-                            $html .= '<input type="text" name="attendance['.$employee_id.'][clockin]" value="'.$todaysClockInTime.'" placeholder="00:00" class="form-control clockMask"/>';
-                        $html .= '</td>';
-                    $html .= '</tr>';
-                $html .= '</table>';
+            $html .= '<td class="attendanceFormCtrlTd">';
+                $html .= '<div class="hr-live-add-time-field hr-live-add-time-field--in">';
+                    $html .= '<span class="hr-live-add-schedule-pill">Sched '.e($scheduleStart).'</span>';
+                    $html .= '<input type="text" name="attendance['.$employee_id.'][clockin]" value="'.e($todaysClockInTime).'" placeholder="00:00" class="form-control clockMask hr-live-add-time-input"/>';
+                $html .= '</div>';
             $html .= '</td>';
-            $html .= '<td>';
-                $html .= '<table class="table table-sm">';
-                    $html .= '<tr>';
-                        $html .= '<td class="attendanceFormCtrlTd">';
-                            $html .= '<input type="text" name="attendance['.$employee_id.']['.(empty($lastBreak) ? 'break' : 'exist_break').']" value="'.$lastBreak.'" placeholder="00:00" class="form-control clockMask"/>';
-                        $html .= '</td>';
-                        $html .= '<td class="attendanceFormCtrlTd">';
-                            $html .= '<input type="text" name="attendance['.$employee_id.'][return]" value="" placeholder="00:00" class="form-control clockMask"/>';
-                        $html .= '</td>';
-                    $html .= '</tr>';
-                $html .= '</table>';
+            $html .= '<td class="attendanceFormCtrlTd">';
+                $html .= '<div class="hr-live-add-time-field hr-live-add-time-field--break">';
+                    $html .= '<span class="hr-live-add-schedule-pill">Start / End</span>';
+                    $html .= '<div class="hr-live-add-break-fields">';
+                        $html .= '<input type="text" name="attendance['.$employee_id.']['.$breakName.']" value="'.e($lastBreak).'" placeholder="00:00" class="form-control clockMask hr-live-add-time-input"/>';
+                        $html .= '<span>&ndash;</span>';
+                        $html .= '<input type="text" name="attendance['.$employee_id.'][return]" value="" placeholder="00:00" class="form-control clockMask hr-live-add-time-input"/>';
+                    $html .= '</div>';
+                $html .= '</div>';
             $html .= '</td>';
-            $html .= '<td>';
-                $html .= '<table class="table table-sm">';
-                    $html .= '<tr>';
-                        $html .= '<td class="font-medium text-primary whitespace-nowrap bg-slate-200 w-30">'.$patternEnd.'</td>';
-                        $html .= '<td class="attendanceFormCtrlTd">';
-                            $html .= '<input type="text" name="attendance['.$employee_id.'][clockout]" value="'.$todaysClockOutTime.'" placeholder="00:00" class="form-control clockMask"/>';
-                        $html .= '</td>';
-                    $html .= '</tr>';
-                $html .= '</table>';
+            $html .= '<td class="attendanceFormCtrlTd">';
+                $html .= '<div class="hr-live-add-time-field hr-live-add-time-field--out">';
+                    $html .= '<span class="hr-live-add-schedule-pill">Sched '.e($scheduleEnd).'</span>';
+                    $html .= '<input type="text" name="attendance['.$employee_id.'][clockout]" value="'.e($todaysClockOutTime).'" placeholder="00:00" class="form-control clockMask hr-live-add-time-input"/>';
+                $html .= '</div>';
             $html .= '</td>';
         $html .= '</tr>';
 

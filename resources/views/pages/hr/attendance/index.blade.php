@@ -3,38 +3,44 @@
 @section('subhead')
     <title>{{ $title }}</title>
 @endsection
+@section('body_class', 'hr-attendance-body')
 @section('subcontent')
     <!-- BEGIN: Page Header -->
-    <div class="intro-y flex flex-wrap items-center justify-between gap-3 mt-8 mb-2">
-        <div>
-            <h2 class="font-display text-3xl font-semibold text-slate-800 dark:text-white leading-tight tracking-tight">Monthly Attendance</h2>
-            <p class="text-sm text-slate-400 mt-1">Daily sync &amp; payroll status &middot; London Churchill College</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-            <a href="{{ route('hr.portal.leave.calendar') }}" class="btn btn-outline-secondary h-[42px] text-sm">
-                <i data-lucide="calendar-days" class="w-4 h-4 mr-1.5"></i> Planner
-            </a>
-            <a href="{{ route('hr.portal.live.attedance') }}" class="btn btn-primary text-white h-[42px] text-sm">
-                <span class="mr-2" style="display:inline-block;width:8px;height:8px;border-radius:9999px;background:#7de3b0;box-shadow:0 0 0 3px rgba(125,227,176,.3)"></span> Live Attendance
-            </a>
+    <div class="att-page att-page--monthly intro-y">
+        <div class="att-header att-header--monthly">
+            <div class="att-header__lead">
+                <div class="att-header__eyebrow">Monthly attendance</div>
+                <h2 class="att-header__title">Monthly Attendance</h2>
+                <p class="att-header__copy">Daily sync &amp; payroll status &middot; London Churchill College</p>
+            </div>
+            <div class="att-header__actions">
+                <a href="{{ route('hr.portal.leave.calendar') }}" class="att-btn att-btn--outline att-btn--planner">
+                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                    Planner
+                </a>
+                <a href="{{ route('hr.portal.live.attedance') }}" class="att-btn att-btn--solid att-btn--live">
+                    <span class="att-live-dot"></span>
+                    Live Attendance
+                </a>
+            </div>
         </div>
     </div>
     <!-- END: Page Header -->
 
     <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box mt-5">
+    <div class="intro-y box mt-5 att-monthly-shell">
         <!-- Toolbar -->
-        <div class="flex flex-col xl:flex-row xl:items-end gap-4 px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
-            <form id="filterMonthAttenForm" class="flex flex-wrap xl:flex-nowrap gap-3 items-end mr-auto">
-                <div class="flex items-center gap-2.5">
-                    <label class="text-[13px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">Query</label>
-                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" data-date="{{ date('Y-m-01') }}" value="{{ date('F Y') }}" name="queryDate" type="text" class="form-control h-[42px] rounded-lg border-slate-200 dark:border-darkmode-400 bg-slate-50 dark:bg-darkmode-800 text-sm font-semibold w-44" placeholder="Month YYYY">
+        <div class="att-page att-monthly-toolbar flex flex-col xl:flex-row xl:items-end gap-4 px-5 py-4 border-b border-slate-100 dark:border-darkmode-400">
+            <form id="filterMonthAttenForm" class="att-monthly-toolbar__form flex flex-wrap xl:flex-nowrap gap-3 items-end mr-auto">
+                <div class="att-monthly-toolbar__field flex items-center gap-2.5">
+                    <label class="att-monthly-toolbar__label whitespace-nowrap">Query</label>
+                    <input id="queryDate" readonly data-org="{{ date('m-Y') }}" data-date="{{ date('Y-m-01') }}" value="{{ date('F Y') }}" name="queryDate" type="text" class="att-input att-input--month" placeholder="Month YYYY">
                 </div>
-                <div class="flex gap-2">
-                    <button type="submit" id="filterMonthAtten" class="btn btn-primary text-white h-[42px] px-5 text-sm syncroniseAttendance">
+                <div class="att-monthly-toolbar__actions flex gap-2">
+                    <button type="submit" id="filterMonthAtten" class="att-btn att-btn--solid syncroniseAttendance">
                         Go
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
+                        <svg style="display: none;" width="16" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                            stroke="currentColor" class="att-spin w-4 h-4">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
                                     <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -46,12 +52,19 @@
                             </g>
                         </svg>
                     </button>
-                    <button type="button" id="generateReport" class="btn btn-outline-secondary h-[42px] text-sm"><i data-lucide="file-text" class="w-4 h-4 mr-1.5"></i> Generate Report</button>
+                    <button type="button" id="generateReport" class="att-btn att-btn--outline">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                        Generate Report
+                    </button>
                 </div>
             </form>
-            <div class="relative">
+            <div class="att-monthly-toolbar__uploads relative">
                 <div class="dropdown" id="uploadsDropdown">
-                    <button class="dropdown-toggle btn btn-outline-accent h-[42px] text-sm" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="upload" class="w-4 h-4 mr-1.5"></i> Upload PaySlips <i data-lucide="chevron-down" class="w-4 h-4 ml-1.5"></i></button>
+                    <button class="dropdown-toggle att-btn att-btn--gold" aria-expanded="false" data-tw-toggle="dropdown">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        Upload PaySlips
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
                     <div class="dropdown-menu w-72">
                         <ul class="dropdown-content">
                             <li><h6 class="dropdown-header">Pending Payslips</h6></li>
@@ -74,8 +87,14 @@
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <div class="flex p-1">
-                                    <button id="uploadSync" data-tw-toggle="modal" data-tw-target="#synPaySlipModal" type="button" class="w-auto btn-sm px-1 py-2 btn btn-primary text-white mr-auto"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Upload Payslips</button>
-                                    <button type="button" id="closeUploadsDropdown" class="btn btn-secondary py-1 px-2 ml-auto">Close</button>
+                                    <button id="uploadSync" data-tw-toggle="modal" data-tw-target="#synPaySlipModal" type="button" class="att-btn att-btn--solid att-btn--sm mr-auto">
+                                        <i data-lucide="upload" class="w-4 h-4"></i>
+                                        Upload Payslips
+                                    </button>
+                                    <button type="button" id="closeUploadsDropdown" class="att-btn att-btn--outline att-btn--sm ml-auto">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                        Close
+                                    </button>
                                 </div>
                             </li>
                         </ul>
@@ -83,7 +102,7 @@
                 </div>
             </div>
         </div>
-        <div class="overflow-x-auto scrollbar-hidden pb-2" id="attendanceSyncListTable">
+        <div class="att-monthly-shell__table overflow-x-auto scrollbar-hidden" id="attendanceSyncListTable">
             <table class="att-table">
                 <thead>
                     <tr>

@@ -21,7 +21,6 @@ class AttendanceLiveStatsService
             return '';
         }
 
-        $html = '';
         $lastDate = (isset($employee->employment->last_action_date) && $employee->employment->last_action_date != '')
             ? $employee->employment->last_action_date
             : '';
@@ -30,20 +29,23 @@ class AttendanceLiveStatsService
             : 0;
 
         $lastActionLabel = '';
-        $lastActionClass = '';
+        $lastActionState = 'no-clock-in';
         switch ($lastAction) {
             case 1:
                 $lastActionLabel = 'Working';
+                $lastActionState = 'working';
                 break;
             case 2:
                 $lastActionLabel = 'Break';
-                $lastActionClass = ' text-red-800';
+                $lastActionState = 'break';
                 break;
             case 3:
                 $lastActionLabel = 'Working';
+                $lastActionState = 'working';
                 break;
             case 4:
                 $lastActionLabel = 'Clocked Out';
+                $lastActionState = 'clocked-out';
                 break;
             default:
                 $lastActionLabel = 'No clock-in';
@@ -67,29 +69,29 @@ class AttendanceLiveStatsService
                 : strtotime(date('H:i:s'));
             $durationSeconds = $rtime * 1000;
 
-            
-            $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
-            $html .= '<div class="statusArea">';
-            $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
-            $html .= '<div class="font-medium whitespace-nowrap uppercase' . $lastActionClass . '">' . $lastActionLabel . '</div>';
-            $html .= '</div>';
-            $html .= '<div class="sinceArea">';
-            $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">since</div>';
-            $html .= '<div class="font-medium whitespace-nowrap uppercase">'
-                . date('H:i A', strtotime($live->time))
-                . (isset($liveLast->time) && !empty($liveLast->time) ? ' - ' . date('H:i A', strtotime($liveLast->time)) : '')
-                . '</div>';
+            $timeRange = date('H:i A', strtotime($live->time))
+                . (isset($liveLast->time) && !empty($liveLast->time) ? ' - ' . date('H:i A', strtotime($liveLast->time)) : '');
+
+            $html = '<div class="lcc-clock-status lcc-clock-status--' . $lastActionState . '">';
+            $html .= '<span class="lcc-clock-status__state">';
+            $html .= '<span class="lcc-clock-status__label">Status</span>';
+            $html .= '<span class="lcc-clock-status__dot" aria-hidden="true"></span>';
+            $html .= '<strong>' . e($lastActionLabel) . '</strong>';
+            $html .= '</span>';
+            $html .= '<span class="lcc-clock-status__since">';
+            $html .= '<span class="lcc-clock-status__label">Since</span>';
+            $html .= '<strong>' . e($timeRange) . '</strong>';
             if ($lastAction != 4) {
-                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap clockedInFrom" id="clockedInFrom" data-starts="' . $durationSeconds . '">00:00</div>';
+                $html .= '<small class="clockedInFrom" id="clockedInFrom" data-starts="' . $durationSeconds . '">0h 0m</small>';
             }
-            $html .= '</div>';
+            $html .= '</span>';
             $html .= '</div>';
         } else {
-            $html .= '<div class="clockinStatistics inline-flex justify-end items-start ml-auto">';
-            $html .= '<div class="statusArea">';
-            $html .= '<div class="text-slate-500 text-xs whitespace-nowrap uppercase">Status</div>';
-            $html .= '<div class="font-medium whitespace-nowrap uppercase text-danger">No clock-in</div>';
-            $html .= '</div>';
+            $html = '<div class="lcc-clock-status lcc-clock-status--no-clock-in">';
+            $html .= '<span class="lcc-clock-status__state">';
+            $html .= '<span class="lcc-clock-status__label">Status</span>';
+            $html .= '<strong>No clock-in</strong>';
+            $html .= '</span>';
             $html .= '</div>';
         }
 

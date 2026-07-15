@@ -32,6 +32,9 @@ use Illuminate\Support\Facades\Crypt;
 
 class EmployeePortalController extends Controller
 {
+    private const LEAVE_CALENDAR_INITIAL_PER_PAGE = 30;
+    private const LEAVE_CALENDAR_SCROLL_PER_PAGE = 10;
+
     public function index(){
         $expireDate = Carbon::now()->addDays(60)->format('Y-m-d');
         $absentToday = $this->getAbsentEmployees(date('Y-m-d'));
@@ -537,12 +540,13 @@ class EmployeePortalController extends Controller
     }
 
     public function leaveCalendar(){
+        $theDate = date('Y-m-d');
         $html = '';
         $html .= '<thead>';
-            $html .= $this->getCalendarHeader(date('Y-m-d'));
+            $html .= $this->getCalendarHeader($theDate);
         $html .= '</thead>';
         $html .= '<tbody>';
-            $html .= $this->getCalendarBody(date('Y-m-d'));
+            $html .= $this->getCalendarBody($theDate, 0, [], 1, self::LEAVE_CALENDAR_INITIAL_PER_PAGE);
         $html .= '</tbody>';
         
         return view('pages.hr.portal.leave-calendar', [
@@ -553,13 +557,14 @@ class EmployeePortalController extends Controller
             ],
             'department' => Department::orderBy('name', 'ASC')->get(),
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get(),
-            'calendarHtml' => $html
+            'calendarHtml' => $html,
+            'calendarMeta' => $this->getLeaveCalendarMeta($theDate, 0, [], self::LEAVE_CALENDAR_INITIAL_PER_PAGE),
         ]);
     }
 
     public function filterLeaveCalendar(Request $request){
         $department = (isset($request->department) && $request->department > 0 ? $request->department : 0);
-        $employee = (isset($request->employee) && !empty($request->employee) ? $request->employee : []);
+        $employee = $this->normaliseLeaveCalendarEmployees($request->employee ?? []);
         $month = ($request->month < 10 ? '0'.$request->month : $request->month);
         $year = $request->year;
 
@@ -570,16 +575,16 @@ class EmployeePortalController extends Controller
             $html .= $this->getCalendarHeader($theDate);
         $html .= '</thead>';
         $html .= '<tbody>';
-            $html .= $this->getCalendarBody($theDate, $department, $employee);
+            $html .= $this->getCalendarBody($theDate, $department, $employee, 1, self::LEAVE_CALENDAR_INITIAL_PER_PAGE);
         $html .= '</tbody>';
 
 
-        return response()->json(['res' => $html], 200);
+        return response()->json(['res' => $html, 'date' => $theDate, 'meta' => $this->getLeaveCalendarMeta($theDate, $department, $employee, self::LEAVE_CALENDAR_INITIAL_PER_PAGE)], 200);
     }
 
     public function navigateLeaveCalendar(Request $request){
         $department = (isset($request->department) && $request->department > 0 ? $request->department : 0);
-        $employee = (isset($request->employee) && !empty($request->employee) ? $request->employee : []);
+        $employee = $this->normaliseLeaveCalendarEmployees($request->employee ?? []);
         $theMonthStatus = (isset($request->theMonthStatus) && !empty($request->theMonthStatus) ? $request->theMonthStatus : 'prev');
         $thedate = (isset($request->thedate) && !empty($request->thedate) ? $request->thedate : date('Y-m-d'));
 
@@ -594,23 +599,37 @@ class EmployeePortalController extends Controller
             $html .= $this->getCalendarHeader($theDate);
         $html .= '</thead>';
         $html .= '<tbody>';
-            $html .= $this->getCalendarBody($theDate, $department, $employee);
+            $html .= $this->getCalendarBody($theDate, $department, $employee, 1, self::LEAVE_CALENDAR_INITIAL_PER_PAGE);
         $html .= '</tbody>';
 
 
-        return response()->json(['res' => $html, 'date' => $theDate], 200);
+        return response()->json(['res' => $html, 'date' => $theDate, 'meta' => $this->getLeaveCalendarMeta($theDate, $department, $employee, self::LEAVE_CALENDAR_INITIAL_PER_PAGE)], 200);
+    }
+
+    public function loadLeaveCalendarRows(Request $request){
+        $department = (isset($request->department) && $request->department > 0 ? $request->department : 0);
+        $employee = $this->normaliseLeaveCalendarEmployees($request->employee ?? []);
+        $theDate = (isset($request->thedate) && !empty($request->thedate) ? $request->thedate : date('Y-m-d'));
+        $offset = (isset($request->offset) && $request->offset >= 0 ? (int) $request->offset : self::LEAVE_CALENDAR_INITIAL_PER_PAGE);
+
+        return response()->json([
+            'rows' => $this->getCalendarBody($theDate, $department, $employee, 1, self::LEAVE_CALENDAR_SCROLL_PER_PAGE, false, $offset),
+            'date' => $theDate,
+            'meta' => $this->getLeaveCalendarMeta($theDate, $department, $employee, $offset + self::LEAVE_CALENDAR_SCROLL_PER_PAGE),
+        ], 200);
     }
 
     public function getCalendarHeader($date){
         $html = '';
-        $html .= '<th class="whitespace-nowrap text-left">Employee</th>';
+        $html .= '<th class="leave-calendar-employee-head whitespace-nowrap text-left">Employee</th>';
 
         $start_date = date('Y-m', strtotime($date)).'-01';
         $end_date = date('Y-m-t', strtotime($date));
         $today = date('Y-m-d');
 
         while (strtotime($start_date) <= strtotime($end_date)) {
-            $html .= '<th class="'.($start_date == $today ? 'today' : '').' whitespace-nowrap text-center">';
+            $weekendClass = (date('N', strtotime($start_date)) >= 6) ? ' leave-calendar-day-head--weekend' : '';
+            $html .= '<th class="leave-calendar-day-head'.$weekendClass.' '.($start_date == $today ? 'today' : '').' whitespace-nowrap text-center">';
                 $html .= '<span>'.date('d', strtotime($start_date)).'</span>';
                 $html .= '<span>'.substr(date('D', strtotime($start_date)), 0, 1).'</span>';
             $html .= '</th>';
@@ -618,20 +637,13 @@ class EmployeePortalController extends Controller
             $start_date = date ("Y-m-d", strtotime("+1 day", strtotime($start_date)));
         }
 
+        $html .= '<th class="leave-calendar-total-head whitespace-nowrap text-center">Leave Days</th>';
+
         return $html;
     }
 
-    public function getCalendarBody($theDate, $department = 0, $employee = []){
-        $query = Employee::where('status', 1)->orderBy('first_name', 'ASC');
-        if($department > 0):
-            $query->whereHas('employment', function($q) use ($department){
-                $q->where('department_id', $department);
-            });
-        endif;
-        if(!empty($employee)):
-            $query->whereIn('id', $employee);
-        endif;
-        $employees = $query->get();
+    public function getCalendarBody($theDate, $department = 0, $employee = [], $page = 1, $perPage = self::LEAVE_CALENDAR_INITIAL_PER_PAGE, $showEmpty = true, $offset = null){
+        $employees = $this->getLeaveCalendarEmployees($department, $employee, $page, $perPage, $offset);
         
         $today = date('Y-m-d');
 
@@ -641,16 +653,23 @@ class EmployeePortalController extends Controller
                 $employee_id = $emp->id;
                 $start_date = date('Y-m', strtotime($theDate)).'-01';
                 $end_date = date('Y-m-t', strtotime($theDate));
+                $leaveCount = 0;
+                $employeeName = trim((isset($emp->title->name) ? $emp->title->name.' ' : '').$emp->first_name.' '.$emp->last_name);
+                $departmentName = (isset($emp->employment->department->name) && !empty($emp->employment->department->name)) ? $emp->employment->department->name : 'No department';
 
                 $html .= '<tr>';
-                    $html .= '<td><span class="font-medium">'.(isset($emp->title->name) ? $emp->title->name.' ' : '').$emp->first_name.' '.$emp->last_name.'</span></td>';
+                    $html .= '<td class="leave-calendar-employee-cell">';
+                        $html .= '<div class="leave-calendar-employee-name">'.e($employeeName).'</div>';
+                        $html .= '<div class="leave-calendar-employee-department">'.e($departmentName).'</div>';
+                    $html .= '</td>';
 
                     while(strtotime($start_date) <= strtotime($end_date)):
                         $class = '';
-                        $label = '';
+                        $label = '&check;';
                         $title = '';
                         $style = '';
                         $dataAttr = '';
+                        $countedLeave = false;
 
                         $date = date('Y-m-d', strtotime($start_date));
                         $d = strtolower(date('D', strtotime($start_date)));
@@ -672,8 +691,8 @@ class EmployeePortalController extends Controller
                             $patternDay = EmployeeWorkingPatternDetail::where('employee_working_pattern_id', $activePatternId)->where('day', $n)->get()->first();
                             $day_Status = (isset($patternDay->id) && $patternDay->id > 0 ? 1 : 0);
 
-                            $class .= ($day_Status == 1) ? '' : ' NonWorkingDay';
-                            $label = ($day_Status == 0) ? 'x' : '';
+                            $class .= ($day_Status == 1) ? ' leave-calendar-day--ok' : ' NonWorkingDay leave-calendar-day--off';
+                            $label = ($day_Status == 0) ? '&times;' : '&check;';
                             /* Check if None working day / Weekend */
 
                             /* Check if Leave day */
@@ -695,6 +714,11 @@ class EmployeePortalController extends Controller
                                 $class .= ' pendingDay pending_'.$leaveday->leave_type;
                             endif;
                             if(isset($leaveday->leave_type) && $leaveday->leave_type > 0 && $day_Status > 0):
+                                $class .= ' leave-calendar-day--leave';
+                                if(!$countedLeave):
+                                    $leaveCount++;
+                                    $countedLeave = true;
+                                endif;
                                 switch ($leaveday->leave_type):
                                     case 1:
                                         $label = 'H';
@@ -729,16 +753,20 @@ class EmployeePortalController extends Controller
                             if((isset($emp->payment->bank_holiday_auto_book) && $emp->payment->bank_holiday_auto_book == 'Yes') && $day_Status > 0):
                                 $hrBankHoliday = HrBankHoliday::where('start_date', '<=', $date)->where('end_date', '>=', $date)->get()->first();
                                 if(isset($hrBankHoliday->id) && $hrBankHoliday->id > 0):
-                                    $label = 'BH';
+                                    $label = 'B';
                                     $title = 'Bank Holiday';
                                     $style = '';
-                                    $class .= 'bankHolidayBG';
+                                    $class .= ' bankHolidayBG leave-calendar-day--leave';
+                                    if(!$countedLeave):
+                                        $leaveCount++;
+                                        $countedLeave = true;
+                                    endif;
                                 endif;
                             endif;
                             /* Check if Bank Holiday day */
                         else:
-                            $class .= ' NonWorkingDay';
-                            $label = 'x';
+                            $class .= ' NonWorkingDay leave-calendar-day--off';
+                            $label = '&times;';
                         endif;
 
                         $theTitle = ($title != '') ? 'title="'.$title.'" ' : '' ;
@@ -749,17 +777,81 @@ class EmployeePortalController extends Controller
                         $start_date = date ("Y-m-d", strtotime("+1 day", strtotime($start_date)));
                     endwhile;
 
+                    $html .= '<td class="leave-calendar-total-cell text-center">'.$leaveCount.'</td>';
                 $html .= '</tr>';
             endforeach;
-        else:
+        elseif($showEmpty):
             $html .= '<tr>';
-                $html .= '<td class="text-center font-medium" style="padding: 1.2rem 1rem; background: rgba(245, 158, 11, .2); color: rgb(245, 158, 11);" colspan="'.(date('t', strtotime($theDate)) + 1).'">';
-                    $html .= 'No item found to display!';
+                $html .= '<td class="leave-calendar-empty text-center font-medium" colspan="'.(date('t', strtotime($theDate)) + 2).'">';
+                    $html .= 'No employees match the current filters.';
                 $html .= '</td>';
             $html .= '</tr>';
         endif;
 
         return $html;
+    }
+
+    private function normaliseLeaveCalendarEmployees($employee){
+        return array_values(array_filter((array) $employee, function($value){
+            return $value !== null && $value !== '';
+        }));
+    }
+
+    private function getLeaveCalendarEmployeeQuery($department = 0, $employee = []){
+        $query = Employee::with(['title', 'employment.department', 'payment'])->where('status', 1)->orderBy('first_name', 'ASC');
+        if($department > 0):
+            $query->whereHas('employment', function($q) use ($department){
+                $q->where('department_id', $department);
+            });
+        endif;
+        if(!empty($employee)):
+            $query->whereIn('id', $employee);
+        endif;
+
+        return $query;
+    }
+
+    private function getLeaveCalendarEmployees($department = 0, $employee = [], $page = null, $perPage = null, $offset = null){
+        $query = $this->getLeaveCalendarEmployeeQuery($department, $employee);
+        if($perPage !== null):
+            $perPage = max(1, (int) $perPage);
+            if($offset !== null):
+                $query->skip(max(0, (int) $offset))->take($perPage);
+            elseif($page !== null):
+                $page = max(1, (int) $page);
+                $query->skip(($page - 1) * $perPage)->take($perPage);
+            endif;
+        endif;
+
+        return $query->get();
+    }
+
+    private function getLeaveCalendarMeta($theDate, $department = 0, $employee = [], $loadedCount = self::LEAVE_CALENDAR_INITIAL_PER_PAGE){
+        $employeeQuery = $this->getLeaveCalendarEmployeeQuery($department, $employee);
+        $total = (clone $employeeQuery)->count();
+        $employeeIds = (clone $employeeQuery)->pluck('id')->all();
+        $onLeaveToday = 0;
+        $loadedCount = min($total, max(0, (int) $loadedCount));
+
+        if(!empty($employeeIds)):
+            $onLeaveToday = DB::table('employee_leave_days as eld')
+                ->leftJoin('employee_leaves as el', 'eld.employee_leave_id', 'el.id')
+                ->where('eld.leave_date', date('Y-m-d'))
+                ->where('eld.status', 'Active')
+                ->where('el.status', '!=', 'Canceled')
+                ->whereIn('el.employee_id', $employeeIds)
+                ->distinct()
+                ->count('el.employee_id');
+        endif;
+
+        return [
+            'monthLabel' => date('F Y', strtotime($theDate)),
+            'visibleCount' => $total,
+            'onLeaveToday' => $onLeaveToday,
+            'loadedCount' => $loadedCount,
+            'nextOffset' => $loadedCount,
+            'hasMore' => $loadedCount < $total,
+        ];
     }
 
     public function updateAbsent(HrPortalAbsentUpdateRequest $request){
