@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\EmployeeAttendance;
 use App\Models\EmployeeLeave;
 use App\Models\EmployeeLeaveDay;
+use App\Models\EmployeeWorkType;
 use App\Models\EmployeeWorkingPattern;
 use App\Models\EmployeeWorkingPatternDetail;
 use App\Models\EmployeeWorkingPatternPay;
@@ -21,6 +22,8 @@ class AttendanceReportController extends Controller
 {
     public function index($date){
         $theDate = (!empty($date) ? date('Y-m-d', strtotime('01-'.$date)) : date('Y-m-d'));
+        $monthOptions = $this->attendanceReportMonths($theDate);
+
         return view('pages.hr.portal.reports.attendance', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
@@ -28,10 +31,12 @@ class AttendanceReportController extends Controller
                 ['label' => 'Reports', 'href' => route('hr.portal.employment.reports.show')],
                 ['label' => 'Attendance', 'href' => 'javascript:void(0);']
             ],
-            'employees' => Employee::where('status', 1)->whereHas('payment', function($q){
+            'employees' => Employee::with(['employment.employeeJobTitle'])->where('status', 1)->whereHas('payment', function($q){
                                 $q->where('subject_to_clockin', 'Yes');
                             })->orderBy('first_name', 'ASC')->get(),
+            'workTypes' => EmployeeWorkType::orderBy('name', 'ASC')->get(),
             'theDate' => $theDate,
+            'reportMonths' => $monthOptions,
             'reportHtml' => $this->generateReport($theDate)
         ]);
     }
@@ -39,20 +44,29 @@ class AttendanceReportController extends Controller
     public function filterReport(Request $request){
         $the_date = (isset($request->the_date) && !empty($request->the_date) ? date('Y-m-d', strtotime($request->the_date)) : date('Y-m-d'));
         $employee_id = (isset($request->employee_id) && !empty($request->employee_id) ? $request->employee_id : []);
+        $employee_work_type_id = (isset($request->employee_work_type_id) && $request->employee_work_type_id > 0 ? $request->employee_work_type_id : 0);
 
-        $res = $this->generateReport($the_date, $employee_id);
+        $res = $this->generateReport($the_date, $employee_id, $employee_work_type_id);
         return response()->json(['res' => $res], 200);
     }
 
-    public function generateReport($the_month, $employee_id = []){
+    public function generateReport($the_month, $employee_id = [], $employee_work_type_id = 0){
         $res = [];
         if(!empty($the_month)):
             $monthStart = date('Y-m-01', strtotime($the_month));
             $monthEnd = date('Y-m-t', strtotime($the_month));
             $attendEmployees = EmployeeAttendance::where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)->pluck('employee_id')->unique()->toArray();
-            $query = Employee::has('activePatterns')->whereHas('payment', function($q){
+            $query = Employee::with(['employment.employeeJobTitle', 'employment.employeeWorkType'])
+                    ->has('activePatterns')->whereHas('payment', function($q){
                         $q->where('subject_to_clockin', 'Yes');
                     });
+
+            if($employee_work_type_id > 0):
+                $query->whereHas('employment', function($q) use($employee_work_type_id){
+                    $q->where('employee_work_type_id', $employee_work_type_id);
+                });
+            endif;
+
             if(!empty($employee_id)): 
                 $query->whereIn('id', $employee_id); 
             elseif(!empty($attendEmployees)):  
@@ -61,21 +75,28 @@ class AttendanceReportController extends Controller
             $employees = $query->orderBy('first_name', 'ASC')->get();
             if($employees->count() > 0):
                 $html = '';
-                $html .= '<table class="table table-bordered">';
-                    $html .= '<thead>';
-                        $html .= '<tr>';
-                            $html .= '<th class="whitespace-nowrap">Name</th>';
-                            $html .= '<th class="whitespace-nowrap">Rate</th>';
-                            $html .= '<th class="whitespace-nowrap">Working Hour</th>';
-                            $html .= '<th class="whitespace-nowrap">Holiday Hour</th>';
-                            $html .= '<th class="whitespace-nowrap">Working Pay</th>';
-                            $html .= '<th class="whitespace-nowrap">Holiday Pay</th>';
-                            $html .= '<th class="whitespace-nowrap">Sick/SSP</th>';
-                            $html .= '<th class="whitespace-nowrap">Gross Pay</th>';
-                        $html .= '</tr>';
-                    $html .= '</thead>';
-                    $html .= '<tbody>';
-                        $TBHTML = '';
+                $TBHTML = '';
+                $totalRows = 0;
+                $totalWorkingHours = 0;
+                $totalHolidayHours = 0;
+                $totalWorkingPay = 0;
+                $totalHolidayPay = 0;
+                $totalGrossPay = 0;
+
+                $html .= '<div class="hr-att-report-card">';
+                    $html .= '<div class="hr-att-report-scroll">';
+                        $html .= '<div class="hr-att-report-table">';
+                            $html .= '<div class="hr-att-report-row hr-att-report-head">';
+                                $html .= '<span>Name</span>';
+                                $html .= '<span class="text-right">Rate</span>';
+                                $html .= '<span class="text-right">Working Hr</span>';
+                                $html .= '<span class="text-right">Holiday Hr</span>';
+                                $html .= '<span class="text-right">Working Pay</span>';
+                                $html .= '<span class="text-right">Holiday Pay</span>';
+                                $html .= '<span class="text-right">Bnk / SSP</span>';
+                                $html .= '<span class="text-right hr-att-gross-head">Gross Pay</span>';
+                            $html .= '</div>';
+
                         foreach($employees as $emp):
                             if($this->employeeHasSyncdAttendance($emp->id, $the_month)):
                                 $payRate = $this->getEmployeeActivePatternsActivePayRate($emp->id);
@@ -98,57 +119,132 @@ class AttendanceReportController extends Controller
                                 $holiday_hours = (isset($holidayDetails['holiday_hours']) ? $holidayDetails['holiday_hours'] : 0);
                                 $holiday_hours += (isset($bankHolidayDetails['bank_holiday_hours']) ? $bankHolidayDetails['bank_holiday_hours'] : 0);
                                 $holiday_pays = $this->calculateHoursPayment($holiday_hours, $payRate);
-                                $TBHTML .= '<tr>';
-                                    $TBHTML .= '<td>';
-                                        $TBHTML .= '<div>';
-                                            $TBHTML .= '<a href="'.route('hr.portal.reports.attendance.show', [$emp->id, date('m-Y', strtotime($the_month))]).'" class="font-medium text-primary whitespace-nowrap underline">'.$emp->full_name.'</a>';
-                                            if(isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name)):
-                                                $TBHTML .= ' - <span>'.$emp->employment->employeeJobTitle->name.'</span>';
-                                            endif;
-                                        $TBHTML .= '</div>';
-                                        $TBHTML .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'; 
-                                            $TBHTML .= (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : '');
-                                            $TBHTML .= (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? ' - '.$emp->employment->works_number : '');
-                                        $TBHTML .= '</div>';
-                                    $TBHTML .= '</td>';
-                                    $TBHTML .= '<td>';
-                                        $TBHTML .= '£'.number_format($payRate, 2);
-                                    $TBHTML .= '</td>';
-                                    $TBHTML .= '<td>'.$this->calculateHourMinute($working_hours).'</td>';
-                                    $TBHTML .= '<td>'.$this->calculateHourMinute($holiday_hours).'</td>';
-                                    $TBHTML .= '<td>£'.number_format($working_pays, 2).'</td>';
-                                    $TBHTML .= '<td>£'.number_format($holiday_pays, 2).'</td>';
-                                    $TBHTML .= '<td>'.($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '').'</td>';
-                                    $TBHTML .= '<td>£'.number_format(($working_pays + $holiday_pays), 2).'</td>';
-                                $TBHTML .= '</tr>';
+
+                                $grossPay = $working_pays + $holiday_pays;
+                                $employeeName = $emp->first_name.' '.$emp->last_name;
+                                $jobTitle = (isset($emp->employment->employeeJobTitle->name) && !empty($emp->employment->employeeJobTitle->name) ? $emp->employment->employeeJobTitle->name : 'Staff');
+                                $worksNumber = (isset($emp->employment->works_number) && !empty($emp->employment->works_number) ? $emp->employment->works_number : (isset($emp->ni_number) && !empty($emp->ni_number) ? $emp->ni_number : $emp->id));
+                                $sickLabel = ($sickDays > 0 ? ($sickDays == 1 ? $sickDays.' Day' : $sickDays.' Days') : '');
+                                $avatar = $this->attendanceInitials($employeeName);
+                                $avatarColour = $this->attendanceAvatarColour($employeeName);
+                                $holidayHourText = $this->calculateHourMinute($holiday_hours);
+                                $holidayPayText = '£'.number_format($holiday_pays, 2);
+
+                                $TBHTML .= '<a href="'.route('hr.portal.reports.attendance.show', [$emp->id, date('m-Y', strtotime($the_month))]).'" class="hr-att-report-row hr-att-report-body-row">';
+                                    $TBHTML .= '<span class="hr-att-person">';
+                                        $TBHTML .= '<span class="hr-att-avatar" style="--hr-att-avatar-bg: '.$avatarColour.';">'.e($avatar).'</span>';
+                                        $TBHTML .= '<span class="min-w-0">';
+                                            $TBHTML .= '<span class="hr-att-name">'.e($employeeName).'</span>';
+                                            $TBHTML .= '<span class="hr-att-role">'.e($jobTitle).' &middot; <span>'.e($worksNumber).'</span></span>';
+                                        $TBHTML .= '</span>';
+                                    $TBHTML .= '</span>';
+                                    $TBHTML .= '<span class="hr-att-money">£'.number_format($payRate, 2).'</span>';
+                                    $TBHTML .= '<span class="hr-att-strong">'.$this->calculateHourMinute($working_hours).'</span>';
+                                    $TBHTML .= '<span class="'.($holiday_hours > 0 ? 'hr-att-warn' : 'hr-att-muted').'">'.$holidayHourText.'</span>';
+                                    $TBHTML .= '<span class="hr-att-money">£'.number_format($working_pays, 2).'</span>';
+                                    $TBHTML .= '<span class="'.($holiday_pays > 0 ? 'hr-att-warn' : 'hr-att-muted').'">'.$holidayPayText.'</span>';
+                                    $TBHTML .= '<span>'.(!empty($sickLabel) ? '<span class="hr-att-chip">'.e($sickLabel).'</span>' : '<span class="hr-att-muted">£0.00</span>').'</span>';
+                                    $TBHTML .= '<span class="hr-att-gross">£'.number_format($grossPay, 2).'</span>';
+                                $TBHTML .= '</a>';
+
+                                $totalRows++;
+                                $totalWorkingHours += $working_hours;
+                                $totalHolidayHours += $holiday_hours;
+                                $totalWorkingPay += $working_pays;
+                                $totalHolidayPay += $holiday_pays;
+                                $totalGrossPay += $grossPay;
                             endif;
                         endforeach;
                         if(!empty($TBHTML)):
                             $html .= $TBHTML;
+                            $html .= '<div class="hr-att-report-row hr-att-report-total">';
+                                $html .= '<span>Totals &middot; '.$totalRows.' staff</span>';
+                                $html .= '<span></span>';
+                                $html .= '<span class="hr-att-strong">'.$this->calculateHourMinute($totalWorkingHours).'</span>';
+                                $html .= '<span class="hr-att-strong">'.$this->calculateHourMinute($totalHolidayHours).'</span>';
+                                $html .= '<span class="hr-att-strong">£'.number_format($totalWorkingPay, 2).'</span>';
+                                $html .= '<span class="hr-att-strong">£'.number_format($totalHolidayPay, 2).'</span>';
+                                $html .= '<span></span>';
+                                $html .= '<span class="hr-att-gross">£'.number_format($totalGrossPay, 2).'</span>';
+                            $html .= '</div>';
                         else:
-                            $html .= '<tr>';
-                                $html .= '<td colspan="8">';
-                                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">
-                                                    <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Employee attendance data not found
-                                              </div>';
-                                $html .= '</td>';
-                            $html .= '</tr>';
+                            $html .= '<div class="hr-att-empty"><i data-lucide="alert-octagon" class="w-5 h-5"></i><span>Employee attendance data not found</span></div>';
                         endif;
-                    $html .= '</tbody>';
-                $html .= '</table>';
+                        $html .= '</div>';
+                    $html .= '</div>';
+                $html .= '</div>';
 
                 $res['suc'] = 1;
                 $res['html'] = $html;
+                $res['count'] = $totalRows;
             else:
                 $res['suc'] = 2;
-                $res['html'] = '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> Employees not found based on query parameters.</div>';
+                $res['count'] = 0;
+                $res['html'] = '<div class="hr-att-empty"><i data-lucide="alert-circle" class="w-5 h-5"></i><span>Employees not found based on query parameters.</span></div>';
             endif;
         else:
             $res['suc'] = 2;
-            $res['html'] = '<div class="alert alert-warning-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-circle" class="w-6 h-6 mr-2"></i> The date can not be empty.</div>';
+            $res['count'] = 0;
+            $res['html'] = '<div class="hr-att-empty"><i data-lucide="alert-circle" class="w-5 h-5"></i><span>The date can not be empty.</span></div>';
         endif;
 
         return $res;
+    }
+
+    private function attendanceInitials($name)
+    {
+        $name = preg_replace('/^(Mr|Mrs|Ms|Miss|Dr)\.?\s+/i', '', trim((string) $name));
+        $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
+        $first = $parts[0] ?? 'L';
+        $last = count($parts) > 1 ? $parts[count($parts) - 1] : 'C';
+
+        return strtoupper(substr($first, 0, 1).substr($last, 0, 1));
+    }
+
+    private function attendanceAvatarColour($seed)
+    {
+        $colours = ['#7a4fa3', '#137a70', '#2f8f5b', '#c94f7c', '#b5602f', '#2f5fa1', '#a13f6b', '#4a7a2f', '#b3261e', '#0d7c73'];
+        $hash = 0;
+
+        foreach(str_split((string) $seed) as $char):
+            $hash = (($hash * 31) + ord($char)) & 0xffffffff;
+        endforeach;
+
+        return $colours[$hash % count($colours)];
+    }
+
+    private function attendanceReportMonths($selectedDate)
+    {
+        $selectedRouteValue = date('m-Y', strtotime($selectedDate));
+        $selectedMonthStart = date('Y-m-01', strtotime($selectedDate));
+
+        $months = EmployeeAttendance::selectRaw("DATE_FORMAT(date, '%m-%Y') as route_value, DATE_FORMAT(date, '%Y-%m-01') as date_value, MIN(date) as first_date")
+            ->whereNotNull('date')
+            ->groupByRaw("DATE_FORMAT(date, '%Y-%m')")
+            ->orderByRaw('MIN(date) DESC')
+            ->get()
+            ->map(function($month) use($selectedRouteValue) {
+                $dateValue = date('Y-m-d', strtotime($month->date_value));
+
+                return [
+                    'route' => $month->route_value,
+                    'date' => $dateValue,
+                    'label' => date('F Y', strtotime($dateValue)),
+                    'selected' => $month->route_value === $selectedRouteValue,
+                ];
+            })
+            ->values();
+
+        if(!$months->contains('route', $selectedRouteValue)):
+            $months->push([
+                'route' => $selectedRouteValue,
+                'date' => $selectedMonthStart,
+                'label' => date('F Y', strtotime($selectedMonthStart)),
+                'selected' => true,
+            ]);
+        endif;
+
+        return $months->sortByDesc('date')->values();
     }
 
     public function employeeHasSyncdAttendance($employee_id, $the_month){
@@ -445,121 +541,73 @@ class AttendanceReportController extends Controller
                 endswitch;
             endif;
 
-            $html .= '<tr class="'.$dayClass.'" data-expandid="#attenTR_'.$i.'">';
-                $html .= '<td class="font-medium whitespace-nowrap">'.date('l, jS F', strtotime($today)).'</td>';
-                $html .= '<td>';
-                    $html .= ($isWorkStarted && $isWorkingDay ? $todayPattern->total : '&nbsp;');
-                $html .= '</td>';
-                $html .= '<td>'.$dayStatus.'</td>';
-                $html .= '<td>';
-                    $html .= ($dayHour > 0 || $holidayHour > 0 ? '£'.number_format($payRate, 2) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($dayHour > 0 ? $this->calculateHourMinute($dayHour) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $html .= ($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    $totalHourToday = ($dayHour + $holidayHour);
-                    $todaysPay = $this->calculateHoursPayment($totalHourToday, $payRate);
-                    $monthTotalPay += $todaysPay;
-                    $html .= ($todaysPay > 0 ? '£'.number_format($todaysPay, 2) : '');
-                $html .= '</td>';
-                $html .= '<td>';
-                    if($isLeaveDay && isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note)):
-                        $html .= $todayLeave->leaveDay->leave->note;
-                    elseif($isBankHoliday && $todayBankHoliday->name && !empty($todayBankHoliday->name) && $isWorkingDay):
-                        $html .= $todayBankHoliday->name;
-                    elseif(isset($todayAttendance->note) && !empty($todayAttendance->note)):
-                        $html .= $todayAttendance->note;
-                    endif;
-                $html .= '</td>';
-            $html .= '</tr>';
+            $totalHourToday = ($dayHour + $holidayHour);
+            $todaysPay = $this->calculateHoursPayment($totalHourToday, $payRate);
+            $monthTotalPay += $todaysPay;
+            $note = '';
+            if($isLeaveDay && isset($todayLeave->leaveDay->leave->note) && !empty($todayLeave->leaveDay->leave->note)):
+                $note = $todayLeave->leaveDay->leave->note;
+            elseif($isBankHoliday && $todayBankHoliday->name && !empty($todayBankHoliday->name) && $isWorkingDay):
+                $note = $todayBankHoliday->name;
+            elseif(isset($todayAttendance->note) && !empty($todayAttendance->note)):
+                $note = $todayAttendance->note;
+            endif;
+
+            $displayStatus = ($dayStatus == 'Holiday Vacation' ? 'Holiday / Vacation' : ($dayStatus == 'Sick' ? 'Sick Leave' : $dayStatus));
+            $html .= '<div class="ar-detail-grid ar-detail-row '.$dayClass.'" data-expandid="#attenTR_'.$i.'">';
+                $html .= '<span class="ar-detail-date">'.date('l, jS F', strtotime($today)).'</span>';
+                $html .= '<span>'.($isWorkStarted && $isWorkingDay ? '<span class="ar-detail-pill ar-detail-pill--contracted">'.e($todayPattern->total).'</span>' : '').'</span>';
+                $html .= '<span>'.(!empty($displayStatus) ? '<span class="ar-detail-status">'.e($displayStatus).'</span>' : '').'</span>';
+                $html .= '<span class="text-right">'.($dayHour > 0 || $holidayHour > 0 ? '<span class="ar-detail-pill ar-detail-pill--rate">£'.number_format($payRate, 2).'</span>' : '').'</span>';
+                $html .= '<span class="text-right">'.($dayHour > 0 ? '<span class="ar-detail-pill ar-detail-pill--work">'.$this->calculateHourMinute($dayHour).'</span>' : '').'</span>';
+                $html .= '<span class="text-right">'.($holidayHour > 0 ? '<span class="ar-detail-pill ar-detail-pill--holiday">'.$this->calculateHourMinute($holidayHour).'</span>' : '').'</span>';
+                $html .= '<span class="text-right">'.($todaysPay > 0 ? '<span class="ar-detail-pill ar-detail-pill--pay">£'.number_format($todaysPay, 2).'</span>' : '').'</span>';
+                $html .= '<span class="ar-detail-note">'.e($note).'</span>';
+            $html .= '</div>';
             if(($isWorkingDay && $isClockedIn) || (!$isWorkingDay && $isClockedIn) || ($isWorkingDay && $isBankHoliday) || ($isWorkingDay && $isLeaveDay)):
-                $html .= '<tr class="expandableRow" id="attenTR_'.$i.'">';
-                    $html .= '<td colspan="8">';
+                $html .= '<div class="ar-detail-expand" id="attenTR_'.$i.'">';
+                    $html .= '<div class="ar-detail-expand-inner">';
                         if(($isWorkingDay && $isClockedIn) || (!$isWorkingDay && $isClockedIn)):
-                            $html .= '<table class="table table-bordered table-sm '.($isLeaveDay ? 'mb-2' : '').'">';
-                                $html .= '<thead>';
-                                    $html .= '<th>Clock In</th>';
-                                    $html .= '<th>Clock Out</th>';
-                                    $html .= '<th>Break</th>';
-                                    $html .= '<th>Adjustment</th>';
-                                    $html .= '<th>Hour</th>';
-                                $html .= '</thead>';
-                                $html .= '<tbody>';
-                                    $html .= '<td>';
-                                        $html .= (isset($todayAttendance->clockin_system) ? $todayAttendance->clockin_system : '');
-                                        if(isset($todayAttendance->clock_in_location) && !empty($todayAttendance->clock_in_location)):
-                                            if($todayAttendance->clock_in_location['suc'] == 0):
-                                                $html .= '<span class="text-white ml-5 bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= 'Away '.(isset($todayAttendance->clock_in_location['ip']) && !empty($todayAttendance->clock_in_location['ip']) ? '('.$todayAttendance->clock_in_location['ip'].')' : '');
-                                                $html .= '</span>';
-                                            elseif($todayAttendance->clock_in_location['suc'] == 2):
-                                                $html .= '<span class="text-white ml-5 bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= 'Punch Not Found ';
-                                                $html .= '</span>';
-                                            else:
-                                                $html .= '<span class="text-white ml-5 bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= $todayAttendance->clock_in_location['venue'];
-                                                $html .= '</span>';
-                                            endif;
-                                        endif;
-                                    $html .= '</td>';
-                                    $html .= '<td>';
-                                        $html .= (isset($todayAttendance->clockout_system) ? $todayAttendance->clockout_system : '');
-                                        if(isset($todayAttendance->clock_out_location) && !empty($todayAttendance->clock_out_location)):
-                                            if($todayAttendance->clock_out_location['suc'] == 0):
-                                                $html .= '<span class="text-white ml-5 bg-danger px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= 'Away '.(isset($todayAttendance->clock_out_location['ip']) && !empty($todayAttendance->clock_out_location['ip']) ? '('.$todayAttendance->clock_out_location['ip'].')' : '');
-                                                $html .= '</span>';
-                                            elseif($todayAttendance->clock_out_location['suc'] == 2):
-                                                $html .= '<span class="text-white ml-5 bg-warning px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= 'Punch Not Found ';
-                                                $html .= '</span>';
-                                            else:
-                                                $html .= '<span class="text-white ml-5 bg-success px-2 py-1 font-medium" style="padding-top: .125rem; padding-bottom: .125rem;">';
-                                                    $html .= $todayAttendance->clock_out_location['venue'];
-                                                $html .= '</span>';
-                                            endif;
-                                        endif;
-                                    $html .= '</td>';
-                                    $html .= '<td>';
-                                        $html .= (isset($todayAttendance->break_time) ? $todayAttendance->break_time : '00:00');
-                                    $html .= '</td>';
-                                    $html .= '<td>';
-                                        $html .= (isset($todayAttendance->adjustment) ? $todayAttendance->adjustment : '+00:00');
-                                    $html .= '</td>';
-                                    $html .= '<td>';
-                                        $html .= (isset($todayAttendance->work_hour) ? $todayAttendance->work_hour : '00:00');
-                                    $html .= '</td>';
-                                $html .= '</tbody>';
-                            $html .= '</table>';
+                            $clockInLocation = '';
+                            if(isset($todayAttendance->clock_in_location) && !empty($todayAttendance->clock_in_location)):
+                                if($todayAttendance->clock_in_location['suc'] == 0):
+                                    $clockInLocation = 'Away '.(isset($todayAttendance->clock_in_location['ip']) && !empty($todayAttendance->clock_in_location['ip']) ? '('.$todayAttendance->clock_in_location['ip'].')' : '');
+                                elseif($todayAttendance->clock_in_location['suc'] == 2):
+                                    $clockInLocation = 'Punch Not Found';
+                                else:
+                                    $clockInLocation = $todayAttendance->clock_in_location['venue'];
+                                endif;
+                            endif;
+                            $clockOutLocation = '';
+                            if(isset($todayAttendance->clock_out_location) && !empty($todayAttendance->clock_out_location)):
+                                if($todayAttendance->clock_out_location['suc'] == 0):
+                                    $clockOutLocation = 'Away '.(isset($todayAttendance->clock_out_location['ip']) && !empty($todayAttendance->clock_out_location['ip']) ? '('.$todayAttendance->clock_out_location['ip'].')' : '');
+                                elseif($todayAttendance->clock_out_location['suc'] == 2):
+                                    $clockOutLocation = 'Punch Not Found';
+                                else:
+                                    $clockOutLocation = $todayAttendance->clock_out_location['venue'];
+                                endif;
+                            endif;
+                            $html .= '<div class="ar-detail-subgrid '.($isLeaveDay ? 'mb-2' : '').'">';
+                                $html .= '<span><strong>Clock In</strong><em>'.e(isset($todayAttendance->clockin_system) ? $todayAttendance->clockin_system : '').'</em>'.(!empty($clockInLocation) ? '<small>'.e($clockInLocation).'</small>' : '').'</span>';
+                                $html .= '<span><strong>Clock Out</strong><em>'.e(isset($todayAttendance->clockout_system) ? $todayAttendance->clockout_system : '').'</em>'.(!empty($clockOutLocation) ? '<small>'.e($clockOutLocation).'</small>' : '').'</span>';
+                                $html .= '<span><strong>Break</strong><em>'.e(isset($todayAttendance->break_time) ? $todayAttendance->break_time : '00:00').'</em></span>';
+                                $html .= '<span><strong>Adjustment</strong><em>'.e(isset($todayAttendance->adjustment) ? $todayAttendance->adjustment : '+00:00').'</em></span>';
+                                $html .= '<span><strong>Hour</strong><em>'.e(isset($todayAttendance->work_hour) ? $todayAttendance->work_hour : '00:00').'</em></span>';
+                            $html .= '</div>';
                         endif;
                         if(($isWorkingDay && $isBankHoliday) || ($isWorkingDay && $isLeaveDay)):
-                            $html .= '<table class="table table-bordered table-sm">';
-                                $html .= '<thead>';
-                                    $html .= '<th>Details</th>';
-                                    $html .= '<th>Hour</th>';
-                                $html .= '</thead>';
-                                $html .= '<tbody>';
-                                    if($isWorkingDay && $isBankHoliday):
-                                        $html .= '<tr>';
-                                            $html .= '<td>Bank Holiday: '.(isset($todayBankHoliday->name) ? $todayBankHoliday->name : '').'</td>';
-                                            $html .= '<td>'.($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '00:00').'</td>';
-                                        $html .= '</tr>';
-                                    else:
-                                        $html .= '<tr>';
-                                            $html .= '<td>'.$leaveExpandedTitle.'</td>';
-                                            $html .= '<td>'.($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '00:00').'</td>';
-                                        $html .= '</tr>';
-                                    endif;
-                                $html .= '</tbody>';
-                            $html .= '</table>';
+                            $html .= '<div class="ar-detail-leave">';
+                                if($isWorkingDay && $isBankHoliday):
+                                    $html .= '<span><strong>Details</strong><em>Bank Holiday: '.e(isset($todayBankHoliday->name) ? $todayBankHoliday->name : '').'</em></span>';
+                                else:
+                                    $html .= '<span><strong>Details</strong><em>'.e($leaveExpandedTitle).'</em></span>';
+                                endif;
+                                $html .= '<span><strong>Hour</strong><em>'.($holidayHour > 0 ? $this->calculateHourMinute($holidayHour) : '00:00').'</em></span>';
+                            $html .= '</div>';
                         endif;
-                    $html .= '</td>';
-                $html .= '</tr>';
+                    $html .= '</div>';
+                $html .= '</div>';
             endif;
         endfor;
 
@@ -583,14 +631,16 @@ class AttendanceReportController extends Controller
         return $res;
     }
 
-    public function exportExcel($date){
+    public function exportExcel(Request $request, $date){
         $the_date = (!empty($date) ? date('Y-m-d', strtotime($date)) : date('Y-m-d'));
-        $theCollection = $this->generateReportArray($the_date);
+        $employee_id = (array) $request->query('employee_id', []);
+        $employee_work_type_id = ($request->query('employee_work_type_id') > 0 ? $request->query('employee_work_type_id') : 0);
+        $theCollection = $this->generateReportArray($the_date, $employee_id, $employee_work_type_id);
 
         return Excel::download(new ArrayCollectionExport($theCollection), date('F_Y', strtotime($the_date)).'_Attendance_Report.xlsx');
     }
 
-    public function generateReportArray($the_month){
+    public function generateReportArray($the_month, $employee_id = [], $employee_work_type_id = 0){
         $theCollection = [];
         $theCollection[1][] = 'Work Number';
         $theCollection[1][] = 'NI Number';
@@ -612,9 +662,22 @@ class AttendanceReportController extends Controller
             $monthEnd = date('Y-m-t', strtotime($the_month));
             $attendEmployees = EmployeeAttendance::where('date', '>=', $monthStart)->where('date', '<=', $monthEnd)->pluck('employee_id')->unique()->toArray();
 
-            $query = Employee::has('activePatterns')->whereIn('id', $attendEmployees)->whereHas('payment', function($q){
+            $query = Employee::has('activePatterns')->whereHas('payment', function($q){
                 $q->where('subject_to_clockin', 'Yes');
             });
+
+            if($employee_work_type_id > 0):
+                $query->whereHas('employment', function($q) use($employee_work_type_id){
+                    $q->where('employee_work_type_id', $employee_work_type_id);
+                });
+            endif;
+
+            if(!empty($employee_id)):
+                $query->whereIn('id', $employee_id);
+            elseif(!empty($attendEmployees)):
+                $query->whereIn('id', $attendEmployees);
+            endif;
+
             $employees = $query->orderBy('first_name', 'ASC')->get();
 
             $row = 2;

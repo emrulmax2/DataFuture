@@ -62,18 +62,18 @@ class AuthController extends Controller
             );
 
             $redirect = session()->pull('url.intended');
-            if ($redirect && Str::startsWith($redirect, '/')):
-                session()->forget('url.intended');
-                return response()->json(['redirect' => $redirect]);
-            endif;
+            $hasIntendedRedirect = $redirect && Str::startsWith($redirect, '/') && !Str::startsWith($redirect, '//');
+            $redirectTo = $hasIntendedRedirect ? url($redirect) : url('/dashboard');
 
             // First-time users get the welcome interstitial before the dashboard.
-            if ($isFirstLogin) {
+            if ($isFirstLogin && !$hasIntendedRedirect) {
                 session()->flash('login_welcome', $this->firstName(auth()->user()->name));
-                return response()->json(['redirect' => route('welcome.first')]);
+                $redirectTo = route('welcome.first');
             }
 
-            return response()->json(['redirect' => '/dashboard']);
+            return $request->expectsJson()
+                ? response()->json(['redirect' => $redirectTo])
+                : redirect()->to($redirectTo);
         }
     }
 

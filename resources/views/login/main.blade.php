@@ -32,19 +32,20 @@
                 <span class="lcc-divider__ln"></span>
             </div>
 
-            <form id="login-form" class="lcc-form" onsubmit="return false;">
+            <form id="login-form" class="lcc-form" method="post" action="{{ route('login.check') }}">
+                @csrf
                 <div class="lcc-field">
                     <label class="lcc-label" for="email">Email address</label>
-                    <input id="email" type="email" class="lcc-input login__input" placeholder="you@lcc.ac.uk" autocomplete="username">
+                    <input id="email" name="email" type="email" class="lcc-input login__input" placeholder="you@lcc.ac.uk" autocomplete="username">
                     <div id="error-email" class="lcc-error login__input-error"></div>
                 </div>
                 <div class="lcc-field">
                     <label class="lcc-label" for="password">Password</label>
-                    <input id="password" type="password" class="lcc-input login__input" placeholder="••••••••" autocomplete="current-password">
+                    <input id="password" name="password" type="password" class="lcc-input login__input" placeholder="••••••••" autocomplete="current-password">
                     <div id="error-password" class="lcc-error login__input-error"></div>
                 </div>
                 <label class="lcc-check">
-                    <input id="remember-me" type="checkbox"> Remember me
+                    <input id="remember-me" name="remember" type="checkbox" value="1"> Remember me
                 </label>
                 <button id="btn-login" type="submit" class="lcc-btn">Staff sign in</button>
                 <a href="{{ route('applicant.register') }}" class="lcc-btn-ghost">Register as applicant</a>
@@ -61,45 +62,50 @@
 @section('script')
     <script type="module">
         (function () {
-            if ($('#login-form').length === 0) return;
+            const form = document.getElementById('login-form');
+            if (!form) return;
 
             let submitting = false;
 
-            async function login() {
+            async function login(e) {
+                e.preventDefault();
                 if (submitting) return;            // guard against double submit (Enter + click) -> /undefined
                 submitting = true;
 
-                $('#login-form').find('.login__input').removeClass('border-danger')
-                $('#login-form').find('.login__input-error').html('')
-
-                let email = $('#email').val()
-                let password = $('#password').val()
+                $(form).find('.login__input').removeClass('border-danger')
+                $(form).find('.login__input-error').html('')
 
                 $('#btn-login').html('<i data-loading-icon="oval" data-color="white" class="w-5 h-5 mx-auto"></i>')
-                tailwind.svgLoader()
-                await helper.delay(1000)
+                if (window.tailwind && typeof window.tailwind.svgLoader === 'function') {
+                    window.tailwind.svgLoader()
+                }
 
-                axios.post(`/login`, { email: email, password: password }).then(res => {
-                    // Fall back to /dashboard so a missing redirect can never send us to /undefined.
-                    location.href = (res.data && res.data.redirect) ? res.data.redirect : '/dashboard';
-                }).catch(err => {
+                try {
+                    const res = await axios.post(form.action, new FormData(form), {
+                        headers: { 'Accept': 'application/json' },
+                    });
+                    const redirectTo = (res.data && res.data.redirect) ? res.data.redirect : '/dashboard';
+                    window.location.replace(redirectTo);
+                } catch (err) {
                     submitting = false;            // allow retry after an error
                     $('#btn-login').html('Staff sign in')
-                    if (err.response.data.message != 'Wrong email or password.') {
-                        for (const [key, val] of Object.entries(err.response.data.errors)) {
+
+                    const data = err.response && err.response.data ? err.response.data : {};
+                    if (data.message !== 'Wrong email or password.' && data.errors) {
+                        for (const [key, val] of Object.entries(data.errors)) {
                             $(`#${key}`).addClass('border-danger')
                             $(`#error-${key}`).html(val)
                         }
                     } else {
                         $(`#password`).addClass('border-danger')
-                        $(`#error-password`).html(err.response.data.message)
+                        $(`#error-password`).html(data.message || 'Unable to sign in. Please try again.')
                     }
-                })
+                }
             }
 
             // The submit button (type=submit) already fires "submit" on both Enter and
             // click, so a single handler avoids invoking login() twice.
-            $('#login-form').on('submit', function (e) { e.preventDefault(); login() })
+            $(form).on('submit', login)
         })()
     </script>
 @endsection

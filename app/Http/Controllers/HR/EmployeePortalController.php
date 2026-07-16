@@ -327,15 +327,41 @@ class EmployeePortalController extends Controller
     }
 
     public function manageHolidays(){
+        $years = HrHolidayYear::where('active', 1)->orderBy('id', 'DESC')->get();
+        $holidayStats = [];
+
+        foreach($years as $year):
+            $approvedLeaveIds = EmployeeLeave::where('hr_holiday_year_id', $year->id)->where('status', 'Approved')->pluck('id')->toArray();
+            $rejectedLeaveIds = EmployeeLeave::where('hr_holiday_year_id', $year->id)->where('status', '!=', 'Pending')->pluck('id')->toArray();
+
+            $holidayStats[$year->id] = [
+                'pending' => EmployeeLeave::where('status', 'Pending')->where('hr_holiday_year_id', $year->id)->count(),
+                'approved' => EmployeeLeaveDay::whereIn('employee_leave_id', $approvedLeaveIds)->where('status', 'Active')->count(),
+                'rejected' => EmployeeLeaveDay::whereIn('employee_leave_id', $rejectedLeaveIds)->where('status', 'In Active')->count(),
+            ];
+        endforeach;
+
         return view('pages.hr.portal.manage-holidays', [
             'title' => 'HR Portal - London Churchill College',
             'breadcrumbs' => [
                 ['label' => 'HR Portal', 'href' => route('hr.portal')],
                 ['label' => 'Manage Holidays', 'href' => 'javascript:void(0);']
             ],
-            'years' => HrHolidayYear::where('active', 1)->orderBy('id', 'DESC')->get(),
+            'years' => $years,
+            'holidayStats' => $holidayStats,
             'employees' => Employee::where('status', 1)->orderBy('first_name', 'ASC')->get()
         ]);
+    }
+
+    private function holidayEmployeePhotoUrl(?Employee $employee): string
+    {
+        if(!$employee || empty($employee->photo)):
+            return '';
+        endif;
+
+        $photoPath = 'public/employees/'.$employee->id.'/'.$employee->photo;
+
+        return Storage::disk('local')->exists($photoPath) ? Storage::disk('local')->url($photoPath) : '';
     }
 
     public function list(Request $request){
@@ -401,19 +427,20 @@ class EmployeePortalController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'url' => route('employee.holiday', $list->leave->employee_id),
-                    'photo_url' => $list->leave->employee->photo_url,
+                    'photo_url' => $this->holidayEmployeePhotoUrl($list->leave->employee),
                     'name' => $list->leave->employee->first_name.' '.$list->leave->employee->last_name,
                     'designation' => (isset($list->leave->employee->employment->employeeJobTitle->name) ? $list->leave->employee->employment->employeeJobTitle->name : ''),
                     'status' => $status,
-                    'start_date' => date('D jS F, Y', strtotime($list->leave_date)),
-                    'end_date' => date('D jS F, Y', strtotime($list->leave_date)),
+                    'start_date' => date('D j M Y', strtotime($list->leave_date)),
+                    'end_date' => date('D j M Y', strtotime($list->leave_date)),
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
                     'type' => 'approved',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => (isset($list->leave->approved->employee->full_name) && !empty($list->leave->approved->employee->full_name) ? $list->leave->approved->employee->full_name : ''),
-                    'approved_at' => (isset($list->leave->approved_at) && !empty($list->leave->approved_at) ? date('jS M, Y', strtotime($list->leave->approved_at)) : ''),
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'approved_at' => (isset($list->leave->approved_at) && !empty($list->leave->approved_at) ? date('j M Y', strtotime($list->leave->approved_at)) : ''),
+                    'created_at' => (!empty($createdAt) ? date('j M Y', strtotime($createdAt)) : ''),
+                    'created_relative' => (!empty($createdAt) ? $list->created_at->diffForHumans() : ''),
                     'leave_status' => 'Approved',
                     'supervised' => 0
                 ];
@@ -448,19 +475,20 @@ class EmployeePortalController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'url' => route('employee.holiday', $list->leave->employee_id),
-                    'photo_url' => $list->leave->employee->photo_url,
+                    'photo_url' => $this->holidayEmployeePhotoUrl($list->leave->employee),
                     'name' => $list->leave->employee->first_name.' '.$list->leave->employee->last_name,
                     'designation' => (isset($list->leave->employee->employment->employeeJobTitle->name) ? $list->leave->employee->employment->employeeJobTitle->name : ''),
                     'status' => $status,
-                    'start_date' => date('D jS F, Y', strtotime($list->leave_date)),
-                    'end_date' => date('D jS F, Y', strtotime($list->leave_date)),
+                    'start_date' => date('D j M Y', strtotime($list->leave_date)),
+                    'end_date' => date('D j M Y', strtotime($list->leave_date)),
                     'title' => isset($list->leave->note) && !empty($list->leave->note) ? $list->leave->note : '',
                     'hour' => $this->calculateHourMinute($list->hour),
                     'type' => 'rejected',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => (isset($list->uuser->employee->full_name) && !empty($list->uuser->employee->full_name) ? $list->uuser->employee->full_name : ''),
-                    'approved_at' => (isset($list->updated_at) && !empty($list->updated_at) ? date('jS M, Y', strtotime($list->updated_at)) : ''),
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'approved_at' => (isset($list->updated_at) && !empty($list->updated_at) ? date('j M Y', strtotime($list->updated_at)) : ''),
+                    'created_at' => (!empty($createdAt) ? date('j M Y', strtotime($createdAt)) : ''),
+                    'created_relative' => (!empty($createdAt) ? $list->created_at->diffForHumans() : ''),
                     'leave_status' => 'Canceled',
                     'supervised' => 0
                 ];
@@ -484,19 +512,20 @@ class EmployeePortalController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'url' => route('employee.holiday', $list->employee_id),
-                    'photo_url' => $list->employee->photo_url,
+                    'photo_url' => $this->holidayEmployeePhotoUrl($list->employee),
                     'name' => $list->employee->first_name.' '.$list->employee->last_name,
                     'designation' => (isset($list->employee->employment->employeeJobTitle->name) ? $list->employee->employment->employeeJobTitle->name : ''),
                     'status' => 'Request for approval '.($leaveDays > 1 ? $leaveDays.' days' : $leaveDays.' day'),
-                    'start_date' => date('D jS F, Y', strtotime($list->from_date)),
-                    'end_date' => date('D jS F, Y', strtotime($list->to_date)),
+                    'start_date' => date('D j M Y', strtotime($list->from_date)),
+                    'end_date' => date('D j M Y', strtotime($list->to_date)),
                     'title' => 'Holiday / Vacation',
                     'hour' => $this->calculateHourMinute($leaveHours),
                     'type' => 'pending',
                     'can_auth' => (!empty($employeeApprover) && in_array(auth()->user()->id, $employeeApprover) ? 1 : 0),
                     'approved_by' => '',
                     'approved_at' => '',
-                    'created_at' => (!empty($createdAt) ? date('jS F, Y', strtotime($createdAt)).' ('.$list->created_at->diffForHumans().')' : ''),
+                    'created_at' => (!empty($createdAt) ? date('j M Y', strtotime($createdAt)) : ''),
+                    'created_relative' => (!empty($createdAt) ? $list->created_at->diffForHumans() : ''),
                     'leave_status' => $leave_status,
                     'supervised' => (isset($list->supervisedDays) && $list->supervisedDays->count() > 0 ? 1 : 0)
                 ];

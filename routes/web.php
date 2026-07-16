@@ -379,14 +379,19 @@ Route::controller(ApplicantVarifyTempEmailController::class)->middleware('applic
 
 Route::get('/go', function (\Illuminate\Http\Request $request) {
     $redirect = $request->redirect;
-    if ($redirect && \Illuminate\Support\Str::startsWith($redirect, '/')):
+    $isSafeRedirect = $redirect
+        && \Illuminate\Support\Str::startsWith($redirect, '/')
+        && !\Illuminate\Support\Str::startsWith($redirect, '//');
+
+    if ($isSafeRedirect):
         session(['url.intended' => $redirect]);
     endif;
 
     if (auth()->check()):
-        return redirect($redirect ?? '/dashboard');
+        return redirect($isSafeRedirect ? $redirect : '/dashboard');
     endif;
-    return redirect()->route('login');
+
+    return redirect()->route('login.index');
 });
 
 Route::controller(AuthController::class)->middleware('loggedin')->group(function() {

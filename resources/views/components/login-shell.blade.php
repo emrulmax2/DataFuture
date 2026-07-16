@@ -19,11 +19,12 @@
 ])
 
 @php
-    // Full-colour crest + white wordmark for the dark brand panel; colour logo for the light card header (mobile).
-    $brandLogo = asset('build/assets/images/red_and_white_logo.png');
-    $cardLogo = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']))
+    $siteLightLogo = (isset($opt['site_logo']) && !empty($opt['site_logo']) && Storage::disk('local')->exists('public/'.$opt['site_logo']))
         ? Storage::disk('local')->url('public/'.$opt['site_logo'])
-        : 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg';
+        : null;
+    // Use the site-setting light logo on the login brand area; keep existing assets as fallback.
+    $brandLogo = $siteLightLogo ?: asset('build/assets/images/red_and_white_logo.png');
+    $cardLogo = $siteLightLogo ?: 'https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/images/logo-with-blue-color-3.svg';
     $year = date('Y');
 
     // ---- Resolve which card state is shown on first paint (server-driven, genuine) ----

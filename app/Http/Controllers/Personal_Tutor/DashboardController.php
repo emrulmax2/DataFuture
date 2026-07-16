@@ -72,7 +72,9 @@ class DashboardController extends Controller
         $yesterday = Carbon::yesterday()->format('d-m-Y');
         return  view('pages.personal-tutor.dashboard.index', [
             'title' => 'Personal Tutor Dashboard - London Churchill College',
-            'breadcrumbs' => [],
+            'breadcrumbs' => [
+                ['label' => 'Personal Tutor', 'href' => route('pt.dashboard')],
+            ],
             'user' => $userData,
             'employee' => $employee,
             'theDate' => date('d-m-Y', strtotime($theDate)),
@@ -268,64 +270,95 @@ class DashboardController extends Controller
                         endif;
                     endif;
 
-                    $html .= '<div class="intro-x relative flex items-center mb-3">';
-                        $html .= '<div class="before:block before:absolute before:w-20 before:h-px before:bg-slate-200 before:dark:bg-darkmode-400 before:mt-5 before:ml-5">';
-                            $html .= '<div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">';
-                                $html .= '<img alt="'.(isset($class->plan->tutor->employee->full_name) && !empty($class->plan->tutor->employee->full_name) ? $class->plan->tutor->employee->full_name : 'London Churchill College').'" src="'.(isset($class->plan->tutor->employee->photo_url) && !empty($class->plan->tutor->employee->photo_url) ? $class->plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                    $html .= '<div class="pt-class-card '.($showClass == 1 ? 'is-live' : '').'">';
+                        $html .= '<div class="pt-class-head">';
+                            $html .= '<div class="pt-class-title">';
+                                $html .= e($class->plan->creations->module_name).' ('.e($class->plan->group->name).')'.(isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.e($class->plan->class_type) : '');
                             $html .= '</div>';
+                            $html .= '<div class="pt-class-time">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
                         $html .= '</div>';
-                        $html .= '<div class="box px-5 py-3 ml-4 flex-1 bg-warning-soft zoom-in">';
-                            $html .= '<div class="flex items-center mb-3">';
-                                $html .= '<div class="font-medium">'.$class->plan->creations->module_name.' ('. $class->plan->group->name.')'.(isset($class->plan->class_type) && !empty($class->plan->class_type) ? ' - '.$class->plan->class_type : '').'</div>';
-                                $html .= '<div class="text-xs text-slate-500 ml-auto">'.(isset($class->plan->start_time) && !empty($class->plan->start_time) ? date('h:i A', strtotime($class->plan->start_time)) : '').'</div>';
-                            $html .= '</div>';
-                            //$html .= '<div class="text-slate-500 mt-1">'.(isset($class->plan->course->name) ? $class->plan->course->name : '').'</div>';
-                            if($class->plan->class_type == 'Tutorial'):
-                                if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
-                                    if($class->feed_given == 1):
-                                        $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Feed Attendance</a>';
-                                    else:
-                                        $html .= '<a href="'.route('tutor-dashboard.attendance', [$class->plan->tutor_id, $class->id, 1]).'"  data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" class="start-punch transition duration-200 btn btn-sm btn-success text-white py-2 px-3 "><i data-lucide="view" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
-                                        if($class->feed_given == 1 && $class->attendanceInformation->end_time == null):
-                                            $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch transition duration-200 btn btn-sm btn-danger text-white py-2 px-3 ml-1"><i data-lucide="x-circle" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</a>';
-                                        endif;
-                                    endif;
+                        $html .= '<div class="pt-class-sub">';
+                            $html .= (isset($class->plan->course->name) ? e($class->plan->course->name) : '');
+                            $html .= (isset($class->plan->room->name) && !empty($class->plan->room->name) ? ' &middot; '.e($class->plan->room->name) : '');
+                        $html .= '</div>';
+
+                        if($class->plan->class_type == 'Tutorial' || ($class->plan->class_type == 'Seminar' && ($class->proxy_tutor_id == null || $class->proxy_tutor_id == 0))):
+                            if(isset($class->attendanceInformation->id) && $class->attendanceInformation->id > 0):
+                                if($class->feed_given == 1):
+                                    $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" href="'.route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]).'" class="start-punch pt-action"><i data-lucide="eye" class="w-4 h-4"></i>View Attendance</a>';
                                 else:
-                                    if($showClass == 1):
-                                        $html .= '<a data-tw-toggle="modal" data-id="'.$class['id'].'" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch transition duration-200 btn btn-sm btn-primary text-white py-2 px-3">Start Class</a>';
-                                    elseif($showClass == 2):
-                                        $html .= '<div class="alert alert-danger-soft show flex items-start" role="alert">
-                                                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Class Start Button appears 15 minutes before the scheduled time.
-                                                </div>';
-                                    endif;
+                                    $html .= '<a href="'.route('tutor-dashboard.attendance', [$class->plan->personal_tutor_id, $class->id, 1]).'" data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" class="start-punch pt-action"><i data-lucide="eye" class="w-4 h-4"></i>Feed Attendance</a>';
+                                endif;
+                                if($class->feed_given == 1 && $class->attendanceInformation->end_time == null && $class->status == 'Ongoing'):
+                                    $html .= '<a data-attendanceinfo="'.$class->attendanceInformation->id.'" data-id="'.$class->id.'" data-tw-toggle="modal" data-tw-target="#endClassModal" class="start-punch pt-action is-danger"><i data-lucide="x-circle" class="w-4 h-4"></i>End Class</a>';
+                                endif;
+                            else:
+                                if($showClass == 1):
+                                    $html .= '<a data-tw-toggle="modal" data-id="'.$class['id'].'" data-tw-target="#editPunchNumberDeteilsModal" class="start-punch pt-action">Start Class</a>';
+                                elseif($showClass == 2):
+                                    $html .= '<div class="pt-class-alert" role="alert">
+                                                <i data-lucide="alert-triangle"></i>
+                                                <span>Class Start Button appears 15 minutes before the scheduled time.</span>
+                                            </div>';
                                 endif;
                             endif;
-                        $html .= '</div>';
+                        endif;
                     $html .= '</div>';
                 endforeach;
             else:
-                $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
-                            <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No Class found for the day.
-                      </div>';
+                $html .= '<div class="pt-empty">No class found for the day.</div>';
             endif;
         else:
-            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">
-                            <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> No Class found for the day.
-                      </div>';
+            $html .= '<div class="pt-empty">No class found for the day.</div>';
         endif;
 
         return response()->json(['res' => $html], 200);
     }
     public function searchStudent(Request $request){
-        $SearchVal = $request->SearchVal;
+        $SearchVal = trim((string) $request->SearchVal);
 
         $html = '';
-        $Query = Student::with('title')->orderBy('registration_no', 'ASC')->where('registration_no', 'LIKE', '%'.$SearchVal.'%')->get();
+        $Query = Student::with('title')
+                    ->where(function($q) use($SearchVal){
+                        $q->where('registration_no', 'LIKE', '%'.$SearchVal.'%')
+                          ->orWhere('first_name', 'LIKE', '%'.$SearchVal.'%')
+                          ->orWhere('last_name', 'LIKE', '%'.$SearchVal.'%');
+                    })
+                    ->orderBy('registration_no', 'ASC')
+                    ->limit(8)
+                    ->get();
         
+        $html .= '<li class="pt-search-results-head">';
+            $html .= '<span>Matching students</span>';
+            $html .= '<span class="pt-search-count">'.$Query->count().'</span>';
+        $html .= '</li>';
+
         if($Query->count() > 0):
             foreach($Query as $qr):
+                $cleanName = preg_replace('/^(?:(Mr|Mrs|Ms|Miss|Dr|Md)\.?\s+)+/i', '', trim((string) $qr->full_name));
+                $nameParts = preg_split('/\s+/', $cleanName ?: 'London Churchill');
+                $firstInitial = strtoupper(substr($nameParts[0] ?? 'L', 0, 1));
+                $lastInitial = strtoupper(substr($nameParts[count($nameParts) - 1] ?? 'C', 0, 1));
+                $initials = $firstInitial.$lastInitial;
+                $avatarPalettes = [
+                    ['#e6ecf5', '#2f5fa1'],
+                    ['#f4e6ec', '#a13f6b'],
+                    ['#e4f1ee', '#0d7c73'],
+                    ['#f3ecd8', '#a1802f'],
+                    ['#e9f0e4', '#4a7a2f'],
+                ];
+                $avatarPalette = $avatarPalettes[abs(crc32((string) $qr->registration_no)) % count($avatarPalettes)];
+                $label = $qr->registration_no.' - '.$qr->full_name;
+
                 $html .= '<li>';
-                    $html .= '<a href="'.route('student.show', $qr->id).'" data-label="'.$qr->registration_no.' - '.' '.$qr->title->name.$qr->first_name.' '.$qr->last_name.'" class="dropdown-item">'.$qr->registration_no.' - '.$qr->full_name.'</a>';
+                    $html .= '<a href="'.route('student.show', $qr->id).'" data-label="'.e($label).'" class="dropdown-item pt-student-result">';
+                        $html .= '<span class="pt-result-avatar" style="background: '.$avatarPalette[0].'; color: '.$avatarPalette[1].';">'.$initials.'</span>';
+                        $html .= '<span class="pt-result-body">';
+                            $html .= '<span class="pt-result-name">'.e($qr->full_name).'</span>';
+                            $html .= '<span class="pt-result-reg">'.e($qr->registration_no).'</span>';
+                        $html .= '</span>';
+                        $html .= '<span class="pt-result-chevron">&rsaquo;</span>';
+                    $html .= '</a>';
                 $html .= '</li>';
             endforeach;
         else:
@@ -708,45 +741,70 @@ class DashboardController extends Controller
         $html = '';
         if(!empty($res)):
             foreach($res as $row):
+                $nameForInitials = preg_replace('/^(Mr|Mrs|Ms|Miss|Dr)\.?\s+/i', '', trim((string) $row['name']));
+                $nameParts = preg_split('/\s+/', $nameForInitials ?: 'London Churchill');
+                $firstInitial = strtoupper(substr($nameParts[0] ?? 'L', 0, 1));
+                $lastInitial = strtoupper(substr($nameParts[count($nameParts) - 1] ?? 'C', 0, 1));
+                $initials = $firstInitial.$lastInitial;
+                $avatarPalettes = [
+                    ['#e4f1ee', '#0d7c73'],
+                    ['#f3ecd8', '#a1802f'],
+                    ['#e6ecf5', '#2f5fa1'],
+                    ['#f4e6ec', '#a13f6b'],
+                    ['#e9f0e4', '#4a7a2f'],
+                ];
+                $avatarPalette = $avatarPalettes[abs(crc32((string) $row['name'])) % count($avatarPalettes)];
+                $attendance = (float) $row['attendance'];
+                $attendanceTone = $attendance < 60 ? 'is-low' : ($attendance < 75 ? 'is-mid' : 'is-high');
+                $attendanceWidth = min(100, max(0, $attendance));
+
                 $html .= '<tr class="intro-x">';
-                    $html .= '<td class="w-40">';
-                        $html .= '<div class="flex items-center">';
-                            $html .= '<div class="w-10 h-10 image-fit zoom-in">';
-                                $html .= '<img alt="'.$row['name'].'" class="tooltip rounded-full" src="'.$row['photo_url'].'">';
+                    $html .= '<td>';
+                        $html .= '<div class="pt-student-cell">';
+                            $html .= '<span class="pt-student-avatar" style="background: '.$avatarPalette[0].'; color: '.$avatarPalette[1].';">'.$initials.'</span>';
+                            $html .= '<div class="min-w-0">';
+                                $html .= '<a href="'.route('student.show', $row['student_id']).'" class="pt-student-name">'.e($row['name']).'</a>';
+                                $html .= '<div class="pt-student-course">'.e($row['course']).'</div>';
+                                $html .= '<div class="pt-student-meta">'.e($row['registration_no']).(!empty($row['mobile']) ? ' &middot; '.e($row['mobile']) : '').'</div>';
                             $html .= '</div>';
-                            $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap ml-3">'.$row['registration_no'].'</a>';
                         $html .= '</div>';
                     $html .= '</td>';
                     $html .= '<td>';
-                        $html .= '<a href="'.route('student.show', $row['student_id']).'" class="font-medium whitespace-nowrap">'.$row['name'].'</a>';
-                        $html .= '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5">'.$row['course'].'</div>';
-                        if(!empty($row['mobile'])):
-                            $html .= '<div class="text-slate-500 text-xs font-medium whitespace-nowrap mt-0.5">'.$row['mobile'].'</div>';
-                        endif;
+                        $html .= '<span class="pt-attendance-value '.$attendanceTone.'">'.number_format($attendance, 2).'%</span>';
+                        $html .= '<div class="pt-attendance-meter"><span class="'.$attendanceTone.'" style="width: '.$attendanceWidth.'%;"></span></div>';
                     $html .= '</td>';
-                    $html .= '<td class="text-center">'.number_format($row['attendance'], 2).'%</td>';
-                    $html .= '<td class="text-left">';
+                    $html .= '<td>';
                         if(isset($row['modules']) && !empty($row['modules'])):
-                            $m = 1;
+                            $html .= '<div class="pt-module-stack">';
                             foreach($row['modules'] as $mod):
-                                $html .= '<div class="'.($m != count($mod) ? 'mb-1' : '').' flex items-start justify-start text-'.($mod['status'] == 1 ? 'success' : 'danger').'">';
-                                    $html .= '<i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> '.$mod['module'];
-                                    $html .= (isset($mod['type']) && !empty($mod['type']) ? ' ('.$mod['type'].')' : '');
-                                    $html .= (isset($mod['group']) && !empty($mod['group']) ? ' ('.$mod['group'].')' : '');
-                                    $html .= (!empty($mod['start']) ? ' ('.$mod['start'].(!empty($mod['end']) ? ' - '.$mod['end'] : '').')' : '');
-                                $html .= '</div>';
+                                $isAttended = isset($mod['status']) && $mod['status'] == 1;
+                                $moduleIcon = $isAttended ? 'check' : 'x';
+                                $moduleType = isset($mod['type']) && !empty($mod['type']) ? ' ('.$mod['type'].')' : '';
+                                $moduleTime = !empty($mod['start']) ? $mod['start'].(!empty($mod['end']) ? ' - '.$mod['end'] : '') : '';
 
-                                $m++;
+                                $html .= '<div class="pt-missed-module-card '.($isAttended ? 'is-attended' : '').'">';
+                                    $html .= '<div class="pt-missed-title">';
+                                        $html .= '<i data-lucide="'.$moduleIcon.'" class="w-3.5 h-3.5"></i>';
+                                        $html .= '<span>'.e($mod['module'].$moduleType).'</span>';
+                                        if(isset($mod['group']) && !empty($mod['group'])):
+                                            $html .= '<span class="pt-module-code">'.e($mod['group']).'</span>';
+                                        endif;
+                                    $html .= '</div>';
+                                    if(!empty($moduleTime)):
+                                        $html .= '<div class="pt-module-time"><i data-lucide="clock" class="w-3 h-3"></i>'.e($moduleTime).'</div>';
+                                    endif;
+                                $html .= '</div>';
                             endforeach;
+                            $html .= '</div>';
                         endif;
                     $html .= '</td>';
-                    $html .= '<td class="table-report__action w-56">';
-                        $html .= '<div class="flex justify-center items-center">';
-                            $html .= '<a class="addNoteBtn flex items-center mr-3" data-tw-toggle="modal" data-tw-target="#addNoteModal" href="javascript:void(0);" data-attendanceids="'.$row['attendance_ids'].'" data-student="'.$row['student_id'].'">';
-                                $html .= '<i data-lucide="check-square" class="w-4 h-4 mr-1"></i> Note';
+                    $html .= '<td class="table-report__action">';
+                        $html .= '<div class="flex justify-end items-center">';
+                            $html .= '<a title="Add note" class="addNoteBtn flex items-center" data-tw-toggle="modal" data-tw-target="#addNoteModal" href="javascript:void(0);" data-attendanceids="'.$row['attendance_ids'].'" data-student="'.$row['student_id'].'" data-student-name="'.e($row['name']).'" data-registration="'.e($row['registration_no']).'" data-attendance="'.number_format($attendance, 2).'%" data-initials="'.e($initials).'">';
+                                $html .= '<i data-lucide="pencil" class="w-4 h-4"></i> Note';
                             $html .= '</a>';
-                            $html .= '<a class="addSmsBtn flex items-center text-danger" href="javascript:void(0);" data-student="'.$row['student_id'].'" data-tw-toggle="modal" data-tw-target="#smsSMSModal">';
-                                $html .= '<i data-lucide="tablet-smartphone" class="w-4 h-4 mr-1"></i> Send SMS';
+                            $html .= '<a title="Send SMS" class="addSmsBtn flex items-center text-danger" href="javascript:void(0);" data-student="'.$row['student_id'].'" data-student-name="'.e($row['name']).'" data-registration="'.e($row['registration_no']).'" data-attendance="'.number_format($attendance, 2).'%" data-initials="'.e($initials).'" data-tw-toggle="modal" data-tw-target="#smsSMSModal">';
+                                $html .= '<i data-lucide="message-square" class="w-4 h-4"></i> Send SMS';
                             $html .= '</a>';
                         $html .= '</div>';
                     $html .= '</td>';
@@ -754,7 +812,7 @@ class DashboardController extends Controller
             endforeach;
         else:
             $html .= '<tr class="intro-x">';
-                $html .= '<td colspan="5">';
+                $html .= '<td colspan="4">';
                     $html .= '<div class="alert alert-pending-soft show flex items-center" role="alert">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="alert-circle" class="lucide lucide-alert-circle w-6 h-6 mr-2"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
                                 Assiged student not foud for the day.
@@ -823,49 +881,52 @@ class DashboardController extends Controller
             $attendance_avg = $this->myModulesAttendanceAverage($id, $term_id);
             $bellow_60 = $this->myModulesAttendanceBellow($id, $term_id);
 
-            $statsHtml .= '<div class="grid grid-cols-12 gap-y-8 gap-x-10">';
-                $statsHtml .= '<div class="col-span-6 sm:col-span-6">';
-                    $statsHtml .= '<div class="text-slate-500">No of Module</div>';
-                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
-                        $statsHtml .= '<div id="totalModule" class="text-base">';
-                            if($myModules->count() > 0):
-                                foreach($myModules as $mm):
-                                    if($mm->TOTAL_MODULE > 0):
-                                        $statsHtml .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium text-primary">'.$mm->class_type.': '.$mm->TOTAL_MODULE.'</span>';
-                                    endif;
-                                endforeach;
-                            else:
-                                $statsHtml .= '<span class="bg-slate-200 px-2 py-1 mr-1 text-xs rounded font-medium">0 Modules</span>';
-                            endif;
-                        $statsHtml .= '</div>';
-                    $statsHtml .= '</div>';
-                $statsHtml .= '</div>';
-                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
-                    $statsHtml .= '<div class="text-slate-500">No of Student</div>';
-                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
-                        $statsHtml .= '<div class="text-base">'.$no_of_assigned.'</div>';
-                    $statsHtml .= '</div>';
-                $statsHtml .= '</div>';
-                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
-                    $statsHtml .= '<div class="text-slate-500">Expected Assignments</div>';
-                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
-                        $statsHtml .= '<div class="text-base">'.($no_of_assignment).'</div>';
-                    $statsHtml .= '</div>';
-                $statsHtml .= '</div>';
-                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
-                    $statsHtml .= '<div class="text-slate-500">Average Attendance</div>';
-                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
-                        $statsHtml .= '<div class="text-base">'.$attendance_avg.'</div>';
-                    $statsHtml .= '</div>';
-                $statsHtml .= '</div>';
+            $moduleTotal = 0;
+            $moduleSummaryParts = [];
+            if($myModules->count() > 0):
+                foreach($myModules as $mm):
+                    $moduleTotal += (int) $mm->TOTAL_MODULE;
+                    if($mm->TOTAL_MODULE > 0):
+                        $moduleLabel = trim((string) $mm->class_type);
+                        $moduleLabel = [
+                            'theory' => 'Theory',
+                            'tutorial' => 'Tutorial',
+                            'seminar' => 'Seminer',
+                        ][strtolower($moduleLabel)] ?? $moduleLabel;
+                        $moduleSummaryParts[] = (int) $mm->TOTAL_MODULE.' '.e($moduleLabel);
+                    endif;
+                endforeach;
+            endif;
+            $moduleSummaryHtml = !empty($moduleSummaryParts) ? implode(' &middot; ', $moduleSummaryParts) : '0 Modules';
+            $attendanceAvgValue = (float) str_replace('%', '', $attendance_avg);
+            $attendanceTone = $attendanceAvgValue < 60 ? 'is-danger' : ($attendanceAvgValue < 75 ? 'is-warning' : '');
+            $attendanceProgress = min(100, max(0, $attendanceAvgValue));
 
-                $statsHtml .= '<div class="col-span-12 sm:col-span-6"></div>';
-
-                $statsHtml .= '<div class="col-span-12 sm:col-span-6">';
-                    $statsHtml .= '<div class="text-slate-500">Attendance Bellow 60%</div>';
-                    $statsHtml .= '<div class="mt-1.5 flex items-center">';
-                        $statsHtml .= '<a target="_blank" href="'.route('attendance.percentage', [auth()->user()->id, $term_id]).'" class="text-base font-medium underline">'.$bellow_60.'</a>';
-                    $statsHtml .= '</div>';
+            $statsHtml .= '<div class="pt-kpi-grid">';
+                $statsHtml .= '<div class="pt-kpi-card">';
+                    $statsHtml .= '<div class="pt-kpi-label"><span class="pt-kpi-icon"><i data-lucide="book-open" class="w-4 h-4"></i></span>Modules</div>';
+                    $statsHtml .= '<div id="totalModule" class="pt-kpi-value">'.$moduleTotal.'</div>';
+                    $statsHtml .= '<div class="pt-kpi-note">'.$moduleSummaryHtml.'</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="pt-kpi-card">';
+                    $statsHtml .= '<div class="pt-kpi-label"><span class="pt-kpi-icon"><i data-lucide="users" class="w-4 h-4"></i></span>Students</div>';
+                    $statsHtml .= '<div class="pt-kpi-value">'.$no_of_assigned.'</div>';
+                    $statsHtml .= '<div class="pt-kpi-note">Assigned to selected term</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="pt-kpi-card">';
+                    $statsHtml .= '<div class="pt-kpi-label"><span class="pt-kpi-icon is-gold"><i data-lucide="file-text" class="w-4 h-4"></i></span>Assignments</div>';
+                    $statsHtml .= '<div class="pt-kpi-value">'.$no_of_assignment.'</div>';
+                    $statsHtml .= '<div class="pt-kpi-note">Expected this term</div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="pt-kpi-card">';
+                    $statsHtml .= '<div class="pt-kpi-label"><span class="pt-kpi-icon is-warning"><i data-lucide="trending-up" class="w-4 h-4"></i></span>Avg attendance</div>';
+                    $statsHtml .= '<div class="pt-kpi-value '.$attendanceTone.'">'.$attendance_avg.'</div>';
+                    $statsHtml .= '<div class="pt-progress"><span style="width: '.$attendanceProgress.'%;"></span></div>';
+                $statsHtml .= '</div>';
+                $statsHtml .= '<div class="pt-kpi-card">';
+                    $statsHtml .= '<div class="pt-kpi-label"><span class="pt-kpi-icon is-danger"><i data-lucide="alert-triangle" class="w-4 h-4"></i></span>Below 60%</div>';
+                    $statsHtml .= '<a target="_blank" href="'.route('attendance.percentage', [auth()->user()->id, $term_id]).'" class="pt-kpi-value is-danger">'.$bellow_60.'</a>';
+                    $statsHtml .= '<div class="pt-kpi-note">Need follow-up</div>';
                 $statsHtml .= '</div>';
             $statsHtml .= '</div>';
         else:
@@ -878,36 +939,20 @@ class DashboardController extends Controller
             $i = 1;
             foreach($modules as $mod):
                 $module_id = (isset($mod->parent_id) && $mod->parent_id > 0 ? $mod->parent_id : $mod->id);
-                $modClass = ($i > 4 ? 'more hidden' : 'block');
-                $modulHtml .= '<a class="'.$modClass.'" href="'.route('tutor-dashboard.plan.module.show', $module_id).'" target="_blank">';
-                    $modulHtml .= '<div id="moduleset-'.$mod->id.'" class="intro-y module-details_'.$mod->id.'">';
-                        $modulHtml .= '<div class="box px-4 py-4 mb-3 zoom-in '.(isset($mod->tutor_id) && $mod->tutor_id > 0 ? 'pl-5' : '').'">';
-                            if(isset($mod->tutor_id) && $mod->tutor_id > 0):
-                                $modulHtml .= '<div class="w-10 h-10 image-fit -ml-5 rounded-full absolute t-0 b-0 my-auto" style="margin-left: -35px;">';
-                                    $modulHtml .= '<img src="'.(isset($mod->tutor->employee->photo_url) && !empty($mod->tutor->employee->photo_url) ? $mod->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'" title="'.(isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '').'" class="tooltip rounded-full" alt="'.(isset($mod->tutor->employee->full_name) && !empty($mod->tutor->employee->full_name) ? $mod->tutor->employee->full_name : '').'"/>';
-                                $modulHtml .= '</div>';
-                            endif;
-                            $modulHtml .= '<div class="flex justify-start items-center mb-2 pl-4">';
-                                $modulHtml .= '<div class="rounded bg-success text-white cursor-pointer font-medium w-auto inline-flex justify-center items-center min-w-10 px-3 py-0.5">'.$mod->group->name.'</div>';
-                                $modulHtml .= '<button class="rounded bg-info text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">';
-                                    $modulHtml .= (!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown'));
-                                $modulHtml .= '</button>';
-                                $modulHtml .= '<button class="rounded bg-primary text-white cursor-pointer font-medium inline-flex justify-center items-center w-auto ml-1 px-3 py-0.5">';
-                                    $modulHtml .= $mod->activeAssign->count();
-                                $modulHtml .= '</button>';
+                $modulHtml .= '<a class="block" href="'.route('tutor-dashboard.plan.module.show', $module_id).'" target="_blank">';
+                    $modulHtml .= '<div id="moduleset-'.$mod->id.'" class="module-details_'.$mod->id.'">';
+                        $modulHtml .= '<div class="pt-module-item">';
+                            $modulHtml .= '<span class="pt-module-icon"><i data-lucide="book-open" class="w-4 h-4"></i></span>';
+                            $modulHtml .= '<div class="min-w-0 flex-1">';
+                                $modulHtml .= '<div class="pt-module-title">'.$mod->creations->module_name.'</div>';
+                                $modulHtml .= '<div class="pt-module-sub">'.$mod->group->name.' &middot; '.(!empty($mod->class_type) ? $mod->class_type : (isset($mod->creations->class_type) && !empty($mod->creations->class_type) ? $mod->creations->class_type : 'Unknown')).'</div>';
                             $modulHtml .= '</div>';
-                            $modulHtml .= '<div class="ml-4 mr-auto">';
-                                $modulHtml .= '<div class="font-medium">'.$mod->creations->module_name.'</div>';
-                                $modulHtml .= '<div class="text-slate-500 text-xs mt-0.5">'.$mod->course->name.'</div>';
-                            $modulHtml .= '</div>';
+                            $modulHtml .= '<span class="pt-module-count">'.$mod->activeAssign->count().'</span>';
                         $modulHtml .= '</div>';
                     $modulHtml .= '</div>';
                 $modulHtml .= '</a>';
                 $i += 1;
             endforeach;
-            if($modules->count() > 4):
-                $modulHtml .= '<a href="javascript:void(0);" id="load-more" class="intro-y w-full block text-center rounded-md py-4 border border-dotted border-slate-400 dark:border-darkmode-300 text-slate-500">View More</a>';
-            endif;
         else: 
             $modulHtml .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert">';
                 $modulHtml .= '<i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Modules not found!';

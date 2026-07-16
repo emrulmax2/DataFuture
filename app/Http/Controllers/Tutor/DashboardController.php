@@ -250,7 +250,7 @@ class DashboardController extends Controller
                     if($currentTerm==0)
                         $currentTerm = $list->attendance_term_id;
 
-                    $termData[$list->attendance_term_id] = (object) [ 
+                    $termData[$list->attendance_term_id] = (object) [
                         'id' =>$list->attendance_term_id,
                         'name' => $list->term_name,   
                         "total_modules" => !isset($termData[$list->attendance_term_id]) ? 1 : $termData[$list->attendance_term_id]->total_modules,
@@ -265,7 +265,7 @@ class DashboardController extends Controller
                         'group'=> $list->group_name,           
                     ];
 
-                    if(isset($termData[$list->attendance_term_id]))  
+                    if(isset($termData[$list->attendance_term_id]))
                         $termData[$list->attendance_term_id]->total_modules = count($data[$list->attendance_term_id]);
                     else 
                         $termData[$list->attendance_term_id] = 1;
@@ -329,6 +329,7 @@ class DashboardController extends Controller
 
 
         $Query = $Query->orderBy('datelist.date', 'DESC')
+               ->orderBy('plan.start_time', 'ASC')
                ->get();
 
         $data = array();
@@ -347,16 +348,17 @@ class DashboardController extends Controller
                 $end_time = date('h:i A', strtotime($end_time));
 
                 $venue_ips = VenueIpAddress::whereNotNull('venue_id')->pluck('ip')->toArray();
-                $showClass = false;
+                $showClass = 0;
                 if(in_array(auth()->user()->last_login_ip, $venue_ips)) {
                     $listStart = $plan_date.' '.$list->start_time;
                     $listEnd = $plan_date.' '.$list->end_time;
                     $classStart = date('Y-m-d H:i:s', strtotime('-15 minutes', strtotime($listStart)));
                     $classEnd = date('Y-m-d H:i:s', strtotime($listEnd));
                     $currentTime = date('Y-m-d H:i:s');
-                    $showClass = $classStart.' - '.$classEnd.' - '.$currentTime;
                     if($currentTime >= $classStart && $currentTime <= $classEnd):
-                        $showClass = true;
+                        $showClass = 1;
+                    elseif($currentTime < $classStart):
+                        $showClass = 2;
                     endif;
                 }
                 
@@ -783,7 +785,7 @@ class DashboardController extends Controller
 
 
         $Query = DB::table('plans as plan')
-        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
+        ->select('plan.*','academic_years.id as academic_year_id','academic_years.name as academic_year_name','terms.id as term_id','term_declarations.id as attendance_term_id','term_declarations.name as term_name','terms.term as term','course.name as course_name','module.module_name','venue.name as venue_name','room.name as room_name','group.name as group_name',"user.name as username")
         ->leftJoin('courses as course', 'plan.course_id', 'course.id')
         ->leftJoin('module_creations as module', 'plan.module_creation_id', 'module.id')
         ->leftJoin('instance_terms as terms', 'module.instance_term_id', 'terms.id')
@@ -796,7 +798,7 @@ class DashboardController extends Controller
         ->leftJoin('groups as group', 'plan.group_id', 'group.id')
         ->leftJoin('users as user', 'plan.tutor_id', 'user.id')
         ->where('plan.tutor_id', $tutor)
-        ->where('terms.id', $instance_term);
+        ->where('term_declarations.id', $instance_term);
 
         
 
@@ -810,38 +812,37 @@ class DashboardController extends Controller
             $i = 1;
             
             foreach($Query as $list):
-                    
-                    if($currentTerm==0)
-                        $currentTerm = $list->term_id;
 
-                    $termData[$list->term_id] = (object) [ 
-                        'id' =>$list->term_id,
-                        'name' => $list->term_name,   
-                        "total_modules" => !isset($termData[$list->term_id]) ? 1 : $termData[$list->term_id]->total_modules,
-                        
+                    if($currentTerm==0)
+                        $currentTerm = $list->attendance_term_id;
+
+                    $termData[$list->attendance_term_id] = (object) [
+                        'id' =>$list->attendance_term_id,
+                        'name' => $list->term_name,
+                        "total_modules" => !isset($termData[$list->attendance_term_id]) ? 1 : $termData[$list->attendance_term_id]->total_modules,
                     ];
 
-                    $data[$list->term_id][] = (object) [
+                    $data[$list->attendance_term_id][] = (object) [
                         'id' => $list->id,
                         'sl' => $i,
                         'course' => $list->course_name,
                         'module' => $list->module_name,
-                        'group'=> $list->group_name,           
+                        'group'=> $list->group_name,
                     ];
 
-                    if(isset($termData[$list->term_id]))  
-                        $termData[$list->term_id]->total_modules = count($data[$list->term_id]);
-                    else 
-                        $termData[$list->term_id] = 1;
+                    if(isset($termData[$list->attendance_term_id]))
+                        $termData[$list->attendance_term_id]->total_modules = count($data[$list->attendance_term_id]);
+                    else
+                        $termData[$list->attendance_term_id] = 1;
                     $i++;
-        
+
             endforeach;
             return response()->json(["current_term" =>$termData,
             "module_data" => $data],200);
         endif;
 
-        return response()->json(["current_term" =>"",
-            "module_data" =>""],422);
+        return response()->json(["current_term" => [],
+            "module_data" => []],200);
     }
 
     /**

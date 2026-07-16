@@ -71,11 +71,12 @@ class MicrosoftSocialiteController extends Controller
      */
     private function afterLoginRedirect(User $user, bool $isFirstLogin)
     {
-        if ($isFirstLogin) {
+        if ($isFirstLogin && !session()->has('url.intended')) {
             $first = trim(explode(' ', trim((string) $user->name))[0]);
             session()->flash('login_welcome', $first !== '' ? $first : null);
             return redirect()->route('welcome.first');
         }
-        return redirect('/');
+
+        return redirect()->intended('/');
     }
 }
