@@ -278,7 +278,8 @@
                                                         <td>
                                                             <div class="acc-table-primary">
                                                                 <span class="acc-invoice-no">{{ $payment->invoice_no }}</span>
-                                                                @if($payment->mailed_pdf_file != null || $payment->mailed_pdf_file != '')
+                                                                {{-- mailed_pdf_file is a smallint holding a coerced path: NULL = never emailed, 0 = emailed --}}
+                                                                @if(!is_null($payment->mailed_pdf_file))
                                                                     <i data-lucide="send" class="w-4 h-4 text-orange-500"></i>
                                                                 @endif
                                                             </div>
@@ -299,6 +300,22 @@
                                                                 @endif
                                                                 @if($can_delete)
                                                                     <button data-id="{{ $payment->id }}" type="button" class="deletePaymentBtn acc-mini-btn acc-mini-btn--danger" title="Delete payment"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                                                                @endif
+                                                                @if($agreementCount > 1 && $can_add)
+                                                                    <div class="dropdown inline-flex" data-tw-placement="bottom-end">
+                                                                        <button class="dropdown-toggle acc-mini-btn" aria-expanded="false" data-tw-toggle="dropdown" title="Move payment to another agreement">
+                                                                            <i data-lucide="arrow-right-left" class="w-3 h-3"></i>
+                                                                        </button>
+                                                                        <div class="dropdown-menu w-64">
+                                                                            <ul class="dropdown-content">
+                                                                                @foreach($agreements as $sagr)
+                                                                                    @if($sagr->id != $agr->id)
+                                                                                        <li><a href="javascript:void(0);" data-agr="{{ $sagr->id }}" data-pay="{{ $payment->id }}" class="dropdown-item assignPaymentToAgr text-success"><i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>Agreement ID: {{ $sagr->id }} - Year {{ $sagr->year }}</a></li>
+                                                                                    @endif
+                                                                                @endforeach
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
                                                                 @endif
                                                             </div>
                                                         </td>

@@ -6008,8 +6008,8 @@ body.student-profile-body .modal #confirmModal .text-3xl {
 }
 
 .student-profile-redesign .acc-mini-btn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 7px;
 }
 
@@ -6207,6 +6207,13 @@ body.student-profile-body .modal #confirmModal .text-3xl {
     border-radius: 10px;
 }
 
+/* The clipping above rounds the thead/tfoot corners, but it also cuts off an open
+   row-action dropdown, which Popper positions inside this wrapper. Stop clipping
+   only while a menu is actually open. */
+.student-profile-redesign .acc-table-wrap:has(.dropdown-menu.show) {
+    overflow: visible;
+}
+
 .student-profile-redesign .acc-table {
     width: 100%;
     border-collapse: collapse;
@@ -6273,7 +6280,14 @@ body.student-profile-body .modal #confirmModal .text-3xl {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Hold the buttons at their full size so a cramped cell wraps them onto
+   another line instead of shrinking them into ovals. */
+.student-profile-redesign .acc-row-actions > * {
+    flex: none;
 }
 
 .student-profile-redesign .acc-row-actions--wide {
