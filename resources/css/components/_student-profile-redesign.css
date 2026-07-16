@@ -6099,6 +6099,7 @@ body.student-profile-body .modal #confirmModal .text-3xl {
 
 .student-profile-redesign .acc-meta-pill {
     padding: 3px 10px;
+    gap: 5px;
 }
 
 .student-profile-redesign .acc-meta-pill--warn {
