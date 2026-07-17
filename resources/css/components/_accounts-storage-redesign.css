@@ -1,0 +1,975 @@
+/*
+ |--------------------------------------------------------------------------
+ | Accounts Storage redesign
+ |--------------------------------------------------------------------------
+ |
+ | Storage/transactions-page-only styling. The page shell, sidebar and palette
+ | come from _accounts-shell.css — the page carries both `.accounts-shell` and
+ | `.accounts-storage-redesign`.
+ |
+ | The transaction table is rendered by Tabulator 4.9, so the table rules below
+ | target its DOM (.tabulator-*) rather than markup in the blade.
+ |
+ */
+
+/* ----------------------------------------------------------------- toolbar */
+
+.acc-st__toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.accounts-storage-redesign .acc-st__action {
+    align-items: center;
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    color: var(--acc-accent);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    height: 42px;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    width: 42px;
+}
+
+.accounts-storage-redesign .acc-st__action:hover {
+    border-color: var(--acc-accent-border);
+    background: var(--acc-accent-soft);
+}
+
+.accounts-storage-redesign .acc-st__action > i,
+.accounts-storage-redesign .acc-st__action > svg {
+    height: 18px;
+    width: 18px;
+}
+
+/* Add-transaction toggle — filled. The +/- swap is handled globally by the
+   existing `.addTransactionToggle` rules in datafuture.css. */
+.accounts-storage-redesign .acc-st__action--primary {
+    background: var(--acc-accent);
+    border-color: var(--acc-accent);
+    color: #ffffff;
+}
+
+.accounts-storage-redesign .acc-st__action--primary:hover {
+    background: var(--acc-accent-hover);
+    border-color: var(--acc-accent-hover);
+    color: #ffffff;
+}
+
+/* Current storage identity */
+.acc-st__identity {
+    align-items: center;
+    display: flex;
+    gap: 11px;
+    margin-left: 6px;
+    min-width: 0;
+}
+
+.acc-st__mono {
+    align-items: center;
+    border-radius: 10px;
+    color: #ffffff;
+    display: flex;
+    flex: none;
+    font-size: 15px;
+    font-weight: 800;
+    height: 40px;
+    justify-content: center;
+    line-height: 1;
+    width: 40px;
+}
+
+.acc-st__logo {
+    border-radius: 10px;
+    flex: none;
+    height: 40px;
+    overflow: hidden;
+    width: 40px;
+}
+
+.acc-st__logo img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.accounts-storage-redesign .acc-st__name {
+    align-items: center;
+    color: var(--acc-ink);
+    display: flex;
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    gap: 7px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.accounts-storage-redesign .acc-st__name a {
+    color: var(--acc-accent);
+    font-family: "Public Sans", system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.acc-st__balance {
+    color: var(--acc-muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.acc-st__balance strong {
+    color: var(--acc-accent);
+    font-weight: 700;
+}
+
+.acc-st__balance--negative strong {
+    color: var(--acc-danger);
+}
+
+/* Search + export */
+.acc-st__tools {
+    align-items: center;
+    display: flex;
+    gap: 9px;
+    margin-left: auto;
+}
+
+.acc-st__search {
+    position: relative;
+    width: 280px;
+}
+
+.acc-st__search-icon {
+    color: var(--acc-faint);
+    height: 16px;
+    left: 13px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+}
+
+.accounts-storage-redesign .acc-st__search .form-control {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    box-shadow: none;
+    color: var(--acc-ink);
+    font-size: 14px;
+    height: auto;
+    padding: 10px 14px 10px 37px;
+    width: 100%;
+}
+
+.accounts-storage-redesign .acc-st__search .form-control::placeholder {
+    color: var(--acc-faint);
+}
+
+.accounts-storage-redesign .acc-st__search .form-control:focus {
+    border-color: var(--acc-accent-border);
+    box-shadow: 0 0 0 3px rgba(14, 118, 108, 0.1);
+    outline: none;
+}
+
+.accounts-storage-redesign .acc-st__export {
+    background: var(--acc-accent);
+    border: 1px solid var(--acc-accent);
+    border-radius: 11px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 16px;
+}
+
+.accounts-storage-redesign .acc-st__export:hover {
+    background: var(--acc-accent-hover);
+    border-color: var(--acc-accent-hover);
+}
+
+/* ------------------------------------------------------- add transaction form */
+
+.acc-st__form-card {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 19px;
+    box-shadow: 0 18px 40px -24px rgba(18, 51, 47, 0.45);
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+/* Card header */
+.acc-st__form-head {
+    align-items: center;
+    background: var(--acc-surface-soft);
+    border-bottom: 1px solid var(--acc-soft-line);
+    display: flex;
+    gap: 10px;
+    padding: 16px 24px;
+}
+
+.acc-st__form-badge {
+    align-items: center;
+    background: var(--acc-accent-soft);
+    border-radius: 9px;
+    color: var(--acc-accent);
+    display: flex;
+    flex: none;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+.acc-st__form-badge > i,
+.acc-st__form-badge > svg {
+    height: 16px;
+    stroke-width: 2.4;
+    width: 16px;
+}
+
+.acc-st__form-title {
+    color: var(--acc-ink);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.acc-st__form-sub {
+    color: var(--acc-faint);
+    font-size: 12.5px;
+}
+
+.accounts-storage-redesign .acc-st__form-x {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--acc-line);
+    border-radius: 8px;
+    color: var(--acc-faint);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    height: 30px;
+    justify-content: center;
+    margin-left: auto;
+    padding: 0;
+    width: 30px;
+}
+
+.accounts-storage-redesign .acc-st__form-x:hover {
+    border-color: var(--acc-accent-border);
+    color: var(--acc-accent);
+}
+
+.accounts-storage-redesign .acc-st__form-x > i,
+.accounts-storage-redesign .acc-st__form-x > svg {
+    height: 15px;
+    width: 15px;
+}
+
+/* Card body + field grid */
+.acc-st__form-body {
+    padding: 20px 24px 22px;
+}
+
+.acc-st__form-row {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.acc-st__form-row--top {
+    grid-template-columns: 190px minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.acc-st__form-row--mid {
+    grid-template-columns: 190px minmax(0, 1fr) 180px 180px;
+}
+
+.acc-st__amounts {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: 1fr 1fr;
+}
+
+.acc-st__field {
+    min-width: 0;
+}
+
+.accounts-storage-redesign .acc-st__label {
+    color: var(--acc-faint);
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.accounts-storage-redesign .acc-st__label--out {
+    color: var(--acc-danger);
+}
+
+.accounts-storage-redesign .acc-st__label--in {
+    color: var(--acc-accent);
+}
+
+/* Fields */
+.accounts-storage-redesign .acc-st__form .form-control,
+.accounts-storage-redesign .acc-st__form .ts-input {
+    background-color: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    box-shadow: none;
+    color: var(--acc-ink);
+    font-size: 14px;
+    min-height: 42px;
+    padding: 10px 14px;
+}
+
+.accounts-storage-redesign .acc-st__form .form-control::placeholder {
+    color: #aab4b1;
+}
+
+.accounts-storage-redesign .acc-st__form .form-control:focus,
+.accounts-storage-redesign .acc-st__form .ts-input.focus {
+    border-color: var(--acc-accent-border);
+    box-shadow: 0 0 0 3px rgba(14, 118, 108, 0.1);
+    outline: none;
+}
+
+/* Selected value reads as plain text, not a chip — tom-select's own item
+   styling would otherwise tint it. */
+.accounts-storage-redesign .acc-st__form .ts-input > div.item {
+    background: none;
+    border-radius: 0;
+    color: var(--acc-ink);
+    font-weight: 600;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* A failed save marks invalid fields with `border-danger` (see the 422 branch in
+   accounts-storage.js). The field rule above sets a `border` shorthand that
+   outweighs that single-class utility, so restate it here. Matched via
+   [class~=] rather than `.border-danger`: naming a Tailwind utility in a
+   selector makes _pristine.css's `@apply border-danger` circular and fails the
+   CSS build. */
+.accounts-storage-redesign .acc-st__form .form-control[class~="border-danger"] {
+    border-color: var(--acc-danger);
+}
+
+.accounts-storage-redesign .acc-st__form #trans_type {
+    font-weight: 600;
+}
+
+/* Amount inputs carry a £ prefix; the sign is decorative so the input keeps its
+   own padding and the number stays right-aligned. */
+.acc-st__money {
+    position: relative;
+}
+
+.acc-st__money-sign {
+    color: #c3ccca;
+    font-size: 14px;
+    font-weight: 600;
+    left: 14px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.accounts-storage-redesign .acc-st__money .form-control {
+    padding-left: 28px;
+}
+
+/* Action bar */
+.acc-st__form-actions {
+    align-items: center;
+    border-top: 1px solid var(--acc-soft-line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 18px;
+}
+
+.acc-st__form-actions-end {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.acc-st__check {
+    align-items: center;
+    display: flex;
+    gap: 9px;
+}
+
+.accounts-storage-redesign .acc-st__check .form-check-input {
+    border-radius: 7px;
+    height: 24px;
+    margin: 0;
+    width: 24px;
+}
+
+.accounts-storage-redesign .acc-st__check .form-check-input:checked {
+    background-color: var(--acc-accent);
+    border-color: var(--acc-accent);
+}
+
+.acc-st__check-label {
+    color: #3d4d4a;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.acc-st__icon-wrap {
+    display: inline-flex;
+    position: relative;
+}
+
+.accounts-storage-redesign .acc-st__icon-btn {
+    align-items: center;
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    color: var(--acc-accent);
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 44px;
+}
+
+.accounts-storage-redesign .acc-st__icon-btn:hover {
+    background: var(--acc-accent-soft);
+    border-color: var(--acc-accent-border);
+}
+
+.accounts-storage-redesign .acc-st__icon-btn i,
+.accounts-storage-redesign .acc-st__icon-btn svg {
+    height: 19px;
+    width: 19px;
+}
+
+/* Asset toggle when checked — the global `#is_assets:checked + .assetsChecker`
+   rules paint it #0d9488; repaint to the accounts accent. */
+.accounts-storage-redesign #is_assets:checked + .assetsChecker {
+    background-color: var(--acc-accent);
+    border-color: var(--acc-accent);
+}
+
+.accounts-storage-redesign .acc-st__btn-cancel {
+    background: transparent;
+    border: 0;
+    border-radius: 11px;
+    color: #5c6a66;
+    cursor: pointer;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 12px 20px;
+}
+
+.accounts-storage-redesign .acc-st__btn-cancel:hover {
+    color: var(--acc-ink);
+}
+
+.accounts-storage-redesign .acc-st__btn-save {
+    align-items: center;
+    background: var(--acc-accent);
+    border: 0;
+    border-radius: 11px;
+    box-shadow: 0 10px 20px -12px rgba(14, 118, 108, 0.9);
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14.5px;
+    font-weight: 700;
+    gap: 8px;
+    padding: 12px 30px;
+}
+
+.accounts-storage-redesign .acc-st__btn-save:hover {
+    background: var(--acc-accent-hover);
+}
+
+.accounts-storage-redesign .acc-st__btn-save i,
+.accounts-storage-redesign .acc-st__btn-save > svg:not([width="25"]) {
+    height: 16px;
+    width: 16px;
+}
+
+.accounts-storage-redesign .acc-st__btn-delete {
+    align-items: center;
+    background: var(--acc-danger);
+    border: 0;
+    border-radius: 11px;
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-flex;
+    height: 44px;
+    justify-content: center;
+    padding: 0;
+    width: 44px;
+}
+
+.accounts-storage-redesign .acc-st__btn-delete:hover {
+    background: #a83228;
+}
+
+.accounts-storage-redesign .acc-st__btn-delete i,
+.accounts-storage-redesign .acc-st__btn-delete svg {
+    height: 17px;
+    width: 17px;
+}
+
+@media (max-width: 1279px) {
+    .acc-st__form-row--top,
+    .acc-st__form-row--mid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .acc-st__form-row--top,
+    .acc-st__form-row--mid {
+        grid-template-columns: 1fr;
+    }
+
+    .acc-st__form-actions-end {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* ------------------------------------------------------------- table card */
+
+.acc-st__card {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 19px;
+    overflow: hidden;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator {
+    background: transparent;
+    border: 0;
+    margin: 0;
+}
+
+/* Header row */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header {
+    background: #fafbfb;
+    border-bottom: 1px solid var(--acc-soft-line);
+    border-top: 0;
+    color: var(--acc-faint);
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col {
+    background: transparent;
+    border-right: 0;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    padding: 15px 10px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col:first-child .tabulator-col-content {
+    padding-left: 24px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col:last-child .tabulator-col-content {
+    padding-right: 24px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col-title {
+    color: var(--acc-faint);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+    background: #f3f6f6;
+}
+
+/* Body rows */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row {
+    background: var(--acc-surface);
+    border-bottom: 1px solid #f2f5f5;
+    min-height: 0;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row.tabulator-row-even {
+    background: var(--acc-surface);
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row:hover,
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row.tabulator-row-even:hover {
+    background: #f6faf9;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row .tabulator-cell {
+    border-right: 0;
+    color: #2b3a37;
+    font-size: 13.5px;
+    line-height: 1.35;
+    padding: 13px 10px;
+    white-space: normal;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row .tabulator-cell:first-child {
+    padding-left: 24px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-row .tabulator-cell:last-child {
+    padding-right: 24px;
+}
+
+/* Date cell: teal underlined link + transaction code beneath */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell .editTransaction {
+    color: var(--acc-accent);
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell .editTransaction:hover {
+    color: var(--acc-accent-hover);
+}
+
+/* Targets the formatter's own class, never `.text-slate-500` — using a Tailwind
+   utility as a selector makes every `@apply text-slate-500` circular and breaks
+   the CSS build. */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell .acc-st__tc {
+    color: #9aa5a2 !important;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+/* Amounts */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell[tabulator-field="out"] {
+    color: var(--acc-danger);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell[tabulator-field="in"] {
+    color: var(--acc-accent);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-cell[tabulator-field="balance"] {
+    color: var(--acc-ink);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+/* Category dot (colour comes from the formatter in accounts-storage.js) */
+.acc-st__dot {
+    border-radius: 50%;
+    display: inline-block;
+    flex: none;
+    height: 8px;
+    margin-right: 8px;
+    vertical-align: middle;
+    width: 8px;
+}
+
+/* Footer / pager */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer {
+    background: var(--acc-surface);
+    border-top: 1px solid var(--acc-soft-line);
+    color: var(--acc-muted);
+    font-weight: 600;
+    padding: 12px 24px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page-size {
+    border: 1px solid var(--acc-field-line);
+    border-radius: 9px;
+    color: var(--acc-ink);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 7px 12px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page {
+    align-items: center;
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 9px;
+    color: #3d4d4a;
+    display: inline-flex;
+    font-size: 13.5px;
+    font-weight: 700;
+    height: 34px;
+    justify-content: center;
+    margin: 0 3px;
+    min-width: 34px;
+    padding: 0 10px;
+}
+
+/* First/prev/next/last carry a chevron instead of a text label. */
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page i,
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page svg {
+    height: 16px;
+    width: 16px;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page:not(.disabled):hover {
+    background: var(--acc-accent-soft);
+    border-color: var(--acc-accent-border);
+    color: var(--acc-accent);
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page.active,
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page.active:hover {
+    background: var(--acc-accent);
+    border-color: var(--acc-accent);
+    color: #ffffff;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-footer .tabulator-page.disabled {
+    opacity: 0.45;
+}
+
+.accounts-storage-redesign .acc-st__card .tabulator .tabulator-placeholder {
+    color: var(--acc-faint);
+    font-weight: 600;
+}
+
+@media (max-width: 767px) {
+    .acc-st__tools {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .acc-st__search {
+        width: 100%;
+    }
+}
+
+/* -------------------------------------------------------------- CSV modal */
+
+/* The theme reparents `.modal` to <body> on show, so these rules hang off the
+   modal itself — scoping them under `.accounts-storage-redesign` would stop
+   matching the moment the modal opens. The palette is redeclared for the same
+   reason: there is no `.accounts-shell` ancestor left to inherit from. */
+.acc-modal {
+    --acc-surface: #ffffff;
+    --acc-surface-soft: #fafbfb;
+    --acc-ink: #12332f;
+    --acc-muted: #7c8986;
+    --acc-faint: #93a09d;
+    --acc-line: #e6ecec;
+    --acc-soft-line: #eef2f2;
+    --acc-field-line: #e2e8e9;
+    --acc-accent: #0e766c;
+    --acc-accent-hover: #0a5850;
+    --acc-accent-soft: #e7f2f0;
+    --acc-accent-border: #bfe0d9;
+
+    font-family: "Public Sans", Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.acc-modal .modal-content {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.acc-modal .modal-header {
+    border-bottom: 1px solid var(--acc-soft-line);
+    padding: 20px 24px;
+}
+
+.acc-modal__title {
+    color: var(--acc-ink);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.acc-modal__x {
+    align-items: center;
+    border: 1px solid var(--acc-soft-line);
+    border-radius: 9px;
+    color: var(--acc-faint);
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.acc-modal__x:hover {
+    border-color: var(--acc-accent-border);
+    color: var(--acc-accent);
+}
+
+.acc-modal__x i,
+.acc-modal__x svg {
+    height: 16px;
+    width: 16px;
+}
+
+.acc-modal .modal-body {
+    padding: 24px;
+}
+
+.acc-modal__label {
+    color: #3d4d4a;
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 9px;
+}
+
+.acc-modal__drop {
+    align-items: center;
+    background: var(--acc-surface-soft);
+    border: 1.5px dashed #cdd8d6;
+    border-radius: 12px;
+    display: flex;
+    gap: 14px;
+    padding: 16px 18px;
+}
+
+.acc-modal__drop-icon {
+    align-items: center;
+    background: var(--acc-accent-soft);
+    border-radius: 11px;
+    color: var(--acc-accent);
+    display: flex;
+    flex: none;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.acc-modal__drop-icon i,
+.acc-modal__drop-icon svg {
+    height: 20px;
+    width: 20px;
+}
+
+.acc-modal__drop-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.acc-modal__drop input[type="file"] {
+    color: var(--acc-muted);
+    font-size: 13.5px;
+    max-width: 100%;
+}
+
+.acc-modal__drop input[type="file"]::file-selector-button {
+    background: var(--acc-surface);
+    border: 1px solid #d8e0e1;
+    border-radius: 9px;
+    color: var(--acc-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-right: 11px;
+    padding: 8px 13px;
+}
+
+.acc-modal__drop input[type="file"]::file-selector-button:hover {
+    border-color: var(--acc-accent-border);
+    color: var(--acc-accent);
+}
+
+.acc-modal__hint {
+    color: #aab4b1;
+    font-size: 12px;
+    margin-top: 7px;
+}
+
+.acc-modal__switch {
+    margin-top: 20px;
+}
+
+.acc-modal__switch .form-check-input:checked {
+    background-color: var(--acc-accent);
+    border-color: var(--acc-accent);
+}
+
+.acc-modal__switch .form-check-label {
+    color: var(--acc-ink);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.acc-modal__switch .acc-modal__hint {
+    margin-top: 4px;
+}
+
+.acc-modal .modal-footer {
+    background: var(--acc-surface-soft);
+    border-top: 1px solid var(--acc-soft-line);
+    justify-content: flex-end;
+    padding: 16px 24px;
+}
+
+.acc-modal__btn-cancel {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    color: #3d4d4a;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 11px;
+    padding: 11px 22px;
+}
+
+.acc-modal__btn-cancel:hover {
+    border-color: var(--acc-accent-border);
+    color: var(--acc-accent);
+}
+
+.acc-modal__btn-submit {
+    align-items: center;
+    background: var(--acc-accent);
+    border: 0;
+    border-radius: 11px;
+    box-shadow: 0 10px 20px -12px rgba(14, 118, 108, 0.9);
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 700;
+    gap: 8px;
+    padding: 11px 26px;
+}
+
+.acc-modal__btn-submit:hover {
+    background: var(--acc-accent-hover);
+}
+
+.acc-modal__btn-submit i,
+.acc-modal__btn-submit > svg:not([width="25"]) {
+    height: 15px;
+    width: 15px;
+}

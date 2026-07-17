@@ -1,5 +1,4 @@
 import helper from "./helper";
-import colors from "./colors";
 import Chart from "chart.js/auto";
 
 import { createIcons, icons } from "lucide";
@@ -157,6 +156,10 @@ import Litepicker from "litepicker";
 
         if(months != '' && incomes != '' && expense != ''){
             let ctx = $("#report-line-chart")[0].getContext("2d");
+            let incomeFill = ctx.createLinearGradient(0, 0, 0, 340);
+            incomeFill.addColorStop(0, "rgba(14, 118, 108, .22)");
+            incomeFill.addColorStop(1, "rgba(14, 118, 108, 0)");
+
             let myChart = new Chart(ctx, {
                 type: "line",
                 data: {
@@ -166,21 +169,29 @@ import Litepicker from "litepicker";
                         {
                             label: "# Inflows",
                             data: incomes,
-                            borderWidth: 2,
-                            borderColor: '#0d9488',
-                            backgroundColor: "transparent",
+                            borderWidth: 3,
+                            borderColor: '#0e766c',
+                            backgroundColor: incomeFill,
+                            fill: true,
                             pointBorderColor: "transparent",
+                            pointBackgroundColor: "transparent",
+                            pointHoverBackgroundColor: '#0e766c',
+                            pointHoverBorderColor: '#ffffff',
                             tension: 0.4,
                         },
                         //Expenses
                         {
                             label: "# Outflows",
                             data: expense,
-                            borderWidth: 2,
-                            borderDash: [2, 2],
-                            borderColor: 'rgba(185, 28, 28, .8)',
+                            borderWidth: 2.4,
+                            borderDash: [2, 7],
+                            borderColor: '#c8443a',
                             backgroundColor: "transparent",
+                            fill: false,
                             pointBorderColor: "transparent",
+                            pointBackgroundColor: "transparent",
+                            pointHoverBackgroundColor: '#c8443a',
+                            pointHoverBorderColor: '#ffffff',
                             tension: 0.4,
                         },
                     ],
@@ -196,9 +207,10 @@ import Litepicker from "litepicker";
                         x: {
                             ticks: {
                                 font: {
-                                    size: 12,
+                                    size: 11.5,
+                                    weight: "600",
                                 },
-                                color: colors.slate["500"](0.8),
+                                color: '#93a09d',
                             },
                             grid: {
                                 display: false,
@@ -206,21 +218,23 @@ import Litepicker from "litepicker";
                             },
                         },
                         y: {
-                            afterFit: instance => console.log(instance),
                             ticks: {
                                 font: {
-                                    size: 12,
+                                    size: 11,
                                 },
-                                color: colors.slate["500"](0.8),
+                                color: '#aab4b1',
                                 callback: function (value, index, values) {
+                                    if(Math.abs(value) >= 1000000){
+                                        return "£" + (value / 1000000).toFixed(1).replace('.0', '') + "M";
+                                    }
+                                    if(Math.abs(value) >= 1000){
+                                        return "£" + (value / 1000).toFixed(1).replace('.0', '') + "K";
+                                    }
                                     return "£" + value;
                                 },
                             },
                             grid: {
-                                color: $("html").hasClass("dark")
-                                    ? colors.slate["500"](0.3)
-                                    : colors.slate["300"](),
-                                borderDash: [2, 2],
+                                color: '#eef2f2',
                                 drawBorder: false,
                             },
                         },

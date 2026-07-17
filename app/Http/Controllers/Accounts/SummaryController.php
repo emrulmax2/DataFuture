@@ -208,6 +208,8 @@ class SummaryController extends Controller
         endif;
         $res['totalInc'] = ($totalIncomes > 0 ? '£'.number_format($totalIncomes, 2) : '£0.00');
         $res['totalExp'] = ($totalExpense > 0 ? '£'.number_format($totalExpense, 2) : '£0.00');
+        $res['totalIncRaw'] = $totalIncomes;
+        $res['totalExpRaw'] = $totalExpense;
 
         return $res;
     }

@@ -4,6 +4,22 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+// Stable colour per category name, so a category keeps the same dot between
+// rows and reloads.
+const accCategoryDot = (function () {
+    const palette = ['#0e766c', '#7d6bd6', '#e0972a', '#c86bb0', '#2f8fd1', '#5aa457', '#d1652f', '#b1000e', '#8a9693', '#5b2c6f'];
+    return function (name) {
+        const key = String(name || '');
+        if (key === '') { return '#8a9693'; }
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+        }
+        return palette[hash % palette.length];
+    };
+})();
+
 var storageTransList = (function () {
     var _tableGen = function () {
         let storage = $('#storageTransList').attr('data-storage');
@@ -23,6 +39,24 @@ var storageTransList = (function () {
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
+            // Chevron pager. Tabulator assigns these with innerHTML, so the
+            // lucide placeholders are swapped for SVG by the createIcons() call
+            // in renderComplete(). The *_title entries carry the dropped text
+            // through to title/aria-label.
+            langs: {
+                "default": {
+                    "pagination": {
+                        "first": '<i data-lucide="chevrons-left"></i>',
+                        "first_title": "First Page",
+                        "prev": '<i data-lucide="chevron-left"></i>',
+                        "prev_title": "Prev Page",
+                        "next": '<i data-lucide="chevron-right"></i>',
+                        "next_title": "Next Page",
+                        "last": '<i data-lucide="chevrons-right"></i>',
+                        "last_title": "Last Page",
+                    },
+                },
+            },
             columns: [
                 {
                     title: "Date",
@@ -39,7 +73,7 @@ var storageTransList = (function () {
                                         html += '</a>';
                                     }
                                 html += '</div>';
-                                html += '<div class="text-slate-500 text-xs whitespace-nowrap mt-0.5 flex justify-start items-center">';
+                                html += '<div class="acc-st__tc text-slate-500 text-xs whitespace-nowrap mt-0.5 flex justify-start items-center">';
                                     if(cell.getData().doc_url != ''){
                                         html += '<a data-id="'+cell.getData().id+'" href="javascript:void(0);" target="_blank" class="downloadTransDoc text-success mr-2" style="position: relative; top: -1px;"><i data-lucide="hard-drive-download" class="w-4 h-4"></i></a>';
                                     }
@@ -116,7 +150,7 @@ var storageTransList = (function () {
                             html += '</div>';
                         }else if(cell.getData().acc_category_id > 0){
                             html += '<div class="relative">';
-                                html += '<div class="font-medium whitespace-normal">'+cell.getData().category_name+'</div>';
+                                html += '<div class="font-medium whitespace-normal"><span class="acc-st__dot" style="background: '+accCategoryDot(cell.getData().category_name)+';"></span>'+cell.getData().category_name+'</div>';
                             html += '</div>';
                         }
                         return html;
@@ -382,6 +416,15 @@ var storageTransList = (function () {
         }
     });
 
+    // Cancel / close in the form header. Routed through the toggle so the form
+    // still gets the full field reset rather than just being hidden.
+    $('.acc-st__form-dismiss').on('click', function(e){
+        e.preventDefault();
+        if($('#addTransactionToggle').hasClass('active')){
+            $('#addTransactionToggle').trigger('click');
+        }
+    });
+
     $('#storageExportBtn').on('click', function(e){
         e.preventDefault();
         let $theBtn = $(this);
@@ -404,7 +447,7 @@ var storageTransList = (function () {
         }
 
         document.querySelector('#storeTransaction').setAttribute('disabled', 'disabled');
-        document.querySelector('#storeTransaction svg').style.cssText = 'display: inline-block;';
+        document.querySelector('#storeTransaction svg.acc-st__spinner').style.cssText = 'display: inline-block;';
 
         let form_data = new FormData(form);
         form_data.append('file', $('#storageTransactionForm input[name="document"]')[0].files[0]); 
@@ -421,7 +464,7 @@ var storageTransList = (function () {
 
                 let msg = response.data.msg;
                 document.querySelector("#storeTransaction").removeAttribute("disabled");
-                document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
+                document.querySelector("#storeTransaction svg.acc-st__spinner").style.cssText = "display: none;";
 
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -438,7 +481,7 @@ var storageTransList = (function () {
             storageTransList.init();
         }).catch((error) => {
             document.querySelector("#storeTransaction").removeAttribute("disabled");
-            document.querySelector("#storeTransaction svg").style.cssText = "display: none;";
+            document.querySelector("#storeTransaction svg.acc-st__spinner").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {

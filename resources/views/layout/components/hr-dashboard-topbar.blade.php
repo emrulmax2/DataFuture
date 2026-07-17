@@ -34,16 +34,8 @@
     $hrdUserName = $hrdUserName !== '' ? $hrdUserName : (optional(auth()->user())->name ?? 'Super Admin');
     $hrdUserEmail = optional(auth()->user())->email ?? '';
 
-    $hrdInitials = function ($name) {
-        $name = trim(preg_replace('/^(Mrs|Mr|Miss|Ms|Dr)\.?\s+/i', '', (string) $name));
-        $parts = preg_split('/\s+/', $name);
-        return strtoupper(substr($parts[0] ?? 'L', 0, 1).substr($parts[1] ?? 'C', 0, 1));
-    };
-
-    $hrdAvatarColor = function ($name) {
-        $palette = ['#0F7B76', '#3B5BB5', '#7A3FB0', '#C4432F', '#187A45', '#B07E14', '#2A6FA8', '#B0357E', '#0E7C86', '#8A5A2B'];
-        return $palette[abs(crc32((string) $name)) % count($palette)];
-    };
+    // The avatar (photo, or the initials chip fallback) is rendered by
+    // pages.hr.portal.partials.avatar, which owns the initials/colour logic.
 
     $hrdRouteUrl = function ($name, $fallback = 'javascript:void(0);') {
         return Route::has($name) ? route($name) : $fallback;
@@ -88,10 +80,24 @@
             </a>
         </nav>
 
+        <div class="hrd-topbar__end">
+        {{-- HR pages are behind the `web` guard, so only the default guard can be
+             impersonated here (agent/applicant/student never reach this bar). --}}
+        @impersonating($guard=null)
+            <a href="{{ route('impersonate.leave') }}" class="hrd-impersonate">
+                <i data-lucide="log-out"></i>
+                <span>Leave Impersonate...</span>
+            </a>
+        @endImpersonating
+
         <div class="dropdown hrd-account">
             <button class="dropdown-toggle hrd-account__button" aria-expanded="false" data-tw-toggle="dropdown">
                 <span>{{ $hrdUserName }}</span>
-                <span class="hrd-avatar" style="background: {{ $hrdAvatarColor($hrdUserName) }}">{{ $hrdInitials($hrdUserName) }}</span>
+                @include('pages.hr.portal.partials.avatar', [
+                    'name' => $hrdUserName,
+                    'photoUrl' => optional($hrdEmployeeProfile)->photo_url,
+                    'avatarSize' => 'md',
+                ])
             </button>
             <div class="dropdown-menu hrd-account-menu">
                 <div class="dropdown-content">
@@ -107,6 +113,7 @@
                     </a>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </header>

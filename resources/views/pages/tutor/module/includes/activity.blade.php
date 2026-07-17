@@ -1,104 +1,228 @@
-<div class="intro-y bg-slate-200 box">
-    <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-        <h2 class="font-medium text-base mr-auto">Module Documents</h2>
-        <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" data-planid={{ $plan->id }} data-moduleCretionId = {{ $plan->module_creation_id }} class="callModalPlanTask ml-auto transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&amp;:hover:not(:disabled)]:bg-opacity-90 [&amp;:hover:not(:disabled)]:border-opacity-90 [&amp;:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-primary border-primary text-white dark:border-primary mb-2"><i data-lucide="activity" class="w-4 h-4 mr-1"></i> Syncronize Documents</button>
-    </div>
-    <div class="p-5 pt-0">
-        <div class="grid grid-cols-12 gap-4">
-            @foreach ($planTasks as $task) 
-                @php
-                    //if ($task->task->logo !== null && Storage::disk('s3')->exists('public/activity/'.$task->task->logo)) {
-                    //    $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$task->task->logo, now()->addMinutes(120));
-                    //} else {
-                        $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
-                    //}
+@php
+    $documentPalettes = [
+        ['#0b5f58', '#12867b', '#0d7c73', 'rgba(13,124,115,.10)'],
+        ['#8a6420', '#c69233', '#b98a2e', 'rgba(185,138,46,.12)'],
+        ['#25578c', '#3b7fc4', '#2f6fb0', 'rgba(47,111,176,.10)'],
+        ['#5f3d78', '#8a5aa8', '#7a4f97', 'rgba(122,79,151,.10)'],
+    ];
+@endphp
 
-                    $FullName = isset($task->task->user) ? $task->task->user->employee->full_name : '';
-                    $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
-                    $userProfileImage =$task->task->createdBy->employee->photo_url;
-                    $onlyTaskCreatorFound =1;
-                    $rand = rand(0,1);
-
-                    $required_date = '';
-                    $days_reminder = (isset($task->task->days_reminder) && $task->task->days_reminder > 0 ? $task->task->days_reminder : 0);
-                    $class_start = (isset($plan->attenTerm->start_date) && !empty($plan->attenTerm->start_date) ? date('Y-m-d', strtotime($plan->attenTerm->start_date)) : '');
-                    if(!empty($class_start)):
-                        $required_date = date('jS F, Y', strtotime('+'.$days_reminder.' days', strtotime($class_start)));
-                    endif;
-
-                    $document = [];
-                @endphp
-                <div class="intro-y col-span-12 sm:col-span-3">
-                    <div class="box">
-                        <div class="p-5">
-                            <div class="relative h-40 overflow-hidden rounded-md before:absolute before:left-0 before:top-0 before:z-10 before:block before:h-full before:w-full before:bg-gradient-to-t before:from-black before:to-black/10 2xl:h-56">
-                                <img class="rounded-md absolute h-30 w-auto m-auto l-0 r-0 t-0 b-0" src="{{ $logoUrl }}" alt="{{ $task->task->name }}">
-                                {{--<span class="absolute top-0 z-10 m-5 rounded bg-pending/80 px-2 py-1 text-xs text-white">
-                                    {{ $task->task->category }}
-                                </span>--}}
-                                <div class="absolute bottom-0 z-10 px-5 pb-6 text-white">
-                                    <a class="block text-base font-medium mt-3 " href="">
-                                        <span class="text-lg text-white/90">{{ $task->task->name }}</span>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="mt-5 text-slate-600 dark:text-slate-500">
-                                <div class="flex items-center">
-                                    <i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i>
-                                    Upload Required By: {{ (!empty($required_date) ? $required_date : '')}}
-                                </div>
-
-                                @if($task->taskUploads->isNotEmpty())
-                                    @foreach($task->taskUploads as $upload)
-                                        @php
-                                            $document['type'] = $upload->doc_type;
-                                            $document['url'] = Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name, now()->addMinutes(120))
-                                        @endphp
-                                        <div class="mt-2 flex items-center">
-                                            <i class="w-4 h-4 mr-2" data-lucide="user"></i>
-                                            Uploaded By: {{ $upload->createdBy->employee->full_name }}
-                                        </div>
-                                        <div class="mt-2 flex items-center">
-                                            <i class="w-4 h-4 mr-2" data-lucide="clock"></i>
-                                            Uploaded At: {{ (isset($upload->created_at) && !empty($upload->created_at) ? date('jS F, Y', strtotime($upload->created_at)) : '') }}
-                                        </div>
-                                        @php
-                                            $userProfileImage = $upload->createdBy->employee->photo_url;
-                                        @endphp
-                                    @endForeach
-                                @endif
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-center border-t border-slate-200/60 p-5 dark:border-darkmode-400 lg:justify-end">
-                            @if(!empty($document) && count($document) > 0 && isset($document['url']) && !empty($document['url']))
-                                <a target="_blank" href="{{ $document['url'] }}" class="mr-auto flex items-center text-success">
-                                    @if($document['type'] !="pdf" && $document['type']!="xls" && $document['type']!="doc" && $document['type']!="docx")
-                                        <i data-lucide="file-down" class="w-4 h-4 mr-2"></i>
-                                    @else
-                                        <i data-lucide="image-down" class="w-4 h-4 mr-2"></i>
-                                    @endif   
-                                    Download File
-                                </a>
-                            @else
-                                <a class="mr-auto flex items-center text-slate-400" href="javascript:void(0);">
-                                    <i data-lucide="x-circle" class="w-4 h-4 mr-2"></i> File Not Available
-                                </a>
-                            @endif
-                            <a data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" data-plantaskid="{{ $task->task->id }}" class="task-upload__Button btn btn-sm btn-success text-white" href="javascript:void(0);">
-                                <i data-lucide="upload-cloud" class="w-4 h-4 mr-2"></i>
-                                Upload
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
+<div class="tm-section-head no-border">
+    <h2 class="tm-section-title">Module Documents</h2>
+    <button data-tw-merge data-module="Yes" data-tw-toggle="modal" data-tw-target="#confirmModalPlanTask" data-planid="{{ $plan->id }}" data-moduleCretionId="{{ $plan->module_creation_id }}" class="callModalPlanTask tm-btn tm-btn-primary">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Synchronize Documents
+    </button>
 </div>
 
+<div class="grid grid-cols-12 gap-5">
+    @forelse ($planTasks as $key => $task)
+        @php
+            $palette = $documentPalettes[$key % count($documentPalettes)];
+            $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
+            $lastUpdate = ($task->task->updated_at) ?? $task->task->created_at;
+            $required_date = '';
+            $days_reminder = (isset($task->task->days_reminder) && $task->task->days_reminder > 0 ? $task->task->days_reminder : 0);
+            $class_start = (isset($plan->attenTerm->start_date) && !empty($plan->attenTerm->start_date) ? date('Y-m-d', strtotime($plan->attenTerm->start_date)) : '');
 
- <!-- BEGIN: Plan Task  Confirm Modal Content -->
- <div id="confirmModalPlanTask" class="modal" tabindex="-1" aria-hidden="true">
+            if(!empty($class_start)):
+                $required_date = date('jS F, Y', strtotime('+'.$days_reminder.' days', strtotime($class_start)));
+            endif;
+
+            $document = [];
+            $uploadedBy = '';
+            $uploadedAt = '';
+        @endphp
+
+        @if($task->taskUploads->isNotEmpty())
+            @foreach($task->taskUploads as $upload)
+                @php
+                    $document['type'] = $upload->doc_type;
+                    $document['url'] = Storage::disk('s3')->temporaryUrl('public/plans/plan_task/'.$task->task->id.'/'.$upload->current_file_name, now()->addMinutes(120));
+                    $uploadedBy = $upload->createdBy->employee->full_name ?? '';
+                    $uploadedAt = (isset($upload->created_at) && !empty($upload->created_at) ? date('jS F, Y', strtotime($upload->created_at)) : '');
+                @endphp
+            @endforeach
+        @endif
+
+        <div class="col-span-12 md:col-span-6 2xl:col-span-3">
+            <div class="tm-doc-card">
+                <div class="tm-doc-banner" style="background: linear-gradient(135deg, {{ $palette[0] }}, {{ $palette[1] }});">
+                    <span class="tm-doc-corner"><i data-lucide="file-text" class="w-4 h-4"></i></span>
+                    <span class="tm-doc-ext">{{ !empty($document['type'] ?? '') ? strtoupper($document['type']) : 'DOC' }}</span>
+                    <div class="tm-doc-title">{{ $task->task->name }}</div>
+                </div>
+                <div class="tm-doc-body">
+                    <div class="tm-doc-meta">
+                        <span class="tm-doc-chip" style="color: {{ $palette[2] }}; background: {{ $palette[3] }};">{{ $task->task->category ?? 'Document' }}</span>
+                        <span>{{ !empty($document) ? 'Available' : 'Pending upload' }}</span>
+                    </div>
+
+                    <div class="tm-doc-info">
+                        <div>
+                            <i data-lucide="calendar-days" class="w-3.5 h-3.5"></i>
+                            <span>Required by</span>
+                            <strong>{{ !empty($required_date) ? $required_date : 'Not set' }}</strong>
+                        </div>
+                        @if(!empty($uploadedBy))
+                            <div>
+                                <i data-lucide="user" class="w-3.5 h-3.5"></i>
+                                <span>{{ $uploadedBy }}</span>
+                                <strong>{{ $uploadedAt }}</strong>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="tm-doc-actions">
+                        @if(!empty($document) && count($document) > 0 && isset($document['url']) && !empty($document['url']))
+                            <a target="_blank" href="{{ $document['url'] }}" class="tm-btn tm-btn-primary">
+                                <i data-lucide="{{ ($document['type'] !="pdf" && $document['type']!="xls" && $document['type']!="doc" && $document['type']!="docx") ? 'file-down' : 'download' }}" class="w-4 h-4"></i>
+                                Download
+                            </a>
+                        @else
+                            <span class="tm-btn tm-btn-secondary text-slate-400">
+                                <i data-lucide="x-circle" class="w-4 h-4"></i> Not Available
+                            </span>
+                        @endif
+                        <a data-tw-toggle="modal" data-tw-target="#addStudentPhotoModal" data-plantaskid="{{ $task->task->id }}" class="task-upload__Button tm-btn tm-btn-primary" href="javascript:void(0);">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Upload
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @empty
+        <div class="col-span-12">
+            <div class="tm-empty">No module documents found.</div>
+        </div>
+    @endforelse
+</div>
+
+<style>
+    #tutorModuleDetails .tm-doc-card {
+        background: #fff;
+        border: 1px solid #ecebe2;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(16,49,46,.05);
+        height: 100%;
+        overflow: hidden;
+        transition: box-shadow .16s ease, transform .16s ease;
+    }
+
+    #tutorModuleDetails .tm-doc-card:hover {
+        box-shadow: 0 10px 28px rgba(16,49,46,.10);
+        transform: translateY(-2px);
+    }
+
+    #tutorModuleDetails .tm-doc-banner {
+        display: flex;
+        flex-direction: column;
+        height: 180px;
+        justify-content: flex-end;
+        padding: 18px 20px;
+        position: relative;
+    }
+
+    #tutorModuleDetails .tm-doc-corner {
+        align-items: center;
+        background: rgba(255,255,255,.22);
+        border-radius: 9px;
+        color: #fff;
+        display: flex;
+        height: 34px;
+        justify-content: center;
+        position: absolute;
+        right: 14px;
+        top: 14px;
+        width: 34px;
+    }
+
+    #tutorModuleDetails .tm-doc-ext {
+        color: rgba(255,255,255,.82);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .7px;
+    }
+
+    #tutorModuleDetails .tm-doc-title {
+        color: #fff;
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.22;
+        margin-top: 3px;
+        text-shadow: 0 1px 2px rgba(0,0,0,.12);
+    }
+
+    #tutorModuleDetails .tm-doc-body {
+        padding: 16px 20px 18px;
+    }
+
+    #tutorModuleDetails .tm-doc-meta {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    #tutorModuleDetails .tm-doc-meta > span:last-child {
+        color: #9aa7a4;
+        font-size: 11px;
+    }
+
+    #tutorModuleDetails .tm-doc-chip {
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .4px;
+        padding: 3px 9px;
+        text-transform: uppercase;
+    }
+
+    #tutorModuleDetails .tm-doc-info {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 16px;
+    }
+
+    #tutorModuleDetails .tm-doc-info div {
+        align-items: center;
+        color: #39514d;
+        display: flex;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    #tutorModuleDetails .tm-doc-info i {
+        color: #a1802f;
+        flex: none;
+    }
+
+    #tutorModuleDetails .tm-doc-info span {
+        color: #39514d;
+        font-size: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #tutorModuleDetails .tm-doc-info strong {
+        color: #12312e;
+        font-size: 12.5px;
+        font-weight: 600;
+        margin-left: auto;
+        white-space: nowrap;
+    }
+
+    #tutorModuleDetails .tm-doc-actions {
+        display: grid;
+        gap: 9px;
+        grid-template-columns: 1fr 1fr;
+    }
+</style>
+
+<!-- BEGIN: Plan Task Confirm Modal Content -->
+<div id="confirmModalPlanTask" class="modal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body p-0">

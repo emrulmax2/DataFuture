@@ -504,7 +504,8 @@ class DashboardController extends Controller
         return view('pages.tutor.attendance.create', [
             'title' => 'Attendance - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'Attendance', 'href' => 'javascript:void(0);']
+                ['label' => 'Courses', 'href' => 'javascript:void(0);'],
+                ['label' => 'Attendance Feed', 'href' => 'javascript:void(0);']
             ],
             'data' => $data,
             'type' => $type
@@ -529,6 +530,9 @@ class DashboardController extends Controller
         $studentListCount = $studentAssign->count();
         
         $planDates = $planDateList = PlansDateList::where("plan_id",$plan->id)->get();
+        $tutorialPlanDateCount = (isset($plan->tutorial->id) && $plan->tutorial->id > 0)
+            ? PlansDateList::where("plan_id", $plan->tutorial->id)->count()
+            : 0;
         $eLearningActivites = ELearningActivitySetting::all();
         $planDateWiseContent = [];
         foreach($planDates as $classDate) {
@@ -586,6 +590,7 @@ class DashboardController extends Controller
             'studentAssignArray' => $studentAssign->pluck('student_id')->toArray(),
             'planDates' => $planDateWiseContent,
             'planDateList' => $planDateList,
+            'tutorialPlanDateCount' => $tutorialPlanDateCount,
             'eLearningActivites' => $eLearningActivites,
             'studentCount' => $studentListCount,
             'assessmentlist' => $assessmentlist, 

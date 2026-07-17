@@ -30,11 +30,53 @@ class AccBank extends Model
 
     public function getImageUrlAttribute()
     {
-        if ($this->bank_image !== null && $this->bank_image != '' && Storage::disk('local')->exists('public/banks/'.$this->bank_image)) {
+        if ($this->hasImage()) {
             return Storage::disk('local')->url('public/banks/'.$this->bank_image);
         } else {
             return asset('build/assets/images/placeholders/200x200.jpg');
         }
+    }
+
+    /**
+     * Whether a real logo is on disk. image_url always resolves — it falls back
+     * to a placeholder — so callers that want to render their own fallback
+     * (e.g. a monogram) need to ask separately.
+     */
+    public function hasImage()
+    {
+        return $this->bank_image !== null
+            && $this->bank_image != ''
+            && Storage::disk('local')->exists('public/banks/'.$this->bank_image);
+    }
+
+    /**
+     * Two-letter monogram: initials of the first two words, else the first two
+     * letters of a single-word name.
+     */
+    public function getMonogramAttribute()
+    {
+        $words = preg_split('/[^a-z0-9]+/i', (string) $this->bank_name, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (empty($words)) {
+            return '#';
+        }
+
+        if (count($words) >= 2) {
+            return strtoupper(substr($words[0], 0, 1).substr($words[1], 0, 1));
+        }
+
+        return strtoupper(substr($words[0], 0, 2));
+    }
+
+    /**
+     * Stable colour for the monogram tile — derived from the name so a storage
+     * keeps the same tile across requests.
+     */
+    public function getMonogramColorAttribute()
+    {
+        $palette = ['#0e766c', '#7d2b2f', '#1d1d1f', '#0e9e6e', '#b1000e', '#006a4d', '#c8443a', '#8a6d1f', '#2f4858', '#5b2c6f'];
+
+        return $palette[abs(crc32((string) $this->bank_name)) % count($palette)];
     }
 
     public function setOpeningDateAttribute($value) {  
