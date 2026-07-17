@@ -20,14 +20,6 @@ import TomSelect from "tom-select";
         },
     };
 
-    if($('#personalTutorDashboard').length > 0){
-        $("#personalTutorDashboard").on('click', '#load-more', function(e){
-            e.preventDefault()
-            $('.more').removeClass('hidden');
-            $("#load-more").hide()
-        });
-    }
-
     let dateOption = {
         autoApply: true,
         singleMode: true,
@@ -43,9 +35,14 @@ import TomSelect from "tom-select";
         },
     };
 
+    let todayDateOption = {
+        ...dateOption,
+        format: "DD / MM / YYYY",
+    };
+
     const start_date = new Litepicker({
         element: document.getElementById('personalTutorCalendar'),
-        ...dateOption,
+        ...todayDateOption,
         setup: (picker) => {
             picker.on('selected', (date) => {
                 let personalTutorId  = $('#personalTutorCalendar').attr('data-pt')
@@ -80,11 +77,15 @@ import TomSelect from "tom-select";
     });
 
     let currentRequest = null;
+    $('.pt-search-form').on('submit', function(e){
+        e.preventDefault();
+    });
+
     $('#registration_no').on('keyup paste change', function(){
         var $theInput = $(this);
         var SearchVal = $theInput.val();
 
-        if(SearchVal.length >= 3){
+        if(SearchVal.length >= 1){
             $('#viewStudentBtn').find('.svgSearch').css({opacity: 0});
             $('#viewStudentBtn').find('.svgLoader').css({opacity: 1});
             currentRequest = $.ajax({
@@ -105,6 +106,11 @@ import TomSelect from "tom-select";
                     $theInput.siblings('.autoFillDropdown').html(data.htm).fadeIn();
                     $theInput.siblings('#profileUrl').val('');
                     $theInput.parent('.autoCompleteField').siblings('#viewStudentBtn').attr('disabled', 'disabled');
+                    createIcons({
+                        icons,
+                        "stroke-width": 1.5,
+                        nameAttr: "data-lucide",
+                    });
                 },
                 error:function(e){
                     console.log('Error');
@@ -135,7 +141,7 @@ import TomSelect from "tom-select";
         window.location.href = profile_url;
     });
 
-    $(".start-punch").on("click", function (event) {
+    $(document).on("click", ".start-punch", function (event) {
         let data = $(this).data('id');   
         document.getElementById('employee_punch_number').focus();
         console.log(data);
@@ -178,6 +184,10 @@ import TomSelect from "tom-select";
         $('#addNoteModal #addNoteDocumentName').html('');
         $('#addNoteModal input[name="student_id"]').val('0');
         $('#addNoteModal input[name="attendance_ids"]').val('');
+        $('#addNoteModal .pt-note-student-initials').text('ST');
+        $('#addNoteModal .pt-note-student-name').text('Selected student');
+        $('#addNoteModal .pt-note-student-reg').text('Student ID');
+        $('#addNoteModal .pt-note-student-attendance').text('attendance');
 
         addEditor.setData('');
         note_term_declaration_id.clear(true);
@@ -187,9 +197,14 @@ import TomSelect from "tom-select";
     const smsSMSModalEl = document.getElementById('smsSMSModal')
     smsSMSModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#smsSMSModal .acc__input-error').html('');
-        $('#smsSMSModal .modal-body input, #smsSMSModal .modal-body textarea').val('');
+        $('#smsSMSModal input[name="subject"], #smsSMSModal textarea').val('');
         $('#smsSMSModal input[name="student_id"]').val('0');
         $('#smsSMSModal .sms_countr').html('160 / 1');
+        $('#smsSMSModal .smsWarning').remove();
+        $('#smsSMSModal .pt-sms-student-initials').text('ST');
+        $('#smsSMSModal .pt-sms-student-name').text('Selected student');
+        $('#smsSMSModal .pt-sms-student-reg').text('Student ID');
+        $('#smsSMSModal .pt-sms-student-attendance').text('attendance');
         sms_template_id.clear(true);
     });
     
@@ -419,15 +434,27 @@ import TomSelect from "tom-select";
         generateStudentAttendanceTrackingHtml();
     })
 
+    function setStudentTrackingLoading(isLoading) {
+        $('#studentAttendanceTrackingWrap').toggleClass('is-loading', isLoading);
+        $('#studentAttendanceTrackingWrap .leaveTableLoader').toggleClass('active', isLoading);
+        $('#trackingStatus, #theAttendanceDate').prop('disabled', isLoading);
+    }
+
     function generateStudentAttendanceTrackingHtml(theDate = null){
-        let $theWrap = $('#studentAttendanceTrackingWrap');
-        let $theLoader = $('#studentAttendanceTrackingWrap .leaveTableLoader')
-        $theLoader.addClass('active');
         let $theStatus = $('#trackingStatus');
         let trackingStatus = $theStatus.val();
         if(theDate == null){
             let $theCalendar = $('#theAttendanceDate');
-            let theDate = $theCalendar.val();
+            theDate = $theCalendar.val();
+        }
+        const loaderStartedAt = Date.now();
+        setStudentTrackingLoading(true);
+
+        function finishStudentTrackingLoading() {
+            const remainingLoaderTime = Math.max(0, 260 - (Date.now() - loaderStartedAt));
+            setTimeout(function(){
+                setStudentTrackingLoading(false);
+            }, remainingLoaderTime);
         }
 
         axios({
@@ -438,7 +465,6 @@ import TomSelect from "tom-select";
         }).then(response => {
             if (response.status == 200) {
                 //console.log(response.data);
-                $theLoader.removeClass('active');
                 $('#studentTrackingListTable tbody').html(response.data.htm);
 
                 createIcons({
@@ -447,8 +473,9 @@ import TomSelect from "tom-select";
                     nameAttr: "data-lucide",
                 });
             }
+            finishStudentTrackingLoading();
         }).catch(error => {
-            $theLoader.removeClass('active');
+            finishStudentTrackingLoading();
             if (error.response) {
                 console.log('error');
             }
@@ -472,9 +499,17 @@ import TomSelect from "tom-select";
         var $theBtn = $(this);
         var student_id = $theBtn.attr('data-student');
         var attendance_ids = $theBtn.attr('data-attendanceids');
+        var student_name = $theBtn.attr('data-student-name') || 'Selected student';
+        var registration = $theBtn.attr('data-registration') || 'Student ID';
+        var attendance = $theBtn.attr('data-attendance') || 'attendance';
+        var initials = $theBtn.attr('data-initials') || 'ST';
 
         $('#addNoteModal input[name="student_id"]').val(student_id);
         $('#addNoteModal input[name="attendance_ids"]').val(attendance_ids);
+        $('#addNoteModal .pt-note-student-initials').text(initials);
+        $('#addNoteModal .pt-note-student-name').text(student_name);
+        $('#addNoteModal .pt-note-student-reg').text(registration);
+        $('#addNoteModal .pt-note-student-attendance').text(attendance + ' attendance');
     })
 
     $('#addNoteForm').on('submit', function(e){
@@ -532,8 +567,16 @@ import TomSelect from "tom-select";
         e.preventDefault();
         var $theBtn = $(this);
         var student_id = $theBtn.attr('data-student');
+        var student_name = $theBtn.attr('data-student-name') || 'Selected student';
+        var registration = $theBtn.attr('data-registration') || 'Student ID';
+        var attendance = $theBtn.attr('data-attendance') || 'attendance';
+        var initials = $theBtn.attr('data-initials') || 'ST';
 
         $('#smsSMSModal input[name="student_id"]').val(student_id);
+        $('#smsSMSModal .pt-sms-student-initials').text(initials);
+        $('#smsSMSModal .pt-sms-student-name').text(student_name);
+        $('#smsSMSModal .pt-sms-student-reg').text(registration);
+        $('#smsSMSModal .pt-sms-student-attendance').text(attendance + ' attendance');
     })
 
     $('#smsTextArea').on('keyup', function(){
@@ -544,7 +587,7 @@ import TomSelect from "tom-select";
         if(chars > 0){
             if(chars >= maxlength && maxlength > 0){
                 $('#smsSMSModal .modal-content .smsWarning').remove();
-                $('#smsSMSModal .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
+                $('#smsSMSModal .pt-note-body').prepend('<div class="smsWarning pt-drawer-alert" role="alert">Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
             }else{
                 $('#smsSMSModal .modal-content .smsWarning').remove();
             }
@@ -643,9 +686,9 @@ import TomSelect from "tom-select";
         $myModuleWrap.find('.leaveTableLoader').addClass('active');
 
 
-        $('.ptTermDropdwnWrap').find('#ptTermDropdown span').html(term_name);
-        $theList.find('li .pt_term_item').removeClass('text-primary font-medium');
-        $theBtn.addClass('text-primary font-medium');
+        $('.ptTermDropdwnWrap').find('#ptTermDropdown .pt-term-label').html(term_name);
+        $theList.find('li .pt_term_item').removeClass('text-primary font-medium is-active');
+        $theBtn.addClass('text-primary font-medium is-active');
 
         axios({
             method: "post",

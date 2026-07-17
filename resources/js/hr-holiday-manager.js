@@ -1,14 +1,127 @@
-import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
-import IMask from 'imask';
-
-import dayjs from "dayjs";
-import Litepicker from "litepicker";
-import 'litepicker/dist/plugins/multiselect';
 
 ("use strict");
+
+const refreshHolidayIcons = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"'`=\/]/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+    "`": "&#096;",
+    "=": "&#061;",
+    "/": "&#047;",
+}[char]));
+
+const leaveInitials = (name) => {
+    const clean = String(name || "London Churchill").replace(/^(Mr|Mrs|Ms|Miss|Dr)\.?\s+/i, "").trim();
+    const parts = clean.split(/\s+/).filter(Boolean);
+    const first = parts[0] || "L";
+    const last = parts.length > 1 ? parts[parts.length - 1] : "C";
+
+    return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+};
+
+const leavePalette = (seed) => {
+    const palettes = [
+        ["#7a4fa3", "#fff"],
+        ["#137a70", "#fff"],
+        ["#2f8f5b", "#fff"],
+        ["#c94f7c", "#fff"],
+        ["#b5602f", "#fff"],
+        ["#2f5fa1", "#fff"],
+        ["#a13f6b", "#fff"],
+        ["#4a7a2f", "#fff"],
+        ["#b3261e", "#fff"],
+    ];
+    const value = String(seed || "employee");
+    let hash = 0;
+
+    for (let index = 0; index < value.length; index += 1) {
+        hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+    }
+
+    return palettes[hash % palettes.length];
+};
+
+const renderAvatar = (data) => {
+    const photoUrl = String(data.photo_url || "");
+
+    if (photoUrl !== "") {
+        return `<span class="hm-avatar"><img src="${escapeHtml(photoUrl)}" alt="${escapeHtml(data.name)}"></span>`;
+    }
+
+    const palette = leavePalette(data.name);
+
+    return `<span class="hm-avatar" style="background:${palette[0]};color:${palette[1]};">${escapeHtml(leaveInitials(data.name))}</span>`;
+};
+
+const renderPersonCell = (data) => `<a href="${escapeHtml(data.url)}" class="hm-person-cell">
+    ${renderAvatar(data)}
+    <span class="min-w-0">
+        <span class="hm-person-name">${escapeHtml(data.name)}</span>
+        <span class="hm-person-role">${escapeHtml(data.designation || "Unknown")}</span>
+    </span>
+</a>`;
+
+const statusText = (data, type) => {
+    if (type === "approved") {
+        return "Approved";
+    }
+
+    if (type === "rejected") {
+        return "Rejected";
+    }
+
+    return String(data.status || "Approval").replace(/^Request for approval\s*/i, "Approval · ");
+};
+
+const renderStatusCell = (data, type) => {
+    const shield = Number(data.supervised) === 1 && type === "pending"
+        ? '<i data-lucide="shield-check" class="hm-supervised w-4 h-4"></i>'
+        : "";
+
+    return `<span class="hm-status-cell">
+        <span class="hm-status-chip">${shield}${escapeHtml(statusText(data, type))}</span>
+        <span class="hm-status-time">${escapeHtml(data.hour)}</span>
+    </span>`;
+};
+
+const renderDateCell = (value) => `<span class="hm-date-cell">${escapeHtml(value)}</span>`;
+
+const renderTitleCell = (value) => {
+    const label = String(value || "").trim();
+
+    if (label === "") {
+        return '<span class="hm-title-cell is-empty">&mdash;</span>';
+    }
+
+    return `<span class="hm-title-cell${label.length > 22 ? " is-long" : ""}">${escapeHtml(label)}</span>`;
+};
+
+const renderMetaCell = (data, type) => {
+    if (type === "pending") {
+        return `<span class="hm-meta-cell">
+            <span class="hm-meta-main">${escapeHtml(data.created_at)}</span>
+            <span class="hm-meta-sub">${escapeHtml(data.created_relative)}</span>
+        </span>`;
+    }
+
+    return `<span class="hm-meta-cell">
+        <span class="hm-meta-main">${escapeHtml(data.approved_by || "Unknown")}</span>
+        <span class="hm-meta-sub">${escapeHtml(data.approved_at)}</span>
+    </span>`;
+};
+
 var manageHolidayListTable = (function () {
     var _tableGen = function (yearid, type) {
         let tableID = '#leaveListTable-'+type+'-'+yearid;
@@ -24,92 +137,74 @@ var manageHolidayListTable = (function () {
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
-            placeholder: "No matching records found",
+            columnDefaults: {
+                headerSortTristate: true,
+            },
+            placeholder: "No leave records found",
             columns: [
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    widthGrow: 1.5,
+                    minWidth: 245,
                     formatter(cell, formatterParams) { 
-                        var html = '<a href="'+cell.getData().url+'" class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+(cell.getData().designation != '' ? cell.getData().designation : 'Unknown')+'</div>';
-                                html += '</div>';
-                            html += '</a>';
-                        return html;
+                        return renderPersonCell(cell.getData());
                     }
                 },
                 {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    widthGrow: 1.35,
+                    minWidth: 230,
                     formatter(cell, formatterParams) { 
-                        var html = '';
-                        html += '<div class="flex justify-start items-start relative">';
-                            if(cell.getData().supervised == 1 && type == 'pending'){
-                                html += '<span class="w-auto text-success py-0 mr-2 relative" style="top: 2px;"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="shield-check" class="lucide lucide-shield-check w-6 h-6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path><path d="m9 12 2 2 4-4"></path></svg></span>';
-                            }
-                            html += '<div>';
-                                html += '<div class="whitespace-nowrap">'+cell.getData().status+'</div>';
-                                html += '<div class="font-medium text-xs whitespace-nowrap">'+cell.getData().hour+'</div>';
-                            html += '</div>';
-                        html += '</div>';
-                        return html;
+                        return renderStatusCell(cell.getData(), type);
                     }
                 },
                 {
                     title: "Start Date",
                     field: "start_date",
                     headerHozAlign: "left",
+                    widthGrow: 1.05,
+                    minWidth: 150,
+                    formatter(cell, formatterParams) {
+                        return renderDateCell(cell.getValue());
+                    }
                 },
                 {
                     title: "End Date",
                     field: "end_date",
                     headerHozAlign: "left",
+                    widthGrow: 1.05,
+                    minWidth: 150,
+                    formatter(cell, formatterParams) {
+                        return renderDateCell(cell.getValue());
+                    }
                 },
                 {
                     title: "Title",
                     field: "title",
                     headerHozAlign: "left",
+                    widthGrow: 1.15,
+                    minWidth: 165,
+                    formatter(cell, formatterParams) {
+                        return renderTitleCell(cell.getValue());
+                    }
                 },
                 {
-                    title: "Request Made",
-                    field: "created_at",
+                    title: type == 'pending' ? "Request Made" : (type == 'approved' ? "Approved By" : "Rejected By"),
+                    field: type == 'pending' ? "created_at" : "approved_by",
                     headerHozAlign: "left",
-                    visible: (type == 'pending' ? true : false),
-                },
-                {
-                    title: "Approved By",
-                    field: "approved_by",
-                    headerHozAlign: "left",
-                    width: "200",
-                    visible: (type == 'approved' || type == 'rejected' ? true : false),
+                    widthGrow: 1.2,
+                    minWidth: 180,
                     formatter(cell, formatterParams) { 
-                        var html = '<div class="block">';
-                                html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().approved_by+'</div>';
-                                html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().approved_at+'</div>';
-                            html += '</div>';
-                        return html;
+                        return renderMetaCell(cell.getData(), type);
                     }
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                refreshHolidayIcons();
             },
             rowClick:function(e, row){
                 var type = row.getData().type;
@@ -163,11 +258,7 @@ var manageHolidayListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            refreshHolidayIcons();
         });
     };
     return {
@@ -179,12 +270,24 @@ var manageHolidayListTable = (function () {
 
 
 (function(){
+    refreshHolidayIcons();
+
+    const initialiseYearTables = (yearid) => {
+        ['pending', 'approved', 'rejected'].forEach((type) => {
+            const tableSelector = '#leaveListTable-'+type+'-'+yearid;
+            const $table = $(tableSelector);
+
+            if ($table.length > 0 && !$table.data('holiday-loaded')) {
+                manageHolidayListTable.init(yearid, type);
+                $table.data('holiday-loaded', 1);
+            }
+        });
+    };
+
     if($('#employeeHolidayAccordion-0').length > 0){
         var yearid = $('#employeeHolidayAccordion-0 .holidayCollapseBtns').attr('data-year');
         if(!$('#employeeHolidayAccordion-0 .holidayCollapseBtns').hasClass('collapsed')){
-            manageHolidayListTable.init(yearid, 'pending');
-            manageHolidayListTable.init(yearid, 'approved');
-            manageHolidayListTable.init(yearid, 'rejected');
+            initialiseYearTables(yearid);
         }
     }
 
@@ -194,9 +297,7 @@ var manageHolidayListTable = (function () {
         var yearid = $theBtn.attr('data-year');
 
         if($theBtn.hasClass('collapsed')){
-            manageHolidayListTable.init(yearid, 'pending');
-            manageHolidayListTable.init(yearid, 'approved');
-            manageHolidayListTable.init(yearid, 'rejected');
+            initialiseYearTables(yearid);
         }
     });
 
@@ -252,11 +353,7 @@ var manageHolidayListTable = (function () {
             $('#empNewLeaveRequestForm .validationWarning').remove();
             $('#empNewLeaveRequestForm .modal-content').prepend('<div class="alert validationWarning alert-danger-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Validation error found! Leave status can nto be un-checked.</div>')
             
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            refreshHolidayIcons();
             
             setTimeout(function(){
                 $('#empNewLeaveRequestForm .validationWarning').remove()

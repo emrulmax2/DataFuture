@@ -120,6 +120,12 @@
         }
 
         $currentInitials = $initialsFromName($currentUserName);
+        $currentAvatarUrl = null;
+
+        if (isset($employee) && $employee?->photo && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo)) {
+            $currentAvatarUrl = Storage::disk('local')->url('public/employees/'.$employee->id.'/'.$employee->photo);
+        }
+
         $breadcrumbsList = [
             ['label' => 'Dashboard', 'href' => $dashboardUrl],
         ];
@@ -199,7 +205,6 @@
                         <label class="lcc-global-header__search-box">
                             <i data-lucide="search"></i>
                             <input type="search" autocomplete="off" placeholder="{{ $searchPlaceholder }}" data-global-search-input>
-                            <span>&#8984;K</span>
                         </label>
                         <div class="lcc-global-header__search-results" data-global-search-results></div>
                     </div>
@@ -241,12 +246,24 @@
                             <strong>{{ $currentUserName }}</strong>
                             <small>{{ $currentUserRole }}</small>
                         </span>
-                        <span class="lcc-global-header__avatar">{{ $currentInitials }}</span>
+                        <span class="lcc-global-header__avatar">
+                            @if($currentAvatarUrl)
+                                <img src="{{ $currentAvatarUrl }}" alt="{{ $currentUserName }}">
+                            @else
+                                {{ $currentInitials }}
+                            @endif
+                        </span>
                         <i data-lucide="chevron-down" class="lcc-global-header__chevron"></i>
                     </button>
                     <div class="lcc-global-header__menu lcc-global-header__menu--account">
                         <div class="lcc-global-header__account-card">
-                            <span class="lcc-global-header__avatar lcc-global-header__avatar--large">{{ $currentInitials }}</span>
+                            <span class="lcc-global-header__avatar lcc-global-header__avatar--large">
+                                @if($currentAvatarUrl)
+                                    <img src="{{ $currentAvatarUrl }}" alt="{{ $currentUserName }}">
+                                @else
+                                    {{ $currentInitials }}
+                                @endif
+                            </span>
                             <span>
                                 <strong>{{ $currentUserName }}</strong>
                                 <small>{{ $currentUserEmail }}</small>

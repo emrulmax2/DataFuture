@@ -1,10 +1,14 @@
+import { createIcons, icons } from "lucide";
 
 (function(){
-    $('#employeeAttendanceDetailsTable tr.expandRow').on('click', function(){
-        var $theTr = $(this);
-        var theNextTrId = $theTr.attr('data-expandid');
-        var $theNextTr = $('#employeeAttendanceDetailsTable '+theNextTrId);
+    createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
 
-        $theNextTr.fadeToggle();
-    })
-})()
+    $('#employeeAttendanceDetailsTable .expandRow').on('click', function(){
+        const $row = $(this);
+        const targetId = $row.attr('data-expandid');
+        const $target = $('#employeeAttendanceDetailsTable ' + targetId);
+
+        $target.fadeToggle(140);
+        $row.toggleClass('is-open');
+    });
+})();

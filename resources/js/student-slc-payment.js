@@ -333,7 +333,7 @@ import { set } from "lodash";
                     successModal.show();
                     document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
                         $('#successModal .successModalTitle').html('Done!');
-                        $('#successModal .successModalDesc').html('Student\'s payment  successfully deleted.');
+                        $('#successModal .successModalDesc').html('Student\'s payment successfully moved to the selected agreement.');
                         $('#successModal .successCloser').attr('data-action', 'RELOAD');
                     });
 
