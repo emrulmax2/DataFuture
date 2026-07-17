@@ -4,113 +4,23 @@ import { bottom } from "@popperjs/core";
 
 (function(){
     if($('#attendanceRateOvTable').length > 0){
-        let attendanceRateBarChart = null;
-        $(window).on('load', function(){
-            let $theTable = $('#attendanceRateOvTable');
-            let theTitle = $theTable.attr('data-title');
-            let labels = [];
-            let rates = [];
-            let bgs = [];
-            let bds = [];
-
-            $theTable.find('.rateRow').each(function(){
+        // The rates panel now renders CSS progress bars (see analytics.blade.php).
+        // Each bar carries data-rate-id matching a .rateRowCheck value; toggling
+        // the checkbox shows/hides its bar. The .rateRow data attributes are kept
+        // so this stays driven by the same table the server renders.
+        const syncRateBars = function(){
+            $('#attendanceRateOvTable .rateRow').each(function(){
                 let $theRow = $(this);
-                let $checkbox = $theRow.find('.rateRowCheck');
-                if($checkbox.prop('checked')){
-                    labels.push($theRow.attr('data-label'));
-                    bgs.push($theRow.attr('data-bg'));
-                    bds.push($theRow.attr('data-bd'));
-                    rates.push($theRow.attr('data-rate'));
-                }
+                let id = $theRow.find('.rateRowCheck').val();
+                let on = $theRow.find('.rateRowCheck').prop('checked');
+                $('.tm-arate__line[data-rate-id="' + id + '"]').toggleClass('is-off', !on);
+                $('.tm-arate__legend[for="rateRowCheck_' + id + '"]').toggleClass('is-off', !on);
             });
+        };
 
-            if(labels.length > 0 && rates.length > 0){
-                let ctx = document.getElementById('attendanceRateBarChart').getContext("2d");
-                attendanceRateBarChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            axis: 'y',
-                            label: false,
-                            data: rates,
-                            barThickness: 25,
-                            fill: false,
-                            backgroundColor: bgs,
-                            borderColor: bds,
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        maintainAspectRatio: false,
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: false,
-                                //text: theTitle,
-                                color: '#164e63e6',
-                                padding: {
-                                    bottom: 20
-                                },
-                                font: {
-                                    size: 18,
-                                    weight: 'bold',
-                                    lineHeight: 1
-                                }
-                            },
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    color: '#164e63e6',
-                                    display: true,
-                                    font: {
-                                        size: 13,
-                                        weight: 'bold',
-                                        lineHeight: 1.5
-                                    }
-                                },
-                                stacked: false,
-                                afterFit(scale) {
-                                    scale.width = 250;
-                                },
-                            }
-                        }
-                    }
-                });
-            }
-        });
+        syncRateBars();
 
-        $('#attendanceRateOvTable .rateRowCheck').on('change', function(e){
-            let $theTable = $('#attendanceRateOvTable');
-            let labels = [];
-            let rates = [];
-            let bgs = [];
-            let bds = [];
-
-            $theTable.find('.rateRow').each(function(){
-                let $theRow = $(this);
-                let $checkbox = $theRow.find('.rateRowCheck');
-                if($checkbox.prop('checked')){
-                    bgs.push($theRow.attr('data-bg'));
-                    bds.push($theRow.attr('data-bd'));
-                    labels.push($theRow.attr('data-label'));
-                    rates.push($theRow.attr('data-rate'));
-                }
-            });
-
-            attendanceRateBarChart.data.datasets[0].data = rates;
-            attendanceRateBarChart.data.datasets[0].backgroundColor = bgs;
-            attendanceRateBarChart.data.datasets[0].borderColor = bds;
-            attendanceRateBarChart.data.labels = labels;
-
-            attendanceRateBarChart.update();
-        });
+        $('#attendanceRateOvTable .rateRowCheck').on('change', syncRateBars);
     }
 
     if($('#attendanceTrendLineChart').length > 0){

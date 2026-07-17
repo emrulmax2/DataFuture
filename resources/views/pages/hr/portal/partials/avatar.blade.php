@@ -10,10 +10,12 @@
      | is how we detect "no real photo".
      |
      | Params:
-     |   $name      string   full name (used for initials + colour + alt text)
-     |   $photoUrl  ?string  the employee's photo_url (may be null or a data: URI)
+     |   $name        string   full name (used for initials + colour + alt text)
+     |   $photoUrl    ?string  the employee's photo_url (may be null or a data: URI)
+     |   $avatarSize  ?string  'sm' (default, list rows) | 'md' (topbar)
      */
     $hrdHasPhoto = !empty($photoUrl) && !str_starts_with($photoUrl, 'data:');
+    $hrdAvSizeClass = ($avatarSize ?? 'sm') === 'sm' ? ' hrd-avatar--sm' : '';
 
     $hrdAvInitials = function ($n) {
         $n = trim(preg_replace('/^(Mrs|Mr|Miss|Ms|Dr)\.?\s+/i', '', (string) $n));
@@ -26,9 +28,9 @@
     };
 @endphp
 @if($hrdHasPhoto)
-    <span class="hrd-avatar hrd-avatar--sm hrd-avatar--photo">
+    <span class="hrd-avatar{{ $hrdAvSizeClass }} hrd-avatar--photo">
         <img src="{{ $photoUrl }}" alt="{{ $name }}">
     </span>
 @else
-    <span class="hrd-avatar hrd-avatar--sm" style="background: {{ $hrdAvColor($name) }}">{{ $hrdAvInitials($name) }}</span>
+    <span class="hrd-avatar{{ $hrdAvSizeClass }}" style="background: {{ $hrdAvColor($name) }}">{{ $hrdAvInitials($name) }}</span>
 @endif

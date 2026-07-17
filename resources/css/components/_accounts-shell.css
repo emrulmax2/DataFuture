@@ -1,0 +1,317 @@
+/*
+ |--------------------------------------------------------------------------
+ | Accounts shell (shared)
+ |--------------------------------------------------------------------------
+ |
+ | The page shell (full-bleed content, sidebar panel + main column) and the
+ | shared `pages/accounts/sidebar.blade.php` partial. Scoped to `.accounts-shell`
+ | so every redesigned accounts page gets an identical sidebar.
+ |
+ | Page-specific styling lives alongside in:
+ |   _accounts-summary-redesign.css   (.accounts-summary-redesign)
+ |   _accounts-storage-redesign.css   (.accounts-storage-redesign)
+ |
+ | The palette custom properties declared on `.accounts-shell` are inherited by
+ | those files, so they must stay here.
+ |
+ */
+.accounts-shell {
+    --acc-bg: #eef1f3;
+    --acc-surface: #ffffff;
+    --acc-surface-soft: #fbfcfc;
+    --acc-ink: #12332f;
+    --acc-muted: #7c8986;
+    --acc-faint: #93a09d;
+    --acc-line: #e6ecec;
+    --acc-soft-line: #eef2f2;
+    --acc-field-line: #e2e8e9;
+    --acc-accent: #0e766c;
+    --acc-accent-hover: #0a5850;
+    --acc-accent-soft: #e7f2f0;
+    --acc-accent-border: #bfe0d9;
+    --acc-danger: #c8443a;
+    --acc-danger-soft: #fbedeb;
+    --acc-cream: #faf3e1;
+    --acc-cream-border: #ead9a8;
+    --acc-cream-focus: #e0a82e;
+    --acc-cream-ink: #5c4d28;
+    --acc-cream-faint: #8a7a52;
+
+    color: var(--acc-ink);
+    font-family: "Public Sans", Roboto, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.accounts-shell .tnum {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ layout */
+
+/* Full-bleed shell. The theme's content wrapper insets and rounds the page
+   (22px sides, 14px top margin, 35px top radius); cancel it for this page only
+   so the sidebar sits flush against the global header. */
+body.accounts-shell-body .content.content--top-nav {
+    border-radius: 0;
+    margin-top: 0;
+    padding: 0;
+}
+
+body.accounts-shell-body .content.content--top-nav::before {
+    display: none;
+}
+
+.acc-shell__layout {
+    align-items: stretch;
+    display: grid;
+    gap: 0;
+    grid-template-columns: 352px minmax(0, 1fr);
+    /* Global header + breadcrumb bar = 126px. */
+    min-height: calc(100vh - 126px);
+}
+
+.acc-shell__aside {
+    background: var(--acc-surface);
+    border-radius: 0;
+    border-right: 1px solid var(--acc-line);
+    padding: 0;
+}
+
+.acc-shell__main {
+    min-width: 0;
+    padding: 24px 30px;
+}
+
+@media (max-width: 1279px) {
+    .acc-shell__layout {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 0;
+    }
+
+    .acc-shell__aside {
+        border-bottom: 1px solid var(--acc-line);
+        border-right: 0;
+    }
+}
+
+/* ----------------------------------------------------------------- sidebar */
+
+/* The panel itself is flush and square; the inner wrapper carries the spacing
+   the pills need so they don't collide with the panel edges. */
+.accounts-shell .acc-shell__aside > div {
+    border: 0 !important;
+    height: auto;
+    margin: 0;
+    padding: 18px 16px !important;
+}
+
+.accounts-shell .accountsMenu {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.accounts-shell .accountsMenu > li {
+    margin: 0;
+    padding: 0;
+}
+
+/* Design spacing: 5px under Summary, 6px under the Bank / Storages label. */
+.accounts-shell .accountsMenu > li:first-child {
+    margin-bottom: 5px;
+}
+
+.accounts-shell .accountsMenu > li.hasDropdown > a {
+    margin-bottom: 6px;
+}
+
+/* line-height must be set explicitly: the markup's `text-lg` also ships a
+   1.75rem line-height, which would leave these rows ~9px taller than design. */
+.accounts-shell .accountsMenu > li > a {
+    align-items: center;
+    border-radius: 11px;
+    color: var(--acc-ink);
+    display: flex;
+    font-size: 15.5px;
+    font-weight: 700;
+    gap: 11px;
+    line-height: 19px;
+    padding: 12px 13px;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.accounts-shell .accountsMenu > li > a:hover {
+    background: var(--acc-soft-line);
+    color: var(--acc-accent);
+}
+
+/* Matches `.active` only — the markup always pairs it with `text-primary`, and
+   using a Tailwind utility as a selector makes `@apply text-primary` circular. */
+.accounts-shell .accountsMenu > li > a.active {
+    background: var(--acc-accent-soft);
+    color: var(--acc-accent) !important;
+}
+
+.accounts-shell .accountsMenu > li.hasDropdown > a.active {
+    background: transparent;
+    color: var(--acc-ink) !important;
+}
+
+/* The link is a flex row with its own gap, so drop the markup's `mr-4`. */
+.accounts-shell .accountsMenu > li > a > i,
+.accounts-shell .accountsMenu > li > a > svg,
+.accounts-shell .accountsMenu > li > a > .accountsMenu__swatch {
+    height: 19px;
+    margin-right: 0;
+    width: 19px;
+}
+
+/* Per the design, the links below the divider are lighter than Summary and
+   Bank / Storages above it, and hover tints the text only — no fill. */
+.accounts-shell .accountsMenu > .acc-shell__aside-divider ~ li > a {
+    color: #3d4d4a;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 11px 13px;
+}
+
+.accounts-shell .accountsMenu > .acc-shell__aside-divider ~ li > a:hover {
+    background: transparent;
+    color: var(--acc-accent);
+}
+
+.accounts-shell .accountsMenu .assetsRegCounter {
+    background: var(--acc-danger) !important;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: auto !important;
+    padding: 2px 8px;
+}
+
+/* The Bank / Storages link carries the 6px gap above the list. */
+.accounts-shell .accDropDown {
+    display: block;
+    margin: 0;
+}
+
+/* Bank / storage pills */
+.accounts-shell .accDropDown .bankItem {
+    align-items: center;
+    background: var(--acc-surface-soft);
+    border: 1px solid #e8edee;
+    border-radius: 13px;
+    box-shadow: none;
+    display: flex;
+    gap: 12px;
+    margin: 0 0 8px !important;
+    padding: 11px 12px !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.accounts-shell .accDropDown .bankItem:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Neutralise the theme's `zoom-in` scale/shadow — this design signals hover
+   with the border instead. */
+.accounts-shell .accDropDown .bankItem:hover {
+    background: var(--acc-surface);
+    border-color: var(--acc-accent-border);
+    box-shadow: none;
+    transform: none;
+}
+
+.accounts-shell .accDropDown .bankItem.active {
+    background: var(--acc-accent-soft);
+    border-color: var(--acc-accent-border);
+}
+
+.accounts-shell .accDropDown .bankItem > div:first-child {
+    border-radius: 10px;
+    flex: none;
+    height: 36px;
+    width: 36px;
+}
+
+/* Monogram tile — shown when the storage has no logo on disk. */
+.accounts-shell .accDropDown .bankItem__mono {
+    align-items: center;
+    color: #ffffff;
+    display: flex;
+    font-size: 13px;
+    font-weight: 800;
+    justify-content: center;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.accounts-shell .accDropDown .bankItem > div:nth-child(2) {
+    margin-left: 0;
+    min-width: 0;
+}
+
+.accounts-shell .bankItem__name {
+    color: var(--acc-ink);
+    font-size: 14px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accounts-shell .bankItem__meta {
+    color: var(--acc-faint);
+    font-size: 11.5px;
+    margin-top: 1px;
+}
+
+.accounts-shell .accDropDown .bankItem__balance {
+    background: var(--acc-accent-soft) !important;
+    border-radius: 8px;
+    color: var(--acc-accent) !important;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    padding: 5px 9px;
+    white-space: nowrap;
+}
+
+.accounts-shell .accDropDown .bankItem__balance--negative {
+    background: var(--acc-danger-soft) !important;
+    color: var(--acc-danger) !important;
+}
+
+/* `.accountsMenu > li { margin: 0 }` above is more specific than a bare class,
+   so this has to match on the li too or the margins are dropped. */
+.accounts-shell .accountsMenu > li.acc-shell__aside-divider {
+    background: #eaf0f0;
+    height: 1px;
+    margin: 20px 0 16px;
+}
+
+/* accounts.js drops `active` off the Bank / Storages link when the list is
+   slid shut — with no list to separate, the divider goes too. */
+.accounts-shell .accountsMenu > li.hasDropdown:not(:has(> a.active)) + .acc-shell__aside-divider {
+    display: none;
+}
+
+/* Nav icons. These sit outside `.accounts-shell` on purpose: the sidebar
+   partial renders them on every accounts page, redesigned or not. */
+.accountsMenu__icon {
+    flex: none;
+    height: 19px;
+    width: 19px;
+}
+
+.accountsMenu__swatch {
+    background: #e7f2f0;
+    border-radius: 6px;
+    display: block;
+    flex: none;
+    height: 19px;
+    width: 19px;
+}

@@ -14,6 +14,11 @@
     $firstInitial = isset($nameParts[0]) ? substr($nameParts[0], 0, 1) : 'U';
     $lastInitial = count($nameParts) > 1 ? substr($nameParts[count($nameParts) - 1], 0, 1) : '';
     $accountInitials = strtoupper($firstInitial.$lastInitial);
+    // Employee::photo_url returns a real storage URL when a photo exists and a
+    // generated data: SVG (initials) when it does not, so a "data:" prefix means
+    // "no uploaded photo" — fall back to this header's own initials chip.
+    $accountPhotoUrl = optional($accountEmployee)->photo_url;
+    $accountHasPhoto = !empty($accountPhotoUrl) && !str_starts_with($accountPhotoUrl, 'data:');
     $routeUrl = function ($name, $fallback = 'javascript:void(0);') {
         return \Illuminate\Support\Facades\Route::has($name) ? route($name) : $fallback;
     };
@@ -49,7 +54,13 @@
             <div class="dropdown">
                 <button class="dropdown-toggle my-account-user" type="button" aria-expanded="false" data-tw-toggle="dropdown">
                     <span class="my-account-user__name">{{ $accountName }}</span>
-                    <span class="my-account-user__avatar">{{ $accountInitials }}</span>
+                    @if($accountHasPhoto)
+                        <span class="my-account-user__avatar my-account-user__avatar--photo">
+                            <img src="{{ $accountPhotoUrl }}" alt="{{ $accountName }}">
+                        </span>
+                    @else
+                        <span class="my-account-user__avatar">{{ $accountInitials }}</span>
+                    @endif
                 </button>
                 <div class="dropdown-menu w-56">
                     <ul class="dropdown-content my-account-user-menu">

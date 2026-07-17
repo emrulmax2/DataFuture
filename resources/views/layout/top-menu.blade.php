@@ -119,7 +119,19 @@
             $guardLabel = 'User';
         }
 
-        $currentInitials = $initialsFromName($currentUserName);
+        // Initials come from the employee's first/last name, not the display
+        // name: that string is prefixed with the title and can carry middle
+        // names, so "Mr Bhuiyan A M Nazmus Sakib" would read as "MS" (Mr +
+        // Sakib) rather than "BS". Guards without an employee (agent /
+        // applicant / student) keep parsing the display name.
+        $initialsEmployee = $employee ?? null;
+        $initialsFirst = trim((string) ($initialsEmployee?->first_name ?? ''));
+        $initialsLast = trim((string) ($initialsEmployee?->last_name ?? ''));
+
+        $currentInitials = ($initialsFirst !== '' && $initialsLast !== '')
+            ? strtoupper(mb_substr($initialsFirst, 0, 1).mb_substr($initialsLast, 0, 1))
+            : $initialsFromName(trim($initialsFirst.' '.$initialsLast) ?: $currentUserName);
+
         $currentAvatarUrl = null;
 
         if (isset($employee) && $employee?->photo && Storage::disk('local')->exists('public/employees/'.$employee->id.'/'.$employee->photo)) {

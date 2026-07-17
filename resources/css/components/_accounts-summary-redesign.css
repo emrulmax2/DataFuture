@@ -1,0 +1,431 @@
+/*
+ |--------------------------------------------------------------------------
+ | Accounts Summary redesign
+ |--------------------------------------------------------------------------
+ |
+ | Summary-page-only styling. The page shell, sidebar and palette come from
+ | _accounts-shell.css — the page carries both `.accounts-shell` and
+ | `.accounts-summary-redesign`.
+ |
+ */
+
+/* -------------------------------------------------------------- stat cards */
+
+.acc-sum__stats {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 20px;
+}
+
+@media (max-width: 1439px) {
+    .acc-sum__stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 639px) {
+    .acc-sum__stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.acc-sum__stat {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 17px;
+    padding: 18px 20px;
+}
+
+.acc-sum__stat--accent {
+    background: var(--acc-accent);
+    border-color: var(--acc-accent);
+    box-shadow: 0 12px 24px -14px rgba(14, 118, 108, 0.7);
+    color: #ffffff;
+}
+
+.acc-sum__stat-label {
+    color: var(--acc-muted);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.acc-sum__stat--accent .acc-sum__stat-label {
+    color: #ffffff;
+    opacity: 0.85;
+}
+
+.acc-sum__stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.15;
+    margin-top: 7px;
+}
+
+.acc-sum__stat-value--income {
+    color: var(--acc-accent);
+}
+
+.acc-sum__stat-value--expense {
+    color: var(--acc-danger);
+}
+
+.acc-sum__stat-note {
+    color: var(--acc-faint);
+    font-size: 12.5px;
+    margin-top: 5px;
+}
+
+.acc-sum__stat--accent .acc-sum__stat-note {
+    color: #ffffff;
+    opacity: 0.85;
+}
+
+/* ----------------------------------------------------------------- filters */
+
+.acc-sum__filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-bottom: 18px;
+}
+
+.acc-sum__field {
+    position: relative;
+}
+
+.acc-sum__field--date {
+    width: 232px;
+}
+
+.acc-sum__field--grow {
+    flex: 1;
+    min-width: 180px;
+}
+
+.acc-sum__field--amount {
+    width: 140px;
+}
+
+.acc-sum__field-icon {
+    color: var(--acc-faint);
+    height: 15px;
+    left: 13px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    z-index: 1;
+}
+
+.accounts-summary-redesign .acc-sum__field .form-control {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    box-shadow: none;
+    color: var(--acc-ink);
+    font-size: 14px;
+    height: auto;
+    padding: 11px 14px;
+    width: 100%;
+}
+
+.accounts-summary-redesign .acc-sum__field--date .form-control,
+.accounts-summary-redesign .acc-sum__field--report .form-control {
+    padding-left: 36px;
+}
+
+.accounts-summary-redesign .acc-sum__field .form-control::placeholder {
+    color: #93a09d;
+}
+
+.accounts-summary-redesign .acc-sum__field .form-control:focus {
+    border-color: var(--acc-accent-border);
+    box-shadow: 0 0 0 3px rgba(14, 118, 108, 0.1);
+    outline: none;
+}
+
+/* Advanced search toggle */
+.acc-sum__adv-btn {
+    align-items: center;
+    background: var(--acc-accent);
+    border: 1px solid var(--acc-accent);
+    border-radius: 11px;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 11px 18px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.acc-sum__adv-btn:hover,
+.acc-sum__adv-btn.active {
+    background: var(--acc-accent-hover);
+    border-color: var(--acc-accent-hover);
+}
+
+.acc-sum__adv-chevron {
+    display: inline-flex;
+    transition: transform 0.2s ease;
+}
+
+.acc-sum__adv-chevron svg,
+.acc-sum__adv-chevron i {
+    height: 14px;
+    width: 14px;
+}
+
+.acc-sum__adv-btn.active .acc-sum__adv-chevron {
+    transform: rotate(180deg);
+}
+
+/* Advanced search panel */
+.acc-sum__adv-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 18px;
+}
+
+@media (max-width: 767px) {
+    .acc-sum__adv-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.acc-sum__adv-label {
+    color: var(--acc-muted);
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 7px;
+}
+
+/* Tom Select. The wrapper element carries `.ts-control` plus the classes
+   copied off the original <select> (`tom-selects`), so it matches neither
+   `.ts-wrapper` nor the theme's `.tom-select` rules — target `.ts-input`
+   directly rather than leaning on the wrapper's class. */
+.accounts-summary-redesign .acc-sum__adv-field .ts-input {
+    align-items: center;
+    background-color: var(--acc-surface);
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    box-shadow: none;
+    color: var(--acc-ink);
+    font-size: 14px;
+    gap: 7px;
+    min-height: 44px;
+    /* 6px (not 8) so a selected pill still fits inside the 44px field. */
+    padding: 6px 34px 6px 12px;
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-input.focus,
+.accounts-summary-redesign .acc-sum__adv-field .focus > .ts-input {
+    border-color: var(--acc-accent-border);
+    box-shadow: 0 0 0 3px rgba(14, 118, 108, 0.1);
+}
+
+/* The remove_button plugin sets `padding-right: 0 !important`, which crops the
+   × against the pill edge — hence the !important here. */
+.accounts-summary-redesign .acc-sum__adv-field .ts-input > div.item {
+    align-items: center;
+    background: var(--acc-accent-soft);
+    border-radius: 7px;
+    color: var(--acc-accent);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 18px;
+    margin: 2px 4px 2px 0;
+    padding: 4px 8px !important;
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-input > div.item.active {
+    background: var(--acc-accent-border);
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-input .item .remove {
+    border-left-color: rgba(14, 118, 108, 0.25);
+    color: #6ba59c;
+    line-height: 18px;
+    margin-left: 6px;
+    padding: 0 0 0 6px;
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-input .item .remove:hover {
+    background: transparent;
+    color: var(--acc-accent-hover);
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-input input::placeholder {
+    color: #aab4b1;
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-dropdown {
+    border: 1px solid var(--acc-field-line);
+    border-radius: 11px;
+    box-shadow: 0 16px 32px -18px rgba(18, 51, 47, 0.45);
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+.accounts-summary-redesign .acc-sum__adv-field .ts-dropdown .active {
+    background: var(--acc-accent-soft);
+    color: var(--acc-accent);
+}
+
+/* ------------------------------------------------------------ search results */
+
+.accounts-summary-redesign .summarySearchResultWrap:not(:empty) {
+    margin-bottom: 18px;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap > div {
+    background: var(--acc-surface) !important;
+    border: 1px solid var(--acc-line);
+    border-radius: 17px;
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table td {
+    border-bottom: 1px solid var(--acc-soft-line);
+    font-size: 13.5px;
+    padding: 11px 16px;
+    vertical-align: top;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table tr:first-child td {
+    background: var(--acc-accent-soft);
+    border-bottom: 1px solid var(--acc-accent-border);
+    color: var(--acc-accent);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 18px;
+    font-weight: 600;
+    padding: 13px 16px;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table tr:last-child td {
+    border-bottom: 0;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table tr:hover td {
+    background: #f7fafa;
+}
+
+.accounts-summary-redesign .summarySearchResultWrap table tr:first-child:hover td {
+    background: var(--acc-accent-soft);
+}
+
+.accounts-summary-redesign .summarySearchResultWrap .alert {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 13px;
+    color: var(--acc-muted);
+    padding: 14px 16px;
+}
+
+/* -------------------------------------------------------------- chart card */
+
+.acc-sum__card {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 19px;
+    padding: 22px 24px;
+}
+
+.acc-sum__card-head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.acc-sum__card-title {
+    color: var(--acc-ink);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    margin-right: auto;
+}
+
+.acc-sum__legend {
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 16px;
+}
+
+.acc-sum__legend-item {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+
+.acc-sum__legend-item--inc {
+    color: var(--acc-accent);
+}
+
+.acc-sum__legend-item--exp {
+    color: var(--acc-danger);
+}
+
+.acc-sum__legend-item--inc .acc-sum__legend-swatch {
+    background: var(--acc-accent);
+    border-radius: 2px;
+    height: 3px;
+    width: 20px;
+}
+
+.acc-sum__legend-item--exp .acc-sum__legend-swatch {
+    border-top: 3px dotted var(--acc-danger);
+    width: 20px;
+}
+
+/* Report range picker — compact and warm, echoing the cream header chrome. */
+.acc-sum__field--report {
+    width: 200px;
+}
+
+.accounts-summary-redesign .acc-sum__field--report .form-control {
+    background: var(--acc-cream);
+    border-color: var(--acc-cream-border);
+    color: var(--acc-cream-ink);
+    font-size: 13px;
+    line-height: 18px;
+    padding: 7px 12px 7px 32px;
+}
+
+.accounts-summary-redesign .acc-sum__field--report .form-control::placeholder {
+    color: var(--acc-cream-faint);
+}
+
+.accounts-summary-redesign .acc-sum__field--report .form-control:focus {
+    border-color: var(--acc-cream-focus);
+    box-shadow: 0 0 0 3px rgba(224, 168, 46, 0.16);
+}
+
+.accounts-summary-redesign .acc-sum__field--report .acc-sum__field-icon {
+    color: var(--acc-cream-faint);
+    height: 14px;
+    left: 11px;
+    width: 14px;
+}
+
+.acc-sum__chart-canvas {
+    height: 340px;
+    margin-top: 6px;
+    position: relative;
+}

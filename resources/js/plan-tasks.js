@@ -10,6 +10,166 @@ import Toastify from "toastify-js";
 import ClassicEditor from "@ckeditor/ckeditor5-build-decoupled-document";
 
 ("use strict");
+
+const tmDateIcons = {
+    eye: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+    feed: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
+    end: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>',
+};
+
+function tmDateStatusBadge(status) {
+    const statuses = {
+        Scheduled: { className: "is-scheduled", label: "Scheduled" },
+        Ongoing: { className: "is-live", label: "In Progress" },
+        Completed: { className: "is-completed", label: "Completed" },
+        Canceled: { className: "is-canceled", label: "Canceled" },
+        Cancelled: { className: "is-canceled", label: "Canceled" },
+    };
+    const option = statuses[status] || { className: "is-unknown", label: "Unknown" };
+
+    return '<span class="tm-date-status ' + option.className + '">' + option.label + '</span>';
+}
+
+function tmDateRoomFormatter(cell) {
+    return '<span class="tm-date-room"><strong>' + cell.getData().venue + '</strong><small>' + cell.getData().room + '</small></span>';
+}
+
+function tmDateTimeFormatter(cell) {
+    return '<span class="tm-date-time">' + cell.getData().start_time + ' &mdash; ' + cell.getData().end_time + '</span>';
+}
+
+function tmDateActionLink(href, className, icon, label) {
+    return '<a href="' + href + '" class="tm-date-action ' + className + '">' + icon + label + '</a>';
+}
+
+function tmDateActionButton(attributes, className, icon, label) {
+    return '<button type="button" ' + attributes + ' class="tm-date-action ' + className + '">' + icon + label + '</button>';
+}
+
+function tmDateActionsFormatter(cell) {
+    let btn = '';
+    let attendanceInformation = cell.getData().attendance_information;
+    let personal_tutor_id = cell.getData().personal_tutor_id;
+    let tutor_id = cell.getData().tutor_id;
+    let class_type = cell.getData().class_type;
+    let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
+
+    if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
+        btn += tmDateActionLink(route('attendance.create', cell.getData().id), 'is-feed', tmDateIcons.feed, 'Feed Attendance');
+    }else{
+        if(cell.getData().status == 'Scheduled'){
+            btn = '<span class="tm-date-action is-muted">N/A</span>';
+        }else if(cell.getData().status == 'Canceled' || cell.getData().status == 'Cancelled'){
+            btn = '<span class="tm-date-action is-canceled">' + tmDateIcons.end + 'Canceled</span>';
+        }else if(cell.getData().status == 'Unknown'){
+            btn = '<span class="tm-date-action is-muted">Unknown</span>';
+        }else{
+            if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
+                btn += tmDateActionLink(route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2]), 'is-feed', tmDateIcons.feed, 'Feed Attendance');
+            }
+            if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
+                btn += tmDateActionButton(
+                    'data-tw-toggle="modal" data-attendanceinfo="' + (attendanceInformation ? attendanceInformation.id : '') + '" data-id="' + cell.getData().id + '" data-tw-target="#endClassModal"',
+                    'endClassBtns is-end',
+                    tmDateIcons.end,
+                    'End Class'
+                );
+            }
+            if(cell.getData().status == 'Completed' && the_id > 0){
+                btn += tmDateActionLink(route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2]), 'is-view', tmDateIcons.eye, 'View Feed');
+            }
+        }
+    }
+
+    return '<span class="tm-date-actions">' + btn + '</span>';
+}
+
+const tmParticipantIcons = {
+    sun: '<svg class="is-day" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+    sunset: '<svg class="is-evening" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>',
+    accessibility: '<svg class="is-disability" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="4" r="1"></circle><path d="m18 19 1-7-6 1"></path><path d="m5 8 3-3 5.5 3-2 3"></path><path d="M4.24 14.24a4 4 0 0 0 5.52 5.52"></path><path d="M13.76 19.76a4 4 0 0 0 0-5.52"></path></svg>',
+};
+
+function tmParticipantEscape(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (char) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[char];
+    });
+}
+
+function tmParticipantInitials(data) {
+    const first = String(data.first_name || '').trim();
+    const last = String(data.last_name || '').trim();
+    const fallback = String(data.registration_no || 'LC').trim();
+    const firstInitial = (first || fallback).charAt(0);
+    const lastInitial = (last || fallback.charAt(1) || firstInitial).charAt(0);
+
+    return (firstInitial + lastInitial).toUpperCase();
+}
+
+function tmParticipantAvatarStyle(seed) {
+    const colors = ['#7a4fa3', '#137a70', '#2f8f5b', '#c94f7c', '#b5602f', '#2f5fa1', '#a13f6b', '#4a7a2f', '#b3261e', '#0d7c73'];
+    let hash = 0;
+
+    String(seed || 'student').split('').forEach(function (char) {
+        hash = ((hash * 31) + char.charCodeAt(0)) >>> 0;
+    });
+
+    return 'background:' + colors[hash % colors.length] + ';';
+}
+
+function tmParticipantRegFormatter(cell) {
+    const data = cell.getData();
+    const regNo = tmParticipantEscape(data.registration_no);
+    const initials = tmParticipantInitials(data);
+    const avatarStyle = tmParticipantAvatarStyle((data.first_name || '') + (data.last_name || '') + regNo);
+
+    return '<span class="tm-participant-reg">' +
+        '<span class="tm-participant-avatar" style="' + avatarStyle + '">' + initials + '</span>' +
+        '<span class="tm-participant-regno">' + regNo + '</span>' +
+        '</span>' +
+        '<input type="hidden" class="student_ids" name="student_ids[]" value="' + tmParticipantEscape(data.student_id) + '"/>';
+}
+
+function tmParticipantModeFormatter(cell) {
+    const data = cell.getData();
+    const modeIcon = parseInt(data.evening_and_weekend, 10) === 1 ? tmParticipantIcons.sunset : tmParticipantIcons.sun;
+    const disabilityIcon = parseInt(data.disability, 10) === 1 ? tmParticipantIcons.accessibility : '';
+
+    return '<span class="tm-participant-mode">' + modeIcon + disabilityIcon + '</span>';
+}
+
+function tmParticipantStatusFormatter(cell) {
+    const label = tmParticipantEscape(cell.getValue());
+    const normalised = label.toLowerCase();
+    let className = 'is-enrolled';
+
+    if (!label) {
+        className = 'is-muted';
+    } else if (normalised.includes('suspend') || normalised.includes('withdraw') || normalised.includes('termin') || normalised.includes('intermit') || normalised.includes('archive') || normalised.includes('drop')) {
+        className = 'is-danger';
+    } else if (normalised.includes('pending') || normalised.includes('defer') || normalised.includes('hold')) {
+        className = 'is-warning';
+    }
+
+    return '<span class="tm-participant-status ' + className + '">' + (label || 'Unknown') + '</span>';
+}
+
+function tmAssessmentDateFormatter(cell) {
+    const value = String(cell.getValue() == null ? '' : cell.getValue()).trim();
+
+    if (!value) {
+        return '<span class="tm-assessment-date is-empty">&mdash;</span>';
+    }
+
+    return '<span class="tm-assessment-date">' + tmParticipantEscape(value) + '</span>';
+}
+
 var classPlanDateListsTutorTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -36,133 +196,69 @@ var classPlanDateListsTutorTable = (function () {
                     field: "sl",
                     
                     headerSort: false,
-                    width: "180",
+                    width: 74,
                 },
                 {
                     title: "DATE",
                     field: "date",
                     headerHozAlign: "left",
+                    minWidth: 220,
+                    widthGrow: 13,
+                    formatter(cell) {
+                        return '<span class="tm-date-primary">' + cell.getValue() + '</span>';
+                    },
                 },
                 {
                     title: "ROOM",
                     field: "room",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    width:200,
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().venue
-                            }</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">${
-                                cell.getData().room
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    hozAlign: "left",
+                    minWidth: 220,
+                    widthGrow: 13,
+                    formatter(cell) {
+                        return tmDateRoomFormatter(cell);
                     },
                 },
                 {
                     title: "TIME",
                     field: "time",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:"center",
-                    width:150,
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().start_time
-                            } TO </div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">${
-                                cell.getData().end_time
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    hozAlign: "left",
+                    minWidth: 170,
+                    widthGrow: 10,
+                    formatter(cell) {
+                        return tmDateTimeFormatter(cell);
                     },
                 },
                 {
                     title: "STATUS",
                     field: "status",
-                    width: 150,
+                    minWidth: 150,
+                    widthGrow: 9,
                     vertAlign: "middle",
-                    hozAlign:  "center",
+                    hozAlign: "left",
                     headerSort: false,
-                    headerHozAlign: "center",
-                    formatter(cell, formatterParams) {
-                        let labels = '';
-                        if(cell.getData().status == 'Scheduled'){
-                            labels = '<span class="btn btn-outline-secondary text-info border-info w-24 inline-block">Scheduled</span>';
-                        }else if(cell.getData().status == 'Ongoing'){
-                            labels = '<span class="btn btn-outline-primary w-24 inline-block">Ongoing</span>';
-                        }else if(cell.getData().status == 'Completed'){
-                            labels = '<span class="btn btn-outline-success w-24 inline-block">Completed</span>';
-                        }else if(cell.getData().status == 'Canceled'){
-                            labels = '<span class="btn btn-outline-danger w-24 inline-block">Canceled</span>';
-                        }else{
-                            labels = '<span class="btn btn-outline-warning w-24 inline-block">Unknown</span>';
-                        }
-                        return labels;
+                    headerHozAlign: "left",
+                    formatter(cell) {
+                        return tmDateStatusBadge(cell.getData().status);
                     },
                 },
                 {
                     title: "ACTIONS",
-                    minWidth: 200,
+                    minWidth: 220,
                     field: "actions",
                     responsive: 1,
-                    hozAlign: "center",
+                    hozAlign: "right",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
+                    headerHozAlign: "right",
                     headerSort: false,
                     print: false,
                     download: false,
-                    formatter(cell, formatterParams) {
-                        let btn = '';
-                        let attendanceInformation = cell.getData().attendance_information;
-                        let personal_tutor_id = cell.getData().personal_tutor_id;
-                        let tutor_id = cell.getData().tutor_id;
-                        let class_type = cell.getData().class_type;
-                        let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
-                        if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
-                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" class="lucide lucide-plus-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>Add Feed</a>';
-                        }else{
-                            if(cell.getData().status == 'Scheduled'){
-                                btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
-                            }else if(cell.getData().status == 'Canceled'){
-                                btn = '<span class="btn btn-danger w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Canceled</span>';
-                            }else if(cell.getData().status == 'Unknown'){
-                                btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
-                            }else{
-                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" class="lucide lucide-activity stroke-1.5 mr-2 h-4 w-4"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>Feed Attendance</a>';
-                                }
-                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
-                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>End Class</button>';
-                                }
-                                if(cell.getData().status == 'Completed' && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view stroke-1.5 mr-2 h-4 w-4"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg>View Feed</a>';
-                                }
-                            }
-                        }
-
-                        return btn;
-                        
-                        /*let attendanceInformation = cell.getData().attendance_information;
-                        if(attendanceInformation != null) {
-                            if(attendanceInformation.end_time == null) { 
-                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
-                                   
-                                
-                                if(cell.getData().feed_given == 1){
-                                    dropdown +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
-                                }
-                            } else {
-                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
-                            }
-                        }else {
-                            if(cell.getData().upcomming_status!="Upcomming") {
-                                dropdown =`<div class="flex justify-center items-center mr-3">N/A</div>`;
-                            }
-                        }
-                        return dropdown;*/
+                    widthGrow: 27,
+                    formatter(cell) {
+                        return tmDateActionsFormatter(cell);
                     },
                 },
             ],
@@ -251,134 +347,69 @@ var classPlanDateListsTutorialTable = (function () {
                     field: "sl",
                     
                     headerSort: false,
-                    width: "180",
+                    width: 74,
                 },
                 {
                     title: "DATE",
                     field: "date",
                     headerHozAlign: "left",
+                    minWidth: 220,
+                    widthGrow: 13,
+                    formatter(cell) {
+                        return '<span class="tm-date-primary">' + cell.getValue() + '</span>';
+                    },
                 },
                 {
                     title: "ROOM",
                     field: "room",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    width:200,
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().venue
-                            }</div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">${
-                                cell.getData().room
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    hozAlign: "left",
+                    minWidth: 220,
+                    widthGrow: 13,
+                    formatter(cell) {
+                        return tmDateRoomFormatter(cell);
                     },
                 },
                 {
                     title: "TIME",
                     field: "time",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:"center",
-                    width:150,
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().start_time
-                            } TO </div>
-                            <div class="text-slate-500 text-xs whitespace-nowrap">${
-                                cell.getData().end_time
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    hozAlign: "left",
+                    minWidth: 170,
+                    widthGrow: 10,
+                    formatter(cell) {
+                        return tmDateTimeFormatter(cell);
                     },
                 },
                 {
                     title: "STATUS",
                     field: "status",
-                    width: 150,
+                    minWidth: 150,
+                    widthGrow: 9,
                     vertAlign: "middle",
-                    hozAlign:  "center",
+                    hozAlign: "left",
                     headerSort: false,
-                    headerHozAlign: "center",
-                    formatter(cell, formatterParams) {
-                        let labels = '';
-                        if(cell.getData().status == 'Scheduled'){
-                            labels = '<span class="btn btn-outline-secondary text-info border-info w-24 inline-block">Scheduled</span>';
-                        }else if(cell.getData().status == 'Ongoing'){
-                            labels = '<span class="btn btn-outline-primary w-24 inline-block">Ongoing</span>';
-                        }else if(cell.getData().status == 'Completed'){
-                            labels = '<span class="btn btn-outline-success w-24 inline-block">Completed</span>';
-                        }else if(cell.getData().status == 'Canceled'){
-                            labels = '<span class="btn btn-outline-danger w-24 inline-block">Canceled</span>';
-                        }else{
-                            labels = '<span class="btn btn-outline-warning w-24 inline-block">Unknown</span>';
-                        }
-                        return labels;
+                    headerHozAlign: "left",
+                    formatter(cell) {
+                        return tmDateStatusBadge(cell.getData().status);
                     },
                 },
                 {
                     title: "ACTIONS",
-                    minWidth: 200,
+                    minWidth: 220,
                     field: "actions",
                     responsive: 1,
-                    hozAlign: "center",
+                    hozAlign: "right",
                     vertAlign: "middle",
-                    headerHozAlign: "center",
+                    headerHozAlign: "right",
                     headerSort: false,
                     print: false,
                     download: false,
-                    width: 200,
-                    formatter(cell, formatterParams) {
-                        let btn = '';
-                        let attendanceInformation = cell.getData().attendance_information;
-                        let personal_tutor_id = cell.getData().personal_tutor_id;
-                        let tutor_id = cell.getData().tutor_id;
-                        let class_type = cell.getData().class_type;
-                        let the_id = ((class_type == 'Tutorial' || class_type == 'Seminar') && personal_tutor_id > 0 ? personal_tutor_id : tutor_id);
-                        if(cell.getData().time_passed == 1 && cell.getData().attendance_information == null){
-                            btn += '<a href="'+route('attendance.create', cell.getData().id)+'" class="btn btn-primary w-auto ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-circle" class="lucide lucide-plus-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>Add Feed</a>';
-                        }else{
-                            if(cell.getData().status == 'Scheduled'){
-                                btn = '<div class="flex justify-center items-center font-medium text-info">N/A</div>'
-                            }else if(cell.getData().status == 'Canceled'){
-                                btn = '<span class="btn btn-danger w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x-circle" class="lucide lucide-x-circle stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>Canceled</span>';
-                            }else if(cell.getData().status == 'Unknown'){
-                                btn = '<span class="btn btn-pending text-white w-auto">Unknown</span>';
-                            }else{
-                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 0 && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" class="lucide lucide-activity stroke-1.5 mr-2 h-4 w-4"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>Feed Attendance</a>';
-                                }
-                                if(cell.getData().status == 'Ongoing' && cell.getData().feed_given == 1){
-                                    btn +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="endClassBtns btn btn-danger ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="clock" class="lucide lucide-clock stroke-1.5 mr-2 h-4 w-4"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>End Class</button>';
-                                }
-                                if(cell.getData().status == 'Completed' && the_id > 0){
-                                    btn += '<a href="'+route('tutor-dashboard.attendance', [the_id, cell.getData().id, 2])+'" class="btn btn-primary w-auto"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="view" class="lucide lucide-view stroke-1.5 mr-2 h-4 w-4"><path d="M5 12s2.545-5 7-5c4.454 0 7 5 7 5s-2.546 5-7 5c-4.455 0-7-5-7-5z"></path><path d="M12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M21 17v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2"></path><path d="M21 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path></svg>View Feed</a>';
-                                }
-                            }
-                        }
-
-                        return btn;
-                        
-                        /*let attendanceInformation = cell.getData().attendance_information;
-                        if(attendanceInformation != null) {
-                            if(attendanceInformation.end_time == null) { 
-                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="activity" class="stroke-1.5 mr-2 h-4 w-4"></i>Feed Attendance</a>';
-                                   
-                                
-                                if(cell.getData().feed_given == 1){
-                                    dropdown +='<button data-tw-toggle="modal" data-attendanceinfo="'+attendanceInformation.id+'" data-id="'+cell.getData().id+'" data-tw-target="#endClassModal" class="start-punch btn btn-danger ml-2"><i data-lucide="clock" width="24" height="24" class="stroke-1.5 mr-2 h-4 w-4"></i>End Class</button>';
-                                }
-                            } else {
-                                dropdown = '<a href="'+route('tutor-dashboard.attendance', [cell.getData().tutor_id, cell.getData().id, 0])+'" class="btn btn-primary w-auto"><i data-lucide="view" class="stroke-1.5 mr-2 h-4 w-4"></i>View Feed</a>';
-                            }
-                        }else {
-                            if(cell.getData().upcomming_status!="Upcomming") {
-                                dropdown =`<div class="flex justify-center items-center mr-3">N/A</div>`;
-                            }
-                        }
-                        return dropdown;*/
+                    widthGrow: 27,
+                    formatter(cell) {
+                        return tmDateActionsFormatter(cell);
                     },
                 },
             ],
@@ -570,11 +601,46 @@ var classParticipantsTutorTable = (function () {
 // classStudentListTutorModuleTable
 
 var classStudentListTutorModuleTable = (function () {
+    // Tabulator 4.9 has no paginationCounter option, so the footer count is rendered by hand
+    // from the total_rows the endpoint reports alongside the paged data.
+    var _totalRows = 0;
+
+    var _renderCounter = function (table) {
+        let paginator = table.element.querySelector(".tabulator-footer .tabulator-paginator");
+        if (!paginator) {
+            return;
+        }
+
+        let counter = paginator.querySelector(".tm-participant-counter");
+        if (!counter) {
+            counter = document.createElement("span");
+            counter.className = "tm-participant-counter";
+            paginator.insertBefore(counter, paginator.querySelector(".tabulator-page"));
+        }
+
+        let size = table.getPageSize();
+        let page = table.getPage() || 1;
+        let noun = _totalRows === 1 ? "student" : "students";
+
+        if (!_totalRows) {
+            counter.textContent = "No students";
+        } else if (size === true || size >= _totalRows) {
+            counter.textContent = "Showing all " + _totalRows + " " + noun;
+        } else {
+            let from = (page - 1) * size + 1;
+            let to = Math.min(page * size, _totalRows);
+            counter.textContent = "Showing " + from + "–" + to + " of " + _totalRows + " " + noun;
+        }
+    };
+
     var _tableGen = function () {
         // Setup Tabulator
         let planid = $('#classStudentListTutorModuleTable').attr('data-planid');
         let statusu = $("#status-CLTML").val() != "" ? $("#status-CLTML").val() : "";
-        
+
+        $('.tm-selected-count').text(0);
+        $('#actionButtonWrap').hide();
+
         let tableContent = new Tabulator("#classStudentListTutorModuleTable", {
             ajaxURL: route("student-assign.list"),
             ajaxParams: { planid: planid, status: statusu },
@@ -586,16 +652,17 @@ var classStudentListTutorModuleTable = (function () {
             paginationSize: 50,
             paginationSizeSelector: [true, 20, 50, 100],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             selectable:true,
             columns: [
                 {
                     formatter: "rowSelection", 
                     titleFormatter: "rowSelection", 
-                    hozAlign: "left", 
-                    headerHozAlign: "left",
-                    width: "48",
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: 70,
+                    cssClass: "tm-participant-select-cell",
                     headerSort: false, 
                     download: false,
                     cellClick: function(e, cell) {
@@ -604,12 +671,13 @@ var classStudentListTutorModuleTable = (function () {
                 },
                 {
                     title: "S/N",
-                    formatter: function(cell, formatterParams, onRendered) {
-                        return cell.getRow().getPosition(true) + 1; // Add 1 to make it 1-based index
+                    formatter: function(cell) {
+                        return '<span class="tm-participant-sn">' + (cell.getRow().getPosition(true) + 1) + '</span>';
                     },
                     hozAlign: "left",
                     headerHozAlign: "left",
-                    width: "60",
+                    width: 56,
+                    cssClass: "tm-participant-sn-cell",
                     headerSort: false,
                     download: false
                 },
@@ -617,85 +685,75 @@ var classStudentListTutorModuleTable = (function () {
                     title: "Reg. No",
                     field: "registration_no",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
-                                    html += '<img alt="'+cell.getData().first_name+'" class="rounded-full shadow" src="'+cell.getData().photo_url+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -13px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().registration_no+'</div>';
-                                    
-                                html += '</div>';
-                            html += '</div>';
-                            html += '<input type="hidden" class="student_ids" name="student_ids[]" value="'+cell.getData().student_id+'"/>';
-                        return html;
-                    }
+                    minWidth: 280,
+                    widthGrow: 16,
+                    cssClass: "tm-participant-reg-cell",
+                    formatter(cell) {
+                        return tmParticipantRegFormatter(cell);
+                    },
                 },
                 {
                     title: "",
                     field: "evening_and_weekend",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 54,
+                    cssClass: "tm-participant-mode-cell",
                     headerSort: false,
-                    formatter(cell, formatterParams) {  
-                        let day=false;
-                        if(cell.getData().evening_and_weekend==1) 
-                            day = 'text-slate-900' 
-                        else  
-                            day = 'text-amber-600'
-                        var html = '<div class="flex">';
-                                html += '<div class="w-8 h-8 '+day+' intro-x inline-flex">';
-                                if(cell.getData().evening_and_weekend==1)
-                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sunset" class="lucide lucide-sunset w-6 h-6"><path d="M12 10V2"></path><path d="m4.93 10.93 1.41 1.41"></path><path d="M2 18h2"></path><path d="M20 18h2"></path><path d="m19.07 10.93-1.41 1.41"></path><path d="M22 22H2"></path><path d="m16 6-4 4-4-4"></path><path d="M16 18a4 4 0 0 0-8 0"></path></svg>';
-                                else
-                                    html += '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="sun" class="lucide lucide-sun w-6 h-6"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>';
-                                
-                                html += '</div>';
-                            if(cell.getData().disability==1)
-                                html += '<div class="inline-flex intro-x " style="color:#9b1313"><i data-lucide="accessibility" class="w-6 h-6"></i></div>';
-                            
-                            html += '</div>';
-                            createIcons({icons,"stroke-width": 1.5,nameAttr: "data-lucide"});
-
-                        return html;
-                    }
+                    formatter(cell) {
+                        return tmParticipantModeFormatter(cell);
+                    },
                 },
                 {
                     title: "First Name",
                     field: "first_name",
                     headerHozAlign: "left",
+                    minWidth: 180,
+                    widthGrow: 14,
+                    formatter(cell) {
+                        return '<span class="tm-participant-name">' + tmParticipantEscape(cell.getValue()) + '</span>';
+                    },
                 },
                 {
                     title: "Last Name",
                     field: "last_name",
                     headerHozAlign: "left",
+                    minWidth: 180,
+                    widthGrow: 14,
+                    formatter(cell) {
+                        return '<span class="tm-participant-name">' + tmParticipantEscape(cell.getValue()) + '</span>';
+                    },
                 },
                 {
                     title: "Status",
                     field: "status_id",
                     headerHozAlign: "left",
-                    width: 180,
+                    minWidth: 170,
+                    widthGrow: 10,
+                    formatter(cell) {
+                        return tmParticipantStatusFormatter(cell);
+                    },
                 }
                 
             ],
+            ajaxResponse(url, params, response) {
+                _totalRows = response.total_rows > 0 ? response.total_rows : 0;
+                return response;
+            },
             renderComplete() {
                 createIcons({
                     icons,
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
+                _renderCounter(this);
             },
             rowSelectionChanged:function(data, rows){
-                var ids = [];
+                $('.tm-selected-count').text(rows.length);
                 if(rows.length > 0){
-                    $('#actionButtonWrap').fadeIn();
+                    $('#actionButtonWrap').stop(true, true).css('display', 'flex').hide().fadeIn(120);
                 }else{
-                    $('#actionButtonWrap').fadeOut();
+                    $('#actionButtonWrap').stop(true, true).fadeOut(120);
                 }
             },
             selectableCheck:function(row){
@@ -713,32 +771,13 @@ var classStudentListTutorModuleTable = (function () {
             });
         });
 
-        // Export
-        $("#tabulator-export-csv-CLTML").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        $("#clearClassStudentSelection").off("click.tmParticipants").on("click.tmParticipants", function () {
+            tableContent.deselectRow();
         });
 
-        $("#tabulator-export-json-CLTML").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CLTML").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Student List Details",
-            });
-        });
-
-        $("#tabulator-export-html-CLTML").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-CLTML").on("click", function (event) {
-            tableContent.print();
-        });
+        // The Participants tab has no Print/Export buttons of its own — it exports server-side via
+        // #exportStudentList. The old -CLTML print/export handlers here only ever matched the
+        // Assessments tab's buttons, which is why printing there printed this table too.
     };
     return {
         init: function () {
@@ -750,7 +789,7 @@ var classPlanAssessmentModuleTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
         let planid = $('#classPlanAssessmentModuleTable').attr('data-planid');
-        let statusu = $("#status-CLTML").val() != "" ? $("#status-CLTML").val() : "";
+        let statusu = $("#status-ASMT").val() != "" ? $("#status-ASMT").val() : "";
         
         let tableContent = new Tabulator("#classPlanAssessmentModuleTable", {
             ajaxURL: route("assessment.plan.list"),
@@ -763,58 +802,49 @@ var classPlanAssessmentModuleTable = (function () {
             paginationSize: 10,
             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
-            selectable:true,
             columns: [
                 {
                     title: "#",
                     field: "sl",
-                    
+                    headerHozAlign: "left",
+                    hozAlign: "left",
                     headerSort: false,
-                    width: "180",
+                    width: 56,
+                    cssClass: "tm-assessment-sn-cell",
+                    formatter(cell) {
+                        return '<span class="tm-participant-sn">' + tmParticipantEscape(cell.getValue()) + '</span>';
+                    },
                 },
                 {
                     title: "Assessment Name",
                     field: "name",
-                    vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().name
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    minWidth: 220,
+                    widthGrow: 14,
+                    formatter(cell) {
+                        return '<span class="tm-assessment-name">' + tmParticipantEscape(cell.getValue()) + '</span>';
                     },
                 },
-                
                 {
                     title: "Publish Date",
                     field: "published_at",
-                    vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().published_at
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    minWidth: 180,
+                    widthGrow: 10,
+                    formatter(cell) {
+                        return tmAssessmentDateFormatter(cell);
                     },
                 },
                 {
                     title: "Resubmission Date",
                     field: "resubmission_at",
-                    vertAlign: "middle",
-                    headerHozAlign: "center",
-                    hozAlign:  "center",
-                    formatter(cell, formatterParams) {
-                        return `<div>
-                            <div class="font-medium whitespace-nowrap">${
-                                cell.getData().resubmission_at
-                            }</div>
-                        </div>`;
+                    headerHozAlign: "left",
+                    minWidth: 180,
+                    widthGrow: 10,
+                    formatter(cell) {
+                        return tmAssessmentDateFormatter(cell);
                     },
                 },
                 {
@@ -824,28 +854,29 @@ var classPlanAssessmentModuleTable = (function () {
                     hozAlign: "right",
                     headerHozAlign: "right",
                     download: false,
-                    width: 180,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            if (cell.getData().resultFound == 1) {
-                                btns += '<a href="' +route('result.downloadresult-excel',cell.getData().id) +'" data-id="' +cell.getData().id +'" type="button" class="downloadresult_btn  btn btn-warning text-white p-0 w-9 h-9 ml-1"><i data-lucide="download-cloud" class="w-4 h-4"></i> </a>';
-                            
-                            } else
-                            btns += '<a href="' +route('result.download-excel',cell.getData().id) +'" data-id="' +cell.getData().id +'" type="button" class="download_btn  btn btn-primary text-white p-0 w-9 h-9 ml-1"><i data-lucide="file-down" class="w-4 h-4"></i> </a>';
-                            
-                            btns += '<a href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#resultImportModal" data-id="' +cell.getData().id +'" type="button" class="uploadresult_btn  btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="upload-cloud" class="w-4 h-4"></i> </a>';
-                            btns += '<a href="' +route('result.index',cell.getData().id) +'" data-id="' +cell.getData().id +'"  type="button" class="edit_btn transition duration-200 border shadow-sm inline-flex items-center justify-center py-2 px-3 rounded-md font-medium cursor-pointer focus:ring-4 focus:ring-primary focus:ring-opacity-20 focus-visible:outline-none dark:focus:ring-slate-700 dark:focus:ring-opacity-50 [&:hover:not(:disabled)]:bg-opacity-90 [&:hover:not(:disabled)]:border-opacity-90 [&:not(button)]:text-center disabled:opacity-70 disabled:cursor-not-allowed bg-dark border-dark text-white dark:bg-darkmode-800 dark:border-transparent dark:text-slate-300 [&:hover:not(:disabled)]:dark:dark:bg-darkmode-800/70  p-0 w-9 h-9 ml-1 "><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white  ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                    width: 190,
+                    cssClass: "tm-assessment-actions-cell",
+                    formatter(cell) {
+                        let row = cell.getData();
+                        let btns = '<div class="tm-row-actions">';
+
+                        if (row.deleted_at == null) {
+                            if (row.resultFound == 1) {
+                                btns += '<a href="' + route('result.downloadresult-excel', row.id) + '" data-id="' + row.id + '" title="Download result" class="downloadresult_btn tm-row-action is-download"><i data-lucide="download-cloud" class="w-4 h-4"></i></a>';
+                            } else {
+                                btns += '<a href="' + route('result.download-excel', row.id) + '" data-id="' + row.id + '" title="Download template" class="download_btn tm-row-action is-download"><i data-lucide="file-down" class="w-4 h-4"></i></a>';
+                            }
+
+                            btns += '<a href="javascript:void(0);" data-tw-toggle="modal" data-tw-target="#resultImportModal" data-id="' + row.id + '" title="Import result" class="uploadresult_btn tm-row-action is-upload"><i data-lucide="upload-cloud" class="w-4 h-4"></i></a>';
+                            btns += '<a href="' + route('result.index', row.id) + '" data-id="' + row.id + '" title="Edit" class="edit_btn tm-row-action is-edit"><i data-lucide="pencil" class="w-4 h-4"></i></a>';
+                            btns += '<button type="button" data-id="' + row.id + '" title="Delete" class="delete_btn tm-row-action is-delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>';
+                        } else {
+                            btns += '<button type="button" data-id="' + row.id + '" title="Restore" class="restore_btn tm-row-action is-restore"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
                         }
-                        
-                        return btns;
+
+                        return btns + '</div>';
                     },
                 },
-                
-                
             ],
             renderComplete() {
                 createIcons({
@@ -853,14 +884,8 @@ var classPlanAssessmentModuleTable = (function () {
                     "stroke-width": 1.5,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
 
-                $(".uploadresult_btn").on('click',function(){
+                $(".uploadresult_btn").off('click.tmAssessment').on('click.tmAssessment', function () {
                     let id = $(this).attr('data-id');
                     $("input[name='assessment_plan_id']").val(id);
                 });
@@ -878,29 +903,19 @@ var classPlanAssessmentModuleTable = (function () {
         });
 
         // Export
-        $("#tabulator-export-csv-CLTML").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        $("#tabulator-export-csv-ASMT").on("click", function (event) {
+            tableContent.download("csv", "assessments.csv");
         });
 
-        $("#tabulator-export-json-CLTML").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-CLTML").on("click", function (event) {
+        $("#tabulator-export-xlsx-ASMT").on("click", function (event) {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Student List Details",
-            });
-        });
-
-        $("#tabulator-export-html-CLTML").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
+            tableContent.download("xlsx", "assessments.xlsx", {
+                sheetName: "Module Assessments",
             });
         });
 
         // Print
-        $("#tabulator-print-CLTML").on("click", function (event) {
+        $("#tabulator-print-ASMT").on("click", function (event) {
             tableContent.print();
         });
     };
@@ -912,10 +927,19 @@ var classPlanAssessmentModuleTable = (function () {
 })();
 
 (function(){
-    const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
-    const endClassModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#endClassModal"));
+    // This IIFE binds every plan/result handler below, so a modal that is absent
+    // from the current page must not throw here - that would leave the whole page
+    // without handlers. Pages that lack a modal simply get a no-op for it.
+    const noopModal = { show(){}, hide(){}, toggle(){} };
+    const modalFor = (selector) => {
+        const el = document.querySelector(selector);
+        return el ? tailwind.Modal.getOrCreateInstance(el) : noopModal;
+    };
+
+    const succModal = modalFor("#successModal");
+    const confModal = modalFor("#confirmModal");
+    const warningModal = modalFor("#warningModal");
+    const endClassModal = modalFor("#endClassModal");
 
     
     let confModalDelTitle = 'Are you sure?';
@@ -1695,32 +1719,31 @@ var classPlanAssessmentModuleTable = (function () {
         classPlanAssessmentModuleTable.init();
 
         // Filter function
-        function filterHTMLFormCLTML() {
+        function filterHTMLFormASMT() {
             classPlanAssessmentModuleTable.init();
         }
 
         // On submit filter form
-        $("#tabulatorFilterForm-CLTML")[0].addEventListener(
+        $("#tabulatorFilterForm-ASMT")[0].addEventListener(
             "keypress",
             function (event) {
                 let keycode = event.keyCode ? event.keyCode : event.which;
                 if (keycode == "13") {
                     event.preventDefault();
-                    filterHTMLFormCLTML();
+                    filterHTMLFormASMT();
                 }
             }
         );
 
         // On click go button
-        $("#tabulator-html-filter-go-CLTML").on("click", function (event) {
-            filterHTMLFormCLTML();
+        $("#tabulator-html-filter-go-ASMT").on("click", function (event) {
+            filterHTMLFormASMT();
         });
 
         // On reset filter form
-        $("#tabulator-html-filter-reset-CLTML").on("click", function (event) {
-            $("#dates-CLTML").val("");
-            $("#status-CLTML").val("1");
-            filterHTMLFormCLTML();
+        $("#tabulator-html-filter-reset-ASMT").on("click", function (event) {
+            $("#status-ASMT").val("1");
+            filterHTMLFormASMT();
         });
 
         const confirmModalEl = document.getElementById('confirmModal')
