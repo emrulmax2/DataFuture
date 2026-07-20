@@ -263,6 +263,11 @@ var studentEmploymentHistoryTable = (function () {
         persist: false,
         create: true,
         allowEmptyOption: true,
+        maxOptions: null,
+        // Render the dropdown at <body> level so the scrollable modal body
+        // cannot clip the option list (see _student-profile-redesign.css).
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-dropdown',
         onDelete: function (values) {
             return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
         },

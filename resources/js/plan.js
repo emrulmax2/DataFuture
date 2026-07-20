@@ -238,6 +238,8 @@ var classPlanListTable = (function () {
                 dropdown_input: {}
             },
             placeholder: 'Please Select',
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
             //persist: false,
             create: true,
             onDelete: function (values) {

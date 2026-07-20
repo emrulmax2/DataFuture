@@ -936,6 +936,8 @@ var courseCreationINListTable = (function () {
             dropdown_input: {},
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         maxOptions: null,
         persist: false,
         create: true,

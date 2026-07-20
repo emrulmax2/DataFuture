@@ -15,6 +15,8 @@ import { initPrivilegeUi } from "./privilege-ui";
                 dropdown_input: {}
             },
             placeholder: 'Search Here...',
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
             persist: false,
             // The options are real departments, so an ad-hoc entry could never
             // resolve to a template.

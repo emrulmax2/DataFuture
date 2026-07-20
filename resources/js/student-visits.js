@@ -211,6 +211,8 @@ var studentVisitsListTable = (function () {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         //persist: false,
         maxOptions: null,
         create: false,
