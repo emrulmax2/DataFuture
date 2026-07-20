@@ -180,6 +180,8 @@ var budgetNameListTable = (function () {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         create: false,
         allowEmptyOption: false,
         onDelete: function (values) {

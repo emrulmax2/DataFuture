@@ -268,6 +268,8 @@ var studentNotesListTable = (function () {
             dropdown_input: {},
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         persist: false,
         create: false,
         maxOptions: null,

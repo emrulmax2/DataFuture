@@ -7,6 +7,8 @@ import TomSelect from 'tom-select';
             dropdown_input: {},
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         maxOptions: null,
         create: false,
         allowEmptyOption: true,

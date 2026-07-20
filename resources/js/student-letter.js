@@ -209,6 +209,8 @@ var studentCommLetterListTable = (function () {
             dropdown_input: {}
         },
         placeholder: 'Search Here...',
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
         persist: true,
         create: false,
         allowEmptyOption: false,
