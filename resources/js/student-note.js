@@ -265,6 +265,9 @@ var studentNotesListTable = (function () {
     }
 
     let multiTomOptNote = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptionsNote,
         plugins: {
             ...tomOptionsNote.plugins,
@@ -901,6 +904,9 @@ var studentNotesListTable = (function () {
                 setTimeout(() => {
                     $('#followUpCommentModal').find('.tooltip').each(function () {
                         let tippyOption = {
+                            dropdownParent: 'body',
+                            dropdownClass: 'ts-dropdown lcc-tom-float',
+                            
                             content: $(this).attr("alt"),
                         };
                         tippy(this, {
@@ -950,6 +956,9 @@ var studentNotesListTable = (function () {
                     setTimeout(() => {
                         $('#followUpCommentModal').find('.tooltip').each(function () {
                             let tippyOption = {
+                                dropdownParent: 'body',
+                                dropdownClass: 'ts-dropdown lcc-tom-float',
+                                
                                 content: $(this).attr("alt"),
                             };
                             tippy(this, {

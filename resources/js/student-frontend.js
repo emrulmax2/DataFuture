@@ -32,6 +32,9 @@ import { createApp } from 'vue';
     $('.lccTom').each(function () {
         if ($(this).attr('multiple') !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,

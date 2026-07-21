@@ -26,6 +26,9 @@ import { createIcons, icons } from 'lucide';
     };
 
     let tomOptionsSDF = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             dropdown_input: {}
         },
@@ -39,6 +42,9 @@ import { createIcons, icons } from 'lucide';
     };
 
     let tomOptionsSDFNew = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptionsSDF,
         allowEmptyOption: false,
         plugins: {

@@ -276,6 +276,9 @@ var requisitionListTable = (function () {
     };
 
     let tomOptionsMull = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptions,
         plugins: {
             ...tomOptions.plugins,

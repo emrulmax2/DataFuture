@@ -151,6 +151,9 @@ var submissionPerformanceSTDListTable = (function () {
     };
 
     let progressionTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...progressionTomOptions,
         plugins: {
             ...progressionTomOptions.plugins,

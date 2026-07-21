@@ -474,6 +474,9 @@ var attendanceReportListTable = (function () {
         },
     };
     let tomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptions,
         plugins: {
             ...tomOptions.plugins,

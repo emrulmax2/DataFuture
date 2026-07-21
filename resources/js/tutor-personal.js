@@ -38,6 +38,9 @@ import TomSelect from "tom-select";
     };
 
     let todayDateOption = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...dateOption,
         format: "DD / MM / YYYY",
     };

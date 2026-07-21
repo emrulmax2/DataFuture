@@ -17,6 +17,9 @@ import TomSelect from "tom-select";
     };
 
     let accTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...accTomOptions,
         plugins: {
             ...accTomOptions.plugins,

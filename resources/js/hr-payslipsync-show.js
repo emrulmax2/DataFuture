@@ -145,6 +145,9 @@ var hrPayslipListTable = (function () {
     }
 
     let tomOptions = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             dropdown_input: {},
         },
@@ -167,6 +170,9 @@ var hrPayslipListTable = (function () {
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.lcc-tom-select').forEach(function(selectElement) {
             new TomSelect(selectElement, {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 render: {
                     option: function(data, escape) {
                         console.log(data);

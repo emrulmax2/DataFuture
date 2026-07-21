@@ -606,6 +606,9 @@ var employmentHistoryTable = (function () {
     $('.addmissionLccTom').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -620,6 +623,9 @@ var employmentHistoryTable = (function () {
 
     if($('#admissionListTable').length > 0){
         let multiTomOpt = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             ...tomOptions,
             plugins: {
                 ...tomOptions.plugins,

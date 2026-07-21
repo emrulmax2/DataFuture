@@ -157,6 +157,9 @@ var submissionPerformanceSTDListTable = (function () {
     };
 
     let tRetentionTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tRetentionTomOptions,
         plugins: {
             ...tRetentionTomOptions.plugins,

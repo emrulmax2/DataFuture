@@ -21,6 +21,9 @@ import IMask from 'imask';
     };
 
     let tomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptions,
         plugins: {
             ...tomOptions.plugins,
@@ -168,6 +171,9 @@ import IMask from 'imask';
 
     if($('input[name="sort_code"]').length > 0){
         var maskOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             mask: '00-00-00'
         };
         $('input[name="sort_code"]').each(function(){

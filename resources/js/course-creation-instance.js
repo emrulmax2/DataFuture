@@ -424,6 +424,9 @@ var courseCreationINListTable = (function () {
 
         $('.datepicker.ccin').each(function () {
             var maskOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 mask: '00-00-0000',
             };
             var mask = IMask(this, maskOptions);
@@ -958,6 +961,9 @@ var courseCreationINListTable = (function () {
     $('.lccTom').each(function () {
         if ($(this).attr('multiple') !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -973,6 +979,9 @@ var courseCreationINListTable = (function () {
     if ($('#courseCreationInstTable').length > 0) {
         $('.datepicker.itdp').each(function () {
             var maskOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 mask: '00-00-0000',
             };
             var mask = IMask(this, maskOptions);

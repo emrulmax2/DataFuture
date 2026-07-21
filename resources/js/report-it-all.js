@@ -209,6 +209,9 @@ var table = (function () {
         },
     };
     let accTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...accTomOptions,
         plugins: {
             ...accTomOptions.plugins,
@@ -262,6 +265,9 @@ var table = (function () {
 
         $(".datepicker").each(function () {
             var maskOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 mask: '00-00-0000'
             };
             var mask = IMask(this, maskOptions);

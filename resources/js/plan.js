@@ -255,6 +255,9 @@ var classPlanListTable = (function () {
             },
         };
         let topOptionsMultiple = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             ...tomOptions,
             plugins: {
                 ...tomOptions.plugins,

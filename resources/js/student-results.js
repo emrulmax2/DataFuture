@@ -305,6 +305,9 @@ var studentNotesListTable = (function () {
     $('.lccTom').each(function () {
         if ($(this).attr('multiple') !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -635,6 +638,9 @@ var studentNotesListTable = (function () {
             });
 
             var maskOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 mask: 'DD-MM-YYYY HH:mm',
                 blocks: {
                     MM: {
@@ -972,6 +978,9 @@ var studentNotesListTable = (function () {
                 });
 
                 var maskOptions = {
+                    dropdownParent: 'body',
+                    dropdownClass: 'ts-dropdown lcc-tom-float',
+                    
                     mask: 'DD-MM-YYYY HH:mm',
                     blocks: {
                         MM: {
@@ -1334,6 +1343,9 @@ var studentNotesListTable = (function () {
         $('#total-distribution').html('Total: '+$('#sortable-table tbody tr').length);
         $(".tabltooltip").each(function () {
             let tipyyoptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 content: $(this).data('content'),
             };
             tippy(this, {
