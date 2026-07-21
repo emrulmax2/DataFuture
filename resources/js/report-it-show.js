@@ -153,6 +153,9 @@ var table = (function () {
         },
     };
     let accTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...accTomOptions,
         plugins: {
             ...accTomOptions.plugins,

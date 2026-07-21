@@ -221,6 +221,9 @@ var libraryBookLocationList = (function () {
 
 (function (){
     let lbmTomOptions = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             dropdown_input: {}
         },
@@ -235,6 +238,9 @@ var libraryBookLocationList = (function () {
     };
 
     let lbmTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...lbmTomOptions,
         plugins: {
             ...lbmTomOptions.plugins,

@@ -189,6 +189,9 @@ var settingsListTable = (function () {
         };
 
         let multiTomOptFlag = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             ...tomOptionsFlag,
             plugins: {
                 ...tomOptionsFlag.plugins,

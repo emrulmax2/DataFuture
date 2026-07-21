@@ -307,6 +307,9 @@ var termModuleListTable = (function () {
 
 (function () {
     let tomOptions = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             dropdown_input: {},
         },
@@ -330,6 +333,9 @@ var termModuleListTable = (function () {
     $('.lccTom').each(function () {
         if ($(this).attr('multiple') !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -668,6 +674,9 @@ var termModuleListTable = (function () {
     }
     $('.datepicker').each(function () {
         var maskOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             mask: '00-00-0000',
         };
         var mask = IMask(this, maskOptions);
@@ -707,6 +716,9 @@ var termModuleListTable = (function () {
         });
 
         let tomOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             plugins: {
                 dropdown_input: {},
             },

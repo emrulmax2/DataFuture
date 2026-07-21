@@ -287,6 +287,9 @@ var admissionListTable = (function () {
     $('.addmissionLccTom').each(function(){
         if ($(this).attr("multiple") !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -301,6 +304,9 @@ var admissionListTable = (function () {
 
     if($('#requestListTable').length > 0){
         let multiTomOpt = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             ...tomOptions,
             plugins: {
                 ...tomOptions.plugins,

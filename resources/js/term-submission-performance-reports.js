@@ -158,6 +158,9 @@ var submissionPerformanceSTDListTable = (function () {
     };
 
     let subPerfTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...subPerfTomOptions,
         plugins: {
             ...subPerfTomOptions.plugins,
@@ -208,6 +211,9 @@ var submissionPerformanceSTDListTable = (function () {
                     setTimeout(() => {
                         $("#submissionPerformanceReportWrap .tooltip").each(function () {
                             let tTipoptions = {
+                                dropdownParent: 'body',
+                                dropdownClass: 'ts-dropdown lcc-tom-float',
+                                
                                 content: $(this).attr("title"),
                             };
                             $(this).removeAttr("title");

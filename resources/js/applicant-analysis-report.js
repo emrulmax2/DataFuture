@@ -126,6 +126,9 @@ var unknownEntryApplicantList = (function () {
     };
 
     let apAnlsTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...apAnlsTomOptions,
         plugins: {
             ...apAnlsTomOptions.plugins,

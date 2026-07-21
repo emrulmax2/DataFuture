@@ -29,6 +29,9 @@ import tippy, { roundArrow } from "tippy.js";
     $('.lccTom').each(function () {
         if ($(this).attr('multiple') !== undefined) {
             tomOptions = {
+                dropdownParent: 'body',
+                dropdownClass: 'ts-dropdown lcc-tom-float',
+                
                 ...tomOptions,
                 plugins: {
                     ...tomOptions.plugins,
@@ -78,6 +81,9 @@ import tippy, { roundArrow } from "tippy.js";
 
 
     let tomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
                 ...tomOptions,
         plugins: {
             ...tomOptions.plugins,

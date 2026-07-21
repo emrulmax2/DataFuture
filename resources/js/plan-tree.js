@@ -311,6 +311,9 @@ var classPlanTreeListTable = (function () {
 
                 $(".tooltip").each(function () {
                     let ttoptions = {
+                        dropdownParent: 'body',
+                        dropdownClass: 'ts-dropdown lcc-tom-float',
+                        
                         content: $(this).attr("title"),
                     };
 
@@ -927,6 +930,9 @@ var assignedStudentModalListTable = (function () {
 
                         $parent.find('.tooltip').each(function () {
                             let toolTIpOptions = {
+                                dropdownParent: 'body',
+                                dropdownClass: 'ts-dropdown lcc-tom-float',
+                                
                                 content: $(this).attr('title'),
                                 placement: 'right',
                             };
@@ -1012,6 +1018,9 @@ var assignedStudentModalListTable = (function () {
                                             .find('.tooltip')
                                             .each(function () {
                                                 let toolTIpOptions = {
+                                                    dropdownParent: 'body',
+                                                    dropdownClass: 'ts-dropdown lcc-tom-float',
+                                                    
                                                     content:
                                                         $(this).attr('title'),
                                                     placement: 'right',

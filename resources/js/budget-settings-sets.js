@@ -77,6 +77,9 @@ var budgetSetListTable = (function () {
                 }
                 $(".tabltooltip").each(function () {
                     let tipyyoptions = {
+                        dropdownParent: 'body',
+                        dropdownClass: 'ts-dropdown lcc-tom-float',
+                        
                         content: $(this).attr("alt"),
                     };
                     tippy(this, {
@@ -98,6 +101,9 @@ var budgetSetListTable = (function () {
             });
             $(".tabltooltip").each(function () {
                 let tipyyoptions = {
+                    dropdownParent: 'body',
+                    dropdownClass: 'ts-dropdown lcc-tom-float',
+                    
                     content: $(this).attr("alt"),
                 };
                 tippy(this, {
@@ -158,6 +164,9 @@ var budgetSetListTable = (function () {
     };
 
     let tomOptionsMull = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...tomOptions,
         plugins: {
             ...tomOptions.plugins,

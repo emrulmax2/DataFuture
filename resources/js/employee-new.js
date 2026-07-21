@@ -124,6 +124,9 @@ import IMask from 'imask';
     
     $(".date-picker").each(function () {
         var maskOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             mask: Date,
             min: new Date(1900, 0, 1),
             max: new Date(2050, 0, 1),
@@ -134,6 +137,9 @@ import IMask from 'imask';
 
     $(".ni-number").each(function () {
         var maskOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             mask: 'aa-000000-a'
         };
         var mask = IMask(this, maskOptions);

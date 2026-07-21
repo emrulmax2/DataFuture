@@ -758,12 +758,21 @@ $('#callLockModalForm').on('submit', function(e){
 //
 (function () {
     var semestersCOM = new TomSelect('#semestersCom',{
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: ['remove_button'],
     });
     var coursesCOM = new TomSelect('#coursesCom',{
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: ['remove_button'],
     });
     var academicCOM = new TomSelect('#academicCom',{
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: ['remove_button'],
     });
     semestersCOM.clear(true);
@@ -772,6 +781,9 @@ $('#callLockModalForm').on('submit', function(e){
 
     $(".date-picker").each(function () {
         var maskOptions = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             mask: '00-00-0000'
         };
         var mask = IMask(this, maskOptions);
@@ -1002,6 +1014,9 @@ $('#callLockModalForm').on('submit', function(e){
                         tthisInstanceOptions.appendChild(opt);
                     }
                     let instancesCom = new TomSelect('#instancesCom',{
+                        dropdownParent: 'body',
+                        dropdownClass: 'ts-dropdown lcc-tom-float',
+                        
                         plugins: ['remove_button'],
                     });
                     document.getElementById('courseCreationId').value = data.courseCreationId;
@@ -1014,7 +1029,7 @@ $('#callLockModalForm').on('submit', function(e){
         }
     };
 
-    //var instancesCom = new TomSelect('#instancesCom');
+    //var instancesCom = new TomSelect('#instancesCom', { dropdownParent: 'body', dropdownClass: 'ts-dropdown lcc-tom-float' });
     
     // Filter function
     function filterHTMLFormCOM() {

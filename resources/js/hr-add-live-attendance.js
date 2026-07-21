@@ -144,6 +144,9 @@ import Litepicker from "litepicker";
     });
 
     let tomOptions = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             remove_button: {
                 title: "Remove this employee",

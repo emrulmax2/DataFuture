@@ -33,6 +33,9 @@ import TomSelect from "tom-select";
     };
 
     let dueTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...dueTomOptions,
         plugins: {
             ...dueTomOptions.plugins,

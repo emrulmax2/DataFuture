@@ -154,6 +154,9 @@ var venueDFListTable = (function () {
         });
 
         let tomOptionsCBDF = {
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown lcc-tom-float',
+            
             plugins: {
                 dropdown_input: {}
             },

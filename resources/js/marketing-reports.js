@@ -111,6 +111,9 @@ var semesterComissionRateTable = (function () {
     };
 
     let mrkTomOptionsMul = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         ...mrkTomOptions,
         plugins: {
             ...mrkTomOptions.plugins,

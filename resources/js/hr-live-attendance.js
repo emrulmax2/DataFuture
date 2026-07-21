@@ -35,6 +35,9 @@ import tippy, { roundArrow } from "tippy.js";
     }
 
     let tomOptions = {
+        dropdownParent: 'body',
+        dropdownClass: 'ts-dropdown lcc-tom-float',
+        
         plugins: {
             dropdown_input: {},
             remove_button: {
@@ -66,6 +69,9 @@ import tippy, { roundArrow } from "tippy.js";
                 }
 
                 let thTippyOptions = {
+                    dropdownParent: 'body',
+                    dropdownClass: 'ts-dropdown lcc-tom-float',
+                    
                     content: $(this).attr("title"),
                 };
                 if ($(this).data("tooltip-content") !== undefined) {
@@ -242,6 +248,9 @@ import tippy, { roundArrow } from "tippy.js";
                 setTimeout(() => {
                     $('#liveAttendanceTable tbody').find('.tooltip').each(function(){
                         let thTippyOptions = {
+                            dropdownParent: 'body',
+                            dropdownClass: 'ts-dropdown lcc-tom-float',
+                            
                             content: $(this).attr("title"),
                         };
                         if ($(this).data("tooltip-content") !== undefined) {
