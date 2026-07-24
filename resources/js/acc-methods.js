@@ -25,38 +25,47 @@ var methodListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 110,
                 },
                 {
                     title: "Name",
                     field: "method_name",
                     headerHozAlign: "left",
+                    minWidth: 240,
                 },
                 {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    minWidth: 120,
                     formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().status+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                        const isOn = cell.getValue() == 1;
+
+                        return '<button type="button" role="switch" aria-checked="' + (isOn ? 'true' : 'false') + '"' +
+                            ' class="status_updater ss-table-switch ' + (isOn ? 'is-active' : 'is-inactive') + '"' +
+                            ' data-id="' + cell.getData().id + '" aria-label="Toggle method status">' +
+                            '<i data-lucide="' + (isOn ? 'check' : 'x') + '"></i>' +
+                            '</button>';
                     }
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 140,
+                    minWidth: 140,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editMethodModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editMethodModal" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit method"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete method"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore method"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -64,7 +73,7 @@ var methodListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
                 const columnLists = this.getColumns();
@@ -81,7 +90,7 @@ var methodListTable = (function () {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
         });
@@ -151,19 +160,42 @@ var methodListTable = (function () {
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
+        // Keeps the redesigned "Active Status" switch copy in step with its checkbox.
+        const syncStatusToggle = function (input) {
+            const copy = $(input).closest('.ss-status-toggle').find('.ss-status-toggle__copy');
+            if (!copy.length) return;
+
+            copy.find('strong').text(input.checked ? 'Active' : 'Inactive');
+            copy.find('small').text(input.checked
+                ? 'Selectable when recording transactions'
+                : 'Not selectable when recording transactions');
+        };
+
+        const setStatusField = function (selector, checked) {
+            $(selector + ' input[name="status"]').prop('checked', checked).each(function () {
+                syncStatusToggle(this);
+            });
+        };
+
+        $(document).on('change', '.ss-status-toggle input[name="status"]', function () {
+            syncStatusToggle(this);
+        });
+
         const addMethodModalEl = document.getElementById('addMethodModal')
         addMethodModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#addMethodModal .acc__input-error').html('');
-            $('#addMethodModal .modal-body input').val('');
-            $('#addMethodModal input[name="status"]').prop('checked', true);
+            $('#addMethodModal .border-danger').removeClass('border-danger');
+            $('#addMethodModal input:not([type="checkbox"]):not([type="hidden"])').val('');
+            setStatusField('#addMethodModal', true);
         });
-        
+
         const editMethodModalEl = document.getElementById('editMethodModal')
         editMethodModalEl.addEventListener('hide.tw.modal', function(event) {
             $('#editMethodModal .acc__input-error').html('');
-            $('#editMethodModal .modal-body input').val('');
+            $('#editMethodModal .border-danger').removeClass('border-danger');
+            $('#editMethodModal input:not([type="checkbox"]):not([type="hidden"])').val('');
             $('#editMethodModal input[name="id"]').val('0');
-            $('#editMethodModal input[name="status"]').prop('checked', false);
+            setStatusField('#editMethodModal', false);
         });
 
         $('#addMethodForm').on('submit', function(e){
@@ -229,12 +261,8 @@ var methodListTable = (function () {
                     let dataset = response.data;
                     $('#editMethodModal input[name="method_name"]').val(dataset.method_name ? dataset.method_name : '');
 
-                    if(dataset.status == 1){
-                        $('#editMethodModal [name="status"]').prop('checked', true);
-                    }else{
-                        $('#editMethodModal [name="status"]').prop('checked', false);
-                    }
-                    
+                    setStatusField('#editMethodModal', dataset.status == 1);
+
                     $('#editMethodModal input[name="id"]').val(editId);
                 }
             }).catch((error) => {

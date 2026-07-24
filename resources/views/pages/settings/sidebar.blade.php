@@ -1,11 +1,11 @@
 <div class="intro-y box mt-5">
     <div class="relative flex items-center p-5">
         <div class="w-12 h-12 rounded-full inline-flex justify-center items-center bg-slate-100">
-            <i data-lucide="settings" class="w-6 h-6 text-primary"></i>
+            <i data-lucide="{{ $settingsSidebarIcon ?? 'settings' }}" class="w-6 h-6 text-primary"></i>
         </div>
         <div class="ml-4 mr-auto">
             <div class="font-medium text-base">Settings</div>
-            <div class="text-slate-500">{{ $subtitle }}</div>
+            <div class="text-slate-500">{{ $settingsSidebarSubtitle ?? $subtitle }}</div>
         </div>
     </div>
     <div class="p-5 border-t border-slate-200/60 dark:border-darkmode-400 settingsMenu">

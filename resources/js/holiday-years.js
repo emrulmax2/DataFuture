@@ -1,249 +1,146 @@
-import xlsx from 'xlsx';
-import { createIcons, icons } from 'lucide';
-import Tabulator from 'tabulator-tables';
+import xlsx from "xlsx";
+import { createIcons, icons } from "lucide";
+import Tabulator from "tabulator-tables";
+import Litepicker from "litepicker";
 
-import dayjs from 'dayjs';
-import Litepicker from 'litepicker';
-
-('use strict');
-
-var hrHolidayYearsListTable = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = $('#query-HY').val() != '' ? $('#query-HY').val() : '';
-        let status = $('#status-HY').val() != '' ? $('#status-HY').val() : '';
-
-        let tableContent = new Tabulator('#hrHolidayYearsListTable', {
-            ajaxURL: route('holiday.year.list'),
-            ajaxParams: { querystr: querystr, status: status },
-            ajaxFiltering: true,
-            ajaxSorting: true,
-            printAsHtml: true,
-            printStyled: true,
-            pagination: 'remote',
-            paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-            layout: 'fitColumns',
-            responsiveLayout: 'collapse',
-            placeholder: 'No matching records found',
-            columns: [
-                {
-                    title: '#ID',
-                    field: 'id',
-                    width: '180',
-                },
-                {
-                    title: 'Year',
-                    field: 'year',
-                    headerHozAlign: 'left',
-                },
-                {
-                    title: 'Start Date',
-                    field: 'start_date',
-                    headerHozAlign: 'left',
-                },
-                {
-                    title: 'End Date',
-                    field: 'end_date',
-                    headerHozAlign: 'left',
-                },
-                {
-                    title: 'Notice Period',
-                    field: 'notice_period',
-                    headerHozAlign: 'left',
-                },
-                {
-                    title: 'Status',
-                    field: 'active',
-                    headerHozAlign: 'left',
-                    formatter(cell, formatterParams) {
-                        return (
-                            '<div class="form-check form-switch"><input data-id="' +
-                            cell.getData().id +
-                            '" ' +
-                            (cell.getData().active == 1 ? 'Checked' : '') +
-                            ' value="' +
-                            cell.getData().active +
-                            '" type="checkbox" class="status_updater form-check-input"> </div>'
-                        );
-                    },
-                },
-                {
-                    title: 'Actions',
-                    field: 'id',
-                    headerSort: false,
-                    hozAlign: 'right',
-                    headerHozAlign: 'right',
-                    width: '210',
-                    download: false,
-                    formatter(cell, formatterParams) {
-                        var btns = '';
-                        if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<a href="' +
-                                route('hr.bank.holiday', cell.getData().id) +
-                                '" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="landmark" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<a href="' +
-                                route(
-                                    'holiday.year.leave.option',
-                                    cell.getData().id
-                                ) +
-                                '" class="btn-rounded btn btn-facebook text-white p-0 w-9 h-9 ml-1"><i data-lucide="list-ordered" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editHolidayYearModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        } else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-
-                        return btns;
-                    },
-                },
-            ],
-            renderComplete() {
-                createIcons({
-                    icons,
-                    'stroke-width': 1.5,
-                    nameAttr: 'data-lucide',
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
-            },
-        });
-
-        // Export
-        $('#tabulator-export-csv-HY').on('click', function (event) {
-            tableContent.download('csv', 'data.csv');
-        });
-
-        $('#tabulator-export-json-HY').on('click', function (event) {
-            tableContent.download('json', 'data.json');
-        });
-
-        $('#tabulator-export-xlsx-HY').on('click', function (event) {
-            window.XLSX = xlsx;
-            tableContent.download('xlsx', 'data.xlsx', {
-                sheetName: 'Roles Details',
-            });
-        });
-
-        $('#tabulator-export-html-HY').on('click', function (event) {
-            tableContent.download('html', 'data.html', {
-                style: true,
-            });
-        });
-
-        // Print
-        $('#tabulator-print-HY').on('click', function (event) {
-            tableContent.print();
-        });
-    };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
+("use strict");
 
 (function () {
-    if ($('#hrHolidayYearsListTable').length) {
-        // Init Table
-        hrHolidayYearsListTable.init();
+    const tableNode = document.querySelector("#hrHolidayYearsListTable");
 
-        // Filter function
-        function filterHTMLForm() {
-            hrHolidayYearsListTable.init();
-        }
-
-        // On submit filter form
-        $('#tabulatorFilterForm-HY')[0].addEventListener(
-            'keypress',
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == '13') {
-                    event.preventDefault();
-                    filterHTMLForm();
-                }
-            }
-        );
-
-        // On click go button
-        $('#tabulator-html-filter-go-HY').on('click', function (event) {
-            filterHTMLForm();
-        });
-
-        // On reset filter form
-        $('#tabulator-html-filter-reset-HY').on('click', function (event) {
-            $('#query-HY').val('');
-            $('#status-HY').val('1');
-            filterHTMLForm();
-        });
+    if (!tableNode) {
+        return;
     }
 
-    const addHolidayYearModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#addHolidayYearModal')
-    );
-    const editHolidayYearModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#editHolidayYearModal')
-    );
-    const successModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#successModal')
-    );
-    const confirmModal = tailwind.Modal.getOrCreateInstance(
-        document.querySelector('#confirmModal')
-    );
+    const csrfToken = $('meta[name="csrf-token"]').attr("content");
+    const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addHolidayYearModal"));
+    const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editHolidayYearModal"));
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    let tableContent = null;
 
-    let confModalDelTitle = 'Are you sure?';
+    const refreshIcons = () => {
+        createIcons({
+            icons,
+            "stroke-width": 1.7,
+            nameAttr: "data-lucide",
+        });
+    };
 
-    const addHolidayYearModalEl = document.getElementById(
-        'addHolidayYearModal'
-    );
-    addHolidayYearModalEl.addEventListener('hide.tw.modal', function (event) {
-        $('#addHolidayYearModal .acc__input-error').html('');
-        $('#addHolidayYearModal .modal-body input').val('');
-        $('#addHolidayYearModal .modal-footer input[type="checkbox"]').prop(
-            'checked',
-            true
+    const escapeHtml = (value) => {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
+    const setBusy = (selector, busy) => {
+        const button = document.querySelector(selector);
+
+        if (!button) {
+            return;
+        }
+
+        button.disabled = busy;
+        const spinner = button.querySelector(".ss-spinner");
+
+        if (spinner) {
+            spinner.style.cssText = busy ? "display: inline-block;" : "display: none;";
+        }
+    };
+
+    const clearErrors = ($form) => {
+        $form.find(".acc__input-error").html("");
+        $form.find(".border-danger").removeClass("border-danger");
+    };
+
+    const showErrors = ($form, errors) => {
+        clearErrors($form);
+
+        Object.entries(errors || {}).forEach(([key, value]) => {
+            const message = Array.isArray(value) ? value.join(" ") : value;
+            $form.find(`.${key}`).addClass("border-danger");
+            $form.find(`.error-${key}`).text(message);
+        });
+    };
+
+    const showSuccess = (title, description) => {
+        $("#successModal .successModalTitle").text(title);
+        $("#successModal .successModalDesc").text(description);
+        successModal.show();
+    };
+
+    const showConfirm = (title, description, action, recordID) => {
+        $("#confirmModal .confModTitle").text(title);
+        $("#confirmModal .confModDesc").text(description);
+        $("#confirmModal .agreeWith").attr("data-id", recordID);
+        $("#confirmModal .agreeWith").attr("data-action", action);
+        confirmModal.show();
+    };
+
+    const updateActiveToggle = ($toggle) => {
+        const isChecked = $toggle.find('input[name="active"]').is(":checked");
+
+        $toggle.find(".ss-status-toggle__copy strong").text(isChecked ? "Active" : "Inactive");
+        $toggle.find(".ss-status-toggle__copy small").text(
+            isChecked ? "Available for holiday planning" : "Not available for holiday planning"
         );
-    });
+    };
 
-    const editRoleModalEl = document.getElementById('editHolidayYearModal');
-    editRoleModalEl.addEventListener('hide.tw.modal', function (event) {
-        $('#editHolidayYearModal .acc__input-error').html('');
-        $('#editHolidayYearModal .modal-body input').val('');
-        $('#editHolidayYearModal .modal-footer input[type="checkbox"]').prop(
-            'checked',
-            false
-        );
-        $('#editHolidayYearModal input[name="id"]').val('0');
-    });
+    const setActiveField = ($form, value) => {
+        const $toggle = $form.find(".ss-holiday-active-toggle");
+        const isActive = value === true || value === 1 || value === "1";
 
-    const confirmModalEl = document.getElementById('confirmModal');
-    confirmModalEl.addEventListener('hidden.tw.modal', function (event) {
-        $('#confirmModal .roomAgreeWith').attr('data-id', '0');
-        $('#confirmModal .roomAgreeWith').attr('data-action', 'none');
-    });
+        $toggle.find('input[name="active"]').prop("checked", isActive);
+        updateActiveToggle($toggle);
+    };
 
-    let dateOption = {
+    const resetForm = ($form, active = true) => {
+        clearErrors($form);
+        $form[0]?.reset();
+        $form.find('input[type="text"], input[type="number"]').val("");
+        $form.find('input[name="id"]').val("0");
+        setActiveField($form, active);
+    };
+
+    const clearPicker = (picker) => {
+        try {
+            picker?.clearSelection();
+        } catch (error) {
+            // Litepicker can throw if it is asked to clear before initial paint.
+        }
+    };
+
+    const setPickerDate = (picker, selector, value) => {
+        const input = document.querySelector(selector);
+
+        if (input) {
+            input.value = value || "";
+        }
+
+        if (!value) {
+            clearPicker(picker);
+            return;
+        }
+
+        try {
+            picker?.setDate(value);
+        } catch (error) {
+            if (input) {
+                input.value = value;
+            }
+        }
+    };
+
+    const dateOption = {
         autoApply: true,
         singleMode: true,
         numberOfColumns: 1,
         numberOfMonths: 1,
         showWeekNumbers: true,
-        format: 'DD-MM-YYYY',
+        format: "DD-MM-YYYY",
         dropdowns: {
             minYear: 1900,
             maxYear: 2050,
@@ -252,390 +149,398 @@ var hrHolidayYearsListTable = (function () {
         },
     };
 
-    const start_date = new Litepicker({
-        element: document.getElementById('start_date'),
+    const addEndDate = new Litepicker({
+        element: document.getElementById("add_end_date"),
+        ...dateOption,
+    });
+
+    const addStartDate = new Litepicker({
+        element: document.getElementById("add_start_date"),
         ...dateOption,
         setup: (picker) => {
-            picker.on('selected', (date1, date2) => {
-                end_date.setOptions({
-                    minDate: picker.getDate(),
-                });
+            picker.on("selected", () => {
+                addEndDate.clearSelection();
+                addEndDate.setOptions({ minDate: picker.getDate() });
             });
         },
     });
 
-    const end_date = new Litepicker({
-        element: document.getElementById('end_date'),
+    const editEndDate = new Litepicker({
+        element: document.getElementById("edit_end_date"),
         ...dateOption,
     });
 
-    const edit_start_date = new Litepicker({
-        element: document.getElementById('edit_start_date'),
+    const editStartDate = new Litepicker({
+        element: document.getElementById("edit_start_date"),
         ...dateOption,
         setup: (picker) => {
-            picker.on('selected', (date1, date2) => {
-                edit_end_date.clearSelection();
-                edit_end_date.setOptions({
-                    minDate: picker.getDate(),
-                });
+            picker.on("selected", () => {
+                editEndDate.clearSelection();
+                editEndDate.setOptions({ minDate: picker.getDate() });
             });
         },
     });
 
-    const edit_end_date = new Litepicker({
-        element: document.getElementById('edit_end_date'),
-        ...dateOption,
-    });
+    const resetAddForm = () => {
+        resetForm($("#addHolidayYearForm"), true);
+        clearPicker(addStartDate);
+        clearPicker(addEndDate);
+    };
 
-    $('#addHolidayYearForm').on('submit', function (e) {
-        e.preventDefault();
-        const form = document.getElementById('addHolidayYearForm');
+    const resetEditForm = () => {
+        resetForm($("#editHolidayYearForm"), false);
+        clearPicker(editStartDate);
+        clearPicker(editEndDate);
+    };
 
-        $('#addHolidayYearForm').find('input').removeClass('border-danger');
-        $('#addHolidayYearForm').find('.acc__input-error').html('');
+    const statusFormatter = (cell) => {
+        const data = cell.getData();
+        const isActive = data.active == 1;
 
-        document.querySelector('#saveHY').setAttribute('disabled', 'disabled');
-        document.querySelector('#saveHY svg').style.cssText =
-            'display: inline-block;';
+        return `<button type="button" data-id="${escapeHtml(data.id)}" class="status_updater ss-status-pill ss-status-action ${isActive ? "is-active" : "is-inactive"}" aria-label="Change holiday year status"><span></span>${isActive ? "Active" : "Inactive"}</button>`;
+    };
 
-        let form_data = new FormData(form);
+    const actionFormatter = (cell) => {
+        const data = cell.getData();
 
-        axios({
-            method: 'post',
-            url: route('holiday.year.store'),
-            data: form_data,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        if (data.deleted_at != null) {
+            return `<button data-id="${escapeHtml(data.id)}" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore holiday year"><i data-lucide="rotate-cw"></i></button>`;
+        }
+
+        return [
+            `<a href="${route("hr.bank.holiday", data.id)}" class="ss-row-action ss-row-action--calendar" aria-label="Bank holidays"><i data-lucide="landmark"></i></a>`,
+            `<a href="${route("holiday.year.leave.option", data.id)}" class="ss-row-action ss-row-action--list" aria-label="Leave options"><i data-lucide="list-ordered"></i></a>`,
+            `<button data-id="${escapeHtml(data.id)}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit holiday year"><i data-lucide="pencil"></i></button>`,
+            `<button data-id="${escapeHtml(data.id)}" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete holiday year"><i data-lucide="trash-2"></i></button>`,
+        ].join("");
+    };
+
+    const buildTable = () => {
+        const querystr = $("#query-HY").val() || "";
+        const status = $("#status-HY").val() || "";
+
+        if (tableContent) {
+            tableContent.destroy();
+        }
+
+        tableContent = new Tabulator("#hrHolidayYearsListTable", {
+            ajaxURL: route("holiday.year.list"),
+            ajaxParams: { querystr, status },
+            ajaxFiltering: true,
+            ajaxSorting: true,
+            printAsHtml: true,
+            printStyled: true,
+            pagination: "remote",
+            paginationSize: 10,
+            paginationSizeSelector: [10, 25, 50, 100],
+            layout: "fitColumns",
+            responsiveLayout: false,
+            placeholder: "No matching records found",
+            columns: [
+                {
+                    title: "#ID",
+                    field: "id",
+                    width: 96,
+                },
+                {
+                    title: "Year",
+                    field: "year",
+                    headerHozAlign: "left",
+                    minWidth: 160,
+                    formatter(cell) {
+                        return `<strong class="ss-holiday-year-title">${escapeHtml(cell.getValue())}</strong>`;
+                    },
+                },
+                {
+                    title: "Start Date",
+                    field: "start_date",
+                    headerHozAlign: "left",
+                    minWidth: 150,
+                },
+                {
+                    title: "End Date",
+                    field: "end_date",
+                    headerHozAlign: "left",
+                    minWidth: 150,
+                },
+                {
+                    title: "Notice Period",
+                    field: "notice_period",
+                    headerHozAlign: "left",
+                    minWidth: 150,
+                    formatter(cell) {
+                        const value = cell.getValue();
+                        return `<span class="ss-holiday-notice">${escapeHtml(value)} ${Number(value) === 1 ? "day" : "days"}</span>`;
+                    },
+                },
+                {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    minWidth: 130,
+                    formatter: statusFormatter,
+                    download: false,
+                },
+                {
+                    title: "Actions",
+                    field: "actions",
+                    headerSort: false,
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 190,
+                    minWidth: 190,
+                    download: false,
+                    formatter: actionFormatter,
+                },
+            ],
+            renderComplete() {
+                refreshIcons();
             },
-        })
-            .then((response) => {
-                document.querySelector('#saveHY').removeAttribute('disabled');
-                document.querySelector('#saveHY svg').style.cssText =
-                    'display: none;';
+        });
+    };
 
-                if (response.status == 200) {
-                    addHolidayYearModal.hide();
+    buildTable();
+    refreshIcons();
 
-                    successModal.show();
-                    document
-                        .getElementById('successModal')
-                        .addEventListener('shown.tw.modal', function (event) {
-                            $('#successModal .successModalTitle').html(
-                                'Congratulations!'
-                            );
-                            $('#successModal .successModalDesc').html(
-                                'HR Holiday years successfully inserted.'
-                            );
-                        });
-                }
-                hrHolidayYearsListTable.init();
-            })
-            .catch((error) => {
-                document.querySelector('#saveHY').removeAttribute('disabled');
-                document.querySelector('#saveHY svg').style.cssText =
-                    'display: none;';
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(
-                            error.response.data.errors
-                        )) {
-                            $(`#addHolidayYearForm .${key}`).addClass(
-                                'border-danger'
-                            );
-                            $(`#addHolidayYearForm  .error-${key}`).html(val);
-                        }
-                    } else {
-                        console.log('error');
-                    }
-                }
-            });
+    $("#tabulatorFilterForm-HY").on("keypress.holidayYears", function (event) {
+        const keycode = event.keyCode ? event.keyCode : event.which;
+
+        if (keycode == "13") {
+            event.preventDefault();
+            buildTable();
+        }
     });
 
-    $('#hrHolidayYearsListTable').on('click', '.edit_btn', function () {
-        let $editBtn = $(this);
-        let editId = $editBtn.attr('data-id');
+    $("#tabulator-html-filter-go-HY").on("click.holidayYears", buildTable);
+
+    $("#tabulator-html-filter-reset-HY").on("click.holidayYears", function () {
+        $("#query-HY").val("");
+        $("#status-HY").val("1");
+        buildTable();
+    });
+
+    $("#tabulator-export-csv-HY").on("click.holidayYears", function () {
+        tableContent?.download("csv", "holiday-years.csv");
+    });
+
+    $("#tabulator-export-xlsx-HY").on("click.holidayYears", function () {
+        window.XLSX = xlsx;
+        tableContent?.download("xlsx", "holiday-years.xlsx", {
+            sheetName: "Holiday Years",
+        });
+    });
+
+    $("#tabulator-print-HY").on("click.holidayYears", function () {
+        tableContent?.print();
+    });
+
+    document.getElementById("addHolidayYearModal")?.addEventListener("show.tw.modal", resetAddForm);
+    document.getElementById("addHolidayYearModal")?.addEventListener("hide.tw.modal", resetAddForm);
+    document.getElementById("editHolidayYearModal")?.addEventListener("hide.tw.modal", resetEditForm);
+
+    $(".ss-holiday-active-toggle input[name='active']").on("change.holidayYears", function () {
+        updateActiveToggle($(this).closest(".ss-holiday-active-toggle"));
+    });
+
+    $("#addHolidayYearForm").on("submit.holidayYears", function (event) {
+        event.preventDefault();
+
+        const form = document.getElementById("addHolidayYearForm");
+        const $form = $("#addHolidayYearForm");
+
+        clearErrors($form);
+        setBusy("#saveHY", true);
 
         axios({
-            method: 'post',
-            url: route('holiday.year.edit'),
+            method: "post",
+            url: route("holiday.year.store"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            setBusy("#saveHY", false);
+
+            if (response.status == 200) {
+                addModal.hide();
+                showSuccess("Success!", "Holiday year successfully created.");
+                buildTable();
+            }
+        }).catch((error) => {
+            setBusy("#saveHY", false);
+
+            if (error.response?.status == 422) {
+                showErrors($form, error.response.data.errors);
+                return;
+            }
+
+            console.log(error);
+        });
+    });
+
+    $("#hrHolidayYearsListTable").on("click.holidayYears", ".edit_btn", function () {
+        const editId = $(this).attr("data-id");
+        const $form = $("#editHolidayYearForm");
+
+        resetEditForm();
+
+        axios({
+            method: "post",
+            url: route("holiday.year.edit"),
             data: { rowID: editId },
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-        })
-            .then((response) => {
-                if (response.status == 200) {
-                    let dataset = response.data;
-                    $('#editHolidayYearModal input[name="notice_period"]').val(
-                        dataset.notice_period ? dataset.notice_period : ''
-                    );
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            if (response.status == 200) {
+                const dataset = response.data;
+                const startDate = dataset.start_date || "";
+                const endDate = dataset.end_date || "";
 
-                    var startDate = new Date(dataset.start_date_modified);
-                    edit_start_date.setOptions({
-                        startDate: dataset.start_date,
+                setPickerDate(editStartDate, "#edit_start_date", startDate);
+                setPickerDate(editEndDate, "#edit_end_date", endDate);
+
+                if (dataset.start_date_modified) {
+                    editEndDate.setOptions({
+                        minDate: new Date(dataset.start_date_modified),
                     });
-
-                    if (dataset.end_date && dataset.end_date != '') {
-                        edit_end_date.setOptions({
-                            startDate: dataset.end_date,
-                            minDate: startDate,
-                        });
-                    } else {
-                        edit_end_date.clearSelection();
-                        edit_end_date.setOptions({
-                            minDate: startDate,
-                        });
-                    }
-                    if (dataset.active == 1) {
-                        $('#editHolidayYearModal input[name="active"]').prop(
-                            'checked',
-                            true
-                        );
-                    } else {
-                        $('#editHolidayYearModal input[name="active"]').prop(
-                            'checked',
-                            false
-                        );
-                    }
-                    $('#editHolidayYearModal input[name="id"]').val(editId);
                 }
-            })
-            .catch((error) => {
+
+                $form.find('input[name="notice_period"]').val(dataset.notice_period || "");
+                $form.find('input[name="id"]').val(editId);
+                setActiveField($form, dataset.active);
+                editModal.show();
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $("#editHolidayYearForm").on("submit.holidayYears", function (event) {
+        event.preventDefault();
+
+        const form = document.getElementById("editHolidayYearForm");
+        const $form = $("#editHolidayYearForm");
+
+        clearErrors($form);
+        setBusy("#updateHY", true);
+
+        axios({
+            method: "post",
+            url: route("holiday.year.update"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            setBusy("#updateHY", false);
+
+            if (response.status == 200) {
+                editModal.hide();
+                showSuccess("Success!", "Holiday year successfully updated.");
+                buildTable();
+            }
+        }).catch((error) => {
+            setBusy("#updateHY", false);
+
+            if (error.response?.status == 422) {
+                showErrors($form, error.response.data.errors);
+                return;
+            }
+
+            console.log(error);
+        });
+    });
+
+    $("#hrHolidayYearsListTable").on("click.holidayYears", ".delete_btn", function () {
+        showConfirm(
+            "Archive holiday year?",
+            "This holiday year will be moved to archived records.",
+            "DELETE",
+            $(this).attr("data-id")
+        );
+    });
+
+    $("#hrHolidayYearsListTable").on("click.holidayYears", ".restore_btn", function () {
+        showConfirm(
+            "Restore holiday year?",
+            "This holiday year will be available in live records again.",
+            "RESTORE",
+            $(this).attr("data-id")
+        );
+    });
+
+    $("#hrHolidayYearsListTable").on("click.holidayYears", ".status_updater", function () {
+        showConfirm(
+            "Change status?",
+            "This will update whether the holiday year is available for holiday planning.",
+            "CHANGESTAT",
+            $(this).attr("data-id")
+        );
+    });
+
+    document.getElementById("confirmModal")?.addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#confirmModal .agreeWith").on("click.holidayYears", function () {
+        const $agreeBTN = $(this);
+        const recordID = $agreeBTN.attr("data-id");
+        const action = $agreeBTN.attr("data-action");
+
+        $("#confirmModal button").attr("disabled", "disabled");
+
+        if (action == "DELETE") {
+            axios({
+                method: "delete",
+                url: route("holiday.year.destory", recordID),
+                headers: { "X-CSRF-TOKEN": csrfToken },
+            }).then((response) => {
+                if (response.status == 200) {
+                    $("#confirmModal button").removeAttr("disabled");
+                    confirmModal.hide();
+                    showSuccess("Done!", "Holiday year successfully archived.");
+                    buildTable();
+                }
+            }).catch((error) => {
+                $("#confirmModal button").removeAttr("disabled");
                 console.log(error);
             });
-    });
+            return;
+        }
 
-    $('#editHolidayYearForm').on('submit', function (e) {
-        e.preventDefault();
-        const form = document.getElementById('editHolidayYearForm');
-
-        $('#editHolidayYearForm').find('input').removeClass('border-danger');
-        $('#editHolidayYearForm').find('.acc__input-error').html('');
-
-        document
-            .querySelector('#updateHY')
-            .setAttribute('disabled', 'disabled');
-        document.querySelector('#updateHY svg').style.cssText =
-            'display: inline-block;';
-
-        let form_data = new FormData(form);
-
-        axios({
-            method: 'post',
-            url: route('holiday.year.update'),
-            data: form_data,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-            },
-        })
-            .then((response) => {
-                document.querySelector('#updateHY').removeAttribute('disabled');
-                document.querySelector('#updateHY svg').style.cssText =
-                    'display: none;';
-
+        if (action == "RESTORE") {
+            axios({
+                method: "post",
+                url: route("holiday.year.restore", recordID),
+                headers: { "X-CSRF-TOKEN": csrfToken },
+            }).then((response) => {
                 if (response.status == 200) {
-                    editHolidayYearModal.hide();
-
-                    successModal.show();
-                    document
-                        .getElementById('successModal')
-                        .addEventListener('shown.tw.modal', function (event) {
-                            $('#successModal .successModalTitle').html(
-                                'Congratulations!'
-                            );
-                            $('#successModal .successModalDesc').html(
-                                'Holiday year successfully updated.'
-                            );
-                        });
+                    $("#confirmModal button").removeAttr("disabled");
+                    confirmModal.hide();
+                    showSuccess("Done!", "Holiday year successfully restored.");
+                    buildTable();
                 }
-                hrHolidayYearsListTable.init();
-            })
-            .catch((error) => {
-                document.querySelector('#updateHY').removeAttribute('disabled');
-                document.querySelector('#updateHY svg').style.cssText =
-                    'display: none;';
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(
-                            error.response.data.errors
-                        )) {
-                            $(`#editHolidayYearForm .${key}`).addClass(
-                                'border-danger'
-                            );
-                            $(`#editHolidayYearForm  .error-${key}`).html(val);
-                        }
-                    } else {
-                        console.log('error');
-                    }
+            }).catch((error) => {
+                $("#confirmModal button").removeAttr("disabled");
+                console.log(error);
+            });
+            return;
+        }
+
+        if (action == "CHANGESTAT") {
+            axios({
+                method: "post",
+                url: route("holiday.year.update.status"),
+                data: { recordID },
+                headers: { "X-CSRF-TOKEN": csrfToken },
+            }).then((response) => {
+                if (response.status == 200) {
+                    $("#confirmModal button").removeAttr("disabled");
+                    confirmModal.hide();
+                    showSuccess("Done!", "Holiday year status successfully updated.");
+                    buildTable();
                 }
+            }).catch((error) => {
+                $("#confirmModal button").removeAttr("disabled");
+                console.log(error);
             });
-    });
-
-    // Delete Room
-    $('#hrHolidayYearsListTable').on('click', '.delete_btn', function () {
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document
-            .getElementById('confirmModal')
-            .addEventListener('shown.tw.modal', function (event) {
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html(
-                    'Do you really want to delete these record? If yes, the please click on agree btn.'
-                );
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
-    });
-
-    $('#hrHolidayYearsListTable').on('click', '.restore_btn', function () {
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document
-            .getElementById('confirmModal')
-            .addEventListener('shown.tw.modal', function (event) {
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html(
-                    'Do you really want to restore these record?'
-                );
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
-    });
-
-    $('#hrHolidayYearsListTable').on('click', '.status_updater', function () {
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document
-            .getElementById('confirmModal')
-            .addEventListener('shown.tw.modal', function (event) {
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html(
-                    'Do you really want to change status of this record? If yes then please click on the agree btn.'
-                );
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
-            });
-    });
-
-    // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function () {
-        let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
-
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if (action == 'DELETE') {
-            axios({
-                method: 'delete',
-                url: route('holiday.year.destory', recordID),
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        'content'
-                    ),
-                },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confirmModal.hide();
-
-                        successModal.show();
-                        document
-                            .getElementById('successModal')
-                            .addEventListener(
-                                'shown.tw.modal',
-                                function (event) {
-                                    $('#successModal .successModalTitle').html(
-                                        'WOW!'
-                                    );
-                                    $('#successModal .successModalDesc').html(
-                                        'Record successfully deleted from DB row.'
-                                    );
-                                }
-                            );
-                    }
-                    hrHolidayYearsListTable.init();
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        } else if (action == 'RESTORE') {
-            axios({
-                method: 'post',
-                url: route('holiday.year.restore', recordID),
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        'content'
-                    ),
-                },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confirmModal.hide();
-
-                        successModal.show();
-                        document
-                            .getElementById('successModal')
-                            .addEventListener(
-                                'shown.tw.modal',
-                                function (event) {
-                                    $('#successModal .successModalTitle').html(
-                                        'WOW!'
-                                    );
-                                    $('#successModal .successModalDesc').html(
-                                        'Record Successfully Restored!'
-                                    );
-                                }
-                            );
-                    }
-                    hrHolidayYearsListTable.init();
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
-        } else if (action == 'CHANGESTAT') {
-            axios({
-                method: 'post',
-                url: route('holiday.year.update.status'),
-                data: { recordID: recordID },
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                        'content'
-                    ),
-                },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confirmModal.hide();
-
-                        successModal.show();
-                        document
-                            .getElementById('successModal')
-                            .addEventListener(
-                                'shown.tw.modal',
-                                function (event) {
-                                    $('#successModal .successModalTitle').html(
-                                        'WOW!'
-                                    );
-                                    $('#successModal .successModalDesc').html(
-                                        'Record status successfully updated!'
-                                    );
-                                }
-                            );
-                    }
-                    hrHolidayYearsListTable.init();
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
         }
     });
 })();

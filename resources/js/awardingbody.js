@@ -17,7 +17,7 @@ var table = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,38 +25,48 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 110,
                 },
                 {
                     title: "Awarding Body",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 240,
                 },
                 {
                     title: "Hesa Code",
                     field: "hesa_code",
                     headerHozAlign: "left",
+                    minWidth: 140,
+                    formatter(cell) {
+                        return cell.getValue() || "&mdash;";
+                    },
                 },
                 {
                     title: "DF Code",
                     field: "df_code",
                     headerHozAlign: "left",
+                    minWidth: 140,
+                    formatter(cell) {
+                        return cell.getValue() || "&mdash;";
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 180,
+                    minWidth: 180,
                     download: false,
                     formatter(cell, formatterParams) {                        
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit awarding body"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete awarding body"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore awarding body"><i data-lucide="rotate-cw"></i></button>';
                         }
                         
                         return btns;
@@ -66,15 +76,9 @@ var table = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
             },
         });
 
@@ -159,66 +163,64 @@ var table = (function () {
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
         let confModalDelTitle = 'Are you sure?';
+        const isEnabledValue = (value) => value === true || value === 1 || value === "1";
+
+        const setCodeField = ($form, key, enabled, value = "") => {
+            const isEnabled = isEnabledValue(enabled);
+            const areaClass = key === "hesa" ? ".hesa_code_area" : ".df_code_area";
+            const checkboxName = key === "hesa" ? "is_hesa" : "is_df";
+            const inputName = key === "hesa" ? "hesa_code" : "df_code";
+            const $area = $form.find(areaClass);
+            const $checkbox = $form.find(`input[name="${checkboxName}"]`);
+            const $input = $form.find(`input[name="${inputName}"]`);
+
+            $checkbox.prop("checked", isEnabled);
+            $checkbox.attr("aria-checked", isEnabled ? "true" : "false");
+            $area.attr("data-enabled", isEnabled ? "true" : "false");
+            $input.prop("disabled", !isEnabled);
+            $input.val(isEnabled ? value : "");
+        };
+
+        const resetFormState = ($form) => {
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find('input[type="text"], input[type="hidden"]').val("");
+            $form.find('input[name="id"]').val("0");
+            setCodeField($form, "hesa", false);
+            setCodeField($form, "df", false);
+        };
+
+        resetFormState($('#addForm'));
+        resetFormState($('#editForm'));
 
         const addModalEl = document.getElementById('addModal')
+        addModalEl.addEventListener('show.tw.modal', function(event) {
+            resetFormState($('#addForm'));
+        });
+
         addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addModal .acc__input-error').html('');
-            $('#addModal input').val('');
+            resetFormState($('#addForm'));
         });
         
         const editModalEl = document.getElementById('editModal')
         editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editModal .acc__input-error').html('');
-            $('#editModal input').val('');
-            $('#editModal input[name="id"]').val('0');
+            resetFormState($('#editForm'));
         });
 
         $('#addForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#addForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
+            setCodeField($('#addForm'), 'hesa', $(this).prop('checked'));
         })
         
         $('#addForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#addForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
+            setCodeField($('#addForm'), 'df', $(this).prop('checked'));
         })
 
         $('#editForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#editForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
+            setCodeField($('#editForm'), 'hesa', $(this).prop('checked'));
         })
         
         $('#editForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#editForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
+            setCodeField($('#editForm'), 'df', $(this).prop('checked'));
         })
 
         $('#addForm').on('submit', function(e){
@@ -242,7 +244,7 @@ var table = (function () {
                 if (response.status == 200) {
                     document.querySelector('#save').removeAttribute('disabled');
                     document.querySelector("#save svg").style.cssText = "display: none;";
-                    $('#addForm #name').val('');
+                    $('#addForm input[name="name"]').val('');
                     addModal.hide();
                     succModal.show();
                     document.getElementById("successModal")
@@ -264,7 +266,6 @@ var table = (function () {
                             $(`#addForm .${key}`).addClass('border-danger')
                             $(`#addForm  .error-${key}`).html(val)
                         }
-                        $('#addForm #name').val('');
                     } else {
                         console.log('error');
                     }
@@ -275,6 +276,9 @@ var table = (function () {
         $("#awardingbodyTableId").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+            const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+
+            resetFormState($('#editForm'));
 
             axios({
                 method: "get",
@@ -286,32 +290,11 @@ var table = (function () {
                 if (response.status == 200) {
                     let dataset = response.data;
                     $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                    
-                    if(dataset.is_hesa == 1){
-                        document.querySelector('#editModal #is_hesa').checked = true;
-                        $('#editModal .hesa_code_area').fadeIn(500, function () {
-                            $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
-                        });
-                    }else{
-                        document.querySelector('#editModal #is_hesa').checked = false;
-                        $('#editModal .hesa_code_area').fadeOut(500, function () {
-                            $('#editModal input[name="hesa_code"]').val('');
-                        });
-                    }
-                    
-                    if(dataset.is_df == 1){
-                        document.querySelector('#editModal #is_df').checked = true;
-                        $('#editModal .df_code_area').fadeIn(500, function () {
-                            $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
-                        });
-                    }else{
-                        document.querySelector('#editModal #is_df').checked = false;
-                        $('#editModal .df_code_area').fadeOut(500, function () {
-                            $('#editModal input[name="df_code"]').val('');
-                        });
-                    }
+                    setCodeField($('#editForm'), 'hesa', dataset.is_hesa, dataset.hesa_code ? dataset.hesa_code : '');
+                    setCodeField($('#editForm'), 'df', dataset.is_df, dataset.df_code ? dataset.df_code : '');
 
                     $('#editModal input[name="id"]').val(editId);
+                    editModal.show();
                 }
             }).catch((error) => {
                 console.log(error);

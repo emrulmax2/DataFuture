@@ -1,14 +1,69 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import Dropzone from "dropzone";
- 
+
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const processPhaseClass = (value) => {
+    const phase = String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    return phase ? `is-${phase}` : "";
+};
+
+const processInitials = (value) => {
+    const words = String(value || "")
+        .trim()
+        .split(/\s+/)
+        .map((word) => word.replace(/[^A-Za-z0-9]/g, ""))
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return "PR";
+    }
+
+    if (words.length === 1) {
+        return words[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
+};
+
+const hasProcessImage = (imageUrl) => {
+    return imageUrl && !String(imageUrl).includes("placeholders/200x200");
+};
+
+const processAvatarTone = (row) => {
+    const sequence = Number(row.sl || row.id || 1);
+    const tone = ((sequence - 1) % 4) + 1;
+
+    return `is-tone-${tone}`;
+};
+
 var table = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+
+        if (window.processListTableInstance) {
+            window.processListTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#processlistTableId", {
             ajaxURL: route("processlist.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -18,7 +73,7 @@ var table = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -26,55 +81,58 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 86,
+                    minWidth: 70,
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div class="flex lg:justify-start items-center">';
-                            html += '<div class="intro-x w-10 h-10 image-fit mr-3">';
-                                html += '<img alt="'+cell.getData().name+'" class="rounded-full" src="'+cell.getData().image_url+'">';
-                            html += '</div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().name+'</div>';
-                        html += '</div>';
+                    minWidth: 260,
+                    widthGrow: 1.6,
+                    formatter(cell) {
+                        const data = cell.getData();
+                        const rawName = data.name || "";
+                        const name = escapeHtml(rawName);
+                        const imageUrl = data.image_url || "";
+                        const avatar = hasProcessImage(imageUrl)
+                            ? `<span class="ss-process-cell__avatar"><img alt="${name}" src="${escapeHtml(imageUrl)}"></span>`
+                            : `<span class="ss-process-cell__avatar ss-process-cell__avatar--initials ${processAvatarTone(data)}" aria-hidden="true">${escapeHtml(processInitials(rawName))}</span>`;
 
-                        return html;
-                    }
+                        return `<span class="ss-process-cell">
+                            ${avatar}
+                            <strong>${name}</strong>
+                        </span>`;
+                    },
                 },
                 {
                     title: "Phase",
                     field: "phase",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    formatter(cell) {
+                        const phase = cell.getValue();
+                        return `<span class="ss-phase-pill ss-process-phase ${processPhaseClass(phase)}">${escapeHtml(phase)}</span>`;
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 124,
+                    minWidth: 124,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editProcessModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit process"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete process"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore process"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -82,55 +140,55 @@ var table = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.processListTableInstance = tableContent;
+
+        if (window.processListTableResizeHandler) {
+            window.removeEventListener("resize", window.processListTableResizeHandler);
+        }
+
+        window.processListTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.processListTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.processlist").on("click.processlist", function () {
+            tableContent.download("csv", "process-list.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        $("#tabulator-export-json").off("click.processlist").on("click.processlist", function () {
+            tableContent.download("json", "process-list.json");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.processlist").on("click.processlist", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Process Details",
+            tableContent.download("xlsx", "process-list.xlsx", {
+                sheetName: "Process List",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
+        $("#tabulator-export-html").off("click.processlist").on("click.processlist", function () {
+            tableContent.download("html", "process-list.html", {
                 style: true,
             });
         });
 
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.processlist").on("click.processlist", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -139,17 +197,13 @@ var table = (function () {
 })();
 
 (function () {
-    // Tabulator
     if ($("#processlistTableId").length) {
-        // Init Table
         table.init();
 
-        // Filter function
         function filterHTMLForm() {
             table.init();
         }
 
-        // On submit filter form
         $("#tabulatorFilterForm")[0].addEventListener(
             "keypress",
             function (event) {
@@ -161,142 +215,195 @@ var table = (function () {
             }
         );
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
+        $("#tabulator-html-filter-go").on("click", function () {
             filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#tabulator-html-filter-reset").on("click", function () {
             $("#query").val("");
             $("#status").val("1");
             filterHTMLForm();
         });
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        let confModalDelTitle = 'Are you sure?';
+        const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addProcessModal"));
+        const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editProcessModal"));
+        const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        let confModalDelTitle = "Are you sure?";
 
-        const addModalEl = document.getElementById('addProcessModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addProcessModal .acc__input-error').html('');
-            $('#addProcessModal input:not([type="radio"])').val('');
-            $('#addProcessModal select').val('');
-            $('#addProcessModal .autoFeedWrap').fadeOut('fast', function(){
-                $('#addProcessModal #auto_feed-no').prop('checked', true);
-            });
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
 
-            var placeholder = $('#addProcessModal .processImageAddShow').attr('data-placeholder');
-            $('#addProcessModal .processImageAddShow').attr('src', placeholder);
-        });
-        
-        const editModalEl = document.getElementById('editProcessModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editProcessModal .acc__input-error').html('');
-            $('#editProcessModal input:not([type="radio"])').val('');
-            $('#editProcessModal select').val('');
-            $('#editProcessModal input[name="id"]').val('0');
+        const updateUploadName = ($form, name = "No file selected") => {
+            $form.find("[data-ss-upload-name]").text(name);
+        };
 
-            $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
-                $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-            });
+        const setAutoFeedVisibility = ($form, animate = true) => {
+            const isLive = $form.find('[name="phase"]').val() === "Live";
+            const $wrap = $form.find(".autoFeedWrap");
+            const resetAutoFeed = () => {
+                $form.find('input[name="auto_feed"][value="No"]').prop("checked", true);
+            };
 
-            var placeholder = $('#editProcessModal .processImageEditShow').attr('data-placeholder');
-            $('#editProcessModal .processImageEditShow').attr('src', placeholder);
-        });
-
-        $('#addProcessForm').on('change', '#processImageAdd', function(){
-            showPreview('processImageAdd', 'processImageAddShow')
-        })
-
-        $('#editProcessForm').on('change', '#processImageEdit', function(){
-            showPreview('processImageEdit', 'processImageEditShow')
-        })
-
-        $('#addProcessForm [name="phase"]').on('change', function(e){
-            var $phase = $(this);
-            var phase = $phase.val();
-
-            if(phase == 'Live'){
-                $('#addProcessForm .autoFeedWrap').fadeIn('fast', function(){
-                    $('#addProcessForm #auto_feed-no').prop('checked', true);
-                })
-            }else{
-                $('#addProcessForm .autoFeedWrap').fadeOut('fast', function(){
-                    $('#addProcessForm #auto_feed-no').prop('checked', true);
-                })
+            if (isLive) {
+                if (animate) {
+                    $wrap.fadeIn("fast");
+                } else {
+                    $wrap.show();
+                }
+                return;
             }
-        })
 
-        $('#editProcessForm [name="phase"]').on('change', function(e){
-            var $phase = $(this);
-            var phase = $phase.val();
-
-            if(phase == 'Live'){
-                $('#editProcessForm .autoFeedWrap').fadeIn('fast', function(){
-                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-                })
-            }else{
-                $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
-                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-                })
+            if (animate) {
+                $wrap.fadeOut("fast", resetAutoFeed);
+            } else {
+                $wrap.hide();
+                resetAutoFeed();
             }
-        })
+        };
 
-        $('#addProcessForm').on('submit', function(e){
+        const resetFormState = ($form) => {
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find('input[type="text"], input[type="file"]').val("");
+            $form.find("select").val("");
+            $form.find('input[name="id"]').val("0");
+            const placeholder = $form.find("img[data-placeholder]").attr("data-placeholder");
+            if (placeholder) {
+                $form.find("img[data-placeholder]").attr("src", placeholder);
+            }
+            updateUploadName($form);
+            setAutoFeedVisibility($form, false);
+        };
+
+        const setButtonLoading = (selector, isLoading) => {
+            const button = document.querySelector(selector);
+            const spinner = document.querySelector(`${selector} svg`);
+
+            if (!button) {
+                return;
+            }
+
+            if (isLoading) {
+                button.setAttribute("disabled", "disabled");
+                if (spinner) {
+                    spinner.style.cssText = "display: inline-block;";
+                }
+                return;
+            }
+
+            button.removeAttribute("disabled");
+            if (spinner) {
+                spinner.style.cssText = "display: none;";
+            }
+        };
+
+        const renderValidationErrors = ($form, error) => {
+            if (!error.response || error.response.status !== 422) {
+                console.log("error");
+                return;
+            }
+
+            if (!error.response.data.errors) {
+                if (error.response.data.message) {
+                    if ($form.attr("id") === "editProcessForm") {
+                        editModal.hide();
+                    }
+                    showSuccess("No Data Change!", error.response.data.message);
+                }
+                return;
+            }
+
+            for (const [key, val] of Object.entries(error.response.data.errors)) {
+                $form.find(`.${key}`).addClass("border-danger");
+                $form.find(`.error-${key}`).html(val);
+            }
+        };
+
+        const showConfirm = (id, action, title, message) => {
+            $("#confirmModal .confModTitle").html(title);
+            $("#confirmModal .confModDesc").html(message);
+            $("#confirmModal .agreeWith").attr("data-id", id);
+            $("#confirmModal .agreeWith").attr("data-action", action);
+            confModal.show();
+        };
+
+        resetFormState($("#addProcessForm"));
+        resetFormState($("#editProcessForm"));
+
+        const addModalEl = document.getElementById("addProcessModal");
+        addModalEl.addEventListener("show.tw.modal", function () {
+            resetFormState($("#addProcessForm"));
+        });
+
+        addModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#addProcessForm"));
+        });
+
+        const editModalEl = document.getElementById("editProcessModal");
+        editModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#editProcessForm"));
+        });
+
+        const confirmModalEl = document.getElementById("confirmModal");
+        confirmModalEl.addEventListener("hidden.tw.modal", function () {
+            $("#confirmModal .agreeWith").attr("data-id", "0");
+            $("#confirmModal .agreeWith").attr("data-action", "none");
+            $("#confirmModal button").removeAttr("disabled");
+        });
+
+        $("#addProcessForm").on("change", "#processImageAdd", function () {
+            showPreview("processImageAdd", "processImageAddShow");
+            updateUploadName($("#addProcessForm"), this.files?.[0]?.name || "No file selected");
+        });
+
+        $("#editProcessForm").on("change", "#processImageEdit", function () {
+            showPreview("processImageEdit", "processImageEditShow");
+            updateUploadName($("#editProcessForm"), this.files?.[0]?.name || "No file selected");
+        });
+
+        $('#addProcessForm [name="phase"]').on("change", function () {
+            setAutoFeedVisibility($("#addProcessForm"));
+        });
+
+        $('#editProcessForm [name="phase"]').on("change", function () {
+            setAutoFeedVisibility($("#editProcessForm"));
+        });
+
+        $("#addProcessForm").on("submit", function (e) {
             e.preventDefault();
-            const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addProcessModal"));
-            const form = document.getElementById('addProcessForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
+            const form = document.getElementById("addProcessForm");
+
+            setButtonLoading("#save", true);
 
             let form_data = new FormData(form);
-            form_data.append('file', $('#addProcessForm input[name="photo"]')[0].files[0]); 
             axios({
                 method: "post",
-                url: route('processlist.store'),
+                url: route("processlist.store"),
                 data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
+                setButtonLoading("#save", false);
+
                 if (response.status == 200) {
-                    document.querySelector('#save').removeAttribute('disabled');
-                    document.querySelector("#save svg").style.cssText = "display: none;";
-                    $('#addProcessForm input[type="text"]').val('');
-                    $('#addProcessForm select[name="phase"]').val('');
                     addModal.hide();
-                    succModal.show();
-                    document.getElementById("successModal")
-                        .addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html("Success!");
-                            $("#successModal .successModalDesc").html('Process list item successfully inserted');
-                        });                
-                        
+                    showSuccess("Success!", "Process list item successfully inserted.");
                 }
                 table.init();
             }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addProcessForm .${key}`).addClass('border-danger')
-                            $(`#addProcessForm  .error-${key}`).html(val)
-                        }
-                        $('#addProcessForm input[type="text"]').val('');
-                        $('#addProcessForm select[name="phase"]').val('');
-                    } else {
-                        console.log('error');
-                    }
-                }
+                setButtonLoading("#save", false);
+                renderValidationErrors($("#addProcessForm"), error);
             });
         });
 
-        $("#processlistTableId").on("click", ".edit_btn", function () {      
+        $("#processlistTableId").on("click", ".edit_btn", function () {
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+
+            resetFormState($("#editProcessForm"));
 
             axios({
                 method: "get",
@@ -304,50 +411,37 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        let placeholder = $('#editProcessModal .processImageEditShow').attr('data-placeholder');
-                        $('#editProcessModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editProcessModal select[name="phase"]').val(dataset.phase ? dataset.phase : '');
-                        $('#editProcessModal .processImageEditShow').attr('src', dataset.image_url ? dataset.image_url : placeholder);
+            }).then((response) => {
+                if (response.status == 200) {
+                    let dataset = response.data;
+                    let placeholder = $("#editProcessModal .processImageEditShow").attr("data-placeholder");
+                    $('#editProcessForm input[name="name"]').val(dataset.name ? dataset.name : "");
+                    $('#editProcessForm select[name="phase"]').val(dataset.phase ? dataset.phase : "");
+                    $("#editProcessModal .processImageEditShow").attr("src", dataset.image_url ? dataset.image_url : placeholder);
+                    $('#editProcessForm input[name="id"]').val(editId);
 
-                        $('#editProcessModal input[name="id"]').val(editId);
-                        if(dataset.phase == 'Live'){
-                            $('#editProcessForm .autoFeedWrap').fadeIn('fast', function(){
-                                if(dataset.auto_feed == 'Yes'){
-                                    $('#editProcessForm #edit_auto_feed-yes').prop('checked', true);
-                                }else{
-                                    $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-                                }
-                            })
-                        }else{
-                            $('#editProcessForm .autoFeedWrap').fadeOut('fast', function(){
-                                $('#editProcessForm #edit_auto_feed-no').prop('checked', true);
-                            })
-                        }
+                    if (dataset.phase == "Live" && dataset.auto_feed == "Yes") {
+                        $('#editProcessForm input[name="auto_feed"][value="Yes"]').prop("checked", true);
+                    } else {
+                        $('#editProcessForm input[name="auto_feed"][value="No"]').prop("checked", true);
                     }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+
+                    setAutoFeedVisibility($("#editProcessForm"), false);
+                    editModal.show();
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
 
-        // Update Course Data
         $("#editProcessForm").on("submit", function (e) {
-            let editId = $('#editProcessModal input[name="id"]').val();
-            const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editProcessModal"));
-            const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-
             e.preventDefault();
+            let editId = $('#editProcessForm input[name="id"]').val();
             const form = document.getElementById("editProcessForm");
 
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+            setButtonLoading("#update", true);
 
             let form_data = new FormData(form);
-            form_data.append('file', $('#editProcessForm input[name="photo"]')[0].files[0]); 
 
             axios({
                 method: "post",
@@ -356,153 +450,97 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document.querySelector("#update").removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText = "display: none;";
-                        editModal.hide();
-
-                        succModal.show();
-                        document.getElementById("successModal")
-                            .addEventListener("shown.tw.modal", function (event) {
-                                $("#successModal .successModalTitle").html("Success!");
-                                $("#successModal .successModalDesc").html('Process List Item Data successfully Updated');
-                            });
-                    }
-                    table.init();
-                })
-                .catch((error) => {
-                    document.querySelector("#update").removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText = "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#editProcessForm .${key}`).addClass('border-danger')
-                                $(`#editProcessForm  .error-${key}`).html(val)
-                            }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html(
-                                        "No Data Change!"
-                                    );
-                                    $("#successModal .successModalDesc").html(message);
-                                });
-                        } else {
-                            console.log("error");
-                        }
-                    }
-                });
+            }).then((response) => {
+                if (response.status == 200) {
+                    setButtonLoading("#update", false);
+                    editModal.hide();
+                    showSuccess("Success!", "Process list item successfully updated.");
+                }
+                table.init();
+            }).catch((error) => {
+                setButtonLoading("#update", false);
+                renderValidationErrors($("#editProcessForm"), error);
+            });
         });
 
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            
+        $("#confirmModal .agreeWith").on("click", function () {
             let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
+            let recordID = $agreeBTN.attr("data-id");
+            let action = $agreeBTN.attr("data-action");
 
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            $("#confirmModal button").attr("disabled", "disabled");
+            if (action === "DELETE") {
                 axios({
-                    method: 'delete',
-                    url: route('processlist.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "delete",
+                    url: route("processlist.destory", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
-                        });
+                        showSuccess("Done!", "Process list item successfully deleted.");
                     }
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
-            } else if(action == 'RESTORE'){
+            } else if (action === "RESTORE") {
                 axios({
-                    method: 'post',
-                    url: route('processlist.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "post",
+                    url: route("processlist.restore", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
-                        });
+                        showSuccess("Success!", "Process list item successfully restored.");
                     }
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
             }
-        })
-
-         // Delete Course
-         $('#processlistTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
-        // Restore Course
-        $('#processlistTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
+        $("#processlistTableId").on("click", ".delete_btn", function () {
             let $statusBTN = $(this);
-            let dataID = $statusBTN.attr('data-id');
+            let rowID = $statusBTN.attr("data-id");
 
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', dataID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
+            showConfirm(
+                rowID,
+                "DELETE",
+                confModalDelTitle,
+                "Want to delete this process? Please click on agree to continue."
+            );
+        });
+
+        $("#processlistTableId").on("click", ".restore_btn", function () {
+            let $statusBTN = $(this);
+            let dataID = $statusBTN.attr("data-id");
+
+            showConfirm(
+                dataID,
+                "RESTORE",
+                confModalDelTitle,
+                "Want to restore this process from the trash? Please click on agree to continue."
+            );
         });
 
         function showPreview(inputId, targetImageId) {
             var src = document.getElementById(inputId);
             var target = document.getElementById(targetImageId);
-            var title = document.getElementById('selected_image_title');
+
+            if (!src.files || !src.files[0]) {
+                return;
+            }
+
             var fr = new FileReader();
             fr.onload = function () {
                 target.src = fr.result;
-            }
+            };
             fr.readAsDataURL(src.files[0]);
-        };
+        }
     }
 })();

@@ -1,11 +1,10 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
- 
+
 ("use strict");
 var table = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let tableContent = new Tabulator("#tuitionsourceTableId", {
@@ -17,7 +16,7 @@ var table = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,49 +24,50 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 110,
                 },
                 {
                     title: "Source of Tuition Fees",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 260,
                 },
                 {
                     title: "Hesa Code",
                     field: "hesa_code",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    formatter(cell) {
+                        return cell.getValue() || "&mdash;";
+                    },
                 },
                 {
                     title: "DF Code",
                     field: "df_code",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    formatter(cell) {
+                        return cell.getValue() || "&mdash;";
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 180,
+                    minWidth: 180,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit source of tuition fee"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete source of tuition fee"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore source of tuition fee"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -75,42 +75,43 @@ var table = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        window.addEventListener("resize", () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.5,
+                nameAttr: "data-lucide",
+            });
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
+        $("#tabulator-export-csv").on("click", function () {
+            tableContent.download("csv", "source-of-tuition-fees.csv");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-json").on("click", function () {
+            tableContent.download("json", "source-of-tuition-fees.json");
+        });
+
+        $("#tabulator-export-xlsx").on("click", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
+            tableContent.download("xlsx", "source-of-tuition-fees.xlsx", {
                 sheetName: "Source of Tuition Fees",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
+        $("#tabulator-export-html").on("click", function () {
+            tableContent.download("html", "source-of-tuition-fees.html", {
                 style: true,
             });
         });
 
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").on("click", function () {
             tableContent.print();
         });
     };
@@ -122,17 +123,13 @@ var table = (function () {
 })();
 
 (function () {
-    // Tabulator
     if ($("#tuitionsourceTableId").length) {
-        // Init Table
         table.init();
 
-        // Filter function
         function filterHTMLForm() {
             table.init();
         }
 
-        // On submit filter form
         $("#tabulatorFilterForm")[0].addEventListener(
             "keypress",
             function (event) {
@@ -144,136 +141,145 @@ var table = (function () {
             }
         );
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
+        $("#tabulator-html-filter-go").on("click", function () {
             filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#tabulator-html-filter-reset").on("click", function () {
             $("#query").val("");
             $("#status").val("1");
             filterHTMLForm();
         });
-    
+
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        let confModalDelTitle = 'Are you sure?';
+        const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
+        const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
+        const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        let confModalDelTitle = "Are you sure?";
+        const isEnabledValue = (value) => value === true || value === 1 || value === "1";
 
-        
-        const addModalEl = document.getElementById('addModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addModal .acc__input-error').html('');
-            $('#addModal input').val('');
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
+
+        const setCodeField = ($form, key, enabled, value = "") => {
+            const isEnabled = isEnabledValue(enabled);
+            const areaClass = key === "hesa" ? ".hesa_code_area" : ".df_code_area";
+            const checkboxName = key === "hesa" ? "is_hesa" : "is_df";
+            const inputName = key === "hesa" ? "hesa_code" : "df_code";
+            const $area = $form.find(areaClass);
+            const $checkbox = $form.find(`input[name="${checkboxName}"]`);
+            const $input = $form.find(`input[name="${inputName}"]`);
+
+            $checkbox.prop("checked", isEnabled);
+            $checkbox.attr("aria-checked", isEnabled ? "true" : "false");
+            $area.attr("data-enabled", isEnabled ? "true" : "false");
+            $input.prop("disabled", !isEnabled);
+            $input.val(isEnabled ? value : "");
+        };
+
+        const resetFormState = ($form) => {
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find('input[type="text"], input[type="hidden"]').val("");
+            $form.find('input[name="id"]').val("0");
+            setCodeField($form, "hesa", false);
+            setCodeField($form, "df", false);
+        };
+
+        const showConfirm = (id, action, title, message) => {
+            $("#confirmModal .confModTitle").html(title);
+            $("#confirmModal .confModDesc").html(message);
+            $("#confirmModal .agreeWith").attr("data-id", id);
+            $("#confirmModal .agreeWith").attr("data-action", action);
+            confModal.show();
+        };
+
+        resetFormState($("#addForm"));
+        resetFormState($("#editForm"));
+
+        const addModalEl = document.getElementById("addModal");
+        addModalEl.addEventListener("show.tw.modal", function () {
+            resetFormState($("#addForm"));
         });
-        
-        const editModalEl = document.getElementById('editModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editModal .acc__input-error').html('');
-            $('#editModal input').val('');
-            $('#editModal input[name="id"]').val('0');
+
+        addModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#addForm"));
         });
 
-        $('#addForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#addForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
-        })
-        
-        $('#addForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#addForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
-        })
+        const editModalEl = document.getElementById("editModal");
+        editModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#editForm"));
+        });
 
-        $('#editForm input[name="is_hesa"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .hesa_code_area').fadeIn('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }else{
-                $('#editForm .hesa_code_area').fadeOut('fast', function(){
-                    $('.hesa_code_area input').val('');
-                })
-            }
-        })
-        
-        $('#editForm input[name="is_df"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editForm .df_code_area').fadeIn('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }else{
-                $('#editForm .df_code_area').fadeOut('fast', function(){
-                    $('.df_code_area input').val('');
-                })
-            }
-        })
+        const confirmModalEl = document.getElementById("confirmModal");
+        confirmModalEl.addEventListener("hidden.tw.modal", function () {
+            $("#confirmModal .agreeWith").attr("data-id", "0");
+            $("#confirmModal .agreeWith").attr("data-action", "none");
+            $("#confirmModal button").removeAttr("disabled");
+        });
 
-        $('#addForm').on('submit', function(e){
-            const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addModal"));
+        $('#addForm input[name="is_hesa"]').on("change", function () {
+            setCodeField($("#addForm"), "hesa", $(this).prop("checked"));
+        });
+
+        $('#addForm input[name="is_df"]').on("change", function () {
+            setCodeField($("#addForm"), "df", $(this).prop("checked"));
+        });
+
+        $('#editForm input[name="is_hesa"]').on("change", function () {
+            setCodeField($("#editForm"), "hesa", $(this).prop("checked"));
+        });
+
+        $('#editForm input[name="is_df"]').on("change", function () {
+            setCodeField($("#editForm"), "df", $(this).prop("checked"));
+        });
+
+        $("#addForm").on("submit", function (e) {
             e.preventDefault();
-            const form = document.getElementById('addForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
-        
+            const form = document.getElementById("addForm");
+
+            document.querySelector("#save").setAttribute("disabled", "disabled");
+            document.querySelector("#save svg").style.cssText = "display: inline-block;";
+
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('sourcetutionfees.store'),
+                url: route("sourcetutionfees.store"),
                 data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
+                document.querySelector("#save").removeAttribute("disabled");
                 document.querySelector("#save svg").style.cssText = "display: none;";
-                
+
                 if (response.status == 200) {
-                    document.querySelector('#save').removeAttribute('disabled');
-                    document.querySelector("#save svg").style.cssText = "display: none;";
-                    $('#addForm #name').val('');
                     addModal.hide();
-                    succModal.show();
-                    document.getElementById("successModal")
-                        .addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html(
-                                "Success!"
-                            );
-                            $("#successModal .successModalDesc").html('Source of Tution Fee successfully inserted.');
-                        });                
-                        
+                    showSuccess("Success!", "Source of tuition fee successfully inserted.");
                 }
                 table.init();
             }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
+                document.querySelector("#save").removeAttribute("disabled");
                 document.querySelector("#save svg").style.cssText = "display: none;";
                 if (error.response) {
                     if (error.response.status == 422) {
                         for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addForm .${key}`).addClass('border-danger')
-                            $(`#addForm  .error-${key}`).html(val)
+                            $(`#addForm .${key}`).addClass("border-danger");
+                            $(`#addForm .error-${key}`).html(val);
                         }
                     } else {
-                        console.log('error');
+                        console.log("error");
                     }
                 }
             });
         });
 
-        $("#tuitionsourceTableId").on("click", ".edit_btn", function () {      
+        $("#tuitionsourceTableId").on("click", ".edit_btn", function () {
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+
+            resetFormState($("#editForm"));
 
             axios({
                 method: "get",
@@ -281,55 +287,27 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        $('#editModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        
-                        if(dataset.is_hesa == 1){
-                            document.querySelector('#editModal #is_hesa').checked = true;
-                            $('#editModal .hesa_code_area').fadeIn(500, function () {
-                                $('#editModal input[name="hesa_code"]').val(dataset.hesa_code ? dataset.hesa_code : '');
-                            });
-                        }else{
-                            document.querySelector('#editModal #is_hesa').checked = false;
-                            $('#editModal .hesa_code_area').fadeOut(500, function () {
-                                $('#editModal input[name="hesa_code"]').val('');
-                            });
-                        }
-                        
-                        if(dataset.is_df == 1){
-                            document.querySelector('#editModal #is_df').checked = true;
-                            $('#editModal .df_code_area').fadeIn(500, function () {
-                                $('#editModal input[name="df_code"]').val(dataset.df_code ? dataset.df_code : '');
-                            });
-                        }else{
-                            document.querySelector('#editModal #is_df').checked = false;
-                            $('#editModal .df_code_area').fadeOut(500, function () {
-                                $('#editModal input[name="df_code"]').val('');
-                            });
-                        }
-
-                        $('#editModal input[name="id"]').val(editId);
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            }).then((response) => {
+                if (response.status == 200) {
+                    let dataset = response.data;
+                    $('#editForm input[name="name"]').val(dataset.name ? dataset.name : "");
+                    setCodeField($("#editForm"), "hesa", dataset.is_hesa, dataset.hesa_code ? dataset.hesa_code : "");
+                    setCodeField($("#editForm"), "df", dataset.is_df, dataset.df_code ? dataset.df_code : "");
+                    $('#editForm input[name="id"]').val(editId);
+                    editModal.show();
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
 
-        // Update Course Data
         $("#editForm").on("submit", function (e) {
-            let editId = $('#editModal input[name="id"]').val();
-            const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editModal"));
-            const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-
             e.preventDefault();
+            let editId = $('#editForm input[name="id"]').val();
             const form = document.getElementById("editForm");
 
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+            document.querySelector("#update").setAttribute("disabled", "disabled");
+            document.querySelector("#update svg").style.cssText = "display: inline-block;";
 
             let form_data = new FormData(form);
 
@@ -340,137 +318,93 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document
-                            .querySelector("#update")
-                            .removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText =
-                            "display: none;";
-                        editModal.hide();
-
-                        succModal.show();
-                        document.getElementById("successModal")
-                            .addEventListener("shown.tw.modal", function (event) {
-                                $("#successModal .successModalTitle").html(
-                                    "Congratulations!"
-                                );
-                                $("#successModal .successModalDesc").html('Source of Tution Fee successfully updated.');
-                            });
-                    }
-                    table.init();
-                })
-                .catch((error) => {
-                    document
-                        .querySelector("#update")
-                        .removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText =
-                        "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#editForm .${key}`).addClass('border-danger')
-                                $(`#editForm  .error-${key}`).html(val)
-                            }
-                        } else {
-                            console.log("error");
+            }).then((response) => {
+                if (response.status == 200) {
+                    document.querySelector("#update").removeAttribute("disabled");
+                    document.querySelector("#update svg").style.cssText = "display: none;";
+                    editModal.hide();
+                    showSuccess("Success!", "Source of tuition fee successfully updated.");
+                }
+                table.init();
+            }).catch((error) => {
+                document.querySelector("#update").removeAttribute("disabled");
+                document.querySelector("#update svg").style.cssText = "display: none;";
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        for (const [key, val] of Object.entries(error.response.data.errors)) {
+                            $(`#editForm .${key}`).addClass("border-danger");
+                            $(`#editForm .error-${key}`).html(val);
                         }
+                    } else {
+                        console.log("error");
                     }
-                });
+                }
+            });
         });
 
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
+        $("#confirmModal .agreeWith").on("click", function () {
             let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
+            let recordID = $agreeBTN.attr("data-id");
+            let action = $agreeBTN.attr("data-action");
 
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            $("#confirmModal button").attr("disabled", "disabled");
+            if (action == "DELETE") {
                 axios({
-                    method: 'delete',
-                    url: route('sourcetutionfees.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "delete",
+                    url: route("sourcetutionfees.destory", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Source of Tution Fee successfully deleted.');
-                        });
+                        showSuccess("Done!", "Source of tuition fee successfully deleted.");
                     }
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
-            } else if(action == 'RESTORE'){
+            } else if (action == "RESTORE") {
                 axios({
-                    method: 'post',
-                    url: route('sourcetutionfees.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "post",
+                    url: route("sourcetutionfees.restore", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Source of Tution Fee successfully resotred.');
-                        });
+                        showSuccess("Success!", "Source of tuition fee successfully restored.");
                     }
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
             }
-        })
-
-        // Delete Course
-        $('#tuitionsourceTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to delete this Source of Tution Fee from applicant list? Please click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
-        // Restore Course
-        $('#tuitionsourceTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
+        $("#tuitionsourceTableId").on("click", ".delete_btn", function () {
             let $statusBTN = $(this);
-            let courseID = $statusBTN.attr('data-id');
+            let rowID = $statusBTN.attr("data-id");
 
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to restore this Source of Tution Fee from the trash? Please click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
+            showConfirm(
+                rowID,
+                "DELETE",
+                confModalDelTitle,
+                "Want to delete this source of tuition fee? Please click on agree to continue."
+            );
+        });
+
+        $("#tuitionsourceTableId").on("click", ".restore_btn", function () {
+            let $statusBTN = $(this);
+            let courseID = $statusBTN.attr("data-id");
+
+            showConfirm(
+                courseID,
+                "RESTORE",
+                confModalDelTitle,
+                "Want to restore this source of tuition fee from the trash? Please click on agree to continue."
+            );
         });
     }
 })();

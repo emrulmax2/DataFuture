@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\SourceTutionFeesRequests;
 use App\Http\Requests\SourceTutionFeesUpdateRequests;
+use App\Models\Option;
 use App\Models\SourceTuitionFee;
 use App\Models\User;
 
@@ -14,11 +15,12 @@ class SourceTutionFeeController extends Controller
     public function index()
     {
         return view('pages.settings.sourcetutionfee.index', [
-            'title' => 'Source of Tution Fees - London Churchill College',
+            'title' => 'Source of Tuition Fees - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
-                ['label' => 'Source of Tution Fees', 'href' => 'javascript:void(0);']
+                ['label' => 'Source of Tuition Fees', 'href' => 'javascript:void(0);']
             ]
         ]);
     }

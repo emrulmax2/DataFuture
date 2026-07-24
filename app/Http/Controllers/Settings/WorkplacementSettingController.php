@@ -15,7 +15,7 @@ class WorkplacementSettingController extends Controller
     public function index(){
         return view('pages.settings.workplacement.wp-setting', [
             'title' => 'Workplacement Setting - London Churchill College',
-            'subtitle' => 'Course Parameters',
+            'subtitle' => 'Workplacement Settings',
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Workplacement Setting', 'href' => 'javascript:void(0);']

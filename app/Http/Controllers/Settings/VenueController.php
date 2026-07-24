@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\VenueRequest;
 use App\Http\Requests\VenueUpdateRequest;
 use App\Models\DatafutureField;
+use App\Models\Option;
 use App\Models\Venue;
 use App\Models\User;
 use App\Models\VenueIpAddress;
@@ -20,6 +21,7 @@ class VenueController extends Controller
         return view('pages.settings.venues.index', [
             'title' => 'Venues - London Churchill College',
             'subtitle' => 'Campus Settings',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Venues', 'href' => 'javascript:void(0);']

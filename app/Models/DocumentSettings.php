@@ -19,6 +19,7 @@ class DocumentSettings extends Model
         'live',
         'student_profile',
         'staff',
+        'agent',
         'created_by',
         'updated_by',
     ];

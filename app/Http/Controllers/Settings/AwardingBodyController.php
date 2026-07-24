@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AwardingBodyRequests;
 use App\Http\Requests\AwardingBodyUpdateRequests;
 use App\Models\AwardingBody;
+use App\Models\Option;
 use App\Models\User;
 
 class AwardingBodyController extends Controller
@@ -15,6 +16,7 @@ class AwardingBodyController extends Controller
         return view('pages.settings.awardingbody.index', [
             'title' => 'Awarding Body - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Awarding Body', 'href' => 'javascript:void(0);']

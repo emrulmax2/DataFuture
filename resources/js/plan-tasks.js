@@ -129,8 +129,15 @@ function tmParticipantRegFormatter(cell) {
     const initials = tmParticipantInitials(data);
     const avatarStyle = tmParticipantAvatarStyle((data.first_name || '') + (data.last_name || '') + regNo);
 
+    // photo_url is a data: SVG initials avatar when no real photo is stored; show the image
+    // only when it is a real photo, else fall back to the coloured initials avatar.
+    const photo = data.photo_url;
+    const avatar = (photo && String(photo).slice(0, 5) !== 'data:')
+        ? '<span class="tm-participant-avatar"><img src="' + tmParticipantEscape(photo) + '" alt="' + regNo + '"></span>'
+        : '<span class="tm-participant-avatar" style="' + avatarStyle + '">' + initials + '</span>';
+
     return '<span class="tm-participant-reg">' +
-        '<span class="tm-participant-avatar" style="' + avatarStyle + '">' + initials + '</span>' +
+        avatar +
         '<span class="tm-participant-regno">' + regNo + '</span>' +
         '</span>' +
         '<input type="hidden" class="student_ids" name="student_ids[]" value="' + tmParticipantEscape(data.student_id) + '"/>';

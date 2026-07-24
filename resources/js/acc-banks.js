@@ -4,6 +4,42 @@ import Tabulator from "tabulator-tables";
 import IMask from 'imask';
  
 ("use strict");
+
+const escapeHtml = (value) => {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+// Banks are identified by their initials rather than a stored logo, so the list
+// reads consistently whether or not an image was ever uploaded.
+const bankInitials = (value) => {
+    const words = String(value || "")
+        .trim()
+        .split(/\s+/)
+        .map((word) => word.replace(/[^A-Za-z0-9]/g, ""))
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return "BK";
+    }
+
+    if (words.length === 1) {
+        return words[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
+};
+
+const bankAvatarTone = (row) => {
+    const sequence = Number(row.sl || row.id || 1);
+
+    return `is-tone-${((sequence - 1) % 4) + 1}`;
+};
+
 var bankListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -26,86 +62,103 @@ var bankListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "80",
+                    width: 70,
                 },
                 {
                     title: "Name",
                     field: "bank_name",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().bank_name+'" class="rounded-full shadow" src="'+cell.getData().image_url+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -15px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().bank_name+'</div>';
-                                html += '</div>';
-                            html += '</div>';
-                        return html;
+                    minWidth: 190,
+                    formatter(cell, formatterParams) {
+                        const data = cell.getData();
+                        const name = escapeHtml(data.bank_name);
+
+                        return '<span class="ss-process-cell">' +
+                            '<span class="ss-process-cell__avatar ss-process-cell__avatar--initials ' + bankAvatarTone(data) + '" aria-hidden="true">' + escapeHtml(bankInitials(data.bank_name)) + '</span>' +
+                            '<strong>' + name + '</strong>' +
+                            '</span>';
                     }
                 },
                 {
                     title: "Opening Date",
                     field: "opening_date",
                     headerHozAlign: "left",
+                    width: 130,
                 },
                 {
                     title: "Opening Balance",
                     field: "opening_balance",
                     headerHozAlign: "left",
+                    width: 140,
                 },
                 {
                     title: "Audit Status",
                     field: "audit_status",
                     headerHozAlign: "left",
                     headerSort: false,
+                    width: 120,
                     formatter(cell, formatterParams){
-                        return (cell.getData().audit_status == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">No</span>');
+                        const isAudited = cell.getValue() == 1;
+
+                        return '<span class="ss-status-pill ' + (isAudited ? 'is-active' : 'is-inactive') + '"><span></span>' + (isAudited ? 'Yes' : 'No') + '</span>';
                     }
                 },
                 {
                     title: "Status",
                     field: "status",
                     headerHozAlign: "left",
+                    width: 90,
                     formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().status+'" type="checkbox" class="status_updater form-check-input"> </div>';
+                        const isOn = cell.getValue() == 1;
+
+                        return '<button type="button" role="switch" aria-checked="' + (isOn ? 'true' : 'false') + '"' +
+                            ' class="status_updater ss-table-switch ' + (isOn ? 'is-active' : 'is-inactive') + '"' +
+                            ' data-id="' + cell.getData().id + '" aria-label="Toggle bank status">' +
+                            '<i data-lucide="' + (isOn ? 'check' : 'x') + '"></i>' +
+                            '</button>';
                     }
                 },
                 {
                     title: "Accounts",
                     field: "ac_name",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
-                        var html = '';
-                            if(cell.getData().ac_name != ''){
-                                html = '<div class="block">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().ac_name+'</div>';
-                                    html += '<div class="text-slate-400 font-medium inline-flex gap-2">';
-                                        html += (cell.getData().sort_code != '' ? '<span>'+cell.getData().sort_code+'</span>' : '');
-                                        html += (cell.getData().ac_number != '' ? '<span>'+cell.getData().ac_number+'</span>' : '');
-                                    html += '</div>';
-                                html += '</div>';
-                            }
-                        return html;
+                    minWidth: 170,
+                    formatter(cell, formatterParams) {
+                        const data = cell.getData();
+
+                        if (!data.ac_name) {
+                            return '<span class="ss-cell-muted">&mdash;</span>';
+                        }
+
+                        const meta = [data.sort_code, data.ac_number]
+                            .filter(Boolean)
+                            .map((value) => '<span>' + escapeHtml(value) + '</span>')
+                            .join('');
+
+                        return '<span class="ss-bank-account">' +
+                            '<strong>' + escapeHtml(data.ac_name) + '</strong>' +
+                            (meta ? '<span class="ss-bank-account__meta">' + meta + '</span>' : '') +
+                            '</span>';
                     }
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 110,
+                    minWidth: 110,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editBankModal" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit bank"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete bank"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore bank"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -200,28 +253,60 @@ var bankListTable = (function () {
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
+        // Keeps the redesigned status switches' copy in step with their checkboxes.
+        const TOGGLE_COPY = {
+            status: { on: ['Active', 'Selectable when recording transactions'], off: ['Inactive', 'Not selectable when recording transactions'] },
+            audit_status: { on: ['Audited', 'Included in audit reporting'], off: ['Not audited', 'Excluded from audit reporting'] },
+        };
+
+        const syncToggle = function (input) {
+            const copy = $(input).closest('.ss-status-toggle').find('.ss-status-toggle__copy');
+            const text = TOGGLE_COPY[input.name];
+            if (!copy.length || !text) return;
+
+            const [strong, small] = input.checked ? text.on : text.off;
+            copy.find('strong').text(strong);
+            copy.find('small').text(small);
+        };
+
+        const setToggle = function (selector, name, checked) {
+            $(selector + ' input[name="' + name + '"]').prop('checked', checked).each(function () {
+                syncToggle(this);
+            });
+        };
+
+        $(document).on('change', '.ss-status-toggle input[name="status"], .ss-status-toggle input[name="audit_status"]', function () {
+            syncToggle(this);
+        });
+
+        const resetBankModal = function (selector, imageId, statusChecked) {
+            $(selector + ' .acc__input-error').html('');
+            $(selector + ' .border-danger').removeClass('border-danger');
+            $(selector + ' input:not([type="checkbox"]):not([type="hidden"])').val('');
+            $(selector + ' [data-ss-upload-name]').text('No file selected');
+            $(selector + ' #' + imageId).attr('src', $(selector + ' #' + imageId).attr('data-placeholder'));
+            setToggle(selector, 'status', statusChecked);
+            setToggle(selector, 'audit_status', false);
+        };
+
         const addBankModalEl = document.getElementById('addBankModal')
         addBankModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addBankModal .acc__input-error').html('');
-            $('#addBankModal .modal-body input:not([type="checkbox"])').val('');
-            $('#addBankModal input[name="status"]').prop('checked', true);
-            $('#addBankModal #bankImageAdd').attr('src', $('#addBankModal #bankImageAdd').attr('data-placeholder'));
+            resetBankModal('#addBankModal', 'bankImageAdd', true);
         });
-        
+
         const editBankModalEl = document.getElementById('editBankModal')
         editBankModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editBankModal .acc__input-error').html('');
-            $('#editBankModal .modal-body input:not([type="checkbox"])').val('');
+            resetBankModal('#editBankModal', 'bankImageEdit', false);
             $('#editBankModal input[name="id"]').val('0');
-            $('#editBankModal input[name="status"]').prop('checked', false);
-            $('#editBankModal #bankImageEdit').attr('src', $('#editBankModal #bankImageEdit').attr('data-placeholder'));
         });
 
         $('#addBankModal').on('change', '#bankPhotoAdd', function(){
             showPreview('bankPhotoAdd', 'bankImageAdd');
+            $('#addBankModal [data-ss-upload-name]').text(this.files?.[0]?.name || 'No file selected');
         })
         $('#editBankModal').on('change', '#bankPhotoEdit', function(){
             showPreview('bankPhotoEdit', 'bankImageEdit');
+            $('#editBankModal [data-ss-upload-name]').text(this.files?.[0]?.name || 'No file selected');
         })
 
         $(".theSortcode").each(function () {
@@ -304,17 +389,8 @@ var bankListTable = (function () {
                     $('#editBankModal input[name="opening_balance"]').val(dataset.opening_balance ? dataset.opening_balance.toFixed(2) : '');
                     $('#editBankModal input[name="opening_date"]').val(dataset.opening_date ? dataset.opening_date : '');
 
-                    if(dataset.audit_status == 1){
-                        $('#editBankModal [name="audit_status"]').prop('checked', true);
-                    }else{
-                        $('#editBankModal [name="audit_status"]').prop('checked', false);
-                    }
-
-                    if(dataset.status == 1){
-                        $('#editBankModal [name="status"]').prop('checked', true);
-                    }else{
-                        $('#editBankModal [name="status"]').prop('checked', false);
-                    }
+                    setToggle('#editBankModal', 'audit_status', dataset.audit_status == 1);
+                    setToggle('#editBankModal', 'status', dataset.status == 1);
 
                     $('#editBankModal input[name="ac_name"]').val(dataset.ac_name ? dataset.ac_name : '');
                     $('#editBankModal input[name="sort_code"]').val(dataset.sort_code ? dataset.sort_code : '');

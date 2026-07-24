@@ -38,10 +38,12 @@ class HrBankHolidayController extends Controller
 
         $query = HrBankHoliday::orderByRaw(implode(',', $sorts))->where('hr_holiday_year_id', $holidayYear);
         if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('start_date','LIKE','%'.$queryStr.'%');
-            $query->orWhere('end_date','LIKE','%'.$queryStr.'%');
-            $query->orWhere('description','LIKE','%'.$queryStr.'%');
+            $query->where(function ($q) use ($queryStr) {
+                $q->where('name','LIKE','%'.$queryStr.'%');
+                $q->orWhere('start_date','LIKE','%'.$queryStr.'%');
+                $q->orWhere('end_date','LIKE','%'.$queryStr.'%');
+                $q->orWhere('description','LIKE','%'.$queryStr.'%');
+            });
         endif;
 
         if($status == 2):
@@ -72,6 +74,7 @@ class HrBankHolidayController extends Controller
                     'start_date' => $list->start_date,
                     'end_date' => $list->end_date,
                     'duration' => $list->duration,
+                    'description' => $list->description,
                     'deleted_at' => $list->deleted_at
                 ];
                 $i++;
@@ -109,7 +112,7 @@ class HrBankHolidayController extends Controller
     public function restore($id) {
         $data = HrBankHoliday::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 
 

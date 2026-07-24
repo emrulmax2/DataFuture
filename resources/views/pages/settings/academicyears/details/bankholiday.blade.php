@@ -1,60 +1,71 @@
-<div class="intro-y box p-5 mt-5">
-    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+<div class="ss-table-card ss-bankholidays-card">
+    <div class="ss-table-card__header">
+        <h2>Bank Holidays</h2>
+        <button data-tw-toggle="modal" data-tw-target="#bankholidayAddModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">
+            <i data-lucide="plus"></i>
+            Add Bank Holiday
+        </button>
+    </div>
+
+    <div class="ss-table-tools">
+        <form id="tabulatorFilterForm" class="ss-table-filter">
+            <div class="ss-filter-field">
+                <span>Query</span>
+                <label class="ss-filter-input" for="query">
+                    <i data-lucide="search"></i>
+                    <input id="query" name="query" type="text" placeholder="Search...">
+                </label>
             </div>
-            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                    <option value="1">Active</option>
-                    <option value="2">Archived</option>
-                </select>
+            <div class="ss-filter-field">
+                <span>Status</span>
+                <label class="ss-filter-select" for="status">
+                    <select id="status" name="status">
+                        <option value="1">Active</option>
+                        <option value="2">Archived</option>
+                    </select>
+                    <i data-lucide="chevron-down"></i>
+                </label>
             </div>
-            <div class="mt-2 xl:mt-0">
-                <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-            </div>
+            <button id="tabulator-html-filter-go" type="button" class="ss-btn ss-btn--primary ss-btn--tool">Go</button>
+            <button id="tabulator-html-filter-reset" type="button" class="ss-btn ss-btn--light ss-btn--tool">Reset</button>
         </form>
-        <div class="flex mt-5 sm:mt-0">
-            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+
+        <div class="ss-table-actions">
+            <button id="tabulator-print" type="button" class="ss-btn ss-btn--light ss-btn--tool">
+                <i data-lucide="printer"></i>
+                Print
             </button>
-            <div class="dropdown w-1/2 sm:w-auto">
-                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+            <div class="dropdown ss-export-dropdown">
+                <button type="button" class="dropdown-toggle ss-btn ss-btn--light ss-btn--tool" aria-expanded="false" data-tw-toggle="dropdown">
+                    <i data-lucide="download"></i>
+                    Export
+                    <i data-lucide="chevron-down"></i>
                 </button>
-                <div class="dropdown-menu w-40">
+                <div class="dropdown-menu ss-export-menu">
                     <ul class="dropdown-content">
                         <li>
                             <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
+                                <i data-lucide="file-text"></i>
+                                Export CSV
                             </a>
                         </li>
-                        {{-- <li>
-                            <a id="tabulator-export-json" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export JSON
-                            </a>
-                        </li> --}}
                         <li>
                             <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
+                                <i data-lucide="file-spreadsheet"></i>
+                                Export XLSX
                             </a>
                         </li>
-                        {{-- <li>
-                            <a id="tabulator-export-html" href="javascript:;" class="dropdown-item">
-                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export HTML
-                            </a>
-                        </li> --}}
                     </ul>
                 </div>
             </div>
-            <button data-tw-toggle="modal" data-tw-target="#bankholidayAddModal" type="button" class="add_btn btn btn-primary shadow-md ml-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-1"></i> Add Bank Holiday</button>
-            <button data-tw-toggle="modal" data-tw-target="#bankholidayImportModal" type="button" class="add_btn btn btn-outline-secondary shadow-md ml-2"><i data-lucide="navigation-2" class="w-4 h-4 mr-1"></i> Import Holiday</button>
+            <button data-tw-toggle="modal" data-tw-target="#bankholidayImportModal" type="button" class="ss-btn ss-btn--light ss-btn--tool">
+                <i data-lucide="upload"></i>
+                Import Holiday
+            </button>
         </div>
     </div>
-    <div class="overflow-x-auto scrollbar-hidden">
-        <div id="bankholidayTableId" data-academicyearid="{{ $academicyear->id }}" class="mt-5 table-report table-report--tabulator"></div>
+
+    <div class="ss-tabulator-wrap">
+        <div id="bankholidayTableId" data-academicyearid="{{ $academicyear->id }}" class="ss-tabulator table-report table-report--tabulator"></div>
     </div>
 </div>

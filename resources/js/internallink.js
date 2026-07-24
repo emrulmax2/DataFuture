@@ -1,797 +1,667 @@
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import Dropzone from "dropzone";
 import xlsx from "xlsx";
-import { createElement, createIcons, icons,Minus,Plus } from "lucide";
+import { CalendarDays, Check, createElement, createIcons, ExternalLink, icons, Minus, Pencil, Plus, RotateCw, Trash2, X } from "lucide";
 import Tabulator from "tabulator-tables";
- 
-("use strict");
-var table = (function () {
-    var _tableGen = function () {
-        // Setup Tabulator
-        let querystr = $("#query").val() != "" ? $("#query").val() : "";
-        let status = $("#status").val() != "" ? $("#status").val() : "";
-        const minusIcon = createElement(Minus)
-        minusIcon.setAttribute('stroke-width', '1.5')
-        
-        const plusIcon = createElement(Plus)
-        plusIcon.setAttribute('stroke-width', '1.5')
 
-        let tableContent = new Tabulator("#awardingbodyTableId", {
+("use strict");
+
+(function () {
+    const tableNode = document.querySelector("#internalLinkTableId");
+
+    if (!tableNode) {
+        return;
+    }
+
+    const csrfToken = $('meta[name="csrf-token"]').attr("content");
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+    const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModal"));
+    const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModalEdit"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    let tableContent = null;
+
+    Dropzone.autoDiscover = false;
+
+    const refreshIcons = () => {
+        createIcons({
+            icons,
+            "stroke-width": 1.7,
+            nameAttr: "data-lucide",
+        });
+    };
+
+    const escapeHtml = (value) => {
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+
+    const iconSvg = (Icon) => {
+        const icon = createElement(Icon);
+
+        icon.setAttribute("stroke-width", "1.8");
+        icon.setAttribute("aria-hidden", "true");
+
+        return icon.outerHTML;
+    };
+
+    const getInitials = (name) => {
+        const words = String(name || "Link").trim().split(/\s+/).filter(Boolean);
+        const first = words[0]?.charAt(0) || "L";
+        const second = words.length > 1 ? words[words.length - 1].charAt(0) : words[0]?.charAt(1) || "K";
+
+        return `${first}${second}`.toUpperCase();
+    };
+
+    const setBusy = (selector, busy) => {
+        const button = document.querySelector(selector);
+
+        if (!button) {
+            return;
+        }
+
+        button.disabled = busy;
+        const spinner = button.querySelector(".ss-spinner");
+
+        if (spinner) {
+            spinner.style.cssText = busy ? "display: inline-block;" : "display: none;";
+        }
+    };
+
+    const showSuccess = (title, description) => {
+        $("#successModal .successModalTitle").text(title);
+        $("#successModal .successModalDesc").text(description);
+        successModal.show();
+    };
+
+    const showWarning = (title, description) => {
+        $("#warningModal .warningModalTitle").text(title);
+        $("#warningModal .warningModalDesc").text(description);
+        warningModal.show();
+    };
+
+    const showConfirm = (title, description, action, recordID) => {
+        $("#confirmModal .confModTitle").text(title);
+        $("#confirmModal .confModDesc").text(description);
+        $("#confirmModal .agreeWith").attr("data-id", recordID);
+        $("#confirmModal .agreeWith").attr("data-action", action);
+        confirmModal.show();
+    };
+
+    const clearErrors = ($modal) => {
+        $modal.find(".acc__input-error").text("");
+        $modal.find(".border-danger").removeClass("border-danger");
+        $modal.find(".ss-upload-alert").remove();
+        $modal.find(".ss-internal-link-dropzone").removeClass("is-danger");
+    };
+
+    const addFieldError = ($modal, name, message) => {
+        $modal.find(`[name="${name}"]`).addClass("border-danger");
+        $modal.find(`.error-${name}`).text(message);
+    };
+
+    const showUploadAlert = ($modal, message) => {
+        $modal.find(".ss-upload-alert").remove();
+        $modal.find(".ss-settings-modal__body").prepend(
+            `<div class="ss-upload-alert"><i data-lucide="alert-octagon"></i><span>${escapeHtml(message)}</span></div>`
+        );
+        refreshIcons();
+    };
+
+    const resetDropzone = (dropzone) => {
+        if (dropzone) {
+            dropzone.removeAllFiles(true);
+        }
+    };
+
+    const syncFormFields = ($modal, formSelector) => {
+        const $form = $(formSelector);
+
+        $form.find('[name="name"]').val($modal.find('[name="name_status"]').val() || "");
+        $form.find('[name="link"]').val($modal.find('[name="link_status"]').val() || "");
+        $form.find('[name="parent_id"]').val($modal.find('[name="parent_category"]').val() || "");
+        $form.find('[name="available_staff"]').val($modal.find('[name="available_staff_status"]').is(":checked") ? 1 : "");
+        $form.find('[name="available_student"]').val($modal.find('[name="available_student_status"]').is(":checked") ? 1 : "");
+        $form.find('[name="description"]').val($modal.find('[name="description_status"]').val() || "");
+        $form.find('[name="start_date"]').val($modal.find('[name="start_date_status"]').val() || "");
+        $form.find('[name="end_date"]').val($modal.find('[name="end_date_status"]').val() || "");
+        $form.find('[name="active"]').val($modal.find('[name="active_status"]').is(":checked") ? 1 : "");
+    };
+
+    const validateModal = ($modal, dropzone, requireImage) => {
+        clearErrors($modal);
+
+        let valid = true;
+
+        if (!($modal.find('[name="name_status"]').val() || "").trim()) {
+            addFieldError($modal, "name_status", "Name is required.");
+            valid = false;
+        }
+
+        if (requireImage && dropzone.getQueuedFiles().length === 0 && dropzone.files.length === 0) {
+            $modal.find(".ss-internal-link-dropzone").addClass("is-danger");
+            showUploadAlert($modal, "Please upload an image for this site link.");
+            valid = false;
+        }
+
+        return valid;
+    };
+
+    const resetAddForm = (dropzone) => {
+        const $modal = $("#uploadEmployeeDocumentModal");
+
+        clearErrors($modal);
+        $modal.find('input[type="text"], input[type="url"], textarea').val("");
+        $modal.find("select").val("");
+        $modal.find('[name="available_staff_status"], [name="available_student_status"]').prop("checked", false);
+        $modal.find('[name="active_status"]').prop("checked", true);
+        $("#uploadDocumentForm").find('input[type="hidden"]').val("");
+        resetDropzone(dropzone);
+    };
+
+    const resetEditForm = (dropzone) => {
+        const $modal = $("#uploadEmployeeDocumentModalEdit");
+
+        clearErrors($modal);
+        $modal.find('input[type="text"], input[type="url"], textarea').val("");
+        $modal.find("select").val("");
+        $modal.find('input[type="checkbox"]').prop("checked", false);
+        $modal.find("[data-current-image]").prop("hidden", true);
+        $modal.find("[data-current-image-preview]").html("");
+        $modal.find("[data-current-image-name]").text("No image uploaded");
+        $("#uploadDocumentFormEdit").find('input[type="hidden"]').val("");
+        resetDropzone(dropzone);
+    };
+
+    const avatarHtml = (data) => {
+        const initials = getInitials(data.name);
+        const image = data.image ? escapeHtml(data.image) : "";
+        const name = escapeHtml(data.name || "Internal link");
+
+        return `<span class="ss-internal-link-avatar ${image ? "" : "is-fallback"}"><span>${initials}</span>${image ? `<img src="${image}" alt="${name}" onerror="this.remove();this.parentElement.classList.add('is-fallback');">` : ""}</span>`;
+    };
+
+    const nameFormatter = (cell) => {
+        const data = cell.getData();
+        const description = data.description ? escapeHtml(data.description) : (data.parent_id ? "Child shortcut" : "Parent shortcut");
+
+        return `<span class="ss-internal-link-name">${avatarHtml(data)}<span><strong>${escapeHtml(data.name)}</strong><small>${description}</small></span></span>`;
+    };
+
+    const availabilityFormatter = (cell) => {
+        const data = cell.getData();
+        const chips = [];
+
+        if (data.available_staff == 1) {
+            chips.push(`<span class="ss-internal-audience-pill is-staff">${iconSvg(Check)}Staff</span>`);
+        }
+
+        if (data.available_student == 1) {
+            chips.push(`<span class="ss-internal-audience-pill is-student">${iconSvg(Check)}Student</span>`);
+        }
+
+        if (!chips.length) {
+            chips.push(`<span class="ss-internal-audience-pill is-empty">${iconSvg(X)}No audience</span>`);
+        }
+
+        return `<span class="ss-internal-audience-list">${chips.join("")}</span>`;
+    };
+
+    const statusFormatter = (cell) => {
+        const data = cell.getData();
+
+        if (data.deleted_at != null) {
+            return '<span class="ss-status-pill is-inactive"><span></span>Archived</span>';
+        }
+
+        const isActive = data.active == 1;
+
+        return `<span class="ss-status-pill ${isActive ? "is-active" : "is-inactive"}"><span></span>${isActive ? "Active" : "Inactive"}</span>`;
+    };
+
+    const linkFormatter = (cell) => {
+        const link = cell.getValue();
+
+        if (!link) {
+            return '<span class="ss-internal-link-empty">No link</span>';
+        }
+
+        return `<a class="ss-internal-link-url" href="${escapeHtml(link)}" target="_blank" rel="noopener">${iconSvg(ExternalLink)}<span>${escapeHtml(link)}</span></a>`;
+    };
+
+    const dateFormatter = (cell) => {
+        const data = cell.getData();
+        const start = data.start_date || "";
+        const end = data.end_date || "";
+
+        if (!start && !end) {
+            return '<span class="ss-internal-link-empty">No date range</span>';
+        }
+
+        return `<span class="ss-internal-date-range">${iconSvg(CalendarDays)}${escapeHtml(start || "Any time")} - ${escapeHtml(end || "No end")}</span>`;
+    };
+
+    const actionFormatter = (cell) => {
+        const data = cell.getData();
+
+        if (data.deleted_at != null) {
+            return `<button data-id="${escapeHtml(data.id)}" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore internal link">${iconSvg(RotateCw)}</button>`;
+        }
+
+        return [
+            `<button data-id="${escapeHtml(data.id)}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit internal link">${iconSvg(Pencil)}</button>`,
+            `<button data-id="${escapeHtml(data.id)}" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Archive internal link">${iconSvg(Trash2)}</button>`,
+        ].join("");
+    };
+
+    const buildTreeIcon = (Icon) => {
+        const icon = createElement(Icon);
+
+        icon.setAttribute("stroke-width", "2");
+        icon.classList.add("ss-internal-tree-icon");
+
+        return icon;
+    };
+
+    const buildTable = () => {
+        const querystr = $("#query").val() || "";
+        const status = $("#status").val() || "1";
+
+        if (tableContent) {
+            tableContent.destroy();
+        }
+
+        tableContent = new Tabulator("#internalLinkTableId", {
             ajaxURL: route("internal-link.list"),
-            ajaxParams: { querystr: querystr, status: status },
+            ajaxParams: { querystr, status },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
-            dataTree:true,
-            dataTreeStartExpanded:true,
-            dataTreeCollapseElement:minusIcon,
-            dataTreeExpandElement:plusIcon,
-            
+            dataTree: true,
+            dataTreeStartExpanded: true,
+            dataTreeElementColumn: "name",
+            dataTreeCollapseElement: buildTreeIcon(Minus),
+            dataTreeExpandElement: buildTreeIcon(Plus),
             columns: [
-                {
-                    title: "",
-                    field: "",
-                    width: "80",
-                    headerSort:false,
-                   
-                },
                 {
                     title: "#ID",
                     field: "id",
-                    width: "80",
-                    headerSort:false
+                    width: 78,
+                    headerSort: false,
                 },
                 {
                     title: "Name",
-                    field: "image",
+                    field: "name",
                     headerHozAlign: "left",
-                    width: "180",
-                    formatter(cell, formatterParams) {    
-                        var html = '<div class="block">';
-                                html += '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                    html += '<img alt="'+cell.getData().name+'" class="rounded-full shadow" src="'+cell.getData().image+'">';
-                                html += '</div>';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-nowrap uppercase">'+cell.getData().name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+((cell.getData().description != null) ? cell.getData().description : 'N/A')+'</div>';
-                                html += '</div>';
-                            html += '</div>';
-                        return html;
-                    }, 
+                    minWidth: 250,
+                    widthGrow: 1.5,
+                    formatter: nameFormatter,
                 },
-                {
-                    title: "Active",
-                    field: "id",
-                    width: "180",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
-                    download: false,
-                    formatter(cell, formatterParams) {    
-                        var html = '';
-                        console.log(cell.getData().active)
-                        if(cell.getData().active==1)
-                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
-                        else
-                            html += '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
-
-                                
-                        return html;
-                    },
-                },
-                
-                {
-                    title: "Available To",
-                    field: "id",
-                    headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
-                    download: false,
-                    formatter(cell, formatterParams) {    
-                        var html = '';
-                        if(cell.getData().available_staff==1)
-                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0 my-2 mr-1">Staff</span>';
-                        if(cell.getData().available_student==1)
-                            html += '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Student</span>';
-                        if(cell.getData().available_student!=1 && cell.getData().available_staff!=1)
-                            html += '<span class="btn inline-flex btn-warning w-auto px-2 text-white py-0 rounded-0">No One Assigned</span>';
-                                
-                        return html;
-                    },
-                },
-                
                 {
                     title: "Link",
                     field: "link",
                     headerHozAlign: "left",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
-                    download: false,
-                    
+                    minWidth: 180,
+                    widthGrow: 1.2,
+                    formatter: linkFormatter,
                 },
                 {
-                    title: "Started To End Date",
-                    field: "id",
+                    title: "Available To",
+                    field: "available_staff",
                     headerHozAlign: "left",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
+                    minWidth: 162,
+                    widthGrow: 0.8,
+                    formatter: availabilityFormatter,
                     download: false,
-                    formatter(cell, formatterParams) {    
-                        var html = '';
-
-                            html += '<span class=" inline-flex w-auto px-2  py-0 rounded-0 my-2 mr-1">'+cell.getData().start_date+' - '+cell.getData().end_date+'</span>';
-                        
-                                
-                        return html;
-                    },
+                },
+                {
+                    title: "Dates",
+                    field: "start_date",
+                    headerHozAlign: "left",
+                    headerSort: false,
+                    minWidth: 168,
+                    widthGrow: 0.9,
+                    formatter: dateFormatter,
+                },
+                {
+                    title: "Status",
+                    field: "active",
+                    headerHozAlign: "left",
+                    hozAlign: "left",
+                    minWidth: 118,
+                    widthGrow: 0.55,
+                    formatter: statusFormatter,
+                    download: false,
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 112,
+                    minWidth: 112,
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-name="' +cell.getData().name +'" data-link="' +cell.getData().link +'" data-parent="' +cell.getData().parent_id +'" data-tw-toggle="modal" data-tw-target="#uploadEmployeeDocumentModalEdit" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
-                    },
+                    formatter: actionFormatter,
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                refreshIcons();
             },
         });
-
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
-        });
-
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
-            window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Awarding Body Details",
-            });
-        });
-
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
-            tableContent.print();
-        });
     };
-    return {
-        init: function () {
-            _tableGen();
-        },
-    };
-})();
 
-(function () {
-    // Tabulator
-    if ($("#awardingbodyTableId").length) {
-        // Init Table
-        table.init();
+    const createDropzone = (formSelector, modalSelector, buttonSelector, onSuccess) => {
+        const form = document.querySelector(formSelector);
+        const $modal = $(modalSelector);
+        let uploadFailed = false;
 
-        // Filter function
-        function filterHTMLForm() {
-            table.init();
+        if (!form) {
+            return null;
         }
 
-        // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLForm();
+        if (form.dropzone) {
+            form.dropzone.destroy();
+        }
+
+        const dropzone = new Dropzone(form, {
+            autoProcessQueue: false,
+            maxFiles: 1,
+            maxFilesize: 20,
+            parallelUploads: 1,
+            acceptedFiles: ".jpeg,.jpg,.png,.gif,.svg",
+            addRemoveLinks: true,
+            thumbnailWidth: 120,
+            thumbnailHeight: 120,
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        });
+
+        dropzone.on("maxfilesexceeded", (file) => {
+            dropzone.removeAllFiles(true);
+            dropzone.addFile(file);
+        });
+
+        dropzone.on("addedfile", () => {
+            $modal.find(".ss-internal-link-dropzone").removeClass("is-danger");
+            $modal.find(".ss-upload-alert").remove();
+        });
+
+        dropzone.on("processing", () => {
+            uploadFailed = false;
+            setBusy(buttonSelector, true);
+        });
+
+        dropzone.on("error", (file, response) => {
+            uploadFailed = true;
+            const message = typeof response === "string" ? response : response?.message || "Something went wrong. Please try again.";
+
+            showUploadAlert($modal, message);
+        });
+
+        dropzone.on("success", (file) => {
+            file.previewElement?.classList.add("dz-success");
+        });
+
+        dropzone.on("complete", (file) => {
+            dropzone.removeFile(file);
+        });
+
+        dropzone.on("queuecomplete", () => {
+            setBusy(buttonSelector, false);
+
+            if (uploadFailed) {
+                showWarning("Error Found!", "Something went wrong. Please try later or contact administrator.");
+                return;
+            }
+
+            onSuccess();
+        });
+
+        return dropzone;
+    };
+
+    const addDropzone = createDropzone("#uploadDocumentForm", "#uploadEmployeeDocumentModal", "#uploadEmpDocBtn", () => {
+        addModal.hide();
+        showSuccess("Success!", "Internal link successfully created.");
+        resetAddForm(addDropzone);
+        buildTable();
+    });
+
+    const editDropzone = createDropzone("#uploadDocumentFormEdit", "#uploadEmployeeDocumentModalEdit", "#uploadEmpDocBtnEdit", () => {
+        editModal.hide();
+        showSuccess("Success!", "Internal link successfully updated.");
+        resetEditForm(editDropzone);
+        buildTable();
+    });
+
+    buildTable();
+    refreshIcons();
+
+    $("#tabulatorFilterForm").on("keypress.internal-link", function (event) {
+        const keycode = event.keyCode ? event.keyCode : event.which;
+
+        if (keycode == "13") {
+            event.preventDefault();
+            buildTable();
+        }
+    });
+
+    $("#tabulator-html-filter-go").on("click.internal-link", buildTable);
+
+    $("#tabulator-html-filter-reset").on("click.internal-link", function () {
+        $("#query").val("");
+        $("#status").val("1");
+        buildTable();
+    });
+
+    $("#tabulator-export-csv").on("click.internal-link", function () {
+        tableContent?.download("csv", "internal-links.csv");
+    });
+
+    $("#tabulator-export-xlsx").on("click.internal-link", function () {
+        window.XLSX = xlsx;
+        tableContent?.download("xlsx", "internal-links.xlsx", {
+            sheetName: "Internal Links",
+        });
+    });
+
+    $("#tabulator-print").on("click.internal-link", function () {
+        tableContent?.print();
+    });
+
+    $("#warningModal .warningCloser").on("click.internal-link", function () {
+        warningModal.hide();
+    });
+
+    document.getElementById("uploadEmployeeDocumentModal")?.addEventListener("show.tw.modal", function () {
+        resetAddForm(addDropzone);
+    });
+
+    document.getElementById("uploadEmployeeDocumentModal")?.addEventListener("hide.tw.modal", function () {
+        resetAddForm(addDropzone);
+    });
+
+    document.getElementById("uploadEmployeeDocumentModalEdit")?.addEventListener("hide.tw.modal", function () {
+        resetEditForm(editDropzone);
+    });
+
+    document.getElementById("confirmModal")?.addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#uploadEmpDocBtn").on("click.internal-link", function (event) {
+        event.preventDefault();
+
+        const $modal = $("#uploadEmployeeDocumentModal");
+
+        if (!validateModal($modal, addDropzone, true)) {
+            return;
+        }
+
+        syncFormFields($modal, "#uploadDocumentForm");
+        addDropzone.processQueue();
+    });
+
+    $("#internalLinkTableId").on("click.internal-link", ".edit_btn", function () {
+        const internalLink = $(this).attr("data-id");
+        const $modal = $("#uploadEmployeeDocumentModalEdit");
+        const $form = $("#uploadDocumentFormEdit");
+
+        resetEditForm(editDropzone);
+
+        axios({
+            method: "get",
+            url: route("internal-link.edit", internalLink),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            if (response.status == 200) {
+                const dataset = response.data;
+
+                $form.find('[name="id"]').val(dataset.id || internalLink);
+                $modal.find('[name="name_status"]').val(dataset.name || "");
+                $modal.find('[name="link_status"]').val(dataset.link || "");
+                $modal.find('[name="parent_category"]').val(dataset.parent_id || "");
+                $modal.find('[name="description_status"]').val(dataset.description || "");
+                $modal.find('[name="start_date_status"]').val(dataset.start_date || "");
+                $modal.find('[name="end_date_status"]').val(dataset.end_date || "");
+                $modal.find('[name="available_staff_status"]').prop("checked", dataset.available_staff == 1);
+                $modal.find('[name="available_student_status"]').prop("checked", dataset.available_student == 1);
+                $modal.find('[name="active_status"]').prop("checked", dataset.active == 1);
+
+                if (dataset.image) {
+                    $modal.find("[data-current-image]").prop("hidden", false);
+                    $modal.find("[data-current-image-preview]").html(avatarHtml(dataset));
+                    $modal.find("[data-current-image-name]").text(dataset.name || "Internal link image");
                 }
+
+                syncFormFields($modal, "#uploadDocumentFormEdit");
+                editModal.show();
+                refreshIcons();
             }
+        }).catch((error) => {
+            console.log(error);
+        });
+    });
+
+    $("#uploadEmpDocBtnEdit").on("click.internal-link", function (event) {
+        event.preventDefault();
+
+        const $modal = $("#uploadEmployeeDocumentModalEdit");
+
+        if (!validateModal($modal, editDropzone, false)) {
+            return;
+        }
+
+        syncFormFields($modal, "#uploadDocumentFormEdit");
+
+        if (editDropzone.getQueuedFiles().length > 0) {
+            editDropzone.processQueue();
+            return;
+        }
+
+        setBusy("#uploadEmpDocBtnEdit", true);
+
+        axios({
+            method: "post",
+            url: route("internal-link.update"),
+            data: new FormData(document.getElementById("uploadDocumentFormEdit")),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            setBusy("#uploadEmpDocBtnEdit", false);
+
+            if (response.status == 200) {
+                editModal.hide();
+                showSuccess("Success!", "Internal link successfully updated.");
+                resetEditForm(editDropzone);
+                buildTable();
+            }
+        }).catch((error) => {
+            setBusy("#uploadEmpDocBtnEdit", false);
+
+            if (error.response?.status == 422) {
+                showUploadAlert($modal, error.response.data.message || "Please check the form and try again.");
+                return;
+            }
+
+            showWarning("Error Found!", "Something went wrong. Please try later or contact administrator.");
+            console.log(error);
+        });
+    });
+
+    $("#internalLinkTableId").on("click.internal-link", ".delete_btn", function () {
+        showConfirm(
+            "Archive internal link?",
+            "This internal link will move to archived records.",
+            "DELETE",
+            $(this).attr("data-id")
         );
+    });
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterHTMLForm();
-        });
+    $("#internalLinkTableId").on("click.internal-link", ".restore_btn", function () {
+        showConfirm(
+            "Restore internal link?",
+            "This internal link will be returned to active records.",
+            "RESTORE",
+            $(this).attr("data-id")
+        );
+    });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterHTMLForm();
-        });
+    $("#confirmModal .agreeWith").on("click.internal-link", function () {
+        const $agreeButton = $(this);
+        const recordID = $agreeButton.attr("data-id");
+        const action = $agreeButton.attr("data-action");
 
-        const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        const uploadEmployeeDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModal"));
-        const uploadEmployeeDocumentModalEdit = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadEmployeeDocumentModalEdit"));
-        
-        const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
+        $("#confirmModal button").attr("disabled", "disabled");
 
-        
-
-        let confModalDelTitle = 'Are you sure?';
-
-        // let addEditor;
-        // if($("#addEditor").length > 0){
-        //     const el = document.getElementById('addEditor');
-        //     ClassicEditor.create(el).then(newEditor => {
-        //         addEditor = newEditor;
-        //     }).catch((error) => {
-        //         console.error(error);
-        //     });
-        // }
-
-        // let editEditor;
-        // if($("#editEditor").length > 0){
-        //     const el = document.getElementById('editEditor');
-        //     ClassicEditor.create(el).then(newEditor => {
-        //         editEditor = newEditor;
-        //     }).catch((error) => {
-        //         console.error(error);
-        //     });
-        // }
-        const addModalEl = document.getElementById('uploadEmployeeDocumentModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#uploadEmployeeDocumentModal .acc__input-error').html('');
-            $('#uploadEmployeeDocumentModal input').val('');
-            $('#uploadEmployeeDocumentModal select').val('');
-
-            // if($("#addEditor").length > 0){
-            //     addEditor.setData('');
-            // }
-        });
-
-        const editModalEl = document.getElementById('uploadEmployeeDocumentModalEdit')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#uploadEmployeeDocumentModal .acc__input-error').html('');
-            $('#uploadEmployeeDocumentModal input').val('');
-            // if($("#editEditor").length > 0){
-            //     editEditor.setData('');
-            // }
-        });
-        
-
-
-
-
-        $('#uploadEmployeeDocumentModal [name="name_status"]','#uploadEmployeeDocumentModalEdit [name="name_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="name"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="name"]').val($(this).val());
-        })
-        $('#uploadEmployeeDocumentModal [name="link_status"]','#uploadEmployeeDocumentModalEdit [name="link_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="link"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="link"]').val($(this).val());
-        })
-
-        $('#uploadEmployeeDocumentModal [name="parent_category"]','#uploadEmployeeDocumentModalEdit [name="parent_category"]').on('change', function(){
-            $('#uploadEmployeeDocumentModal [name="parent_id"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($(this).val());
-        })
-
-        $('#uploadEmployeeDocumentModal [name="available_staff_status"]','#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="available_staff"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($(this).val());
-        })
-
-        
-        $('#uploadEmployeeDocumentModal [name="available_student_status"]','#uploadEmployeeDocumentModalEdit [name="available_student_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="available_student"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($(this).val());
-        })
-
-        
-        $('#uploadEmployeeDocumentModal [name="description_status"]','#uploadEmployeeDocumentModalEdit [name="description_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="description"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="description"]').val($(this).val());
-        })
-
-        
-        $('#uploadEmployeeDocumentModal [name="start_date_status"]','#uploadEmployeeDocumentModalEdit [name="start_date_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="start_date"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($(this).val());
-        })
-
-        
-        $('#uploadEmployeeDocumentModal [name="end_date_status"]','#uploadEmployeeDocumentModalEdit [name="end_date_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="end_date"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($(this).val());
-        })
-
-        
-        $('#uploadEmployeeDocumentModal [name="active_status"]','#uploadEmployeeDocumentModalEdit [name="active_status"]').on('keyup', function(){
-            $('#uploadEmployeeDocumentModal [name="active"]').val($(this).val());
-            $('#uploadEmployeeDocumentModalEdit [name="active"]').val($(this).val());
-        })
-
-    /* Start Dropzone */
-    if($("#uploadDocumentForm").length > 0){
-        
-        let dzError = false;
-        Dropzone.autoDiscover = false;
-        Dropzone.options.uploadDocumentForm = {
-            autoProcessQueue: false,
-            maxFiles: 10,
-            maxFilesize: 20,
-            parallelUploads: 10,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif,.svg",
-            addRemoveLinks: true,
-            thumbnailWidth: 100,
-            thumbnailHeight: 100,
-        };
-
-        let options = {
-            accept: (file, done) => {
-                console.log("Uploaded");
-                done();
-            },
-        };
-
-
-        var drzn1 = new Dropzone('#uploadDocumentForm', options);
-
-        drzn1.on("maxfilesexceeded", (file) => {
-            $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-            $('#uploadEmployeeDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
-            drzn1.removeFile(file);
-            setTimeout(function(){
-                $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-            }, 2000)
-        });
-
-        drzn1.on("error", function(file, response){
-            dzError = true;
-        });
-
-        drzn1.on("success", function(file, response){
-            //console.log(response);
-            return file.previewElement.classList.add("dz-success");
-        });
-
-        drzn1.on("complete", function(file) {
-            drzn1.removeFile(file);
-        }); 
-
-        drzn1.on('queuecomplete', function(){
-            $('#uploadEmpDocBtn').removeAttr('disabled');
-            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
-
-            uploadEmployeeDocumentModal.hide();
-            if(!dzError){
-                succModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Employee document successfully uploaded.');
-                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
-                });      
-                
-                setTimeout(function(){
-                    succModal.hide();
-                     window.location.reload();
-                }, 2000);
-                //table.init();
-            }else{
-                warningModal.show();
-                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#warningModal .warningModalTitle").html("Error Found!" );
-                    $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
-                    $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
-                });
-                setTimeout(function(){
-                    warningModal.hide();
-                    //window.location.reload();
-                }, 2000);
-            }
-        })
-
-        $('#uploadEmpDocBtn').on('click', function(e){
-            e.preventDefault();
-            document.querySelector('#uploadEmpDocBtn').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: inline-block;";
-            
-            if($('#uploadEmployeeDocumentModal [name="name_status"]').length > 0){
-                
-                    $('#uploadEmployeeDocumentModal [name="name"]').val($('#uploadEmployeeDocumentModal [name="name_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="link"]').val($('#uploadEmployeeDocumentModal [name="link_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="parent_id"]').val($('#uploadEmployeeDocumentModal [name="parent_category"]').val());
-                
-
-                    $('#uploadEmployeeDocumentModal [name="available_staff"]').val($('#uploadEmployeeDocumentModal [name="available_staff_status"]').prop('checked') ? 1 : '');
-                    $('#uploadEmployeeDocumentModal [name="available_student"]').val($('#uploadEmployeeDocumentModal [name="available_student_status"]').prop('checked') ? 1 : '');
-                    $('#uploadEmployeeDocumentModal [name="description"]').val($('#uploadEmployeeDocumentModal [name="description_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="start_date"]').val($('#uploadEmployeeDocumentModal [name="start_date_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="end_date"]').val($('#uploadEmployeeDocumentModal [name="end_date_status"]').val());
-                    $('#uploadEmployeeDocumentModal [name="active"]').val($('#uploadEmployeeDocumentModal [name="active_status"]').val());
-
-                drzn1.processQueue();
-            }else{
-                $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-                $('#uploadEmployeeDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-
-                setTimeout(function(){
-                    $('#uploadEmployeeDocumentModal .modal-content .uploadError').remove();
-                    document.querySelector('#uploadEmpDocBtn').removeAttribute('disabled', 'disabled');
-                    document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
-                }, 2000)
-            }
-            
-        });
-    }
-    if($("#uploadDocumentFormEdit").length > 0){
-        
-        let dzError = false;
-        Dropzone.autoDiscover = false;
-        Dropzone.options.uploadDocumentFormEdit = {
-            autoProcessQueue: false,
-            maxFiles: 10,
-            maxFilesize: 20,
-            parallelUploads: 10,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif,.svg",
-            addRemoveLinks: true,
-            thumbnailWidth: 100,
-            thumbnailHeight: 100,
-        };
-
-        let options = {
-            accept: (file, done) => {
-                console.log("Uploaded");
-                done();
-            },
-        };
-
-
-        var drzn2 = new Dropzone('#uploadDocumentFormEdit', options);
-
-        drzn2.on("maxfilesexceeded", (file) => {
-            $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
-            $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
-            drzn2.removeFile(file);
-            setTimeout(function(){
-                $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
-            }, 2000)
-        });
-
-        drzn2.on("error", function(file, response){
-            dzError = true;
-        });
-
-        drzn2.on("success", function(file, response){
-            //console.log(response);
-            return file.previewElement.classList.add("dz-success");
-        });
-
-        drzn2.on("complete", function(file) {
-            drzn2.removeFile(file);
-        }); 
-
-        drzn2.on('queuecomplete', function(){
-            $('#uploadEmpDocBtn').removeAttr('disabled');
-            document.querySelector("#uploadEmpDocBtn svg").style.cssText ="display: none;";
-
-            uploadEmployeeDocumentModalEdit.hide();
-            if(!dzError){
-                succModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulation!" );
-                    $("#successModal .successModalDesc").html('Employee document successfully uploaded.');
-                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
-                });      
-                table.init();
-                setTimeout(function(){
-                    succModal.hide();
-                     window.location.reload();
-                }, 2000);
-
-            }else{
-                warningModal.show();
-                document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#warningModal .warningModalTitle").html("Error Found!" );
-                    $("#warningModal .warningModalDesc").html('Something went wrong. Please try later or contact administrator.');
-                    $("#warningModal .warningCloser").attr('data-action', 'DISMISS');
-                });
-                setTimeout(function(){
-                    warningModal.hide();
-                    //window.location.reload();
-                }, 2000);
-            }
-        })
-
-
-        $('#uploadEmpDocBtnEdit').on('click', function(e) {
-
-            e.preventDefault();
-            document.querySelector('#uploadEmpDocBtnEdit').setAttribute('disabled', 'disabled');
-            document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText ="display: inline-block;";
-            
-            if($('#uploadEmployeeDocumentModalEdit [name="name_status"]').length > 0){
-                
-                    $('#uploadEmployeeDocumentModalEdit [name="name"]').val($('#uploadEmployeeDocumentModalEdit [name="name_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="link"]').val($('#uploadEmployeeDocumentModalEdit [name="link_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="parent_id"]').val($('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val());
-                    
-                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val($('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked') ? 1 : '');
-                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val($('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked') ? 1 : '');
-                    $('#uploadEmployeeDocumentModalEdit [name="description"]').val($('#uploadEmployeeDocumentModalEdit [name="description_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val($('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val($('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val());
-                    $('#uploadEmployeeDocumentModalEdit [name="active"]').val($('#uploadEmployeeDocumentModalEdit [name="active_status"]').val());
-                    
-                    if (drzn2.getQueuedFiles().length > 0) {                        
-                        drzn2.processQueue();  
-                     } else {    
-                        const form = document.getElementById('uploadDocumentFormEdit');
-                        let form_data = new FormData(form);
-                        axios({
-                            method: "post",
-                            url: route('internal-link.update'),
-                            data: form_data,
-                            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                        }).then(response => {
-
-                            document.querySelector('#uploadEmpDocBtnEdit').removeAttribute('disabled');
-                            document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText = "display: none;";
-                            
-                            if (response.status == 200) {
-                                uploadEmployeeDocumentModalEdit.hide();
-                                succModal.show();
-                                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html("Congratulation!" );
-                                    $("#successModal .successModalDesc").html('Employee document successfully uploaded.');
-                                    $("#successModal .successCloser").attr('data-action', 'RELOAD');
-                                });      
-                                setTimeout(function(){
-                                    succModal.hide();
-                                    //window.location.reload();
-                                }, 2000);
-                            }
-                        }).catch(error => {
-                            document.querySelector('#sendEmailBtn').removeAttribute('disabled');
-                            document.querySelector("#sendEmailBtn svg").style.cssText = "display: none;";
-                            if (error.response) {
-                                if (error.response.status == 422) {
-                                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                        $(`#sendEmailForm .${key}`).addClass('border-danger');
-                                        $(`#sendEmailForm  .error-${key}`).html(val);
-                                    }
-                                } else {
-                                    console.log('error');
-                                }
-                            }
-                        });
-                        
-                        
-                     }
-            }else{
-                $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
-                $('#uploadEmployeeDocumentModalEdit .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
-                
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
-
-                setTimeout(function(){
-                    $('#uploadEmployeeDocumentModalEdit .modal-content .uploadError').remove();
-                    document.querySelector('#uploadEmpDocBtnEdit').removeAttribute('disabled', 'disabled');
-                    document.querySelector("#uploadEmpDocBtnEdit svg").style.cssText ="display: none;";
-                }, 2000)
-            }
-            
-        });
-    }
-    /* End Dropzone */
-
-        $("#awardingbodyTableId").on("click", ".edit_btn", function () {      
-
-            let $editBtn = $(this);
-            let internalLink = $editBtn.attr("data-id");
-            let name = $editBtn.attr("data-name");
-            let link = $editBtn.attr("data-link");
-            let parent = $editBtn.attr("data-parent");
-
+        if (action == "DELETE") {
             axios({
-                method: "get",
-                url: route("internal-link.edit", internalLink),
-                headers: {
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-                },
+                method: "delete",
+                url: route("internal-link.destroy", recordID),
+                headers: { "X-CSRF-TOKEN": csrfToken },
             }).then((response) => {
-
                 if (response.status == 200) {
-
-                    let dataset = response.data;
-                    $('#uploadDocumentFormEdit [name="name"]').val(dataset.name);
-                    $('#uploadEmployeeDocumentModalEdit [name="name_status"]').val(dataset.name);
-                    $('#uploadDocumentFormEdit [name="link"]').val(dataset.link? dataset.name : '');
-                    $('#uploadEmployeeDocumentModalEdit [name="link_status"]').val(dataset.link? dataset.link : '');
-                    $('#uploadDocumentFormEdit [name="parent_id"]').val(dataset.parent_id? dataset.parent_id : '');
-                    $('#uploadEmployeeDocumentModalEdit [name="parent_category"]').val(dataset.parent_id? dataset.parent_id : '');
-                    $('#uploadEmployeeDocumentModalEdit [name="id"]').val(dataset.id);
-                    $('#uploadEmployeeDocumentModalEdit [name="description_status"]').val(dataset.description);
-                    $('#uploadEmployeeDocumentModalEdit [name="start_date_status"]').val(dataset.start_date);
-                    $('#uploadEmployeeDocumentModalEdit [name="end_date_status"]').val(dataset.end_date);
-                    if(dataset.available_staff == 1)
-                        $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',true);
-                    else
-                        $('#uploadEmployeeDocumentModalEdit [name="available_staff_status"]').prop('checked',false);
-                    if(dataset.available_student == 1)
-                        $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',true);
-                    else
-                        $('#uploadEmployeeDocumentModalEdit [name="available_student_status"]').prop('checked',false);
-                    
-                    if(dataset.active)
-                        $('#uploadEmployeeDocumentModalEdit [name="active_status"]').prop('checked',true);
-                    else
-                        $('#uploadEmployeeDocumentModalEdit [name="active_status"]').prop('checked',false);
-
-                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val(dataset.available_student);
-                    $('#uploadEmployeeDocumentModalEdit [name="description"]').val(dataset.description);
-                    $('#uploadEmployeeDocumentModalEdit [name="start_date"]').val(dataset.start_date);
-                    $('#uploadEmployeeDocumentModalEdit [name="end_date"]').val(dataset.end_date);
-                    $('#uploadEmployeeDocumentModalEdit [name="active"]').val(dataset.active);
-                    $('#uploadEmployeeDocumentModalEdit [name="available_student"]').val(dataset.active);
-                    $('#uploadEmployeeDocumentModalEdit [name="available_staff"]').val(dataset.active);
-
+                    $("#confirmModal button").removeAttr("disabled");
+                    confirmModal.hide();
+                    showSuccess("Done!", "Internal link successfully archived.");
+                    buildTable();
                 }
             }).catch((error) => {
+                $("#confirmModal button").removeAttr("disabled");
                 console.log(error);
             });
+            return;
+        }
 
-
-        });
-
-
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function() {
-
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
+        if (action == "RESTORE") {
+            axios({
+                method: "post",
+                url: route("internal-link.restore", recordID),
+                headers: { "X-CSRF-TOKEN": csrfToken },
+            }).then((response) => {
+                if (response.status == 200) {
+                    $("#confirmModal button").removeAttr("disabled");
+                    confirmModal.hide();
+                    showSuccess("Success!", "Internal link successfully restored.");
+                    buildTable();
+                }
+            }).catch((error) => {
+                $("#confirmModal button").removeAttr("disabled");
+                console.log(error);
             });
-            
-            let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
-
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
-                axios({
-                    method: 'delete',
-                    url: route('internal-link.destroy', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Internal link  successfully deleted!');
-                        });
-                    }
-                    table.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
-            } else if(action == 'RESTORE'){
-                axios({
-                    method: 'post',
-                    url: route('internal-link.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
-                        confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Awarding body successfully restored!');
-                        });
-                    }
-                    table.init();
-                }).catch(error =>{
-                    console.log(error)
-                });
-            }
-        })
-
-        // Delete Course
-        $('#awardingbodyTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to delete this Internal link  from applicant list? Please click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
-        });
-
-        // Restore Course
-        $('#awardingbodyTableId').on('click', '.restore_btn', function() {
-
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let courseID = $statusBTN.attr('data-id');
-            confModal.show();
-
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Want to restore this Internal link from the trash? Please click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
-
-        });
-    }
+        }
+    });
 })();

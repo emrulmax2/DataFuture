@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Option;
 use App\Models\SmsTemplate;
 use Illuminate\Http\Request;
 use App\Http\Requests\SMSTemplateRequest;
@@ -24,13 +25,14 @@ class SmsTemplateController extends Controller
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'SMS Template', 'href' => 'javascript:void(0);']
             ],
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && $request->querystr != '' ? $request->querystr : '');
         $status = (isset($request->status) ? $request->status : 1);
-        $phase = (isset($request->phase) && $request->phase > 0 ? $request->phase : '');
+        $phase = (isset($request->phase) && in_array($request->phase, ['admission', 'live', 'hr']) ? $request->phase : '');
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -40,8 +42,10 @@ class SmsTemplateController extends Controller
 
         $query = SmsTemplate::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->orWhere('sms_title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('description','LIKE','%'.$queryStr.'%');
+            $query->where(function($q) use ($queryStr) {
+                $q->where('sms_title','LIKE','%'.$queryStr.'%');
+                $q->orWhere('description','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if(!empty($phase)): $query->where($phase, 1); endif;
         if($status == 2):
@@ -71,7 +75,7 @@ class SmsTemplateController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'sms_title' => $list->sms_title,
-                    'description' => Str::limit($list->description,20),
+                    'description' => Str::limit($list->description, 140),
                     'admission' => (isset($list->admission) && $list->admission > 0 ? $list->admission : 0),
                     'live' => (isset($list->live) && $list->live > 0 ? $list->live : 0),
                     'hr' => (isset($list->hr) && $list->hr > 0 ? $list->hr : 0),

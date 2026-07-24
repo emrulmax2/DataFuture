@@ -50,7 +50,7 @@ $('#addWorkPlacementForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#addWorkPlacementForm .${key}`).addClass('border-danger');
@@ -104,7 +104,7 @@ $('#addLevelHoursForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#addLevelHoursForm .${key}`).addClass('border-danger');
@@ -158,7 +158,7 @@ $('#addLearningHoursForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#addLearningHoursForm .${key}`).addClass('border-danger');
@@ -313,7 +313,7 @@ $('#editLevelHoursForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#editLevelHoursForm .${key}`).addClass('border-danger');
@@ -368,7 +368,7 @@ $('#editLearningHoursForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#editLearningHoursForm .${key}`).addClass('border-danger');
@@ -425,7 +425,7 @@ $('#editWorkPlacementForm').on('submit', function(e){
         if (error.response) {
             if (error.response.status == 422) {
                 $('.acc__input-error').html('');
-                $('.form-control').removeClass('border-danger');
+                $('.border-danger').removeClass('border-danger');
                 
                 for (const [key, val] of Object.entries(error.response.data.errors)) {
                     $(`#editWorkPlacementForm .${key}`).addClass('border-danger');

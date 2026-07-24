@@ -127,6 +127,11 @@ class InternalLinkController extends Controller
     {
         $internalLink = new InternalLink();
         $request->merge(['created_by'=>auth()->user()->id]);
+        $document = $request->file('file');
+
+        if(!$document) {
+            return response()->json(['message' => 'Please upload an image for this site link.'], 422);
+        }
 
         if($request->input('start_date')=="") {
             $request->request->remove('start_date');
@@ -138,7 +143,6 @@ class InternalLinkController extends Controller
         
         $internalLink->fill($request->all());
         $internalLink->save();
-        $document = $request->file('file');
         $imageName = time().'_'.$document->getClientOriginalName();
         $path = $document->storeAs('public/internallink/'.$internalLink->id, $imageName,'local');
         $data = [];
@@ -244,7 +248,7 @@ class InternalLinkController extends Controller
     public function restore($id) {
         $data = InternalLink::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 
 

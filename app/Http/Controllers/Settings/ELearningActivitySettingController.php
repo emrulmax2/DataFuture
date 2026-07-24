@@ -11,6 +11,57 @@ use Illuminate\Support\Facades\Storage;
 
 class ELearningActivitySettingController extends Controller
 {
+    private function activityLogoPlaceholder(): string
+    {
+        return asset('build/assets/images/placeholders/200x200.jpg');
+    }
+
+    private function activityLogoUrl(?string $logo): string
+    {
+        if (empty($logo)) {
+            return $this->activityLogoPlaceholder();
+        }
+
+        $path = 'public/activity/'.$logo;
+
+        try {
+            $disk = Storage::disk('s3');
+
+            if ($disk->exists($path)) {
+                return $disk->temporaryUrl($path, now()->addMinutes(120));
+            }
+        } catch (\Throwable $exception) {
+            logger()->warning('Unable to resolve e-learning activity logo.', [
+                'logo' => $logo,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+
+        return $this->activityLogoPlaceholder();
+    }
+
+    private function deleteActivityLogo(?string $logo): void
+    {
+        if (empty($logo)) {
+            return;
+        }
+
+        $path = 'public/activity/'.$logo;
+
+        try {
+            $disk = Storage::disk('s3');
+
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
+        } catch (\Throwable $exception) {
+            logger()->warning('Unable to delete e-learning activity logo.', [
+                'logo' => $logo,
+                'message' => $exception->getMessage(),
+            ]);
+        }
+    }
+
     public function index()
     {
         return view('pages.settings.activity.index', [
@@ -60,18 +111,13 @@ class ELearningActivitySettingController extends Controller
         if(!empty($Query)):
             $i = 1;
             foreach($Query as $list):
-                if ($list->logo !== null && Storage::disk('s3')->exists('public/activity/'.$list->logo)) {
-                    $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$list->logo, now()->addMinutes(120));
-                } else {
-                    $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
-                }
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
                     'category' => $list->category,
                     'name' => $list->name,
                     'short_code' => (isset($list->short_code) && !empty($list->short_code) ? $list->short_code : ''),
-                    'logo_url' => $logoUrl,
+                    'logo_url' => $this->activityLogoUrl($list->logo),
                     'has_week' => (isset($list->has_week) && $list->has_week > 0 ? $list->has_week : 0),
                     'days_reminder'=> (isset($list->days_reminder) ? $list->days_reminder : NULL),
                     'is_mandatory'=> (isset($list->is_mandatory) && $list->is_mandatory > 0 ? $list->is_mandatory : 0),
@@ -112,19 +158,13 @@ class ELearningActivitySettingController extends Controller
     public function edit(Request $request){
         $id = $request->editid;
         $rowData = ELearningActivitySetting::find($id);
-        if ($rowData->logo !== null && Storage::disk('s3')->exists('public/activity/'.$rowData->logo)) {
-            //$logoUrl = Storage::disk('s3')->url('public/activity/'.$rowData->logo);
-            $logoUrl = Storage::disk('s3')->temporaryUrl('public/activity/'.$rowData->logo, now()->addMinutes(120));
-        } else {
-            $logoUrl = asset('build/assets/images/placeholders/200x200.jpg');
-        }
-        $rowData['logoUrl'] = $logoUrl;
-
-        if($rowData){
-            return response()->json($rowData);
-        }else{
+        if(!$rowData){
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         }
+
+        $rowData['logoUrl'] = $this->activityLogoUrl($rowData->logo);
+
+        return response()->json($rowData);
     }
 
     public function update(ELearningActivitySettingsUpdateRequest $request){     
@@ -146,11 +186,7 @@ class ELearningActivitySettingController extends Controller
             $imageName = 'activity_'.$request->id.'_'.time() . '.' . $logo->getClientOriginalExtension();
             $path = $logo->storeAs('public/activity', $imageName, 's3');
             
-            if(isset($oldRow->logo) && !empty($oldRow->logo)):
-                if (Storage::disk('s3')->exists('public/activity/'.$oldRow->logo)):
-                    Storage::disk('s3')->delete('public/activity/'.$oldRow->logo);
-                endif;
-            endif;
+            $this->deleteActivityLogo($oldRow->logo ?? null);
 
             $activityUpdate = ELearningActivitySetting::where('id', $request->id)->update([
                 'logo' => $imageName

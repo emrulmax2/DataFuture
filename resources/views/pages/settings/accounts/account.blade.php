@@ -1,92 +1,131 @@
-@extends('../layout/' . $layout)
+@extends('../layout/site-settings')
+
+@section('body_class', 'site-settings-isolated')
 
 @section('subhead')
     <title>{{ $title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet">
 @endsection
 
-@section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
-        </div>
-    </div>
+@section('styles')
+    @vite('resources/css/site-settings-redesign.css')
+@endsection
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.settings.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+@section('content')
+    <div id="siteSettingsPage" class="ss-page">
+        @include('pages.settings.partials.isolated-header')
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            @if(isset(auth()->user()->priv()['access_account']) && auth()->user()->priv()['access_account'] == 1)
-                <!-- BEGIN: Display Information -->
-                <div class="intro-y box lg:mt-5">
-                    <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                        <h2 class="font-medium text-base mr-auto">Update Account Settings</h2>
+        <nav class="ss-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ route('dashboard') }}">
+                <i data-lucide="home"></i>
+                Dashboard
+            </a>
+            <i data-lucide="chevron-right"></i>
+            <span>Accounts Settings</span>
+            <i data-lucide="chevron-right"></i>
+            <span>Accounts Setting</span>
+        </nav>
+
+        <main class="ss-main">
+            <section class="ss-title-card">
+                <div class="ss-title-card__content">
+                    <button type="button" class="ss-icon-btn ss-sidebar-toggle" data-ss-sidebar-toggle aria-label="Open settings menu">
+                        <i data-lucide="panel-left"></i>
+                    </button>
+                    <span class="ss-title-card__icon">
+                        <i data-lucide="landmark"></i>
+                    </span>
+                    <div>
+                        <h1>{{ $subtitle }}</h1>
+                        <p>Set the defaults applied across invoicing and accounts documents.</p>
                     </div>
-                    <div class="p-5">
+                </div>
+                <a href="{{ route('dashboard') }}" class="ss-back-btn">
+                    <i data-lucide="arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </section>
+
+            <div class="ss-workspace">
+                <button type="button" class="ss-sidebar-backdrop" data-ss-sidebar-close aria-label="Close settings menu"></button>
+                <aside class="ss-sidebar">
+                    @php($settingsSidebarIcon = 'settings-2')
+                    @php($settingsSidebarSubtitle = 'Global configuration')
+                    @include('pages.settings.sidebar')
+                </aside>
+
+                <section class="ss-content">
+                    @if(isset(auth()->user()->priv()['access_account']) && auth()->user()->priv()['access_account'] == 1)
                         <form method="post" action="#" id="accountSettingsForm" enctype="multipart/form-data">
-                            <div class="flex flex-col-reverse xl:flex-row flex-col">
-                                <div class="flex-1 mt-6 xl:mt-0">
-                                    <div class="grid grid-cols-12 gap-x-5 gap-y-4">
-                                        <div class="col-span-12 sm:col-span-6">
-                                            <label for="payment_term" class="form-label">Payment Term</label>
-                                            <textarea rows="3" id="payment_term" name="payment_term" class="form-control" placeholder="Please send payment within 30 days of receiving this invoice.">{{ (isset($opt['payment_term']) ? $opt['payment_term'] : '' ) }}</textarea>
-                                        </div>
+                            <div class="ss-form-card ss-accounts-card">
+                                <div class="ss-card-heading">
+                                    <span></span>
+                                    <div>
+                                        <h2>Update Account Settings</h2>
+                                        <p>These defaults are applied to invoices and other accounts documents.</p>
                                     </div>
-                                    <button type="submit" id="updateCINF" class="btn btn-primary w-auto mt-4">
-                                        Update
-                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                            stroke="white" class="w-4 h-4 ml-2">
+                                </div>
+
+                                <div class="ss-field-stack">
+                                    <div class="ss-field">
+                                        <label for="payment_term">Payment Term</label>
+                                        <textarea rows="3" id="payment_term" name="payment_term" class="ss-textarea" placeholder="Please send payment within 30 days of receiving this invoice.">{{ old('payment_term', $opt['payment_term'] ?? '') }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="ss-form-actions ss-form-actions--start">
+                                    <button type="submit" id="updateCINF" class="ss-btn ss-btn--primary">
+                                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
                                             <g fill="none" fill-rule="evenodd">
                                                 <g transform="translate(1 1)" stroke-width="4">
                                                     <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
                                                     <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
                                                     </path>
                                                 </g>
                                             </g>
                                         </svg>
+                                        <i data-lucide="save"></i>
+                                        Update
                                     </button>
-                                    <input type="hidden" name="category" value="ACC_SETTINGS"/>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
-            @else 
-                <div class="alert alert-success-soft show flex items-center mb-2 lg:mt-5" role="alert">
-                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> You do not have enough permission to view this page's content. Please navigate to the menus on the left. 
-                </div>
-            @endif
-        </div>
-    </div>
-    <!-- END: Settings Page Content -->
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                            <input type="hidden" name="category" value="ACC_SETTINGS">
+                        </form>
+                    @else
+                        <div class="ss-empty-state" role="alert">
+                            <span><i data-lucide="alert-triangle"></i></span>
+                            <div>
+                                <h2>Permission Required</h2>
+                                <p>You do not have enough permission to view this page's content. Please navigate to the menus on the left.</p>
+                            </div>
+                        </div>
+                    @endif
+                </section>
+            </div>
+        </main>
+
+        <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content ss-success-modal">
+                    <div class="modal-body p-0">
+                        <div class="ss-success-modal__body">
+                            <i data-lucide="check-circle" class="ss-success-modal__icon"></i>
+                            <div class="successModalTitle"></div>
+                            <p class="successModalDesc"></p>
+                        </div>
+                        <div class="ss-success-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--primary">Ok</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
 @endsection
 
 @section('script')
     @vite('resources/js/account-settings.js')
+    @vite('resources/js/site-settings-redesign.js')
 @endsection

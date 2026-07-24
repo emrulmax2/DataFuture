@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\AcademicYearRequest;
 use App\Http\Requests\AcademicYearUpdateRequest;
 use App\Models\AcademicYear;
+use App\Models\Option;
 use App\Models\User;
 
 class AcademicYearController extends Controller
@@ -16,6 +17,7 @@ class AcademicYearController extends Controller
         return view('pages.settings.academicyears.index', [
             'title' => 'Academic Years - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Academic Years', 'href' => 'javascript:void(0);']
@@ -80,6 +82,7 @@ class AcademicYearController extends Controller
         return view('pages.settings.academicyears.show', [
             'title' => 'Academic Years - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Academic Years', 'href' => route('academicyears')],

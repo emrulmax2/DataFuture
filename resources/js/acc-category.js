@@ -32,14 +32,44 @@ import TomSelect from "tom-select";
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     let confModalDelTitle = 'Are you sure?';
 
+    // Keeps the redesigned status switches' copy in step with their checkboxes.
+    const TOGGLE_COPY = {
+        status: { on: ['Active', 'Shown in the category tree'], off: ['Inactive', 'Hidden from the category tree'] },
+        audit_status: { on: ['Audited', 'Included in audit reporting'], off: ['Not audited', 'Excluded from audit reporting'] },
+    };
+
+    const syncToggle = function (input) {
+        const copy = $(input).closest('.ss-status-toggle').find('.ss-status-toggle__copy');
+        const text = TOGGLE_COPY[input.name];
+        if (!copy.length || !text) return;
+
+        const [strong, small] = input.checked ? text.on : text.off;
+        copy.find('strong').text(strong);
+        copy.find('small').text(small);
+    };
+
+    const setToggle = function (selector, name, checked) {
+        $(selector + ' input[name="' + name + '"]').prop('checked', checked).each(function () {
+            syncToggle(this);
+        });
+    };
+
+    $(document).on('change', '.ss-status-toggle input[name="status"], .ss-status-toggle input[name="audit_status"]', function () {
+        syncToggle(this);
+    });
+
+    const resetCategoryModal = function (selector) {
+        $(selector + ' .acc__input-error').html('');
+        $(selector + ' .border-danger').removeClass('border-danger');
+        $(selector + ' input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])').val('');
+        $(selector + ' input[name="trans_type"]').prop('checked', false);
+        setToggle(selector, 'audit_status', false);
+        setToggle(selector, 'status', true);
+    };
+
     const addCategoryModalEl = document.getElementById('addCategoryModal')
     addCategoryModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addCategoryModal .acc__input-error').html('');
-        $('#addCategoryModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
-        $('#addCategoryModal input[name="audit_status"]').prop('checked', false);
-        $('#addCategoryModal input[name="status"]').prop('checked', true);
-
-        $('#addCategoryModal input[name="trans_type"]').prop('checked', false);
+        resetCategoryModal('#addCategoryModal');
         parent_id.clear(true);
         parent_id.clearOptions();
         parent_id.disable();
@@ -47,12 +77,8 @@ import TomSelect from "tom-select";
 
     const editCategoryModalEl = document.getElementById('editCategoryModal')
     editCategoryModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editCategoryModal .acc__input-error').html('');
-        $('#editCategoryModal .modal-body input:not([type="checkbox"]):not([type="radio"])').val('');
-        $('#editCategoryModal input[name="audit_status"]').prop('checked', false);
-        $('#editCategoryModal input[name="status"]').prop('checked', true);
-
-        $('#editCategoryModal input[name="trans_type"]').prop('checked', false);
+        resetCategoryModal('#editCategoryModal');
+        $('#editCategoryModal input[name="id"]').val('0');
         edit_parent_id.clear(true);
         edit_parent_id.clearOptions();
         edit_parent_id.disable();
@@ -181,16 +207,8 @@ import TomSelect from "tom-select";
                 }else{
                     $('#editCategoryModal #edit_inflow').prop('checked', true);
                 }
-                if(dataset.audit_status == 1){
-                    $('#editCategoryModal [name="audit_status"]').prop('checked', true);
-                }else{
-                    $('#editCategoryModal [name="audit_status"]').prop('checked', false);
-                }
-                if(dataset.status == 1){
-                    $('#editCategoryModal [name="status"]').prop('checked', true);
-                }else{
-                    $('#editCategoryModal [name="status"]').prop('checked', false);
-                }
+                setToggle('#editCategoryModal', 'audit_status', dataset.audit_status == 1);
+                setToggle('#editCategoryModal', 'status', dataset.status == 1);
                 $('#editCategoryModal input[name="id"]').val(editId);
             }
         }).catch((error) => {

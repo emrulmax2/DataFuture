@@ -1,14 +1,90 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
-import TomSelect from "tom-select";
 
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const isTrue = (value) => value === true || Number(value) === 1 || String(value).toLowerCase() === "yes";
+
+const hasLogo = (url) => url && !String(url).includes("placeholders/200x200");
+
+const formatYesNo = (value) => {
+    const enabled = isTrue(value);
+    const label = enabled ? "Yes" : "No";
+
+    return `<span class="ss-elearning-icon-state ${enabled ? "is-active" : "is-inactive"}" title="${label}" aria-label="${label}">
+        <i data-lucide="${enabled ? "check" : "x"}"></i>
+    </span>`;
+};
+
+const formatReminder = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return '<span class="ss-cell-muted">&mdash;</span>';
+    }
+
+    const days = Number(value);
+
+    if (!days) {
+        return '<span class="ss-elearning-reminder"><i data-lucide="bell-off"></i>No reminder</span>';
+    }
+
+    return `<span class="ss-elearning-reminder"><i data-lucide="bell"></i>${days} ${days === 1 ? "Day" : "Days"}</span>`;
+};
+
+const formatStatusButton = (data) => {
+    const active = isTrue(data.active);
+    const label = active ? "Active" : "Inactive";
+
+    if (data.deleted_at != null) {
+        return `<span class="ss-elearning-icon-state ${active ? "is-active" : "is-inactive"}" title="${label}" aria-label="${label}">
+            <i data-lucide="${active ? "check" : "x"}"></i>
+        </span>`;
+    }
+
+    return `<button type="button" data-id="${data.id}" class="status_updater ss-elearning-icon-state ss-elearning-status-button ${active ? "is-active" : "is-inactive"}" title="${label}" aria-label="Change activity status">
+        <i data-lucide="${active ? "check" : "x"}"></i>
+    </button>`;
+};
+
+const formatActivityCell = (cell) => {
+    const data = cell.getData();
+    const name = escapeHtml(data.name);
+    const shortCode = data.short_code ? `<small><i data-lucide="hash"></i>${escapeHtml(data.short_code)}</small>` : "";
+    const logo = hasLogo(data.logo_url)
+        ? `<span class="ss-elearning-activity-logo"><img alt="${name}" src="${escapeHtml(data.logo_url)}"></span>`
+        : `<span class="ss-elearning-activity-logo ss-elearning-activity-logo--empty"><i data-lucide="image"></i></span>`;
+
+    return `<span class="ss-elearning-activity-cell">
+        ${logo}
+        <span class="ss-elearning-activity-copy">
+            <strong>${name}</strong>
+            ${shortCode}
+        </span>
+    </span>`;
+};
+
 var ELearningActivityList = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : 1;
+
+        if (window.eLearningActivityTableInstance) {
+            window.eLearningActivityTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#ELearningActivityList", {
             ajaxURL: route("elearning.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -18,95 +94,99 @@ var ELearningActivityList = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
             columns: [
                 {
-                    title: "#",
+                    title: "#ID",
                     field: "id",
-                    headerSort:false,
-                    width: "50",
+                    width: 68,
+                    minWidth: 62,
                 },
                 {
-                    title: "Label",
+                    title: "Activity",
                     field: "name",
                     headerHozAlign: "left",
-                    width: "300",
-                    formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div class="flex justify-start items-center">';
-                            html += '<div class="inline-block w-auto mr-3">';
-                                html += '<img alt="'+cell.getData().name+'" class="rounded-0 h-10 w-auto" style="max-width: 120px;" src="'+cell.getData().logo_url+'">';
-                            html += '</div>';
-                            html += '<div class="inline-block font-medium whitespace-normal">';
-                                html += cell.getData().name;
-                                if(cell.getData().short_code != ''){
-                                    html += ' - <span class="text-success">'+cell.getData().short_code+'</span>';
-                                }
-                            html +='</div>';
-                        html += '</div>';
-
-                        return html;
-                    }
+                    minWidth: 240,
+                    widthGrow: 1.35,
+                    formatter: formatActivityCell,
                 },
                 {
                     title: "Category",
                     field: "category",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    widthGrow: 0.75,
+                    formatter(cell) {
+                        return `<span class="ss-phase-pill ss-elearning-category">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
-                    title: "Repeat Weekly",
+                    title: "Weekly",
                     field: "has_week",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return (cell.getData().has_week == 1 ? 'Yes' : 'No');
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 84,
+                    minWidth: 76,
+                    formatter(cell) {
+                        return formatYesNo(cell.getValue());
+                    },
                 },
                 {
                     title: "Mandatory",
                     field: "is_mandatory",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return (cell.getData().is_mandatory == 1 ? 'Yes' : 'No');
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 104,
+                    minWidth: 92,
+                    formatter(cell) {
+                        return formatYesNo(cell.getValue());
+                    },
                 },
-                
                 {
                     title: "Reminder",
                     field: "days_reminder",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return (cell.getData().days_reminder > 1 ? cell.getData().days_reminder+' Days' : cell.getData().days_reminder+' Day');
-                    }
-                    
+                    width: 128,
+                    minWidth: 118,
+                    formatter(cell) {
+                        return formatReminder(cell.getValue());
+                    },
                 },
                 {
                     title: "Status",
                     field: "active",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().active == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 86,
+                    minWidth: 78,
+                    download: false,
+                    formatter(cell) {
+                        return formatStatusButton(cell.getData());
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "120",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editELearningActivityModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                    formatter(cell) {
+                        let btns = "";
+                        const data = cell.getData();
+
+                        if (data.deleted_at == null) {
+                            btns += `<button data-id="${data.id}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit e-learning activity"><i data-lucide="pencil"></i></button>`;
+                            btns += `<button data-id="${data.id}" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete e-learning activity"><i data-lucide="trash-2"></i></button>`;
+                        } else {
+                            btns += `<button data-id="${data.id}" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore e-learning activity"><i data-lucide="rotate-cw"></i></button>`;
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -114,55 +194,45 @@ var ELearningActivityList = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.eLearningActivityTableInstance = tableContent;
+
+        if (window.eLearningActivityTableResizeHandler) {
+            window.removeEventListener("resize", window.eLearningActivityTableResizeHandler);
+        }
+
+        window.eLearningActivityTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.eLearningActivityTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.elearning").on("click.elearning", function () {
+            tableContent.download("csv", "e-learning-activities.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.elearning").on("click.elearning", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Users Details",
+            tableContent.download("xlsx", "e-learning-activities.xlsx", {
+                sheetName: "E-Learning Activities",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.elearning").on("click.elearning", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -170,331 +240,351 @@ var ELearningActivityList = (function () {
     };
 })();
 
-(function(){
-    if ($("#ELearningActivityList").length) {
-        ELearningActivityList.init();
-
-        // Filter function
-        function filterTitleHTMLForm() {
-            ELearningActivityList.init();
-        }
-
-        // On submit filter form
-        $("#tabulatorFilterForm")[0].addEventListener(
-            "keypress",
-            function (event) {
-                let keycode = event.keyCode ? event.keyCode : event.which;
-                if (keycode == "13") {
-                    event.preventDefault();
-                    filterHTMLForm();
-                }
-            }
-        );
-
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
-            filterTitleHTMLForm();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
-            $("#query").val("");
-            $("#status").val("1");
-            filterTitleHTMLForm();
-        });
+(function () {
+    if (!$("#ELearningActivityList").length) {
+        return;
     }
+
+    ELearningActivityList.init();
 
     const addELearningActivityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addELearningActivityModal"));
     const editELearningActivityModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editELearningActivityModal"));
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-    let confModalDelTitle = 'Are you sure?';
+    const confModalDelTitle = "Are you sure?";
 
-    const addELearningActivityModalEl = document.getElementById('addELearningActivityModal')
-    addELearningActivityModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addELearningActivityModal .acc__input-error').html('');
-        $('#addELearningActivityModal .modal-body select').val('');
-        $('#addELearningActivityModal input[name="has_week"]').prop('checked', false);
-        $('#addELearningActivityModal input[name="active"]').prop('checked', true);
-        $('#addELearningActivityModal .modal-body input[type="file"]').val('');
-
-        var placeholder = $('#addELearningActivityModal .userImageAdd').attr('data-placeholder');
-        $('#addELearningActivityModal .userImageAdd').attr('src', placeholder);
-    });
-    const editELearningActivityModalEl = document.getElementById('editELearningActivityModal')
-    editELearningActivityModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editELearningActivityModal .acc__input-error').html('');
-        $('#editELearningActivityModal .modal-body select').val('');
-        $('#editELearningActivityModal input[name="has_week"]').prop('checked', false);
-        $('#editELearningActivityModal input[name="active"]').prop('checked', false);
-        $('#editELearningActivityModal .modal-body input[type="file"]').val('');
-
-        var placeholder = $('#editELearningActivityModal .userImageEdit').attr('data-placeholder');
-        $('#editELearningActivityModal .userImageEdit').attr('src', placeholder);
-    });
-
-    $('#addELearningActivityForm').on('change', '#userPhotoAdd', function(){
-        showPreview('userPhotoAdd', 'userImageAdd')
-    })
-    $('#editELearningActivityForm').on('change', '#userPhotoEdit', function(){
-        showPreview('userPhotoEdit', 'userImageEdit')
-    })
-
-    function showPreview(inputId, targetImageId) {
-        var src = document.getElementById(inputId);
-        var target = document.getElementById(targetImageId);
-        var title = document.getElementById('selected_image_title');
-        var fr = new FileReader();
-        fr.onload = function () {
-            target.src = fr.result;
-        }
-        fr.readAsDataURL(src.files[0]);
+    const showSuccess = (title, message) => {
+        $("#successModal .successModalTitle").html(title);
+        $("#successModal .successModalDesc").html(message);
+        successModal.show();
     };
 
-    $('#addELearningActivityForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('addELearningActivityForm');
-    
-        document.querySelector('#saveSettings').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveSettings svg").style.cssText ="display: inline-block;";
+    const setButtonLoading = ($button, isLoading) => {
+        $button.prop("disabled", isLoading);
+        $button.find(".ss-spinner").css("display", isLoading ? "inline-block" : "none");
+    };
 
-        let form_data = new FormData(form);
-        form_data.append('file', $('#addELearningActivityForm input[name="logo"]')[0].files[0]); 
-        axios({
-            method: "post",
-            url: route('elearning.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveSettings').removeAttribute('disabled');
-            document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+    const updateUploadName = ($form, name = "No file selected") => {
+        $form.find("[data-ss-upload-name]").text(name);
+    };
 
-            if (response.status == 200) {
-                addELearningActivityModal.hide();
+    const updateActiveToggleCopy = ($form) => {
+        $form.find(".ss-elearning-active-toggle").each(function () {
+            const checked = $(this).find('input[type="checkbox"]').prop("checked");
+            $(this).find(".ss-status-toggle__copy strong").text(checked ? "Active" : "Inactive");
+            $(this).find(".ss-status-toggle__copy small").text(checked ? "Available for planning" : "Hidden from planning");
+        });
+    };
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Congratulations!" );
-                    $("#successModal .successModalDesc").html('E-Learning activity settings successfully added.');
-                });     
+    const clearErrors = ($form) => {
+        $form.find(".acc__input-error").html("");
+        $form.find(".border-danger").removeClass("border-danger");
+        $form.find(".ss-elearning-logo-picker").removeClass("is-danger");
+    };
+
+    const resetFormState = ($form, options = {}) => {
+        clearErrors($form);
+        $form.find('input[type="text"], input[type="number"], input[type="file"]').val("");
+        $form.find("select").val("");
+        $form.find('input[name="id"]').val("0");
+        $form.find('input[name="has_week"], input[name="is_mandatory"]').prop("checked", false);
+        $form.find('input[name="active"]').prop("checked", options.active !== false);
+        const placeholder = $form.find("img[data-placeholder]").attr("data-placeholder");
+        if (placeholder) {
+            $form.find("img[data-placeholder]").attr("src", placeholder);
+        }
+        updateUploadName($form);
+        updateActiveToggleCopy($form);
+        setButtonLoading($form.find('button[type="submit"]'), false);
+    };
+
+    const showPreview = (input, $form) => {
+        const file = input.files?.[0];
+        const target = $form.find("img[data-placeholder]")[0];
+
+        if (!file || !target) {
+            updateUploadName($form);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function () {
+            target.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+        updateUploadName($form, file.name);
+    };
+
+    const renderValidationErrors = ($form, error) => {
+        if (!error.response || error.response.status !== 422 || !error.response.data.errors) {
+            console.log("error");
+            return;
+        }
+
+        for (const [key, val] of Object.entries(error.response.data.errors)) {
+            const message = Array.isArray(val) ? val[0] : val;
+            const $field = $form.find(`.${key}`);
+
+            $field.addClass("border-danger");
+            $form.find(`.error-${key}`).html(message);
+
+            if (key === "logo") {
+                $form.find(".ss-elearning-logo-picker").addClass("is-danger");
             }
-            ELearningActivityList.init();
-        }).catch(error => {
-            document.querySelector('#saveSettings').removeAttribute('disabled');
-            document.querySelector("#saveSettings svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addELearningActivityForm .${key}`).addClass('border-danger');
-                        $(`#addELearningActivityForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
+        }
+    };
+
+    const showConfirm = (id, action, title, message) => {
+        $("#confirmModal .confModTitle").html(title);
+        $("#confirmModal .confModDesc").html(message);
+        $("#confirmModal .agreeWith").attr("data-id", id);
+        $("#confirmModal .agreeWith").attr("data-action", action);
+        confirmModal.show();
+    };
+
+    function filterTitleHTMLForm() {
+        ELearningActivityList.init();
+    }
+
+    $("#tabulatorFilterForm")[0].addEventListener("keypress", function (event) {
+        let keycode = event.keyCode ? event.keyCode : event.which;
+        if (keycode == "13") {
+            event.preventDefault();
+            filterTitleHTMLForm();
+        }
+    });
+
+    $("#tabulator-html-filter-go").on("click", function () {
+        filterTitleHTMLForm();
+    });
+
+    $("#tabulator-html-filter-reset").on("click", function () {
+        $("#query").val("");
+        $("#status").val("1");
+        filterTitleHTMLForm();
+    });
+
+    document.getElementById("addELearningActivityModal").addEventListener("show.tw.modal", function () {
+        resetFormState($("#addELearningActivityForm"), { active: true });
+    });
+
+    document.getElementById("addELearningActivityModal").addEventListener("hide.tw.modal", function () {
+        resetFormState($("#addELearningActivityForm"), { active: true });
+    });
+
+    document.getElementById("editELearningActivityModal").addEventListener("hide.tw.modal", function () {
+        resetFormState($("#editELearningActivityForm"), { active: false });
+        $("#updateSettings").prop("disabled", true);
+    });
+
+    document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#addELearningActivityForm, #editELearningActivityForm").on("input change", ".name, .short_code, .category, .days_reminder", function () {
+        const $form = $(this).closest("form");
+        const names = ["name", "short_code", "category", "days_reminder"];
+        names.forEach((name) => {
+            if ($(this).hasClass(name)) {
+                $(this).removeClass("border-danger");
+                $form.find(`.error-${name}`).html("");
             }
         });
     });
 
-    $("#ELearningActivityList").on("click", ".edit_btn", function () {      
-        let $editBtn = $(this);
-        let editId = $editBtn.attr("data-id");
+    $("#addELearningActivityForm, #editELearningActivityForm").on("change", ".logo", function () {
+        const $form = $(this).closest("form");
+        showPreview(this, $form);
+        $(this).removeClass("border-danger");
+        $form.find(".ss-elearning-logo-picker").removeClass("is-danger");
+        $form.find(".error-logo").html("");
+    });
+
+    $("#addELearningActivityForm, #editELearningActivityForm").on("change", ".ss-elearning-active-toggle input", function () {
+        updateActiveToggleCopy($(this).closest("form"));
+    });
+
+    $("#addELearningActivityForm").on("submit", function (e) {
+        e.preventDefault();
+        const $form = $("#addELearningActivityForm");
+        const form = document.getElementById("addELearningActivityForm");
+
+        clearErrors($form);
+        setButtonLoading($("#saveSettings"), true);
+
+        axios({
+            method: "post",
+            url: route("elearning.store"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setButtonLoading($("#saveSettings"), false);
+
+            if (response.status == 200) {
+                addELearningActivityModal.hide();
+                showSuccess("Success!", "E-Learning activity settings successfully added.");
+            }
+
+            ELearningActivityList.init();
+        }).catch((error) => {
+            setButtonLoading($("#saveSettings"), false);
+            renderValidationErrors($form, error);
+        });
+    });
+
+    $("#ELearningActivityList").on("click", ".edit_btn", function () {
+        const editId = $(this).attr("data-id");
+        const $form = $("#editELearningActivityForm");
+
+        resetFormState($form, { active: false });
+        $("#updateSettings").prop("disabled", true);
 
         axios({
             method: "post",
             url: route("elearning.edit"),
-            data: {editid : editId},
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            data: { editid: editId },
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
         }).then((response) => {
             if (response.status == 200) {
-                let dataset = response.data;
+                const dataset = response.data;
 
-                $('#editELearningActivityModal [name="name"]').val(dataset.name ? dataset.name : '');
-                $('#editELearningActivityModal [name="short_code"]').val(dataset.short_code ? dataset.short_code : '');
-                $('#editELearningActivityModal [name="category"]').val(dataset.category ? dataset.category : '');
-                
-                if(dataset.has_week == 1){
-                    $('#editELearningActivityModal input[name="has_week"]').prop('checked', true);
-                }else{
-                    $('#editELearningActivityModal input[name="has_week"]').prop('checked', false);
-                }
-                if(dataset.is_mandatory == 1){
-                    $('#editELearningActivityModal input[name="is_mandatory"]').prop('checked', true);
-                }else{
-                    $('#editELearningActivityModal input[name="is_mandatory"]').prop('checked', false);
-                }
-                $('#editELearningActivityModal [name="days_reminder"]').val(dataset.days_reminder ? dataset.days_reminder : '');
-                $('#editELearningActivityModal input[name="id"]').val(editId);
-                $('#editELearningActivityModal #userImageEdit').attr('src', dataset.logoUrl).attr('alt', dataset.category);
-
-                if(dataset.active == 1){
-                    $('#editELearningActivityModal input[name="active"]').prop('checked', true);
-                }else{
-                    $('#editELearningActivityModal input[name="active"]').prop('checked', false);
-                }
-
-                document.querySelector('#updateSettings').removeAttribute('disabled');
+                $form.find('[name="name"]').val(dataset.name ? dataset.name : "");
+                $form.find('[name="short_code"]').val(dataset.short_code ? dataset.short_code : "");
+                $form.find('[name="category"]').val(dataset.category ? dataset.category : "");
+                $form.find('[name="days_reminder"]').val(dataset.days_reminder ? dataset.days_reminder : "");
+                $form.find('[name="id"]').val(editId);
+                $form.find('input[name="has_week"]').prop("checked", Number(dataset.has_week) === 1);
+                $form.find('input[name="is_mandatory"]').prop("checked", Number(dataset.is_mandatory) === 1);
+                $form.find('input[name="active"]').prop("checked", Number(dataset.active) === 1);
+                $form.find("#userImageEdit").attr("src", dataset.logoUrl).attr("alt", dataset.category || "Activity logo");
+                updateActiveToggleCopy($form);
+                $("#updateSettings").prop("disabled", false);
+                editELearningActivityModal.show();
             }
         }).catch((error) => {
             console.log(error);
         });
     });
 
-    
     $("#editELearningActivityForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('editELearningActivityForm');
-    
-        document.querySelector('#updateSettings').setAttribute('disabled', 'disabled');
-        document.querySelector("#updateSettings svg").style.cssText ="display: inline-block;";
+        const $form = $("#editELearningActivityForm");
+        const form = document.getElementById("editELearningActivityForm");
 
-        let form_data = new FormData(form);
-        form_data.append('file', $('#editELearningActivityForm input[name="logo"]')[0].files[0]); 
+        clearErrors($form);
+        setButtonLoading($("#updateSettings"), true);
+
         axios({
             method: "post",
-            url: route('elearning.update'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#updateSettings').removeAttribute('disabled');
-            document.querySelector("#updateSettings svg").style.cssText = "display: none;";
+            url: route("elearning.update"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setButtonLoading($("#updateSettings"), false);
 
             if (response.status == 200) {
                 editELearningActivityModal.hide();
-
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html( "Congratulations!" );
-                    $("#successModal .successModalDesc").html('E-Learning activity settings successfully updated.');
-                });     
+                showSuccess("Success!", "E-Learning activity settings successfully updated.");
             }
+
             ELearningActivityList.init();
-        }).catch(error => {
-            document.querySelector('#updateSettings').removeAttribute('disabled');
-            document.querySelector("#updateSettings svg").style.cssText = "display: none;";
-            if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editELearningActivityForm .${key}`).addClass('border-danger');
-                        $(`#editELearningActivityForm  .error-${key}`).html(val);
-                    }
-                } else {
-                    console.log('error');
-                }
-            }
+        }).catch((error) => {
+            setButtonLoading($("#updateSettings"), false);
+            renderValidationErrors($form, error);
         });
     });
 
-    // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function(){
-        let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
+    $("#confirmModal .agreeWith").on("click", function () {
+        const $agreeBTN = $(this);
+        const recordID = $agreeBTN.attr("data-id");
+        const action = $agreeBTN.attr("data-action");
 
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if(action == 'DELETE'){
+        $("#confirmModal button").attr("disabled", "disabled");
+
+        const done = (title, message) => {
+            $("#confirmModal button").removeAttr("disabled");
+            confirmModal.hide();
+            showSuccess(title, message);
+            ELearningActivityList.init();
+        };
+
+        const failed = (error) => {
+            $("#confirmModal button").removeAttr("disabled");
+            console.log(error);
+        };
+
+        if (action == "DELETE") {
             axios({
-                method: 'delete',
-                url: route('elearning.destory', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "delete",
+                url: route("elearning.destory", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
-                    });
+                    done("Done!", "E-Learning activity successfully deleted.");
                 }
-                ELearningActivityList.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'RESTORE'){
+            }).catch(failed);
+        } else if (action == "RESTORE") {
             axios({
-                method: 'post',
-                url: route('elearning.restore', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("elearning.restore", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record Successfully Restored!');
-                    });
+                    done("Success!", "E-Learning activity successfully restored.");
                 }
-                ELearningActivityList.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'CHANGESTAT'){
+            }).catch(failed);
+        } else if (action == "CHANGESTAT") {
             axios({
-                method: 'post',
-                url: route('elearning.update.status', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("elearning.update.status", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('WOW!');
-                        $('#successModal .successModalDesc').html('Record status successfully updated!');
-                    });
+                    done("Done!", "E-Learning activity status successfully updated.");
                 }
-                ELearningActivityList.init();
-            }).catch(error =>{
-                console.log(error)
-            });
+            }).catch(failed);
+        } else {
+            $("#confirmModal button").removeAttr("disabled");
+            confirmModal.hide();
         }
-    })
-
-    // Delete Course
-    $('#ELearningActivityList').on('click', '.status_updater', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
-        });
     });
 
-    // Delete Course
-    $('#ELearningActivityList').on('click', '.delete_btn', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#ELearningActivityList").on("click", ".status_updater", function () {
+        const rowID = $(this).attr("data-id");
 
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-        });
+        showConfirm(
+            rowID,
+            "CHANGESTAT",
+            confModalDelTitle,
+            "Do you really want to change this activity status?"
+        );
     });
 
-    // Restore Course
-    $('#ELearningActivityList').on('click', '.restore_btn', function(){
-        let $statusBTN = $(this);
-        let courseID = $statusBTN.attr('data-id');
+    $("#ELearningActivityList").on("click", ".delete_btn", function () {
+        const rowID = $(this).attr("data-id");
 
-        confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html(confModalDelTitle);
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', courseID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-        });
+        showConfirm(
+            rowID,
+            "DELETE",
+            confModalDelTitle,
+            "Do you really want to delete this e-learning activity?"
+        );
     });
+
+    $("#ELearningActivityList").on("click", ".restore_btn", function () {
+        const rowID = $(this).attr("data-id");
+
+        showConfirm(
+            rowID,
+            "RESTORE",
+            confModalDelTitle,
+            "Do you really want to restore this e-learning activity?"
+        );
+    });
+
+    resetFormState($("#addELearningActivityForm"), { active: true });
+    resetFormState($("#editELearningActivityForm"), { active: false });
+    $("#updateSettings").prop("disabled", true);
 })();

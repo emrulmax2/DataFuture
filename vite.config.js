@@ -20,6 +20,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/css/app.css',
+                'resources/css/site-settings-redesign.css',
                 'resources/js/app.js',
                 'resources/js/ckeditor-classic.js',
                 'resources/js/ckeditor-inline.js',
@@ -77,6 +78,7 @@ export default defineConfig({
                 'resources/js/student-archives.js',
 
                 'resources/js/settings.js',
+                'resources/js/site-settings-redesign.js',
                 'resources/js/awardingbody.js',
                 'resources/js/academicyears.js',
                 'resources/js/sourcetuitionfee.js',

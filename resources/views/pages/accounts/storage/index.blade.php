@@ -124,7 +124,7 @@
                                 </select>
                             </div>
                             <div class="acc-st__field">
-                                <label class="acc-st__label">Category</label>
+                                <label class="acc-st__label" id="acc_category_label">Category</label>
                                 <div id="acc_category_id_in_wrap">
                                     <select class="w-full tom-selects" id="acc_category_id_in" name="acc_category_id_in">
                                         <option value="">Please Select Category</option>

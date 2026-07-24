@@ -13,7 +13,7 @@ class WorkplacementCompanyController extends Controller
     {
         return view('pages.settings.workplacement.wp-companies', [
             'title' => 'Workplacement Companies - London Churchill College',
-            'subtitle' => 'Workplacement Companies',
+            'subtitle' => 'Workplacement Companies / Supervisor',
             'breadcrumbs' => [
                 ['label' => 'Workplacement Companies', 'href' => 'javascript:void(0);']
             ],

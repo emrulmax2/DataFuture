@@ -332,7 +332,9 @@
         display: block;
         position: relative;
         z-index: 60;
-        padding: 0;
+        /* Reserve the fixed command bar's height (below) so the breadcrumb
+           keeps its place and scrolls normally underneath it. */
+        padding: 74px 0 0;
         font-family: "IBM Plex Sans", "Public Sans", system-ui, sans-serif;
     }
 
@@ -347,8 +349,11 @@
     }
 
     .lcc-global-header__main {
-        position: relative;
-        z-index: 25;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 60;
         display: flex;
         align-items: center;
         gap: 18px;

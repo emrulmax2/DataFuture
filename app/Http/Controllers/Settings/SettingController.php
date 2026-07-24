@@ -36,7 +36,8 @@ class SettingController extends Controller
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'Address API', 'href' => 'javascript:void(0);'],
             ],
-            'opt' => Option::where('category', 'ADDR_ANYWHR_API')->pluck('value', 'name')->toArray()
+            'opt' => Option::where('category', 'ADDR_ANYWHR_API')->pluck('value', 'name')->toArray(),
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
@@ -49,7 +50,8 @@ class SettingController extends Controller
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
                 ['label' => 'SMS API', 'href' => 'javascript:void(0);'],
             ],
-            'opt' => Option::where('category', 'SMS')->pluck('value', 'name')->toArray()
+            'opt' => Option::where('category', 'SMS')->pluck('value', 'name')->toArray(),
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray()
         ]);
     }
 
