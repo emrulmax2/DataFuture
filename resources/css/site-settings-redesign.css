@@ -10273,43 +10273,56 @@
     height: 20px;
     flex: 0 0 auto;
     margin: 0;
-    border: 1px solid #d9dee6;
+    border: 1px solid #f3c6c6;
     border-radius: 6px;
     appearance: none;
-    background: #fff;
+    background: #fdecec;
     box-shadow: none;
     cursor: pointer;
     transition: background 0.14s ease, border-color 0.14s ease;
 }
 
 .site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:hover {
-    border-color: #c9a24a;
+    border-color: #e5a0a0;
 }
 
 .site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:checked {
-    border-color: #16264f;
-    background: #16264f;
+    border-color: #b7e2c6;
+    background: #e6f6ec;
 }
 
+.site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:checked:hover {
+    border-color: #8fd0a8;
+}
+
+/* Unchecked state -> red cross */
 .site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]::after {
     position: absolute;
     inset: 2px;
-    background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m20 6-11 11-5-5'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23e5484d' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E");
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 13px 13px;
+    background-size: 12px 12px;
     content: "";
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.14s ease;
 }
 
+/* Checked state -> primary (green) tick */
 .site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:checked::after {
+    background-image: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m20 6-11 11-5-5'/%3E%3C/svg%3E");
+    background-size: 13px 13px;
     opacity: 1;
+}
+
+.site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .site-settings-redesign-body .ss-permissions-page .form-check-input[type="checkbox"]:focus-visible {
     outline: 0;
-    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.16);
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
 }
 
 .site-settings-redesign-body .ss-permissions-page .form-check-input + label,
@@ -10398,6 +10411,107 @@
     line-height: 1.5;
 }
 
+/* --- Bulk check-all / uncheck-all controls (in the accordion header) ------ */
+
+/* The controls live to the right of the title inside the header row, so the
+   title button shrinks to share the row instead of filling it. Specificity is
+   set one class above the base .accordion-button width rule so this wins. */
+.site-settings-redesign-body .ss-permissions-page .accordion-header.ss-perm-bulk-host {
+    align-items: center;
+    gap: 10px;
+}
+
+.site-settings-redesign-body .ss-permissions-page .accordion .accordion-item .accordion-header.ss-perm-bulk-host button.accordion-button {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+/* Count reads as a quiet subtitle right after the accordion name. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__count {
+    margin-left: 10px;
+    color: #8a93a1;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    white-space: nowrap;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__count[data-state="all"] {
+    color: #16a34a;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__count[data-state="some"] {
+    color: #8a6a12;
+}
+
+/* Group rows only: a full-height segment flush to the right edge, tinted like
+   the header button so it reads as part of the header strip. */
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__actions {
+    display: inline-flex;
+    align-items: center;
+    align-self: stretch;
+    gap: 8px;
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-right: 0;
+    padding: 0 14px;
+    background: #fbf3e0;
+    border-left: 1px solid #ecdfbe;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.14s ease, border-color 0.14s ease, opacity 0.14s ease;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn svg {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.4;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn--check {
+    border-color: #b7e2c6;
+    background: #e6f6ec;
+    color: #12703a;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn--check:hover:not(:disabled) {
+    border-color: #8fd0a8;
+    background: #d7efe0;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn--clear {
+    border-color: #edd0d0;
+    background: #fdecec;
+    color: #b5383c;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn--clear:hover:not(:disabled) {
+    border-color: #e5a0a0;
+    background: #f9dede;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.14);
+}
+
 @media (max-width: 900px) {
     .ss-perm-toolbar {
         align-items: stretch;
@@ -10406,5 +10520,26 @@
 
     .ss-perm-toolbar .ss-btn {
         width: 100%;
+    }
+}
+
+/* On narrow screens the header can't hold the count + labelled buttons beside
+   the title, so drop to icon-only actions (labels stay as aria-label/title). */
+@media (max-width: 640px) {
+    .site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__actions {
+        gap: 6px;
+        padding: 0 10px;
+    }
+
+    .site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__count {
+        display: none;
+    }
+
+    .site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn span {
+        display: none;
+    }
+
+    .site-settings-redesign-body .ss-permissions-page .ss-perm-bulk__btn {
+        padding: 6px 9px;
     }
 }
