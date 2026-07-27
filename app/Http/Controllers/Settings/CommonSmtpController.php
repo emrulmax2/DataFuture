@@ -7,6 +7,10 @@ use App\Http\Requests\CommonSmtpRequest;
 use App\Http\Requests\ComonSmtpUpdateRequest;
 use App\Models\ComonSmtp;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport;
+use Symfony\Component\Mailer\Transport\Smtp\Stream\SocketStream;
+use Throwable;
 
 class CommonSmtpController extends Controller
 {
@@ -165,5 +169,86 @@ class CommonSmtpController extends Controller
         $data = ComonSmtp::where('id', $id)->withTrashed()->restore();
 
         response()->json($data);
+    }
+
+    /**
+     * Probe the given SMTP accounts against their provider and report which ones
+     * can actually connect + authenticate. Results are cached per credential set
+     * so opening the list repeatedly does not hammer the mail provider (which can
+     * trip rate limiting / security blocks on Gmail and friends).
+     */
+    public function health(Request $request)
+    {
+        $ids = collect($request->input('ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->take(50)
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json(['data' => []]);
+        }
+
+        $accounts = ComonSmtp::withTrashed()->whereIn('id', $ids)->get();
+        $data = [];
+
+        foreach ($accounts as $account) {
+            $signature = md5(implode('|', [
+                $account->smtp_user,
+                $account->smtp_pass,
+                $account->smtp_host,
+                $account->smtp_port,
+                $account->smtp_encryption,
+                $account->smtp_authentication,
+            ]));
+
+            $data[$account->id] = Cache::remember(
+                'smtp-health:'.$account->id.':'.$signature,
+                now()->addMinutes(10),
+                fn () => $this->probeSmtp($account)
+            );
+        }
+
+        return response()->json(['data' => $data]);
+    }
+
+    private function probeSmtp(ComonSmtp $account): array
+    {
+        if (empty($account->smtp_host) || empty($account->smtp_port)) {
+            return ['ok' => false, 'message' => 'Host or port is missing.'];
+        }
+
+        $transport = null;
+
+        try {
+            $port = (int) $account->smtp_port;
+            $useTls = strtolower((string) $account->smtp_encryption) === 'ssl';
+
+            $transport = new EsmtpTransport($account->smtp_host, $port, $useTls);
+
+            $stream = $transport->getStream();
+            if ($stream instanceof SocketStream) {
+                $stream->setTimeout(5);
+            }
+
+            if (strtolower((string) $account->smtp_authentication) !== 'false') {
+                $transport->setUsername((string) $account->smtp_user);
+                $transport->setPassword((string) $account->smtp_pass);
+            }
+
+            $transport->start();
+
+            return ['ok' => true, 'message' => 'Connected successfully.'];
+        } catch (Throwable $e) {
+            return ['ok' => false, 'message' => trim($e->getMessage()) ?: 'Unable to connect.'];
+        } finally {
+            if ($transport !== null) {
+                try {
+                    $transport->stop();
+                } catch (Throwable $e) {
+                    // Nothing useful to do if the socket is already gone.
+                }
+            }
+        }
     }
 }

@@ -20,32 +20,33 @@ class BankHolidayController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $academicyear = (isset($request->academicyear) && $request->academicyear > 0 ? $request->academicyear : '');
 
-        $query = BankHoliday::where('academic_year_id', $academicyear);
-        if(!empty($queryStr)):
-            $query->where('name','LIKE','%'.$queryStr.'%');
-        endif;
-        $total_rows = $query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
         $query = BankHoliday::where('academic_year_id', $academicyear)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('type','LIKE','%'.$queryStr.'%');
+            $query->where(function($q) use ($queryStr) {
+                $q->where('title','LIKE','%'.$queryStr.'%')
+                    ->orWhere('type','LIKE','%'.$queryStr.'%')
+                    ->orWhere('start_date','LIKE','%'.$queryStr.'%')
+                    ->orWhere('end_date','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
         endif;
+
+        $total_rows = $query->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -57,8 +58,8 @@ class BankHolidayController extends Controller
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
-                    'start_date' => $list->start_date,
-                    'end_date' => $list->end_date,
+                    'start_date' => (isset($list->start_date) && !empty($list->start_date) ? date('d-m-Y', strtotime($list->start_date)) : ''),
+                    'end_date' => (isset($list->end_date) && !empty($list->end_date) ? date('d-m-Y', strtotime($list->end_date)) : ''),
                     'duration' => $list->duration,
                     'title' => $list->title,
                     'type'=> $list->type,

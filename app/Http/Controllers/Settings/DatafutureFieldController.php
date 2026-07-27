@@ -124,6 +124,6 @@ class DatafutureFieldController extends Controller
     public function restore(Request $request) {
         $data = DatafutureField::where('id', $request->id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 }

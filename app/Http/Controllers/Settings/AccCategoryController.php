@@ -119,21 +119,31 @@ class AccCategoryController extends Controller
 
         $html = '';
         $categories = AccCategory::where('trans_type', $type)->where('parent_id', $category_id)->where('status', 1)->orderBy('category_name', 'ASC')->get();
+        // Node markup mirrors the branches rendered in pages/settings/accounts/category.blade.php —
+        // keep the two in step so lazily loaded children look identical to the roots.
         if($categories->count() > 0):
             $html .= '<ul class="theChild">';
                 foreach($categories as $cat):
-                    $html .= '<li class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'hasChildren' : '').' relative">';
-                        $html .= '<a href="javascript:void(0);" data-type="'.$type.'" data-category="'.$cat->id.'" class="'.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? 'parent_category' : '').' flex items-center text-primary font-medium">'.$cat->category_name.(isset($cat->activechildrens) && $cat->activechildrens->count() > 0 ? ' ('.$cat->activechildrens->count().')' : '').(isset($cat->code) && !empty($cat->code) ? ' - '.$cat->code : '').' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
-                        $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
-                            $html .= '<button data-id="'.$cat->id.'" data-tw-toggle="modal" data-tw-target="#editCategoryModal" class="edit_btn p-0 border-0 rounded-0 text-success inline-flex"><i class="w-4 h-4" data-lucide="Pencil"></i></button>';
-                            $html .= '<button data-id="'.$cat->id.'" class="delete_btn p-0 border-0 rounded-0 text-danger inline-flex ml-2"><i class="w-4 h-4" data-lucide="trash-2"></i></button>';
+                    $childCount = (isset($cat->activechildrens) ? $cat->activechildrens->count() : 0);
+                    $name = e($cat->category_name);
+
+                    $html .= '<li class="'.($childCount > 0 ? 'hasChildren' : 'notHasChild').' relative">';
+                        $html .= '<a href="javascript:void(0);" data-type="'.e($type).'" data-category="'.$cat->id.'" class="'.($childCount > 0 ? 'parent_category' : '').' ss-cat-node">';
+                            $html .= '<span class="ss-cat-node__label">'.$name.'</span>';
+                            $html .= ($childCount > 0 ? '<span class="ss-cat-node__count">'.$childCount.'</span>' : '');
+                            $html .= (!empty($cat->code) ? '<span class="ss-cat-node__code">'.e($cat->code).'</span>' : '');
+                            $html .= '<i data-loading-icon="oval" class="ss-cat-node__spinner"></i>';
+                        $html .= '</a>';
+                        $html .= '<div class="settingBtns ss-cat-node__actions">';
+                            $html .= '<button data-id="'.$cat->id.'" data-tw-toggle="modal" data-tw-target="#editCategoryModal" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit '.$name.'"><i data-lucide="pencil"></i></button>';
+                            $html .= '<button data-id="'.$cat->id.'" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete '.$name.'"><i data-lucide="trash-2"></i></button>';
                         $html .= '</div>';
                     $html .= '</li>';
                 endforeach;
             $html .= '</ul>';
         else:
             $html .= '<ul class="errorUL theChild">';
-                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Child Categories not found!</div></li>';
+                $html .= '<li><div class="ss-cat-branch-empty"><i data-lucide="alert-triangle"></i> Child categories not found</div></li>';
             $html .= '</ul>';
         endif;
 

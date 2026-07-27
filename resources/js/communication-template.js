@@ -4,12 +4,44 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const normalizeType = (type) => {
+    return Number(type) === 2 || String(type).toLowerCase() === "sms" ? "sms" : "email";
+};
+
+const typeLabel = (type) => {
+    return normalizeType(type) === "sms" ? "SMS" : "Email";
+};
+
+const formatType = (cell) => {
+    const type = normalizeType(cell.getValue());
+    const icon = type === "sms" ? "smartphone" : "mail";
+
+    return `<span class="ss-template-type-badge is-${type}"><i data-lucide="${icon}"></i>${typeLabel(type)}</span>`;
+};
+
 var CommunTemplateListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query-LS").val() != "" ? $("#query-LS").val() : "";
         let status = $("#status-LS").val() != "" ? $("#status-LS").val() : "";
-        
+
+        if (window.communicationTemplateTableInstance) {
+            window.communicationTemplateTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#CommunTemplateListTable", {
             ajaxURL: route("communication.template.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -19,7 +51,7 @@ var CommunTemplateListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -27,35 +59,47 @@ var CommunTemplateListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "120",
+                    width: 68,
+                    minWidth: 62,
                 },
                 {
                     title: "Type",
                     field: "type",
                     headerHozAlign: "left",
+                    minWidth: 110,
+                    widthGrow: 0.5,
+                    formatter(cell) {
+                        return formatType(cell);
+                    },
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 260,
+                    widthGrow: 2.2,
+                    formatter(cell) {
+                        return `<span class="ss-template-name-cell">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editTemplateModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit communication template"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete communication template"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore communication template"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -63,55 +107,45 @@ var CommunTemplateListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.communicationTemplateTableInstance = tableContent;
+
+        if (window.communicationTemplateTableResizeHandler) {
+            window.removeEventListener("resize", window.communicationTemplateTableResizeHandler);
+        }
+
+        window.communicationTemplateTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.communicationTemplateTableResizeHandler);
+
+        $("#tabulator-export-csv-LS").off("click.communicationtemplate").on("click.communicationtemplate", function () {
+            tableContent.download("csv", "communication-templates.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv-LS").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-LS").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-LS").on("click", function (event) {
+        $("#tabulator-export-xlsx-LS").off("click.communicationtemplate").on("click.communicationtemplate", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Letter Set Details",
+            tableContent.download("xlsx", "communication-templates.xlsx", {
+                sheetName: "Communication Templates",
             });
         });
 
-        $("#tabulator-export-html-LS").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-LS").on("click", function (event) {
+        $("#tabulator-print-LS").off("click.communicationtemplate").on("click.communicationtemplate", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -119,38 +153,46 @@ var CommunTemplateListTable = (function () {
     };
 })();
 
-
-(function(){
-    if ($("#CommunTemplateListTable").length) {
-        // Init Table
-        CommunTemplateListTable.init();
-
-        // Filter function
-        function filterHTMLForm() {
-            CommunTemplateListTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go-LS").on("click", function (event) {
-            filterHTMLForm();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-LS").on("click", function (event) {
-            $("#query-LS").val("");
-            $("#status-LS").val("1");
-            filterHTMLForm();
-        });
+(function () {
+    if (!$("#CommunTemplateListTable").length) {
+        return;
     }
+
+    CommunTemplateListTable.init();
+
+    function filterHTMLForm() {
+        CommunTemplateListTable.init();
+    }
+
+    $("#tabulatorFilterForm-LS")[0].addEventListener("keypress", function (event) {
+        let keycode = event.keyCode ? event.keyCode : event.which;
+        if (keycode == "13") {
+            event.preventDefault();
+            filterHTMLForm();
+        }
+    });
+
+    $("#tabulator-html-filter-go-LS").on("click", function () {
+        filterHTMLForm();
+    });
+
+    $("#tabulator-html-filter-reset-LS").on("click", function () {
+        $("#query-LS").val("");
+        $("#status-LS").val("1");
+        filterHTMLForm();
+    });
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const addTemplateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTemplateModal"));
     const editTemplateModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTemplateModal"));
+    const confModalTitle = "Are you sure?";
 
     let addEditor;
-    if($("#addEditor").length > 0){
-        const el = document.getElementById('addEditor');
+    let editEditor;
+
+    if ($("#addEditor").length > 0) {
+        const el = document.getElementById("addEditor");
         ClassicEditor.create(el).then((editor) => {
             addEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -159,9 +201,8 @@ var CommunTemplateListTable = (function () {
         });
     }
 
-    let editEditor;
-    if($("#editEditor").length > 0){
-        const el = document.getElementById('editEditor');
+    if ($("#editEditor").length > 0) {
+        const el = document.getElementById("editEditor");
         ClassicEditor.create(el).then((editor) => {
             editEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -170,330 +211,295 @@ var CommunTemplateListTable = (function () {
         });
     }
 
-    const addTemplateModalEl = document.getElementById('addTemplateModal')
-    addTemplateModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addTemplateModal .acc__input-error').html('');
-        $('#addTemplateModal input:not([type="radio"])').val('');
-        $('#addTemplateModal input[type="radio"][value="1"]').prop('checked', true);
+    const setBusy = ($button, isBusy) => {
+        $button.prop("disabled", isBusy);
+        $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+    };
 
-        $('#addTemplateForm .smsContentWrap').fadeOut('fast', function(){
-            $('#addTemplateForm .smsContentWrap textarea').val('');
-            $('#addTemplateForm .emailContentWrap').fadeIn();
-            addEditor.setData('');
-        })
-        $('#addTemplateForm .sms_countr').html('160 / 1');
-        $('#addTemplateForm .modal-content .smsWarning').remove();
-    });
+    const showSuccess = (title, message) => {
+        $("#successModal .successModalTitle").html(title);
+        $("#successModal .successModalDesc").html(message);
+        successModal.show();
+    };
 
-    const editTemplateModalEl = document.getElementById('editTemplateModal')
-    editTemplateModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editTemplateModal .acc__input-error').html('');
-        $('#editTemplateModal input:not([type="radio"])').val('');
-        $('#addTemplateModal input[type="radio"][value="1"]').prop('checked', true);
+    const clearErrors = ($form) => {
+        $form.find(".acc__input-error").html("");
+        $form.find(".border-danger").removeClass("border-danger");
+        $form.find(".ss-editor").removeClass("is-danger");
+        $form.find(".ss-template-type-options").removeClass("is-danger");
+    };
 
-        $('#editTemplateForm .smsContentWrap').fadeOut('fast', function(){
-            $('#editTemplateForm .smsContentWrap textarea').val('');
-            $('#editTemplateForm .emailContentWrap').fadeIn();
-            editEditor.setData('');
-        })
-        $('#editTemplateForm .sms_countr').html('160 / 1');
-        $('#editTemplateForm .modal-content .smsWarning').remove();
-    });
+    const showErrors = ($form, errors) => {
+        for (const [key, val] of Object.entries(errors)) {
+            const message = Array.isArray(val) ? val[0] : val;
+            const field = key.split(".")[0];
 
-    document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-        $('#confirmModal .agreeWith').attr('data-id', '0');
-        $('#confirmModal .agreeWith').attr('data-action', 'none');
-    });
+            $form.find(`.${field}`).addClass("border-danger");
+            $form.find(`.error-${field}`).html(message);
 
-    $('#addTemplateForm').on('change', '.templateType', function(){
-        let templateType = $('#addTemplateForm input[name="type"]:checked').val();
-        if(templateType == 2){
-            $('#addTemplateForm .emailContentWrap').fadeOut('fast', function(){
-                addEditor.setData('');
-                $('#addTemplateForm .smsContentWrap').fadeIn();
-                $('#addTemplateForm .smsContentWrap textarea').val('');
-                $('#addTemplateForm .sms_countr').html('160 / 1');
-            })
-        }else{
-            $('#addTemplateForm .smsContentWrap').fadeOut('fast', function(){
-                $('#addTemplateForm .smsContentWrap textarea').val('');
-                $('#addTemplateForm .emailContentWrap').fadeIn();
-                addEditor.setData('');
-            })
-        }
-        $('#addTemplateForm .modal-content .smsWarning').remove();
-    });
-
-    $('#editTemplateForm').on('change', '.templateType', function(){
-        let templateType = $('#editTemplateForm input[name="type"]:checked').val();
-        if(templateType == 2){
-            $('#editTemplateForm .emailContentWrap').fadeOut('fast', function(){
-                addEditor.setData('');
-                $('#editTemplateForm .smsContentWrap').fadeIn();
-                $('#editTemplateForm .smsContentWrap textarea').val('');
-                $('#editTemplateForm .sms_countr').html('160 / 1');
-            })
-        }else{
-            $('#editTemplateForm .smsContentWrap').fadeOut('fast', function(){
-                $('#editTemplateForm .smsContentWrap textarea').val('');
-                $('#editTemplateForm .emailContentWrap').fadeIn();
-                addEditor.setData('');
-            })
-        }
-        $('#editTemplateForm .modal-content .smsWarning').remove();
-    });
-
-    $('#sms_content').on('keyup', function(){
-        var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
-        var chars = this.value.length,
-            messages = Math.ceil(chars / 160),
-            remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
-        if(chars > 0){
-            if(chars >= maxlength && maxlength > 0){
-                $('#addTemplateForm .modal-content .smsWarning').remove();
-                $('#addTemplateForm .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
-            }else{
-                $('#addTemplateForm .modal-content .smsWarning').remove();
+            if (field === "type") {
+                $form.find(".ss-template-type-options").addClass("is-danger");
             }
-            $('#addTemplateForm .sms_countr').html(remaining +' / '+messages);
-        }else{
-            $('#addTemplateForm .sms_countr').html('160 / 1');
-            $('#addTemplateForm .modal-content .smsWarning').remove();
-        }
-    });
 
-    $('#edit_sms_content').on('keyup', function(){
-        var maxlength = ($(this).attr('maxlength') > 0 && $(this).attr('maxlength') != '' ? $(this).attr('maxlength') : 0);
-        var chars = this.value.length,
-            messages = Math.ceil(chars / 160),
-            remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
-        if(chars > 0){
-            if(chars >= maxlength && maxlength > 0){
-                $('#addTemplateForm .modal-content .smsWarning').remove();
-                $('#addTemplateForm .modal-content').prepend('<div class="alert smsWarning alert-danger-soft show flex items-center mb-0" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>Opps! Your maximum character limit exceeded. Please make the text short or contact with administrator.</div>').fadeIn();
-            }else{
-                $('#addTemplateForm .modal-content .smsWarning').remove();
+            if (field === "email_content") {
+                $form.find(".ss-editor").addClass("is-danger");
             }
-            $('#addTemplateForm .sms_countr').html(remaining +' / '+messages);
-        }else{
-            $('#addTemplateForm .sms_countr').html('160 / 1');
-            $('#addTemplateForm .modal-content .smsWarning').remove();
         }
+    };
+
+    const updateSmsCounter = ($textarea) => {
+        const chars = $textarea.val().length;
+        const messages = Math.max(Math.ceil(chars / 160), 1);
+        const remaining = chars > 0 ? messages * 160 - chars : 160;
+        const $form = $textarea.closest("form");
+
+        $form.find(".sms_countr").html(`${remaining} / ${messages}`);
+    };
+
+    const setTemplateMode = ($form, mode, options = {}) => {
+        const clearContent = options.clearContent || false;
+        const editor = $form.attr("id") === "editTemplateForm" ? editEditor : addEditor;
+        const isSms = normalizeType(mode) === "sms";
+
+        $form.find('input[name="type"][value="' + (isSms ? "2" : "1") + '"]').prop("checked", true);
+
+        if (isSms) {
+            $form.find(".emailContentWrap").hide();
+            $form.find(".smsContentWrap").show();
+        } else {
+            $form.find(".smsContentWrap").hide();
+            $form.find(".emailContentWrap").show();
+        }
+
+        if (clearContent) {
+            if (editor) {
+                editor.setData("");
+            }
+
+            $form.find(".smsContentWrap textarea").val("");
+            updateSmsCounter($form.find(".smsContentWrap textarea"));
+        }
+    };
+
+    const resetAddForm = () => {
+        const $form = $("#addTemplateForm");
+        clearErrors($form);
+        $form.find('input[name="name"]').val("");
+        setTemplateMode($form, "email", { clearContent: true });
+        setBusy($("#saveTemplate"), false);
+    };
+
+    const resetEditForm = () => {
+        const $form = $("#editTemplateForm");
+        clearErrors($form);
+        $form.find('input[name="name"]').val("");
+        $form.find('input[name="id"]').val("0");
+        setTemplateMode($form, "email", { clearContent: true });
+        setBusy($("#editTemplates"), false);
+    };
+
+    updateSmsCounter($("#sms_content"));
+    updateSmsCounter($("#edit_sms_content"));
+
+    $(document).on("change", "#addTemplateForm .templateType, #editTemplateForm .templateType", function () {
+        const $form = $(this).closest("form");
+        setTemplateMode($form, $(this).val(), { clearContent: true });
+        clearErrors($form);
     });
 
-    $('#addTemplateForm').on('submit', function(e){
+    $(document).on("keyup input", "#sms_content, #edit_sms_content", function () {
+        updateSmsCounter($(this));
+    });
+
+    document.getElementById("addTemplateModal").addEventListener("show.tw.modal", function () {
+        resetAddForm();
+    });
+
+    document.getElementById("addTemplateModal").addEventListener("hide.tw.modal", function () {
+        resetAddForm();
+    });
+
+    document.getElementById("editTemplateModal").addEventListener("hide.tw.modal", function () {
+        resetEditForm();
+    });
+
+    document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#addTemplateForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('addTemplateForm');
-    
-        document.querySelector('#saveTemplate').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveTemplate svg").style.cssText ="display: inline-block;";
+        const $form = $("#addTemplateForm");
+        const form = document.getElementById("addTemplateForm");
 
-        let form_data = new FormData(form);
-        form_data.append("email_content", addEditor.getData());
+        clearErrors($form);
+        setBusy($("#saveTemplate"), true);
+
+        let formData = new FormData(form);
+        formData.append("email_content", addEditor ? addEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('communication.template.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveTemplate').removeAttribute('disabled');
-            document.querySelector("#saveTemplate svg").style.cssText = "display: none;";
-            
-            if (response.status == 200) {
-                addTemplateModal.hide();
+            url: route("communication.template.store"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#saveTemplate"), false);
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('System communication set successfully inserted.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+            if (response.status == 200) {
+                resetAddForm();
+                addTemplateModal.hide();
+                showSuccess("Success!", "System communication template successfully inserted.");
             }
+
             CommunTemplateListTable.init();
-        }).catch(error => {
-            document.querySelector('#saveTemplate').removeAttribute('disabled');
-            document.querySelector("#saveTemplate svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#saveTemplate"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addTemplateForm .${key}`).addClass('border-danger')
-                        $(`#addTemplateForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    $('#CommunTemplateListTable').on('click', '.edit_btn', function(){
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
+    $("#CommunTemplateListTable").on("click", ".edit_btn", function () {
+        let recordId = $(this).attr("data-id");
+        resetEditForm();
 
         axios({
             method: "get",
             url: route("communication.template.edit", recordId),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
         }).then((response) => {
             if (response.status == 200) {
-                let dataset = response.data;
-                
-                $('#editTemplateModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                $('#editTemplateModal input[type="radio"][value="'+dataset.type+'"]').prop('checked', true);
-                if(dataset.type == 2){
-                    $('#editTemplateModal .emailContentWrap').fadeOut('fast', function(){
-                        editEditor.setData('');
-                        $('#editTemplateModal .smsContentWrap').fadeIn();
-                        $('#editTemplateModal .smsContentWrap textarea').val(dataset.content ? dataset.content : '');
-                        $('#editTemplateModal .sms_countr').html('160 / 1');
-                    })
-                }else{
-                    $('#editTemplateModal .smsContentWrap').fadeOut('fast', function(){
-                        $('#editTemplateModal .smsContentWrap textarea').val('');
-                        $('#editTemplateModal .emailContentWrap').fadeIn();
-                        editEditor.setData(dataset.content ? dataset.content : '');
-                        $('#editTemplateModal .sms_countr').html('160 / 1');
-                    })
+                const dataset = response.data;
+                const $form = $("#editTemplateForm");
+                const isSms = Number(dataset.type) === 2;
+
+                $form.find('input[name="name"]').val(dataset.name ? dataset.name : "");
+                $form.find('input[name="id"]').val(recordId);
+                setTemplateMode($form, isSms ? "sms" : "email");
+
+                if (isSms) {
+                    $form.find("#edit_sms_content").val(dataset.content ? dataset.content : "");
+                    updateSmsCounter($form.find("#edit_sms_content"));
+                } else if (editEditor) {
+                    editEditor.setData(dataset.content ? dataset.content : "");
                 }
 
-                $('#editTemplateModal input[name="id"]').val(recordId);
+                editTemplateModal.show();
             }
         }).catch((error) => {
             console.log(error);
         });
     });
 
-
-    $('#editTemplateForm').on('submit', function(e){
+    $("#editTemplateForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('editTemplateForm');
-    
-        document.querySelector('#editTemplates').setAttribute('disabled', 'disabled');
-        document.querySelector("#editTemplates svg").style.cssText ="display: inline-block;";
+        const $form = $("#editTemplateForm");
+        const form = document.getElementById("editTemplateForm");
 
-        let form_data = new FormData(form);
-        form_data.append("email_content", editEditor.getData());
+        clearErrors($form);
+        setBusy($("#editTemplates"), true);
+
+        let formData = new FormData(form);
+        formData.append("email_content", editEditor ? editEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('communication.template.update'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#editTemplates').removeAttribute('disabled');
-            document.querySelector("#editTemplates svg").style.cssText = "display: none;";
-            
+            url: route("communication.template.update"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#editTemplates"), false);
+
             if (response.status == 200) {
                 editTemplateModal.hide();
-
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('System communication set successfully updated.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+                showSuccess("Success!", "System communication template successfully updated.");
             }
+
             CommunTemplateListTable.init();
-        }).catch(error => {
-            document.querySelector('#editTemplates').removeAttribute('disabled');
-            document.querySelector("#editTemplates svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#editTemplates"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editTemplateForm .${key}`).addClass('border-danger')
-                        $(`#editTemplateForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
+                } else if (error.response.status == 304) {
+                    editTemplateModal.hide();
+                    showSuccess("No Data Change!", error.response.statusText);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    // Delete Course
-    $('#CommunTemplateListTable').on('click', '.delete_btn', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#CommunTemplateListTable").on("click", ".delete_btn", function () {
+        let rowID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to delete this communication template?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-action", "DELETE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-        });
     });
 
-    // Restore Course
-    $('#CommunTemplateListTable').on('click', '.restore_btn', function(){
-        let $statusBTN = $(this);
-        let dataID = $statusBTN.attr('data-id');
+    $("#CommunTemplateListTable").on("click", ".restore_btn", function () {
+        let dataID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to restore this communication template?");
+        $("#confirmModal .agreeWith").attr("data-id", dataID);
+        $("#confirmModal .agreeWith").attr("data-action", "RESTORE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', dataID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-        });
     });
 
-
-    // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function(){
+    $("#confirmModal .agreeWith").on("click", function () {
         let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
+        let recordID = $agreeBTN.attr("data-id");
+        let action = $agreeBTN.attr("data-action");
 
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if(action == 'DELETE'){
+        $("#confirmModal button").attr("disabled", "disabled");
+
+        const done = (title, message) => {
+            $("#confirmModal button").removeAttr("disabled");
+            confirmModal.hide();
+            showSuccess(title, message);
+            CommunTemplateListTable.init();
+        };
+
+        const failed = (error) => {
+            $("#confirmModal button").removeAttr("disabled");
+            console.log(error);
+        };
+
+        if (action == "DELETE") {
             axios({
-                method: 'delete',
-                url: route('communication.template.destory', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "delete",
+                url: route("communication.template.destory", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('System Communication Template item successfully deleted!');
-                    });
+                    done("Done!", "System communication template successfully deleted.");
                 }
-                CommunTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'RESTORE'){
+            }).catch(failed);
+        } else if (action == "RESTORE") {
             axios({
-                method: 'post',
-                url: route('communication.template.restore', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("communication.template.restore", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('System Communication Template item successfully restored!');
-                    });
+                    done("Success!", "System communication template successfully restored.");
                 }
-                CommunTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
+            }).catch(failed);
         }
     });
-
-})()
+})();

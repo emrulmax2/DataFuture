@@ -161,21 +161,33 @@ var submissionTable = (function () {
     };
 
     $('.lccTom').each(function () {
-        if ($(this).attr('multiple') !== undefined) {
-            tomOptions = {
+        let selectOptions = {
+            ...tomOptions,
+            plugins: {
+                ...tomOptions.plugins,
+            },
+        };
+
+        if ($(this).hasClass('sr-final-select')) {
+            selectOptions = {
+                ...selectOptions,
                 dropdownParent: 'body',
-                dropdownClass: 'ts-dropdown lcc-tom-float',
-                
-                ...tomOptions,
+                dropdownClass: 'ts-dropdown sr-comparison-grade-dropdown',
+            };
+        }
+
+        if ($(this).attr('multiple') !== undefined) {
+            selectOptions = {
+                ...selectOptions,
                 plugins: {
-                    ...tomOptions.plugins,
+                    ...selectOptions.plugins,
                     remove_button: {
                         title: 'Remove this item',
                     },
                 },
             };
         }
-        new TomSelect(this, tomOptions);
+        new TomSelect(this, selectOptions);
     });
     const successModal = tailwind.Modal.getOrCreateInstance(
         document.querySelector('#successModal')

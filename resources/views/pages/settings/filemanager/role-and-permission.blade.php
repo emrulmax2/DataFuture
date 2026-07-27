@@ -1,294 +1,388 @@
-@extends('../layout/' . $layout)
+@extends('../layout/site-settings')
+
+@section('body_class', 'site-settings-isolated')
 
 @section('subhead')
     <title>{{ $title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet">
 @endsection
 
-@section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('site.setting') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Settings</a>
-        </div>
-    </div>
+@section('styles')
+    @vite('resources/css/site-settings-redesign.css')
+@endsection
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.settings.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+@section('content')
+    <div id="siteSettingsPage" class="ss-page ss-doc-role-page">
+        @include('pages.settings.partials.isolated-header')
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <!-- BEGIN: Display Information -->
-            <div class="intro-y box lg:mt-5">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Roles & Permissions</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addPermissionModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add Permission</button>
+        <nav class="ss-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ route('dashboard') }}">
+                <i data-lucide="home"></i>
+                Dashboard
+            </a>
+            <i data-lucide="chevron-right"></i>
+            <span>Site Settings</span>
+            <i data-lucide="chevron-right"></i>
+            <span>File Manager</span>
+            <i data-lucide="chevron-right"></i>
+            <span>Document Roles</span>
+        </nav>
+
+        <main class="ss-main">
+            <section class="ss-title-card">
+                <div class="ss-title-card__content">
+                    <button type="button" class="ss-icon-btn ss-sidebar-toggle" data-ss-sidebar-toggle aria-label="Open settings menu">
+                        <i data-lucide="panel-left"></i>
+                    </button>
+                    <span class="ss-title-card__icon">
+                        <i data-lucide="shield-check"></i>
+                    </span>
+                    <div>
+                        <h1>{{ $subtitle }}</h1>
+                        <p>Define document roles and the actions each role can perform in File Manager.</p>
+                    </div>
                 </div>
-                <div class="p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
+                <a href="{{ route('site.setting') }}" class="ss-back-btn">
+                    <i data-lucide="arrow-left"></i>
+                    Back to Settings
+                </a>
+            </section>
+
+            <div class="ss-workspace">
+                <button type="button" class="ss-sidebar-backdrop" data-ss-sidebar-close aria-label="Close settings menu"></button>
+                <aside class="ss-sidebar">
+                    @php
+                        $settingsSidebarIcon = 'folder-lock';
+                        $settingsSidebarSubtitle = 'File manager access';
+                    @endphp
+                    @include('pages.settings.sidebar')
+                </aside>
+
+                <section class="ss-content">
+                    <div class="ss-table-card ss-doc-role-card">
+                        <div class="ss-table-card__header">
+                            <div>
+                                <h2>Roles & Permissions</h2>
+                                <p>Create, read, update and delete access for document folders</p>
                             </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                            <button data-tw-toggle="modal" data-tw-target="#addPermissionModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">
+                                <i data-lucide="plus"></i>
+                                Add Permission
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                        </div>
+
+                        <div class="ss-table-tools">
+                            <form id="tabulatorFilterForm" class="ss-table-filter">
+                                <div class="ss-filter-field">
+                                    <span>Query</span>
+                                    <label class="ss-filter-input" for="query">
+                                        <i data-lucide="search"></i>
+                                        <input id="query" name="query" type="text" placeholder="Search roles...">
+                                    </label>
+                                </div>
+                                <div class="ss-filter-field">
+                                    <span>Status</span>
+                                    <label class="ss-filter-select" for="status">
+                                        <select id="status" name="status">
+                                            <option value="1">Active</option>
+                                            <option value="2">Archived</option>
+                                        </select>
+                                        <i data-lucide="chevron-down"></i>
+                                    </label>
+                                </div>
+                                <button id="tabulator-html-filter-go" type="button" class="ss-btn ss-btn--primary ss-btn--tool">Go</button>
+                                <button id="tabulator-html-filter-reset" type="button" class="ss-btn ss-btn--light ss-btn--tool">Reset</button>
+                            </form>
+
+                            <div class="ss-table-actions">
+                                <button id="tabulator-print" type="button" class="ss-btn ss-btn--light ss-btn--tool">
+                                    <i data-lucide="printer"></i>
+                                    Print
                                 </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                            </a>
-                                        </li>
-                                    </ul>
+                                <div class="dropdown ss-export-dropdown">
+                                    <button type="button" class="dropdown-toggle ss-btn ss-btn--light ss-btn--tool" aria-expanded="false" data-tw-toggle="dropdown">
+                                        <i data-lucide="download"></i>
+                                        Export
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu ss-export-menu">
+                                        <ul class="dropdown-content">
+                                            <li>
+                                                <a id="tabulator-export-csv" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-text"></i>
+                                                    Export CSV
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a id="tabulator-export-xlsx" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-spreadsheet"></i>
+                                                    Export XLSX
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="docRolePermissionTable" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Settings Page Content -->
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="addPermissionForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Role & Permission</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="display_name" class="form-label">Display Name <span class="text-danger">*</span></label>
-                            <input id="display_name" type="text" name="display_name" class="form-control w-full">
-                            <div class="acc__input-error error-display_name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="type" class="form-label">Type <span class="text-danger">*</span></label>
-                            <input id="type" type="text" name="type" class="form-control w-full">
-                            <div class="acc__input-error error-type text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="opening_date" class="form-label">Permissions</label>
-                            <table class="table table-bordered table-sm allPermissions">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Create</th>
-                                        <th class="text-center">Read</th>
-                                        <th class="text-center">Update</th>
-                                        <th class="text-center">Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="create" class="form-check-input" name="create" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="read" class="form-check-input" name="read" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="update" class="form-check-input" name="update" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="delete" class="form-check-input" name="delete" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="acc__input-error error-checkboxs text-danger mt-2"></div>
+                        <div class="ss-tabulator-wrap">
+                            <div id="docRolePermissionTable" class="ss-tabulator table-report table-report--tabulator"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveRole" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
+                </section>
+            </div>
+        </main>
+
+        <div id="addPermissionModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-settings-modal__dialog ss-doc-role-modal-dialog">
+                <form method="POST" action="#" id="addPermissionForm" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content ss-settings-modal ss-doc-role-modal">
+                        <div class="ss-settings-modal__header">
+                            <div>
+                                <span></span>
+                                <h2>Add Role & Permission</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ss-settings-modal__body">
+                            <div class="ss-modal-grid">
+                                <div class="ss-modal-field">
+                                    <label for="display_name">Display Name <span>*</span></label>
+                                    <input id="display_name" type="text" name="display_name" class="ss-modal-input display_name" placeholder="Display name">
+                                    <div class="acc__input-error error-display_name"></div>
+                                </div>
+                                <div class="ss-modal-field">
+                                    <label for="type">Type <span>*</span></label>
+                                    <input id="type" type="text" name="type" class="ss-modal-input type" placeholder="Permission type">
+                                    <div class="acc__input-error error-type"></div>
+                                </div>
+                                <div class="ss-modal-field ss-modal-field--full">
+                                    <label>Permissions <span>*</span></label>
+                                    <div class="ss-doc-permission-grid" data-permission-group>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="create">
+                                            <input id="create" name="create" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Create</strong>
+                                                <small>Add new documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="read">
+                                            <input id="read" name="read" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Read</strong>
+                                                <small>View documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="update">
+                                            <input id="update" name="update" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Update</strong>
+                                                <small>Edit documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="delete">
+                                            <input id="delete" name="delete" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Delete</strong>
+                                                <small>Remove documents</small>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="acc__input-error error-checkboxs"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer ss-settings-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
+                                <i data-lucide="x"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" id="saveRole" class="ss-btn ss-btn--primary">
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
                                     </g>
-                                </g>
-                            </svg>
-                        </button>
+                                </svg>
+                                <i data-lucide="check"></i>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="editPermissionModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-settings-modal__dialog ss-doc-role-modal-dialog">
+                <form method="POST" action="#" id="editPermissionForm" autocomplete="off">
+                    <div class="modal-content ss-settings-modal ss-doc-role-modal">
+                        <div class="ss-settings-modal__header">
+                            <div>
+                                <span></span>
+                                <h2>Edit Role & Permission</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ss-settings-modal__body">
+                            <div class="ss-modal-grid">
+                                <div class="ss-modal-field">
+                                    <label for="edit_display_name">Display Name <span>*</span></label>
+                                    <input id="edit_display_name" type="text" name="display_name" class="ss-modal-input display_name" placeholder="Display name">
+                                    <div class="acc__input-error error-display_name"></div>
+                                </div>
+                                <div class="ss-modal-field">
+                                    <label for="edit_type">Type <span>*</span></label>
+                                    <input id="edit_type" type="text" name="type" class="ss-modal-input type" placeholder="Permission type">
+                                    <div class="acc__input-error error-type"></div>
+                                </div>
+                                <div class="ss-modal-field ss-modal-field--full">
+                                    <label>Permissions <span>*</span></label>
+                                    <div class="ss-doc-permission-grid" data-permission-group>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="edit_create">
+                                            <input id="edit_create" name="create" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Create</strong>
+                                                <small>Add new documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="edit_read">
+                                            <input id="edit_read" name="read" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Read</strong>
+                                                <small>View documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="edit_update">
+                                            <input id="edit_update" name="update" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Update</strong>
+                                                <small>Edit documents</small>
+                                            </span>
+                                        </label>
+                                        <label class="ss-status-toggle ss-doc-permission-toggle" for="edit_delete">
+                                            <input id="edit_delete" name="delete" type="checkbox" value="1" autocomplete="off">
+                                            <span class="ss-status-toggle__control">
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                            </span>
+                                            <span class="ss-status-toggle__copy">
+                                                <strong>Delete</strong>
+                                                <small>Remove documents</small>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="acc__input-error error-checkboxs"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer ss-settings-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
+                                <i data-lucide="x"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" id="updateRole" class="ss-btn ss-btn--primary">
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
+                                    </g>
+                                </svg>
+                                <i data-lucide="check"></i>
+                                Update
+                            </button>
+                            <input type="hidden" name="id" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content ss-success-modal">
+                    <div class="modal-body p-0">
+                        <div class="ss-success-modal__body">
+                            <i data-lucide="check-circle" class="ss-success-modal__icon"></i>
+                            <div class="successModalTitle"></div>
+                            <p class="successModalDesc"></p>
+                        </div>
+                        <div class="ss-success-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--primary">Ok</button>
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-    <!-- END: Add Modal -->
-    <!-- BEGIN: Edit Modal -->
-    <div id="editPermissionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form method="POST" action="#" id="editPermissionForm">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Role & Permission</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
+
+        <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-confirm-modal__dialog">
+                <div class="modal-content ss-confirm-modal">
+                    <div class="ss-confirm-modal__hero">
+                        <span><i data-lucide="alert-triangle"></i></span>
+                        <h2 class="confModTitle">Are you sure?</h2>
                     </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="edit_display_name" class="form-label">Display Name <span class="text-danger">*</span></label>
-                            <input id="edit_display_name" type="text" name="display_name" class="form-control w-full">
-                            <div class="acc__input-error error-display_name text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="edit_type" class="form-label">Type <span class="text-danger">*</span></label>
-                            <input id="edit_type" type="text" name="type" class="form-control w-full">
-                            <div class="acc__input-error error-type text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="opening_date" class="form-label">Permissions</label>
-                            <table class="table table-bordered table-sm allPermissions">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Create</th>
-                                        <th class="text-center">Read</th>
-                                        <th class="text-center">Update</th>
-                                        <th class="text-center">Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="edit_create" class="form-check-input" name="create" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="edit_read" class="form-check-input" name="read" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="edit_update" class="form-check-input" name="update" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="form-check m-0 inline-flex">
-                                                <input id="edit_delete" class="form-check-input" name="delete" type="checkbox" value="1">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="acc__input-error error-checkboxs text-danger mt-2"></div>
-                        </div>
+                    <div class="ss-confirm-modal__body">
+                        <p class="confModDesc"></p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="updateRole" class="btn btn-primary w-auto">
-                            Update
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
+                    <div class="ss-confirm-modal__footer">
+                        <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--light">
+                            <i data-lucide="x"></i>
+                            No, Cancel
                         </button>
-                        <input type="hidden" name="id" value="0" />
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Edit Modal -->
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWith ss-btn ss-btn--danger">
+                            <i data-lucide="check"></i>
+                            Yes, I agree
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')
     @vite('resources/js/settings.js')
     @vite('resources/js/document-role-and-permission.js')
+    @vite('resources/js/site-settings-redesign.js')
 @endsection

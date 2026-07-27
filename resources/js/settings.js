@@ -1,7 +1,8 @@
 import { createIcons, icons } from "lucide";
 
 (function(){
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const successModalEl = document.querySelector("#successModal");
+    const successModal = successModalEl ? tailwind.Modal.getOrCreateInstance(successModalEl) : null;
 
     $('.settingsMenu ul li.hasChild > a').on('click', function(e){
         e.preventDefault();
@@ -55,6 +56,10 @@ import { createIcons, icons } from "lucide";
             document.querySelector("#updateCINF svg").style.cssText = "display: none;";
             console.log(response.data.msg);
             if (response.status == 200) {
+                if (!successModal) {
+                    return;
+                }
+
                 successModal.show();
                 document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
                     $("#successModal .successModalTitle").html( "Congratulations!" );

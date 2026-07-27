@@ -4,13 +4,51 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
+
+const emailPhaseKeys = ["admission", "live", "hr"];
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const isOnValue = (value) => {
+    return value === true || value == 1;
+};
+
+const formatSwitch = (cell, options) => {
+    const isOn = isOnValue(cell.getValue());
+    const rowId = cell.getData().id;
+    const phaseAttr = options.phase ? ` data-phase="${options.phase}"` : "";
+
+    return (
+        '<button type="button" role="switch" aria-checked="' + (isOn ? "true" : "false") + '"' +
+        ' class="ss-table-switch ' + options.className + (isOn ? " is-active" : " is-inactive") + '"' +
+        ' data-id="' + rowId + '"' + phaseAttr +
+        ' aria-label="' + options.label + '">' +
+        '<i data-lucide="' + (isOn ? "check" : "x") + '"></i>' +
+        "</button>"
+    );
+};
+
 var emailTemplateListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query-EMAIL").val() != "" ? $("#query-EMAIL").val() : "";
         let status = $("#status-EMAIL").val() != "" ? $("#status-EMAIL").val() : "";
         let phase = $("#phase-EMAIL").val() != "" ? $("#phase-EMAIL").val() : "";
-        
+
+        if (window.emailTemplateTableInstance) {
+            window.emailTemplateTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#emailTemplateListTable", {
             ajaxURL: route("email.template.list"),
             ajaxParams: { querystr: querystr, status: status, phase: phase },
@@ -20,7 +58,7 @@ var emailTemplateListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -28,66 +66,96 @@ var emailTemplateListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "70",
+                    width: 68,
+                    minWidth: 62,
                 },
                 {
                     title: "Template Title",
                     field: "email_title",
                     headerHozAlign: "left",
+                    minWidth: 200,
+                    widthGrow: 2,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "Admission",
                     field: "admission",
-                    headerHozAlign: "left",
-                    width: "120",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="admission" data-id="'+cell.getData().id+'" '+(cell.getData().admission == 1 ? 'Checked' : '')+' value="'+cell.getData().admission+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 96,
+                    widthGrow: 0.55,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "admission",
+                            label: "Toggle admission phase",
+                        });
+                    },
                 },
                 {
                     title: "Live",
                     field: "live",
-                    headerHozAlign: "left",
-                    width: "120",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="live" data-id="'+cell.getData().id+'" '+(cell.getData().live == 1 ? 'Checked' : '')+' value="'+cell.getData().live+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 88,
+                    widthGrow: 0.5,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "live",
+                            label: "Toggle live student phase",
+                        });
+                    },
                 },
                 {
                     title: "HR",
                     field: "hr",
-                    width: "120",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="hr" data-id="'+cell.getData().id+'" '+(cell.getData().hr == 1 ? 'Checked' : '')+' value="'+cell.getData().hr+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 84,
+                    widthGrow: 0.48,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "hr",
+                            label: "Toggle human resource phase",
+                        });
+                    },
                 },
                 {
                     title: "Status",
                     field: "status",
-                    width: "120",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 92,
+                    widthGrow: 0.5,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "status_updater",
+                            label: "Toggle template status",
+                        });
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editEmailModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit email template"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete email template"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore email template"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -95,55 +163,45 @@ var emailTemplateListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.emailTemplateTableInstance = tableContent;
+
+        if (window.emailTemplateTableResizeHandler) {
+            window.removeEventListener("resize", window.emailTemplateTableResizeHandler);
+        }
+
+        window.emailTemplateTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.emailTemplateTableResizeHandler);
+
+        $("#tabulator-export-csv-EMAIL").off("click.emailtemplate").on("click.emailtemplate", function () {
+            tableContent.download("csv", "email-templates.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv-EMAIL").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json-EMAIL").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx-EMAIL").on("click", function (event) {
+        $("#tabulator-export-xlsx-EMAIL").off("click.emailtemplate").on("click.emailtemplate", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
+            tableContent.download("xlsx", "email-templates.xlsx", {
                 sheetName: "Email Template Details",
             });
         });
 
-        $("#tabulator-export-html-EMAIL").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print-EMAIL").on("click", function (event) {
+        $("#tabulator-print-EMAIL").off("click.emailtemplate").on("click.emailtemplate", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -151,39 +209,47 @@ var emailTemplateListTable = (function () {
     };
 })();
 
-
-(function(){
-    if ($("#emailTemplateListTable").length) {
-        // Init Table
-        emailTemplateListTable.init();
-
-        // Filter function
-        function filterHTMLForm() {
-            emailTemplateListTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go-EMAIL").on("click", function (event) {
-            filterHTMLForm();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-EMAIL").on("click", function (event) {
-            $("#query-EMAIL").val("");
-            $("#status-EMAIL").val("1");
-            $("#phase-EMAIL").val("");
-            filterHTMLForm();
-        });
+(function () {
+    if (!$("#emailTemplateListTable").length) {
+        return;
     }
 
-    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    emailTemplateListTable.init();
+
+    function filterHTMLForm() {
+        emailTemplateListTable.init();
+    }
+
+    $("#tabulatorFilterForm-EMAIL")[0].addEventListener("keypress", function (event) {
+        let keycode = event.keyCode ? event.keyCode : event.which;
+        if (keycode == "13") {
+            event.preventDefault();
+            filterHTMLForm();
+        }
+    });
+
+    $("#tabulator-html-filter-go-EMAIL").on("click", function () {
+        filterHTMLForm();
+    });
+
+    $("#tabulator-html-filter-reset-EMAIL").on("click", function () {
+        $("#query-EMAIL").val("");
+        $("#status-EMAIL").val("1");
+        $("#phase-EMAIL").val("");
+        filterHTMLForm();
+    });
+
     const addEmailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addEmailModal"));
     const editEmailModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editEmailModal"));
+    const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const confModalTitle = "Are you sure?";
 
     let addEditor;
-    if($("#addEditor").length > 0){
-        const el = document.getElementById('addEditor');
+    let editEditor;
+
+    if ($("#addEditor").length > 0) {
+        const el = document.getElementById("addEditor");
         ClassicEditor.create(el).then((editor) => {
             addEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -192,9 +258,8 @@ var emailTemplateListTable = (function () {
         });
     }
 
-    let editEditor;
-    if($("#editEditor").length > 0){
-        const el = document.getElementById('editEditor');
+    if ($("#editEditor").length > 0) {
+        const el = document.getElementById("editEditor");
         ClassicEditor.create(el).then((editor) => {
             editEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -203,337 +268,336 @@ var emailTemplateListTable = (function () {
         });
     }
 
-    const addEmailModalEl = document.getElementById('addEmailModal')
-    addEmailModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addEmailModal .acc__input-error').html('');
-        $('#addEmailModal input:not([type="checkbox"])').val('');
-        $('#addEmailModal .phaseCheckboxs').prop('checked', false);
-        $('#addEmailModal #status').prop('checked', true);
-        addEditor.setData('');
+    const setBusy = ($button, isBusy) => {
+        $button.prop("disabled", isBusy);
+        $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+    };
+
+    const showSuccess = (title, message) => {
+        $("#successModal .successModalTitle").html(title);
+        $("#successModal .successModalDesc").html(message);
+        successModal.show();
+    };
+
+    const clearErrors = ($form) => {
+        $form.find(".acc__input-error").html("");
+        $form.find(".border-danger").removeClass("border-danger");
+        $form.find(".ss-editor").removeClass("is-danger");
+    };
+
+    const showErrors = ($form, errors) => {
+        for (const [key, val] of Object.entries(errors)) {
+            const message = Array.isArray(val) ? val[0] : val;
+            const field = key.split(".")[0];
+
+            $form.find(`.${field}`).addClass("border-danger");
+            $form.find(`.error-${field}`).html(message);
+
+            if (field === "description") {
+                $form.find(".ss-editor").addClass("is-danger");
+            }
+        }
+    };
+
+    const updatePhaseToggleText = ($toggle) => {
+        const enabled = $toggle.find("input").is(":checked");
+        $toggle.find(".ss-status-toggle__copy small").text(enabled ? "Enabled" : "Not enabled");
+    };
+
+    const updateStatusToggleText = ($toggle) => {
+        const enabled = $toggle.find("input").is(":checked");
+        $toggle.find(".ss-status-toggle__copy small").text(enabled ? "Template is available" : "Template is hidden");
+    };
+
+    const updateToggleTexts = ($form) => {
+        $form.find(".ss-doc-toggle").each(function () {
+            updatePhaseToggleText($(this));
+        });
+        $form.find(".ss-status-toggle--inline").each(function () {
+            updateStatusToggleText($(this));
+        });
+    };
+
+    const resetAddForm = () => {
+        const $form = $("#addEmailForm");
+        clearErrors($form);
+        $form.find('input[name="email_title"]').val("");
+        $form.find(".phaseCheckboxs").prop("checked", false);
+        $form.find("#status").prop("checked", true);
+        updateToggleTexts($form);
+        setBusy($("#saveEmailSet"), false);
+
+        if (addEditor) {
+            addEditor.setData("");
+        }
+    };
+
+    const resetEditForm = () => {
+        const $form = $("#editEmailForm");
+        clearErrors($form);
+        $form.find('input[name="email_title"]').val("");
+        $form.find('input[name="id"]').val("0");
+        $form.find(".phaseCheckboxs").prop("checked", false);
+        $form.find("#edit_status").prop("checked", false);
+        updateToggleTexts($form);
+        setBusy($("#editEmailSet"), false);
+
+        if (editEditor) {
+            editEditor.setData("");
+        }
+    };
+
+    updateToggleTexts($("#addEmailForm"));
+    updateToggleTexts($("#editEmailForm"));
+
+    $(document).on("change", "#addEmailForm .ss-doc-toggle input, #editEmailForm .ss-doc-toggle input", function () {
+        updatePhaseToggleText($(this).closest(".ss-doc-toggle"));
     });
 
-    const editEmailModalEl = document.getElementById('editEmailModal')
-    editEmailModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editEmailModal .acc__input-error').html('');
-        $('#editEmailModal .modal-body input:not([type="checkbox"])').val('');
-        $('#editEmailModal .phaseCheckboxs').prop('checked', false);
-        $('#editEmailModal #edit_status').prop('checked', false);
-        editEditor.setData('');
+    $(document).on("change", "#addEmailForm .ss-status-toggle--inline input, #editEmailForm .ss-status-toggle--inline input", function () {
+        updateStatusToggleText($(this).closest(".ss-status-toggle--inline"));
     });
 
-    document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-        $('#confirmModal .agreeWith').attr('data-id', '0');
-        $('#confirmModal .agreeWith').attr('data-action', 'none');
-        $('#confirmModal .agreeWith').attr('data-phase', '');
+    document.getElementById("addEmailModal").addEventListener("show.tw.modal", function () {
+        resetAddForm();
     });
 
-    $('#addEmailForm').on('submit', function(e){
+    document.getElementById("addEmailModal").addEventListener("hide.tw.modal", function () {
+        resetAddForm();
+    });
+
+    document.getElementById("editEmailModal").addEventListener("hide.tw.modal", function () {
+        resetEditForm();
+    });
+
+    document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#addEmailForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('addEmailForm');
-    
-        document.querySelector('#saveEmailSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveEmailSet svg").style.cssText ="display: inline-block;";
+        const $form = $("#addEmailForm");
+        const form = document.getElementById("addEmailForm");
 
-        let form_data = new FormData(form);
-        form_data.append("description", addEditor.getData());
+        clearErrors($form);
+        setBusy($("#saveEmailSet"), true);
+
+        let formData = new FormData(form);
+        formData.append("description", addEditor ? addEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('email.template.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveEmailSet').removeAttribute('disabled');
-            document.querySelector("#saveEmailSet svg").style.cssText = "display: none;";
-            
-            if (response.status == 200) {
-                addEmailModal.hide();
+            url: route("email.template.store"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#saveEmailSet"), false);
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Email Template successfully inserted.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+            if (response.status == 200) {
+                resetAddForm();
+                addEmailModal.hide();
+                showSuccess("Success!", "Email template successfully inserted.");
             }
+
             emailTemplateListTable.init();
-        }).catch(error => {
-            document.querySelector('#saveEmailSet').removeAttribute('disabled');
-            document.querySelector("#saveEmailSet svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#saveEmailSet"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addEmailForm .${key}`).addClass('border-danger')
-                        $(`#addEmailForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    $('#emailTemplateListTable').on('click', '.edit_btn', function(){
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
+    $("#emailTemplateListTable").on("click", ".edit_btn", function () {
+        let editId = $(this).attr("data-id");
+        resetEditForm();
 
         axios({
             method: "get",
-            url: route("email.template.edit", recordId),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            url: route("email.template.edit", editId),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
         }).then((response) => {
             if (response.status == 200) {
-                let dataset = response.data;
-                
-                $('#editEmailModal input[name="email_title"]').val(dataset.email_title ? dataset.email_title : '');
-                editEditor.setData(dataset.description ? dataset.description : '');
-                $('#editEmailModal input[name="id"]').val(recordId);
+                const dataset = response.data;
+                const $form = $("#editEmailForm");
 
-                if(dataset.admission == 1){
-                    $('#editEmailModal #edit_phase_admission').prop('checked', true);
-                }else{
-                    $('#editEmailModal #edit_phase_admission').prop('checked', false);
+                $form.find('input[name="email_title"]').val(dataset.email_title ? dataset.email_title : "");
+                $form.find('input[name="id"]').val(editId);
+
+                emailPhaseKeys.forEach((key) => {
+                    $form.find(`#edit_phase_${key}`).prop("checked", isOnValue(dataset[key]));
+                });
+
+                $form.find("#edit_status").prop("checked", isOnValue(dataset.status));
+
+                if (editEditor) {
+                    editEditor.setData(dataset.description ? dataset.description : "");
                 }
-                if(dataset.live == 1){
-                    $('#editEmailModal #edit_phase_live').prop('checked', true);
-                }else{
-                    $('#editEmailModal #edit_phase_live').prop('checked', false);
-                }
-                if(dataset.hr == 1){
-                    $('#editEmailModal #edit_phase_hr').prop('checked', true);
-                }else{
-                    $('#editEmailModal #edit_phase_hr').prop('checked', false);
-                }
-                if(dataset.status == 1){
-                    $('#editEmailModal #edit_status').prop('checked', true);
-                }else{
-                    $('#editEmailModal #edit_status').prop('checked', false);
-                }
+
+                updateToggleTexts($form);
+                editEmailModal.show();
             }
         }).catch((error) => {
             console.log(error);
         });
     });
 
-
-    $('#editEmailForm').on('submit', function(e){
+    $("#editEmailForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('editEmailForm');
-    
-        document.querySelector('#editEmailSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#editEmailSet svg").style.cssText ="display: inline-block;";
+        const $form = $("#editEmailForm");
+        const form = document.getElementById("editEmailForm");
 
-        let form_data = new FormData(form);
-        form_data.append("description", editEditor.getData());
+        clearErrors($form);
+        setBusy($("#editEmailSet"), true);
+
+        let formData = new FormData(form);
+        formData.append("description", editEditor ? editEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('email.template.update'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#editEmailSet').removeAttribute('disabled');
-            document.querySelector("#editEmailSet svg").style.cssText = "display: none;";
-            
+            url: route("email.template.update"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#editEmailSet"), false);
+
             if (response.status == 200) {
                 editEmailModal.hide();
-
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Email Template successfully updated.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+                showSuccess("Success!", "Email template successfully updated.");
             }
+
             emailTemplateListTable.init();
-        }).catch(error => {
-            document.querySelector('#editEmailSet').removeAttribute('disabled');
-            document.querySelector("#editEmailSet svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#editEmailSet"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editEmailForm .${key}`).addClass('border-danger')
-                        $(`#editEmailForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
+                } else if (error.response.status == 304) {
+                    editEmailModal.hide();
+                    showSuccess("No Data Change!", error.response.statusText);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    // Delete Course
-    $('#emailTemplateListTable').on('click', '.delete_btn', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#emailTemplateListTable").on("click", ".delete_btn", function () {
+        let rowID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to delete this email template?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "DELETE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-        });
     });
 
-    // Restore Course
-    $('#emailTemplateListTable').on('click', '.restore_btn', function(){
-        let $statusBTN = $(this);
-        let dataID = $statusBTN.attr('data-id');
+    $("#emailTemplateListTable").on("click", ".restore_btn", function () {
+        let dataID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to restore this email template?");
+        $("#confirmModal .agreeWith").attr("data-id", dataID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "RESTORE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', dataID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-        });
     });
 
-    // Update Status
-    $('#emailTemplateListTable').on('click', '.status_updater', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#emailTemplateListTable").on("click", ".status_updater", function () {
+        let rowID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to change the status of this email template?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "CHANGESTAT");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
-        });
     });
 
-    // Update Phase
-    $('#emailTemplateListTable').on('click', '.updatePhase', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-        let phase = $statusBTN.attr('data-phase');
+    $("#emailTemplateListTable").on("click", ".updatePhase", function () {
+        let rowID = $(this).attr("data-id");
+        let phase = $(this).attr("data-phase");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to change the phase status of this email template?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", phase);
+        $("#confirmModal .agreeWith").attr("data-action", "CHANGEPHS");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to change phase status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-phase', phase);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGEPHS');
-        });
     });
 
-
-    // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function(){
+    $("#confirmModal .agreeWith").on("click", function () {
         let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
-        let phase = $agreeBTN.attr('data-phase');
+        let recordID = $agreeBTN.attr("data-id");
+        let action = $agreeBTN.attr("data-action");
+        let phase = $agreeBTN.attr("data-phase");
 
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if(action == 'DELETE'){
+        $("#confirmModal button").attr("disabled", "disabled");
+
+        const done = (title, message) => {
+            $("#confirmModal button").removeAttr("disabled");
+            confirmModal.hide();
+            showSuccess(title, message);
+            emailTemplateListTable.init();
+        };
+
+        const failed = (error) => {
+            $("#confirmModal button").removeAttr("disabled");
+            console.log(error);
+        };
+
+        if (action == "DELETE") {
             axios({
-                method: 'delete',
-                url: route('email.template.destory', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "delete",
+                url: route("email.template.destory", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Email Template successfully deleted!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Done!", "Email template successfully deleted.");
                 }
-                emailTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'RESTORE'){
+            }).catch(failed);
+        } else if (action == "RESTORE") {
             axios({
-                method: 'post',
-                url: route('email.template.restore', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("email.template.restore", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Email Template successfully restored!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Email template successfully restored.");
                 }
-                emailTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'CHANGESTAT'){
+            }).catch(failed);
+        } else if (action == "CHANGESTAT") {
             axios({
-                method: 'post',
-                url: route('email.template.update.status'),
-                data: {row_id : recordID},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("email.template.update.status"),
+                data: { row_id: recordID },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Email Template status successfully updated!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Email template status successfully updated.");
                 }
-                emailTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'CHANGEPHS'){
+            }).catch(failed);
+        } else if (action == "CHANGEPHS") {
             axios({
-                method: 'post',
-                url: route('email.template.update.phase.status'),
-                data: {row_id : recordID, phase : phase},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("email.template.update.phase.status"),
+                data: { row_id: recordID, phase: phase },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Email Template Phase status successfully updated!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Email template phase status successfully updated.");
                 }
-                emailTemplateListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
+            }).catch(failed);
         }
     });
-
-})()
+})();

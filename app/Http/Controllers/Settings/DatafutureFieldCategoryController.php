@@ -109,6 +109,6 @@ class DatafutureFieldCategoryController extends Controller
     public function restore(Request $request) {
         $data = DatafutureFieldCategory::where('id', $request->id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 }

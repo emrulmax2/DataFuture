@@ -20,10 +20,10 @@ class WorkplacementDetailsController extends Controller
     public function wp_details()
     {
         return view('pages.settings.workplacement.wp-details', [
-            'title' => 'Workplacement Settings - London Churchill College',
-            'subtitle' => 'Workplacement Settings',
+            'title' => 'Workplacement Details - London Churchill College',
+            'subtitle' => 'Workplacement Details',
             'breadcrumbs' => [
-                ['label' => 'Workplacement Settings', 'href' => 'javascript:void(0);']
+                ['label' => 'Workplacement Details', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::where('active', 1)->get(),
             'workplacement_details' => WorkplacementDetails::with(['level_hours', 'level_hours.learning_hours'])->get()

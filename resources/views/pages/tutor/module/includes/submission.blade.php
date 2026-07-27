@@ -270,7 +270,7 @@
 <!-- END: Final Confirm Modal Content -->
 
 <div data-tw-backdrop="static" aria-hidden="true" tabindex="-1" id="student-preview-modal" class="modal group bg-black/60 transition-[visibility,opacity] w-screen h-screen fixed left-0 top-0 [&:not(.show)]:duration-[0s,0.2s] [&:not(.show)]:delay-[0.2s,0s] [&:not(.show)]:invisible [&:not(.show)]:opacity-0 [&.show]:visible [&.show]:opacity-100 [&.show]:duration-[0s,0.4s]">
-    <div data-tw-merge class="tm-sub-modal w-[92%] mx-auto bg-white relative shadow-md transition-[margin-top,transform] duration-[0.4s,0.3s] -mt-16 group-[.show]:mt-16 group-[.modal-static]:scale-[1.05] dark:bg-darkmode-600 sm:w-[980px] lg:w-[980px]">
+    <div data-tw-merge class="tm-sub-modal w-[94%] mx-auto bg-white relative shadow-md transition-[margin-top,transform] duration-[0.4s,0.3s] -mt-16 group-[.show]:mt-16 group-[.modal-static]:scale-[1.05] dark:bg-darkmode-600 sm:w-[1080px] lg:w-[1120px]">
         <div class="tm-sub-modal-head">
             <h2 class="tm-sub-modal-title">Student Submission</h2>
             <a class="tm-sub-modal-close" data-tw-dismiss="modal" href="#" title="Close">
@@ -401,9 +401,9 @@
 
     body.tutor-module-body #student-preview-modal .tm-sub-modal-head {
         border-bottom: 1px solid #f0ede3;
-        padding: 22px 28px;
+        padding: 22px 64px 22px 28px;
         position: relative;
-        text-align: center;
+        text-align: left;
     }
 
     body.tutor-module-body #student-preview-modal .tm-sub-modal-title {
@@ -542,5 +542,125 @@
         font-weight: 700;
         padding: 3px 10px;
         white-space: nowrap;
+    }
+
+    /* ---- In-modal Tabulator footer (pagination) ---- */
+    body.tutor-module-body #submissionListTable .tabulator-footer {
+        background: #fafaf7 !important;
+        border-top: 1px solid #f0ede3 !important;
+        color: #5a6f6c !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        padding: 12px 24px !important;
+        text-align: left !important;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-paginator {
+        align-items: center;
+        color: #5a6f6c;
+        display: flex;
+        font-size: 12px;
+        font-weight: 500;
+        gap: 8px;
+        width: 100%;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-paginator > label {
+        color: #8b9995;
+        font-size: 12px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page-size {
+        background: #fff !important;
+        border: 1px solid #dfe4e2 !important;
+        border-radius: 9px !important;
+        color: #3f524f !important;
+        font-size: 12px;
+        font-weight: 700;
+        height: 30px;
+        margin: 0 auto 0 0 !important;
+        padding: 4px 28px 4px 10px !important;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-pages {
+        margin: 0 !important;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page {
+        align-items: center;
+        background: #fff !important;
+        border: 1px solid #dfe4e2 !important;
+        border-radius: 8px !important;
+        color: #5a6f6c !important;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 600;
+        height: 30px;
+        justify-content: center;
+        margin: 0 0 0 4px !important;
+        min-width: 30px;
+        padding: 0 8px !important;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page.active {
+        background: #0d7c73 !important;
+        border-color: #0d7c73 !important;
+        color: #fff !important;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page:disabled {
+        color: #c3ccc9 !important;
+        opacity: 1 !important;
+    }
+
+    /* First/Prev/Next/Last render as chevron icons. Tabulator keeps aria-label/title from its
+       localization, so hiding the label text still leaves them announced. The glyph is a mask
+       painted with currentColor, so it tracks the button colour (including the :disabled grey). */
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="first"],
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="prev"],
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="next"],
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="last"] {
+        font-size: 0 !important;
+        padding: 0 !important;
+        width: 30px;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="first"]::before,
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="prev"]::before,
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="next"]::before,
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="last"]::before {
+        background-color: currentColor;
+        content: "";
+        display: block;
+        height: 15px;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 15px 15px;
+        mask-size: 15px 15px;
+        width: 15px;
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="first"]::before {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m11 17-5-5 5-5'/%3E%3Cpath d='m18 17-5-5 5-5'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m11 17-5-5 5-5'/%3E%3Cpath d='m18 17-5-5 5-5'/%3E%3C/svg%3E");
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="prev"]::before {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E");
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="next"]::before {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+    }
+
+    body.tutor-module-body #submissionListTable .tabulator-footer .tabulator-page[data-page="last"]::before {
+        -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 17 5-5-5-5'/%3E%3Cpath d='m13 17 5-5-5-5'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 17 5-5-5-5'/%3E%3Cpath d='m13 17 5-5-5-5'/%3E%3C/svg%3E");
     }
 </style>

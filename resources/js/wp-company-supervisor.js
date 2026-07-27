@@ -44,21 +44,22 @@ var wpSupervisorListTable = (function () {
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "120",
+                    width: 120,
+                    minWidth: 120,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell, formatterParams) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCompanySupervisorModal" type="button" class="editSupervisor btn-rounded btn btn-success text-white p-0 w-[30px] h-[30px] ml-1"><i data-lucide="Pencil" class="w-3 h-3"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="deleteSupervisor btn btn-danger text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="Trash2" class="w-3 h-3"></i></button>';
+                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editCompanySupervisorModal" type="button" class="editSupervisor ss-row-action ss-row-action--edit" aria-label="Edit supervisor"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="deleteSupervisor ss-row-action ss-row-action--delete" aria-label="Delete supervisor"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restoreSupervisor btn btn-linkedin text-white btn-rounded ml-1 p-0 w-[30px] h-[30px]"><i data-lucide="rotate-cw" class="w-3 h-3"></i></button>';
+                            btns += '<button data-id="' +cell.getData().id +'" type="button" class="restoreSupervisor ss-row-action ss-row-action--restore" aria-label="Restore supervisor"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -66,7 +67,7 @@ var wpSupervisorListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
                 const columnLists = this.getColumns();
@@ -82,10 +83,10 @@ var wpSupervisorListTable = (function () {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
-             const actionColumn = this.getColumn("id");
+            const actionColumn = tableContent.getColumn("actions");
             if (actionColumn) {
                 const currentWidth = actionColumn.getWidth();
                 actionColumn.setWidth(currentWidth - 1);
@@ -114,38 +115,56 @@ var wpSupervisorListTable = (function () {
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
+        // Keeps the redesigned "Active Status" switch copy in step with its checkbox.
+        const syncActiveToggle = function (input) {
+            const copy = $(input).closest('.ss-status-toggle').find('.ss-status-toggle__copy');
+            if (!copy.length) return;
+
+            copy.find('strong').text(input.checked ? 'Active' : 'Inactive');
+            copy.find('small').text(input.checked ? 'Available when placing students' : 'Not available when placing students');
+        };
+
+        // Clears a modal's fields without touching its hidden inputs, which carry
+        // the record/company ids the submit handlers post back.
+        const resetModal = function (selector) {
+            $(selector + ' .acc__input-error').html('');
+            $(selector + ' .border-danger').removeClass('border-danger');
+            $(selector + ' input:not([type="checkbox"]):not([type="hidden"])').val('');
+            $(selector + ' textarea').val('');
+        };
+
+        $(document).on('change', '.ss-status-toggle input[name="active"]', function () {
+            syncActiveToggle(this);
+        });
+
         const addWPCompanyModalEl = document.getElementById('addWPCompanyModal')
         addWPCompanyModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addWPCompanyModal .acc__input-error').html('');
-            $('#addWPCompanyModal .modal-body input:not([type="checkbox"])').val('');
-            $('#addWPCompanyModal .modal-body textarea').val('');
+            resetModal('#addWPCompanyModal');
 
-            $('#addWPCompanyModal input[name="active"]').prop('checked', true);
+            $('#addWPCompanyModal input[name="active"]').prop('checked', true).each(function () {
+                syncActiveToggle(this);
+            });
         });
-        
+
         const editWPCompanyModalEl = document.getElementById('editWPCompanyModal')
         editWPCompanyModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editWPCompanyModal .acc__input-error').html('');
-            $('#editWPCompanyModal .modal-body input:not([type="checkbox"])').val('');
+            resetModal('#editWPCompanyModal');
             $('#editWPCompanyModal input[name="id"]').val('0');
-            $('#editWPCompanyModal .modal-body textarea').val('');
-            
-            $('#editWPCompanyModal input[name="active"]').prop('checked', false);
+
+            $('#editWPCompanyModal input[name="active"]').prop('checked', false).each(function () {
+                syncActiveToggle(this);
+            });
         });
-        
+
         const addCompanySupervisorModalEl = document.getElementById('addCompanySupervisorModal')
         addCompanySupervisorModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addCompanySupervisorModal .acc__input-error').html('');
-            $('#addCompanySupervisorModal .modal-body input:not([type="checkbox"])').val('');
-            $('#addCompanySupervisorModal .modal-body textarea').val('');
+            resetModal('#addCompanySupervisorModal');
         });
-        
+
         const editCompanySupervisorModalEl = document.getElementById('editCompanySupervisorModal')
         editCompanySupervisorModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editCompanySupervisorModal .acc__input-error').html('');
-            $('#editCompanySupervisorModal .modal-body input:not([type="checkbox"])').val('');
-            $('#editCompanySupervisorModal .modal-body textarea').val('');
-            $('#editCompanySupervisorModal .modal-footer [name="id"]').val('0');
+            resetModal('#editCompanySupervisorModal');
+            $('#editCompanySupervisorModal input[name="id"]').val('0');
         });
 
 
@@ -228,11 +247,11 @@ var wpSupervisorListTable = (function () {
                     
                     $('#editWPCompanyModal input[name="id"]').val(editId);
 
-                    if(dataset.active == 1){
-                        $('#editWPCompanyModal input[name="active"]').prop('checked', true);
-                    }else{
-                        $('#editWPCompanyModal input[name="active"]').prop('checked', false);
-                    }
+                    $('#editWPCompanyModal input[name="active"]')
+                        .prop('checked', dataset.active == 1)
+                        .each(function () {
+                            syncActiveToggle(this);
+                        });
                 }
             }).catch((error) => {
                 console.log(error);

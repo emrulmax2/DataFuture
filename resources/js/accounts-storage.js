@@ -367,6 +367,7 @@ var storageTransList = (function () {
         let trans_type = $trans_type.val();
 
         if(trans_type == 2){
+            $('#acc_category_label').text('Storage');
             $('#acc_category_id_in_wrap, #acc_category_id_out_wrap').fadeOut('fast', function(){
                 $('#acc_bank_id_wrap').fadeIn();
                 acc_bank_id.clear(true);
@@ -374,6 +375,7 @@ var storageTransList = (function () {
                 acc_category_id_out.clear(true);
             });
         }else if(trans_type == 1){
+            $('#acc_category_label').text('Category');
             $('#acc_category_id_in_wrap, #acc_bank_id_wrap').fadeOut('fast', function(){
                 acc_category_id_out.clear(true);
                 $('#acc_category_id_out_wrap').fadeIn();
@@ -381,6 +383,7 @@ var storageTransList = (function () {
                 acc_category_id_in.clear(true);
             });
         }else{
+            $('#acc_category_label').text('Category');
             $('#acc_category_id_out_wrap, #acc_bank_id_wrap').fadeOut('fast', function(){
                 $('#acc_category_id_in_wrap').fadeIn();
                 acc_bank_id.clear(true);
@@ -402,6 +405,7 @@ var storageTransList = (function () {
                 $('#storageTransactionForm input[type="checkbox"]').prop('checked', true);
                 $('#trans_type').val('0');
 
+                $('#acc_category_label').text('Category');
                 $('#acc_category_id_out_wrap, #acc_bank_id_wrap').val('').fadeOut();
                 $('#acc_category_id_in_wrap').fadeIn();
                 acc_bank_id.clear(true);
@@ -576,6 +580,7 @@ var storageTransList = (function () {
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
+                        $('#acc_category_label').text('Category');
                         $('#acc_category_id_in_wrap').fadeIn();
                         acc_category_id_in.addItem(row.acc_category_id)
 
@@ -589,6 +594,7 @@ var storageTransList = (function () {
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
+                        $('#acc_category_label').text('Category');
                         acc_category_id_in.clear(true)
                         $('#acc_category_id_in_wrap').fadeOut();
                         $('#acc_category_id_out_wrap').fadeIn();
@@ -601,11 +607,12 @@ var storageTransList = (function () {
                         $('#expense').val((row.flow == 1 ? row.transaction_amount : ''));
                         $('#income').val((row.flow == 0 ? row.transaction_amount : ''));
 
+                        $('#acc_category_label').text('Storage');
                         acc_category_id_in.clear(true);
                         acc_category_id_out.clear(true);
                         $('#acc_category_id_in_wrap').fadeOut();
                         $('#acc_category_id_out_wrap').fadeOut();
-                        $('#acc_bank_id').fadeIn();
+                        $('#acc_bank_id_wrap').fadeIn();
                         acc_bank_id.addItem(row.transfer_bank_id);
 
                         $('#storeTransaction').fadeOut();

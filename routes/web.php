@@ -2308,6 +2308,7 @@ Route::middleware('auth')->group(function() {
 
         Route::delete('site-settings/common-smtp/delete/{id}', 'destroy')->name('common.smtp.destory');
         Route::post('site-settings/common-smtp/restore/{id}', 'restore')->name('common.smtp.restore');
+        Route::post('site-settings/common-smtp/health', 'health')->name('common.smtp.health');
     });
 
     Route::controller(LetterSetController::class)->group(function() {
@@ -3062,7 +3063,7 @@ Route::middleware('auth')->group(function() {
         Route::get('site-settings/issue-types/edit/{issueType}', 'edit')->name('issue.types.edit');
         Route::post('site-settings/issue-types/update/{issueType}', 'update')->name('issue.types.update');
         Route::delete('site-settings/issue-types/delete/{id}', 'destroy')->name('issue.types.destroy');
-        Route::post('site-settings/issue-types/restore', 'restore')->name('issue.types.restore');
+        Route::post('site-settings/issue-types/restore/{id}', 'restore')->name('issue.types.restore');
 
     });
 

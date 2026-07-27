@@ -125,6 +125,7 @@ class ResultComparisonController extends Controller
             $resultSet[$key]['result_submission_staff_id'] = isset($resultSubmissionByStaff->id) ? $resultSubmissionByStaff->id : null;
             $resultSet[$key]['full_name'] = $value->student->full_name;
             $resultSet[$key]['student_id'] = $value->student->id;
+            $resultSet[$key]['student_photo'] = (isset($value->student->photo_url) && !\Illuminate\Support\Str::startsWith($value->student->photo_url, 'data:')) ? $value->student->photo_url : '';
             $resultSet[$key]['registration_no'] = $value->student->registration_no;
             $resultSet[$key]['status'] = $value->student->status->name;
             $resultSet[$key]['assement'] = ($AssessmentPlanStaff->course_module_base_assesment_id == $AssessmentPlan->course_module_base_assesment_id) ? $AssessmentPlan->courseModuleBase->assesment_name." - ".$AssessmentPlan->courseModuleBase->assesment_code : 'Assesment Plan Not Matched';

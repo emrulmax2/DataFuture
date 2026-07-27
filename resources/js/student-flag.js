@@ -4,9 +4,23 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
  
 ("use strict");
+
+function flagColorLabel(value) {
+    const labels = {
+        Success: "Green",
+        Warning: "Yellow",
+        Danger: "Red",
+    };
+
+    return labels[value] || "Not set";
+}
+
+function flagColorTone(value) {
+    return ["Success", "Warning", "Danger"].includes(value) ? value.toLowerCase() : "none";
+}
+
 var settingsListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let tableContent = new Tabulator("#settingsListTable", {
@@ -18,7 +32,7 @@ var settingsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -26,26 +40,23 @@ var settingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 110,
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 240,
                 },
                 {
                     title: "Color",
                     field: "color",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
-                        var color = cell.getData().color;
-                        if(color == 'Success') {
-                            return '<span class="text-white px-2 py-1 bg-'+color.toLowerCase()+'">Green</span>';
-                        }else if(color == 'Warning'){
-                            return '<span class="text-white px-2 py-1 bg-'+color.toLowerCase()+'">Yellow</span>';
-                        }else if(color == 'Danger'){
-                            return '<span class="text-white px-2 py-1 bg-'+color.toLowerCase()+'">Red</span>';
-                        }
+                    minWidth: 150,
+                    formatter(cell) {
+                        const color = cell.getData().color;
+
+                        return `<span class="ss-flag-color-pill is-${flagColorTone(color)}"><span></span>${flagColorLabel(color)}</span>`;
                     }
                 },
                 {
@@ -53,25 +64,27 @@ var settingsListTable = (function () {
                     field: "raisers",
                     headerHozAlign: "left",
                     headerSort: false,
-                    formatter(cell, formatterParams) { 
-                        return '<div class="whitespace-normal break-words">'+cell.getData().raisers+'</div>';
+                    minWidth: 320,
+                    formatter(cell) {
+                        return `<div class="ss-flag-raisers">${cell.getData().raisers || '<span class="ss-cell-muted">No clearers assigned</span>'}</div>`;
                     }
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 170,
+                    minWidth: 170,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSettingsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit flag"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete flag"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore flag"><i data-lucide="rotate-cw"></i></button>';
                         }
                         
                         return btns;
@@ -81,19 +94,12 @@ var settingsListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
             createIcons({
@@ -103,30 +109,28 @@ var settingsListTable = (function () {
             });
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        $("#tabulator-export-csv").on("click", function () {
+            tableContent.download("csv", "student-flags.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
+        $("#tabulator-export-json").on("click", function () {
+            tableContent.download("json", "student-flags.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").on("click", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Status Details",
+            tableContent.download("xlsx", "student-flags.xlsx", {
+                sheetName: "Student Flags",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
+        $("#tabulator-export-html").on("click", function () {
+            tableContent.download("html", "student-flags.html", {
                 style: true,
             });
         });
 
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").on("click", function () {
             tableContent.print();
         });
     };
@@ -176,10 +180,9 @@ var settingsListTable = (function () {
             plugins: {
                 dropdown_input: {}
             },
-            placeholder: 'Search Here...',
+            placeholder: "Search users...",
             dropdownParent: 'body',
-            dropdownClass: 'ts-dropdown lcc-tom-float',
-            //persist: false,
+            dropdownClass: 'ts-dropdown ss-settings-tom-dropdown',
             maxOptions: null,
             create: false,
             allowEmptyOption: true,
@@ -190,7 +193,7 @@ var settingsListTable = (function () {
 
         let multiTomOptFlag = {
             dropdownParent: 'body',
-            dropdownClass: 'ts-dropdown lcc-tom-float',
+            dropdownClass: 'ts-dropdown ss-settings-tom-dropdown',
             
             ...tomOptionsFlag,
             plugins: {
@@ -210,28 +213,40 @@ var settingsListTable = (function () {
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addSettingsModalEl = document.getElementById('addSettingsModal')
-        addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addSettingsModal .acc__input-error').html('');
-            $('#addSettingsModal .modal-body input').val('');
-            $('#addSettingsModal .modal-body select[name="color"]').val('');
+        function resetModalForm($modal, tomSelect, resetId = false) {
+            $modal.find(".acc__input-error").html("");
+            $modal.find(".border-danger").removeClass("border-danger");
+            $modal.find(".ss-settings-modal__body input[type='text']").val("");
+            $modal.find(".ss-settings-modal__body select[name='color']").val("");
 
-            user_ids.clear(true);
+            if (resetId) {
+                $modal.find('input[name="id"]').val("0");
+            }
+
+            tomSelect.clear(true);
+        }
+
+        const addSettingsModalEl = document.getElementById('addSettingsModal');
+        addSettingsModalEl.addEventListener('show.tw.modal', function() {
+            resetModalForm($('#addSettingsModal'), user_ids);
+        });
+
+        addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
+            resetModalForm($('#addSettingsModal'), user_ids);
         });
         
-        const editSettingsModalEl = document.getElementById('editSettingsModal')
+        const editSettingsModalEl = document.getElementById('editSettingsModal');
         editSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editSettingsModal .acc__input-error').html('');
-            $('#editSettingsModal .modal-body input').val('');
-            $('#editSettingsModal .modal-body select[name="color"]').val('');
-            $('#editSettingsModal input[name="id"]').val('0');
-
-            edit_user_ids.clear(true);
+            resetModalForm($('#editSettingsModal'), edit_user_ids, true);
         });
 
         $('#addSettingsForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('addSettingsForm');
+            const $form = $(form);
+
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
         
             document.querySelector('#saveSettings').setAttribute('disabled', 'disabled');
             document.querySelector("#saveSettings svg").style.cssText ="display: inline-block;";
@@ -276,6 +291,8 @@ var settingsListTable = (function () {
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
 
+            resetModalForm($('#editSettingsModal'), edit_user_ids, true);
+
             axios({
                 method: "get",
                 url: route("flags.edit", editId),
@@ -299,6 +316,8 @@ var settingsListTable = (function () {
                     }else{
                         edit_user_ids.clear(true);
                     }
+
+                    editSettingsModal.show();
                 }
             }).catch((error) => {
                 console.log(error);
@@ -308,8 +327,11 @@ var settingsListTable = (function () {
         
         $("#editSettingsForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editSettingsForm input[name="id"]').val();
             const form = document.getElementById("editSettingsForm");
+            const $form = $(form);
+
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
 
             document.querySelector('#updateSettings').setAttribute('disabled', 'disabled');
             document.querySelector('#updateSettings svg').style.cssText = 'display: inline-block;';
@@ -351,8 +373,8 @@ var settingsListTable = (function () {
                         let message = error.response.statusText;
                         succModal.show();
                         document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModal").html("Oops!");
-                            $("#successModal .successModal").html('No data change found!');
+                            $("#successModal .successModalTitle").html("Oops!");
+                            $("#successModal .successModalDesc").html(message || 'No data change found!');
                         });
                     } else {
                         console.log("error");

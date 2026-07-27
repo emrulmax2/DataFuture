@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreTermTypeRequest;
 use App\Http\Requests\UpdateTermTypeRequest;
+use App\Models\Option;
 use App\Models\TermType;
 use App\Models\User;
 
@@ -13,11 +14,12 @@ class TermTypeController extends Controller
 {
     public function index(){
         return view('pages.settings.termtype.index', [
-            'title' => 'Awarding Body - London Churchill College',
+            'title' => 'Term Type - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
-                ['label' => 'Awarding Body', 'href' => 'javascript:void(0);']
+                ['label' => 'Term Type', 'href' => 'javascript:void(0);']
             ]
         ]);
     }
@@ -72,10 +74,10 @@ class TermTypeController extends Controller
     public function show($id)
     {
         return view('pages.settings.termtype.show', [
-            'title' => 'Awarding Body - London Churchill College',
+            'title' => 'Term Type - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'Awarding Body', 'href' => route('awardingbody')],
-                ['label' => 'Awarding Body Details', 'href' => 'javascript:void(0);']
+                ['label' => 'Term Type', 'href' => route('term-type.index')],
+                ['label' => 'Term Type Details', 'href' => 'javascript:void(0);']
             ],
             'Term Type' => TermType::find($id),
         ]);
@@ -106,6 +108,7 @@ class TermTypeController extends Controller
         $data = TermType::where('id', $request->id)->update([
             'name'=> $request->name,
             'code'=> $request->code,
+            'is_active'=> (isset($request->is_active) ? $request->is_active : 0),
             'updated_by' => auth()->user()->id
         ]);
 

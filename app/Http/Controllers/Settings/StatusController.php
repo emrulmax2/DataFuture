@@ -13,6 +13,34 @@ use App\Models\Signatory;
 
 class StatusController extends Controller
 {
+    private function processPhaseForStatusType(?string $type): string
+    {
+        return match ($type) {
+            'Applicant' => 'Applicant',
+            'Register' => 'Register',
+            default => 'Live',
+        };
+    }
+
+    private function processOptionsForStatusType(?string $type): array
+    {
+        $processes = [
+            ['id' => '', 'name' => 'Please Select'],
+        ];
+
+        ProcessList::where('phase', $this->processPhaseForStatusType($type))
+            ->orderBy('name', 'ASC')
+            ->get()
+            ->each(function ($process) use (&$processes) {
+                $processes[] = [
+                    'id' => $process->id,
+                    'name' => $process->name,
+                ];
+            });
+
+        return $processes;
+    }
+
     public function index()
     {
         return view('pages.settings.status.index', [
@@ -102,27 +130,13 @@ class StatusController extends Controller
 
     public function edit($id){
         $data = Status::where('id', $id)->get()->first();
-        $phase = ($data->type == 'Applicant' ? 'Applicant' : 'Live');
-        $process = ProcessList::where('phase', $phase)->where('auto_feed', 'No')->orderBy('name', 'ASC')->get();
-
-        $processes = [];
-        if(!empty($process)):
-            $i = 1;
-            $processes[0]['id'] = '';
-            $processes[0]['name'] = 'Please Select';
-            foreach($process as $prs):
-                $processes[$i]['id'] = $prs->id;
-                $processes[$i]['name'] = $prs->name;
-                $i++;
-            endforeach;
-        endif;
-        $data['processes'] = $processes;
-
-        if($data){
-            return response()->json($data);
-        }else{
+        if(!$data){
             return response()->json(['message' => 'Something went wrong. Please try later'], 422);
         }
+
+        $data['processes'] = $this->processOptionsForStatusType($data->type);
+
+        return response()->json($data);
     }
 
     public function update(StatusRequest $request){  
@@ -160,22 +174,8 @@ class StatusController extends Controller
     }
 
     public function getProcess(Request $request){
-        $theType = (isset($request->theType) && $request->theType == 'Applicant' ? 'Applicant' : 'Live');
-        $process = ProcessList::where('phase', $theType)->where('auto_feed', 'No')->orderBy('name', 'ASC')->get();
-
-        if(!empty($process)):
-            $processes = [];
-            $i = 1;
-            $processes[0]['id'] = '';
-            $processes[0]['name'] = 'Please Select';
-            foreach($process as $prs):
-                $processes[$i]['id'] = $prs->id;
-                $processes[$i]['name'] = $prs->name;
-                $i++;
-            endforeach;
-            return response()->json(['res' => $processes], 200);
-        else:
-            return response()->json(['res' => 'Nothing found!'], 304);
-        endif;
+        return response()->json([
+            'res' => $this->processOptionsForStatusType($request->theType),
+        ], 200);
     }
 }

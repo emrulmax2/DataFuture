@@ -4,23 +4,61 @@ import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 
 ("use strict");
+
+const letterPhaseKeys = ["admission", "live", "hr", "document_request"];
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const isOnValue = (value) => {
+    return value === true || value == 1;
+};
+
+const formatSwitch = (cell, options) => {
+    const isOn = isOnValue(cell.getValue());
+    const rowId = cell.getData().id;
+    const phaseAttr = options.phase ? ` data-phase="${options.phase}"` : "";
+
+    return (
+        '<button type="button" role="switch" aria-checked="' + (isOn ? "true" : "false") + '"' +
+        ' class="ss-table-switch ' + options.className + (isOn ? " is-active" : " is-inactive") + '"' +
+        ' data-id="' + rowId + '"' + phaseAttr +
+        ' aria-label="' + options.label + '">' +
+        '<i data-lucide="' + (isOn ? "check" : "x") + '"></i>' +
+        "</button>"
+    );
+};
+
 var letterSettingsListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query-LS").val() != "" ? $("#query-LS").val() : "";
         let status = $("#status-LS").val() != "" ? $("#status-LS").val() : "";
         let phase = $("#phase-LS").val() != "" ? $("#phase-LS").val() : "";
-        
+
+        if (window.letterSettingsTableInstance) {
+            window.letterSettingsTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#letterSettingsListTable", {
             ajaxURL: route("letter.set.list"),
-            ajaxParams: { querystr: querystr, status: status, phase : phase },
+            ajaxParams: { querystr: querystr, status: status, phase: phase },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -28,87 +66,123 @@ var letterSettingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "70",
+                    width: 68,
+                    minWidth: 62,
                 },
                 {
                     title: "Letter Type",
                     field: "letter_type",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<a href="'+route("letter.set.edit", cell.getData().id)+'" target="_blank" class="font-medium text-primary underline">'+cell.getData().letter_type+'</a>';
-                    }
+                    minWidth: 170,
+                    widthGrow: 1.15,
+                    formatter(cell) {
+                        const value = escapeHtml(cell.getValue());
+                        return '<a href="' + route("letter.set.edit", cell.getData().id) + '" target="_blank" class="ss-letter-link">' + value + "</a>";
+                    },
                 },
                 {
                     title: "Letter Title",
                     field: "letter_title",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<a href="'+route("letter.set.edit", cell.getData().id)+'" target="_blank" class="font-medium text-primary underline">'+cell.getData().letter_title+'</a>';
-                    }
+                    minWidth: 220,
+                    widthGrow: 1.7,
+                    formatter(cell) {
+                        const value = escapeHtml(cell.getValue());
+                        return '<a href="' + route("letter.set.edit", cell.getData().id) + '" target="_blank" class="ss-letter-title-cell">' + value + "</a>";
+                    },
                 },
                 {
                     title: "Document Requests",
                     field: "document_request",
-                    headerHozAlign: "left",
-                    width: "100",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="document_request" data-id="'+cell.getData().id+'" '+(cell.getData().document_request == 1 ? 'Checked' : '')+' value="'+cell.getData().document_request+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 118,
+                    widthGrow: 0.58,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "document_request",
+                            label: "Toggle document request phase",
+                        });
+                    },
                 },
                 {
                     title: "Admission",
                     field: "admission",
-                    headerHozAlign: "left",
-                    width: "100",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="admission" data-id="'+cell.getData().id+'" '+(cell.getData().admission == 1 ? 'Checked' : '')+' value="'+cell.getData().admission+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 92,
+                    widthGrow: 0.5,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "admission",
+                            label: "Toggle admission phase",
+                        });
+                    },
                 },
                 {
                     title: "Live",
                     field: "live",
-                    headerHozAlign: "left",
-                    width: "100",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="live" data-id="'+cell.getData().id+'" '+(cell.getData().live == 1 ? 'Checked' : '')+' value="'+cell.getData().live+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 82,
+                    widthGrow: 0.45,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "live",
+                            label: "Toggle live student phase",
+                        });
+                    },
                 },
                 {
                     title: "HR",
                     field: "hr",
-                    width: "100",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-phase="hr" data-id="'+cell.getData().id+'" '+(cell.getData().hr == 1 ? 'Checked' : '')+' value="'+cell.getData().hr+'" type="checkbox" class="updatePhase form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 76,
+                    widthGrow: 0.4,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "updatePhase",
+                            phase: "hr",
+                            label: "Toggle human resource phase",
+                        });
+                    },
                 },
                 {
                     title: "Status",
                     field: "status",
-                    width: "120",
-                    headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        return '<div class="form-check form-switch"><input data-id="'+cell.getData().id+'" '+(cell.getData().status == 1 ? 'Checked' : '')+' value="'+cell.getData().active+'" type="checkbox" class="status_updater form-check-input"> </div>';
-                    }
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    minWidth: 86,
+                    widthGrow: 0.45,
+                    formatter(cell) {
+                        return formatSwitch(cell, {
+                            className: "status_updater",
+                            label: "Toggle letter set status",
+                        });
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "100",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns +='<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editLetterModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            //btns +='<a href="'+route("letter.set.edit", cell.getData().id)+'" class="btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +='<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit letter set"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete letter set"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore letter set"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -116,45 +190,45 @@ var letterSettingsListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.letterSettingsTableInstance = tableContent;
+
+        if (window.letterSettingsTableResizeHandler) {
+            window.removeEventListener("resize", window.letterSettingsTableResizeHandler);
+        }
+
+        window.letterSettingsTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.letterSettingsTableResizeHandler);
+
+        $("#tabulator-export-csv-LS").off("click.letterset").on("click.letterset", function () {
+            tableContent.download("csv", "letter-sets.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv-LS").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-xlsx-LS").on("click", function (event) {
+        $("#tabulator-export-xlsx-LS").off("click.letterset").on("click.letterset", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
+            tableContent.download("xlsx", "letter-sets.xlsx", {
                 sheetName: "Letter Set Details",
             });
         });
 
-        // Print
-        $("#tabulator-print-LS").on("click", function (event) {
+        $("#tabulator-print-LS").off("click.letterset").on("click.letterset", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -162,47 +236,47 @@ var letterSettingsListTable = (function () {
     };
 })();
 
-
-(function(){
-    if ($("#letterSettingsListTable").length) {
-        // Init Table
-        letterSettingsListTable.init();
-
-        // Filter function
-        function filterHTMLForm() {
-            letterSettingsListTable.init();
-        }
-
-        // On click go button
-        $("#tabulator-html-filter-go-LS").on("click", function (event) {
-            filterHTMLForm();
-        });
-
-        // On reset filter form
-        $("#tabulator-html-filter-reset-LS").on("click", function (event) {
-            $("#query-LS").val("");
-            $("#status-LS").val("1");
-            $("#phase-LS").val("");
-            filterHTMLForm();
-        });
-
-        $('#query-LS').on('keypress', function(e){
-            var keycode = e.keyCode || e.which;
-            if(keycode == 13) {
-                filterHTMLForm();
-                return false;
-            }
-        });
+(function () {
+    if (!$("#letterSettingsListTable").length) {
+        return;
     }
+
+    letterSettingsListTable.init();
+
+    function filterHTMLForm() {
+        letterSettingsListTable.init();
+    }
+
+    $("#tabulatorFilterForm-LS")[0].addEventListener("keypress", function (event) {
+        let keycode = event.keyCode ? event.keyCode : event.which;
+        if (keycode == "13") {
+            event.preventDefault();
+            filterHTMLForm();
+        }
+    });
+
+    $("#tabulator-html-filter-go-LS").on("click", function () {
+        filterHTMLForm();
+    });
+
+    $("#tabulator-html-filter-reset-LS").on("click", function () {
+        $("#query-LS").val("");
+        $("#status-LS").val("1");
+        $("#phase-LS").val("");
+        filterHTMLForm();
+    });
 
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const addLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addLetterModal"));
     const editLetterModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editLetterModal"));
+    const confModalTitle = "Are you sure?";
 
     let addEditor;
-    if($("#addEditor").length > 0){
-        const el = document.getElementById('addEditor');
+    let editEditor;
+
+    if ($("#addEditor").length > 0) {
+        const el = document.getElementById("addEditor");
         ClassicEditor.create(el).then((editor) => {
             addEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -211,10 +285,8 @@ var letterSettingsListTable = (function () {
         });
     }
 
-
-    let editEditor;
-    if($("#editEditor").length > 0){
-        const el = document.getElementById('editEditor');
+    if ($("#editEditor").length > 0) {
+        const el = document.getElementById("editEditor");
         ClassicEditor.create(el).then((editor) => {
             editEditor = editor;
             $(el).closest(".editor").find(".document-editor__toolbar").append(editor.ui.view.toolbar.element);
@@ -223,338 +295,344 @@ var letterSettingsListTable = (function () {
         });
     }
 
-    const addLetterModalEl = document.getElementById('addLetterModal')
-    addLetterModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#addLetterModal .acc__input-error').html('');
-        $('#addLetterModal input:not([type="checkbox"])').val('');
-        $('#addLetterModal .phaseCheckboxs').prop('checked', false);
-        $('#addLetterModal #status').prop('checked', true);
-        addEditor.setData('');
+    const setBusy = ($button, isBusy) => {
+        $button.prop("disabled", isBusy);
+        $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+    };
+
+    const showSuccess = (title, message) => {
+        $("#successModal .successModalTitle").html(title);
+        $("#successModal .successModalDesc").html(message);
+        successModal.show();
+    };
+
+    const clearErrors = ($form) => {
+        $form.find(".acc__input-error").html("");
+        $form.find(".border-danger").removeClass("border-danger");
+        $form.find(".ss-document-choices").removeClass("border-danger");
+        $form.find(".ss-editor").removeClass("is-danger");
+    };
+
+    const showErrors = ($form, errors) => {
+        for (const [key, val] of Object.entries(errors)) {
+            const message = Array.isArray(val) ? val[0] : val;
+            const field = key.split(".")[0];
+
+            $form.find(`.${field}`).addClass("border-danger");
+            $form.find(`.error-${field}`).html(message);
+
+            if (field === "phase") {
+                $form.find(".ss-document-choices").addClass("border-danger");
+            }
+
+            if (field === "description") {
+                $form.find(".ss-editor").addClass("is-danger");
+            }
+        }
+    };
+
+    const updatePhaseToggleText = ($toggle) => {
+        const enabled = $toggle.find("input").is(":checked");
+        $toggle.find(".ss-status-toggle__copy small").text(enabled ? "Enabled" : "Not enabled");
+    };
+
+    const updateStatusToggleText = ($toggle) => {
+        const enabled = $toggle.find("input").is(":checked");
+        $toggle.find(".ss-status-toggle__copy small").text(enabled ? "Letter set is active" : "Letter set is inactive");
+    };
+
+    const updateToggleTexts = ($form) => {
+        $form.find(".ss-doc-toggle").each(function () {
+            updatePhaseToggleText($(this));
+        });
+        $form.find(".ss-status-toggle--inline").each(function () {
+            updateStatusToggleText($(this));
+        });
+    };
+
+    const resetAddForm = () => {
+        const $form = $("#addLetterForm");
+        clearErrors($form);
+        $form.find('input[name="letter_type"]').val("");
+        $form.find('input[name="letter_title"]').val("");
+        $form.find(".phaseCheckboxs").prop("checked", false);
+        $form.find("#status").prop("checked", true);
+        updateToggleTexts($form);
+        setBusy($("#saveLetterSet"), false);
+
+        if (addEditor) {
+            addEditor.setData("");
+        }
+    };
+
+    const resetEditForm = () => {
+        const $form = $("#editLetterForm");
+        clearErrors($form);
+        $form.find('input[name="letter_type"]').val("");
+        $form.find('input[name="letter_title"]').val("");
+        $form.find('input[name="id"]').val("0");
+        $form.find(".phaseCheckboxs").prop("checked", false);
+        $form.find("#edit_status").prop("checked", false);
+        updateToggleTexts($form);
+        setBusy($("#editLetterSet"), false);
+
+        if (editEditor) {
+            editEditor.setData("");
+        }
+    };
+
+    updateToggleTexts($("#addLetterForm"));
+    updateToggleTexts($("#editLetterForm"));
+
+    $(document).on("change", "#addLetterForm .ss-doc-toggle input, #editLetterForm .ss-doc-toggle input", function () {
+        updatePhaseToggleText($(this).closest(".ss-doc-toggle"));
     });
 
-    const editLetterModalEl = document.getElementById('editLetterModal')
-    editLetterModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#editLetterModal .acc__input-error').html('');
-        $('#editLetterModal .modal-body input:not([type="checkbox"])').val('');
-        $('#editLetterModal .phaseCheckboxs').prop('checked', false);
-        $('#addLetterModal #edit_status').prop('checked', false);
-        editEditor.setData('');
+    $(document).on("change", "#addLetterForm .ss-status-toggle--inline input, #editLetterForm .ss-status-toggle--inline input", function () {
+        updateStatusToggleText($(this).closest(".ss-status-toggle--inline"));
     });
 
-    document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-        $('#confirmModal .agreeWith').attr('data-id', '0');
-        $('#confirmModal .agreeWith').attr('data-phase', '');
-        $('#confirmModal .agreeWith').attr('data-action', 'none');
+    document.getElementById("addLetterModal").addEventListener("show.tw.modal", function () {
+        resetAddForm();
     });
 
-    $('#addLetterForm').on('submit', function(e){
+    document.getElementById("addLetterModal").addEventListener("hide.tw.modal", function () {
+        resetAddForm();
+    });
+
+    document.getElementById("editLetterModal").addEventListener("hide.tw.modal", function () {
+        resetEditForm();
+    });
+
+    document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+        $("#confirmModal .agreeWith").attr("data-id", "0");
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "none");
+        $("#confirmModal button").removeAttr("disabled");
+    });
+
+    $("#addLetterForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('addLetterForm');
-    
-        document.querySelector('#saveLetterSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveLetterSet svg").style.cssText ="display: inline-block;";
+        const $form = $("#addLetterForm");
+        const form = document.getElementById("addLetterForm");
 
-        let form_data = new FormData(form);
-        form_data.append("description", addEditor.getData());
+        clearErrors($form);
+        setBusy($("#saveLetterSet"), true);
+
+        let formData = new FormData(form);
+        formData.append("description", addEditor ? addEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('letter.set.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#saveLetterSet').removeAttribute('disabled');
-            document.querySelector("#saveLetterSet svg").style.cssText = "display: none;";
-            
-            if (response.status == 200) {
-                addLetterModal.hide();
+            url: route("letter.set.store"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#saveLetterSet"), false);
 
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Letter set successfully inserted.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+            if (response.status == 200) {
+                resetAddForm();
+                addLetterModal.hide();
+                showSuccess("Success!", "Letter set successfully inserted.");
             }
+
             letterSettingsListTable.init();
-        }).catch(error => {
-            document.querySelector('#saveLetterSet').removeAttribute('disabled');
-            document.querySelector("#saveLetterSet svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#saveLetterSet"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#addLetterForm .${key}`).addClass('border-danger')
-                        $(`#addLetterForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    $('#letterSettingsListTable').on('click', '.edit_btn', function(){
-        var $btn = $(this);
-        var recordId = $btn.attr('data-id');
+    $("#letterSettingsListTable").on("click", ".edit_btn", function () {
+        let editId = $(this).attr("data-id");
+        resetEditForm();
 
         axios({
             method: "get",
-            url: route("letter.set.get.row", recordId),
-            headers: {
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
-            },
+            url: route("letter.set.get.row", editId),
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
         }).then((response) => {
             if (response.status == 200) {
-                let dataset = response.data;
-                
-                $('#editLetterModal input[name="letter_type"]').val(dataset.letter_type ? dataset.letter_type : '');
-                $('#editLetterModal input[name="letter_title"]').val(dataset.letter_title ? dataset.letter_title : '');
-                editEditor.setData(dataset.description ? dataset.description : '');
-                $('#editLetterModal input[name="id"]').val(recordId);
+                const dataset = response.data;
+                const $form = $("#editLetterForm");
 
-                if(dataset.admission == 1){
-                    $('#editLetterModal #edit_phase_admission').prop('checked', true);
-                }else{
-                    $('#editLetterModal #edit_phase_admission').prop('checked', false);
+                $form.find('input[name="letter_type"]').val(dataset.letter_type ? dataset.letter_type : "");
+                $form.find('input[name="letter_title"]').val(dataset.letter_title ? dataset.letter_title : "");
+                $form.find('input[name="id"]').val(editId);
+
+                letterPhaseKeys.forEach((key) => {
+                    $form.find(`#edit_phase_${key}`).prop("checked", isOnValue(dataset[key]));
+                });
+
+                $form.find("#edit_status").prop("checked", isOnValue(dataset.status));
+
+                if (editEditor) {
+                    editEditor.setData(dataset.description ? dataset.description : "");
                 }
-                if(dataset.live == 1){
-                    $('#editLetterModal #edit_phase_live').prop('checked', true);
-                }else{
-                    $('#editLetterModal #edit_phase_live').prop('checked', false);
-                }
-                if(dataset.hr == 1){
-                    $('#editLetterModal #edit_phase_hr').prop('checked', true);
-                }else{
-                    $('#editLetterModal #edit_phase_hr').prop('checked', false);
-                }
-                if(dataset.status == 1){
-                    $('#editLetterModal #edit_status').prop('checked', true);
-                }else{
-                    $('#editLetterModal #edit_status').prop('checked', false);
-                }
+
+                updateToggleTexts($form);
+                editLetterModal.show();
             }
         }).catch((error) => {
             console.log(error);
         });
     });
 
-
-    $('#editLetterForm').on('submit', function(e){
+    $("#editLetterForm").on("submit", function (e) {
         e.preventDefault();
-        const form = document.getElementById('editLetterForm');
-    
-        document.querySelector('#editLetterSet').setAttribute('disabled', 'disabled');
-        document.querySelector("#editLetterSet svg").style.cssText ="display: inline-block;";
+        const $form = $("#editLetterForm");
+        const form = document.getElementById("editLetterForm");
 
-        let form_data = new FormData(form);
-        form_data.append("description", editEditor.getData());
+        clearErrors($form);
+        setBusy($("#editLetterSet"), true);
+
+        let formData = new FormData(form);
+        formData.append("description", editEditor ? editEditor.getData() : "");
+
         axios({
             method: "post",
-            url: route('letter.set.update'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#editLetterSet').removeAttribute('disabled');
-            document.querySelector("#editLetterSet svg").style.cssText = "display: none;";
-            
+            url: route("letter.set.update"),
+            data: formData,
+            headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+        }).then((response) => {
+            setBusy($("#editLetterSet"), false);
+
             if (response.status == 200) {
                 editLetterModal.hide();
-
-                successModal.show();
-                document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                    $("#successModal .successModalTitle").html("Congratulations!");
-                    $("#successModal .successModalDesc").html('Letter set successfully updated.');
-                });                
-                
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000);
+                showSuccess("Success!", "Letter set successfully updated.");
             }
+
             letterSettingsListTable.init();
-        }).catch(error => {
-            document.querySelector('#editLetterSet').removeAttribute('disabled');
-            document.querySelector("#editLetterSet svg").style.cssText = "display: none;";
+        }).catch((error) => {
+            setBusy($("#editLetterSet"), false);
+
             if (error.response) {
-                if (error.response.status == 422) {
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editLetterForm .${key}`).addClass('border-danger')
-                        $(`#editLetterForm  .error-${key}`).html(val)
-                    }
+                if (error.response.status == 422 && error.response.data.errors) {
+                    showErrors($form, error.response.data.errors);
+                } else if (error.response.status == 304) {
+                    editLetterModal.hide();
+                    showSuccess("No Data Change!", error.response.statusText);
                 } else {
-                    console.log('error');
+                    console.log("error");
                 }
             }
         });
     });
 
-    // Delete Course
-    $('#letterSettingsListTable').on('click', '.delete_btn', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#letterSettingsListTable").on("click", ".delete_btn", function () {
+        let rowID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to delete this letter set?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "DELETE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to delete these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-        });
     });
 
-    // Restore Course
-    $('#letterSettingsListTable').on('click', '.restore_btn', function(){
-        let $statusBTN = $(this);
-        let dataID = $statusBTN.attr('data-id');
+    $("#letterSettingsListTable").on("click", ".restore_btn", function () {
+        let dataID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to restore this letter set?");
+        $("#confirmModal .agreeWith").attr("data-id", dataID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "RESTORE");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree btn to continue.');
-            $('#confirmModal .agreeWith').attr('data-id', dataID);
-            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-        });
     });
 
-    // Update Status
-    $('#letterSettingsListTable').on('click', '.status_updater', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
+    $("#letterSettingsListTable").on("click", ".status_updater", function () {
+        let rowID = $(this).attr("data-id");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to change the status of this letter set?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", "");
+        $("#confirmModal .agreeWith").attr("data-action", "CHANGESTAT");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to change status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGESTAT');
-        });
     });
 
-    // Update Phase
-    $('#letterSettingsListTable').on('click', '.updatePhase', function(){
-        let $statusBTN = $(this);
-        let rowID = $statusBTN.attr('data-id');
-        let phase = $statusBTN.attr('data-phase');
+    $("#letterSettingsListTable").on("click", ".updatePhase", function () {
+        let rowID = $(this).attr("data-id");
+        let phase = $(this).attr("data-phase");
 
+        $("#confirmModal .confModTitle").html(confModalTitle);
+        $("#confirmModal .confModDesc").html("Do you really want to change the phase status of this letter set?");
+        $("#confirmModal .agreeWith").attr("data-id", rowID);
+        $("#confirmModal .agreeWith").attr("data-phase", phase);
+        $("#confirmModal .agreeWith").attr("data-action", "CHANGEPHS");
         confirmModal.show();
-        document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-            $('#confirmModal .confModTitle').html('Are you sure?');
-            $('#confirmModal .confModDesc').html('Do you really want to change phase status of this record? If yes then please click on the agree btn.');
-            $('#confirmModal .agreeWith').attr('data-id', rowID);
-            $('#confirmModal .agreeWith').attr('data-phase', phase);
-            $('#confirmModal .agreeWith').attr('data-action', 'CHANGEPHS');
-        });
     });
 
-
-    // Confirm Modal Action
-    $('#confirmModal .agreeWith').on('click', function(){
+    $("#confirmModal .agreeWith").on("click", function () {
         let $agreeBTN = $(this);
-        let recordID = $agreeBTN.attr('data-id');
-        let action = $agreeBTN.attr('data-action');
-        let phase = $agreeBTN.attr('data-phase');
+        let recordID = $agreeBTN.attr("data-id");
+        let action = $agreeBTN.attr("data-action");
+        let phase = $agreeBTN.attr("data-phase");
 
-        $('#confirmModal button').attr('disabled', 'disabled');
-        if(action == 'DELETE'){
+        $("#confirmModal button").attr("disabled", "disabled");
+
+        const done = (title, message) => {
+            $("#confirmModal button").removeAttr("disabled");
+            confirmModal.hide();
+            showSuccess(title, message);
+            letterSettingsListTable.init();
+        };
+
+        const failed = (error) => {
+            $("#confirmModal button").removeAttr("disabled");
+            console.log(error);
+        };
+
+        if (action == "DELETE") {
             axios({
-                method: 'delete',
-                url: route('letter.set.destory', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "delete",
+                url: route("letter.set.destory", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set item successfully deleted!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Done!", "Letter set successfully deleted.");
                 }
-                letterSettingsListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        } else if(action == 'RESTORE'){
+            }).catch(failed);
+        } else if (action == "RESTORE") {
             axios({
-                method: 'post',
-                url: route('letter.set.restore', recordID),
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("letter.set.restore", recordID),
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set item successfully restored!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Letter set successfully restored.");
                 }
-                letterSettingsListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'CHANGESTAT'){
+            }).catch(failed);
+        } else if (action == "CHANGESTAT") {
             axios({
-                method: 'post',
-                url: route('letter.set.update.status'),
-                data: {row_id : recordID},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("letter.set.update.status"),
+                data: { row_id: recordID },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set status successfully updated!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Letter set status successfully updated.");
                 }
-                letterSettingsListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
-        }else if(action == 'CHANGEPHS'){
+            }).catch(failed);
+        } else if (action == "CHANGEPHS") {
             axios({
-                method: 'post',
-                url: route('letter.set.update.phase.status'),
-                data: {row_id : recordID, phase : phase},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-            }).then(response => {
+                method: "post",
+                url: route("letter.set.update.phase.status"),
+                data: { row_id: recordID, phase: phase },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
+            }).then((response) => {
                 if (response.status == 200) {
-                    $('#confirmModal button').removeAttr('disabled');
-                    confirmModal.hide();
-
-                    successModal.show();
-                    document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                        $('#successModal .successModalTitle').html('Congratulation!');
-                        $('#successModal .successModalDesc').html('Letter Set Phase status successfully updated!');
-                    });
-
-                    setTimeout(function(){
-                        successModal.hide();
-                    }, 2000);
+                    done("Success!", "Letter set phase status successfully updated.");
                 }
-                letterSettingsListTable.init();
-            }).catch(error =>{
-                console.log(error)
-            });
+            }).catch(failed);
         }
     });
-
-})()
+})();

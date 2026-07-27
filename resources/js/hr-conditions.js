@@ -1,58 +1,62 @@
-import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
-import Tabulator from "tabulator-tables";
 
-(function(){
+(function () {
+    const form = document.getElementById("hrConditionForm");
+
+    if (!form) {
+        return;
+    }
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
+    const csrfToken = $('meta[name="csrf-token"]').attr("content");
 
-    const successModalEl = document.getElementById('successModal')
-    successModalEl.addEventListener('hide.tw.modal', function(event) {
-        window.location.reload();
-    });
+    const refreshIcons = () => {
+        createIcons({
+            icons,
+            "stroke-width": 1.7,
+            nameAttr: "data-lucide",
+        });
+    };
 
-    $('#hrConditionForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('hrConditionForm');
-        let $form = $(this);
+    const setBusy = (busy) => {
+        const buttons = form.querySelectorAll(".updateHRC");
 
-        $form.find('.updateHRC').attr('disabled', 'disabled');
-        $form.find('.updateHRC svg').fadeIn();
+        buttons.forEach((button) => {
+            button.disabled = busy;
+            const spinner = button.querySelector(".ss-spinner");
 
-        let form_data = new FormData(form);
+            if (spinner) {
+                spinner.style.cssText = busy ? "display: inline-block;" : "display: none;";
+            }
+        });
+    };
+
+    const showSuccess = (title, description) => {
+        $("#successModal .successModalTitle").text(title);
+        $("#successModal .successModalDesc").text(description);
+        successModal.show();
+    };
+
+    refreshIcons();
+
+    $("#hrConditionForm").on("submit.hrConditions", function (event) {
+        event.preventDefault();
+        setBusy(true);
 
         axios({
             method: "post",
-            url: route('hr.condition.store'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            $form.find('.updateHRC').removeAttr('disabled');
-            $form.find('.updateHRC svg').fadeOut();
-            
+            url: route("hr.condition.store"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            setBusy(false);
+
             if (response.status == 200) {
-                
-                successModal.show();
-                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                    $('#successModal .successModalTitle').html('Congratulations!');
-                    $('#successModal .successModalDesc').html('HR attendance conditions successfully updated.');
-                });
-
-                setTimeout(function(){
-                    successModal.hide();
-                }, 2000)
+                showSuccess("Success!", "HR attendance conditions successfully updated.");
             }
-            
-        }).catch(error => {
-            $form.find('.updateHRC').attr('disabled', 'disabled');
-            $form.find('.updateHRC svg').fadeIn();
-
-            if (error.response) {
-                if (error.response.status == 422) {
-                    console.log('error');
-                }
-            }
+        }).catch((error) => {
+            setBusy(false);
+            console.log(error);
         });
     });
-
-
 })();

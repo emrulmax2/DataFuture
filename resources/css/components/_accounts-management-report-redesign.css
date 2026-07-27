@@ -1,0 +1,323 @@
+/*
+ |--------------------------------------------------------------------------
+ | Accounts — Management Report (Profit & Loss) redesign
+ |--------------------------------------------------------------------------
+ |
+ | Scoped to `.accounts-management-report-redesign`. Shares the `.accounts-shell`
+ | palette and sidebar from `_accounts-shell.css`; this file styles the report
+ | header chrome and the P&L statement table.
+ |
+ | The table markup is a legacy 4-column colspan layout driven by
+ | `resources/js/accounts-management-report.js` (toggle rows), so the rules below
+ | target its existing row classes (`.gpHeadingRow`, `.parent_row`, …) rather than
+ | replacing the DOM.
+ |
+ */
+
+/* ------------------------------------------------------------------- header */
+
+.acc-mr__head {
+    align-items: center;
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 19px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding: 20px 24px;
+}
+
+.acc-mr__eyebrow {
+    color: var(--acc-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.acc-mr__title {
+    color: var(--acc-ink);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 26px;
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0;
+}
+
+.acc-mr__title span {
+    border-bottom: 2px solid var(--acc-cream-border);
+    color: var(--acc-accent);
+    padding-bottom: 1px;
+    white-space: nowrap;
+}
+
+.acc-mr__head-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+}
+
+/* Report range picker — cream chrome, echoing the summary page. */
+.acc-mr__date {
+    position: relative;
+    width: 210px;
+}
+
+.acc-mr__date-icon {
+    color: var(--acc-cream-faint);
+    height: 14px;
+    left: 12px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    z-index: 1;
+}
+
+.accounts-management-report-redesign .acc-mr__date .form-control {
+    background: var(--acc-cream);
+    border: 1px solid var(--acc-cream-border);
+    border-radius: 10px;
+    box-shadow: none;
+    color: var(--acc-cream-ink);
+    font-size: 13px;
+    height: auto;
+    padding: 7px 12px 7px 34px;
+    width: 100%;
+}
+
+.accounts-management-report-redesign .acc-mr__date .form-control::placeholder {
+    color: var(--acc-cream-faint);
+}
+
+.accounts-management-report-redesign .acc-mr__date .form-control:focus {
+    border-color: var(--acc-cream-focus);
+    box-shadow: 0 0 0 3px rgba(224, 168, 46, 0.16);
+    outline: none;
+}
+
+/* Export or Print — accent pill matching the summary "Advanced search" button. */
+.accounts-management-report-redesign .acc-mr__export-btn {
+    align-items: center;
+    background: var(--acc-accent);
+    border: 1px solid var(--acc-accent);
+    border-radius: 10px;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 8px 15px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.accounts-management-report-redesign .acc-mr__export-btn:hover {
+    background: var(--acc-accent-hover);
+    border-color: var(--acc-accent-hover);
+}
+
+.acc-mr__export-chevron {
+    transition: transform 0.2s ease;
+}
+
+.accounts-management-report-redesign .acc-mr__export[aria-expanded="true"] .acc-mr__export-chevron,
+.accounts-management-report-redesign .acc-mr__export-btn[aria-expanded="true"] .acc-mr__export-chevron {
+    transform: rotate(180deg);
+}
+
+/* The theme relocates an open .dropdown-menu to <body>, so the menu is styled by
+   its own class at body level rather than under the page wrapper. */
+.acc-mr__export-menu {
+    border: 1px solid #e6ecec;
+    border-radius: 13px;
+    box-shadow: 0 18px 40px -18px rgba(18, 51, 47, 0.4);
+    overflow: hidden;
+}
+
+.acc-mr__export-menu .dropdown-item {
+    border-radius: 9px;
+    color: #12332f;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.acc-mr__export-menu .dropdown-item:hover {
+    background: #e7f2f0;
+    color: #0e766c;
+}
+
+/* -------------------------------------------------------------- statement */
+
+.acc-mr__card {
+    background: var(--acc-surface);
+    border: 1px solid var(--acc-line);
+    border-radius: 19px;
+    overflow: hidden;
+    padding: 12px 28px 22px;
+}
+
+.acc-mr__table {
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+    width: 100%;
+}
+
+.accounts-management-report-redesign .acc-mr__table td {
+    color: var(--acc-ink);
+    font-size: 14px;
+    padding: 11px 0;
+    vertical-align: middle;
+}
+
+/* Two right-hand money columns, 180px each, so line items and subtotals keep
+   their two-tier alignment from the original colspan layout. */
+.accounts-management-report-redesign .acc-mr__table td.w-\[180px\] {
+    width: 180px;
+    padding-left: 18px;
+}
+
+.acc-mr__amount {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Links / toggles */
+.accounts-management-report-redesign .acc-mr__link,
+.accounts-management-report-redesign .acc-mr__toggle {
+    align-items: center;
+    color: var(--acc-accent);
+    display: inline-flex;
+    font-weight: 500;
+    gap: 6px;
+    text-decoration: none;
+    transition: color 0.12s ease;
+}
+
+.accounts-management-report-redesign .acc-mr__link:hover,
+.accounts-management-report-redesign .acc-mr__toggle:hover {
+    color: var(--acc-accent-hover);
+    text-decoration: underline;
+}
+
+.accounts-management-report-redesign .acc-mr__toggle {
+    font-weight: 700;
+}
+
+.accounts-management-report-redesign .acc-mr__link > i,
+.accounts-management-report-redesign .acc-mr__link > svg,
+.accounts-management-report-redesign .acc-mr__toggle > i,
+.accounts-management-report-redesign .acc-mr__toggle > svg {
+    color: var(--acc-faint);
+    flex: none;
+}
+
+/* Lead rows — Sales, Other Income: hairline separator + a touch more air. */
+.acc-mr__lead-row td {
+    border-top: 1px solid var(--acc-soft-line);
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+}
+
+.acc-mr__table tbody tr:first-child.acc-mr__lead-row td {
+    border-top: 0;
+}
+
+/* Item rows */
+.acc-mr__item-row td {
+    padding: 9px 0;
+}
+
+.acc-mr__item-row--sub td:first-child {
+    padding-left: 22px;
+}
+
+/* Section labels — Cost Of Sales, Expenditure */
+.acc-mr__section {
+    color: var(--acc-muted);
+    font-size: 11.5px !important;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding-top: 22px !important;
+    padding-bottom: 6px !important;
+    text-transform: uppercase;
+}
+
+.acc-mr__section-row td {
+    border-top: 1px solid var(--acc-soft-line);
+}
+
+/* Subtotal / total rows (Gross Profit, running totals, total expenditure) */
+.acc-mr__total-row td {
+    border-top: 1.5px solid var(--acc-line);
+    padding-top: 13px !important;
+    padding-bottom: 13px !important;
+}
+
+.acc-mr__total-label {
+    color: var(--acc-ink);
+    font-size: 13px !important;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.acc-mr__amount--total {
+    font-weight: 700 !important;
+}
+
+/* Net profit — the headline figure. A standalone rounded band with no border-top,
+   which would otherwise cut straight across the top of the rounded corners. The
+   total-expenditure row above already carries the separating hairline. */
+.acc-mr__net-row td {
+    background: var(--acc-accent-soft);
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+}
+
+.acc-mr__net-row td:first-child {
+    border-bottom-left-radius: 12px;
+    border-top-left-radius: 12px;
+    padding-left: 16px !important;
+}
+
+.acc-mr__net-row td:last-child {
+    border-bottom-right-radius: 12px;
+    border-top-right-radius: 12px;
+    padding-right: 16px !important;
+}
+
+.acc-mr__net-label {
+    color: var(--acc-accent);
+    font-size: 14px !important;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.acc-mr__amount--net {
+    color: var(--acc-accent);
+    font-size: 16px !important;
+    font-weight: 800 !important;
+}
+
+@media (max-width: 767px) {
+    .acc-mr__card {
+        padding: 8px 16px 16px;
+    }
+
+    .accounts-management-report-redesign .acc-mr__table td.w-\[180px\] {
+        width: 120px;
+        padding-left: 10px;
+    }
+
+    .acc-mr__title {
+        font-size: 22px;
+    }
+}

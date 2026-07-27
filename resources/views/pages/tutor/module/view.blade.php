@@ -1024,7 +1024,14 @@
             height: 34px;
             justify-content: center;
             letter-spacing: 0;
+            overflow: hidden;
             width: 34px;
+        }
+
+        #tutorModuleDetails .tm-participant-avatar img {
+            height: 100%;
+            object-fit: cover;
+            width: 100%;
         }
 
         #tutorModuleDetails .tm-participant-regno {
@@ -1448,14 +1455,29 @@
     $courseTitle = $data->course ?? ($plan->course->name ?? '');
     $termTitle = $data->term_name ?? ($plan->attenTerm->name ?? '');
     $classType = isset($plan->class_type) && !empty($plan->class_type) ? $plan->class_type : ($data->classType ?? '');
-    $tutorName = $plan->tutor->employee->full_name ?? $data->tutor ?? null;
+    // photo_url returns a data: SVG initials avatar when no real photo is stored;
+    // use the URL only when it is a real image so the avatar can fall back to initials.
+    $realPhoto = function ($employee) {
+        $url = $employee->photo_url ?? null;
+        return ($url && !\Illuminate\Support\Str::startsWith($url, 'data:')) ? $url : null;
+    };
+
+    $tutorEmployee = $plan->tutor->employee ?? null;
+    $tutorName = $tutorEmployee->full_name ?? $data->tutor ?? null;
+    $tutorPhoto = $realPhoto($tutorEmployee);
+
     $personalTutorName = null;
+    $personalTutorEmployee = null;
 
     if (isset($plan->class_type) && $plan->class_type == 'Tutorial' && $plan->personal_tutor_id > 0) {
-        $personalTutorName = $plan->personalTutor->employee->full_name ?? $data->personalTutor ?? null;
+        $personalTutorEmployee = $plan->personalTutor->employee ?? null;
+        $personalTutorName = $personalTutorEmployee->full_name ?? $data->personalTutor ?? null;
     } elseif (isset($plan->class_type) && $plan->class_type != 'Tutorial' && isset($plan->tutorial->personal_tutor_id) && $plan->tutorial->personal_tutor_id > 0) {
-        $personalTutorName = $plan->tutorial->personalTutor->employee->full_name ?? $data->personalTutor ?? null;
+        $personalTutorEmployee = $plan->tutorial->personalTutor->employee ?? null;
+        $personalTutorName = $personalTutorEmployee->full_name ?? $data->personalTutor ?? null;
     }
+
+    $personalTutorPhoto = $realPhoto($personalTutorEmployee);
 
     $showCourseContent = $plan->class_type != 'Tutorial' && $plan->class_type != 'Seminar';
     $defaultDatesActive = !$showCourseContent;
@@ -1485,7 +1507,11 @@
                         @if($plan->tutor_id > 0 && !empty($tutorName))
                             <div class="tm-person">
                                 <span class="tm-avatar">
-                                    <img alt="{{ $tutorName }}" src="{{ (isset($plan->tutor->employee->photo_url) ? $plan->tutor->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')) }}">
+                                    @if($tutorPhoto)
+                                        <img alt="{{ $tutorName }}" src="{{ $tutorPhoto }}">
+                                    @else
+                                        {{ $initialsFor($tutorName) }}
+                                    @endif
                                 </span>
                                 <span>
                                     <span class="tm-person-name">{{ $tutorName }}</span>
@@ -1496,9 +1522,9 @@
 
                         @if(!empty($personalTutorName))
                             <div class="tm-person">
-                                <span class="tm-avatar" style="background:#c94f7c;">
-                                    @if(isset($plan->personalTutor->employee->photo_url) || isset($plan->tutorial->personalTutor->employee->photo_url))
-                                        <img alt="{{ $personalTutorName }}" src="{{ $plan->personalTutor->employee->photo_url ?? $plan->tutorial->personalTutor->employee->photo_url ?? asset('build/assets/images/placeholders/200x200.jpg') }}">
+                                <span class="tm-avatar" style="{{ $personalTutorPhoto ? '' : 'background:#c94f7c;' }}">
+                                    @if($personalTutorPhoto)
+                                        <img alt="{{ $personalTutorName }}" src="{{ $personalTutorPhoto }}">
                                     @else
                                         {{ $initialsFor($personalTutorName) }}
                                     @endif

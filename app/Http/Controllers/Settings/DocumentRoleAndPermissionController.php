@@ -116,6 +116,6 @@ class DocumentRoleAndPermissionController extends Controller
     public function restore($id) {
         $data = DocumentRoleAndPermission::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 }

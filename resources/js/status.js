@@ -2,13 +2,31 @@ import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
- 
+
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
 var settingsListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+
+        if (window.statusesTableInstance) {
+            window.statusesTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#settingsListTable", {
             ajaxURL: route("statuses.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -18,7 +36,7 @@ var settingsListTable = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -26,65 +44,90 @@ var settingsListTable = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 76,
+                    minWidth: 64,
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
+                    minWidth: 150,
+                    widthGrow: 1.3,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
-                    title: "Type",
+                    title: "Phase",
                     field: "type",
                     headerHozAlign: "left",
+                    minWidth: 108,
+                    formatter(cell) {
+                        return `<span class="ss-phase-pill">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Process",
                     field: "process",
                     headerHozAlign: "left",
                     headerSort: false,
+                    minWidth: 145,
+                    widthGrow: 1.1,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "Letter/Email",
-                    field: "id",
+                    field: "template",
                     headerSort: false,
                     hozAlign: "left",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) { 
-                        if(cell.getData().letter_set_id > 0){
-                            return '<div style="white-space: normal; word-break: break-all;">Letter: '+cell.getData().letter_name+(cell.getData().signatory_name != '' ? '<br/>Signatory: '+cell.getData().signatory_name : '')+'</div>';
-                        }else if(cell.getData().email_template_id > 0){
-                            return '<div style="white-space: normal; word-break: break-all;">Email: '+cell.getData().email_name+'</div>';
-                        }else{
-                            return '';
+                    minWidth: 180,
+                    widthGrow: 1.45,
+                    variableHeight: true,
+                    formatter(cell) {
+                        const data = cell.getData();
+
+                        if (data.letter_set_id > 0) {
+                            return '<span class="ss-template-cell"><strong>Letter</strong>' + escapeHtml(data.letter_name) + (data.signatory_name != "" ? '<small>Signatory: ' + escapeHtml(data.signatory_name) + "</small>" : "") + "</span>";
                         }
-                    }
+
+                        if (data.email_template_id > 0) {
+                            return '<span class="ss-template-cell"><strong>Email</strong>' + escapeHtml(data.email_name) + "</span>";
+                        }
+
+                        return '<span class="ss-cell-wrap">&mdash;</span>';
+                    },
                 },
                 {
-                    title: "Elibible for Award",
+                    title: "Eligible for Award",
                     field: "eligible_for_award",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams){
-                        return (cell.getData().eligible_for_award == 1 ? '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Yes</span>' : '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">No</span>');
-                    }
+                    minWidth: 132,
+                    formatter(cell) {
+                        const isEligible = cell.getValue() == 1;
+                        return `<span class="ss-status-pill ${isEligible ? "is-active" : "is-inactive"}"><span></span>${isEligible ? "Yes" : "No"}</span>`;
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
-                    hozAlign: "center",
-                    headerHozAlign: "center",
-                    width: "180",
+                    hozAlign: "right",
+                    headerHozAlign: "right",
+                    width: 124,
+                    minWidth: 124,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
                         if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' +cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editSettingsModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit status"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete status"><i data-lucide="trash-2"></i></button>';
                         }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore status"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -92,52 +135,41 @@ var settingsListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.statusesTableInstance = tableContent;
+
+        if (window.statusesTableResizeHandler) {
+            window.removeEventListener("resize", window.statusesTableResizeHandler);
+        }
+
+        window.statusesTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.statusesTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.statuses").on("click.statuses", function () {
+            tableContent.download("csv", "status-details.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.statuses").on("click.statuses", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
+            tableContent.download("xlsx", "status-details.xlsx", {
                 sheetName: "Status Details",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.statuses").on("click.statuses", function () {
             tableContent.print();
         });
     };
@@ -188,12 +220,12 @@ var settingsListTable = (function () {
                 dropdown_input: {}
             },
             placeholder: 'Search Here...',
-            dropdownParent: 'body',
-            dropdownClass: 'ts-dropdown lcc-tom-float',
-            //persist: false,
             maxOptions: null,
+            dropdownParent: 'body',
+            dropdownClass: 'ts-dropdown ss-settings-tom-dropdown',
             create: false,
             allowEmptyOption: true,
+            copyClassesToDropdown: false,
             onDelete: function (values) {
                 return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
             },
@@ -215,12 +247,94 @@ var settingsListTable = (function () {
         const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
         let confModalDelTitle = 'Are you sure?';
 
-        const addSettingsModalEl = document.getElementById('addSettingsModal')
-        addSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
+        const setBusy = ($button, isBusy) => {
+            $button.prop("disabled", isBusy);
+            $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+        };
+
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
+
+        const showErrors = ($form, errors) => {
+            for (const [key, val] of Object.entries(errors)) {
+                $form.find(`.${key}`).addClass("border-danger");
+                $form.find(`.error-${key}`).html(Array.isArray(val) ? val[0] : val);
+            }
+        };
+
+        const resetProcessSelect = (select, placeholder = "Select a phase first") => {
+            select.clear(true);
+            select.clearOptions();
+            select.addOption({
+                value: "",
+                text: placeholder,
+            });
+            select.refreshOptions(false);
+            select.disable();
+        };
+
+        const populateProcessSelect = (select, rows, selectedValue = "") => {
+            select.clear(true);
+            select.clearOptions();
+
+            const options = Array.isArray(rows) && rows.length > 0
+                ? rows
+                : [{ id: "", name: "No process found" }];
+
+            $.each(options, function(index, row) {
+                select.addOption({
+                    value: String(row.id ?? ""),
+                    text: row.name ?? "Please Select",
+                });
+            });
+
+            select.enable();
+            if (selectedValue) {
+                select.addItem(String(selectedValue), true);
+            }
+            select.refreshOptions(false);
+        };
+
+        const loadProcessOptions = (phaseType, select, selectedValue = "") => {
+            resetProcessSelect(select);
+
+            if (!phaseType) {
+                return Promise.resolve();
+            }
+
+            return axios({
+                method: "post",
+                url: route('statuses.get.process'),
+                data: {theType : phaseType},
+                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+            }).then(response => {
+                populateProcessSelect(select, response.data.res, selectedValue);
+            }).catch(error => {
+                populateProcessSelect(select, [{ id: "", name: "No process found" }]);
+                if (error.response && error.response.status != 304) {
+                    console.log('error');
+                }
+            });
+        };
+
+        const updateAwardToggleText = ($field) => {
+            const isChecked = $field.find('input[name="eligible_for_award"]').is(":checked");
+            $field.find(".ss-status-toggle__copy strong").text(isChecked ? "Yes" : "No");
+            $field.find(".ss-status-toggle__copy small").text(
+                isChecked ? "Eligible for award workflows" : "Not eligible for award workflows"
+            );
+        };
+
+        const resetAddForm = () => {
             $('#addSettingsModal .acc__input-error').html('');
+            $('#addSettingsModal .border-danger').removeClass('border-danger');
             $('#addSettingsModal .modal-body input:not([type="checkbox"])').val('');
             $('#addSettingsModal .modal-body select').val('');
             $('#addSettingsModal .modal-body input[name="eligible_for_award"]').prop('checked', false);
+            updateAwardToggleText($('#addSettingsModal .ss-status-toggle'));
 
             letter_set_id.clear(true);
             $('#addSettingsModal .signatoryWrap').fadeOut('fast', function(){
@@ -228,17 +342,18 @@ var settingsListTable = (function () {
             });
             email_template_id.clear(true);
 
-            process_list_id.clear(true);
-            process_list_id.clearOptions(); 
-        });
-        
-        const editSettingsModalEl = document.getElementById('editSettingsModal')
-        editSettingsModalEl.addEventListener('hide.tw.modal', function(event) {
+            resetProcessSelect(process_list_id);
+            setBusy($("#saveSettings"), false);
+        };
+
+        const resetEditForm = () => {
             $('#editSettingsModal .acc__input-error').html('');
+            $('#editSettingsModal .border-danger').removeClass('border-danger');
             $('#editSettingsModal .modal-body input:not([type="checkbox"])').val('');
             $('#editSettingsModal .modal-body select').val('');
             $('#editSettingsModal input[name="id"]').val('0');
             $('#editSettingsModal .modal-body input[name="eligible_for_award"]').prop('checked', false);
+            updateAwardToggleText($('#editSettingsModal .ss-status-toggle'));
 
             edit_letter_set_id.clear(true);
             $('#editSettingsModal .signatoryWrap').fadeOut('fast', function(){
@@ -246,45 +361,39 @@ var settingsListTable = (function () {
             });
             edit_email_template_id.clear(true);
 
-            edit_process_list_id.clear(true);
-            edit_process_list_id.clearOptions(); 
+            resetProcessSelect(edit_process_list_id);
+            setBusy($("#updateSettings"), false);
+        };
+
+        resetAddForm();
+        resetEditForm();
+
+        $(".ss-status-toggle input[name='eligible_for_award']").on("change", function () {
+            updateAwardToggleText($(this).closest(".ss-status-toggle"));
         });
 
-        $('#addSettingsForm #type').on('change', function(e){
-            var $theType = $(this);
-            var theType = $theType.val();
+        const addSettingsModalEl = document.getElementById('addSettingsModal')
+        addSettingsModalEl.addEventListener('show.tw.modal', function() {
+            resetAddForm();
+        });
 
-            process_list_id.clear(true);
-            process_list_id.clearOptions(); 
-            process_list_id.disable(); 
-            if(theType != ''){
-                axios({
-                    method: "post",
-                    url: route('statuses.get.process'),
-                    data: {theType : theType},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    process_list_id.enable();
-                    if(response.status == 200){  
-                        $.each(response.data.res, function(index, row) {
-                            process_list_id.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        process_list_id.refreshOptions();
-                    }
-                }).catch(error => {
-                    process_list_id.enable();
-                    if (error.response) {
-                        if (error.response.status == 304) {
-                            console.log('content not found');
-                        } else {
-                            console.log('error');
-                        }
-                    }
-                });
-            }
+        addSettingsModalEl.addEventListener('hide.tw.modal', function() {
+            resetAddForm();
+        });
+        
+        const editSettingsModalEl = document.getElementById('editSettingsModal')
+        editSettingsModalEl.addEventListener('hide.tw.modal', function() {
+            resetEditForm();
+        });
+
+        document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function() {
+            $('#confirmModal .agreeWith').attr('data-id', '0');
+            $('#confirmModal .agreeWith').attr('data-action', 'none');
+            $('#confirmModal button').removeAttr('disabled');
+        });
+
+        $('#addSettingsForm select[name="type"]').on('change', function(){
+            loadProcessOptions($(this).val(), process_list_id);
         })
 
         $('#letter_set_id').on('change', function(e){
@@ -304,9 +413,8 @@ var settingsListTable = (function () {
         $('#addSettingsForm').on('submit', function(e){
             e.preventDefault();
             const form = document.getElementById('addSettingsForm');
-        
-            document.querySelector('#saveSettings').setAttribute('disabled', 'disabled');
-            document.querySelector("#saveSettings svg").style.cssText ="display: inline-block;";
+
+            setBusy($("#saveSettings"), true);
 
             let form_data = new FormData(form);
             axios({
@@ -315,28 +423,18 @@ var settingsListTable = (function () {
                 data: form_data,
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                setBusy($("#saveSettings"), false);
                 
                 if (response.status == 200) {
                     addSettingsModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html( "Congratulations!" );
-                            $("#successModal .successModalDesc").html('Title Item Successfully inserted.');
-                    });     
+                    showSuccess("Success!", "Status successfully inserted.");
                 }
                 settingsListTable.init();
             }).catch(error => {
-                document.querySelector('#saveSettings').removeAttribute('disabled');
-                document.querySelector("#saveSettings svg").style.cssText = "display: none;";
+                setBusy($("#saveSettings"), false);
                 if (error.response) {
                     if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addSettingsForm .${key}`).addClass('border-danger');
-                            $(`#addSettingsForm  .error-${key}`).html(val);
-                        }
+                        showErrors($("#addSettingsForm"), error.response.data.errors);
                     } else {
                         console.log('error');
                     }
@@ -347,6 +445,8 @@ var settingsListTable = (function () {
         $("#settingsListTable").on("click", ".edit_btn", function () {      
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+
+            resetEditForm();
 
             axios({
                 method: "get",
@@ -389,29 +489,15 @@ var settingsListTable = (function () {
                             edit_email_template_id.clear(true);
                         }
 
-                        if(dataset.processes){
-                            edit_process_list_id.clear(true);
-                            edit_process_list_id.clearOptions(); 
-
-                            $.each(dataset.processes, function(index, row) {
-                                edit_process_list_id.addOption({
-                                    value: row.id,
-                                    text: row.name,
-                                });
-                            });
-                            if(dataset.process_list_id > 0){
-                                edit_process_list_id.addItem(dataset.process_list_id, true); 
-                            }
-                        }else{
-                            edit_process_list_id.clear(true);
-                            edit_process_list_id.clearOptions(); 
-                        }
+                        populateProcessSelect(edit_process_list_id, dataset.processes, dataset.process_list_id);
 
                         if(dataset.eligible_for_award == 1){
                             $('#editSettingsModal input[name="eligible_for_award"]').prop('checked', true);
                         }else{
                             $('#editSettingsModal input[name="eligible_for_award"]').prop('checked', false);
                         }
+                        updateAwardToggleText($('#editSettingsModal .ss-status-toggle'));
+                        editSettingsModal.show();
                     }
                 })
                 .catch((error) => {
@@ -433,51 +519,16 @@ var settingsListTable = (function () {
             });
         })
 
-        $('#editSettingsForm #type').on('change', function(e){
-            var $theType = $(this);
-            var theType = $theType.val();
-
-            edit_process_list_id.clear(true);
-            edit_process_list_id.clearOptions(); 
-            edit_process_list_id.disable(); 
-            if(theType != ''){
-                axios({
-                    method: "post",
-                    url: route('statuses.get.process'),
-                    data: {theType : theType},
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-                }).then(response => {
-                    edit_process_list_id.enable();
-                    if(response.status == 200){  
-                        $.each(response.data.res, function(index, row) {
-                            edit_process_list_id.addOption({
-                                value: row.id,
-                                text: row.name,
-                            });
-                        });
-                        edit_process_list_id.refreshOptions();
-                    }
-                }).catch(error => {
-                    edit_process_list_id.enable();
-                    if (error.response) {
-                        if (error.response.status == 304) {
-                            console.log('content not found');
-                        } else {
-                            console.log('error');
-                        }
-                    }
-                });
-            }
+        $('#editSettingsForm select[name="type"]').on('change', function(){
+            loadProcessOptions($(this).val(), edit_process_list_id);
         });
 
         // Update Course Data
         $("#editSettingsForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editSettingsForm input[name="id"]').val();
             const form = document.getElementById("editSettingsForm");
 
-            document.querySelector('#updateSettings').setAttribute('disabled', 'disabled');
-            document.querySelector('#updateSettings svg').style.cssText = 'display: inline-block;';
+            setBusy($("#updateSettings"), true);
 
             let form_data = new FormData(form);
 
@@ -489,36 +540,20 @@ var settingsListTable = (function () {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
             }).then((response) => {
+                setBusy($("#updateSettings"), false);
                 if (response.status == 200) {
-                    document.querySelector("#updateSettings").removeAttribute("disabled");
-                    document.querySelector("#updateSettings svg").style.cssText = "display: none;";
                     editSettingsModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Congratulations!");
-                        $("#successModal .successModalDesc").html('Titles data successfully updated.');
-                    });
+                    showSuccess("Success!", "Status successfully updated.");
                 }
                 settingsListTable.init();
             }).catch((error) => {
-                document.querySelector("#updateSettings").removeAttribute("disabled");
-                document.querySelector("#updateSettings svg").style.cssText = "display: none;";
+                setBusy($("#updateSettings"), false);
                 if (error.response) {
                     if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#editSettingsForm .${key}`).addClass('border-danger')
-                            $(`#editSettingsForm  .error-${key}`).html(val)
-                        }
+                        showErrors($("#editSettingsForm"), error.response.data.errors);
                     }else if (error.response.status == 304) {
                         editSettingsModal.hide();
-
-                        let message = error.response.statusText;
-                        succModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModal").html("Oops!");
-                            $("#successModal .successModal").html('No data change found!');
-                        });
+                        showSuccess("No Data Change!", error.response.statusText);
                     } else {
                         console.log("error");
                     }
@@ -542,15 +577,11 @@ var settingsListTable = (function () {
                     if (response.status == 200) {
                         $('#confirmModal button').removeAttr('disabled');
                         confirmModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('WOW!');
-                            $('#successModal .successModalDesc').html('Record successfully deleted from DB row.');
-                        });
+                        showSuccess("Done!", "Status successfully deleted.");
                     }
                     settingsListTable.init();
                 }).catch(error =>{
+                    $('#confirmModal button').removeAttr('disabled');
                     console.log(error)
                 });
             } else if(action == 'RESTORE'){
@@ -562,15 +593,11 @@ var settingsListTable = (function () {
                     if (response.status == 200) {
                         $('#confirmModal button').removeAttr('disabled');
                         confirmModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('WOW!');
-                            $('#successModal .successModalDesc').html('Record Successfully Restored!');
-                        });
+                        showSuccess("Success!", "Status successfully restored.");
                     }
                     settingsListTable.init();
                 }).catch(error =>{
+                    $('#confirmModal button').removeAttr('disabled');
                     console.log(error)
                 });
             }
@@ -578,30 +605,24 @@ var settingsListTable = (function () {
 
         // Delete Course
         $('#settingsListTable').on('click', '.delete_btn', function(){
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
+            let rowID = $(this).attr('data-id');
 
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Want to delete this status? Please click on agree to continue.');
+            $('#confirmModal .agreeWith').attr('data-id', rowID);
+            $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
             confirmModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record? If yes then please click on the agree btn.');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
         // Restore Course
         $('#settingsListTable').on('click', '.restore_btn', function(){
-            let $statusBTN = $(this);
-            let courseID = $statusBTN.attr('data-id');
+            let statusID = $(this).attr('data-id');
 
+            $('#confirmModal .confModTitle').html(confModalDelTitle);
+            $('#confirmModal .confModDesc').html('Want to restore this status from the trash? Please click on agree to continue.');
+            $('#confirmModal .agreeWith').attr('data-id', statusID);
+            $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
             confirmModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record? Click on agree to continue.');
-                $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
         });
     }
 })();

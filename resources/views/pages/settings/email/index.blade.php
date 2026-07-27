@@ -1,285 +1,390 @@
-@extends('../layout/' . $layout)
+@extends('../layout/site-settings')
+
+@section('body_class', 'site-settings-isolated')
 
 @section('subhead')
     <title>{{ $title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet">
 @endsection
 
-@section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('dashboard') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Dashboard</a>
-        </div>
-    </div>
+@section('styles')
+    @vite('resources/css/site-settings-redesign.css')
+@endsection
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.settings.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+@section('content')
+    @php
+        $emailPhases = [
+            ['key' => 'admission', 'label' => 'Admission'],
+            ['key' => 'live', 'label' => 'Live Student'],
+            ['key' => 'hr', 'label' => 'Human Resource'],
+        ];
+    @endphp
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <!-- BEGIN: Display Information -->
-            <div class="intro-y box lg:mt-5">
-                <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-                    <h2 class="font-medium text-base mr-auto">Email Template</h2>
-                    <button data-tw-toggle="modal" data-tw-target="#addEmailModal" type="button" class="add_btn btn btn-primary shadow-md ml-auto">Add New Email</button>
+    <div id="siteSettingsPage" class="ss-page">
+        @include('pages.settings.partials.isolated-header')
+
+        <nav class="ss-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ route('dashboard') }}">
+                <i data-lucide="home"></i>
+                Dashboard
+            </a>
+            <i data-lucide="chevron-right"></i>
+            <span>Communication Settings</span>
+            <i data-lucide="chevron-right"></i>
+            <span>Email Template</span>
+        </nav>
+
+        <main class="ss-main">
+            <section class="ss-title-card">
+                <div class="ss-title-card__content">
+                    <button type="button" class="ss-icon-btn ss-sidebar-toggle" data-ss-sidebar-toggle aria-label="Open settings menu">
+                        <i data-lucide="panel-left"></i>
+                    </button>
+                    <span class="ss-title-card__icon">
+                        <i data-lucide="mail"></i>
+                    </span>
+                    <div>
+                        <h1>{{ $subtitle }}</h1>
+                        <p>Compose and maintain the email templates used across admission, live student and human resource communications.</p>
+                    </div>
                 </div>
-                <div class="p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                        <form id="tabulatorFilterForm-LS" class="xl:flex sm:mr-auto" >
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                                <input id="query-EMAIL" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                            </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Phase</label>
-                                <select id="phase-EMAIL" name="phase" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="">All</option>
-                                    <option value="admission">Admission</option>
-                                    <option value="live">Live Student</option>
-                                    <option value="hr">Human Resource</option>
-                                </select>
-                            </div>
-                            <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                                <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                                <select id="status-EMAIL" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                    <option value="1">Active</option>
-                                    <option value="0">Inactive</option>
-                                    <option value="2">Archived</option>
-                                </select>
-                            </div>
-                            <div class="mt-2 xl:mt-0">
-                                <button id="tabulator-html-filter-go-EMAIL" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                                <button id="tabulator-html-filter-reset-EMAIL" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                            </div>
-                        </form>
-                        <div class="flex mt-5 sm:mt-0">
-                            <button id="tabulator-print" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
+                <a href="{{ route('dashboard') }}" class="ss-back-btn">
+                    <i data-lucide="arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </section>
+
+            <div class="ss-workspace">
+                <button type="button" class="ss-sidebar-backdrop" data-ss-sidebar-close aria-label="Close settings menu"></button>
+                <aside class="ss-sidebar">
+                    @php($settingsSidebarIcon = 'settings-2')
+                    @php($settingsSidebarSubtitle = 'Global configuration')
+                    @include('pages.settings.sidebar')
+                </aside>
+
+                <section class="ss-content">
+                    <div class="ss-table-card ss-email-template-card">
+                        <div class="ss-table-card__header">
+                            <h2>Email Template List</h2>
+                            <button data-tw-toggle="modal" data-tw-target="#addEmailModal" type="button" class="ss-btn ss-btn--primary ss-btn--compact">
+                                <i data-lucide="plus"></i>
+                                Add New Email Template
                             </button>
-                            <div class="dropdown w-1/2 sm:w-auto">
-                                <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                                    <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
+                        </div>
+
+                        <div class="ss-table-tools">
+                            <form id="tabulatorFilterForm-EMAIL" class="ss-table-filter">
+                                <div class="ss-filter-field">
+                                    <span>Query</span>
+                                    <label class="ss-filter-input" for="query-EMAIL">
+                                        <i data-lucide="search"></i>
+                                        <input id="query-EMAIL" name="query" type="text" placeholder="Search...">
+                                    </label>
+                                </div>
+                                <div class="ss-filter-field">
+                                    <span>Phase</span>
+                                    <label class="ss-filter-select" for="phase-EMAIL">
+                                        <select id="phase-EMAIL" name="phase">
+                                            <option value="">All</option>
+                                            <option value="admission">Admission</option>
+                                            <option value="live">Live Student</option>
+                                            <option value="hr">Human Resource</option>
+                                        </select>
+                                        <i data-lucide="chevron-down"></i>
+                                    </label>
+                                </div>
+                                <div class="ss-filter-field">
+                                    <span>Status</span>
+                                    <label class="ss-filter-select" for="status-EMAIL">
+                                        <select id="status-EMAIL" name="status">
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                            <option value="2">Archived</option>
+                                        </select>
+                                        <i data-lucide="chevron-down"></i>
+                                    </label>
+                                </div>
+                                <button id="tabulator-html-filter-go-EMAIL" type="button" class="ss-btn ss-btn--primary ss-btn--tool">Go</button>
+                                <button id="tabulator-html-filter-reset-EMAIL" type="button" class="ss-btn ss-btn--light ss-btn--tool">Reset</button>
+                            </form>
+
+                            <div class="ss-table-actions">
+                                <button id="tabulator-print-EMAIL" type="button" class="ss-btn ss-btn--light ss-btn--tool">
+                                    <i data-lucide="printer"></i>
+                                    Print
                                 </button>
-                                <div class="dropdown-menu w-40">
-                                    <ul class="dropdown-content">
-                                        <li>
-                                            <a id="tabulator-export-csv-EMAIL" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a id="tabulator-export-xlsx-EMAIL" href="javascript:;" class="dropdown-item">
-                                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                            </a>
-                                        </li>
-                                    </ul>
+                                <div class="dropdown ss-export-dropdown">
+                                    <button type="button" class="dropdown-toggle ss-btn ss-btn--light ss-btn--tool" aria-expanded="false" data-tw-toggle="dropdown">
+                                        <i data-lucide="download"></i>
+                                        Export
+                                        <i data-lucide="chevron-down"></i>
+                                    </button>
+                                    <div class="dropdown-menu ss-export-menu">
+                                        <ul class="dropdown-content">
+                                            <li>
+                                                <a id="tabulator-export-csv-EMAIL" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-text"></i>
+                                                    Export CSV
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a id="tabulator-export-xlsx-EMAIL" href="javascript:;" class="dropdown-item">
+                                                    <i data-lucide="file-spreadsheet"></i>
+                                                    Export XLSX
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <div class="ss-tabulator-wrap">
+                            <div id="emailTemplateListTable" class="ss-tabulator table-report table-report--tabulator"></div>
+                        </div>
                     </div>
-                    <div class="overflow-x-auto scrollbar-hidden">
-                        <div id="emailTemplateListTable" class="mt-5 table-report table-report--tabulator"></div>
-                    </div>
-                </div>
+                </section>
             </div>
-        </div>
-    </div>
+        </main>
 
+        <div id="addEmailModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-settings-modal__dialog ss-settings-modal__dialog--editor">
+                <form method="POST" action="#" id="addEmailForm" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content ss-settings-modal ss-compact-settings-modal ss-email-template-modal">
+                        <div class="ss-settings-modal__header">
+                            <div>
+                                <span></span>
+                                <h2>Add Email Template</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ss-settings-modal__body">
+                            <div class="ss-modal-grid">
+                                <div class="ss-modal-field ss-modal-field--full ss-document-choices">
+                                    <div class="ss-document-choices__heading">
+                                        <span>Phase <em>*</em></span>
+                                        <small>Select where this template can be used.</small>
+                                    </div>
+                                    <div class="ss-document-toggle-grid ss-phase-toggle-grid">
+                                        @foreach($emailPhases as $emailPhase)
+                                            <label class="ss-status-toggle ss-doc-toggle" for="phase_{{ $emailPhase['key'] }}">
+                                                <input id="phase_{{ $emailPhase['key'] }}" class="phaseCheckboxs {{ $emailPhase['key'] }}" name="phase[{{ $emailPhase['key'] }}]" type="checkbox" value="1" autocomplete="off">
+                                                <span class="ss-status-toggle__control">
+                                                    <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                    <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                                </span>
+                                                <span class="ss-status-toggle__copy">
+                                                    <strong>{{ $emailPhase['label'] }}</strong>
+                                                    <small>Not enabled</small>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <div class="acc__input-error error-phase"></div>
+                                </div>
 
-    <!-- BEGIN: Edit Modal -->
-    <div id="editEmailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="editEmailForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Edit Email</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
-                            <div class="flex flex-col sm:flex-row">
-                                <div class="form-check mr-4">
-                                    <input id="edit_phase_admission" class="form-check-input phaseCheckboxs" name="phase[admission]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="edit_phase_admission">Admission</label>
+                                <div class="ss-modal-field ss-modal-field--full">
+                                    <label for="email_title">Email Title <span>*</span></label>
+                                    <input id="email_title" type="text" name="email_title" class="ss-modal-input form-control email_title" placeholder="Email template title">
+                                    <div class="acc__input-error error-email_title"></div>
                                 </div>
-                                <div class="form-check mr-4 mt-2 sm:mt-0">
-                                    <input id="edit_phase_live" class="form-check-input phaseCheckboxs"  name="phase[live]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="edit_phase_live">Live Student</label>
+
+                                <div class="ss-modal-field ss-modal-field--full ss-editor-field">
+                                    <label for="addEditor">Description <span>*</span></label>
+                                    <div class="editor document-editor ss-editor">
+                                        <div class="document-editor__toolbar"></div>
+                                        <div class="document-editor__editable-container">
+                                            <div class="document-editor__editable" id="addEditor"></div>
+                                        </div>
+                                    </div>
+                                    <div class="acc__input-error error-description"></div>
                                 </div>
-                                <div class="form-check mr-4 mt-2 sm:mt-0">
-                                    <input id="edit_phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="edit_phase_hr">Human Resource</label>
+
+                                <div class="ss-modal-field ss-modal-field--third">
+                                    <label for="status">Status</label>
+                                    <label class="ss-status-toggle ss-status-toggle--inline" for="status">
+                                        <input id="status" class="status" name="status" type="checkbox" value="1" checked autocomplete="off">
+                                        <span class="ss-status-toggle__control">
+                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                        </span>
+                                        <span class="ss-status-toggle__copy">
+                                            <strong>Active</strong>
+                                            <small>Template is available</small>
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-phase text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="edit_email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
-                            <input id="edit_email_title" type="text" name="email_title" class="form-control w-full">
-                            <div class="acc__input-error error-email_title text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="editEditor" class="form-label">Description <span class="text-danger">*</span></label>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="editEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-description text-danger mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
-                            <label class="form-check-label mr-3 ml-0" for="edit_status">Active</label>
-                            <input id="edit_status" class="form-check-input m-0" name="status" checked value="1" type="checkbox">
-                        </div>
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="editEmailSet" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
+                        <div class="modal-footer ss-settings-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
+                                <i data-lucide="x"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" id="saveEmailSet" class="ss-btn ss-btn--primary">
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
                                     </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="id" value="0"/>
+                                </svg>
+                                <i data-lucide="check"></i>
+                                Save
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-    <!-- END: Edit Modal -->
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addEmailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="addEmailForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Email</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="phase" class="form-label">Phase <span class="text-danger">*</span></label>
-                            <div class="flex flex-col sm:flex-row">
-                                <div class="form-check mr-4">
-                                    <input id="phase_admission" class="form-check-input phaseCheckboxs" name="phase[admission]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="phase_admission">Admission</label>
+        <div id="editEmailModal" class="modal ss-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-settings-modal__dialog ss-settings-modal__dialog--editor">
+                <form method="POST" action="#" id="editEmailForm" enctype="multipart/form-data" autocomplete="off">
+                    <div class="modal-content ss-settings-modal ss-compact-settings-modal ss-email-template-modal">
+                        <div class="ss-settings-modal__header">
+                            <div>
+                                <span></span>
+                                <h2>Edit Email Template</h2>
+                            </div>
+                            <button type="button" data-tw-dismiss="modal" class="ss-modal-close" aria-label="Close modal">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body ss-settings-modal__body">
+                            <div class="ss-modal-grid">
+                                <div class="ss-modal-field ss-modal-field--full ss-document-choices">
+                                    <div class="ss-document-choices__heading">
+                                        <span>Phase <em>*</em></span>
+                                        <small>Select where this template can be used.</small>
+                                    </div>
+                                    <div class="ss-document-toggle-grid ss-phase-toggle-grid">
+                                        @foreach($emailPhases as $emailPhase)
+                                            <label class="ss-status-toggle ss-doc-toggle" for="edit_phase_{{ $emailPhase['key'] }}">
+                                                <input id="edit_phase_{{ $emailPhase['key'] }}" class="phaseCheckboxs {{ $emailPhase['key'] }}" name="phase[{{ $emailPhase['key'] }}]" type="checkbox" value="1" autocomplete="off">
+                                                <span class="ss-status-toggle__control">
+                                                    <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                                    <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                                </span>
+                                                <span class="ss-status-toggle__copy">
+                                                    <strong>{{ $emailPhase['label'] }}</strong>
+                                                    <small>Not enabled</small>
+                                                </span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                    <div class="acc__input-error error-phase"></div>
                                 </div>
-                                <div class="form-check mr-4 mt-2 sm:mt-0">
-                                    <input id="phase_live" class="form-check-input phaseCheckboxs"  name="phase[live]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="phase_live">Live Student</label>
+
+                                <div class="ss-modal-field ss-modal-field--full">
+                                    <label for="edit_email_title">Email Title <span>*</span></label>
+                                    <input id="edit_email_title" type="text" name="email_title" class="ss-modal-input form-control email_title" placeholder="Email template title">
+                                    <div class="acc__input-error error-email_title"></div>
                                 </div>
-                                <div class="form-check mr-4 mt-2 sm:mt-0">
-                                    <input id="phase_hr" class="form-check-input phaseCheckboxs" name="phase[hr]" type="checkbox" value="1">
-                                    <label class="form-check-label" for="phase_hr">Human Resource</label>
+
+                                <div class="ss-modal-field ss-modal-field--full ss-editor-field">
+                                    <label for="editEditor">Description <span>*</span></label>
+                                    <div class="editor document-editor ss-editor">
+                                        <div class="document-editor__toolbar"></div>
+                                        <div class="document-editor__editable-container">
+                                            <div class="document-editor__editable" id="editEditor"></div>
+                                        </div>
+                                    </div>
+                                    <div class="acc__input-error error-description"></div>
+                                </div>
+
+                                <div class="ss-modal-field ss-modal-field--third">
+                                    <label for="edit_status">Status</label>
+                                    <label class="ss-status-toggle ss-status-toggle--inline" for="edit_status">
+                                        <input id="edit_status" class="status" name="status" type="checkbox" value="1" autocomplete="off">
+                                        <span class="ss-status-toggle__control">
+                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--on"><i data-lucide="check"></i></span>
+                                            <span class="ss-status-toggle__icon ss-status-toggle__icon--off"><i data-lucide="x"></i></span>
+                                        </span>
+                                        <span class="ss-status-toggle__copy">
+                                            <strong>Active</strong>
+                                            <small>Template is available</small>
+                                        </span>
+                                    </label>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-phase text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="email_title" class="form-label">Email Title <span class="text-danger">*</span></label>
-                            <input id="email_title" type="text" name="email_title" class="form-control w-full">
-                            <div class="acc__input-error error-email_title text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="addEditor" class="form-label">Description <span class="text-danger">*</span></label>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="addEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-description text-danger mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <div class="form-check form-switch" style="float: left; margin: 7px 0 0;">
-                            <label class="form-check-label mr-3 ml-0" for="status">Active</label>
-                            <input id="status" class="form-check-input m-0" name="status" checked value="1" type="checkbox">
-                        </div>
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveEmailSet" class="btn btn-primary w-auto">     
-                            Save                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
+                        <div class="modal-footer ss-settings-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--danger-soft">
+                                <i data-lucide="x"></i>
+                                Cancel
+                            </button>
+                            <button type="submit" id="editEmailSet" class="ss-btn ss-btn--primary">
+                                <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="ss-spinner">
+                                    <g fill="none" fill-rule="evenodd">
+                                        <g transform="translate(1 1)" stroke-width="4">
+                                            <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
+                                            <path d="M36 18c0-9.94-8.06-18-18-18">
+                                                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                            </path>
+                                        </g>
                                     </g>
-                                </g>
-                            </svg>
+                                </svg>
+                                <i data-lucide="check"></i>
+                                Update
+                            </button>
+                            <input type="hidden" name="id" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content ss-success-modal">
+                    <div class="modal-body p-0">
+                        <div class="ss-success-modal__body">
+                            <i data-lucide="check-circle" class="ss-success-modal__icon"></i>
+                            <div class="successModalTitle"></div>
+                            <p class="successModalDesc"></p>
+                        </div>
+                        <div class="ss-success-modal__footer">
+                            <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--primary">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog ss-confirm-modal__dialog">
+                <div class="modal-content ss-confirm-modal">
+                    <div class="ss-confirm-modal__hero">
+                        <span><i data-lucide="alert-triangle"></i></span>
+                        <h2 class="confModTitle">Are you sure?</h2>
+                    </div>
+                    <div class="ss-confirm-modal__body">
+                        <p class="confModDesc"></p>
+                    </div>
+                    <div class="ss-confirm-modal__footer">
+                        <button type="button" data-tw-dismiss="modal" class="ss-btn ss-btn--light">
+                            <i data-lucide="x"></i>
+                            No, Cancel
+                        </button>
+                        <button type="button" data-id="0" data-action="none" data-phase="" class="agreeWith ss-btn ss-btn--danger">
+                            <i data-lucide="check"></i>
+                            Yes, I agree
                         </button>
                     </div>
                 </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Add Modal -->
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
-
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button data-phase="" type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')
     @vite('resources/js/settings.js')
     @vite('resources/js/email-template.js')
+    @vite('resources/js/site-settings-redesign.js')
 @endsection

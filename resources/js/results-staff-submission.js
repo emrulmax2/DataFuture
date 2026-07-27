@@ -8,6 +8,63 @@ import Dropzone from 'dropzone';
 import Toastify from 'toastify-js';
 
 ('use strict');
+
+function submissionInitials(first, last, fallback) {
+    const f = String(first || '').trim();
+    const l = String(last || '').trim();
+    const fb = String(fallback || 'LC').trim();
+    const firstInitial = (f || fb).charAt(0);
+    const lastInitial = (l || fb.charAt(1) || firstInitial).charAt(0);
+    return (firstInitial + lastInitial).toUpperCase();
+}
+
+function submissionAvatarColor(seed) {
+    const colors = ['#7a4fa3', '#137a70', '#2f8f5b', '#c94f7c', '#b5602f', '#2f5fa1', '#a13f6b', '#4a7a2f', '#b3261e', '#0d7c73'];
+    let hash = 0;
+    String(seed || 'student').split('').forEach(function (char) {
+        hash = ((hash * 31) + char.charCodeAt(0)) >>> 0;
+    });
+    return colors[hash % colors.length];
+}
+
+function submissionGradeStyle(grade) {
+    const g = String(grade || '').toLowerCase();
+    if (g.includes('distinction')) return ['#7a4fa3', '#f0e9f7', '#ddccec'];
+    if (g.includes('merit')) return ['#2f6fb0', '#e8f1f9', '#c5ddf0'];
+    if (g.includes('pass')) return ['#0d7c73', '#e4f1ee', '#c4e2da'];
+    if (g.includes('referred') || g.startsWith('r-')) return ['#a1802f', '#f6efdc', '#e9dcbc'];
+    if (g.includes('absent') || g.includes('fail') || g.startsWith('a-') || g.startsWith('f-')) return ['#c0392b', '#fbeceb', '#f2cfca'];
+    return ['#93a09d', '#f4f5f4', '#e6e8e3'];
+}
+
+function submissionEscape(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+}
+
+function submissionStudentFormatter(cell) {
+    const data = cell.getData();
+    const reg = submissionEscape(data.registration_no);
+    const name = submissionEscape([data.first_name, data.last_name].filter(Boolean).join(' '));
+    const initials = submissionInitials(data.first_name, data.last_name, data.registration_no);
+    const color = submissionAvatarColor((data.first_name || '') + (data.last_name || '') + reg);
+    const avatar = data.student_photo
+        ? '<span class="tm-sub-avatar"><img src="' + submissionEscape(data.student_photo) + '" alt="' + reg + '"></span>'
+        : '<span class="tm-sub-avatar" style="background:' + color + ';">' + initials + '</span>';
+
+    return (
+        '<a href="' +
+        route('student.show', data.student_id) +
+        '" class="tm-sub-student">' +
+        avatar +
+        '<span style="min-width:0;">' +
+        '<span class="tm-sub-reg">' + reg + '</span>' +
+        '<span class="tm-sub-name">' + name + '</span>' +
+        '</span>' +
+        '</a>'
+    );
+}
 var submissionTable = (function () {
     var _tableGen = function ($id) {
         // Setup Tabulator
@@ -36,44 +93,11 @@ var submissionTable = (function () {
                     title: 'Student',
                     field: 'registration_no',
                     headerHozAlign: 'left',
-                    width: '220',
-                    formatter(cell, formatterParams) {
-                        var html =
-                            '<a href="' +
-                            route('student.show', cell.getData().student_id) +
-                            '" class="block">';
-                        html +=
-                            '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
-                        html +=
-                            '<img alt="' +
-                            cell.getData().first_name +
-                            '" class="rounded-full shadow" src="' +
-                            cell.getData().student_photo +
-                            '">';
-                        html += '</div>';
-                        html +=
-                            '<div class="inline-block relative" style="top: -4px;">';
-                        html +=
-                            '<div class="font-medium whitespace-nowrap uppercase">' +
-                            cell.getData().registration_no +
-                            '</div>';
-                        html +=
-                            '<div class="text-slate-500 text-xs whitespace-nowrap">' +
-                            (cell.getData().first_name != ''
-                                ? cell.getData().first_name
-                                : '') +
-                            ' ' +
-                            (cell.getData().last_name != ''
-                                ? cell.getData().last_name
-                                : '') +
-                            '</div>';
-                        html += '</div>';
-                        html += '</a>';
-                        return html;
-                    },
+                    width: '240',
+                    formatter: submissionStudentFormatter,
                 },
                 {
-                    title: 'Module Code',
+                    title: 'Module',
                     field: 'module_code',
                     headerHozAlign: 'left',
                 },
@@ -81,11 +105,27 @@ var submissionTable = (function () {
                     title: 'Paper Id',
                     field: 'paper_id',
                     headerHozAlign: 'left',
+                    formatter(cell) {
+                        const v = cell.getValue();
+                        return v
+                            ? '<span class="tm-sub-mono">' + submissionEscape(v) + '</span>'
+                            : '<span class="tm-sub-mono" style="color:#c3ccc9;">—</span>';
+                    },
                 },
                 {
                     title: 'Grade',
                     field: 'grade',
                     headerHozAlign: 'left',
+                    formatter(cell) {
+                        const v = cell.getValue();
+                        const c = submissionGradeStyle(v);
+                        return (
+                            '<span class="tm-sub-grade" style="color:' + c[0] +
+                            ';background:' + c[1] +
+                            ';border-color:' + c[2] + ';">' +
+                            submissionEscape(v) + '</span>'
+                        );
+                    },
                 },
                 {
                     title: 'Submission date',
@@ -163,44 +203,11 @@ var submissionTableTutor = (function () {
                     title: 'Student',
                     field: 'registration_no',
                     headerHozAlign: 'left',
-                    width: '220',
-                    formatter(cell, formatterParams) {
-                        var html =
-                            '<a href="' +
-                            route('student.show', cell.getData().student_id) +
-                            '" class="block">';
-                        html +=
-                            '<div class="w-10 h-10 intro-x image-fit mr-4 inline-block">';
-                        html +=
-                            '<img alt="' +
-                            cell.getData().first_name +
-                            '" class="rounded-full shadow" src="' +
-                            cell.getData().student_photo +
-                            '">';
-                        html += '</div>';
-                        html +=
-                            '<div class="inline-block relative" style="top: -4px;">';
-                        html +=
-                            '<div class="font-medium whitespace-nowrap uppercase">' +
-                            cell.getData().registration_no +
-                            '</div>';
-                        html +=
-                            '<div class="text-slate-500 text-xs whitespace-nowrap">' +
-                            (cell.getData().first_name != ''
-                                ? cell.getData().first_name
-                                : '') +
-                            ' ' +
-                            (cell.getData().last_name != ''
-                                ? cell.getData().last_name
-                                : '') +
-                            '</div>';
-                        html += '</div>';
-                        html += '</a>';
-                        return html;
-                    },
+                    width: '240',
+                    formatter: submissionStudentFormatter,
                 },
                 {
-                    title: 'Module Code',
+                    title: 'Module',
                     field: 'module_code',
                     headerHozAlign: 'left',
                 },
@@ -208,11 +215,27 @@ var submissionTableTutor = (function () {
                     title: 'Paper Id',
                     field: 'paper_id',
                     headerHozAlign: 'left',
+                    formatter(cell) {
+                        const v = cell.getValue();
+                        return v
+                            ? '<span class="tm-sub-mono">' + submissionEscape(v) + '</span>'
+                            : '<span class="tm-sub-mono" style="color:#c3ccc9;">—</span>';
+                    },
                 },
                 {
                     title: 'Grade',
                     field: 'grade',
                     headerHozAlign: 'left',
+                    formatter(cell) {
+                        const v = cell.getValue();
+                        const c = submissionGradeStyle(v);
+                        return (
+                            '<span class="tm-sub-grade" style="color:' + c[0] +
+                            ';background:' + c[1] +
+                            ';border-color:' + c[2] + ';">' +
+                            submissionEscape(v) + '</span>'
+                        );
+                    },
                 },
                 {
                     title: 'Submission date',
@@ -377,7 +400,7 @@ var submissionTableTutor = (function () {
 
         drzn1.on('queuecomplete', function () {
             $('#uploadEmpDocBtn').removeAttr('disabled');
-            document.querySelector('#uploadEmpDocBtn svg').style.cssText =
+            document.querySelector('#uploadEmpDocBtn svg.upload-spinner').style.cssText =
                 'display: none;';
             uploadSubmissionDocumentModal.hide();
             console.log(dzError);
@@ -448,7 +471,7 @@ var submissionTableTutor = (function () {
             document
                 .querySelector('#uploadEmpDocBtn')
                 .setAttribute('disabled', 'disabled');
-            document.querySelector('#uploadEmpDocBtn svg').style.cssText =
+            document.querySelector('#uploadEmpDocBtn svg.upload-spinner').style.cssText =
                 'display: inline-block;';
 
             if (drzn1.files.length > 0) {
@@ -486,7 +509,7 @@ var submissionTableTutor = (function () {
                             .querySelector('#uploadEmpDocBtn')
                             .removeAttribute('disabled', 'disabled');
                         document.querySelector(
-                            '#uploadEmpDocBtn svg'
+                            '#uploadEmpDocBtn svg.upload-spinner'
                         ).style.cssText = 'display: none;';
                     }, 2000);
                 }
@@ -510,7 +533,7 @@ var submissionTableTutor = (function () {
                         .querySelector('#uploadEmpDocBtn')
                         .removeAttribute('disabled', 'disabled');
                     document.querySelector(
-                        '#uploadEmpDocBtn svg'
+                        '#uploadEmpDocBtn svg.upload-spinner'
                     ).style.cssText = 'display: none;';
                 }, 2000);
             }
@@ -525,7 +548,7 @@ var submissionTableTutor = (function () {
                 document
                     .querySelector('#uploadEmpDocBtn')
                     .removeAttribute('disabled', 'disabled');
-                document.querySelector('#uploadEmpDocBtn svg').style.cssText =
+                document.querySelector('#uploadEmpDocBtn svg.upload-spinner').style.cssText =
                     'display: none;';
 
                 Dropzone.forElement('#uploadDocumentForm').removeAllFiles(true);

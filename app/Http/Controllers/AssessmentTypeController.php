@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAssessmentTypeRequest;
 use App\Http\Requests\UpdateAssessmentTypeRequest;
 use App\Models\AssessmentType;
+use App\Models\Option;
 use Illuminate\Http\Request;
 
 class AssessmentTypeController extends Controller
 {
     public function index(){
         return view('pages.settings.assessmenttype.index', [
-            'title' => 'Awarding Body - London Churchill College',
+            'title' => 'Assessment Type - London Churchill College',
             'subtitle' => 'Course Parameters',
+            'siteOpt' => Option::where('category', 'SITE_SETTINGS')->pluck('value', 'name')->toArray(),
             'breadcrumbs' => [
                 ['label' => 'Site Settings', 'href' => route('site.setting')],
-                ['label' => 'Awarding Body', 'href' => 'javascript:void(0);']
+                ['label' => 'Assessment Type', 'href' => 'javascript:void(0);']
             ]
         ]);
     }
@@ -70,12 +72,12 @@ class AssessmentTypeController extends Controller
     public function show($id)
     {
         return view('pages.settings.assessmenttype.show', [
-            'title' => 'Awarding Body - London Churchill College',
+            'title' => 'Assessment Type - London Churchill College',
             'breadcrumbs' => [
-                ['label' => 'Awarding Body', 'href' => route('awardingbody')],
-                ['label' => 'Awarding Body Details', 'href' => 'javascript:void(0);']
+                ['label' => 'Assessment Type', 'href' => route('assessment-type.index')],
+                ['label' => 'Assessment Type Details', 'href' => 'javascript:void(0);']
             ],
-            'Term Type' => AssessmentType::find($id),
+            'Assessment Type' => AssessmentType::find($id),
         ]);
     }
 
@@ -104,6 +106,7 @@ class AssessmentTypeController extends Controller
         $data = AssessmentType::where('id', $request->id)->update([
             'name'=> $request->name,
             'code'=> $request->code,
+            'is_active'=> (isset($request->is_active) ? $request->is_active : 0),
             'updated_by' => auth()->user()->id
         ]);
 

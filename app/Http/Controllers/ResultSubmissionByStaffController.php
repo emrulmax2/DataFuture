@@ -76,7 +76,7 @@ class ResultSubmissionByStaffController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'student_id' => $list->student_id,
-                    'student_photo' => (isset($list->student->photo_url) && !empty($list->student->photo_url) ? $list->student->photo_url : asset('build/assets/images/user_avatar.png')),
+                    'student_photo' => (isset($list->student->photo_url) && !\Illuminate\Support\Str::startsWith($list->student->photo_url, 'data:') ? $list->student->photo_url : ''),
                     'first_name' => (isset($list->student->first_name) && !empty($list->student->first_name) ? $list->student->first_name : ''),
                     'last_name' => (isset($list->student->last_name) && !empty($list->student->last_name) ? $list->student->last_name : ''),
                     'registration_no' => (isset($list->student->registration_no) && !empty($list->student->registration_no) ? $list->student->registration_no : ''),

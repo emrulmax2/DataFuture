@@ -196,7 +196,7 @@ class SlcAttendanceController extends Controller
     public function populateAttendanceForm(Request $request){
         $reg_id = $request->reg_id;
         $slcRegistration = SlcRegistration::find($reg_id);
-        $fees = $slcRegistration->instance->fees;
+        $fees = (isset($slcRegistration->agreement->fees) && $slcRegistration->agreement->fees > 0 ? $slcRegistration->agreement->fees : $slcRegistration->instance->fees);
         $year = $slcRegistration->registration_year;
 
         $res['year'] = $year;

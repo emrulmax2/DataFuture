@@ -155,6 +155,6 @@ class DepartmentController extends Controller
     public function restore($id) {
         $data = Department::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        return response()->json($data);
     }
 }

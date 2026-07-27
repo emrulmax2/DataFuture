@@ -1,13 +1,31 @@
 import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
 import Tabulator from "tabulator-tables";
- 
+
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
 var table = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
+
+        if (window.venuesTableInstance) {
+            window.venuesTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#venuesTableId", {
             ajaxURL: route("venues.list"),
             ajaxParams: { querystr: querystr, status: status },
@@ -17,7 +35,7 @@ var table = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
             responsiveLayout: "collapse",
             placeholder: "No matching records found",
@@ -25,75 +43,91 @@ var table = (function () {
                 {
                     title: "#ID",
                     field: "id",
-                    width: "180",
+                    width: 72,
+                    minWidth: 64,
                 },
                 {
                     title: "Venue Name",
                     field: "name",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        return '<div class="whitespace-normal">'+cell.getData().name+'</div>';
-                    }
+                    minWidth: 150,
+                    widthGrow: 1.7,
+                    formatter(cell) {
+                        return '<a class="ss-table-link" href="' + route("venues.show", cell.getData().id) + '">' + escapeHtml(cell.getValue()) + "</a>";
+                    },
                 },
                 {
                     title: "ID Number",
                     field: "idnumber",
                     headerHozAlign: "left",
+                    minWidth: 86,
+                    widthGrow: 0.7,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "UKPRN",
                     field: "ukprn",
                     headerHozAlign: "left",
+                    minWidth: 96,
+                    widthGrow: 0.75,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "Postal Code",
                     field: "postcode",
                     headerHozAlign: "left",
+                    minWidth: 98,
+                    widthGrow: 0.75,
+                    formatter(cell) {
+                        return escapeHtml(cell.getValue());
+                    },
                 },
                 {
                     title: "Full Address",
                     field: "address",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        return '<div class=" whitespace-normal text-slate-500">'+cell.getData().address+'</div>';
-                    }
+                    minWidth: 150,
+                    widthGrow: 2,
+                    variableHeight: true,
+                    formatter(cell) {
+                        return '<span class="ss-cell-wrap">' + escapeHtml(cell.getValue()) + "</span>";
+                    },
                 },
                 {
                     title: "IP",
                     field: "ip",
-                    headerSort: false,
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {  
-                        return '<div class="font-medium whitespace-normal text-slate-500">'+cell.getData().ip+'</div>';
-                    }
+                    minWidth: 132,
+                    widthGrow: 1.4,
+                    variableHeight: true,
+                    formatter(cell) {
+                        return '<span class="ss-cell-wrap ss-cell-wrap--mono">' + escapeHtml(cell.getValue()) + "</span>";
+                    },
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: 104,
+                    minWidth: 104,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
                         var btns = "";
+
                         if (cell.getData().deleted_at == null) {
-                            btns +='<a href="'+route('venues.show', cell.getData().id)+'" class="edit_btn btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '" data-tw-toggle="modal" data-tw-target="#editVenueModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
+                            btns += '<a href="' + route("venues.show", cell.getData().id) + '" class="ss-row-action ss-row-action--view" aria-label="View venue"><i data-lucide="eye"></i></a>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit venue"><i data-lucide="pencil"></i></button>';
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete venue"><i data-lucide="trash-2"></i></button>';
+                        } else if (cell.getData().deleted_at != null) {
+                            btns += '<button data-id="' + cell.getData().id + '" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore venue"><i data-lucide="rotate-cw"></i></button>';
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -101,55 +135,45 @@ var table = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                } 
             },
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
+        window.venuesTableInstance = tableContent;
+
+        if (window.venuesTableResizeHandler) {
+            window.removeEventListener("resize", window.venuesTableResizeHandler);
+        }
+
+        window.venuesTableResizeHandler = () => {
             tableContent.redraw();
             createIcons({
                 icons,
-                "stroke-width": 1.5,
+                "stroke-width": 1.7,
                 nameAttr: "data-lucide",
             });
+        };
+
+        window.addEventListener("resize", window.venuesTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.venues").on("click.venues", function () {
+            tableContent.download("csv", "venues.csv");
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
-        });
-
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
-        });
-
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.venues").on("click.venues", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
-                sheetName: "Venues Details",
+            tableContent.download("xlsx", "venues.xlsx", {
+                sheetName: "Venues",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
-                style: true,
-            });
-        });
-
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.venues").on("click.venues", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -158,17 +182,13 @@ var table = (function () {
 })();
 
 (function () {
-    // Tabulator
     if ($("#venuesTableId").length) {
-        // Init Table
         table.init();
 
-        // Filter function
         function filterHTMLForm() {
             table.init();
         }
 
-        // On submit filter form
         $("#tabulatorFilterForm")[0].addEventListener(
             "keypress",
             function (event) {
@@ -180,94 +200,144 @@ var table = (function () {
             }
         );
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
+        $("#tabulator-html-filter-go").on("click", function () {
             filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#tabulator-html-filter-reset").on("click", function () {
             $("#query").val("");
             $("#status").val("1");
             filterHTMLForm();
         });
 
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addVenueModal"));
+        const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addVenueModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editVenueModal"));
-        let confModalDelTitle = 'Are you sure?';
+        const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+        const confModalDelTitle = "Are you sure?";
+        const isActiveValue = (value) => value === true || value === 1 || value === "1";
 
-        const addModalEl = document.getElementById('addVenueModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addVenueModal .acc__input-error').html('');
-            $('#addVenueModal input').val('');
-            $('#addVenueModal textarea').val('');
-        });
-        
-        const editModalEl = document.getElementById('editVenueModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editVenueModal .acc__input-error').html('');
-            $('#editVenueModal input').val('');
-            $('#editVenueModal textarea').val('');
-            $('#editVenueModal input[name="id"]').val('0');
+        const setBusy = ($button, isBusy) => {
+            $button.prop("disabled", isBusy);
+            $button.find(".ss-spinner").css("display", isBusy ? "inline-block" : "none");
+        };
+
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
+
+        const updateActiveFieldText = ($field) => {
+            const isChecked = $field.find('input[type="checkbox"][name="active"]').is(":checked");
+            $field.find(".ss-status-toggle__copy strong").text(isChecked ? "Active" : "Inactive");
+            $field.find(".ss-status-toggle__copy small").text(
+                isChecked ? "Available for campus setup" : "Hidden from active campus setup"
+            );
+        };
+
+        const setActiveField = ($form, value) => {
+            const $field = $form.find(".ss-status-toggle");
+
+            if (!$field.length) {
+                return;
+            }
+
+            $field.find('input[type="checkbox"][name="active"]').prop("checked", isActiveValue(value));
+            updateActiveFieldText($field);
+        };
+
+        const resetFormState = ($form) => {
+            if ($form[0]) {
+                $form[0].reset();
+            }
+
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find('input[name="id"]').val("0");
+            setActiveField($form, false);
+        };
+
+        const showErrors = ($form, errors) => {
+            for (const [key, val] of Object.entries(errors)) {
+                $form.find(`.${key}`).addClass("border-danger");
+                $form.find(`.error-${key}`).html(Array.isArray(val) ? val[0] : val);
+            }
+        };
+
+        const showConfirm = (id, action, title, message) => {
+            $("#confirmModal .confModTitle").html(title);
+            $("#confirmModal .confModDesc").html(message);
+            $("#confirmModal .agreeWith").attr("data-id", id);
+            $("#confirmModal .agreeWith").attr("data-action", action);
+            confModal.show();
+        };
+
+        resetFormState($("#addForm"));
+        resetFormState($("#editForm"));
+
+        $(".ss-status-toggle input[type='checkbox'][name='active']").on("change", function () {
+            updateActiveFieldText($(this).closest(".ss-status-toggle"));
         });
 
-        $('#addForm').on('submit', function(e){
+        document.getElementById("addVenueModal").addEventListener("show.tw.modal", function () {
+            resetFormState($("#addForm"));
+        });
+
+        document.getElementById("addVenueModal").addEventListener("hide.tw.modal", function () {
+            resetFormState($("#addForm"));
+            setBusy($("#save"), false);
+        });
+
+        document.getElementById("editVenueModal").addEventListener("hide.tw.modal", function () {
+            resetFormState($("#editForm"));
+            setBusy($("#update"), false);
+        });
+
+        document.getElementById("confirmModal").addEventListener("hidden.tw.modal", function () {
+            $("#confirmModal .agreeWith").attr("data-id", "0");
+            $("#confirmModal .agreeWith").attr("data-action", "none");
+            $("#confirmModal button").removeAttr("disabled");
+        });
+
+        $("#addForm").on("submit", function (e) {
             e.preventDefault();
-            const form = document.getElementById('addForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
+            const form = document.getElementById("addForm");
+
+            setBusy($("#save"), true);
 
             let form_data = new FormData(form);
             axios({
                 method: "post",
-                url: route('venues.store'),
+                url: route("venues.store"),
                 data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
+                setBusy($("#save"), false);
+
                 if (response.status == 200) {
-                    document.querySelector('#save').removeAttribute('disabled');
-                    document.querySelector("#save svg").style.cssText = "display: none;";
-                    $('#addForm #name').val('');
-                    $('#addForm #idnumber').val('');
-                    $('#addForm #ukprn').val('');
-                    $('#addForm #postcode').val('');
-                    $('#addForm #address').val('');
                     addModal.hide();
-                    succModal.show();
-                    document.getElementById("successModal")
-                        .addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html(
-                                "Success!"
-                            );
-                            $("#successModal .successModalDesc").html('Data Inserted');
-                        });                
-                        
+                    showSuccess("Success!", "Venue successfully inserted.");
                 }
+
                 table.init();
             }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
+                setBusy($("#save"), false);
                 if (error.response) {
                     if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addForm .${key}`).addClass('border-danger')
-                            $(`#addForm  .error-${key}`).html(val)
-                        }
+                        showErrors($("#addForm"), error.response.data.errors);
                     } else {
-                        console.log('error');
+                        console.log("error");
                     }
                 }
             });
         });
 
-        $("#venuesTableId").on("click", ".edit_btn", function () {      
+        $("#venuesTableId").on("click", ".edit_btn", function () {
             let $editBtn = $(this);
             let editId = $editBtn.attr("data-id");
+
+            resetFormState($("#editForm"));
 
             axios({
                 method: "get",
@@ -275,37 +345,32 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        $('#editVenueModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editVenueModal input[name="idnumber"]').val(dataset.idnumber ? dataset.idnumber : '');
-                        $('#editVenueModal input[name="ukprn"]').val(dataset.ukprn ? dataset.ukprn : '');
-                        $('#editVenueModal input[name="postcode"]').val(dataset.postcode ? dataset.postcode : '');
-                        $('#editVenueModal [name="address"]').val(dataset.address ? dataset.address : '');
-                        $('#editVenueModal textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : '');
-                        $('#editVenueModal [name="active"]').prop('checked',dataset.active);
-                        $('#editVenueModal input[name="id"]').val(editId);
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            }).then((response) => {
+                if (response.status == 200) {
+                    let dataset = response.data;
+                    $('#editForm input[name="name"]').val(dataset.name ? dataset.name : "");
+                    $('#editForm input[name="idnumber"]').val(dataset.idnumber ? dataset.idnumber : "");
+                    $('#editForm input[name="ukprn"]').val(dataset.ukprn ? dataset.ukprn : "");
+                    $('#editForm input[name="postcode"]').val(dataset.postcode ? dataset.postcode : "");
+                    $('#editForm textarea[name="address"]').val(dataset.address ? dataset.address : "");
+                    $('#editForm textarea[name="ip_addresses"]').val(dataset.ip_addresses ? dataset.ip_addresses : "");
+                    setActiveField($("#editForm"), dataset.active);
+                    $('#editForm input[name="id"]').val(editId);
+                    editModal.show();
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
 
-        // Update Course Data
         $("#editForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editVenueModal input[name="id"]').val();
-
+            let editId = $('#editForm input[name="id"]').val();
             const form = document.getElementById("editForm");
 
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+            setBusy($("#update"), true);
 
             let form_data = new FormData(form);
-
             axios({
                 method: "post",
                 url: route("venues.update", editId),
@@ -313,147 +378,94 @@ var table = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document.querySelector("#update").removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText = "display: none;";
+            }).then((response) => {
+                setBusy($("#update"), false);
+
+                if (response.status == 200) {
+                    editModal.hide();
+                    showSuccess("Success!", "Venue successfully updated.");
+                }
+
+                table.init();
+            }).catch((error) => {
+                setBusy($("#update"), false);
+                if (error.response) {
+                    if (error.response.status == 422) {
+                        showErrors($("#editForm"), error.response.data.errors);
+                    } else if (error.response.status == 304) {
                         editModal.hide();
-
-                        succModal.show();
-                        document.getElementById("successModal")
-                            .addEventListener("shown.tw.modal", function (event) {
-                                $("#successModal .successModalTitle").html(
-                                    "Success!"
-                                );
-                                $("#successModal .successModalDesc").html('Data Updated');
-                            });
+                        showSuccess("No Data Change!", error.response.statusText);
+                    } else {
+                        console.log("error");
                     }
-                    table.init();
-                })
-                .catch((error) => {
-                    document
-                        .querySelector("#update")
-                        .removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText =
-                        "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#editForm .${key}`).addClass('border-danger')
-                                $(`#editForm  .error-${key}`).html(val)
-                            }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html(
-                                        "No Data Change!"
-                                    );
-                                    $("#successModal .successModalDesc").html(message);
-                                });
-                        } else {
-                            console.log("error");
-                        }
-                    }
-                });
+                }
+            });
         });
 
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            
+        $("#confirmModal .agreeWith").on("click", function () {
             let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
+            let recordID = $agreeBTN.attr("data-id");
+            let action = $agreeBTN.attr("data-action");
 
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            $("#confirmModal button").attr("disabled", "disabled");
+
+            if (action == "DELETE") {
                 axios({
-                    method: 'delete',
-                    url: route('venues.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "delete",
+                    url: route("venues.destory", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
-                        });
+                        showSuccess("Done!", "Venue successfully deleted.");
                     }
+
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
-            } else if(action == 'RESTORE'){
+            } else if (action == "RESTORE") {
                 axios({
-                    method: 'post',
-                    url: route('venues.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "post",
+                    url: route("venues.restore", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
-                        });
+                        showSuccess("Success!", "Venue successfully restored.");
                     }
+
                     table.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
             }
-        })
-
-        // Delete Course
-        $('#venuesTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
-        // Restore Course
-        $('#venuesTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let courseID = $statusBTN.attr('data-id');
+        $("#venuesTableId").on("click", ".delete_btn", function () {
+            let rowID = $(this).attr("data-id");
 
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', courseID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
+            showConfirm(
+                rowID,
+                "DELETE",
+                confModalDelTitle,
+                "Want to delete this venue? Please click on agree to continue."
+            );
+        });
+
+        $("#venuesTableId").on("click", ".restore_btn", function () {
+            let venueID = $(this).attr("data-id");
+
+            showConfirm(
+                venueID,
+                "RESTORE",
+                confModalDelTitle,
+                "Want to restore this venue from the trash? Please click on agree to continue."
+            );
         });
     }
 })();

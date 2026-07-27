@@ -1,88 +1,137 @@
-@extends('../layout/' . $layout)
+@extends('../layout/site-settings')
+
+@section('body_class', 'site-settings-isolated')
 
 @section('subhead')
     <title>{{ $title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet">
 @endsection
 
-@section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('academicyears') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To Academic Years</a>
-        </div>
-    </div>
+@section('styles')
+    @vite('resources/css/site-settings-redesign.css')
+@endsection
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.settings.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+@section('content')
+    @php
+        $yearName = $academicyear?->name ?? 'Academic Year';
+        $fromDate = $academicyear?->from_date ? date('d-m-Y', strtotime($academicyear->from_date)) : '-';
+        $toDate = $academicyear?->to_date ? date('d-m-Y', strtotime($academicyear->to_date)) : '-';
+    @endphp
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="intro-y box px-5 pt-5 mt-5">
-                <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
-                    <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
-                        <div class="ml-auto mr-auto">
-                            <div class="w-auto sm:w-full truncate text-primary sm:whitespace-normal font-bold text-3xl">{{ $academicyear->name }}</div>
-                        </div>
+    <div id="siteSettingsPage" class="ss-page">
+        @include('pages.settings.partials.isolated-header')
+
+        <nav class="ss-breadcrumb" aria-label="Breadcrumb">
+            <a href="{{ route('dashboard') }}">
+                <i data-lucide="home"></i>
+                Dashboard
+            </a>
+            <i data-lucide="chevron-right"></i>
+            <span>Course Parameters</span>
+            <i data-lucide="chevron-right"></i>
+            <a href="{{ route('academicyears') }}">Academic Years</a>
+            <i data-lucide="chevron-right"></i>
+            <span>{{ $yearName }}</span>
+        </nav>
+
+        <main class="ss-main">
+            <section class="ss-title-card">
+                <div class="ss-title-card__content">
+                    <button type="button" class="ss-icon-btn ss-sidebar-toggle" data-ss-sidebar-toggle aria-label="Open settings menu">
+                        <i data-lucide="panel-left"></i>
+                    </button>
+                    <span class="ss-title-card__icon">
+                        <i data-lucide="calendar-range"></i>
+                    </span>
+                    <div>
+                        <h1>{{ $subtitle }}</h1>
+                        <p>Manage academic years, bank holidays, term types, assessments and awarding bodies.</p>
                     </div>
-                    <div class="mt-6 lg:mt-0 flex-1 px-5 border-l border-slate-200/60 dark:border-darkmode-400 border-t lg:border-t-0 pt-5 lg:pt-0">
-                        <div class="font-medium text-center lg:text-left lg:mt-3">Academic Year Details</div>
-                        <div class="flex flex-col justify-center items-center lg:items-start mt-4">
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">From Date:</span> <span class="font-medium ml-2">{{ $academicyear->from_date }}</span>
+                </div>
+                <a href="{{ route('academicyears') }}" class="ss-back-btn">
+                    <i data-lucide="arrow-left"></i>
+                    Back To Academic Years
+                </a>
+            </section>
+
+            <div class="ss-workspace">
+                <button type="button" class="ss-sidebar-backdrop" data-ss-sidebar-close aria-label="Close settings menu"></button>
+                <aside class="ss-sidebar">
+                    @php($settingsSidebarIcon = 'settings-2')
+                    @php($settingsSidebarSubtitle = 'Global configuration')
+                    @include('pages.settings.sidebar')
+                </aside>
+
+                <section class="ss-content">
+                    @if(isset(auth()->user()->priv()['course_parameters']) && auth()->user()->priv()['course_parameters'] == 1)
+                        @if($academicyear)
+                            <div class="ss-year-detail-card">
+                                <div class="ss-year-detail-card__hero">
+                                    <div class="ss-year-detail-card__identity">
+                                        <span class="ss-year-detail-card__icon">
+                                            <i data-lucide="calendar-days"></i>
+                                        </span>
+                                        <div>
+                                            <span>Academic Year</span>
+                                            <h2>{{ $yearName }}</h2>
+                                        </div>
+                                    </div>
+                                    <div class="ss-year-detail-card__dates">
+                                        <div class="ss-year-date">
+                                            <span><i data-lucide="calendar"></i></span>
+                                            <div>
+                                                <small>From Date</small>
+                                                <strong>{{ $fromDate }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="ss-year-date">
+                                            <span><i data-lucide="calendar-check"></i></span>
+                                            <div>
+                                                <small>To Date</small>
+                                                <strong>{{ $toDate }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ss-year-detail-card__tabs">
+                                    <button id="bankholiday-tab" type="button" class="ss-year-tab is-active">
+                                        <i data-lucide="calendar-days"></i>
+                                        Bank Holidays
+                                    </button>
+                                </div>
                             </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-3">
-                                <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> <span class="text-slate-500">To Date:</span> <span class="font-medium ml-2">{{ $academicyear->to_date }}</span>
+
+                            <div id="bankholiday" role="tabpanel" aria-labelledby="bankholiday-tab">
+                                @include('pages.settings.academicyears.details.bankholiday')
+                            </div>
+
+                            @include('pages.settings.academicyears.details.bankholiday-modal')
+                        @else
+                            <div class="ss-empty-state" role="alert">
+                                <span><i data-lucide="alert-triangle"></i></span>
+                                <div>
+                                    <h2>Academic Year Not Found</h2>
+                                    <p>The selected academic year could not be found. Please return to the academic years list and choose another record.</p>
+                                </div>
+                            </div>
+                        @endif
+                    @else
+                        <div class="ss-empty-state" role="alert">
+                            <span><i data-lucide="alert-triangle"></i></span>
+                            <div>
+                                <h2>Permission Required</h2>
+                                <p>You do not have enough permission to view this page's content. Please navigate to the menus on the left.</p>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-6 lg:mt-0 flex-1 px-5 pt-5 lg:pt-0">
-                        
-                    </div>
-                </div>
-                <ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center" role="tablist">
-                    <li id="bankholiday-tab" class="nav-item mr-5" role="presentation">
-                        <a href="javascript:void(0);" class="nav-link py-4 inline-flex px-0 active" data-tw-target="#bankholiday" aria-controls="bankholiday" aria-selected="true" role="tab" >
-                            <i data-lucide="tablet" class="w-4 h-4 mr-2"></i> Bank Holidays
-                        </a>
-                    </li>
-                </ul>
+                    @endif
+                </section>
             </div>
-            <div class="intro-y tab-content mt-5">
-                <div id="bankholiday" class="tab-pane active" role="tabpanel" aria-labelledby="bankholiday-tab">
-                    @include('pages.settings.academicyears.details.bankholiday')
-                </div>
-            </div>
-            @include('pages.settings.academicyears.details.bankholiday-modal')
-        </div>
-    </div>
-    <!-- END: Settings Page Content -->
-    
-
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 @endsection
 
 @section('script')
     @vite('resources/js/settings.js')
-    @vite('resources/js/academicyears.js')
     @vite('resources/js/bankholiday.js')
+    @vite('resources/js/site-settings-redesign.js')
 @endsection

@@ -1,55 +1,64 @@
-import xlsx from "xlsx";
 import { createIcons, icons } from "lucide";
-import Tabulator from "tabulator-tables";
 
-(function(){
+(function () {
+    const form = document.getElementById("holidayYearLeaveOptionForm");
+
+    if (!form) {
+        return;
+    }
+
     const successModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-    const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
+    const csrfToken = $('meta[name="csrf-token"]').attr("content");
 
-    let confModalDelTitle = 'Are you sure?';
+    const refreshIcons = () => {
+        createIcons({
+            icons,
+            "stroke-width": 1.7,
+            nameAttr: "data-lucide",
+        });
+    };
 
-    $('#holidayYearLeaveOptionForm').on('submit', function(e){
-        e.preventDefault();
-        const form = document.getElementById('holidayYearLeaveOptionForm');
+    const setBusy = (busy) => {
+        const button = document.querySelector("#updateLO");
 
-        $('#holidayYearLeaveOptionForm').find('input').removeClass('border-danger')
-        $('#holidayYearLeaveOptionForm').find('.acc__input-error').html('')
+        if (!button) {
+            return;
+        }
 
-        document.querySelector('#updateLO').setAttribute('disabled', 'disabled');
-        document.querySelector('#updateLO svg').style.cssText = 'display: inline-block;';
+        button.disabled = busy;
+        const spinner = button.querySelector(".ss-spinner");
 
-        let form_data = new FormData(form);
+        if (spinner) {
+            spinner.style.cssText = busy ? "display: inline-block;" : "display: none;";
+        }
+    };
+
+    const showSuccess = (title, description) => {
+        $("#successModal .successModalTitle").text(title);
+        $("#successModal .successModalDesc").text(description);
+        successModal.show();
+    };
+
+    refreshIcons();
+
+    $("#holidayYearLeaveOptionForm").on("submit.holidayLeaveOptions", function (event) {
+        event.preventDefault();
+        setBusy(true);
 
         axios({
             method: "post",
-            url: route('holiday.year.update.leave.option'),
-            data: form_data,
-            headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        }).then(response => {
-            document.querySelector('#updateLO').removeAttribute('disabled');
-            document.querySelector('#updateLO svg').style.cssText = 'display: none;';
-            
+            url: route("holiday.year.update.leave.option"),
+            data: new FormData(form),
+            headers: { "X-CSRF-TOKEN": csrfToken },
+        }).then((response) => {
+            setBusy(false);
+
             if (response.status == 200) {
-                
-                successModal.show();
-                document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                    $('#successModal .successModalTitle').html('Congratulations!');
-                    $('#successModal .successModalDesc').html('Holiday year leave options successfully updated.');
-                });
+                showSuccess("Success!", "Holiday year leave options successfully updated.");
             }
-        }).catch(error => {
-            document.querySelector('#updateLO').removeAttribute('disabled');
-            document.querySelector('#updateLO svg').style.cssText = 'display: none;';
-            if(error.response){
-                if(error.response.status == 422){
-                    for (const [key, val] of Object.entries(error.response.data.errors)) {
-                        $(`#editHolidayYearForm .${key}`).addClass('border-danger')
-                        $(`#editHolidayYearForm  .error-${key}`).html(val)
-                    }
-                }else{
-                    console.log('error');
-                }
-            }
+        }).catch((error) => {
+            setBusy(false);
+            console.log(error);
         });
     });
-})()
+})();

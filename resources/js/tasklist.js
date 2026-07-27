@@ -4,128 +4,269 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
+
+const escapeHtml = (value) => {
+    if (value === null || value === undefined || value === "") {
+        return "&mdash;";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+const isYes = (value) => {
+    return value === true || value === 1 || value === "1" || String(value || "").toLowerCase() === "yes";
+};
+
+const yesNoPill = (value) => {
+    const active = isYes(value);
+    const className = active ? "is-active" : "is-inactive";
+    const icon = active ? "check" : "x";
+
+    return `<span class="ss-task-bool-pill ${className}" aria-label="${active ? "Yes" : "No"}"><i data-lucide="${icon}"></i></span>`;
+};
+
+const taskNameCell = (cell) => {
+    const data = cell.getData();
+
+    return `<span class="ss-task-name-cell">
+        <strong>${escapeHtml(data.name)}</strong>
+        <small>${escapeHtml(data.processlist)}</small>
+    </span>`;
+};
+
+const initialsFromName = (value) => {
+    const words = String(value || "")
+        .trim()
+        .split(/\s+/)
+        .map((word) => word.replace(/[^A-Za-z0-9]/g, ""))
+        .filter(Boolean);
+
+    if (words.length === 0) {
+        return "NA";
+    }
+
+    if (words.length === 1) {
+        return words[0].slice(0, 2).toUpperCase();
+    }
+
+    return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
+};
+
+const assignedAvatarTone = (index) => {
+    return `is-tone-${(index % 4) + 1}`;
+};
+
+const normalizeAssignedUsersHtml = (content) => {
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = content;
+
+    wrapper.querySelectorAll(".taskUserLoader > div").forEach((avatar, index) => {
+        const image = avatar.querySelector("img");
+        const imageUrl = image ? image.getAttribute("src") || "" : "";
+
+        if (!image || imageUrl.includes("placeholders/200x200")) {
+            const name = image ? image.getAttribute("alt") || "" : "";
+            avatar.innerHTML = `<span class="ss-task-assigned-initial ${assignedAvatarTone(index)}">${escapeHtml(initialsFromName(name))}</span>`;
+        }
+    });
+
+    return wrapper.innerHTML;
+};
+
+const assignedUsersCell = (cell) => {
+    const content = cell.getValue();
+
+    return content
+        ? `<span class="ss-task-assigned-cell">${normalizeAssignedUsersHtml(content)}</span>`
+        : '<span class="ss-cell-muted">&mdash;</span>';
+};
+
 var taskListTable = (function () {
     var _tableGen = function () {
-        // Setup Tabulator
         let querystr = $("#query").val() != "" ? $("#query").val() : "";
         let status = $("#status").val() != "" ? $("#status").val() : "";
         let processlist = $("#processlists-01").val() != "" ? $("#processlists-01").val() : "";
 
+        if (window.taskListTableInstance) {
+            window.taskListTableInstance.destroy();
+        }
+
         let tableContent = new Tabulator("#taskTableId", {
             ajaxURL: route("tasklist.list"),
-            ajaxParams: { querystr: querystr, status: status, processlist: processlist},
+            ajaxParams: { querystr: querystr, status: status, processlist: processlist },
             ajaxFiltering: true,
             ajaxSorting: true,
             printAsHtml: true,
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 5, 10, 20, 30, 40],
+            paginationSizeSelector: [10, 25, 50, 100],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
                     title: "#ID",
-                    headerSort: false,
                     field: "id",
-                    width: "50",
+                    width: 58,
+                    minWidth: 54,
                 },
                 {
                     title: "Name",
                     field: "name",
                     headerHozAlign: "left",
-                    
-                    width: "250",
-                    formatter(cell, formatterParams) { 
-                        var html = '<div class="block">';
-                                html += '<div class="inline-block relative" style="top: -5px;">';
-                                    html += '<div class="font-medium whitespace-normal uppercase">'+cell.getData().name+'</div>';
-                                    html += '<div class="text-slate-500 text-xs whitespace-normal">'+cell.getData().processlist+'</div>';
-                                html += '</div>';
-                            html += '</div>';
-                        return html;
-                    }
+                    minWidth: 190,
+                    widthGrow: 1.25,
+                    variableHeight: true,
+                    formatter: taskNameCell,
                 },
                 {
                     title: "Interview",
                     field: "interview",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 84,
+                    minWidth: 76,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Upload",
                     field: "upload",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 72,
+                    minWidth: 66,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Ex. Link",
                     field: "external_link",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 78,
+                    minWidth: 72,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Status",
                     field: "status",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 74,
+                    minWidth: 68,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Email",
                     field: "org_email",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 68,
+                    minWidth: 64,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "ID Card",
                     field: "id_card",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 74,
+                    minWidth: 68,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Excuse",
                     field: "attendance_excuses",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 74,
+                    minWidth: 68,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
-                    title: "Pearson Reg",
+                    title: "Pearson",
                     field: "pearson_reg",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 78,
+                    minWidth: 72,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
-                    title: "Address Req",
+                    title: "Address",
                     field: "address_request",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 78,
+                    minWidth: 72,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
                     title: "Hesa Status",
                     field: "hesa_status",
-                    headerHozAlign: "left",
+                    headerHozAlign: "center",
+                    hozAlign: "center",
+                    width: 98,
+                    minWidth: 92,
+                    formatter(cell) {
+                        return yesNoPill(cell.getValue());
+                    },
                 },
                 {
-                    title: "Assigned User",
+                    title: "Assigned",
                     field: "user",
                     headerHozAlign: "left",
                     headerSort: false,
-                    formatter(cell, formatterParams) { 
-                        return '<div style="white-space: normal;">'+cell.getData().user+'</div>';
-                    }
+                    width: 112,
+                    minWidth: 104,
+                    formatter: assignedUsersCell,
                 },
                 {
                     title: "Actions",
-                    field: "id",
+                    field: "actions",
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "85",
+                    width: 106,
+                    minWidth: 106,
                     download: false,
-                    formatter(cell, formatterParams) {                        
+                    formatter(cell) {
+                        const data = cell.getData();
                         var btns = "";
-                        if (cell.getData().deleted_at == null) {
-                            if(cell.getData().external_link_ref != '' && cell.getData().external_link_ref != null){
-                                btns += '<a target="_blank" href="'+cell.getData().external_link_ref+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="link" class="w-3 h-3"></i></a>';
+
+                        if (data.deleted_at == null) {
+                            if (data.external_link_ref != "" && data.external_link_ref != null) {
+                                btns += `<a target="_blank" rel="noopener" href="${escapeHtml(data.external_link_ref)}" class="ss-row-action ss-row-action--view" aria-label="Open task link"><i data-lucide="link"></i></a>`;
                             }
-                            btns += '<button data-id="'+cell.getData().id +'" data-tw-toggle="modal" data-tw-target="#editTaskModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-7 h-7 ml-1"><i data-lucide="Pencil" class="w-3 h-3"></i></a>';
-                            btns += '<button data-id="' +cell.getData().id +'"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="Trash2" class="w-3 h-3"></i></button>';
-                        }  else if (cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' +cell.getData().id +'"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-7 h-7"><i data-lucide="rotate-cw" class="w-3 h-3"></i></button>';
+                            btns += `<button data-id="${data.id}" type="button" class="edit_btn ss-row-action ss-row-action--edit" aria-label="Edit task"><i data-lucide="pencil"></i></button>`;
+                            btns += `<button data-id="${data.id}" type="button" class="delete_btn ss-row-action ss-row-action--delete" aria-label="Delete task"><i data-lucide="trash-2"></i></button>`;
+                        } else {
+                            btns += `<button data-id="${data.id}" type="button" class="restore_btn ss-row-action ss-row-action--restore" aria-label="Restore task"><i data-lucide="rotate-cw"></i></button>`;
                         }
-                        
+
                         return btns;
                     },
                 },
@@ -133,45 +274,55 @@ var taskListTable = (function () {
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.7,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }   
             },
         });
 
-        // Export
-        $("#tabulator-export-csv").on("click", function (event) {
-            tableContent.download("csv", "data.csv");
+        window.taskListTableInstance = tableContent;
+
+        if (window.taskListTableResizeHandler) {
+            window.removeEventListener("resize", window.taskListTableResizeHandler);
+        }
+
+        window.taskListTableResizeHandler = () => {
+            tableContent.redraw();
+            createIcons({
+                icons,
+                "stroke-width": 1.7,
+                nameAttr: "data-lucide",
+            });
+        };
+
+        window.addEventListener("resize", window.taskListTableResizeHandler);
+
+        $("#tabulator-export-csv").off("click.tasklist").on("click.tasklist", function () {
+            tableContent.download("csv", "task-list.csv");
         });
 
-        $("#tabulator-export-json").on("click", function (event) {
-            tableContent.download("json", "data.json");
+        $("#tabulator-export-json").off("click.tasklist").on("click.tasklist", function () {
+            tableContent.download("json", "task-list.json");
         });
 
-        $("#tabulator-export-xlsx").on("click", function (event) {
+        $("#tabulator-export-xlsx").off("click.tasklist").on("click.tasklist", function () {
             window.XLSX = xlsx;
-            tableContent.download("xlsx", "data.xlsx", {
+            tableContent.download("xlsx", "task-list.xlsx", {
                 sheetName: "Tasks List",
             });
         });
 
-        $("#tabulator-export-html").on("click", function (event) {
-            tableContent.download("html", "data.html", {
+        $("#tabulator-export-html").off("click.tasklist").on("click.tasklist", function () {
+            tableContent.download("html", "task-list.html", {
                 style: true,
             });
         });
 
-        // Print
-        $("#tabulator-print").on("click", function (event) {
+        $("#tabulator-print").off("click.tasklist").on("click.tasklist", function () {
             tableContent.print();
         });
     };
+
     return {
         init: function () {
             _tableGen();
@@ -180,17 +331,13 @@ var taskListTable = (function () {
 })();
 
 (function () {
-    // Tabulator
     if ($("#taskTableId").length) {
-        // Init Table
         taskListTable.init();
 
-        // Filter function
         function filterHTMLForm() {
             taskListTable.init();
         }
 
-        // On submit filter form
         $("#tabulatorFilterForm")[0].addEventListener(
             "keypress",
             function (event) {
@@ -202,201 +349,315 @@ var taskListTable = (function () {
             }
         );
 
-        // On click go button
-        $("#tabulator-html-filter-go").on("click", function (event) {
+        $("#tabulator-html-filter-go").on("click", function () {
             filterHTMLForm();
         });
 
-        // On reset filter form
-        $("#tabulator-html-filter-reset").on("click", function (event) {
+        $("#tabulator-html-filter-reset").on("click", function () {
             $("#query").val("");
-            $("#status").val("");
+            $("#processlists-01").val("");
+            $("#status").val("1");
             filterHTMLForm();
         });
 
         let tomOptions = {
-            dropdownParent: 'body',
-            dropdownClass: 'ts-dropdown lcc-tom-float',
-            
+            dropdownParent: "body",
+            dropdownClass: "ts-dropdown ss-settings-tom-dropdown",
             plugins: {
                 dropdown_input: {},
                 remove_button: {
                     title: "Remove this item",
-                }
+                },
             },
-            placeholder: 'Search Here...',
-            //persist: false,
+            placeholder: "Search Here...",
             create: false,
             maxOptions: null,
             allowEmptyOption: true,
             onDelete: function (values) {
-                return confirm( values.length > 1 ? "Are you sure you want to remove these " + values.length + " items?" : 'Are you sure you want to remove "' +values[0] +'"?' );
+                return confirm(
+                    values.length > 1
+                        ? "Are you sure you want to remove these " + values.length + " items?"
+                        : 'Are you sure you want to remove "' + values[0] + '"?'
+                );
             },
         };
 
-        var assignedUserAdd = new TomSelect('#assigned_users', tomOptions);
-        var assignedUserEdit = new TomSelect('#edit_assigned_users', tomOptions);
+        var assignedUserAdd = new TomSelect("#assigned_users", tomOptions);
+        var assignedUserEdit = new TomSelect("#edit_assigned_users", tomOptions);
 
-        const addModal  = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTaskModal"));
+        const addModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#addTaskModal"));
         const editModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editTaskModal"));
         const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
-        let confModalDelTitle = 'Are you sure?';
         const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-        document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-            $('#confirmModal .agreeWith').attr('data-id', '0');
-            $('#confirmModal .agreeWith').attr('data-action', 'none');
-        });
-
         const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
-        document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
-            $('#taskUserModal .taskUserModalContent').fadeOut('fast', function(){
-                $('table tbody', this).html('');
-            });
-            $('#taskUserModal .taskUserModalLoader').fadeIn();
+        let confModalDelTitle = "Are you sure?";
+
+        const showSuccess = (title, message) => {
+            $("#successModal .successModalTitle").html(title);
+            $("#successModal .successModalDesc").html(message);
+            succModal.show();
+        };
+
+        const setButtonLoading = (selector, isLoading) => {
+            const button = document.querySelector(selector);
+            const spinner = document.querySelector(`${selector} svg`);
+
+            if (!button) {
+                return;
+            }
+
+            if (isLoading) {
+                button.setAttribute("disabled", "disabled");
+                if (spinner) {
+                    spinner.style.cssText = "display: inline-block;";
+                }
+                return;
+            }
+
+            button.removeAttribute("disabled");
+            if (spinner) {
+                spinner.style.cssText = "display: none;";
+            }
+        };
+
+        const clearValidation = ($form) => {
+            $form.find(".acc__input-error").html("");
+            $form.find(".border-danger").removeClass("border-danger");
+            $form.find(".ts-wrapper").removeClass("border-danger");
+        };
+
+        const updateUploadName = ($form, name = "No file selected") => {
+            $form.find("[data-ss-upload-name]").text(name);
+        };
+
+        const setExternalVisibility = ($form, animate = true, resetValue = false) => {
+            const isEnabled = $form.find('input[name="external_link"]').prop("checked");
+            const $wrap = $form.find(".extarnalUrlWrap");
+            const clearValue = () => {
+                if (resetValue) {
+                    $form.find('input[name="external_link_ref"]').val("");
+                }
+            };
+
+            if (isEnabled) {
+                if (animate) {
+                    $wrap.stop(true, true).css("display", "flex").hide().fadeIn("fast");
+                } else {
+                    $wrap.css("display", "flex");
+                }
+                return;
+            }
+
+            if (animate) {
+                $wrap.fadeOut("fast", clearValue);
+            } else {
+                $wrap.hide();
+                clearValue();
+            }
+        };
+
+        const setTaskStatusesVisibility = ($form, animate = true, resetValue = false) => {
+            const hasTaskStatus = $form.find('input[name="status"]:checked').val() === "Yes";
+            const $wrap = $form.find(".taskStatusesWrap");
+            const clearValues = () => {
+                if (resetValue) {
+                    $form.find('.taskStatusesWrap input[type="checkbox"]').prop("checked", false);
+                }
+            };
+
+            if (hasTaskStatus) {
+                if (animate) {
+                    $wrap.fadeIn("fast");
+                } else {
+                    $wrap.show();
+                }
+                return;
+            }
+
+            if (animate) {
+                $wrap.fadeOut("fast", clearValues);
+            } else {
+                $wrap.hide();
+                clearValues();
+            }
+        };
+
+        const setRadioValue = ($form, name, value) => {
+            const normalized = isYes(value) ? "Yes" : "No";
+            $form.find(`input[name="${name}"][value="${normalized}"]`).prop("checked", true);
+        };
+
+        const resetFormState = ($form, tomSelectInstance) => {
+            clearValidation($form);
+            $form.find('input[type="text"], input[type="url"], input[type="file"]').val("");
+            $form.find("select").val("");
+            $form.find('input[name="id"]').val("0");
+            $form.find('input[type="checkbox"]').prop("checked", false);
+            $form.find('input[type="radio"][value="No"]').prop("checked", true);
+            if (tomSelectInstance) {
+                tomSelectInstance.clear(true);
+            }
+
+            const placeholder = $form.find("img[data-placeholder]").attr("data-placeholder");
+            if (placeholder) {
+                $form.find("img[data-placeholder]").attr("src", placeholder);
+            }
+
+            updateUploadName($form);
+            setExternalVisibility($form, false, true);
+            setTaskStatusesVisibility($form, false, true);
+        };
+
+        const renderValidationErrors = ($form, error) => {
+            if (!error.response || error.response.status !== 422) {
+                console.log("error");
+                return;
+            }
+
+            if (!error.response.data.errors) {
+                if (error.response.data.message) {
+                    if ($form.attr("id") === "editTaskForm") {
+                        editModal.hide();
+                    }
+                    showSuccess("No Data Change!", error.response.data.message);
+                }
+                return;
+            }
+
+            for (const [key, val] of Object.entries(error.response.data.errors)) {
+                $form.find(`.${key}`).addClass("border-danger");
+                $form.find(`.error-${key}`).html(val);
+
+                if (key === "assigned_users") {
+                    $form.find(".ts-wrapper").addClass("border-danger");
+                }
+
+                if (key === "task_statuses") {
+                    $form.find('[name="task_statuses[]"]').closest(".ss-status-toggle").addClass("border-danger");
+                }
+            }
+        };
+
+        const showConfirm = (id, action, title, message) => {
+            $("#confirmModal .confModTitle").html(title);
+            $("#confirmModal .confModDesc").html(message);
+            $("#confirmModal .agreeWith").attr("data-id", id);
+            $("#confirmModal .agreeWith").attr("data-action", action);
+            confModal.show();
+        };
+
+        resetFormState($("#addTaskForm"), assignedUserAdd);
+        resetFormState($("#editTaskForm"), assignedUserEdit);
+
+        const addModalEl = document.getElementById("addTaskModal");
+        addModalEl.addEventListener("show.tw.modal", function () {
+            resetFormState($("#addTaskForm"), assignedUserAdd);
         });
 
-        const addModalEl = document.getElementById('addTaskModal')
-        addModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#addTaskModal .acc__input-error').html('');
-            $('#addTaskModal input:not([type="radio"]):not([type="checkbox"])').val('');
-            $('#addTaskModal select').val('');
-            $('#addTaskModal input[type="checkbox"]').prop('checked', false);
-            $('#addTaskModal input[type="radio"][value="No"]').prop('checked', true);
-            $('#addTaskModal .extarnalUrlWrap').fadeOut('fast', function(){
-                $('#addTaskModal input[name="external_link_ref"]').val('')
-            });
-            $('#addTaskModal .taskStatusesWrap').fadeOut('fast', function(){
-                $('#addTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false)
-            });
-            assignedUserAdd.clear(true);
-
-            var placeholder = $('#addTaskModal .processImageAddShow').attr('data-placeholder');
-            $('#addTaskModal .processImageAddShow').attr('src', placeholder);
-        });
-        
-        const editModalEl = document.getElementById('editTaskModal')
-        editModalEl.addEventListener('hide.tw.modal', function(event) {
-            $('#editTaskModal .acc__input-error').html('');
-            $('#addTaskModal input:not([type="radio"]):not([type="checkbox"])').val('');
-            $('#addTaskModal select').val('');
-            $('#addTaskModal input[type="checkbox"]').prop('checked', false);
-            $('#editTaskModal input[name="id"]').val('0');
-            $('#editTaskModal .extarnalUrlWrap').fadeOut('fast', function(){
-                $('#editTaskModal input[name="external_link_ref"]').val('')
-            })
-            $('#editTaskModal .taskStatusesWrap').fadeOut('fast', function(){
-                $('#editTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false)
-            });
-            assignedUserEdit.clear(true);
-
-            var placeholder = $('#editTaskModal .processImageEditShow').attr('data-placeholder');
-            $('#editTaskModal .processImageEditShow').attr('src', placeholder);
+        addModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#addTaskForm"), assignedUserAdd);
         });
 
-        $('#addTaskForm').on('change', '#processImageAdd', function(){
-            showPreview('processImageAdd', 'processImageAddShow')
-        })
+        const editModalEl = document.getElementById("editTaskModal");
+        editModalEl.addEventListener("hide.tw.modal", function () {
+            resetFormState($("#editTaskForm"), assignedUserEdit);
+        });
 
-        $('#editTaskForm').on('change', '#processImageEdit', function(){
-            showPreview('processImageEdit', 'processImageEditShow')
-        })
+        const confirmModalEl = document.getElementById("confirmModal");
+        confirmModalEl.addEventListener("hidden.tw.modal", function () {
+            $("#confirmModal .agreeWith").attr("data-id", "0");
+            $("#confirmModal .agreeWith").attr("data-action", "none");
+            $("#confirmModal button").removeAttr("disabled");
+        });
 
-        $('#addTaskForm input[name="external_link"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#addTaskForm .extarnalUrlWrap').fadeIn('fast', function(){
-                    $('#addTaskForm input[name="external_link_ref"]').val('')
-                })
-            }else{
-                $('#addTaskForm .extarnalUrlWrap').fadeOut('fast', function(){
-                    $('#addTaskForm input[name="external_link_ref"]').val('')
-                })
+        const taskUserModalEl = document.getElementById("taskUserModal");
+        taskUserModalEl.addEventListener("hidden.tw.modal", function () {
+            $("#taskUserModal .taskUserModalContent").hide();
+            $("#taskUserModal table tbody").html("");
+            $("#taskUserModal .taskUserModalLoader").show();
+        });
+
+        $("#addTaskForm").on("change", "#processImageAdd", function () {
+            showPreview("processImageAdd", "processImageAddShow");
+            updateUploadName($("#addTaskForm"), this.files?.[0]?.name || "No file selected");
+        });
+
+        $("#editTaskForm").on("change", "#processImageEdit", function () {
+            showPreview("processImageEdit", "processImageEditShow");
+            updateUploadName($("#editTaskForm"), this.files?.[0]?.name || "No file selected");
+        });
+
+        $('#addTaskForm input[name="external_link"]').on("change", function () {
+            setExternalVisibility($("#addTaskForm"), true, true);
+        });
+
+        $('#editTaskForm input[name="external_link"]').on("change", function () {
+            setExternalVisibility($("#editTaskForm"), true, true);
+        });
+
+        $('#addTaskForm input[name="status"]').on("change", function () {
+            setTaskStatusesVisibility($("#addTaskForm"), true, true);
+        });
+
+        $('#editTaskForm input[name="status"]').on("change", function () {
+            setTaskStatusesVisibility($("#editTaskForm"), true, true);
+        });
+
+        $("#addTaskForm, #editTaskForm").on("input change", "input, select", function () {
+            const $form = $(this).closest("form");
+            const name = $(this).attr("name");
+
+            if (name) {
+                const normalizedName = name.replace("[]", "");
+                $form.find(`.${normalizedName}`).removeClass("border-danger");
+                $form.find(`.error-${normalizedName}`).html("");
             }
-        })
 
-        $('#editTaskForm input[name="external_link"]').on('change', function(){
-            if($(this).prop('checked')){
-                $('#editTaskForm .extarnalUrlWrap').fadeIn('fast', function(){
-                    $('#editTaskForm input[name="external_link_ref"]').val('')
-                })
-            }else{
-                $('#editTaskForm .extarnalUrlWrap').fadeOut('fast', function(){
-                    $('#editTaskForm input[name="external_link_ref"]').val('')
-                })
+            if (name === "assigned_users[]") {
+                $form.find(".ts-wrapper").removeClass("border-danger");
+                $form.find(".error-assigned_users").html("");
             }
-        })
 
-        $('#addTaskForm input[name="status"]').on('change', function(){
-            if($('#addTaskForm input[name="status"]:checked').val() == 'Yes'){
-                $('#addTaskForm .taskStatusesWrap').fadeIn('fast', function(){
-                    $('#addTaskForm .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                })
-            }else{
-                $('#addTaskForm .taskStatusesWrap').fadeOut('fast', function(){
-                    $('#addTaskForm .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                })
+            if (name === "task_statuses[]") {
+                $(this).closest(".ss-status-toggle").removeClass("border-danger");
+                $form.find(".error-task_statuses").html("");
             }
-        })
+        });
 
-        $('#editTaskForm input[name="status"]').on('change', function(){
-            if($('#editTaskForm input[name="status"]:checked').val() == 'Yes'){
-                $('#editTaskForm .taskStatusesWrap').fadeIn('fast', function(){
-                    $('#editTaskForm .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                })
-            }else{
-                $('#editTaskForm .taskStatusesWrap').fadeOut('fast', function(){
-                    $('#editTaskForm .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                })
-            }
-        })
-
-        $('#addTaskForm').on('submit', function(e){
+        $("#addTaskForm").on("submit", function (e) {
             e.preventDefault();
-            const form = document.getElementById('addTaskForm');
-        
-            document.querySelector('#save').setAttribute('disabled', 'disabled');
-            document.querySelector("#save svg").style.cssText ="display: inline-block;";
+            const $form = $("#addTaskForm");
+            const form = document.getElementById("addTaskForm");
 
-            let form_data = new FormData(form);
-            form_data.append('file', $('#addTaskForm input[name="photo"]')[0].files[0]); 
+            clearValidation($form);
+            setButtonLoading("#save", true);
+
+            let formData = new FormData(form);
+
             axios({
                 method: "post",
-                url: route('tasklist.store'),
-                data: form_data,
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                url: route("tasklist.store"),
+                data: formData,
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then(response => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                
+                setButtonLoading("#save", false);
+
                 if (response.status == 200) {
                     addModal.hide();
-
-                    succModal.show();
-                    document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                        $("#successModal .successModalTitle").html("Success!");
-                        $("#successModal .successModalDesc").html('Task list item successfully inserted');
-                    });                
-                        
+                    showSuccess("Success!", "Task list item successfully inserted.");
                 }
                 taskListTable.init();
             }).catch(error => {
-                document.querySelector('#save').removeAttribute('disabled');
-                document.querySelector("#save svg").style.cssText = "display: none;";
-                if (error.response) {
-                    if (error.response.status == 422) {
-                        for (const [key, val] of Object.entries(error.response.data.errors)) {
-                            $(`#addTaskForm .${key}`).addClass('border-danger')
-                            $(`#addTaskForm  .error-${key}`).html(val)
-                        }
-                    } else {
-                        console.log('error');
-                    }
-                }
+                setButtonLoading("#save", false);
+                renderValidationErrors($form, error);
             });
         });
 
-        $("#taskTableId").on("click", ".edit_btn", function () {      
-            let $editBtn = $(this);
-            let editId = $editBtn.attr("data-id");
+        $("#taskTableId").on("click", ".edit_btn", function () {
+            let editId = $(this).attr("data-id");
+            const $form = $("#editTaskForm");
+
+            resetFormState($form, assignedUserEdit);
 
             axios({
                 method: "get",
@@ -404,327 +665,190 @@ var taskListTable = (function () {
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        let dataset = response.data;
-                        let placeholder = $('#editTaskModal .processImageEditShow').attr('data-placeholder');
-                        $('#editTaskModal .processImageEditShow').attr('src', dataset.image_url ? dataset.image_url : placeholder);
-                        $('#editTaskModal select[name="process_list_id"]').val(dataset.process_list_id ? dataset.process_list_id : '');
-                        $('#editTaskModal input[name="name"]').val(dataset.name ? dataset.name : '');
-                        $('#editTaskModal input[name="short_description"]').val(dataset.short_description ? dataset.short_description : '');
-                        if(dataset.interview == 'Yes'){
-                            $('#editTaskModal input[name="interview"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="interview"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.upload == 'Yes'){
-                            $('#editTaskModal input[name="upload"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="upload"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.org_email == 'Yes'){
-                            $('#editTaskModal input[name="org_email"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="org_email"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.id_card == 'Yes'){
-                            $('#editTaskModal input[name="id_card"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="id_card"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.attendance_excuses == 'Yes'){
-                            $('#editTaskModal input[name="attendance_excuses"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="attendance_excuses"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.pearson_reg == 'Yes'){
-                            $('#editTaskModal input[name="pearson_reg"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="pearson_reg"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.address_request == 'Yes'){
-                            $('#editTaskModal input[name="address_request"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="address_request"][value="No"]').prop('checked', true);
-                        }
-                        if(dataset.hesa_status == 'Yes'){
-                            $('#editTaskModal input[name="hesa_status"][value="Yes"]').prop('checked', true);
-                        }else{
-                            $('#editTaskModal input[name="hesa_status"][value="No"]').prop('checked', true);
-                        }
-                        
-                        if(dataset.external_link == 1){
-                            $('#editTaskModal input[name="external_link"]').prop('checked', true);
-                            $('#editTaskModal .extarnalUrlWrap').fadeIn('fast', function(){
-                                $('#editTaskModal input[name="external_link_ref"]').val(dataset.external_link_ref)
-                            })
-                        }else{
-                            $('#editTaskModal input[name="external_link"]').prop('checked', false);
-                            $('#editTaskModal .extarnalUrlWrap').fadeOut('fast', function(){
-                                $('#editTaskModal input[name="external_link_ref"]').val('')
-                            })
-                        }
+            }).then((response) => {
+                if (response.status == 200) {
+                    let dataset = response.data;
+                    let placeholder = $("#editTaskModal .processImageEditShow").attr("data-placeholder");
 
-                        if(dataset.users.length > 0){
-                            $.each(dataset.users, function(name, value) {
-                                assignedUserEdit.addItem(value.user_id, true);
-                            });
-                        }else{
-                            assignedUserEdit.clear(true);
-                        }
-                                
-                        if(dataset.status == 'Yes'){
-                            $('#editTaskModal input[name="status"][value="Yes"]').prop('checked', true);
-                            $('#editTaskModal .taskStatusesWrap').fadeIn('fast', function(){
-                                $('#editTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                                if(dataset.statuses.length > 0){
-                                    $.each(dataset.statuses, function(name, value) {
-                                        $('#editTaskModal .taskStatusesWrap input[type="checkbox"][value="'+value.task_status_id+'"]').prop('checked', true);
-                                    });
-                                }else{
-                                    $('#editTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                                }
-                            })
-                        }else{
-                            $('#editTaskModal input[name="status"][value="No"]').prop('checked', true);
-                            $('#editTaskModal .taskStatusesWrap').fadeOut('fast', function(){
-                                $('#editTaskModal .taskStatusesWrap input[type="checkbox"]').prop('checked', false);
-                            })
-                        }
+                    $form.find('select[name="process_list_id"]').val(dataset.process_list_id ? dataset.process_list_id : "");
+                    $form.find('input[name="name"]').val(dataset.name ? dataset.name : "");
+                    $form.find('input[name="short_description"]').val(dataset.short_description ? dataset.short_description : "");
+                    $("#editTaskModal .processImageEditShow").attr("src", dataset.image_url ? dataset.image_url : placeholder);
+                    $form.find('input[name="id"]').val(editId);
 
-                        $('#editTaskModal input[name="id"]').val(editId);
+                    [
+                        "interview",
+                        "upload",
+                        "org_email",
+                        "id_card",
+                        "attendance_excuses",
+                        "pearson_reg",
+                        "address_request",
+                        "hesa_status",
+                        "status",
+                    ].forEach((fieldName) => {
+                        setRadioValue($form, fieldName, dataset[fieldName]);
+                    });
+
+                    $form.find('input[name="external_link"]').prop("checked", isYes(dataset.external_link));
+                    $form.find('input[name="external_link_ref"]').val(dataset.external_link_ref ? dataset.external_link_ref : "");
+                    setExternalVisibility($form, false, false);
+
+                    if (dataset.users && dataset.users.length > 0) {
+                        $.each(dataset.users, function (name, value) {
+                            assignedUserEdit.addItem(value.user_id, true);
+                        });
                     }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+
+                    $form.find('.taskStatusesWrap input[type="checkbox"]').prop("checked", false);
+                    if (isYes(dataset.status) && dataset.statuses && dataset.statuses.length > 0) {
+                        $.each(dataset.statuses, function (name, value) {
+                            $form.find(`.taskStatusesWrap input[type="checkbox"][value="${value.task_status_id}"]`).prop("checked", true);
+                        });
+                    }
+                    setTaskStatusesVisibility($form, false, false);
+
+                    editModal.show();
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
 
-        // Update Course Data
         $("#editTaskForm").on("submit", function (e) {
             e.preventDefault();
-            let editId = $('#editTaskModal input[name="id"]').val();
-
+            const $form = $("#editTaskForm");
             const form = document.getElementById("editTaskForm");
 
-            document.querySelector('#update').setAttribute('disabled', 'disabled');
-            document.querySelector('#update svg').style.cssText = 'display: inline-block;';
+            clearValidation($form);
+            setButtonLoading("#update", true);
 
-            let form_data = new FormData(form);
-            form_data.append('file', $('#editTaskForm input[name="photo"]')[0].files[0]);
+            let formData = new FormData(form);
 
             axios({
                 method: "post",
-                url: route("tasklist.update", editId),
-                data: form_data,
+                url: route("tasklist.update"),
+                data: formData,
                 headers: {
                     "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content"),
                 },
-            })
-                .then((response) => {
-                    if (response.status == 200) {
-                        document.querySelector("#update").removeAttribute("disabled");
-                        document.querySelector("#update svg").style.cssText = "display: none;";
-                        editModal.hide();
+            }).then((response) => {
+                setButtonLoading("#update", false);
 
-                        succModal.show();
-                        document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
-                            $("#successModal .successModalTitle").html("Success!" );
-                            $("#successModal .successModalDesc").html('Task list item data successfully updated.');
-                        });
-                    }
-                    taskListTable.init();
-                })
-                .catch((error) => {
-                    document.querySelector("#update").removeAttribute("disabled");
-                    document.querySelector("#update svg").style.cssText = "display: none;";
-                    if (error.response) {
-                        if (error.response.status == 422) {
-                            for (const [key, val] of Object.entries(error.response.data.errors)) {
-                                $(`#editTaskForm .${key}`).addClass('border-danger')
-                                $(`#editTaskForm  .error-${key}`).html(val)
-                            }
-                        }else if (error.response.status == 304) {
-                            editModal.hide();
-
-                            let message = error.response.statusText;
-                            succModal.show();
-                            document.getElementById("successModal")
-                                .addEventListener("shown.tw.modal", function (event) {
-                                    $("#successModal .successModalTitle").html( "No Data Change!" );
-                                    $("#successModal .successModalDesc").html('No data change found.');
-                                });
-                        } else {
-                            console.log("error");
-                        }
-                    }
-                });
+                if (response.status == 200) {
+                    editModal.hide();
+                    showSuccess("Success!", "Task list item successfully updated.");
+                }
+                taskListTable.init();
+            }).catch((error) => {
+                setButtonLoading("#update", false);
+                renderValidationErrors($form, error);
+            });
         });
 
-        // Confirm Modal Action
-        $('#confirmModal .agreeWith').on('click', function(){
+        $("#confirmModal .agreeWith").on("click", function () {
             let $agreeBTN = $(this);
-            let recordID = $agreeBTN.attr('data-id');
-            let action = $agreeBTN.attr('data-action');
+            let recordID = $agreeBTN.attr("data-id");
+            let action = $agreeBTN.attr("data-action");
 
-            $('#confirmModal button').attr('disabled', 'disabled');
-            if(action == 'DELETE'){
+            $("#confirmModal button").attr("disabled", "disabled");
+            if (action === "DELETE") {
                 axios({
-                    method: 'delete',
-                    url: route('tasklist.destory', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "delete",
+                    url: route("tasklist.destory", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Done!');
-                            $('#successModal .successModalDesc').html('Data Deleted!');
-                        });
+                        showSuccess("Done!", "Task list item successfully deleted.");
                     }
                     taskListTable.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
-            } else if(action == 'RESTORE'){
+            } else if (action === "RESTORE") {
                 axios({
-                    method: 'post',
-                    url: route('tasklist.restore', recordID),
-                    headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                    method: "post",
+                    url: route("tasklist.restore", recordID),
+                    headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
                 }).then(response => {
                     if (response.status == 200) {
-                        $('#confirmModal button').removeAttr('disabled');
+                        $("#confirmModal button").removeAttr("disabled");
                         confModal.hide();
-
-                        succModal.show();
-                        document.getElementById('successModal').addEventListener('shown.tw.modal', function(event){
-                            $('#successModal .successModalTitle').html('Success!');
-                            $('#successModal .successModalDesc').html('Data Successfully Restored!');
-                        });
+                        showSuccess("Success!", "Task list item successfully restored.");
                     }
                     taskListTable.init();
-                }).catch(error =>{
-                    console.log(error)
+                }).catch(error => {
+                    $("#confirmModal button").removeAttr("disabled");
+                    console.log(error);
                 });
             }
-        })
-
-         // Delete Course
-         $('#taskTableId').on('click', '.delete_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let rowID = $statusBTN.attr('data-id');
-
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to delete these record?');
-                $('#confirmModal .agreeWith').attr('data-id', rowID);
-                $('#confirmModal .agreeWith').attr('data-action', 'DELETE');
-            });
         });
 
-        // Restore Course
-        $('#taskTableId').on('click', '.restore_btn', function(){
-            const confModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
-            document.getElementById('confirmModal').addEventListener('hidden.tw.modal', function(event){
-                $('#confirmModal .agreeWith').attr('data-id', '0');
-                $('#confirmModal .agreeWith').attr('data-action', 'none');
-            });
-            let $statusBTN = $(this);
-            let dataID = $statusBTN.attr('data-id');
+        $("#taskTableId").on("click", ".delete_btn", function () {
+            let rowID = $(this).attr("data-id");
 
-            confModal.show();
-            document.getElementById('confirmModal').addEventListener('shown.tw.modal', function(event){
-                $('#confirmModal .confModTitle').html(confModalDelTitle);
-                $('#confirmModal .confModDesc').html('Do you really want to restore these record?');
-                $('#confirmModal .agreeWith').attr('data-id', dataID);
-                $('#confirmModal .agreeWith').attr('data-action', 'RESTORE');
-            });
+            showConfirm(
+                rowID,
+                "DELETE",
+                confModalDelTitle,
+                "Want to delete this task? Please click on agree to continue."
+            );
         });
 
-        $('#taskTableId').on('click', '.taskUserLoader', function(){
-            var task_id = $(this).attr('data-taskid');
+        $("#taskTableId").on("click", ".restore_btn", function () {
+            let dataID = $(this).attr("data-id");
+
+            showConfirm(
+                dataID,
+                "RESTORE",
+                confModalDelTitle,
+                "Want to restore this task from the trash? Please click on agree to continue."
+            );
+        });
+
+        $("#taskTableId").on("click", ".taskUserLoader", function () {
+            var task_id = $(this).attr("data-taskid");
             taskUserModal.show();
 
             axios({
-                method: 'post',
-                url: route('tasklist.users'),
-                data: {task_id : task_id},
-                headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
+                method: "post",
+                url: route("tasklist.users"),
+                data: { task_id: task_id },
+                headers: { "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr("content") },
             }).then(response => {
                 if (response.status == 200) {
-                    $('#taskUserModal .taskUserModalLoader').fadeOut('fast');
-                    $('#taskUserModal .taskUserModalContent').fadeIn('fast', function(){
-                        $('table tbody', this).html(response.data.res);
+                    $("#taskUserModal .taskUserModalLoader").fadeOut("fast");
+                    $("#taskUserModal .taskUserModalContent").fadeIn("fast", function () {
+                        $("table tbody", this).html(response.data.res);
                     });
 
                     createIcons({
                         icons,
-                        "stroke-width": 1.5,
+                        "stroke-width": 1.7,
                         nameAttr: "data-lucide",
                     });
                 }
-            }).catch(error =>{
-                console.log(error)
+            }).catch(error => {
+                console.log(error);
             });
         });
 
         function showPreview(inputId, targetImageId) {
             var src = document.getElementById(inputId);
             var target = document.getElementById(targetImageId);
-            var title = document.getElementById('selected_image_title');
+
+            if (!src.files || !src.files[0]) {
+                return;
+            }
+
             var fr = new FileReader();
             fr.onload = function () {
                 target.src = fr.result;
-            }
+            };
             fr.readAsDataURL(src.files[0]);
-        };
-
-        // Sidebar toggle: collapse/expand the left settings sidebar and expand #task-content
-        const SIDEBAR_KEY = 'tasklist_sidebar_collapsed';
-        function applySidebarState(collapsed) {
-            if (collapsed) {
-                $('#settings-sidebar').hide();
-                $('#task-content').removeClass('lg:col-span-8 2xl:col-span-9').addClass('lg:col-span-12 2xl:col-span-12');
-                $('#toggleSidebarBtn').attr('title', 'Restore sidebar');
-                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-right');
-            } else {
-                $('#settings-sidebar').show();
-                $('#task-content').removeClass('lg:col-span-12 2xl:col-span-12').addClass('lg:col-span-8 2xl:col-span-9');
-                $('#toggleSidebarBtn').attr('title', 'Collapse sidebar');
-                $('#toggleSidebarBtn i').attr('data-lucide', 'chevrons-left');
-            }
-            createIcons({ icons, 'stroke-width': 1.5, nameAttr: 'data-lucide' });
         }
-
-        // Toggle button
-        $('#toggleSidebarBtn').on('click', function () {
-            try {
-                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
-                collapsed = !collapsed;
-                localStorage.setItem(SIDEBAR_KEY, collapsed ? '1' : '0');
-                applySidebarState(collapsed);
-            } catch (e) {
-                console.error('Sidebar toggle error', e);
-            }
-        });
-
-        // Apply persisted state on load
-        $(document).ready(function () {
-            try {
-                let collapsed = localStorage.getItem(SIDEBAR_KEY) === '1';
-                applySidebarState(collapsed);
-            } catch (e) {
-                // ignore
-            }
-        });
     }
 })();
