@@ -468,6 +468,7 @@ class  StudentController extends Controller
 
                     $processGroup[$i]['name'] = $prl->name;
                     $processGroup[$i]['id'] = $prl->id;
+                    $processGroup[$i]['created_at'] = $prl->created_at;
                     $processGroup[$i]['pendingTask'] = $pendingTask;
                     $processGroup[$i]['inProgressTask'] = $inProgressTask;
                     $processGroup[$i]['completedTask'] = $completedTask;

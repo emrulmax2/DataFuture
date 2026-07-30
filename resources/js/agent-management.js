@@ -26,6 +26,49 @@ import TomSelect from "tom-select";
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const agentRulesModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#agentRulesModal"));
+    const $agentResultWrap = $('.agentRefListWrap');
+    const $agentResultsPanel = $('.agm-results');
+    const emptyStateHtml = $agentResultWrap.html();
+
+    const showEmptyState = () => {
+        $agentResultsPanel.removeClass('is-loaded');
+        $agentResultWrap.removeClass('loading').fadeIn().html(emptyStateHtml);
+        createIcons({
+            icons,
+            "stroke-width": 1.5,
+            nameAttr: "data-lucide",
+        });
+    };
+
+    const syncReferralList = ($panel) => {
+        if (!$panel.length) {
+            return;
+        }
+
+        const activeFilter = $panel.attr('data-filter') || 'all';
+        const query = (($panel.find('[data-agm-referral-search]').val() || '') + '').toLowerCase().trim();
+        let visibleRows = 0;
+
+        $panel.find('[data-referral-row]').not('[data-agm-referral-empty]').each(function() {
+            const $row = $(this);
+            const state = $row.attr('data-referral-state');
+            const searchText = (($row.attr('data-referral-search') || '') + '').toLowerCase();
+            const matchesFilter = activeFilter === 'all' || state === activeFilter;
+            const matchesQuery = query === '' || searchText.indexOf(query) !== -1;
+            const isVisible = matchesFilter && matchesQuery;
+
+            $row.toggle(isVisible);
+            if (isVisible) {
+                visibleRows++;
+            }
+        });
+
+        if (visibleRows > 0) {
+            $panel.find('[data-agm-referral-empty]').attr('hidden', 'hidden');
+        } else {
+            $panel.find('[data-agm-referral-empty]').removeAttr('hidden');
+        }
+    };
 
     const agentRulesModalEl = document.getElementById('agentRulesModal')
     agentRulesModalEl.addEventListener('hide.tw.modal', function(event) {
@@ -49,7 +92,7 @@ import TomSelect from "tom-select";
     $('#tabulator-html-filter-reset').on('click', function(e){
         e.preventDefault();
         semister_id.clear(true);
-        $('.agentRefListWrap').fadeOut().html('')
+        showEmptyState();
     })
 
     $('#tabulator-html-filter-go').on('click', function(e){
@@ -71,7 +114,8 @@ import TomSelect from "tom-select";
                 $theBtn.find('svg.theLoader').fadeOut();
                 
                 if (response.status == 200) {
-                    $('.agentRefListWrap').fadeIn().html(response.data.html);
+                    $agentResultsPanel.addClass('is-loaded');
+                    $agentResultWrap.fadeIn().html(response.data.html);
 
                     createIcons({
                         icons,
@@ -89,8 +133,25 @@ import TomSelect from "tom-select";
         }else{
             $theBtn.removeAttr('disabled');
             $theBtn.find('svg.theLoader').fadeOut();
-            $('.agentRefListWrap').fadeOut().html('')
+            showEmptyState();
         }
+    });
+
+    $('.agentRefListWrap').on('click', '[data-agm-referral-filter]', function(e){
+        e.preventDefault();
+
+        const $button = $(this);
+        const $panel = $button.closest('[data-agm-referral-panel]');
+        const filter = $button.attr('data-agm-referral-filter');
+
+        $panel.attr('data-filter', filter);
+        $panel.find('[data-agm-referral-filter]').removeClass('is-active').attr('aria-pressed', 'false');
+        $button.addClass('is-active').attr('aria-pressed', 'true');
+        syncReferralList($panel);
+    });
+
+    $('.agentRefListWrap').on('input', '[data-agm-referral-search]', function(){
+        syncReferralList($(this).closest('[data-agm-referral-panel]'));
     });
 
     $('.agentRefListWrap').on('click', '#referralCountTable tr.result_row', function(e){
@@ -108,6 +169,7 @@ import TomSelect from "tom-select";
             $('.agentRefListWrap').removeClass('loading');
             
             if (response.status == 200) {
+                $agentResultsPanel.addClass('is-loaded');
                 $('.agentRefListWrap').html(response.data.html)
 
                 createIcons({
@@ -229,7 +291,7 @@ import TomSelect from "tom-select";
         var $viewBtn = $('.agentRefListWrap').find('#comission_view_'+semester_id+'_'+agent_user_id);
     
         document.querySelector('#saveRuleBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveRuleBtn svg").style.cssText ="display: inline-block;";
+        document.querySelector("#saveRuleBtn .theLoader").style.cssText ="display: inline-block;";
 
         let form_data = new FormData(form);
         axios({
@@ -239,7 +301,7 @@ import TomSelect from "tom-select";
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
             document.querySelector('#saveRuleBtn').removeAttribute('disabled');
-            document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
+            document.querySelector("#saveRuleBtn .theLoader").style.cssText = "display: none;";
             
             if (response.status == 200) {
                 agentRulesModal.hide();
@@ -254,7 +316,7 @@ import TomSelect from "tom-select";
             }
         }).catch(error => {
             document.querySelector('#saveRuleBtn').removeAttribute('disabled');
-            document.querySelector("#saveRuleBtn svg").style.cssText = "display: none;";
+            document.querySelector("#saveRuleBtn .theLoader").style.cssText = "display: none;";
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {

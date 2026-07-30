@@ -9,6 +9,8 @@ use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use App\Models\Address;
 use App\Models\AgentApplicationCheck;
+use App\Models\AgentBankDetail;
+use App\Models\AgentDocuments;
 use App\Models\AgentUser;
 use App\Models\Applicant;
 use App\Models\Course;
@@ -20,11 +22,13 @@ use App\Models\ReferralCode;
 use App\Models\Semester;
 use App\Models\Status;
 use App\Models\Student;
+use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AgentController extends Controller
 {
@@ -38,6 +42,7 @@ class AgentController extends Controller
 
         return view('pages.agent.index', [
             'title' => 'Agent Creations - LCC Data Future Agent Managment',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [['label' => 'Agent Creations', 'href' => 'javascript:void(0);']],
             'agentUser' => AgentUser::all(),
             "unique" => Str::random(10),
@@ -45,39 +50,56 @@ class AgentController extends Controller
     }
 
     public function list(Request $request){
-        $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
-        $academicyear = (isset($request->academicyear) && $request->academicyear > 0 ? $request->academicyear : '');
+        $queryStr = trim((string) $request->input('querystr', ''));
+        $status = (int) $request->input('status', 1);
         $agentUserList = AgentUser::whereNull('parent_id')->pluck('id')->toArray();
         
-        $query = Agent::whereIn('agent_user_id', $agentUserList);
-        if(!empty($queryStr)):
-            $query->where('first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
+        $query = Agent::with('AgentUser')->whereIn('agent_user_id', $agentUserList);
+        if($status == 2):
+            $query->onlyTrashed();
+        elseif($status == 0):
+            $query->withTrashed();
         endif;
+
+        if(!empty($queryStr)):
+            $query->where(function($q) use($queryStr){
+                $q->where('first_name', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('last_name', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhereRaw("concat(first_name, ' ', last_name) like ?", ['%'.$queryStr.'%'])
+                    ->orWhere('organization', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('code', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhereHas('AgentUser', function($userQuery) use($queryStr){
+                        $userQuery->where('email', 'LIKE', '%'.$queryStr.'%');
+                    });
+            });
+        endif;
+
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        $perpage = (isset($request->size) && $request->size == 'true' ? ($total_rows > 0 ? $total_rows : 10) : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
-        $sorts = [];
+        $sortMap = [
+            'id' => 'id',
+            'name' => 'first_name',
+            'first_name' => 'first_name',
+            'last_name' => 'last_name',
+            'organization' => 'organization',
+            'code' => 'code',
+            'is_default' => 'is_default',
+        ];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $field = $sortMap[$sort['field'] ?? 'id'] ?? 'id';
+            $dir = strtoupper((string) ($sort['dir'] ?? 'DESC'));
+            $dir = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+
+            $query->orderBy($field, $dir);
         endforeach;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $query = $query->orderByRaw(implode(',', $sorts));
-        if(!empty($queryStr)):
-            $query->where('title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
-        endif;
-        if($status == 2):
-            $query->onlyTrashed();
-        endif;
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -91,6 +113,9 @@ class AgentController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->full_name,
+                    'email' => $list->AgentUser->email ?? '',
+                    'initials' => $this->agentInitials($list->full_name),
+                    'photo_url' => $this->agentPhotoUrl($list),
                     'organization' => ($agentUserCount) ? $list->organization." [ ".$agentUserCount." ]" : $list->organization,
                     'code' => $list->code,
                     'is_default' => $list->is_default,
@@ -99,7 +124,7 @@ class AgentController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 
     public function ApplicantionList(Request $request, $id){
@@ -168,7 +193,7 @@ class AgentController extends Controller
             endforeach;
         endif;
         $data = array_values($data);
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 
     public function listByQuery(Request $request, $id){
@@ -260,6 +285,8 @@ class AgentController extends Controller
                     'sl' => $i,
                     'application_no' => $list->application_no,
                     'name' => $list->title->name.' '.$list->first_name.' '.$list->last_name,
+                    'initials' => $this->agentInitials($list->first_name.' '.$list->last_name),
+                    'photo_url' => $this->applicantPhotoUrl($list),
                     'dob' => $list->date_of_birth,
                     'applicationCheck' => isset($agentCheck->id) && !empty($agentCheck->id) ? $agentCheck->id : '',
                     'gender' => isset($list->sexid->name) && !empty($list->sexid->name) ? $list->sexid->name : '',
@@ -274,7 +301,7 @@ class AgentController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
     /**
      * Show the form for creating a new resource.
@@ -308,7 +335,7 @@ class AgentController extends Controller
 
         $request->request->add(['agent_user_id' => $User->id]);
 
-        $data = Agent::create($request->all());
+        $data = Agent::create($this->agentPayload($request));
        
         $referral = ReferralCode::create([
             'code' => $data->code,
@@ -336,9 +363,14 @@ class AgentController extends Controller
 
         $agentUserList = AgentUser::where('id',$userData->id)->orWhere('parent_id',$userData->id)->get()->pluck('id')->toArray();
         $agents = Agent::whereIn('agent_user_id',$agentUserList)->orderBy('first_name','ASC')->get();
+        $profileName = trim($employee->first_name.' '.$employee->last_name);
         return view('pages.agent.profile.show',[
-            'title' => 'Welcome - London Churchill College',
-            'breadcrumbs' => [],
+            'title' => 'Agent Profile - London Churchill College',
+            'layout' => 'agent-management-top-menu',
+            'breadcrumbs' => [
+                ['label' => 'Agent Creations', 'href' => route('agent-user.index')],
+                ['label' => 'Profile', 'href' => 'javascript:void(0);'],
+            ],
             "user" => $userData,
             "employee" => $employee,
             "postcodeApi" => $PostCodeAPI,
@@ -346,6 +378,14 @@ class AgentController extends Controller
             'semesters' => Semester::orderBy('id','desc')->get(),
             'statuses' => Status::where('type','applicant')->get(),
             'agents' =>$agents,
+            'agentProfileInitials' => $this->agentInitials($profileName),
+            'agentProfilePhotoUrl' => $this->agentPhotoUrl($employee),
+            'profileTabCounts' => [
+                'applicants' => Applicant::whereIn('agent_user_id', $agentUserList)->where('status_id', '>', 1)->count(),
+                'sub' => AgentUser::where('parent_id', $userData->id)->count(),
+                'docs' => AgentDocuments::where('agent_id', $employee->id)->where('type', 1)->count(),
+                'pay' => AgentBankDetail::where('agent_id', $employee->id)->count(),
+            ],
         ]);
     
     }
@@ -380,23 +420,29 @@ class AgentController extends Controller
         $is_default = (isset($request->is_default) && $request->is_default > 0 ? $request->is_default : 0);
         $request->request->add(['agent_user_id' => $agent_user->AgentUser->id]);
         $agenUser = AgentUser::find($agent_user->AgentUser->id);
-        
-        $agenUser->email=$request->input('email');
+
+        $emailChanged = $agenUser->email !== $request->input('email');
+        $agenUser->email = $request->input('email');
+        if($request->filled('password')):
+            $agenUser->password = $request->input('password');
+        endif;
+        $agenUser->updated_by = auth()->user()->id;
         $agenUser->save();
+        $agentUserChanged = $agenUser->wasChanged();
+
         $request->merge(['updated_by' => auth()->user()->id]);
-        if($agenUser->wasChanged()) { 
+        if($emailChanged) {
 
             $agenUser->email_verified_at=null;
             $agenUser->save();
             event(new Registered($agenUser));
 
-        } else {
-            $agenUser->fill($request->all());
-            $agenUser->save();
         }
 
         $request->merge(['is_default' => $is_default]);
-        $agent_user->fill($request->all());
+        $agentPayload = $this->agentPayload($request);
+
+        $agent_user->fill($agentPayload);
         $agent_user->save();
 
         //$request->request->remove('email');
@@ -405,10 +451,10 @@ class AgentController extends Controller
 
         $agent= Agent::where("agent_user_id",$agent_user->AgentUser->id)->get()->first();
 
-        $agent->fill($request->all());
+        $agent->fill($agentPayload);
         $agent->save();
         
-        if($agenUser->wasChanged() || $agent_user->wasChanged() || $agent->wasChanged()){
+        if($agentUserChanged || $agent_user->wasChanged() || $agent->wasChanged()){
             return response()->json(['message' => 'Data updated'], 200);
         }else{
             return response()->json(['message' => 'something went wrong'], 422);
@@ -481,6 +527,95 @@ class AgentController extends Controller
         }
 
     }
+
+    private function agentInitials(?string $name): string
+    {
+        $clean = trim(preg_replace('/\s+/', ' ', (string) $name));
+        if($clean === ''):
+            return 'AG';
+        endif;
+
+        $parts = explode(' ', $clean);
+        $first = mb_substr($parts[0] ?? 'A', 0, 1);
+        $last = count($parts) > 1 ? mb_substr($parts[count($parts) - 1], 0, 1) : '';
+
+        return mb_strtoupper($first.$last);
+    }
+
+    private function agentPayload(Request $request): array
+    {
+        return $request->only([
+            'title_id',
+            'first_name',
+            'last_name',
+            'email',
+            'mobile',
+            'address_id',
+            'photo',
+            'code',
+            'organization',
+            'agent_user_id',
+            'is_default',
+            'created_by',
+            'updated_by',
+        ]);
+    }
+
+    private function agentPhotoUrl(Agent $agent): ?string
+    {
+        $photoUrl = (string) ($agent->photo_url ?? '');
+        if($photoUrl !== '' && !Str::startsWith($photoUrl, 'data:')):
+            return $photoUrl;
+        endif;
+
+        $photo = trim((string) ($agent->photo ?? ''));
+        if($photo === ''):
+            return null;
+        endif;
+
+        if(ctype_digit($photo)):
+            $documentUrl = Document::find((int) $photo)?->download_url;
+
+            return !empty($documentUrl) && !Str::startsWith((string) $documentUrl, 'data:') ? $documentUrl : null;
+        endif;
+
+        if(filter_var($photo, FILTER_VALIDATE_URL)):
+            return $photo;
+        endif;
+
+        $photo = ltrim($photo, '/');
+        $possiblePaths = [
+            'public/agents/'.$agent->id.'/'.$photo,
+            'public/agents/'.$agent->agent_user_id.'/'.$photo,
+            Str::startsWith($photo, 'storage/') ? preg_replace('/^storage\//', 'public/', $photo) : 'public/'.$photo,
+        ];
+
+        foreach($possiblePaths as $path):
+            if(!empty($path) && Storage::disk('local')->exists($path)):
+                $url = Storage::disk('local')->url($path);
+
+                return !Str::startsWith((string) $url, 'data:') ? $url : null;
+            endif;
+        endforeach;
+
+        return null;
+    }
+
+    private function applicantPhotoUrl(Applicant $applicant): ?string
+    {
+        $photo = trim((string) ($applicant->photo ?? ''));
+        if($photo === ''):
+            return null;
+        endif;
+
+        $path = 'public/applicants/'.$applicant->id.'/'.$photo;
+        if(Storage::disk('local')->exists($path)):
+            return Storage::disk('local')->url($path);
+        endif;
+
+        return null;
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -502,6 +637,6 @@ class AgentController extends Controller
         $data = Agent::where('id', $agent_user)->withTrashed()->restore();
         $dataSet = Agent::find($agent_user);
         AgentUser::where('id',$dataSet->agent_user_id)->withTrashed()->restore();
-        response()->json($data);
+        return response()->json($data);
     }
 }

@@ -28,7 +28,7 @@ class UpdateAgentRequest extends FormRequest
         $agentUserId = Agent::find($this->id)->agent_user_id;
         return [
 
-            'password' => 'nullable|string|required_with:confirmed',
+            'password' => 'nullable|string|confirmed|min:8',
             //'email' => Rule::unique('agent_users')->ignore($this->id),
             'email' => 'unique:agent_users,email,'. $agentUserId,
             'code' => 'unique:agents,code,'. $this->id

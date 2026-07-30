@@ -5,206 +5,143 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('term.module.creation') }}" class="add_btn btn btn-primary shadow-md mr-2">Back To List</a>
-        </div>
-    </div>
+    @php $mcTotal = !empty($moduleCreations) ? count($moduleCreations) : 0; @endphp
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
 
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="intro-y box  lg:mt-5 p-5">
-                <div class="form-wizard" id="termModulCreationsStepWizard">
-                    @if(!empty($moduleCreations))
-                        @foreach($moduleCreations as $mc)
-                            <fieldset class="wizard-fieldset {{ $loop->first ? 'show' : '' }} {{ $loop->last ? 'wizard-last-step' : '' }}">
-                                <form action="" method="post" role="form" id="moduleCreationStepForms_{{ $mc->id }}" enctype="multipart/form-data">
-                                    <div class="grid grid-cols-12 gap-4">
-                                        <div class="col-span-12">
-                                            <h2 class="text-xl font-medium mb-5 text-left">Module {{ ($loop->index < 9 ) ? '0'.$loop->index + 1 : $loop->index + 1}}</h2>
+        <div class="cm-layout__content">
+            @if($mcTotal === 0)
+                <div class="cm-card">
+                    <div class="cm-empty">
+                        <span class="cm-empty__icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                        </span>
+                        <div class="cm-empty__title cm-serif">No modules to configure</div>
+                        <div class="cm-empty__text">This term has no module creations yet. Pick the modules first, then set their assessments here.</div>
+                    </div>
+                </div>
+            @else
+                {{-- One step per module; all render, only the current one is
+                     visible. Stepping is handled in js/course-term-module-details.js. --}}
+                <div id="termModulCreationsStepWizard" data-cm-wizard data-cm-total="{{ $mcTotal }}">
+                    @foreach($moduleCreations as $mc)
+                        @php
+                            $mcIndex = $loop->index + 1;
+                            $mcAssessments = $mc->module->assesments ?? null;
+                        @endphp
+
+                        <div class="cm-card cm-step"
+                             data-cm-step-index="{{ $mcIndex }}"
+                             @if(!$loop->first) hidden @endif
+                             @if($loop->last) data-cm-step-last @endif>
+
+                            <div class="cm-stephead">
+                                <div class="cm-stephead__meta">
+                                    <span class="cm-stephead__pill">Step 2 of 2</span>
+                                    <span class="cm-stephead__sub">{{ $mcIndex }} of {{ $mcTotal }}</span>
+                                </div>
+                                <h2 class="cm-stephead__title cm-serif">Module {{ str_pad($mcIndex, 2, '0', STR_PAD_LEFT) }}</h2>
+                            </div>
+
+                            <form action="#" method="post" role="form" id="moduleCreationStepForms_{{ $mc->id }}" enctype="multipart/form-data">
+                                <div style="padding:24px 26px;">
+                                    <div class="cm-readonly">
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Module Name</span>
+                                            <span class="cm-readonly__value cm-readonly__value--lead">{{ $mc->module_name }}</span>
                                         </div>
-                                        <div class="col-span-6">
-                                            <div class="grid grid-cols-12 gap-0">
-                                                <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Module Name:</div></div>
-                                                <div class="col-span-9"><div class="text-left font-medium font-bold"><u>{{ $mc->module_name }}</u></div></div>
-                                            </div>
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Module Level</span>
+                                            <span class="cm-readonly__value">{{ $mc->module_level_id > 0 ? ($mc->level->name ?? '—') : '—' }}</span>
                                         </div>
-                                        @if($mc->module_level_id > 0)
-                                            <div class="col-span-6">
-                                                <div class="grid grid-cols-12 gap-0">
-                                                    <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Module Level:</div></div>
-                                                    <div class="col-span-9"><div class="text-left font-medium font-bold">{{ $mc->level->name }}</div></div>
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Credit Value</span>
+                                            <span class="cm-readonly__value">{{ $mc->credit_value !== '' && $mc->credit_value !== null ? $mc->credit_value : '—' }}</span>
+                                        </div>
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Unit Value</span>
+                                            <span class="cm-readonly__value">{{ $mc->unit_value !== '' && $mc->unit_value !== null ? $mc->unit_value : '—' }}</span>
+                                        </div>
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Code</span>
+                                            <span class="cm-readonly__value">{{ $mc->code ?: '—' }}</span>
+                                        </div>
+                                        <div class="cm-readonly__item">
+                                            <span class="cm-readonly__label">Course Status</span>
+                                            <span class="cm-readonly__value">{{ $mc->status ? ucfirst($mc->status) : '—' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top:26px;">
+                                        <div class="cm-picker__label" style="display:block; margin-bottom:11px;">Course Module Base Assesments</div>
+
+                                        <div class="cm-asslist">
+                                            @if($mcAssessments && $mcAssessments->count() > 0)
+                                                <div class="cm-asslist__head">
+                                                    <span>#</span>
+                                                    <span>Name</span>
+                                                    <span>Code</span>
+                                                    <span></span>
                                                 </div>
-                                            </div>
-                                        @endif
-                                        <div class="col-span-6">
-                                            <div class="grid grid-cols-12 gap-0">
-                                                <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Credit Value:</div></div>
-                                                <div class="col-span-9"><div class="text-left font-medium font-bold">{{ $mc->credit_value }}</div></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-6">
-                                            <div class="grid grid-cols-12 gap-0">
-                                                <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Unit Value:</div></div>
-                                                <div class="col-span-9"><div class="text-left font-medium font-bold">{{ $mc->unit_value }}</div></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-6">
-                                            <div class="grid grid-cols-12 gap-0">
-                                                <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Code:</div></div>
-                                                <div class="col-span-9"><div class="text-left font-medium font-bold">{{ $mc->code }}</div></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-6">
-                                            <div class="grid grid-cols-12 gap-0">
-                                                <div class="col-span-3"><div class="text-left text-slate-500 font-medium">Course Status:</div></div>
-                                                <div class="col-span-9"><div class="text-left font-medium font-bold">{{ ucfirst($mc->status) }}</div></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-span-12 pt-5">
-                                            <h3 class="font-medium text-base mt-0 mb-0">Course Module Base Assesments:</h3>
-                                            <div class="assessmentError text-danger mt-0" style="display: none;"></div>
-                                        </div>
-                                        <div class="col-span-12">
-                                            <div class="overflow-x-auto">
-                                                <table class="table  table-striped border-t">
-                                                    <thead>
-                                                        <tr>
-                                                            <th class="whitespace-nowrap">
-                                                                #
-                                                            </th>
-                                                            <th class="whitespace-nowrap">Name</th>
-                                                            <th class="whitespace-nowrap">Code</th>
-                                                            <th class="whitespace-nowrap">&nbsp;</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @if(!empty($mc->module->assesments) && $mc->module->assesments->count() > 0)
-                                                            @foreach($mc->module->assesments as $ass)
-                                                                <tr>
-                                                                    <td class="whitespace-nowrap">{{ $loop->index + 1 }}</td>
-                                                                    <td class="whitespace-nowrap">{{ $ass->assesment_name}}</td>
-                                                                    <td class="whitespace-nowrap">{{ $ass->assesment_code}}</td>
-                                                                    <td class="whitespace-nowrap">
-                                                                        <div class="form-check form-switch">
-                                                                            <input class="cmb_assessment form-check-input" id="cmb_assessment_{{ $mc->id }}_{{ $ass->id }}" name="cmb_assessment[]" value="{{ $ass->id }}" type="checkbox">
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            @endforeach
-                                                        @else
-                                                            <tr>
-                                                                <td class="whitespace-nowrap" colspan="4">
-                                                                    <div class="alert alert-pending-soft show flex items-center" role="alert">
-                                                                        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Assessment not Found for this module!
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        @endif
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                                @foreach($mcAssessments as $ass)
+                                                    <div class="cm-asslist__row">
+                                                        <span class="cm-asslist__n">{{ $loop->index + 1 }}</span>
+                                                        <span class="cm-asslist__name">{{ $ass->assesment_name }}</span>
+                                                        <span class="cm-asslist__code">{{ $ass->assesment_code }}</span>
+                                                        <span class="cm-asslist__toggle">
+                                                            <label class="cm-switchmini" title="Include this assesment">
+                                                                <input class="cm-switchmini__input cmb_assessment" id="cmb_assessment_{{ $mc->id }}_{{ $ass->id }}" name="cmb_assessment[]" value="{{ $ass->id }}" type="checkbox">
+                                                                <span class="cm-switchmini__track">
+                                                                    <span class="cm-switchmini__knob">
+                                                                        <svg data-cm-switch-on width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                                                        <svg data-cm-switch-off width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                                                    </span>
+                                                                </span>
+                                                            </label>
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="cm-asslist__empty">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                                                    No assesments found for this module
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
-                                    <div class="border-t mt-5 pt-5 flex flex-col sm:flex-row items-center">
-                                        @if(!$loop->first)
-                                            <button type="button" class=" btn btn-outline-secondary w-auto form-wizard-previous-btn mr-auto">Previous</button>
-                                        @endif
-                                        <button type="button" name="next" value="Next" class="form-wizard-next-btn btn btn-primary w-auto ml-auto">
-                                            Save & {{ $loop->last ? 'Exit' : 'Continue'}}
-                                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                                stroke="white" class="w-4 h-4 ml-2">
-                                                <g fill="none" fill-rule="evenodd">
-                                                    <g transform="translate(1 1)" stroke-width="4">
-                                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                        </path>
-                                                    </g>
-                                                </g>
-                                            </svg>
+                                </div>
+
+                                <div class="cm-modal__foot" style="justify-content:space-between;">
+                                    @if($loop->first)
+                                        <a href="{{ route('term.module.creation') }}" class="cm-btn cm-btn--keep">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                                            Back to modules
+                                        </a>
+                                    @else
+                                        <button type="button" class="cm-btn cm-btn--keep" data-cm-step-prev>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                                            Previous module
                                         </button>
-                                        <input type="hidden" name="module_creation_id" value="{{ $mc->id }}"/>
-                                    </div>
-                                </form>
-                            </fieldset>
-                        @endforeach 
-                    @endif
+                                    @endif
+
+                                    <button type="button" class="cm-btn cm-btn--save" data-cm-step-next id="stepNext_{{ $mc->id }}">
+                                        @include('pages.course-management.partials.save-glyphs')
+                                        Save &amp; {{ $loop->last ? 'Exit' : 'Next' }}
+                                    </button>
+                                    <input type="hidden" name="module_creation_id" value="{{ $mc->id }}">
+                                </div>
+                            </form>
+                        </div>
+                    @endforeach
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModalMCRD" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitleMCRD"></div>
-                        <div class="text-slate-500 mt-2 successModalDescMCRD"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <a href="#" class="btn btn-primary w-auto">Ok, Get me there</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->  
-
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModalMCRD" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitleMCRD"></div>
-                        <div class="text-slate-500 mt-2 warningModalDescMCRD"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" type="button" class="btn btn-primary w-24">Ok, Got it</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
-
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModalMCRD" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitleMCRD">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDescMCRD"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWithMCRD btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/term-module-creation.js')
+    @vite('resources/js/course-term-module-details.js')
 @endsection

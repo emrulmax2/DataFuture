@@ -22,7 +22,12 @@ class ModuleDatafutureController extends Controller
 
         $query = ModuleDatafuture::where('course_module_id', $module)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->orWhere('field_value','LIKE','%'.$queryStr.'%');
+            // Grouped: a bare `orWhere` beside `course_module_id` produced
+            // `course_module_id = X OR field_value LIKE q`, so searching
+            // returned rows belonging to every other module as well.
+            $query->where(function($q) use ($queryStr) {
+                $q->where('field_value','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
@@ -31,7 +36,8 @@ class ModuleDatafutureController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -57,7 +63,7 @@ class ModuleDatafutureController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
 
@@ -109,6 +115,7 @@ class ModuleDatafutureController extends Controller
     public function restore($id) {
         $data = ModuleDatafuture::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        // The `return` was missing, so this answered 200 with an empty body.
+        return response()->json($data);
     }
 }

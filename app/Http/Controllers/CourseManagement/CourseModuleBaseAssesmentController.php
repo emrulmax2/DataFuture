@@ -17,33 +17,38 @@ class CourseModuleBaseAssesmentController extends Controller
         $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
         $module = (isset($request->module) && $request->module > 0 ? $request->module : 0);
 
-        $query = CourseModuleBaseAssesment::where('course_module_id', $module);
-        if(!empty($queryStr)):
-            $query->where('assesment_code','LIKE','%'.$queryStr.'%');
-            $query->orWhere('assesment_name','LIKE','%'.$queryStr.'%');
-        endif;
-        $total_rows = $query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);        
-        $limit = $perpage;
-
+        // Built once, then counted and paginated. It used to be built twice —
+        // and the copy that produced `$total_rows` never had the status filter
+        // applied, so the Archived view reported the active count.
         $query = CourseModuleBaseAssesment::where('course_module_id', $module)->orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('assesment_code','LIKE','%'.$queryStr.'%');
-            $query->orWhere('assesment_name','LIKE','%'.$queryStr.'%');
+            // Grouped: the two terms used to sit beside `course_module_id` as
+            // siblings, and AND binds tighter than OR — so a search returned
+            // matching assesments belonging to *other* modules too.
+            $query->where(function($q) use ($queryStr) {
+                $q->where('assesment_code','LIKE','%'.$queryStr.'%')
+                  ->orWhere('assesment_name','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if($status == 2):
             $query->onlyTrashed();
         endif;
+
+        $total_rows = (clone $query)->reorder()->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true' ? ($total_rows > 0 ? $total_rows : 10) : ($request->size > 0 ? $request->size : 10));
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
+
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+        $limit = $perpage;
+
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -66,7 +71,7 @@ class CourseModuleBaseAssesmentController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
 
@@ -93,7 +98,10 @@ class CourseModuleBaseAssesmentController extends Controller
     }
 
     public function edit($id){
-        $data = CourseModuleBaseAssesment::with(["-"])->where('id',$id)->get()->first();
+        // Was `with(["-"])`, which threw RelationNotFoundException on every
+        // call — the edit modal could never be populated. `grades` is the
+        // relation the client actually reads.
+        $data = CourseModuleBaseAssesment::with(['grades'])->where('id',$id)->get()->first();
 
         if($data){
             return response()->json($data);
@@ -140,6 +148,7 @@ class CourseModuleBaseAssesmentController extends Controller
     public function restore($id) {
         $data = CourseModuleBaseAssesment::where('id', $id)->withTrashed()->restore();
 
-        response()->json($data);
+        // The `return` was missing, so this answered 200 with an empty body.
+        return response()->json($data);
     }
 }

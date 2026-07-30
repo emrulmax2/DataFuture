@@ -26,6 +26,8 @@ use App\Models\SlcMoneyReceipt;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Number;
@@ -38,6 +40,7 @@ class AgentManagementController extends Controller
     public function index(){
         return view('pages.agent.management.index', [
             'title' => 'Agent Management - London Churchill College',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);']
@@ -60,7 +63,7 @@ class AgentManagementController extends Controller
             if($student->count() > 0):
                 $reff_codes = $student->pluck('referral_code')->unique()->toArray();
                 $student_ids = $student->pluck('id')->unique()->toArray();
-                $html .= '<table class="table table-bordered table-sm" id="referralCountTable">';
+                $html .= '<table class="table table-bordered table-sm agm-summary-table" id="referralCountTable">';
                     $html .= '<tr class="cursor-pointer result_row font-medium" data-semester="'.$semester_id.'">';
                         $html .= '<td>No of referral found</td>';
                         $html .= '<td class="w-[150px]">'.(!empty($reff_codes) && count($reff_codes) > 0 ? count($reff_codes) : 0).'</td>';
@@ -69,10 +72,10 @@ class AgentManagementController extends Controller
                     $html .= '</tr>';
                 $html .= '</table>';
             else:
-                $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Student not found for the Semester.</div>';
+                $html .= '<div class="agm-alert" role="alert"><i data-lucide="alert-triangle"></i> Student not found for the Semester.</div>';
             endif;
         else:
-            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Semester does not started yet.</div>';
+            $html .= '<div class="agm-alert" role="alert"><i data-lucide="alert-triangle"></i> Semester does not started yet.</div>';
         endif;
 
         return response()->json(['html' => $html], 200);
@@ -91,106 +94,185 @@ class AgentManagementController extends Controller
                             $q->whereNotNull('referral_code')->orWhere('referral_code', '!=', '');
                         })->where('is_referral_varified', 1)->get();
             if($student->count() > 0):
-                $reff_codes = $student->pluck('referral_code')->unique()->toArray();
-                $html .= '<table class="table table-bordered table-sm" id="referralCountTable">';
-                    $html .= '<thead>'; 
-                        $html .= '<tr>';
-                            $html .= '<th class="text-left">Referral Name</th>';
-                            $html .= '<th class="text-left">Referral Code</th>';
-                            $html .= '<th class="text-left">Type</th>';
-                            $html .= '<th class="text-left">No of Student</th>';
-                            $html .= '<th class="text-right w-[120px]">&nbsp;</th>';
-                        $html .= '</tr>';
-                    $html .= '</thead>'; 
-                    $html .= '<tbody>'; 
-                        $all_student_ids = [];
-                        if(!empty($reff_codes)):
-                            foreach($reff_codes as $code):
-                                $theCode = ReferralCode::where('code', $code)->get()->first();
-                                $student_ids = Student::whereHas('activeCR', function($q) use($creation_ids){
-                                                $q->whereIn('course_creation_id', $creation_ids);
-                                            })->where('referral_code', $code)->where('is_referral_varified', 1)->pluck('id')->unique()->toArray();
-                                $all_student_ids = array_merge($all_student_ids, $student_ids);
-                                
-                                if(isset($theCode->agent_user_id)) {
-                                $rules = AgentComissionRule::where('agent_user_id', $theCode->agent_user_id)->where('semester_id', $semester_id)->get()->first();
-                                
-                                $html .= '<tr class="cursor-pointer code_row font-medium" data-code="'.$code.'" data-semester="'.$semester_id.'">';
-                                    $html .= '<td>';
-                                        if($theCode->type == 'Agent'):
-                                            $html .= '<div>';
-                                                $html .= '<div class="font-medium whitespace-nowrap">';
-                                                    $html .= (isset($theCode->agent_user->agent->full_name) && !empty($theCode->agent_user->agent->full_name) ? $theCode->agent_user->agent->full_name : '');
-                                                    $html .= (isset($theCode->agent_user->agent->organization) && !empty($theCode->agent_user->agent->organization) ? ' ('.$theCode->agent_user->agent->organization.')' : '');
-                                                $html .= '</div>';
-                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->agent_user->email) && !empty($theCode->agent_user->email) ? $theCode->agent_user->email : '').'</div>';
-                                            $html .= '</div>';
-                                        elseif($theCode->type == 'Student'):
-                                            $html .= '<div>';
-                                                $html .= '<div class="font-medium whitespace-nowrap">'.(isset($theCode->student->full_name) && !empty($theCode->student->full_name) ? $theCode->student->full_name : '').'</div>';
-                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->student->contact->institutional_email) && !empty($theCode->student->contact->institutional_email) ? $theCode->student->contact->institutional_email : '').'</div>';
-                                            $html .= '</div>';
-                                        endif;
-                                    $html .= '</td>';
-                                    $html .= '<td>'.$code.'</td>';
-                                    $html .= '<td>'.$theCode->type.'</td>';
-                                    $html .= '<td class="w-[150px]">'.(!empty($student_ids) && count($student_ids) > 0 ? count($student_ids) : 0).'</td>';
-                                    $html .= '<td class="text-right w-[150px]">';
-                                        $html .= '<a href="'.route('agent.management.comission', [$semester_id, $theCode->agent_user_id]).'" id="comission_view_'.$semester_id.'_'.$theCode->agent_user_id.'" class="'.(isset($rules->id) && $rules->id > 0 ? '' : 'hidden').' mr-2 btn btn-linkedin text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                                        $html .= '<button data-isdefault="0" data-code="'.$code.'" data-agent="'.$theCode->agent_user_id.'" data-semester="'.$semester_id.'" type="button" class="theRuleBtn btn btn-success text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="settings" class="w-4 h-4"></i></button>';
-                                    $html .= '</td>';
-                                $html .= '</tr>';
-                                } else {
-                                    $html .= '<tr class="cursor-pointer code_row font-medium">';
-                                                $html .= '<td colspan="6">'.$code.' - This code does not match the referral code. </td>';
-                                    $html .= '</tr>';
-                                }
-                            endforeach;
+                $reff_codes = $student->pluck('referral_code')->filter(function($code){
+                    return trim((string) $code) !== '';
+                })->unique()->values()->toArray();
+
+                $rows = [];
+                $matchedIndex = 0;
+                $studentCounts = [];
+                $all_student_ids = [];
+
+                $initialsFor = function($name){
+                    $baseName = trim(preg_replace('/\s*\(.*/', '', (string) $name));
+                    $baseName = preg_replace('/^(mr|mrs|miss|ms|dr)\.?\s+/i', '', $baseName);
+                    preg_match_all('/[A-Za-z0-9]+/', $baseName, $matches);
+                    $words = $matches[0] ?? [];
+
+                    if(count($words) >= 2):
+                        return strtoupper(mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1));
+                    elseif(count($words) == 1):
+                        return strtoupper(mb_substr($words[0], 0, 2));
+                    endif;
+
+                    return 'AG';
+                };
+
+                $nameFor = function($theCode) use($initialsFor){
+                    if(($theCode->type ?? '') == 'Agent'):
+                        $name = (isset($theCode->agent_user->agent->full_name) && !empty($theCode->agent_user->agent->full_name) ? $theCode->agent_user->agent->full_name : '');
+                        $name .= (isset($theCode->agent_user->agent->organization) && !empty($theCode->agent_user->agent->organization) ? ' ('.$theCode->agent_user->agent->organization.')' : '');
+                    elseif(($theCode->type ?? '') == 'Student'):
+                        $name = (isset($theCode->student->full_name) && !empty($theCode->student->full_name) ? $theCode->student->full_name : '');
+                    else:
+                        $name = '';
+                    endif;
+
+                    return trim($name) !== '' ? trim($name) : 'Referral Contact';
+                };
+
+                $emailFor = function($theCode){
+                    if(($theCode->type ?? '') == 'Agent'):
+                        return (isset($theCode->agent_user->email) && !empty($theCode->agent_user->email) ? $theCode->agent_user->email : '');
+                    elseif(($theCode->type ?? '') == 'Student'):
+                        return (isset($theCode->student->contact->institutional_email) && !empty($theCode->student->contact->institutional_email) ? $theCode->student->contact->institutional_email : '');
+                    endif;
+
+                    return '';
+                };
+
+                $photoFor = function($theCode){
+                    if(($theCode->type ?? '') !== 'Agent'):
+                        return null;
+                    endif;
+
+                    $agent = $theCode->agent_user?->agent;
+                    if(!$agent):
+                        return null;
+                    endif;
+
+                    $photoUrl = (string) ($agent->photo_url ?? '');
+                    if($photoUrl !== '' && !Str::startsWith($photoUrl, 'data:')):
+                        return $photoUrl;
+                    endif;
+
+                    $photo = trim((string) ($agent->photo ?? ''));
+                    if($photo === ''):
+                        return null;
+                    endif;
+
+                    if(ctype_digit($photo)):
+                        $documentUrl = \App\Models\Document::find((int) $photo)?->download_url;
+
+                        return !empty($documentUrl) && !Str::startsWith((string) $documentUrl, 'data:') ? $documentUrl : null;
+                    endif;
+
+                    if(filter_var($photo, FILTER_VALIDATE_URL)):
+                        return $photo;
+                    endif;
+
+                    $photo = ltrim($photo, '/');
+                    $possiblePaths = [
+                        'public/agents/'.$agent->id.'/'.$photo,
+                        'public/agents/'.$agent->agent_user_id.'/'.$photo,
+                        Str::startsWith($photo, 'storage/') ? preg_replace('/^storage\//', 'public/', $photo) : 'public/'.$photo,
+                    ];
+
+                    foreach($possiblePaths as $path):
+                        if(Storage::disk('local')->exists($path)):
+                            return Storage::disk('local')->url($path);
                         endif;
-                        if(!empty($defaultAgentsCodes)):
-                            foreach($defaultAgentsCodes as $code):
-                                $theCode = ReferralCode::where('code', $code)->get()->first();
-                            if(isset($theCode->agent_user_id)) {    
-                                $rules = AgentComissionRule::where('agent_user_id', $theCode->agent_user_id)->where('semester_id', $semester_id)->get()->first();
-                                $html .= '<tr class="cursor-pointer code_row font-medium" data-code="'.$code.'" data-semester="'.$semester_id.'">';
-                                    $html .= '<td>';
-                                        if($theCode->type == 'Agent'):
-                                            $html .= '<div>';
-                                                $html .= '<div class="font-medium whitespace-nowrap">';
-                                                    $html .= (isset($theCode->agent_user->agent->full_name) && !empty($theCode->agent_user->agent->full_name) ? $theCode->agent_user->agent->full_name : '');
-                                                    $html .= (isset($theCode->agent_user->agent->organization) && !empty($theCode->agent_user->agent->organization) ? ' ('.$theCode->agent_user->agent->organization.')' : '');
-                                                $html .= '</div>';
-                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->agent_user->email) && !empty($theCode->agent_user->email) ? $theCode->agent_user->email : '').'</div>';
-                                            $html .= '</div>';
-                                        elseif($theCode->type == 'Student'):
-                                            $html .= '<div>';
-                                                $html .= '<div class="font-medium whitespace-nowrap">'.(isset($theCode->student->full_name) && !empty($theCode->student->full_name) ? $theCode->student->full_name : '').'</div>';
-                                                $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.(isset($theCode->student->contact->institutional_email) && !empty($theCode->student->contact->institutional_email) ? $theCode->student->contact->institutional_email : '').'</div>';
-                                            $html .= '</div>';
-                                        endif;
-                                    $html .= '</td>';
-                                    $html .= '<td>'.$code.'</td>';
-                                    $html .= '<td>'.$theCode->type.'</td>';
-                                    $html .= '<td class="w-[150px]">'.(!empty($all_student_ids) && count($all_student_ids) > 0 ? count($all_student_ids) : 0).'</td>';
-                                    $html .= '<td class="text-right w-[150px]">';
-                                        $html .= '<a href="'.route('agent.management.comission', [$semester_id, $theCode->agent_user_id]).'" id="comission_view_'.$semester_id.'_'.$theCode->agent_user_id.'" class="'.(isset($rules->id) && $rules->id > 0 ? '' : 'hidden').' mr-2 btn btn-linkedin text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-                                        $html .= '<button data-isdefault="1" data-code="'.$code.'" data-agent="'.$theCode->agent_user_id.'" data-semester="'.$semester_id.'" type="button" class="theRuleBtn btn btn-success text-white rounded-full p-0 w-[32px] h-[32px]"><i data-lucide="settings" class="w-4 h-4"></i></button>';
-                                    $html .= '</td>';
-                                $html .= '</tr>';
-                            } else {
-                                $html .= '<tr class="cursor-pointer code_row font-medium">';
-                                            $html .= '<td colspan="6">'.$code.' - This code does not match the referral code. </td>';
-                                $html .= '</tr>';
-                            }
-                            endforeach;
+                    endforeach;
+
+                    return null;
+                };
+
+                $pushMatchedRow = function($theCode, $code, $studentCount, $isDefault) use (&$rows, &$matchedIndex, &$studentCounts, $semester_id, $nameFor, $emailFor, $initialsFor, $photoFor){
+                    $matchedIndex++;
+                    $name = $nameFor($theCode);
+                    $email = $emailFor($theCode);
+                    $type = (isset($theCode->type) && !empty($theCode->type) ? $theCode->type : 'Agent');
+                    $rules = AgentComissionRule::where('agent_user_id', $theCode->agent_user_id)->where('semester_id', $semester_id)->get()->first();
+                    $studentCounts[] = $studentCount;
+
+                    $rows[] = [
+                        'matched' => true,
+                        'display_index' => str_pad($matchedIndex, 2, '0', STR_PAD_LEFT),
+                        'name' => $name,
+                        'email' => $email,
+                        'initials' => $initialsFor($name),
+                        'photo_url' => $photoFor($theCode),
+                        'code' => $code,
+                        'type' => $type,
+                        'student_count' => $studentCount,
+                        'agent_user_id' => $theCode->agent_user_id,
+                        'semester_id' => $semester_id,
+                        'is_default' => $isDefault,
+                        'has_rule' => (isset($rules->id) && $rules->id > 0),
+                        'tone' => (($matchedIndex - 1) % 6) + 1,
+                        'meter_width' => 0,
+                        'search' => trim($name.' '.$email.' '.$code.' '.$type),
+                    ];
+                };
+
+                $pushMismatchedRow = function($code) use (&$rows){
+                    $rows[] = [
+                        'matched' => false,
+                        'code' => $code,
+                        'search' => trim($code.' This code does not match the referral code.'),
+                    ];
+                };
+
+                if(!empty($reff_codes)):
+                    foreach($reff_codes as $code):
+                        $theCode = ReferralCode::with(['agent_user.agent', 'student.contact'])->where('code', $code)->get()->first();
+                        $student_ids = Student::whereHas('activeCR', function($q) use($creation_ids){
+                                        $q->whereIn('course_creation_id', $creation_ids);
+                                    })->where('referral_code', $code)->where('is_referral_varified', 1)->pluck('id')->unique()->toArray();
+                        $all_student_ids = array_merge($all_student_ids, $student_ids);
+
+                        if(isset($theCode->agent_user_id)):
+                            $pushMatchedRow($theCode, $code, (!empty($student_ids) ? count($student_ids) : 0), 0);
+                        else:
+                            $pushMismatchedRow($code);
                         endif;
-                    $html .= '</tbody>';
-                $html .= '</table>';
+                    endforeach;
+                endif;
+
+                if(!empty($defaultAgentsCodes)):
+                    foreach($defaultAgentsCodes as $code):
+                        $theCode = ReferralCode::with(['agent_user.agent', 'student.contact'])->where('code', $code)->get()->first();
+                        if(isset($theCode->agent_user_id)):
+                            $pushMatchedRow($theCode, $code, (!empty($all_student_ids) ? count(array_unique($all_student_ids)) : 0), 1);
+                        else:
+                            $pushMismatchedRow($code);
+                        endif;
+                    endforeach;
+                endif;
+
+                $maxStudents = max(!empty($studentCounts) ? $studentCounts : [1]);
+                foreach($rows as &$row):
+                    if($row['matched']):
+                        $row['meter_width'] = $row['student_count'] > 0 ? min(100, max(5, (int) round(($row['student_count'] / max($maxStudents, 1)) * 100))) : 0;
+                    endif;
+                endforeach;
+                unset($row);
+
+                $counts = [
+                    'all' => count($rows),
+                    'matched' => $matchedIndex,
+                    'mismatched' => count($rows) - $matchedIndex,
+                ];
+
+                $html = view('pages.agent.management.partials.referral-table', [
+                    'rows' => $rows,
+                    'counts' => $counts,
+                ])->render();
             else:
-                $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Student not found for the Semester.</div>';
+                $html .= '<div class="agm-alert" role="alert"><i data-lucide="alert-triangle"></i> Student not found for the Semester.</div>';
             endif;
         else:
-            $html .= '<div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Semester does not started yet.</div>';
+            $html .= '<div class="agm-alert" role="alert"><i data-lucide="alert-triangle"></i> Semester does not started yet.</div>';
         endif;
 
         return response()->json(['html' => $html], 200);
@@ -236,12 +318,14 @@ class AgentManagementController extends Controller
 
     public function comission(Semester $semester, AgentUser $agent_user){
         $rule = AgentComissionRule::where('agent_user_id', $agent_user->id)->where('semester_id', $semester->id)->get()->first();
-        $theCode = ReferralCode::where('code', $rule->code)->where('agent_user_id', $agent_user->id)->get()->first();
+        $theCode = $rule ? ReferralCode::where('code', $rule->code)->where('agent_user_id', $agent_user->id)->get()->first() : null;
+
         return view('pages.agent.management.comission', [
             'title' => 'Agent Management - London Churchill College',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
-                ['label' => 'Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Management', 'href' => route('agent.management')],
                 ['label' => 'Comission', 'href' => 'javascript:void(0);'],
             ],
             'semester' => $semester,
@@ -255,6 +339,7 @@ class AgentManagementController extends Controller
         $semester_id = (isset($request->semester_id) && $request->semester_id > 0 ? $request->semester_id : 0);
         $agent_user_id = (isset($request->agent_id) && $request->agent_id > 0 ? $request->agent_id : 0);
         $code = (isset($request->code) && !empty($request->code) ? $request->code : '');
+        $queryStr = trim((string) $request->input('query', ''));
 
         $agent = Agent::where('agent_user_id', $agent_user_id)->orderBy('id', 'DESC')->get()->first();
         $is_default = (isset($agent->is_default) && $agent->is_default == 1 ? true : false);
@@ -279,10 +364,23 @@ class AgentManagementController extends Controller
         endif;
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
+        $allowedSortFields = ['id', 'application_no', 'registration_no', 'ssn_no', 'first_name', 'last_name', 'date_of_birth'];
         $sorts = [];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $field = isset($sort['field']) ? (string) $sort['field'] : 'id';
+            $dir = strtoupper((string) ($sort['dir'] ?? 'DESC'));
+
+            if(!in_array($dir, ['ASC', 'DESC'])):
+                $dir = 'DESC';
+            endif;
+
+            if(in_array($field, $allowedSortFields, true)):
+                $sorts[] = $field.' '.$dir;
+            endif;
         endforeach;
+        if(empty($sorts)):
+            $sorts[] = 'id DESC';
+        endif;
 
         $query = Student::whereHas('activeCR', function($q) use($creation_ids){
                     $q->whereIn('course_creation_id', $creation_ids);
@@ -293,6 +391,25 @@ class AgentManagementController extends Controller
             $query->where('referral_code', $code)->where('is_referral_varified', 1);
         endif;
 
+        if($queryStr !== ''):
+            $query->where(function($q) use($queryStr){
+                $like = '%'.$queryStr.'%';
+
+                $q->where('application_no', 'LIKE', $like)
+                    ->orWhere('registration_no', 'LIKE', $like)
+                    ->orWhere('ssn_no', 'LIKE', $like)
+                    ->orWhere('first_name', 'LIKE', $like)
+                    ->orWhere('last_name', 'LIKE', $like)
+                    ->orWhereRaw("concat(first_name, ' ', last_name) LIKE ?", [$like])
+                    ->orWhereHas('status', function($qs) use($like){
+                        $qs->where('name', 'LIKE', $like);
+                    })
+                    ->orWhereHas('activeCR.creation.course', function($qc) use($like){
+                        $qc->where('name', 'LIKE', $like);
+                    });
+            });
+        endif;
+
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
@@ -301,7 +418,8 @@ class AgentManagementController extends Controller
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $Query= $query->skip($offset)
+        $Query= $query->orderByRaw(implode(',', $sorts))
+               ->skip($offset)
                ->take($limit)
                ->get();
 
@@ -679,6 +797,7 @@ class AgentManagementController extends Controller
         $agent_comission = AgentComission::create([
             'agent_id' => (isset($theRule->agentuser->agent->id) && $theRule->agentuser->agent->id > 0 ? $theRule->agentuser->agent->id : null),
             'agent_user_id' => (isset($theRule->agent_user_id) && $theRule->agent_user_id > 0 ? $theRule->agent_user_id : null),
+            'agent_bank_detail_id' => (isset($theRule->agentuser->agent->bank->id) && $theRule->agentuser->agent->bank->id > 0 ? $theRule->agentuser->agent->bank->id : null),
             'agent_comission_rule_id' => $theRule->id,
             'semester_id' => $theRule->semester_id,
             'remittance_ref' => $remittanceRef,
@@ -831,9 +950,10 @@ class AgentManagementController extends Controller
     }
 
     public function comissionDetails(AgentComission $comission){
-        $comission->load(['agent', 'agentuser', 'rule', 'semester']);
+        $comission->load(['agent.address', 'agentuser', 'rule', 'semester', 'comissions', 'payment']);
         return view('pages.agent.management.comission-details', [
             'title' => 'Agent Management - London Churchill College',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);'],
@@ -873,6 +993,8 @@ class AgentManagementController extends Controller
             foreach($Query as $list):
                 $comissionFor = (isset($list->comission_for) && !empty($list->comission_for) ? $list->comission_for : 'Course Fee');
                 $receiptAmount = (isset($list->receipt->amount) && $list->receipt->amount > 0 ? ($comissionFor == 'Refund' ? abs($list->receipt->amount) * -1 : $list->receipt->amount) : 0);
+                $studentPhotoUrl = (string) ($list->student->photo_url ?? '');
+                $studentPhotoUrl = (!empty($studentPhotoUrl) && !Str::startsWith($studentPhotoUrl, 'data:') ? $studentPhotoUrl : '');
                 $data[] = [
                     'id' => $list->id,
                     'sl' => $i,
@@ -880,6 +1002,7 @@ class AgentManagementController extends Controller
                     'application_no' => (isset($list->student->application_no) ? $list->student->application_no : ''),
                     'registration_no' => (isset($list->student->registration_no) ? $list->student->registration_no : ''),
                     'full_name' => (isset($list->student->full_name) ? $list->student->full_name : $list->student->full_name),
+                    'photo_url' => $studentPhotoUrl,
                     'course' => (isset($list->student->activeCR->creation->course->name) && !empty($list->student->activeCR->creation->course->name) ? $list->student->activeCR->creation->course->name : ''),
                     'amount' => Number::currency($list->amount, in: 'GBP'),//(isset($list->amount) && $list->amount ? '£'.number_format($list->amount, 2) : '£0.00'),
                     'invoice_no' => (isset($list->receipt->invoice_no) && !empty($list->receipt->invoice_no) ? $list->receipt->invoice_no : ''),
@@ -895,19 +1018,72 @@ class AgentManagementController extends Controller
     }
 
     public function remittance(){
+        $totalRemittance = AgentComissionDetail::whereHas('comission')->sum('amount');
+        $paidCount = AgentComission::whereHas('payment', function($q) {
+            $q->where('status', 2);
+        })->count();
+        $scheduledCount = AgentComission::whereHas('payment', function($q) {
+            $q->where('status', 1);
+        })->count();
+        $pendingCount = AgentComission::whereNull('agent_comission_payment_id')->count();
+
+        $formatCompactCurrency = function($amount) {
+            $amount = (float) $amount;
+            $absoluteAmount = abs($amount);
+
+            if($absoluteAmount >= 1000000):
+                return '£'.rtrim(rtrim(number_format($amount / 1000000, 1), '0'), '.').'m';
+            elseif($absoluteAmount >= 1000):
+                return '£'.rtrim(rtrim(number_format($amount / 1000, 1), '0'), '.').'k';
+            endif;
+
+            return Number::currency($amount, in: 'GBP');
+        };
+
         return view('pages.agent.management.remittance', [
             'title' => 'Agent Management - London Churchill College',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);'],
                 ['label' => 'Remittance', 'href' => 'javascript:void(0);'],
-            ]
+            ],
+            'remittanceKpis' => [
+                [
+                    'label' => 'Total Remittance',
+                    'value' => $formatCompactCurrency($totalRemittance),
+                    'icon' => 'pound-sterling',
+                    'tone' => 'teal',
+                    'width' => '78%',
+                ],
+                [
+                    'label' => 'Paid',
+                    'value' => number_format($paidCount),
+                    'icon' => 'check',
+                    'tone' => 'green',
+                    'width' => '92%',
+                ],
+                [
+                    'label' => 'Scheduled',
+                    'value' => number_format($scheduledCount),
+                    'icon' => 'clock',
+                    'tone' => 'blue',
+                    'width' => '26%',
+                ],
+                [
+                    'label' => 'Pending',
+                    'value' => number_format($pendingCount),
+                    'icon' => 'alert-triangle',
+                    'tone' => 'gold',
+                    'width' => '12%',
+                ],
+            ],
         ]);
     }
 
     public function remittanceList(Request $request){
         $querystr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 0);
+        $status = (isset($request->status) && $request->status !== '' ? $request->status : 0);
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
@@ -915,15 +1091,24 @@ class AgentManagementController extends Controller
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
 
-        $query = AgentComission::with('comissions')->orderByRaw(implode(',', $sorts));
+        $query = AgentComission::with(['comissions', 'rule.semester', 'agent', 'payment'])->orderByRaw(implode(',', $sorts));
         if(!empty($querystr)):
             $query->where(function($q) use($querystr){
-                $q->where('remittance_ref','LIKE','%'.$querystr.'%');
+                $q->where('remittance_ref','LIKE','%'.$querystr.'%')
+                    ->orWhereHas('agent', function($agentQuery) use($querystr) {
+                        $agentQuery->where('full_name','LIKE','%'.$querystr.'%')
+                            ->orWhere('organization','LIKE','%'.$querystr.'%');
+                    })
+                    ->orWhereHas('rule.semester', function($semesterQuery) use($querystr) {
+                        $semesterQuery->where('name','LIKE','%'.$querystr.'%');
+                    });
             });
         endif;
-        if($status > 0):
+        if((int) $status === 4):
+            $query->whereNull('agent_comission_payment_id');
+        elseif((int) $status > 0):
             $query->whereHas('payment', function($q) use($status){
-                $q->where('status', $status);
+                $q->where('status', (int) $status);
             });
         endif;
 
@@ -1031,194 +1216,84 @@ class AgentManagementController extends Controller
     }
 
     public function printRemittance($comission_id){
-        $comission = AgentComission::find($comission_id);
-        $comission_details = AgentComissionDetail::with('student')->where('agent_comission_id', $comission_id)->get();
+        $comission = AgentComission::with([
+            'agent.address',
+            'agent.bank',
+            'agentBank',
+            'rule',
+            'semester',
+            'payment',
+            'comissions.student.activeCR.creation.course',
+            'comissions.receipt',
+        ])->findOrFail($comission_id);
+
+        $comissionDetails = $comission->comissions->sortBy('id')->values();
+        $agentBank = (isset($comission->agentBank->id) ? $comission->agentBank : optional($comission->agent)->bank);
         $remittanceRef = (isset($comission->remittance_ref) && !empty($comission->remittance_ref) ? $comission->remittance_ref : '');
+        $entryDate = $comission->getRawOriginal('entry_date');
+        $generatedDate = (!empty($entryDate) ? date('j M Y', strtotime($entryDate)) : date('j M Y'));
+        $semesterName = (isset($comission->semester->name) && !empty($comission->semester->name) ? $comission->semester->name : 'Current Intake');
+        $paymentStatus = (isset($comission->payment->status) && $comission->payment->status > 0 ? (int) $comission->payment->status : 0);
+        $statusLabel = match ($paymentStatus) {
+            1 => 'Scheduled',
+            2 => 'Paid',
+            3 => 'Canceled',
+            default => 'Pending',
+        };
+        $statusTone = match ($paymentStatus) {
+            1 => 'scheduled',
+            2 => 'paid',
+            3 => 'canceled',
+            default => 'pending',
+        };
 
-        $user = User::find(auth()->user()->id);
-        $regNo = Option::where('category', 'SITE')->where('name', 'register_no')->get()->first();
-        $regAt = Option::where('category', 'SITE')->where('name', 'register_at')->get()->first();
+        $rule = $comission->rule;
+        $ruleModeLabel = 'Agreed Rule';
+        $ruleValueLabel = 'the agreed amount';
+        if(isset($rule->comission_mode) && (int) $rule->comission_mode === 1):
+            $ruleModeLabel = 'Percentage';
+            $ruleValueLabel = (isset($rule->percentage) && $rule->percentage > 0 ? rtrim(rtrim(number_format((float) $rule->percentage, 2), '0'), '.').'%' : 'the agreed percentage');
+        elseif(isset($rule->comission_mode) && (int) $rule->comission_mode === 2):
+            $ruleModeLabel = 'Fixed Amount';
+            $ruleValueLabel = (isset($rule->amount) && $rule->amount > 0 ? Number::currency((float) $rule->amount, in: 'GBP') : 'the agreed amount');
+        endif;
 
-        $report_title = 'Agent Remittance ('.$remittanceRef.') Report';
-        $PDFHTML = '';
-        $PDFHTML .= '<html>';
-            $PDFHTML .= '<head>';
-                $PDFHTML .= '<title>'.$report_title.'</title>';
-                $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-                $PDFHTML .= '<style>
-                                body{font-family: Tahoma, sans-serif; font-size: 13px; line-height: normal; color: #1e293b; padding-top: 10px;}
-                                table{margin-left: 0px; width: 100%; border-collapse: collapse;}
-                                figure{margin: 0;}
-                                @page{margin-top: 110px;margin-left: 85px !important; margin-right:85px !important; }
+        $rulePeriodLabel = match ((int) ($rule->period ?? 0)) {
+            1 => 'Full Course',
+            2 => 'Year 1',
+            default => 'Agreed Period',
+        };
+        $rulePaymentLabel = match ((int) ($rule->payment_type ?? 0)) {
+            1 => 'single payment',
+            2 => 'on receipt',
+            default => 'agreed payment terms',
+        };
 
-                                header{position: fixed;left: 0px;right: 0px; height: 80px; margin-top: -90px;}
-                                .headerTable img{height: 70px; width: auto;}
-                                .headerTable tr td.headerRightCol{ width: 200px;}
-                                .headerTable tr td{vertical-align: top; padding: 0;}
-                                .headerTable tr td.headerRightCol{font-size: 12px; line-height: 14px;}
-                                .headerTable tr td.headerRightCol table tr.headerHeadingRow td{font-size: 16px; text-transform: uppercase; font-weight: bold; padding-bottom: 2px;}
-                                .headerTable tr td.headerRightCol table tr.headerBodyRow td{padding-top: 3px;}
-                                .headerTable tr td.headerRightCol table tr td.htd2{ text-align: right;}
+        $logoPath = resource_path('images/lcc-header-sample-logo.png');
+        $logoSrc = (is_readable($logoPath) ? 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath)) : '');
+        $totalAmount = $comissionDetails->sum('amount');
+        $report_title = 'Agent Remittance'.(!empty($remittanceRef) ? ' ('.$remittanceRef.')' : '').' Report';
+        $fileName = preg_replace('/[^A-Za-z0-9_\-]+/', '_', $report_title).'.pdf';
 
-                                footer{position: fixed;left: 0px;right: 0px;bottom: 0;height: 100px;margin-bottom: -120px;}
-                                .pageCounter{position: relative;}
-                                .pageCounter:before{content: counter(page);position: relative;display: inline-block;}
-                                .pinRow td{border-bottom: 1px solid gray;}
-                                .text-center{text-align: center;}
-                                .text-left{text-align: left;}
-                                .text-right{text-align: right;}
-                                @media print{ .pageBreak{page-break-after: always;} }
-                                .pageBreak{page-break-after: always;}
-                                
-                                .mb-15{margin-bottom: 15px;}
-                                .mb-10{margin-bottom: 10px;}
-                                .table-bordered th, .table-bordered td {border: 1px solid #e5e7eb;}
-                                .table-sm th, .table-sm td{padding: 5px 10px;}
-                                .w-1/6{width: 16.666666%;}
-                                .w-2/6{width: 33.333333%;}
-                                .table.attenRateReportTable tr th{ background: #0d9488; color: #FFF; font-size: 12px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 10px;}
-                                .table.attenRateReportTable tr th, .table.attenRateReportTable tr td{ text-align: left;}
-                                .table.attenRateReportTable tr th a{ text-decoration: none; color: #1e293b; }
-                                .table.attenRateReportTable tr th.amountHeading, .table.attenRateReportTable tr td.amountColumn{width: 90px; text-align: center;}
-                                .attenRateReportTable.table {border-collapse: separate;}
-                                .attenRateReportTable.table tr th, .attenRateReportTable.table tr td{border-spacing: 3px;}
-                                .attenRateReportTable.table tr:nth-child(even) td{background: rgba(241, 245, 249, .9);}
-                                .table.attenRateReportTable tfoot tr th.amountHeading{font-size: 14px;}
-                                .table.attenRateReportTable thead tr td.serialHeading, .table.attenRateReportTable tbody tr td.serialColumn{width: 30px;}
-
-                                .invInfoTable{margin-top: 30px; margin-bottom: 50px;}
-                                .invToTable{width: 300px;}
-                                .invToTable.payInfoTable{margin-top: 30px;}
-                                .invInfoTableRight{width: 200px; vertical-align: top;}
-                                .invInfoTableRight .invToTable{width: 100%;}
-                                .invToLabel{ font-size: 12px; font-weight: bold; text-transform: uppercase; color: #0d9488; line-height: 1; padding-bottom: 10px;}
-                                .invToName{ font-size: 18px; font-weight: bold; text-transform: capitalize; line-height: 1; padding-bottom: 2px;}
-                                .invToOrg{ font-size: 13px; line-height: 1; padding-bottom: 7px;}
-                                .invInfoRow td{ vertical-align: top; font-size: 13px; line-height: 16px; padding-bottom: 5px;}
-                                .invInfoRow td:first-child{ width: 80px;}
-                                .invInfoRow td.addressCol{ width: 220px; line-height: 16px;}
-                            </style>';
-            $PDFHTML .= '</head>';
-
-            $PDFHTML .= '<body>';
-                $PDFHTML .= '<header>';
-                    $PDFHTML .= '<table class="headerTable">';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<td class="text-left"><img src="https://sms.londonchurchillcollege.ac.uk/sms_new_copy_2/uploads/LCC_LOGO_01_263_100.png" alt="London Churchill College"/></td>';
-                            $PDFHTML .= '<td class="headerRightCol">';
-                                
-                            $PDFHTML .= '</td>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</table>';
-                $PDFHTML .= '</header>';
-
-                $PDFHTML .= '<table class="invInfoTable">';
-                    $PDFHTML .= '<tr>';
-                        $PDFHTML .= '<td class="invInfoTableLeft">';
-                            $PDFHTML .= '<table class="invToTable">';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Remit To</td></tr>';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToName">'.(isset($comission->agent->organization) && !empty($comission->agent->organization) ? $comission->agent->organization : '').'</td></tr>';
-                                //$PDFHTML .= '<tr><td colspan="2" class="invToOrg">'.(isset($comission->agent->organization) && !empty($comission->agent->organization) ? $comission->agent->organization : '').'</td></tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td colspan="2">'.(isset($comission->agent->email) && !empty($comission->agent->email) ? $comission->agent->email : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                                if(isset($comission->agent->address->full_address_pdf) && !empty($comission->agent->address->full_address_pdf)):
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Address</td>';
-                                    $PDFHTML .= '<td class="addressCol">'.$comission->agent->address->full_address_pdf.'</td>';
-                                $PDFHTML .= '</tr>';
-                                endif;
-                            $PDFHTML .= '</table>';
-
-                            $PDFHTML .= '<table class="invToTable payInfoTable">';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Payment Information</td></tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Sort Code</td>';
-                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->sort_code) && !empty($comission->agent->bank->sort_code) ? $comission->agent->bank->sort_code : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Account No</td>';
-                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->ac_no) && !empty($comission->agent->bank->ac_no) ? $comission->agent->bank->ac_no : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Beneficiary</td>';
-                                    $PDFHTML .= '<td class="text-left">'.(isset($comission->agent->bank->beneficiary) && !empty($comission->agent->bank->beneficiary) ? $comission->agent->bank->beneficiary : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                            $PDFHTML .= '</table>';
-
-                        $PDFHTML .= '</td>';
-                        $PDFHTML .= '<td class="invInfoTableRight text-right" style="vertical-align: top;">';
-                            $PDFHTML .= '<table class="invToTable">';
-                                $PDFHTML .= '<tr><td colspan="2" class="invToLabel">Remit Report</td></tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Reference</td>';
-                                    $PDFHTML .= '<td class="text-right">'.(!empty($remittanceRef) ? '#'.$remittanceRef : '---').'</td>';
-                                $PDFHTML .= '</tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Date</td>';
-                                    $PDFHTML .= '<td class="text-right">'.(isset($comission->entry_date) && !empty($comission->entry_date) ? date('jS M, Y', strtotime($comission->entry_date)) : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>Semester</td>';
-                                    $PDFHTML .= '<td class="text-right">'.(isset($comission->semester->name) && !empty($comission->semester->name) ? $comission->semester->name : '').'</td>';
-                                $PDFHTML .= '</tr>';
-                                $PDFHTML .= '<tr class="invInfoRow">';
-                                    $PDFHTML .= '<td>No of Student</td>';
-                                    $PDFHTML .= '<td class="text-right">'.(!empty($comission_details) && $comission_details->count() > 0 ? $comission_details->count() : 0).'</td>';
-                                $PDFHTML .= '</tr>';
-                            $PDFHTML .= '</table>';
-
-                            
-                        $PDFHTML .= '</td>';
-                    $PDFHTML .= '</tr>';
-                $PDFHTML .= '</table>';
-
-                
-
-                $PDFHTML .= '<table class="table attenRateReportTable table-sm" id="continuationListTable">';
-                    $PDFHTML .= '<thead>';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th class="serialHeading">SL</th>';
-                            $PDFHTML .= '<th>Reference</th>';
-                            $PDFHTML .= '<th>Name</th>';
-                            $PDFHTML .= '<th class="amountHeading">Amount</th>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</thead>';
-                    $PDFHTML .= '<tbody>';
-                    if($comission_details->count() > 0):
-                        $sl = 1;
-                        foreach($comission_details as $list):
-                            $comissionFor = (isset($list->comission_for) && !empty($list->comission_for) ? $list->comission_for : 'Course Fee');
-                            $receiptAmount = (isset($list->receipt->amount) && $list->receipt->amount > 0 ? ($comissionFor == 'Refund' ? abs($list->receipt->amount) * -1 : $list->receipt->amount) : 0);
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="serialColumn">'.$sl.'</td>';
-                                $PDFHTML .= '<td style="font-weight: bold; font-size: 12px;">';
-                                    $PDFHTML .= (isset($list->student->application_no) ? $list->student->application_no : '');
-                                    $PDFHTML .= (isset($list->student->registration_no) ? '<br/><span style="display: block; padding-top: 3px; font-weight: normal; font-size: 11px; color: #64748b;">'.$list->student->registration_no.'</span>' : '');
-                                $PDFHTML .= '</td>';
-                                $PDFHTML .= '<td>';
-                                    $PDFHTML .= (isset($list->student->full_name) ? $list->student->full_name : $list->student->full_name);
-                                    $PDFHTML .= (isset($list->student->activeCR->creation->course->name) && !empty($list->student->activeCR->creation->course->name) ? '<span style="display: block; padding-top: 3px; font-weight: normal; font-size: 11px; color: #64748b;">'.$list->student->activeCR->creation->course->name.'</span>' : '');
-                                $PDFHTML .= '</td>';
-                                $PDFHTML .= '<td class="amountColumn" style="'.($list->amount < 0 ? 'color: red;' : '').'">'.Number::currency($list->amount, in: 'GBP').'</td>';
-                            $PDFHTML .= '</tr>';
-                            $sl++;
-                        endforeach;
-                    endif;
-                    $PDFHTML .= '</tbody>';
-                    $PDFHTML .= '<tfoot>';
-                        $PDFHTML .= '<tr>';
-                            $PDFHTML .= '<th colspan="3">Total</th>';
-                            $PDFHTML .= '<th class="amountHeading">'.Number::currency($comission->comissions->sum('amount'), in: 'GBP').'</th>';
-                        $PDFHTML .= '</tr>';
-                    $PDFHTML .= '</tfoot>';
-                $PDFHTML .= '</table>';
-            $PDFHTML .= '</body>';
-        $PDFHTML .= '</html>';
-
-        $fileName = str_replace(' ', '_', $report_title).'.pdf';
-        $pdf = PDF::loadHTML($PDFHTML)->setOption(['isRemoteEnabled' => true])
-            ->setPaper('a4', 'portrait')//landscape portrait
+        $pdf = PDF::loadView('pages.agent.management.pdf.remittance-report', [
+                'reportTitle' => $report_title,
+                'logoSrc' => $logoSrc,
+                'comission' => $comission,
+                'comissionDetails' => $comissionDetails,
+                'agentBank' => $agentBank,
+                'remittanceRef' => $remittanceRef,
+                'generatedDate' => $generatedDate,
+                'semesterName' => $semesterName,
+                'statusLabel' => $statusLabel,
+                'statusTone' => $statusTone,
+                'ruleModeLabel' => $ruleModeLabel,
+                'ruleValueLabel' => $ruleValueLabel,
+                'rulePeriodLabel' => $rulePeriodLabel,
+                'rulePaymentLabel' => $rulePaymentLabel,
+                'totalAmount' => $totalAmount,
+            ])
+            ->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])
+            ->setPaper('a4', 'portrait')
             ->setWarnings(false);
         return $pdf->download($fileName);
     }
@@ -1309,6 +1384,7 @@ class AgentManagementController extends Controller
     public function payments(){
         return view('pages.agent.management.payments', [
             'title' => 'Agent Management - London Churchill College',
+            'layout' => 'agent-management-top-menu',
             'breadcrumbs' => [
                 ['label' => 'Agent', 'href' => route('agent-user.index')],
                 ['label' => 'Management', 'href' => 'javascript:void(0);'],
@@ -1388,24 +1464,50 @@ class AgentManagementController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
 
+    /**
+     * Transaction picker for the Linked Transaction modal.
+     *
+     * Returns rows rather than ready-made markup: the modal decorates each
+     * result with whether its amount matches the remittance total, which only
+     * the page knows. "TC0" used to match several thousand transactions and
+     * every one of them was rendered into the dropdown, so the list is capped
+     * and the response says how many were left out.
+     */
     public function searchTransactions(Request $request){
         $SearchVal = (isset($request->SearchVal) && !empty($request->SearchVal) ? trim($request->SearchVal) : '');
-        $html = '';
-        $Query = AccTransaction::where('transaction_code', 'LIKE', '%'.$SearchVal.'%')->whereDoesntHave('agentPayment')->orderBy('transaction_date_2', 'DESC')->get();
-        
-        if($Query->count() > 0):
-            foreach($Query as $qr):
-                $html .= '<li>';
-                    $html .= '<a href="'.$qr->transaction_code.'" data-id="'.$qr->id.'" data-amount="'.$qr->transaction_amount.'" class="dropdown-item">'.$qr->transaction_code.'</a>';
-                $html .= '</li>';
-            endforeach;
-        else:
-            $html .= '<li>';
-                $html .= '<a href="javascript:void(0);" class="dropdown-item">No Match found or Transaction already linked.</a>';
-            $html .= '</li>';
-        endif;
+        $limit = 25;
 
-        return response()->json(['htm' => $html], 200);
+        $query = AccTransaction::with('bank')
+            ->where('transaction_code', 'LIKE', '%'.$SearchVal.'%')
+            ->whereDoesntHave('agentPayment')
+            ->orderBy('transaction_date_2', 'DESC');
+
+        $total = (clone $query)->reorder()->count();
+
+        $rows = $query->take($limit)->get()->map(function($tr){
+            // `detail` carries the payer, `description` the note; either helps
+            // tell two same-value transactions apart.
+            $detail = trim((string) $tr->detail);
+            if($detail === ''):
+                $detail = trim((string) $tr->description, " -\t\n\r\0\x0B");
+            endif;
+
+            return [
+                'id' => $tr->id,
+                'code' => $tr->transaction_code,
+                'amount' => (float) $tr->transaction_amount,
+                'amount_label' => '£'.number_format((float) $tr->transaction_amount, 2),
+                'date' => !empty($tr->transaction_date_2) ? date('d M Y', strtotime($tr->transaction_date_2)) : '',
+                'bank' => (isset($tr->bank->name) ? $tr->bank->name : ''),
+                'detail' => $detail,
+            ];
+        })->values();
+
+        return response()->json([
+            'rows' => $rows,
+            'total' => $total,
+            'shown' => $rows->count(),
+        ], 200);
     }
 
     public function linkedTransaction(RemittanceLinkedRequest $request){

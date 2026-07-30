@@ -44,10 +44,15 @@ class PlanTreeController extends Controller
             $yearPush[] = $year->academic_year_id;
         endforeach;       
         return view('pages.course-management.plan.tree.index', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plan - Tree View',
+            'cmPageTitle' => 'Class Plan — Tree View',
+            'cmBackUrl' => route('class.plan'),
+            'cmBackLabel' => 'Back to Class Plans',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Tree', 'href' => 'javascript:void(0);']
             ],
@@ -75,24 +80,26 @@ class PlanTreeController extends Controller
                 ->get();
 
         $html = '';
-        if(!empty($Query)):
-            $html .= '<ul class="theChild">';
+        if(!empty($Query) && count($Query) > 0):
+            $html .= '<ul class="cm-tree__child">';
             foreach($Query as $list):
                 $TermDeclaration = TermDeclaration::find($list->id);
                 $visibility = $this->getTermVisibility($academicYear, $list->id);
 
-                $html .= '<li class="hasChildren relative">';
-                    $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYear.'" data-attendanceSemester="'.$list->id.'" class="theTerm flex items-center text-primary font-medium">'.$TermDeclaration->name.' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
-                    $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
-                        $html .= '<button data-yearid="'.$academicYear.'" data-attendanceSemester="'.$list->id.'" data-courseid="" data-groupid="" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
+                $html .= '<li class="cm-tree__item">';
+                    $html .= '<div class="cm-tree__line">';
+                    $html .= '<button type="button" data-yearid="'.$academicYear.'" data-attendanceSemester="'.$list->id.'" class="cm-tree__row theTerm" data-cm-level="1">';
+                        $html .= '<span class="cm-tree__mark" data-cm-mark>+</span>';
+                        $html .= '<span class="cm-tree__label">'.e($TermDeclaration->name).'</span>';
+                        $html .= '<span class="cm-tree__spin" data-cm-tree-spin hidden></span>';
+                    $html .= '</button>';
+                    $html .= $this->treeToolsHtml($academicYear, $list->id, '', '', $visibility, false);
                     $html .= '</div>';
                 $html .= '</li>';
             endforeach;
             $html .= '</ul>';
         else:
-            $html .= '<ul class="errorUL theChild">';
-                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Terms not foudn!</div></li>';
-            $html .= '</ul>';
+            $html .= $this->treeEmptyHtml('No terms found for this year.');
         endif;
 
         return response()->json(['htm' => $html], 200);
@@ -111,22 +118,24 @@ class PlanTreeController extends Controller
 
         $html = '';
         if(!$Query->isEmpty()):
-            $html .= '<ul class="theChild">';
-
+            $html .= '<ul class="cm-tree__child">';
             foreach($Query as $list):
                 $visibility = $this->getCourseVisibility($academicYearId, $attendanceSemester, $list->id);
-                $html .= '<li class="hasChildren courseItems">';
-                    $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$attendanceSemester.'" data-courseid="'.$list->id.'" class="theCourse flex items-start text-primary font-medium">'.$list->name.' <i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
-                    $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
-                        $html .= '<button data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$attendanceSemester.'" data-courseid="'.$list->id.'" data-groupid="" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
+
+                $html .= '<li class="cm-tree__item">';
+                    $html .= '<div class="cm-tree__line">';
+                    $html .= '<button type="button" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$attendanceSemester.'" data-courseid="'.$list->id.'" class="cm-tree__row theCourse" data-cm-level="2">';
+                        $html .= '<span class="cm-tree__mark" data-cm-mark>+</span>';
+                        $html .= '<span class="cm-tree__label">'.e($list->name).'</span>';
+                        $html .= '<span class="cm-tree__spin" data-cm-tree-spin hidden></span>';
+                    $html .= '</button>';
+                    $html .= $this->treeToolsHtml($academicYearId, $attendanceSemester, $list->id, '', $visibility, false);
                     $html .= '</div>';
                 $html .= '</li>';
             endforeach;
             $html .= '</ul>';
         else:
-            $html .= '<ul class="errorUL theChild">';
-                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Course not foudn!</div></li>';
-            $html .= '</ul>';
+            $html .= $this->treeEmptyHtml('No courses found for this term.');
         endif;
 
         return response()->json(['htm' => $html], 200);
@@ -152,43 +161,85 @@ class PlanTreeController extends Controller
 
         $html = '';
         if(!$query->isEmpty()):
-            $html .= '<ul class="theChild" data-total-group="'.count($query).'">';
+            $html .= '<ul class="cm-tree__child" data-total-group="'.count($query).'">';
                 foreach($query as $list):
-                    $groupName = $list->name;
-                    $theGroup = Group::where('name', $groupName)->where('course_id', $courseId)->where('term_declaration_id', $termDeclaredId)->orderBy('id', 'DESC')->get()->first();
+                    $theGroup = Group::where('name', $list->name)->where('course_id', $courseId)
+                        ->where('term_declaration_id', $termDeclaredId)->orderBy('id', 'DESC')->get()->first();
+                    if (empty($theGroup)) {
+                        continue;
+                    }
                     $visibility = $this->getGroupVisibility($academicYearId, $termDeclaredId, $courseId, $theGroup->id);
-                    
-                    $html .= '<li class="hasChildren">';/*($theGroup->evening_and_weekend ? " - [ Eve/Week ]" : "")*/
-                        $html .= '<a href="javascript:void(0);" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="theGroup flex items-center font-medium '.($theGroup->evening_and_weekend == 1 ? 'text-primary' : 'text-amber-600').'">'.$theGroup->name.($theGroup->evening_and_weekend == 1 ? '<span class="tooltip" title="Evening & Weekend"><i data-lucide="sunset" class="w-4 h-4 ml-2"></i></span>' : '<span class="tooltip" title="Weekdays"><i data-lucide="sun" class="w-4 h-4 ml-2"></i></span>').'<i data-loading-icon="oval" class="w-4 h-4 ml-2"></i></a>';
-                        $html .= '<div class="settingBtns flex justify-end items-center absolute">';  
-                            $html .= '<button data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" data-visibility="'.($visibility == 1 ? 0 : 1).'" class="p-0 border-0 rounded-0 text-slate-500 inline-flex visibilityBtn mr-2 visibility_'.$visibility.'"><i class="w-4 h-4" data-lucide="eye"></i></button>';
-                            $html .= '<div class="dropdown">';
-                                $html .= '<button class="dropdown-toggle p-0 border-0 rounded-0 text-slate-500" aria-expanded="false" data-tw-toggle="dropdown"><i data-lucide="settings" class="w-4 h4"></i></button>';
-                                $html .= '<div class="dropdown-menu w-48">';
-                                    $html .= '<ul class="dropdown-content">';
-                                        $html .= '<li>';
-                                            $html .= '<a data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" href="javascript:void(0);" class="dropdown-item assignManager">';
-                                                $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Assign Manager';
-                                            $html .= '</a>';
-                                        $html .= '</li>';
-                                        $html .= '<li>';
-                                            $html .= '<a data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" href="javascript:void(0);" class="dropdown-item assignCoOrdinator">';
-                                                $html .= '<i data-lucide="user-plus-2" class="w-4 h-4 mr-2"></i> Audit User';
-                                            $html .= '</a>';
-                                        $html .= '</li>';
-                                    $html .= '</ul>';
-                                $html .= '</div>';
-                            $html .= '</div>';
-                        $html .= '</div>';
+                    $evening = ((int) $theGroup->evening_and_weekend === 1);
+
+                    $html .= '<li class="cm-tree__item">';
+                    $html .= '<div class="cm-tree__line cm-tree__line--leaf">';
+                        $html .= '<button type="button" data-yearid="'.$academicYearId.'" data-attendanceSemester="'.$termDeclaredId.'" data-courseid="'.$courseId.'" data-groupid="'.$theGroup->id.'" class="cm-tree__row cm-tree__row--leaf theGroup" data-cm-level="3">';
+                            $html .= '<span class="cm-tree__mark cm-tree__mark--leaf" data-cm-mark>';
+                                $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>';
+                            $html .= '</span>';
+                            $html .= '<span class="cm-tree__label">'.e($theGroup->name).'</span>';
+                            // Evening groups run outside the normal week, which
+                            // changes who can be assigned to them.
+                            $html .= '<span class="cm-tree__eve '.($evening ? 'is-eve' : '').'" title="'.($evening ? 'Evening &amp; weekend' : 'Weekdays').'">';
+                                $html .= ($evening
+                                    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M16 5l-4 4-4-4"></path></svg>'
+                                    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path></svg>');
+                            $html .= '</span>';
+                            $html .= '<span class="cm-tree__spin" data-cm-tree-spin hidden></span>';
+                        $html .= '</button>';
+                        $html .= $this->treeToolsHtml($academicYearId, $termDeclaredId, $courseId, $theGroup->id, $visibility, true);
+                    $html .= '</div>';
                     $html .= '</li>';
                 endforeach;
             $html .= '</ul>';
         else:
-            $html .= '<ul class="errorUL theChild">';
-                $html .= '<li><div class="alert alert-pending-soft show flex items-center mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> Group not foudn!</div></li>';
-            $html .= '</ul>';
+            $html .= $this->treeEmptyHtml('No groups found for this course.');
         endif;
+
         return response()->json(['htm' => $html], 200);
+    }
+
+    /** The empty state a tree level falls back to. */
+    private function treeEmptyHtml($message)
+    {
+        return '<ul class="cm-tree__child"><li class="cm-tree__empty">'.e($message).'</li></ul>';
+    }
+
+    /**
+     * The visibility toggle every level carries, plus the settings menu that
+     * only groups get (Assign Manager / Audit User).
+     *
+     * `visibility_1` / `visibility_0` stay on the button: the class is what
+     * `updateVisibility` and the client both read to know the current state.
+     */
+    private function treeToolsHtml($year, $term, $course, $group, $visibility, $withMenu)
+    {
+        $on = ((int) $visibility === 1);
+        $attrs = 'data-yearid="'.$year.'" data-attendanceSemester="'.$term.'" data-courseid="'.$course.'" data-groupid="'.$group.'"';
+
+        $html = '<span class="cm-tree__tools">';
+            $html .= '<button type="button" '.$attrs.' data-visibility="'.($on ? 0 : 1).'" title="'.($on ? 'Visible to students' : 'Hidden from students').'" class="cm-tree__tool visibilityBtn visibility_'.((int) $visibility).'">';
+                $html .= ($on
+                    ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+                    : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18 18 0 0 1-2.16 3.19M6.61 6.61A18 18 0 0 0 2 12s3 8 10 8a9 9 0 0 0 5.39-1.61M2 2l20 20M14.12 14.12a3 3 0 1 1-4.24-4.24"></path></svg>');
+            $html .= '</button>';
+
+            if ($withMenu) {
+                $html .= '<span class="dropdown">';
+                    $html .= '<button type="button" class="dropdown-toggle cm-tree__tool" aria-expanded="false" data-tw-toggle="dropdown" title="Group settings">';
+                        $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
+                    $html .= '</button>';
+                    $html .= '<span class="dropdown-menu cm-treemenu">';
+                        $html .= '<ul class="dropdown-content">';
+                            $html .= '<li><a href="javascript:void(0);" '.$attrs.' class="dropdown-item assignManager"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>Assign Manager</a></li>';
+                            $html .= '<li><a href="javascript:void(0);" '.$attrs.' class="dropdown-item assignCoOrdinator"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle><path d="M16 11l2 2 4-4"></path></svg>Audit User</a></li>';
+                        $html .= '</ul>';
+                    $html .= '</span>';
+                $html .= '</span>';
+            }
+        $html .= '</span>';
+
+        return $html;
     }
 
     public function getModule(Request $request) {
@@ -209,76 +260,65 @@ class PlanTreeController extends Controller
         $plans = Plan::where('course_id', $courseId)->where('term_declaration_id', $termDeclaredData)->where('academic_year_id', $academicYearId)
                         ->whereIn('group_id', $sameNameGroupIds)->get();
         
-        $html = '';
-        $html .= '<div class="grid grid-cols-12 gap-4 mb-3">';
-            $html .= '<div class="col-span-12 sm:col-span-4">';
-                $html .= '<div class="grid grid-cols-12 gap-0">';
-                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Term</div>';
-                    $html .= '<div class="col-span-8 font-medium">'.$termDeclaraion->name."-".$termDeclaraion->termType->name.'</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-12 sm:col-span-4">';
-                $html .= '<div class="grid grid-cols-12 gap-0">';
-                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Course</div>';
-                    $html .= '<div class="col-span-8 font-medium">'.$course->name.'</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-12 sm:col-span-4">';
-                $html .= '<div class="grid grid-cols-12 gap-0">';
-                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Group</div>';
-                    $html .= '<div class="col-span-8 font-medium">'.$group->name.'</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-            $html .= '<div class="col-span-12 sm:col-span-4">';
-                $html .= '<div class="grid grid-cols-12 gap-0 items-center">';
-                    $html .= '<div class="col-span-4 text-slate-500 font-medium">Evening & Weekend</div>';
-                    $html .= '<div class="col-span-8 font-medium">';
-                        $html .= ($group->evening_and_weekend == 1 ? '<span class="font-medium text-primary inline-flex justify-start items-center tooltip" title="Evening & Weekends">Yes<i data-lucide="sunset" class="w-6 h-6 ml-2"></i></span>' : '<span class="font-medium text-amber-600 inline-flex justify-start items-center tooltip" title="Weekdays">No<i data-lucide="sun" class="w-6 h-6 ml-2"></i></span>' );
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-        $html .= '</div>';
+        $meta = [
+            ['Term', ($termDeclaraion->name ?? '').' · '.($termDeclaraion->termType->name ?? ''), 'calendar'],
+            ['Course', $course->name ?? '', 'book'],
+            ['Group', $group->name ?? '', 'users'],
+            ['Evening & Weekend', ((int) $group->evening_and_weekend === 1 ? 'Yes' : 'No'), 'alert'],
+        ];
 
-        if($plans->count() > 0):
-            $html .= '<div class="grid grid-cols-12 gap-0 gap-x-4">';
-                $html .= '<div class="col-span-3"></div>';
-                $html .= '<div class="col-span-9 text-right">';
-                    $html .= '<div class="flex mt-5 sm:mt-0 justify-end">';
-                        
-                        $html .= '<button id="generateDaysBtn" style="display: none;" type="button" class="btn btn-primary shadow-md mr-2 w-auto">
-                            Generate Days
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>';
-                        $html .= '<button type="button" id="bulkCommunication"  style="display: none;" class="btn btn-facebook shadow-md mr-2 w-auto text-white">Bulk Communication</button>';
-                        $html .= '<a href="'.route('assign', [$academicYearId, $termDeclaredData, $courseId, $group->id]).'" id="assignStudent" class="btn btn-success shadow-md mr-2 w-auto text-white"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Assign / Deassignned Students</a>';
-                    $html .= '</div>';
+        $icons = [
+            'calendar' => '<path d="M8 2v4M16 2v4M3 10h18"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect>',
+            'book' => '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>',
+            'users' => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>',
+            'alert' => '<circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path>',
+        ];
+
+        $html = '<div class="cm-card cm-treepanel">';
+            $html .= '<div class="cm-treepanel__head">';
+                $html .= '<div class="cm-treepanel__meta">';
+                    foreach ($meta as $m):
+                        $html .= '<div class="cm-meta">';
+                            $html .= '<span class="cm-meta__icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'.$icons[$m[2]].'</svg></span>';
+                            $html .= '<div style="min-width:0;">';
+                                $html .= '<div class="cm-meta__label">'.e($m[0]).'</div>';
+                                $html .= '<div class="cm-meta__value">'.(trim($m[1], ' ·') !== '' ? e($m[1]) : '—').'</div>';
+                            $html .= '</div>';
+                        $html .= '</div>';
+                    endforeach;
                 $html .= '</div>';
-            $html .= '</div>';
-            
-            //data-term="'.$term.'"
-            $html .= '<div class="overflow-x-auto scrollbar-hidden">';
-                $html .= '<div id="classPlanTreeListTable" data-course="'.$courseId.'" data-attendanceSemester="'.$termDeclaredData.'" data-group="'.(!empty($sameNameGroupIds) ? implode(',', $sameNameGroupIds) : '0').'" data-year="'.$academicYearId.'" class="mt-5 table-report table-report--tabulator"></div>';
-            $html .= '</div>';
-        else:
-            $html .= '<div class="grid grid-cols-12 gap-4 mt-5">';
-                $html .= '<div class="col-span-12">';
-                    $html .= '<div class="alert alert-danger-soft show flex items-center mb-2" role="alert">';
-                        $html .= '<i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Class plans not found under those selected parameters.';
+
+                if($plans->count() > 0):
+                    $html .= '<div class="cm-treepanel__actions">';
+                        // Both appear only once rows are ticked, as in the design.
+                        $html .= '<button type="button" id="generateDaysBtn" class="cm-btn cm-btn--go" hidden>';
+                            $html .= '<svg style="display:none;" class="cm-spinner" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white"><g fill="none" fill-rule="evenodd"><g transform="translate(1 1)" stroke-width="4"><circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle><path d="M36 18c0-9.94-8.06-18-18-18"><animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform></path></g></g></svg>';
+                            $html .= '<svg data-cm-btn-icon width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"></path><rect x="3" y="4" width="18" height="18" rx="2"></rect></svg>';
+                            $html .= 'Generate Days';
+                        $html .= '</button>';
+                        $html .= '<button type="button" id="bulkCommunication" class="cm-btn cm-btn--bulk" hidden>';
+                            $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>';
+                            $html .= 'Bulk Communication';
+                        $html .= '</button>';
+                        $html .= '<a href="'.route('assign', [$academicYearId, $termDeclaredData, $courseId, $group->id]).'" id="assignStudent" class="cm-btn cm-btn--pill">';
+                            $html .= '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path></svg>';
+                            $html .= 'Assign / Deassign Students';
+                        $html .= '</a>';
                     $html .= '</div>';
-                $html .= '</div>';
+                endif;
             $html .= '</div>';
-        endif;
+
+            if($plans->count() > 0):
+                $html .= '<div class="cm-tabulator-wrap">';
+                    $html .= '<div id="classPlanTreeListTable" class="cm-tabulator" data-course="'.$courseId.'" data-attendanceSemester="'.$termDeclaredData.'" data-group="'.(!empty($sameNameGroupIds) ? implode(',', $sameNameGroupIds) : '0').'" data-year="'.$academicYearId.'"></div>';
+                $html .= '</div>';
+            else:
+                $html .= '<div class="cm-finder__note" style="margin:0 26px 22px;">';
+                    $html .= '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>';
+                    $html .= 'No class plans found for this combination.';
+                $html .= '</div>';
+            endif;
+        $html .= '</div>';
 
         return response()->json(['htm' => $html], 200);
     }
@@ -303,7 +343,8 @@ class PlanTreeController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -415,7 +456,7 @@ class PlanTreeController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function edit($id){
@@ -689,7 +730,8 @@ class PlanTreeController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -720,7 +762,7 @@ class PlanTreeController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function getTheories(Request $request){

@@ -5,131 +5,131 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-5">
-        <h2 class="text-lg font-medium mr-auto">Agent Comission Details</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('agent.management.comission', [$comission->semester_id, $comission->agent_user_id]) }}" class="add_btn btn btn-primary shadow-md">Back to List</a>
-        </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
+    @php
+        $agent = $comission?->agent;
+        $agentName = trim(($agent?->full_name ?? '').(!empty($agent?->organization) ? ' ('.$agent->organization.')' : ''));
+        $agentName = $agentName !== '' ? $agentName : ($comission?->agentuser?->email ?? 'Agent');
+        $agentEmail = $agent?->email ?? ($comission?->agentuser?->email ?? '');
+        $addressHtml = (string) ($agent?->address?->full_address ?? '');
+        $addressValue = trim(preg_replace('/\s+/', ' ', strip_tags(str_replace(['<br>', '<br/>', '<br />'], ', ', $addressHtml))));
+        $studentCount = $comission?->comissions?->count() ?? 0;
+        $remittanceTotal = \Illuminate\Support\Number::currency($comission?->comissions?->sum('amount') ?? 0, in: 'GBP');
+        $paymentStatus = (int) ($comission?->payment?->status ?? 0);
+        $statusLabel = match ($paymentStatus) {
+            1 => 'Scheduled',
+            2 => 'Paid',
+            3 => 'Canceled',
+            default => 'Pending',
+        };
+        $statusTone = match ($paymentStatus) {
+            1 => 'is-scheduled',
+            2 => 'is-paid',
+            3 => 'is-canceled',
+            default => 'is-pending',
+        };
+        $commissionDetails = [
+            ['label' => 'Name', 'value' => $agentName, 'icon' => 'users', 'tone' => 'teal'],
+            ['label' => 'Email', 'value' => $agentEmail, 'icon' => 'mail', 'tone' => 'blue'],
+            ['label' => 'Address', 'value' => $addressValue, 'icon' => 'map-pin', 'tone' => 'red'],
+            ['label' => 'Remittance Ref', 'value' => $comission?->remittance_ref ?? '', 'icon' => 'file-text', 'tone' => 'slate'],
+            ['label' => 'Generate Date', 'value' => !empty($comission?->entry_date) ? date('jS F, Y', strtotime($comission->entry_date)) : '', 'icon' => 'calendar-days', 'tone' => 'purple'],
+            ['label' => 'Intake Semester', 'value' => $comission?->semester?->name ?? '', 'icon' => 'graduation-cap', 'tone' => 'gold'],
+            ['label' => 'Remittance Total', 'value' => $remittanceTotal, 'icon' => 'pound-sterling', 'tone' => 'green', 'emphasis' => true],
+        ];
+    @endphp
 
-    <div class="intro-y box mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center p-5">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Details</div>
+    <div class="agm-page agm-commission-page agm-commission-detail-page">
+        <section class="agm-commission-hero agm-commission-hero--remittance">
+            <div class="agm-commission-hero__copy">
+                <span class="agm-commission-hero__icon">
+                    <i data-lucide="file-text"></i>
+                </span>
+                <div>
+                    <span class="agm-eyebrow">Remittance {{ $comission?->remittance_ref ?? '' }}</span>
+                    <h1>Agent Commission Details</h1>
+                    <p>Per-student breakdown of this remittance payout</p>
+                </div>
             </div>
-            <div class="col-span-6 text-right"></div>
-        </div>
-        <div class="border-t border-slate-200/60 dark:border-darkmode-400"></div>
-        <div class="p-5">
-            <div class="grid grid-cols-12 gap-4"> 
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Name</div>
-                        <div class="col-span-8 font-medium">
-                            {{ (isset($comission->agent->full_name) && !empty($comission->agent->full_name) ? $comission->agent->full_name : '') }}
-                            {{ (isset($comission->agent->organization) && !empty($comission->agent->organization) ? ' ('.$comission->agent->organization.')' : '') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Email</div>
-                        <div class="col-span-8 font-medium">{{ (isset($comission->agent->email) && !empty($comission->agent->email) ? $comission->agent->email : '') }}</div>
-                    </div>
-                </div>
-                @if(isset($comission->agent->address_id) && $comission->agent->address_id > 0)
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Address</div>
-                        <div class="col-span-8 font-medium">{!! (isset($comission->agent->address->full_address) && !empty($comission->agent->address->full_address) ? $comission->agent->address->full_address : '') !!}</div>
-                    </div>
-                </div>
-                @else 
-                <div class="col-span-12 sm:col-span-3"></div>
-                @endif
-                <div class="col-span-12 sm:col-span-3"></div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Remittance Ref</div>
-                        <div class="col-span-8 font-medium">
-                            {{ (isset($comission->remittance_ref) && !empty($comission->remittance_ref) ? $comission->remittance_ref : '') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Generate Date</div>
-                        <div class="col-span-8 font-medium">
-                            {{ (isset($comission->entry_date) && !empty($comission->entry_date) ? date('jS F, Y', strtotime($comission->entry_date)) : '') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Intake Semester</div>
-                        <div class="col-span-8 font-medium">
-                            {{ (isset($comission->semester->name) && !empty($comission->semester->name) ? $comission->semester->name : '') }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-span-12 sm:col-span-3">
-                    <div class="grid grid-cols-12 gap-0">
-                        <div class="col-span-4 text-slate-500 font-medium">Remittance Total</div>
-                        <div class="col-span-8 font-bold">
-                            {{ Number::currency($comission->comissions->sum('amount'), in: 'GBP') }}
-                        </div>
-                    </div>
-                </div>
-                
+
+            <a href="{{ route('agent.management.comission', [$comission->semester_id, $comission->agent_user_id]) }}" class="agm-btn agm-btn--dark">
+                <i data-lucide="arrow-left"></i>
+                <span>Back to List</span>
+            </a>
+        </section>
+
+        <section class="agm-commission-details agm-commission-remittance-details">
+            <div class="agm-commission-card__head">
+                <span></span>
+                <strong>Details</strong>
+                <b class="agm-commission-payment-pill {{ $statusTone }}">{{ $statusLabel }}</b>
             </div>
-        </div>
+
+            <div class="agm-commission-details__grid agm-commission-remittance-details__grid">
+                @foreach($commissionDetails as $detail)
+                    <div class="agm-commission-detail agm-commission-remittance-detail {{ !empty($detail['emphasis']) ? 'agm-commission-remittance-detail--emphasis' : '' }}">
+                        <span class="agm-commission-detail__icon is-{{ $detail['tone'] }}">
+                            <i data-lucide="{{ $detail['icon'] }}"></i>
+                        </span>
+                        <div>
+                            <small>{{ $detail['label'] }}</small>
+                            <strong>{{ $detail['value'] !== '' ? $detail['value'] : 'Not set' }}</strong>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        <section class="agm-commission-card agm-commission-remittance-students">
+            <div class="agm-commission-students-head">
+                <div class="agm-commission-students-head__title">
+                    <span></span>
+                    <strong>Students in this remittance</strong>
+                    <b id="comissionStudentCount">{{ $studentCount }}</b>
+                </div>
+
+                <a href="{{ route('agent.management.remittance.export', $comission->id) }}" class="agm-btn agm-btn--export">
+                    <i data-lucide="download"></i>
+                    <span>Export</span>
+                </a>
+            </div>
+
+            <div class="agm-commission-table-wrap agm-commission-remittance-table-wrap">
+                <div id="agentComissionDetailsListTable"
+                     data-comission="{{ $comission->id }}"
+                     data-total="{{ $remittanceTotal }}"
+                     class="agm-commission-table agm-commission-remittance-table"></div>
+            </div>
+        </section>
     </div>
-    <div class="intro-y box p-5 mt-5">
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="agentComissionDetailsListTable" data-comission="{{ $comission->id }}" class="mt-5 table-report table-report--tabulator"></div>
-        </div>
-    </div>
-    <!-- END: HTML Table Data -->
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
+
+    <div id="successModal" class="modal agm-commission-feedback-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
+                <div class="modal-body">
+                    <i data-lucide="check-circle"></i>
+                    <h2 class="successModalTitle"></h2>
+                    <p class="successModalDesc"></p>
+                    <button type="button" data-tw-dismiss="modal" class="agm-btn agm-btn--primary">Ok</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="confirmModal" class="modal agm-commission-feedback-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
+                <div class="modal-body">
+                    <i data-lucide="x-circle"></i>
+                    <h2 class="confModTitle">Are you sure?</h2>
+                    <p class="confModDesc"></p>
+                    <div class="agm-commission-feedback-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="agm-btn agm-btn--muted">No, Cancel</button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWith agm-btn agm-btn--danger">Yes, I agree</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Delete Confirm Modal Content -->
 @endsection
 
 @section('script')

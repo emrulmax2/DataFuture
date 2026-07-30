@@ -5,87 +5,117 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-5">
-        <h2 class="text-lg font-medium mr-auto">Remittance Payments</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <a href="{{ route('agent.management.remittance') }}" class="btn btn-facebook shadow-md text-white mr-1"><i data-lucide="badge-pound-sterling" class="w-4 h-4 mr-2"></i> Remittance</a>
-            <a href="{{ route('agent.management') }}" class="add_btn btn btn-success shadow-md text-white"><i data-lucide="user-cog" class="w-4 h-4 mr-2"></i> Agent Management</a>
-        </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
+    <div class="agm-page agm-remittance-page agm-payments-page">
+        <section class="agm-remittance-hero agm-payments-hero">
+            <div class="agm-remittance-hero__copy">
+                <span class="agm-remittance-hero__icon">
+                    <i data-lucide="credit-card"></i>
+                </span>
+                <div>
+                    <span class="agm-eyebrow">Settlements</span>
+                    <h1>Remittance Payments</h1>
+                    <p>Scheduled payments and their linked bank transactions</p>
+                </div>
+            </div>
 
-    <div class="intro-y box p-5 mt-5">
-        <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-            <form id="tabulatorFilterForm" class="xl:flex sm:mr-auto" >
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                    <input id="query" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                </div>
-                <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                    <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                    <select id="status" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                        <option value="1">Scheduled</option>
-                        <option value="2">Paid</option>
-                        <option value="3">Canceled</option>
-                    </select>
-                </div>
-                <div class="mt-2 xl:mt-0">
-                    <button id="tabulator-html-filter-go" type="button" class="btn btn-primary w-full sm:w-auto" >
-                        Go 
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2 theLoader">
+            <div class="agm-remittance-hero__actions">
+                <a href="{{ route('agent.management.remittance') }}" class="agm-btn agm-btn--cream agm-remittance-action-btn">
+                    <span class="agm-btn__icon-chip agm-btn__icon-chip--blue">
+                        <i data-lucide="badge-pound-sterling"></i>
+                    </span>
+                    Remittance
+                </a>
+                <a href="{{ route('agent.management') }}" class="agm-btn agm-btn--dark">
+                    <i data-lucide="user-cog"></i>
+                    Agent Management
+                </a>
+            </div>
+        </section>
+
+        <section class="agm-remittance-card agm-payments-card">
+            <div class="agm-remittance-toolbar">
+                <form id="tabulatorFilterForm" class="agm-remittance-filter">
+                    <div class="agm-remittance-field">
+                        <label for="query">Query</label>
+                        <div class="agm-remittance-search">
+                            <i data-lucide="search"></i>
+                            <input id="query" name="query" type="search" placeholder="Search..." autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="agm-remittance-field">
+                        <label for="status">Status</label>
+                        <div class="agm-remittance-select">
+                            <select id="status" name="status">
+                                <option value="1">Scheduled</option>
+                                <option value="2">Paid</option>
+                                <option value="3">Canceled</option>
+                            </select>
+                            <i data-lucide="chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <button id="tabulator-html-filter-go" type="submit" class="agm-btn agm-btn--primary">
+                        <i data-lucide="search" class="theIcon"></i>
+                        Go
+                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg" stroke="white" class="theLoader">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
                                     <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
                                     <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
+                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
                                     </path>
                                 </g>
                             </g>
                         </svg>
                     </button>
-                    <button id="tabulator-html-filter-reset" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                </div>
-            </form>
-            <div class="flex mt-5 sm:mt-0">
-                <button type="button" id="scheduleRemitPaymentBtn" style="display: none;" class="scheduleRemitPaymentBtn btn btn-linkedin shadow-md text-white"><i data-lucide="calendar-days" class="w-4 h-4 mr-2"></i> Schedule Payment</button>
-            </div>
-        </div>
-        <div class="overflow-x-auto scrollbar-hidden">
-            <div id="agentRemittPaymentsListTable" class="mt-5 table-report table-report--tabulator"></div>
-        </div>
-    </div>
-    <!-- END: HTML Table Data -->
 
-    <!-- BEGIN: Linked Transaction Modal -->
-    <div id="linkTransactionModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+                    <button id="tabulator-html-filter-reset" type="button" class="agm-btn agm-btn--muted">
+                        <i data-lucide="rotate-ccw"></i>
+                        Reset
+                    </button>
+                </form>
+            </div>
+
+            <div class="agm-remittance-table-wrap">
+                <div id="agentRemittPaymentsListTable" class="agm-remittance-table agm-payments-table"></div>
+            </div>
+        </section>
+    </div>
+
+    <div id="linkTransactionModal" class="modal agm-commission-modal agm-payment-link-modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="#" id="linkTransactionForm" enctype="multipart/form-data">
+                @csrf
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Linked Transaction</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;"><i data-lucide="x" class="w-5 h-5 text-slate-400"></i></a>
+                        <h2>Linked Transaction</h2>
+                        <a data-tw-dismiss="modal" href="javascript:;" aria-label="Close">
+                            <i data-lucide="x"></i>
+                        </a>
                     </div>
                     <div class="modal-body">
-                        <div>
+                        <div class="agm-payment-link-field">
                             <label class="form-label">Search Transaction</label>
-                            <div>
-                                <div class="autoCompleteField" data-table="acc_transactions">
-                                    <input type="text" autocomplete="off" id="transaction_code" name="transaction_code" class="form-control transaction_code" value="" placeholder="TC00000"/>
-                                    <input type="hidden" id="transaction_id" name="transaction_id" class="form-control transaction_id" value="" />
-                                    <ul class="autoFillDropdown"></ul>
-                                </div>
+                            <div class="autoCompleteField agm-payment-link-search" data-table="acc_transactions">
+                                <i data-lucide="search"></i>
+                                <input type="text" autocomplete="off" id="transaction_code" name="transaction_code" class="form-control transaction_code" value="" placeholder="Type a transaction ref, e.g. TC0">
+                                <input type="hidden" id="transaction_id" name="transaction_id" class="form-control transaction_id" value="">
+                                <ul class="autoFillDropdown"></ul>
                             </div>
                             <div class="acc__input-error error-transaction_id text-danger mt-2"></div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="linkTransBtn" class="btn btn-primary w-auto">     
-                            Save                    
+                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary">
+                            <i data-lucide="x"></i>
+                            Cancel
+                        </button>
+                        <button type="submit" id="linkTransBtn" class="btn btn-primary">
+                            <i data-lucide="check" class="theIcon"></i>
+                            Save
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                                stroke="white" class="w-4 h-4 ml-2 theLoader">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -104,65 +134,60 @@
             </form>
         </div>
     </div>
-    <!-- END: Linked Transaction Modal -->
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="successModal" class="modal agm-commission-feedback-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
+                <div class="modal-body">
+                    <i data-lucide="check-circle"></i>
+                    <h2 class="successModalTitle"></h2>
+                    <p class="successModalDesc"></p>
+                    <button type="button" data-tw-dismiss="modal" class="agm-btn agm-btn--primary">
+                        <i data-lucide="check"></i>
+                        Ok
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Delete Confirm Modal Content -->
 
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
+    <div id="confirmModal" class="modal agm-commission-feedback-modal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="alert-octagon" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle"></div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+                <div class="modal-body">
+                    <i data-lucide="x-circle"></i>
+                    <h2 class="confModTitle">Are you sure?</h2>
+                    <p class="confModDesc"></p>
+                    <div class="agm-commission-feedback-modal__actions">
+                        <button type="button" data-tw-dismiss="modal" class="agm-btn agm-btn--muted">
+                            <i data-lucide="x"></i>
+                            No, Cancel
+                        </button>
+                        <button type="button" data-id="0" data-action="none" class="agreeWith agm-btn agm-btn--danger">
+                            <i data-lucide="check"></i>
+                            Yes, I agree
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- END: Warning Modal Content -->
+
+    <div id="warningModal" class="modal agm-commission-feedback-modal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <i data-lucide="alert-octagon"></i>
+                    <h2 class="warningModalTitle"></h2>
+                    <p class="warningModalDesc"></p>
+                    <button type="button" data-tw-dismiss="modal" class="agm-btn agm-btn--danger">
+                        <i data-lucide="check"></i>
+                        Ok
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')

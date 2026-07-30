@@ -103,13 +103,15 @@
                             <div class="acc__input-error error-care_leaver_id text-danger mt-2"></div>
                         </div>
                         <div class="col-span-12 sm:col-span-4">
-                            <label for="disability_status" class="form-label">Do you have any disabilities?</label>
-                            <div class="form-check form-switch">
+                            <div class="form-check adm-check-card">
                                 <input {{ isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'checked' : '' }} id="disability_status" class="form-check-input" name="disability_status" value="1" type="checkbox">
-                                <label class="form-check-label" for="disability_status">&nbsp;</label>
+                                <label class="form-check-label" for="disability_status">
+                                    <span class="adm-check-card__title">Do you have any disabilities?</span>
+                                    <span class="adm-check-card__meta">{{ isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'Yes - select all that apply below' : 'No disabilities declared' }}</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-8 disabilityItems" style="display: {{ isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'block' : 'none' }};">
+                        <div class="col-span-12 sm:col-span-8 disabilityItems adm-check-panel" style="display: {{ isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'block' : 'none' }};">
                             <label for="disability_id" class="form-label">Disabilities <span class="text-danger">*</span></label>
                             @php 
                                 $ids = [];
@@ -119,7 +121,7 @@
                             @endphp
                             @if(!empty($disability))
                                 @foreach($disability as $d)
-                                    <div class="form-check {{ !$loop->first ? 'mt-2' : '' }} items-start">
+                                    <div class="form-check adm-check-row {{ !$loop->first ? 'mt-2' : '' }} items-start">
                                         <input {{ (in_array($d->id, $ids) ? 'checked' : '' ) }} id="disabilty_id_{{ $d->id }}" name="disability_id[]" class="form-check-input disability_ids" type="checkbox" value="{{ $d->id }}">
                                         <label class="form-check-label" for="disabilty_id_{{ $d->id }}">{{ $d->name }}</label>
                                     </div>
@@ -127,14 +129,16 @@
                             @endif 
                             <div class="acc__input-error error-disability_id text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4 disabilityAllowance" style="display: {{ !empty($ids) && isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'block' : 'none' }};">
-                            <label for="disability_id" class="form-label">Do You Claim Disabilities Allowance?</label>
-                            <div class="form-check form-switch">
+                        <div class="col-span-12 sm:col-span-6 disabilityAllowance" style="display: {{ !empty($ids) && isset($applicant->other->disability_status) && $applicant->other->disability_status == 1 ? 'block' : 'none' }};">
+                            <div class="form-check adm-check-card">
                                 <input {{ isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? 'checked' : '' }} id="disabilty_allowance" class="form-check-input" name="disabilty_allowance" value="1" type="checkbox">
-                                <label class="form-check-label" for="disabilty_allowance">&nbsp;</label>
+                                <label class="form-check-label" for="disabilty_allowance">
+                                    <span class="adm-check-card__title">Do You Claim Disabilities Allowance?</span>
+                                    <span class="adm-check-card__meta">{{ isset($applicant->other->disabilty_allowance) && $applicant->other->disabilty_allowance == 1 ? 'Claimed' : 'Not claimed' }}</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="col-span-12 sm:col-span-4">
+                        <div class="col-span-12 sm:col-span-4 adm-proof-id-field">
                             <label for="proof_type" class="form-label">Proof of Id Type</label>
                             <select id="proof_type" class="addmissionLccTom lcc-tom-select w-full" name="proof_type">
                                 <option value="">Please Select</option>
@@ -159,7 +163,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="savePD" class="btn btn-primary w-auto">     
                         Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -277,13 +281,37 @@
                                 $address .= '<input type="hidden" name="applicant_address_country" value="'.$country.'"/>';
                             endif;
                         @endphp
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="address_line_1" class="form-label">Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2 {{ !empty($address) ? 'active' : '' }}" id="applicanAddress" style="display: {{ !empty($address) ? 'block' : 'none' }};">{!! $address !!}</div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="applicant" data-address-wrap="#applicanAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ !empty($address) ? 'Update Address' : 'Add Address' }}</span>
-                                </button>
+                        <div class="col-span-12">
+                            <div id="applicantAddressInline" class="grid grid-cols-12 gap-4 theAddressWrap">
+                                <div class="col-span-12">
+                                    <label for="applicant_address_lookup" class="form-label">Address Lookup</label>
+                                    <input type="text" placeholder="Search address here..." id="applicant_address_lookup" class="form-control w-full theAddressLookup" name="applicant_address_lookup">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="applicant_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $address_line_1 }}" placeholder="Address Line 1" id="applicant_address_line_1" class="address_line_1 form-control w-full required" name="applicant_address_line_1">
+                                    <input type="hidden" value="{{ $address_line_1 }}" name="applicant_address" data-address-source="applicant_address_line_1">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="applicant_address_line_2" class="form-label">Address Line 2</label>
+                                    <input type="text" value="{{ $address_line_2 }}" placeholder="Address Line 2 (Optional)" id="applicant_address_line_2" class="address_line_2 form-control w-full" name="applicant_address_line_2">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="applicant_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $city }}" placeholder="City / Town" id="applicant_address_city" class="city form-control w-full required" name="applicant_address_city">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="applicant_address_state" class="form-label">State</label>
+                                    <input type="text" value="{{ $state }}" placeholder="State" id="applicant_address_state" class="state form-control w-full" name="applicant_address_state">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="applicant_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $post_code }}" placeholder="Post Code" id="applicant_address_postal_zip_code" class="postal_code form-control w-full required" name="applicant_address_postal_zip_code">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="applicant_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $country }}" placeholder="Country" id="applicant_address_country" class="country form-control w-full required" name="applicant_address_country">
+                                </div>
                             </div>
                             <div class="acc__input-error error-applicant_address text-danger mt-2"></div>
                         </div>
@@ -293,7 +321,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="saveCD" class="btn btn-primary w-auto">     
                         Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -392,13 +420,37 @@
                                 $address .= '<input type="hidden" name="kin_address_country" value="'.$country.'"/>';
                             endif;
                         @endphp
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="address" class="form-label">Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2 {{ !empty($address) ? 'active' : '' }}" id="kinAddress" style="display: {{ !empty($address) ? 'block' : 'none' }};">{!! $address !!}</div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="kin" data-address-wrap="#kinAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>{{ !empty($address) ? 'Update Address' : 'Add Address' }}</span>
-                                </button>
+                        <div class="col-span-12">
+                            <div id="kinAddressInline" class="grid grid-cols-12 gap-4 theAddressWrap">
+                                <div class="col-span-12">
+                                    <label for="kin_address_lookup" class="form-label">Address Lookup</label>
+                                    <input type="text" placeholder="Search address here..." id="kin_address_lookup" class="form-control w-full theAddressLookup" name="kin_address_lookup">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="kin_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $address_line_1 }}" placeholder="Address Line 1" id="kin_address_line_1" class="address_line_1 form-control w-full required" name="kin_address_line_1">
+                                    <input type="hidden" value="{{ $address_line_1 }}" name="kin_address" data-address-source="kin_address_line_1">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="kin_address_line_2" class="form-label">Address Line 2</label>
+                                    <input type="text" value="{{ $address_line_2 }}" placeholder="Address Line 2 (Optional)" id="kin_address_line_2" class="address_line_2 form-control w-full" name="kin_address_line_2">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="kin_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $city }}" placeholder="City / Town" id="kin_address_city" class="city form-control w-full required" name="kin_address_city">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="kin_address_state" class="form-label">State</label>
+                                    <input type="text" value="{{ $state }}" placeholder="State" id="kin_address_state" class="state form-control w-full" name="kin_address_state">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="kin_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $post_code }}" placeholder="Post Code" id="kin_address_postal_zip_code" class="postal_code form-control w-full required" name="kin_address_postal_zip_code">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="kin_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                                    <input type="text" value="{{ $country }}" placeholder="Country" id="kin_address_country" class="country form-control w-full required" name="kin_address_country">
+                                </div>
                             </div>
                             <div class="acc__input-error error-kin_address text-danger mt-2"></div>
                         </div>
@@ -408,7 +460,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="saveNOK" class="btn btn-primary w-auto">     
                         Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -574,7 +626,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="savePCP" class="btn btn-primary w-auto">     
                         Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -596,82 +648,6 @@
     </div>
 </div>
 <!-- END: Edit Kin Details Modal -->
-
-<!-- BEGIN: Address Modal -->
-<div id="addressModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <form method="POST" action="#" id="addressForm" enctype="multipart/form-data">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Add Address</h2>
-                    <a data-tw-dismiss="modal" href="javascript:;">
-                        <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div id="addressStart" class="grid grid-cols-12 gap-4 theAddressWrap" >
-                        <div class="col-span-12">
-                            <label for="address_lookup" class="form-label">Address Lookup</label>
-                            <input type="text" placeholder="Search address here..." id="address_lookup" class="form-control w-full theAddressLookup" name="address_lookup">
-                        </div>
-                        <div class="col-span-12">
-                            <label for="student_address_address_line_1" class="form-label">Address Line 1 <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Address Line 1" id="student_address_address_line_1" class="address_line_1 form-control w-full required" name="student_address_address_line_1">
-                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12">
-                            <label for="student_address_address_line_2" class="form-label">Address Line 2</label>
-                            <input type="text" placeholder="Address Line 2 (Optional)" id="student_address_address_line_2" class="address_line_2 form-control w-full" name="student_address_address_line_2">
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_city" class="city form-control w-full required" name="student_address_city">
-                            <div class="acc__input-error error-student_address_city text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_state_province_region" class="form-label">State</label>
-                            <input type="text" placeholder="State" id="student_address_state_province_region" class="state form-control w-full" name="student_address_state_province_region">
-                            <div class="acc__input-error error-student_address_state_province_region text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="City / Town" id="student_address_postal_zip_code" class="postal_code form-control w-full required" name="student_address_postal_zip_code">
-                            <div class="acc__input-error error-student_address_postal_zip_code text-danger mt-2"></div>
-                        </div>
-                        <div class="col-span-12 sm:col-span-6">
-                            <label for="student_address_country" class="form-label">Country <span class="text-danger">*</span></label>
-                            <input type="text" placeholder="Country" id="student_address_country" class="country form-control w-full required" name="student_address_country">
-                            <div class="acc__input-error error-student_address_country text-danger mt-2"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                    <button type="submit" id="insertAddress" class="btn btn-primary w-auto">     
-                        Add Address                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                            stroke="white" class="w-4 h-4 ml-2">
-                            <g fill="none" fill-rule="evenodd">
-                                <g transform="translate(1 1)" stroke-width="4">
-                                    <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                    <path d="M36 18c0-9.94-8.06-18-18-18">
-                                        <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                            to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                    </path>
-                                </g>
-                            </g>
-                        </svg>
-                    </button>
-                    <input type="hidden" name="place" value=""/>
-                    <input type="hidden" name="prefix" value=""/>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-<!-- END: Address Modal -->
-
-
 
 <!-- BEGIN: Add Qualification Modal -->
 <div id="addQualificationModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -715,7 +691,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="saveEducationQualification" class="btn btn-primary w-auto">     
                         Save                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -779,7 +755,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="updateEducationQualification" class="btn btn-primary w-auto">     
                         Update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -846,13 +822,37 @@
                             <input type="text" placeholder="MM-YYYY" id="end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2" id="empHistoryAddress" style="display: none;"></div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#empHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
-                                </button>
+                        <div class="col-span-12">
+                            <div id="empHistoryAddressInline" class="grid grid-cols-12 gap-4 theAddressWrap">
+                                <div class="col-span-12">
+                                    <label for="employment_address_lookup" class="form-label">Organization Address Lookup</label>
+                                    <input type="text" placeholder="Search address here..." id="employment_address_lookup" class="form-control w-full theAddressLookup" name="employment_address_lookup">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="employment_address_line_1" class="form-label">Organization Address Line 1 <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Address Line 1" id="employment_address_line_1" class="address_line_1 form-control w-full required" name="employment_address_line_1">
+                                    <input type="hidden" value="" name="employment_address" data-address-source="employment_address_line_1">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="employment_address_line_2" class="form-label">Organization Address Line 2</label>
+                                    <input type="text" placeholder="Address Line 2 (Optional)" id="employment_address_line_2" class="address_line_2 form-control w-full" name="employment_address_line_2">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="employment_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="City / Town" id="employment_address_city" class="city form-control w-full required" name="employment_address_city">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="employment_address_state" class="form-label">State</label>
+                                    <input type="text" placeholder="State" id="employment_address_state" class="state form-control w-full" name="employment_address_state">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="employment_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Post Code" id="employment_address_postal_zip_code" class="postal_code form-control w-full required" name="employment_address_postal_zip_code">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="employment_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Country" id="employment_address_country" class="country form-control w-full required" name="employment_address_country">
+                                </div>
                             </div>
                             <div class="acc__input-error error-employment_address text-danger mt-2"></div>
                         </div>
@@ -886,7 +886,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="saveEmpHistory" class="btn btn-primary w-auto">     
                         Save                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -952,13 +952,37 @@
                             <input type="text" placeholder="MM-YYYY" id="edit_end_date" class="form-control datepicker" name="end_date" data-format="MM-YYYY" data-single-mode="true">
                             <div class="acc__input-error error-end_date text-danger mt-2"></div>
                         </div>
-                        <div class="col-span-12 sm:col-span-12">
-                            <label for="company_address" class="form-label">Organization Address <span class="text-danger">*</span></label>
-                            <div class="addressWrap mb-2" id="editEmpHistoryAddress" style="display: none;"></div>
-                            <div>
-                                <button type="button" data-tw-toggle="modal" data-prefix="employment" data-address-wrap="#editEmpHistoryAddress" data-tw-target="#addressModal" class="addressPopupToggler btn btn-linkedin w-auto">
-                                    <i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i> <span>Add Address</span>
-                                </button>
+                        <div class="col-span-12">
+                            <div id="editEmpHistoryAddressInline" class="grid grid-cols-12 gap-4 theAddressWrap">
+                                <div class="col-span-12">
+                                    <label for="edit_employment_address_lookup" class="form-label">Organization Address Lookup</label>
+                                    <input type="text" placeholder="Search address here..." id="edit_employment_address_lookup" class="form-control w-full theAddressLookup" name="employment_address_lookup">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="edit_employment_address_line_1" class="form-label">Organization Address Line 1 <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Address Line 1" id="edit_employment_address_line_1" class="address_line_1 form-control w-full required" name="employment_address_line_1">
+                                    <input type="hidden" value="" name="employment_address" data-address-source="employment_address_line_1">
+                                </div>
+                                <div class="col-span-12">
+                                    <label for="edit_employment_address_line_2" class="form-label">Organization Address Line 2</label>
+                                    <input type="text" placeholder="Address Line 2 (Optional)" id="edit_employment_address_line_2" class="address_line_2 form-control w-full" name="employment_address_line_2">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="edit_employment_address_city" class="form-label">City / Town <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="City / Town" id="edit_employment_address_city" class="city form-control w-full required" name="employment_address_city">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="edit_employment_address_state" class="form-label">State</label>
+                                    <input type="text" placeholder="State" id="edit_employment_address_state" class="state form-control w-full" name="employment_address_state">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="edit_employment_address_postal_zip_code" class="form-label">Post Code <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Post Code" id="edit_employment_address_postal_zip_code" class="postal_code form-control w-full required" name="employment_address_postal_zip_code">
+                                </div>
+                                <div class="col-span-12 sm:col-span-6">
+                                    <label for="edit_employment_address_country" class="form-label">Country <span class="text-danger">*</span></label>
+                                    <input type="text" placeholder="Country" id="edit_employment_address_country" class="country form-control w-full required" name="employment_address_country">
+                                </div>
                             </div>
                             <div class="acc__input-error error-employment_address text-danger mt-2"></div>
                         </div>
@@ -992,7 +1016,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="updateEmpHistory" class="btn btn-primary w-auto">     
                         update                      
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -1021,7 +1045,7 @@
         <div class="modal-content">
             <div class="modal-body p-0">
                 <div class="p-5 text-center">
-                    <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                    <i data-lucide="alert-triangle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
                     <div class="text-slate-500 mt-2 confModDesc"></div>
                 </div>
@@ -1063,12 +1087,12 @@
 
                         <div class="col-span-12">
                             <div class="font-medium">Have you been convicted of any criminal offence in the UK or any other Country?</div>
-                            <div class="mt-2 flex flex-wrap gap-6">
-                                <div class="form-check items-center">
+                            <div class="adm-binary-options mt-2">
+                                <div class="form-check adm-binary-option adm-binary-option--yes">
                                     <input id="admission_criminal_conviction_yes" class="form-check-input" type="radio" name="have_you_been_convicted" value="1" {{ isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 1 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="admission_criminal_conviction_yes">Yes</label>
                                 </div>
-                                <div class="form-check items-center">
+                                <div class="form-check adm-binary-option adm-binary-option--no">
                                     <input id="admission_criminal_conviction_no" class="form-check-input" type="radio" name="have_you_been_convicted" value="0" {{ isset($applicant->criminalConviction->have_you_been_convicted) && (int) $applicant->criminalConviction->have_you_been_convicted === 0 ? 'checked' : '' }}>
                                     <label class="form-check-label" for="admission_criminal_conviction_no">No</label>
                                 </div>
@@ -1105,7 +1129,7 @@
                     <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                     <button type="submit" id="saveResidencyCriminal" class="btn btn-primary w-auto">
                         Update
-                        <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
+                        <svg class="adm-btn-loader" style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
                             stroke="white" class="w-4 h-4 ml-2">
                             <g fill="none" fill-rule="evenodd">
                                 <g transform="translate(1 1)" stroke-width="4">
@@ -1137,7 +1161,7 @@
                     <div class="text-slate-500 mt-2 successModalDesc"></div>
                 </div>
                 <div class="px-5 pb-8 text-center">
-                    <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Ok</button>
+                    <button type="button" data-action="DISMISS" class="successCloser btn btn-primary w-24">Done</button>
                 </div>
             </div>
         </div>
@@ -1151,7 +1175,7 @@
         <div class="modal-content">
             <div class="modal-body p-0">
                 <div class="p-5 text-center">
-                    <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                    <i data-lucide="alert-triangle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
                     <div class="text-slate-500 mt-2 confModDesc"></div>
                 </div>
@@ -1171,7 +1195,7 @@
         <div class="modal-content">
             <div class="modal-body p-0">
                 <div class="p-5 text-center">
-                    <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
+                    <i data-lucide="alert-triangle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
                     <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
                     <div class="text-slate-500 mt-2 confModDesc"></div>
                 </div>

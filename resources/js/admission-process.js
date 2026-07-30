@@ -5,6 +5,64 @@ import Dropzone from "dropzone";
 
 
 ("use strict");
+
+const processRenderLucide = () => {
+    createIcons({
+        icons,
+        "stroke-width": 1.5,
+        nameAttr: "data-lucide",
+    });
+};
+
+const processSetButtonBusy = (selector, busy) => {
+    const button = document.querySelector(selector);
+    if (!button) {
+        return;
+    }
+
+    button.toggleAttribute("disabled", busy);
+    button.querySelectorAll(".adm-btn-loader, .theLoader").forEach((loader) => {
+        loader.style.display = busy ? "inline-block" : "none";
+    });
+};
+
+const bindProcessTaskMenuToggle = () => {
+    if (window.__admProcessTaskMenuToggleBound) {
+        return;
+    }
+
+    window.__admProcessTaskMenuToggleBound = true;
+
+    const syncRow = (row, checkbox) => {
+        row.classList.toggle("is-checked", checkbox.checked);
+    };
+
+    document.addEventListener(
+        "click",
+        (event) => {
+            const row = event.target.closest("[data-adm-task-row]");
+            if (!row) {
+                return;
+            }
+
+            const checkbox = row.querySelector(".task_list_id");
+            if (!checkbox) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event("change", { bubbles: true }));
+            syncRow(row, checkbox);
+        },
+        true
+    );
+};
+
+bindProcessTaskMenuToggle();
+
 var processTaskArchiveListTable = (function () {
     var _tableGen = function (tableId, applicantId, processId ) {
         // Setup Tabulator
@@ -61,11 +119,7 @@ var processTaskArchiveListTable = (function () {
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                processRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -78,11 +132,7 @@ var processTaskArchiveListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            processRenderLucide();
         });
     };
     return {
@@ -160,11 +210,7 @@ var processTaskLogTable = (function () {
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                processRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -177,11 +223,7 @@ var processTaskLogTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            processRenderLucide();
         });
     };
     return {
@@ -268,11 +310,7 @@ var applicantInterviewLogTable = (function () {
                 }
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });  
+                processRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -301,11 +339,7 @@ var applicantInterviewLogTable = (function () {
             var tableId = '#'+$table.attr('id');
             
             processTaskArchiveListTable.init(tableId, applicantId, processId);
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            processRenderLucide();
         })
 
         $('.processTaskArchiveListTable').on('click', '.restore_btn', function(e){
@@ -327,12 +361,15 @@ var applicantInterviewLogTable = (function () {
     const confirmModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#confirmModal"));
     const warningModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#warningModal"));
     const processDropdown = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#processDropdown"));
-    const uploadTaskDocumentModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
-    const updateTaskOutcomeModal = tailwind.Dropdown.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
-    const processListAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#processListAccordion"));
-    const studentProcessAccordion = tailwind.Accordion.getOrCreateInstance(document.querySelector("#studentProcessAccordion"));
+    const uploadTaskDocumentModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#uploadTaskDocumentModal"));
+    const updateTaskOutcomeModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#updateTaskOutcomeModal"));
+    const processListAccordionEl = document.querySelector("#processListAccordion");
+    const studentProcessAccordionEl = document.querySelector("#studentProcessAccordion");
+    const processListAccordion = processListAccordionEl ? tailwind.Accordion.getOrCreateInstance(processListAccordionEl) : null;
+    const studentProcessAccordion = studentProcessAccordionEl ? tailwind.Accordion.getOrCreateInstance(studentProcessAccordionEl) : null;
 
     const taskUserModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#taskUserModal"));
+    processRenderLucide();
     document.getElementById('taskUserModal').addEventListener('hidden.tw.modal', function(event){
         $('#taskUserModal .taskUserModalContent').fadeOut('fast', function(){
             $('table tbody', this).html('');
@@ -372,8 +409,7 @@ var applicantInterviewLogTable = (function () {
         var $form = $(this);
         const form = document.getElementById('studentProcessListForm');
     
-        document.querySelector('#addProcessItemsAdd').setAttribute('disabled', 'disabled');
-        document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText ="display: inline-block;";
+        processSetButtonBusy("#addProcessItemsAdd", true);
 
         var task_list_ids = [];
         var applicant_id = $('input[name="applicant_id"]', $form).val();
@@ -391,8 +427,7 @@ var applicantInterviewLogTable = (function () {
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-                    document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
+                    processSetButtonBusy("#addProcessItemsAdd", false);
 
                     successModal.show();
                     document.getElementById("successModal").addEventListener("shown.tw.modal", function (event) {
@@ -407,8 +442,7 @@ var applicantInterviewLogTable = (function () {
                     }, 2000);
                 }
             }).catch(error => {
-                document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-                document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
+                processSetButtonBusy("#addProcessItemsAdd", false);
                 if (error.response) {
                     if (error.response.status == 422) {
                         warningModal.show();
@@ -427,8 +461,7 @@ var applicantInterviewLogTable = (function () {
                 }
             });
         }else{
-            document.querySelector('#addProcessItemsAdd').removeAttribute('disabled');
-            document.querySelector("#addProcessItemsAdd svg.theLoader").style.cssText = "display: none;";
+            processSetButtonBusy("#addProcessItemsAdd", false);
 
             warningModal.show();
             document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -447,7 +480,9 @@ var applicantInterviewLogTable = (function () {
     $('#closeProcessDropdown').on('click', function(e){
         e.preventDefault();
         processDropdown.hide();
-        processListAccordion.hide();
+        if(processListAccordion){
+            processListAccordion.hide();
+        }
     })
 
     $('#successModal .successCloser').on('click', function(e){
@@ -472,37 +507,34 @@ var applicantInterviewLogTable = (function () {
 
 
     // Dropzone
+    let processDropzone = null;
     if($("#uploadTaskDocumentForm").length > 0){
         let dzError = false;
         Dropzone.autoDiscover = false;
-        Dropzone.options.uploadTaskDocumentForm = {
+
+        const uploadTaskDocumentDropzoneOptions = {
             autoProcessQueue: false,
             maxFiles: 10,
-            maxFilesize: 20,
+            maxFilesize: 5,
             parallelUploads: 10,
             acceptedFiles: ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
             addRemoveLinks: true,
             thumbnailWidth: 100,
             thumbnailHeight: 100,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
-        };
-
-        let options = {
             accept: (file, done) => {
-                console.log("Uploaded");
                 done();
             },
         };
 
+        processDropzone = new Dropzone('#uploadTaskDocumentForm', uploadTaskDocumentDropzoneOptions);
 
-        var drzn = new Dropzone('#uploadTaskDocumentForm', options);
-
-        drzn.on('addedfile', function(file){
+        processDropzone.on('addedfile', function(file){
             if(file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)){
                 $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
                 $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! One of your selected file name contain validation error & that file has been removed.</div>');
-                createIcons({ icons, "stroke-width": 1.5, nameAttr: "data-lucide" });
-                drzn.removeFile(file);
+                processRenderLucide();
+                processDropzone.removeFile(file);
 
                 setTimeout(function(){
                     $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
@@ -510,31 +542,30 @@ var applicantInterviewLogTable = (function () {
             }
         });
 
-        drzn.on("maxfilesexceeded", (file) => {
+        processDropzone.on("maxfilesexceeded", (file) => {
             $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
             $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Can not upload more than 10 files at a time.</div>');
-            drzn.removeFile(file);
+            processDropzone.removeFile(file);
             setTimeout(function(){
                 $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
             }, 2000)
         });
 
-        drzn.on("error", function(file, response){
+        processDropzone.on("error", function(file, response){
             dzError = true;
         });
 
-        drzn.on("success", function(file, response){
+        processDropzone.on("success", function(file, response){
             //console.log(response);
             return file.previewElement.classList.add("dz-success");
         });
 
-        drzn.on("complete", function(file) {
-            //drzn.removeFile(file);
+        processDropzone.on("complete", function(file) {
+            //processDropzone.removeFile(file);
         }); 
 
-        drzn.on('queuecomplete', function(){
-            $('#uploadProcessDoc').removeAttr('disabled');
-            document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+        processDropzone.on('queuecomplete', function(){
+            processSetButtonBusy("#uploadProcessDoc", false);
 
             uploadTaskDocumentModal.hide();
             if(!dzError){
@@ -550,8 +581,7 @@ var applicantInterviewLogTable = (function () {
                     window.location.reload();
                 }, 2000);
             }else{
-                $('#uploadProcessDoc').removeAttr('disabled');
-                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+                processSetButtonBusy("#uploadProcessDoc", false);
 
                 warningModal.show();
                 document.getElementById("warningModal").addEventListener("shown.tw.modal", function (event) {
@@ -568,29 +598,24 @@ var applicantInterviewLogTable = (function () {
 
         $('#uploadProcessDoc').on('click', function(e){
             e.preventDefault();
-            var acceptedFiles = drzn.getAcceptedFiles().length;
+            var acceptedFiles = processDropzone.getAcceptedFiles().length;
             
             if(acceptedFiles > 0){
-                document.querySelector('#uploadProcessDoc').setAttribute('disabled', 'disabled');
-                document.querySelector("#uploadProcessDoc svg").style.cssText ="display: inline-block;";
+                processSetButtonBusy("#uploadProcessDoc", true);
                 if($('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').length > 0){
                     var hardCopyChecked = $('#uploadTaskDocumentModal [name="hard_copy_check_status"]:checked').val();
                     $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val(hardCopyChecked)
-                    drzn.processQueue();
+                    dzError = false;
+                    processDropzone.processQueue();
                 }else{
                     $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
                     $('#uploadTaskDocumentModal .modal-content').prepend('<div class="alert uploadError alert-danger-soft show flex items-start mb-0" role="alert"><i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i> Oops! Please select the hard copy check status.</div>');
                     
-                    createIcons({
-                        icons,
-                        "stroke-width": 1.5,
-                        nameAttr: "data-lucide",
-                    });
+                    processRenderLucide();
 
                     setTimeout(function(){
                         $('#uploadTaskDocumentModal .modal-content .uploadError').remove();
-                        document.querySelector('#uploadProcessDoc').removeAttribute('disabled', 'disabled');
-                        document.querySelector("#uploadProcessDoc svg").style.cssText ="display: none;";
+                        processSetButtonBusy("#uploadProcessDoc", false);
                     }, 2000)
                 }
                 
@@ -608,18 +633,22 @@ var applicantInterviewLogTable = (function () {
             }
         });
 
-        $('#uploadTaskDocumentModal [name="process_doc_name"]').on('keyup', function(){
+        $('#uploadTaskDocumentModal [name="process_doc_name"]').on('input keyup change', function(){
             $('#uploadTaskDocumentModal [name="display_file_name"]').val($(this).val());
         })
     }
 
     const uploadTaskDocumentModalEl = document.getElementById('uploadTaskDocumentModal')
     uploadTaskDocumentModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#uploadTaskDocumentModal input[type="applicant_task_id"]').val('0');
-        $('#uploadTaskDocumentModal input[type="display_file_name"]').val('');
-        $('#uploadDocumentModal input[name="hard_copy_check"]').val('0');
-        $('#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', false);
-        //drzn.removeAllFiles();
+        $('#uploadTaskDocumentModal input[name="applicant_task_id"]').val('0');
+        $('#uploadTaskDocumentModal input[name="display_file_name"]').val('');
+        $('#uploadTaskDocumentModal input[name="process_doc_name"]').val('');
+        $('#uploadTaskDocumentModal input[name="hard_copy_check"]').val('0');
+        $('#uploadTaskDocumentModal input[name="hard_copy_check_status"][value="0"]').prop('checked', true);
+        processSetButtonBusy("#uploadProcessDoc", false);
+        if(processDropzone){
+            processDropzone.removeAllFiles(true);
+        }
     });
 
     $('.uploadTaskDoc').on('click', function(e){
@@ -656,7 +685,7 @@ var applicantInterviewLogTable = (function () {
         confirmModal.show();
         document.getElementById("confirmModal").addEventListener("shown.tw.modal", function (event) {
             $("#confirmModal .confModTitle").html("Are you sure?" );
-            $("#confirmModal .confModDesc").html('Want to mark this task as Completed? Please click on agree to continue.');
+            $("#confirmModal .confModDesc").html('Want to mark this task as Pending? Please click on agree to continue.');
             $("#confirmModal .agreeWith").attr('data-recordid', recordid);
             $("#confirmModal .agreeWith").attr('data-status', 'COMPLETEDTASK');
         });
@@ -808,11 +837,7 @@ var applicantInterviewLogTable = (function () {
                 //console.log(response.data.message);
                 $('#updateTaskOutcomeModal .modal-body').html(response.data.message.res);
                 $('#updateTaskOutcomeModal input[name="applicant_task_id"]').val(taskId);
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                processRenderLucide();
             }
         }).catch(error =>{
             console.log(error)
@@ -824,8 +849,7 @@ var applicantInterviewLogTable = (function () {
         var $form = $(this);
         const form = document.getElementById('updateTaskOutcomeForm');
     
-        document.querySelector('#updateOutcomeBtn').setAttribute('disabled', 'disabled');
-        document.querySelector("#updateOutcomeBtn svg").style.cssText ="display: inline-block;";
+        processSetButtonBusy("#updateOutcomeBtn", true);
 
         var taskStatusId = [];
         var applicant_id = $('input[name="applicant_id"]', $form).val();
@@ -844,8 +868,7 @@ var applicantInterviewLogTable = (function () {
                 headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
             }).then(response => {
                 if (response.status == 200) {
-                    document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
-                    document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+                    processSetButtonBusy("#updateOutcomeBtn", false);
                     updateTaskOutcomeModal.hide();
 
                     successModal.show();
@@ -861,8 +884,7 @@ var applicantInterviewLogTable = (function () {
                     }, 2000);
                 }
             }).catch(error => {
-                document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
-                document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+                processSetButtonBusy("#updateOutcomeBtn", false);
                 if (error.response) {
                     if (error.response.status == 422) {
                         warningModal.show();
@@ -881,16 +903,11 @@ var applicantInterviewLogTable = (function () {
                 }
             });
         }else{
-            document.querySelector('#updateOutcomeBtn').removeAttribute('disabled');
-            document.querySelector("#updateOutcomeBtn svg").style.cssText = "display: none;";
+            processSetButtonBusy("#updateOutcomeBtn", false);
 
             $('#updateTaskOutcomeModal .taskUoutComeAlert').remove();
             $('#updateTaskOutcomeModal .modal-content').prepend('<div class="alert taskUoutComeAlert alert-pending-soft show flex items-start mb-2" role="alert"><i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> <strong>Oops!</strong> Result can not be empty.</div>')
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            processRenderLucide();
             setTimeout(function(){
                 $('#updateTaskOutcomeModal .taskUoutComeAlert').remove();
             }, 2000);
@@ -930,11 +947,7 @@ var applicantInterviewLogTable = (function () {
                     $('table tbody', this).html(response.data.res);
                 });
 
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                processRenderLucide();
             }
         }).catch(error =>{
             console.log(error)

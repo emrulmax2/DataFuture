@@ -21,15 +21,26 @@ use Illuminate\Support\Facades\Auth;
 class PlansDateListController extends Controller
 {
     public function index($planId){
+        // The heading names the class these dates belong to, so the page stands
+        // on its own when it is reached straight from the tree.
+        $plan = \App\Models\Plan::find($planId);
+        $planLabel = trim(($plan->creations->module_name ?? '').' '.($plan->class_type ?? ''));
+
         return view('pages.course-management.plandates.index', [
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
             'title' => 'Plans - London Churchill College',
             'subtitle' => 'Class Plan Dates',
+            'cmPageTitle' => 'Class Plan Dates',
+            'cmBackUrl' => route('plans.tree'),
+            'cmBackLabel' => 'Back to tree',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Class Plans', 'href' => route('class.plan')],
                 ['label' => 'Dates', 'href' => 'javascript:void(0);']
             ],
-            'planid' => $planId
+            'planid' => $planId,
+            'planLabel' => $planLabel !== '' ? $planLabel : 'Class plan #'.$planId,
         ]);
     }
 
@@ -52,7 +63,8 @@ class PlansDateListController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
@@ -108,7 +120,7 @@ class PlansDateListController extends Controller
             endforeach;
         endif;
 
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(PlansDatesRequest $request){

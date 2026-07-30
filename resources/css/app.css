@@ -136,6 +136,8 @@
 @import "./components/_pos-dropdown.css";
 @import "./components/_post.css";
 @import "./components/_litepicker.css";
+/* Must stay after `_litepicker.css` — it overrides that skin on source order. */
+@import "./components/_litepicker-redesign.css";
 @import "./components/_tiny-slider.css";
 @import "./components/_tippy.css";
 @import "./components/_tabulator.css";

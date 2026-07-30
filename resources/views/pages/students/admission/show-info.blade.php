@@ -1,157 +1,206 @@
+{{--
+    Applicant hero card — shared by the Information / Communication /
+    Uploaded Files / Notes / Processes screens.
 
-    <div class="grid grid-cols-12 gap-x-4 gap-y-0 mt-5">
-        <div class="col-span-8">
-            <div class="intro-y box px-5 pt-5">
-                <div class="flex flex-col lg:flex-row border-b border-slate-200/60 dark:border-darkmode-400 pb-5 -mx-5">
-                    <div class="flex flex-1 px-5 items-center justify-center lg:justify-start">
-                        <div class="w-20 h-20 sm:w-24 sm:h-24 flex-none lg:w-32 lg:h-32 image-fit relative">
-                            <img alt="{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}" class="rounded-full" src="{{ $applicant->brand_photo_url }}">
-                            <button data-tw-toggle="modal" data-tw-target="#addApplicantPhotoModal" type="button" class="absolute mb-1 mr-1 flex items-center justify-center bottom-0 right-0 bg-primary rounded-full p-2">
-                                <i class="w-4 h-4 text-white" data-lucide="camera"></i>
-                            </button>
-                        </div>
-                        <div class="ml-10">
-                            <div class="w-24 sm:w-40 truncate sm:whitespace-normal font-medium text-lg">{{ $applicant->title->name.' '.$applicant->first_name.' '.$applicant->last_name }}</div>
-                            <div class="text-slate-500 mb-3">{{ $applicant->course->creation->course->name.' - '.$applicant->course->semester->name }}</div>
-                            <div class="truncate sm:whitespace-normal flex items-center font-medium">
-                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Email:</span> {{ $applicant->users->email }}
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
-                                <i data-lucide="phone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Phone:</span> {{ $applicant->contact->home }}
-                            </div>
-                            <div class="truncate sm:whitespace-normal flex items-center mt-1 font-medium">
-                                <i data-lucide="smartphone" class="w-4 h-4 mr-2"></i> <span class="text-slate-500 mr-2">Mobile:</span> {{ $applicant->contact->mobile }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    It bundles what the old design split across three places: the
+    "Application Ref No." title bar from each page, the profile + work
+    progress boxes, and the tab strip (included at the bottom from
+    show-menu). Every JS hook is preserved: .changeApplicantStatus,
+    .rejectApplicationBtn, #addApplicantPhotoModal, .progressBarWrap.
+--}}
+@php
+    $admFullName = trim(($applicant->title->name ?? '').' '.$applicant->first_name.' '.$applicant->last_name);
+
+    // photo_url returns a generated initials SVG (a data: URI) when the
+    // applicant has no uploaded photo. Show a real photo when there is one;
+    // otherwise draw the initials in the course-themed circle so the avatar
+    // follows the palette instead of the fixed brand colour.
+    $admPhotoUrl = (string) $applicant->photo_url;
+    $admHasPhoto = $admPhotoUrl !== '' && !str_starts_with($admPhotoUrl, 'data:');
+    $admInitials = strtoupper(mb_substr((string) $applicant->first_name, 0, 1).mb_substr((string) $applicant->last_name, 0, 1));
+    $admInitials = $admInitials !== '' ? $admInitials : '--';
+
+    // Mirrors admissionStatusTone() in resources/js/admission.js so the
+    // list pill and the hero pill agree.
+    $admStatusTone = match((int) ($applicant->status_id ?? 0)) {
+        5, 7 => 'success',
+        8, 9, 46 => 'danger',
+        4, 6 => 'progress',
+        1, 2 => 'muted',
+        default => 'pending',
+    };
+
+    $admPending = $applicant->pendingTasks->count();
+    $admInProgress = $applicant->inProgressTasks->count();
+    $admCompleted = $applicant->completedTasks->count();
+    $admTotalTask = $admPending + $admInProgress + $admCompleted;
+    $admPendingProgress = ($admTotalTask > 0 ? round(($admPending + $admInProgress) / $admTotalTask, 2) * 100 : '0');
+    $admCompletedProgress = ($admTotalTask > 0 ? round($admCompleted / $admTotalTask, 2) * 100 : '0');
+@endphp
+
+<div class="adm-hero">
+    <div class="adm-hero__strip"></div>
+
+    <div class="adm-hero__body">
+        <div class="adm-hero__top">
+            <div class="adm-hero__refgroup">
+                <span class="adm-hero__reflabel">Application Ref</span>
+                <span class="adm-hero__ref">{{ (isset($applicant->application_no) && !empty($applicant->application_no) ? $applicant->application_no : '---') }}</span>
+                <span class="adm-hero__pill adm-hero__pill--{{ $admStatusTone }}">
+                    <span class="adm-pill__dot"></span>{{ $applicant->status->name ?? '--' }}
+                </span>
+                @if($applicant->status_id == 8 && isset($applicant->application_rejected_reason_id) && $applicant->application_rejected_reason_id > 0 && isset($applicant->reason->name) && !empty($applicant->reason->name))
+                    <span class="adm-hero__reason">Rejection Reason: <b>{{ $applicant->reason->name }}</b></span>
+                @endif
+            </div>
+
+            <div class="adm-hero__actions">
+                {{-- Hidden by default; admission-global.js shows it while the
+                     offer-accepted job batch runs. --}}
+                <button data-tw-toggle="modal" data-tw-target="#progressBarModal" class="add_btn adm-btn adm-btn--danger hidden" type="button">Progress Bar</button>
+
+                <a href="{{ route('applicantprofile.print', $applicant->id) }}" data-id="{{ $applicant->id }}" class="adm-btn adm-btn--tint">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6M9 15l3 3 3-3M12 12v6"></path></svg>
+                    Download Pdf
+                </a>
+
+                @if(isset(auth()->user()->priv()['login_as_applicant']) && auth()->user()->priv()['login_as_applicant'] == 1)
+                    <a target="__blank" href="{{ route('impersonate', ['id' => $applicant->applicant_user_id, 'guardName' => 'applicant']) }}" class="adm-btn adm-btn--gold">
+                        Login As Applicant
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"></path></svg>
+                    </a>
+                @endif
             </div>
         </div>
-        <div class="col-span-4">
-            <div class="intro-y box p-5 pt-3">
-                <div class="grid grid-cols-12 gap-0 items-center">
-                    <div class="col-span-6">
-                        <div class="font-medium text-base">Work Progress</div>
-                    </div>
-                    <div class="col-span-6 text-right">
-                        @if($applicant->status_id == 4 || $applicant->status_id == 5 || $applicant->status_id == 6)
-                            <div class="dropdown inline-block" data-tw-placement="bottom-start">
-                                <button class="dropdown-toggle btn btn-primary" aria-expanded="false" data-tw-toggle="dropdown">
-                                    {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-72">
-                                    <ul class="dropdown-content">
-                                        <li><h6 class="dropdown-header">Status List</h6></li>
-                                        <li><hr class="dropdown-divider mt-0"></li>
 
-                                        @if(!empty($allStatuses))
-                                            @foreach($allStatuses as $sts)
-                                                @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])) || ($applicant->status_id == 6 && in_array($sts->id, [7, 9])))
-                                                <li>
-                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item changeApplicantStatus">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
-                                                    </a>
-                                                </li>
-                                                @endif
-                                            @endforeach
-                                        @endif
-
-                                        <!--<li><hr class="dropdown-divider"></li>
-                                        <li>
-                                            <div class="flex p-1">
-                                                <button type="submit" id="updateStudentStatus" class="btn btn-primary py-1 px-2 w-auto">     
-                                                    <i data-lucide="rotate-cw" class="w-3 h-3 mr-2"></i> Change Status                     
-                                                    <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                                        stroke="white" class="w-4 h-4 ml-2 theLoaderTwo">
-                                                        <g fill="none" fill-rule="evenodd">
-                                                            <g transform="translate(1 1)" stroke-width="4">
-                                                                <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                                                <path d="M36 18c0-9.94-8.06-18-18-18">
-                                                                    <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                                        to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                                                </path>
-                                                            </g>
-                                                        </g>
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </li>-->
-                                    </ul>
-                                </div>
-                            </div>
-                        @elseif(($applicant->status_id == 3 || $applicant->status_id == 8) && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
-                            <div class="dropdown inline-block" data-tw-placement="bottom-start">
-                                <button class="dropdown-toggle btn {{ $applicant->status_id == 8 ? 'btn-danger' : 'btn-primary' }}" aria-expanded="false" data-tw-toggle="dropdown">
-                                    {{ $applicant->status->name }} <i data-lucide="chevron-down" class="w-4 h-4 ml-2"></i>
-                                </button>
-                                <div class="dropdown-menu w-72">
-                                    <ul class="dropdown-content">
-                                        <li><h6 class="dropdown-header">Status List</h6></li>
-                                        <li><hr class="dropdown-divider mt-0"></li>
-
-                                        @if(!empty($allStatuses))
-                                            @foreach($allStatuses as $sts)
-                                                @if(($applicant->status_id == 3 && in_array($sts->id, [8])))
-                                                <li>
-                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item rejectApplicationBtn">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
-                                                    </a>
-                                                </li>
-                                                @elseif($applicant->status_id == 8 && in_array($sts->id, [3]))
-                                                <li>
-                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="dropdown-item rejectApplicationBtn">
-                                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-primary"></i> {{ $sts->name }}
-                                                    </a>
-                                                </li>
-                                                @endif
-                                            @endforeach
-                                        @endif
-                                    </ul>
-                                </div>
-                            </div>
-                        @else
-                            <button type="button" class="btn btn-{{ $applicant->status_id == 8 ? 'danger' : 'primary' }} text-white w-auto mr-1 mb-0">
-                                {{ $applicant->status->name }}
-                            </button>
-                        @endif
-                    </div>
+        <div class="adm-hero__identity">
+            <div class="adm-hero__avatar-wrap">
+                <div class="adm-hero__avatar">
+                    @if($admHasPhoto)
+                        <img alt="{{ $admFullName }}" src="{{ $admPhotoUrl }}">
+                    @else
+                        {{ $admInitials }}
+                    @endif
                 </div>
-                <div class="mt-3 mb-4 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-                @if($applicant->status_id == 8 && isset($applicant->application_rejected_reason_id) && $applicant->application_rejected_reason_id > 0 && isset($applicant->reason->name) && !empty($applicant->reason->name))
-                    <div class="pb-2 text-right">Rejecttion Reason: <span class="font-medium ">{{ $applicant->reason->name }}</span></div>
-                @endif
-                @php 
-                    $pending = $applicant->pendingTasks->count();
-                    $inprogress = $applicant->inProgressTasks->count();
-                    $completed = $applicant->completedTasks->count();
+                <button data-tw-toggle="modal" data-tw-target="#addApplicantPhotoModal" type="button" class="adm-hero__camera" aria-label="Change photo">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </button>
+            </div>
 
-                    $totalTask = $pending + $inprogress + $completed;
-                    $pendingProgress = ( $totalTask > 0 ? round(($pending + $inprogress) / $totalTask, 2) * 100 : '0');
-                    $completedProgress = ( $totalTask > 0 ? round($completed / $totalTask, 2) * 100 : '0');
-                @endphp
-                <div class="progressBarWrap">
-                    <div class="singleProgressBar mb-3">
-                        <div class="flex justify-between mb-1">
-                            <div class="font-medium">Pending Task</div>
-                            <div class="font-medium">{{ $pending + $inprogress }}/{{ $totalTask }}</div>
+            <div class="adm-hero__summary">
+                <h2 class="adm-hero__name">{{ $admFullName }}</h2>
+                <div class="adm-hero__course">{{ ($applicant->course->creation->course->name ?? '').(isset($applicant->course->semester->name) ? ' · '.$applicant->course->semester->name : '') }}</div>
+                <div class="adm-hero__contacts">
+                    <span class="adm-hero__contact">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M2 6l10 7 10-7"></path></svg>
+                        <b>{{ $applicant->users->email ?? '—' }}</b>
+                    </span>
+                    <span class="adm-hero__contact">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3 19.5 19.5 0 01-6-6 19.8 19.8 0 01-3-8.6A2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.5c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z"></path></svg>
+                        @if(!empty($applicant->contact->home))
+                            Phone: <b>{{ $applicant->contact->home }}</b>
+                        @else
+                            <span class="adm-hero__empty">Phone: —</span>
+                        @endif
+                    </span>
+                    <span class="adm-hero__contact">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="20" rx="2"></rect><path d="M11 18h2"></path></svg>
+                        @if(!empty($applicant->contact->mobile))
+                            Mobile: <b>{{ $applicant->contact->mobile }}</b>
+                        @else
+                            <span class="adm-hero__empty">Mobile: —</span>
+                        @endif
+                    </span>
+                </div>
+            </div>
+
+            <div class="adm-work">
+                <div class="adm-work__head">
+                    <span class="adm-work__title">Work Progress</span>
+
+                    @if($applicant->status_id == 4 || $applicant->status_id == 5 || $applicant->status_id == 6)
+                        <div class="dropdown adm-statusmenu" data-tw-placement="bottom-end">
+                            <button class="dropdown-toggle adm-statusmenu__trigger" aria-expanded="false" data-tw-toggle="dropdown">
+                                <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name }}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
+                            </button>
+                            <div class="dropdown-menu adm-statusmenu__menu">
+                                <ul class="adm-statusmenu__panel">
+                                    <li class="adm-statusmenu__head">Status List</li>
+                                    <li class="adm-statusmenu__rule"></li>
+                                    @if(!empty($allStatuses))
+                                        @foreach($allStatuses as $sts)
+                                            @if(($applicant->status_id == 4 && in_array($sts->id, [5, 8])) || ($applicant->status_id == 5 && in_array($sts->id, [6])) || ($applicant->status_id == 6 && in_array($sts->id, [7, 9])))
+                                                <li>
+                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="adm-statusmenu__item changeApplicantStatus">
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ $sts->id == 8 ? '#d64545' : 'currentColor' }}" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+                                                        <span>{{ $sts->name }}</span>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </ul>
+                            </div>
                         </div>
-                        <div class="progress h-1">
-                            <div class="progress-bar bg-warning"  style="width: {{ $pendingProgress }}%;"  role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    @elseif(($applicant->status_id == 3 || $applicant->status_id == 8) && isset(auth()->user()->priv()['applicant_rejected']) && auth()->user()->priv()['applicant_rejected'] == 1)
+                        <div class="dropdown adm-statusmenu" data-tw-placement="bottom-end">
+                            <button class="dropdown-toggle adm-statusmenu__trigger {{ $applicant->status_id == 8 ? 'adm-statusmenu__trigger--danger' : '' }}" aria-expanded="false" data-tw-toggle="dropdown">
+                                <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name }}
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
+                            </button>
+                            <div class="dropdown-menu adm-statusmenu__menu">
+                                <ul class="adm-statusmenu__panel">
+                                    <li class="adm-statusmenu__head">Status List</li>
+                                    <li class="adm-statusmenu__rule"></li>
+                                    @if(!empty($allStatuses))
+                                        @foreach($allStatuses as $sts)
+                                            @if(($applicant->status_id == 3 && in_array($sts->id, [8])) || ($applicant->status_id == 8 && in_array($sts->id, [3])))
+                                                <li>
+                                                    <a href="javascript:void(0);" data-statusid="{{ $sts->id }}" data-applicantid="{{ $applicant->id }}" class="adm-statusmenu__item rejectApplicationBtn">
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ $sts->id == 8 ? '#d64545' : 'currentColor' }}" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg>
+                                                        <span>{{ $sts->name }}</span>
+                                                    </a>
+                                                </li>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </ul>
+                            </div>
+                        </div>
+                    @else
+                        <span class="adm-statusmenu__trigger {{ $applicant->status_id == 8 ? 'adm-statusmenu__trigger--danger' : '' }}" style="cursor:default;">
+                            <span class="adm-statusmenu__dot"></span>{{ $applicant->status->name ?? '--' }}
+                        </span>
+                    @endif
+                </div>
+
+                <div class="progressBarWrap adm-work__bars">
+                    <div class="singleProgressBar adm-work__bar adm-work__bar--pending">
+                        <div class="adm-work__bar-head">
+                            <span class="adm-work__bar-label">Pending</span>
+                            <span class="adm-work__bar-count">{{ $admPending + $admInProgress }}/{{ $admTotalTask }}</span>
+                        </div>
+                        <div class="progress adm-work__track">
+                            <div class="progress-bar adm-work__fill" style="width: {{ $admPendingProgress }}%;" role="progressbar" aria-valuenow="{{ $admPendingProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-                    <div class="singleProgressBar">
-                        <div class="flex justify-between mb-1">
-                            <div class="font-medium">Completed Task</div>
-                            <div class="font-medium">{{ $applicant->completedTasks->count() }}/{{ $totalTask }}</div>
+                    <div class="singleProgressBar adm-work__bar adm-work__bar--done">
+                        <div class="adm-work__bar-head">
+                            <span class="adm-work__bar-label">Completed</span>
+                            <span class="adm-work__bar-count">{{ $admCompleted }}/{{ $admTotalTask }}</span>
                         </div>
-                        <div class="progress h-1">
-                            <div class="progress-bar" style="width: {{ $completedProgress }}%;" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress adm-work__track">
+                            <div class="progress-bar adm-work__fill" style="width: {{ $admCompletedProgress }}%;" role="progressbar" aria-valuenow="{{ $admCompletedProgress }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    @include('pages.students.admission.show-menu')
+</div>
 
     <!-- BEGIN: Import Modal -->
     <div id="addApplicantPhotoModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">

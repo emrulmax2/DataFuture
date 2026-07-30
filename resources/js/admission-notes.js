@@ -7,6 +7,151 @@ import { each } from "jquery";
 import Dropzone from "dropzone";
 
 ("use strict");
+
+function noteEscape(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function noteInitials(name) {
+    const initials = String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("");
+
+    return initials || "?";
+}
+
+function noteAvatarColor(seed) {
+    const palette = ["#0d7a76", "#6d4bb0", "#2f7d4f", "#c0562a", "#2f8f7d", "#3a6ea5"];
+    const text = String(seed || "");
+    let hash = 0;
+
+    for (let i = 0; i < text.length; i += 1) {
+        hash = (hash + text.charCodeAt(i) * (i + 1)) % palette.length;
+    }
+
+    return palette[hash];
+}
+
+function noteRenderLucide() {
+    createIcons({
+        icons,
+        "stroke-width": 1.8,
+        nameAttr: "data-lucide",
+    });
+}
+
+function noteFormatFileSize(bytes) {
+    const size = Number(bytes) || 0;
+    if (size < 1024) return size + " B";
+    if (size < 1024 * 1024) return (size / 1024).toFixed(size < 10240 ? 1 : 0) + " KB";
+    return (size / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function notePersonHtml(name, date, seed) {
+    const safeName = noteEscape(name || "Unknown");
+    const safeDate = noteEscape(date || "");
+
+    return '<div class="adm-comm-by">' +
+        '<span class="adm-comm-by__avatar" style="background:' + noteAvatarColor(seed || name) + ';">' + noteInitials(name) + '</span>' +
+        '<span class="adm-comm-by__text">' +
+            '<span class="adm-comm-by__name">' + safeName + '</span>' +
+            '<span class="adm-comm-by__date">' + safeDate + '</span>' +
+        '</span>' +
+    '</div>';
+}
+
+function notePreviewHtml(data) {
+    const note = noteEscape(data.note || "No note content found.");
+    const hasAttachment = Number(data.applicant_document_id) > 0;
+
+    return '<div class="adm-note-preview">' +
+        '<span class="adm-note-preview__icon"><i data-lucide="file-text"></i></span>' +
+        '<span class="adm-note-preview__text">' +
+            '<span class="adm-note-preview__title">' + note + '</span>' +
+            '<span class="adm-note-preview__meta">' +
+                '<i data-lucide="' + (hasAttachment ? "paperclip" : "minus") + '"></i>' +
+                (hasAttachment ? "Attachment included" : "No attachment") +
+            '</span>' +
+        '</span>' +
+    '</div>';
+}
+
+function noteActionButton(action) {
+    const tag = action.tag || "button";
+    const attrs = [
+        'data-id="' + noteEscape(action.id) + '"',
+        'class="' + noteEscape(action.className) + ' adm-row-action adm-row-action--' + noteEscape(action.type) + '"',
+        'title="' + noteEscape(action.title) + '"',
+        'aria-label="' + noteEscape(action.title) + '"',
+    ];
+
+    if (tag === "button") attrs.push('type="button"');
+    if (tag === "a") attrs.push('href="javascript:void(0);"');
+    if (action.extra) attrs.push(action.extra);
+
+    return '<' + tag + ' ' + attrs.join(" ") + '>' +
+        '<i data-lucide="' + noteEscape(action.icon) + '"></i>' +
+    '</' + tag + '>';
+}
+
+function noteActions(actions) {
+    return '<div class="adm-row-actions">' +
+        actions.filter(Boolean).map(noteActionButton).join("") +
+    '</div>';
+}
+
+function noteViewHtml(rawHtml) {
+    return '<div class="adm-note-view__hero">' +
+        '<span class="adm-note-view__icon"><i data-lucide="file-text"></i></span>' +
+        '<span class="adm-note-view__heading">' +
+            '<span class="adm-note-view__title">Applicant Note</span>' +
+            '<span class="adm-note-view__desc">Saved admission note details</span>' +
+        '</span>' +
+    '</div>' +
+    '<div class="adm-note-view__content">' + rawHtml + '</div>';
+}
+
+function noteSetButtonBusy(selector, busy) {
+    const button = document.querySelector(selector);
+    if (!button) return;
+
+    button.toggleAttribute("disabled", busy);
+    const loader = button.querySelector(".adm-btn-loader");
+    if (loader) {
+        loader.style.display = busy ? "inline-block" : "none";
+    }
+}
+
+function noteDecorateModalButtons(scope = document) {
+    scope.querySelectorAll(".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn").forEach((button) => {
+        if (button.classList.contains("downloadDoc") || button.querySelector(".adm-btn-icon")) return;
+
+        const text = button.textContent.trim().toLowerCase();
+        let icon = "check";
+
+        if (text.includes("cancel") || text.includes("no,")) icon = "x";
+        else if (text.includes("save")) icon = "save";
+        else if (text.includes("update")) icon = "check";
+        else if (text.includes("upload")) icon = "upload-cloud";
+        else if (text === "ok") icon = "check";
+
+        const iconEl = document.createElement("i");
+        iconEl.setAttribute("data-lucide", icon);
+        iconEl.className = "adm-btn-icon";
+        button.prepend(iconEl);
+    });
+
+    noteRenderLucide();
+}
+
 var applicantNotesListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -38,60 +183,74 @@ var applicantNotesListTable = (function () {
                     title: "Note",
                     field: "note",
                     headerHozAlign: "left",
+                    minWidth: 360,
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += cell.getData().note;
-                        html += '</div>';
-
-                        return html;
+                        return notePreviewHtml(cell.getData());
                     }
                 },
                 {
                     title: "Created By",
                     field: "created_by",
                     headerHozAlign: "left",
+                    minWidth: 220,
                     formatter(cell, formatterParams){
-                        var html = '';
-                        html += '<div>';
-                            html += '<div class="font-medium whitespace-nowrap">'+cell.getData().created_by+'</div>';
-                            html += '<div class="text-slate-500 text-xs whitespace-nowrap">'+cell.getData().created_at+'</div>';
-                        html += '</div>';
-
-                        return html;
+                        return notePersonHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
                     }
                 },
                 {
                     title: "Actions",
                     field: "id",
                     headerSort: false,
-                    hozAlign: "right",
-                    headerHozAlign: "right",
-                    width: "230",
+                    hozAlign: "center",
+                    headerHozAlign: "center",
+                    width: "170",
                     download: false,
-                    formatter(cell, formatterParams) {                        
-                        var btns = "";
-                        if(cell.getData().applicant_document_id > 0){
-                            btns +='<a  href="javascript:void(0);" data-id="'+cell.getData().applicant_document_id+'" class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
-                        }
-                        if (cell.getData().deleted_at == null) {
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#viewNoteModal"  class="view_btn btn btn-twitter text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="eye-off" class="w-4 h-4"></i></button>';
-                            btns += '<button data-id="' + cell.getData().id + '" data-tw-toggle="modal" data-tw-target="#editNoteModal" type="button" class="edit_btn btn-rounded btn btn-success text-white p-0 w-9 h-9 ml-1"><i data-lucide="Pencil" class="w-4 h-4"></i></a>';
-                            btns += '<button data-id="' + cell.getData().id + '" class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        }else if(cell.getData().deleted_at != null) {
-                            btns += '<button data-id="' + cell.getData().id + '" class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-                        
-                        return btns;
+                    formatter(cell, formatterParams) {
+                        const data = cell.getData();
+                        return noteActions([
+                            Number(data.applicant_document_id) > 0 ? {
+                                tag: "a",
+                                type: "download",
+                                className: "downloadDoc",
+                                icon: "download",
+                                id: data.applicant_document_id,
+                                title: "Download attachment",
+                            } : null,
+                            data.deleted_at == null ? {
+                                type: "view",
+                                className: "view_btn",
+                                icon: "eye",
+                                id: data.id,
+                                title: "View note",
+                                extra: 'data-tw-toggle="modal" data-tw-target="#viewNoteModal"',
+                            } : null,
+                            data.deleted_at == null ? {
+                                type: "edit",
+                                className: "edit_btn",
+                                icon: "pencil",
+                                id: data.id,
+                                title: "Edit note",
+                                extra: 'data-tw-toggle="modal" data-tw-target="#editNoteModal"',
+                            } : null,
+                            data.deleted_at == null ? {
+                                type: "delete",
+                                className: "delete_btn",
+                                icon: "trash-2",
+                                id: data.id,
+                                title: "Delete note",
+                            } : {
+                                type: "restore",
+                                className: "restore_btn",
+                                icon: "rotate-cw",
+                                id: data.id,
+                                title: "Restore note",
+                            },
+                        ]);
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                noteRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -104,11 +263,7 @@ var applicantNotesListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            noteRenderLucide();
         });
 
         // Export
@@ -177,6 +332,8 @@ var applicantNotesListTable = (function () {
     const viewNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#viewNoteModal"));
     const editNoteModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editNoteModal"));
 
+    noteDecorateModalButtons();
+
     let addEditor;
     if($("#addEditor").length > 0){
         const el = document.getElementById('addEditor');
@@ -203,7 +360,8 @@ var applicantNotesListTable = (function () {
     addNoteModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#addNoteModal .acc__input-error').html('');
         $('#addNoteModal input[name="document"]').val('');
-        $('#addNoteModal #addNoteDocumentName').html('');
+        $('#addNoteModal #addNoteDocumentName').html('').hide();
+        noteSetButtonBusy("#saveNote", false);
         addEditor.setData('');
     });
 
@@ -211,15 +369,16 @@ var applicantNotesListTable = (function () {
     editNoteModalEl.addEventListener('hide.tw.modal', function(event) {
         $('#editNoteModal .acc__input-error').html('');
         $('#editNoteModal input[name="document"]').val('');
-        $('#editNoteModal #editNoteDocumentName').html('');
+        $('#editNoteModal #editNoteDocumentName').html('').hide();
         $('#editNoteModal input[name="id"]').val('0');
         $('#editNoteModal .downloadExistAttachment').attr('href', '#').fadeOut();
+        noteSetButtonBusy("#UpdateNote", false);
         editEditor.setData('');
     });
 
     const viewNoteModalEl = document.getElementById('viewNoteModal')
     viewNoteModalEl.addEventListener('hide.tw.modal', function(event) {
-        $('#viewNoteModal .modal-body').html('');
+        $('#viewNoteModal #viewNoteContent').html('');
         $('#viewNoteModal .modal-footer .footerBtns').html('');
     });
 
@@ -262,8 +421,22 @@ var applicantNotesListTable = (function () {
     function showFileName(inputId, targetPreviewId) {
         let fileInput = document.getElementById(inputId);
         let namePreview = document.getElementById(targetPreviewId);
-        let fileName = fileInput.files[0].name;
-        namePreview.innerText = fileName;
+        if (!fileInput || !namePreview || !fileInput.files || !fileInput.files.length) {
+            if (namePreview) {
+                namePreview.innerHTML = "";
+                namePreview.style.display = "none";
+            }
+            return false;
+        }
+
+        const file = fileInput.files[0];
+        namePreview.innerHTML = '<div class="adm-mail-upload__file">' +
+            '<span class="adm-mail-upload__file-icon"><i data-lucide="file"></i></span>' +
+            '<span class="adm-mail-upload__file-name">' + noteEscape(file.name) + '</span>' +
+            '<span class="adm-mail-upload__file-size">' + noteFormatFileSize(file.size) + '</span>' +
+        '</div>';
+        namePreview.style.display = "grid";
+        noteRenderLucide();
         return false;
     };
 
@@ -276,15 +449,11 @@ var applicantNotesListTable = (function () {
             data: {noteId : noteId},
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            $('#viewNoteModal .modal-body').html(response.data.message);
+            $('#viewNoteModal #viewNoteContent').html(noteViewHtml(response.data.message));
             if(response.data.btns != ''){
                 $('#viewNoteModal .modal-footer .footerBtns').html(response.data.btns);
             }
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            noteDecorateModalButtons(document.getElementById("viewNoteModal"));
         }).catch(error => {
             console.log('error');
         });
@@ -294,8 +463,7 @@ var applicantNotesListTable = (function () {
         e.preventDefault();
         const form = document.getElementById('addNoteForm');
     
-        document.querySelector('#saveNote').setAttribute('disabled', 'disabled');
-        document.querySelector("#saveNote svg").style.cssText ="display: inline-block;";
+        noteSetButtonBusy("#saveNote", true);
 
         let form_data = new FormData(form);
         form_data.append('file', $('#addNoteForm input[name="document"]')[0].files[0]); 
@@ -306,8 +474,7 @@ var applicantNotesListTable = (function () {
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#saveNote').removeAttribute('disabled');
-            document.querySelector("#saveNote svg").style.cssText = "display: none;";
+            noteSetButtonBusy("#saveNote", false);
             //console.log(response.data.message);
             //return false;
 
@@ -327,8 +494,7 @@ var applicantNotesListTable = (function () {
             }
             applicantNotesListTable.init();
         }).catch(error => {
-            document.querySelector('#saveNote').removeAttribute('disabled');
-            document.querySelector("#saveNote svg").style.cssText = "display: none;";
+            noteSetButtonBusy("#saveNote", false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {
@@ -368,8 +534,7 @@ var applicantNotesListTable = (function () {
         e.preventDefault();
         const form = document.getElementById('editNoteForm');
     
-        document.querySelector('#UpdateNote').setAttribute('disabled', 'disabled');
-        document.querySelector("#UpdateNote svg").style.cssText ="display: inline-block;";
+        noteSetButtonBusy("#UpdateNote", true);
 
         let form_data = new FormData(form);
         form_data.append('file', $('#editNoteForm input[name="document"]')[0].files[0]); 
@@ -380,8 +545,7 @@ var applicantNotesListTable = (function () {
             data: form_data,
             headers: {'X-CSRF-TOKEN' :  $('meta[name="csrf-token"]').attr('content')},
         }).then(response => {
-            document.querySelector('#UpdateNote').removeAttribute('disabled');
-            document.querySelector("#UpdateNote svg").style.cssText = "display: none;";
+            noteSetButtonBusy("#UpdateNote", false);
             //console.log(response.data.message);
             //return false;
 
@@ -401,8 +565,7 @@ var applicantNotesListTable = (function () {
             }
             applicantNotesListTable.init();
         }).catch(error => {
-            document.querySelector('#UpdateNote').removeAttribute('disabled');
-            document.querySelector("#UpdateNote svg").style.cssText = "display: none;";
+            noteSetButtonBusy("#UpdateNote", false);
             if (error.response) {
                 if (error.response.status == 422) {
                     for (const [key, val] of Object.entries(error.response.data.errors)) {

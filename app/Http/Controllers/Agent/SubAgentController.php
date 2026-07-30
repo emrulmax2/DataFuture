@@ -8,15 +8,19 @@ use App\Models\Agent;
 use App\Http\Requests\StoreAgentRequest;
 use App\Http\Requests\UpdateAgentRequest;
 use App\Models\Address;
+use App\Models\AgentBankDetail;
+use App\Models\AgentDocuments;
 use App\Models\AgentUser;
 use App\Models\Applicant;
 use App\Models\CourseCreationInstance;
+use App\Models\Document;
 use App\Models\InstanceTerm;
 use App\Models\Option;
 use App\Models\ReferralCode;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Auth\Events\Registered;
 
@@ -30,39 +34,68 @@ class SubAgentController extends Controller
         //
     }
     public function list(Request $request){
-        $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) && $request->status > 0 ? $request->status : 1);
-        $academicyear = (isset($request->academicyear) && $request->academicyear > 0 ? $request->academicyear : '');
-        $agentUserList = AgentUser::where('parent_id',$request->id)->pluck('id')->toArray();
-        
-        $query = Agent::whereIn('agent_user_id', $agentUserList);
-        if(!empty($queryStr)):
-            $query->where('first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
+        $queryStr = trim((string) $request->input('querystr', ''));
+        $status = (int) $request->input('status', 1);
+        $parentId = (int) $request->input('id', 0);
+        $agentUserList = AgentUser::withTrashed()->where('parent_id', $parentId)->pluck('id')->toArray();
+
+        $query = Agent::with(['AgentUser' => function($agentUserQuery) {
+            $agentUserQuery->withTrashed();
+        }])->whereIn('agent_user_id', $agentUserList);
+
+        if($status === 2):
+            $query->withTrashed()->where(function($statusQuery) {
+                $statusQuery->whereNotNull('deleted_at')
+                    ->orWhereHas('AgentUser', function($agentUserQuery) {
+                        $agentUserQuery->withTrashed()->whereNotNull('deleted_at');
+                    });
+            });
+        elseif($status === 0):
+            $query->withTrashed();
+        else:
+            $query->whereHas('AgentUser', function($agentUserQuery) {
+                $agentUserQuery->whereNull('deleted_at');
+            });
         endif;
+
+        if(!empty($queryStr)):
+            $query->where(function($searchQuery) use($queryStr) {
+                $searchQuery->where('first_name', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('last_name', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhereRaw("concat(first_name, ' ', last_name) like ?", ['%'.$queryStr.'%'])
+                    ->orWhere('organization', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhere('code', 'LIKE', '%'.$queryStr.'%')
+                    ->orWhereHas('AgentUser', function($agentUserQuery) use($queryStr) {
+                        $agentUserQuery->withTrashed()->where('email', 'LIKE', '%'.$queryStr.'%');
+                    });
+            });
+        endif;
+
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
+        $perpage = ($request->input('size') === 'true' ? ($total_rows > 0 ? $total_rows : 10) : ((int) $request->input('size', 10) > 0 ? (int) $request->input('size', 10) : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
 
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
-        $sorts = [];
+        $sortMap = [
+            'id' => 'id',
+            'name' => 'first_name',
+            'first_name' => 'first_name',
+            'last_name' => 'last_name',
+            'organization' => 'organization',
+            'code' => 'code',
+        ];
         foreach($sorters as $sort):
-            $sorts[] = $sort['field'].' '.$sort['dir'];
+            $field = $sortMap[$sort['field'] ?? 'id'] ?? 'id';
+            $dir = strtoupper((string) ($sort['dir'] ?? 'DESC'));
+            $dir = in_array($dir, ['ASC', 'DESC'], true) ? $dir : 'DESC';
+
+            $query->orderBy($field, $dir);
         endforeach;
-        
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
-        $query = $query->orderByRaw(implode(',', $sorts));
-        if(!empty($queryStr)):
-            $query->where('title','LIKE','%'.$queryStr.'%');
-            $query->orWhere('first_name','LIKE','%'.$queryStr.'%');
-            $query->orWhere('last_name','LIKE','%'.$queryStr.'%');
-        endif;
-        if($status == 2):
-            $query->onlyTrashed();
-        endif;
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -75,14 +108,17 @@ class SubAgentController extends Controller
                     'id' => $list->id,
                     'sl' => $i,
                     'name' => $list->full_name,
+                    'email' => $list->AgentUser->email ?? '',
+                    'initials' => $this->agentInitials($list->full_name),
+                    'photo_url' => $this->agentPhotoUrl($list),
                     'organization' => $list->organization,
                     'code' => $list->code,
-                    'deleted_at' => $list->deleted_at
+                    'deleted_at' => $list->deleted_at ?? ($list->AgentUser->deleted_at ?? null),
                 ];
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'data' => $data, 'all_rows' => $total_rows]);
     }
     /**
      * Show the form for creating a new resource.
@@ -134,14 +170,27 @@ class SubAgentController extends Controller
         $employee = $sub_agent;
         $userData = AgentUser::find($employee->agent_user_id);
         $PostCodeAPI = Option::where('category', 'ADDR_ANYWHR_API')->where('name', 'anywhere_api')->pluck('value')->first();
+        $agentUserList = AgentUser::where('id', $userData->id)->orWhere('parent_id', $userData->id)->get()->pluck('id')->toArray();
 
         return view('pages.agent.profile.sub.show',[
-            'title' => 'Welcome - London Churchill College',
-            'breadcrumbs' => [],
+            'title' => 'Sub Agents - London Churchill College',
+            'layout' => 'agent-management-top-menu',
+            'breadcrumbs' => [
+                ['label' => 'Agent Creations', 'href' => route('agent-user.index')],
+                ['label' => 'Sub Agents', 'href' => 'javascript:void(0);'],
+            ],
             "user" => $userData,
             "employee" => $employee,
             "postcodeApi" => $PostCodeAPI,
             "unique" => Str::random(10),
+            'agentProfileInitials' => $this->agentInitials($employee->full_name),
+            'agentProfilePhotoUrl' => $this->agentPhotoUrl($employee),
+            'profileTabCounts' => [
+                'applicants' => Applicant::whereIn('agent_user_id', $agentUserList)->where('status_id', '>', 1)->count(),
+                'sub' => AgentUser::where('parent_id', $userData->id)->count(),
+                'docs' => AgentDocuments::where('agent_id', $employee->id)->where('type', 1)->count(),
+                'pay' => AgentBankDetail::where('agent_id', $employee->id)->count(),
+            ],
         ]);
     
     }
@@ -211,6 +260,7 @@ class SubAgentController extends Controller
     {
         
         $data = AgentUser::find($sub_agent->agent_user_id)->delete();
+        $sub_agent->delete();
 
         return response()->json($data);
     }
@@ -220,6 +270,61 @@ class SubAgentController extends Controller
         $data = Agent::where('id', $sub_agent)->withTrashed()->restore();
         $dataSet = Agent::find($sub_agent);
         AgentUser::where('id',$dataSet->agent_user_id)->withTrashed()->restore();
-        response()->json($data);
+
+        return response()->json($data);
+    }
+
+    private function agentInitials(?string $name): string
+    {
+        $clean = trim(preg_replace('/\s+/', ' ', (string) $name));
+        if($clean === ''):
+            return 'AG';
+        endif;
+
+        $parts = explode(' ', $clean);
+        $first = mb_substr($parts[0] ?? 'A', 0, 1);
+        $last = count($parts) > 1 ? mb_substr($parts[count($parts) - 1], 0, 1) : '';
+
+        return mb_strtoupper($first.$last);
+    }
+
+    private function agentPhotoUrl(Agent $agent): ?string
+    {
+        $photoUrl = (string) ($agent->photo_url ?? '');
+        if($photoUrl !== '' && !Str::startsWith($photoUrl, 'data:')):
+            return $photoUrl;
+        endif;
+
+        $photo = trim((string) ($agent->photo ?? ''));
+        if($photo === ''):
+            return null;
+        endif;
+
+        if(ctype_digit($photo)):
+            $documentUrl = Document::find((int) $photo)?->download_url;
+
+            return !empty($documentUrl) && !Str::startsWith((string) $documentUrl, 'data:') ? $documentUrl : null;
+        endif;
+
+        if(filter_var($photo, FILTER_VALIDATE_URL)):
+            return $photo;
+        endif;
+
+        $photo = ltrim($photo, '/');
+        $possiblePaths = [
+            'public/agents/'.$agent->id.'/'.$photo,
+            'public/agents/'.$agent->agent_user_id.'/'.$photo,
+            Str::startsWith($photo, 'storage/') ? preg_replace('/^storage\//', 'public/', $photo) : 'public/'.$photo,
+        ];
+
+        foreach($possiblePaths as $path):
+            if(!empty($path) && Storage::disk('local')->exists($path)):
+                $url = Storage::disk('local')->url($path);
+
+                return !Str::startsWith((string) $url, 'data:') ? $url : null;
+            endif;
+        endforeach;
+
+        return null;
     }
 }

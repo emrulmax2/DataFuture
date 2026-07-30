@@ -6,79 +6,63 @@
 
 @section('subcontent')
 
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Profile of <u><strong>{{ $employee->first_name.' '.$employee->last_name }}</strong></u></h2>
-       
-            <div class="ml-auto flex justify-end">
-                @if(isset(auth()->user()->priv()['login_as_user']) && auth()->user()->priv()['login_as_user'] == 1)
-                    <a target="__blank" href="{{ route('impersonate', ['id' =>$employee->agent_user_id,'guardName' =>'agent']) }}" class="btn btn-success text-white w-auto mr-1 mb-0">
-                            Login As Agent <i data-lucide="log-in" class="w-4 h-4 ml-2"></i>
-                    </a>
-                @endif
-              
-            </div>
-    </div>
+    <div class="agm-page agm-profile-page">
+        @include('pages.agent.profile.show-info')
 
-    <!-- BEGIN: Profile Info -->
-    @include('pages.agent.profile.show-info')
-    <!-- END: Profile Info -->
-
-    <div class="intro-y mt-5">
-        <div class="intro-y box p-5">
-            <div class="grid grid-cols-12 gap-0 items-center">
-                <div class="col-span-6">
-                    <div class="font-medium text-base">Applicant/Student Details</div>
+        <section class="agm-profile-panel">
+            <div class="agm-profile-panel__header">
+                <div class="agm-section-title">
+                    <span aria-hidden="true"></span>
+                    <h2>Applicant / Student Details</h2>
                 </div>
-
             </div>
-            
-            <div class="mt-5 pt-5 border-t border-slate-200/60 dark:border-darkmode-400"></div>
-            <div id="studentSearchAccordionWrap" class="pt-4 mb-2">
-    
-                <div id="studentSearchAccordion" class="accordion accordion-boxed pt-2">
+
+            <div id="studentSearchAccordionWrap" class="agm-profile-search">
+                <div id="studentSearchAccordion" class="accordion">
                     <div class="accordion-item">
                         <div id="studentSearchAccordion-1" class="accordion-header">
-                            <button  id="studentGroupSearchBtn" class="accordion-button collapsed relative w-full text-sm font-semibold" type="button" data-tw-toggle="collapse" data-tw-target="#studentSearchAccordion-collapse-1" aria-expanded="false" aria-controls="studentSearchAccordion-collapse-1">
-                                Search
-                                <span class="accordionCollaps" style="width: 18px; height: 16px;"></span>
+                            <button id="studentGroupSearchBtn" class="agm-profile-search__toggle accordion-button collapsed" type="button" data-tw-toggle="collapse" data-tw-target="#studentSearchAccordion-collapse-1" aria-expanded="false" aria-controls="studentSearchAccordion-collapse-1">
+                                <span>
+                                    <i data-lucide="search"></i>
+                                    Search
+                                </span>
+                                <i data-lucide="plus" class="agm-profile-search__open"></i>
+                                <i data-lucide="minus" class="agm-profile-search__close"></i>
                             </button>
                         </div>
                         <div id="studentSearchAccordion-collapse-1" class="accordion-collapse collapse" aria-labelledby="studentSearchAccordion-1" data-tw-parent="#studentSearchAccordion">
-                            <div class="accordion-body">
-                                <div class="grid grid-cols-12 gap-0 gap-y-2 gap-x-4">
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="application_no" class="form-label">Referrence No</label>
+                            <div class="accordion-body agm-profile-search__body">
+                                <div class="agm-profile-filter-grid">
+                                    <div class="agm-profile-field">
+                                        <label for="application_no">Reference No</label>
                                         <div class="autoCompleteField" data-table="students">
                                             <input type="text" autocomplete="off" id="application_no" name="application_no" class="form-control registration_no" value="" placeholder=""/>
                                             <ul class="autoFillDropdown"></ul>
                                         </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label class="form-label">Search By Name</label>
+                                    <div class="agm-profile-field">
+                                        <label for="query-CNTR">Search By Name</label>
                                         <div class="autoCompleteField" data-table="students">
-                                            <input id="query-CNTR" autocomplete="off" name="query" type="text" class="form-control"  placeholder="Search by Name">
+                                            <input id="query-CNTR" autocomplete="off" name="query" type="text" class="form-control" placeholder="Search by Name">
                                             <ul class="autoFillDropdown"></ul>
                                         </div>
-                                        
                                     </div>
-
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="applicantEmail" class="form-label">Applicant Email</label>
+                                    <div class="agm-profile-field">
+                                        <label for="applicantEmail">Applicant Email</label>
                                         <div class="autoCompleteField" data-table="students">
                                             <input type="text" autocomplete="off" id="applicantEmail" name="applicantEmail" class="form-control email" value="" placeholder=""/>
                                             <ul class="autoFillDropdown"></ul>
                                         </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="phone" class="form-label">Applicant Phone</label>
+                                    <div class="agm-profile-field">
+                                        <label for="applicantPhone">Applicant Phone</label>
                                         <div class="autoCompleteField" data-table="students">
                                             <input type="text" autocomplete="off" id="applicantPhone" name="applicantPhone" class="form-control phone" value="" placeholder=""/>
                                             <ul class="autoFillDropdown"></ul>
                                         </div>
                                     </div>
-                                    
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="semesters" class="form-label">Intake Semester</label>
+                                    <div class="agm-profile-field">
+                                        <label for="semesters">Intake Semester</label>
                                         <select id="semesters" class="w-full tom-selects" name="semesters[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($semesters))
@@ -87,10 +71,10 @@
                                                 @endforeach
                                             @endif
                                         </select>
-                                        <div class="acc__input-error error-semesters text-danger mt-2"></div>
+                                        <div class="acc__input-error error-semesters text-danger"></div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="courses" class="form-label">Course </label>
+                                    <div class="agm-profile-field">
+                                        <label for="courses">Course</label>
                                         <select id="courses" class="w-full tom-selects" name="courses[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($courses))
@@ -99,46 +83,52 @@
                                                 @endforeach
                                             @endif
                                         </select>
-                                        <div class="acc__input-error error-course text-danger mt-2"></div>
+                                        <div class="acc__input-error error-course text-danger"></div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="statuses" class="form-label">Status</label>
+                                    <div class="agm-profile-field">
+                                        <label for="statuses">Status</label>
                                         <select id="statuses" class="w-full tom-selects" name="statuses[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($statuses))
-                                            @foreach($statuses as $crs)
-                                                <option value="{{ $crs->id }}">{{ $crs->name }}</option>
-                                            @endforeach
-                                        @endif
+                                                @foreach($statuses as $crs)
+                                                    <option value="{{ $crs->id }}">{{ $crs->name }}</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
-                                    
-                                    <div class="col-span-12 sm:col-span-3">
-                                        <label for="agents" class="form-label">Agent/SubAgents</label>
+                                    <div class="agm-profile-field">
+                                        <label for="agents">Agent/SubAgents</label>
                                         <select id="agents" class="w-full tom-selects" name="agents[]" multiple>
                                             <option value="">Please Select</option>
                                             @if(!empty($agents))
-                                            @foreach($agents as $crs)
-                                                <option value="{{ $crs->agent_user_id }}">{{ $crs->full_name }} [{{ $crs->code }}]</option>
-                                            @endforeach
-                                        @endif
+                                                @foreach($agents as $crs)
+                                                    <option value="{{ $crs->agent_user_id }}">{{ $crs->full_name }} [{{ $crs->code }}]</option>
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
-
-                                    
-                                    <div class="col-span-12 sm:col-span-6 pt-7">
-                                        <button id="studentGroupSearchSubmitBtn" type="button" class="btn btn-success text-white ml-2 w-auto"><i class="w-4 h-4 mr-2" data-lucide="search"></i> Search <i  data-loading-icon="oval" data-color="white" class="w-4 h-4 ml-2 searchLoading hidden" ></i></button>
-                                    </div>
+                                </div>
+                                <div class="agm-profile-search__actions">
+                                    <button id="studentGroupSearchSubmitBtn" type="button" class="agm-btn agm-btn--primary">
+                                        <i data-lucide="search"></i>
+                                        Search
+                                        <i data-loading-icon="oval" data-color="white" class="w-4 h-4 searchLoading hidden"></i>
+                                    </button>
+                                    <button id="studentGroupSearchResetBtn" type="button" class="agm-btn agm-btn--muted">
+                                        <i data-lucide="refresh-ccw"></i>
+                                        Reset
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantApplicantionList" class="mt-5 table-report table-report--tabulator"></div>
+
+            <div class="agm-profile-table-wrap">
+                <div id="applicantApplicantionList" class="agm-profile-table agm-agent-table"></div>
             </div>
-        </div>
+        </section>
     </div>
 
 

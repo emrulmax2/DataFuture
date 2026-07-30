@@ -261,49 +261,73 @@ class ApplicanESignatureController extends Controller
     private function getMapScreenshot($latitude, $longitude, $applicant_id)
     {
         $apiKey = env('GOOGLE_MAP_API');
+        $latitude = number_format((float) $latitude, 7, '.', '');
+        $longitude = number_format((float) $longitude, 7, '.', '');
+        $mapSize = '640x250';
 
-        $url = "https://maps.googleapis.com/maps/api/staticmap?center={$latitude},{$longitude}&zoom=15&size=800x300&markers=color:red%7C{$latitude},{$longitude}&key={$apiKey}";
-
-        $filename = 'location_' . time() . '.png';
+        $filename = 'location_' . md5($latitude . ',' . $longitude . '|' . $mapSize . '|esign-audit-v3') . '.png';
         $folder = 'applicants/' . $applicant_id;
+        $storagePath = $folder . '/' . $filename;
+        $pngPath = storage_path('app/public/' . $storagePath);
 
         if (!Storage::disk('public')->exists($folder)) {
             Storage::disk('public')->makeDirectory($folder, 0775, true);
         }
 
-        $imageData = file_get_contents($url);
+        if (Storage::disk('public')->exists($storagePath)) {
+            return $pngPath;
+        }
+
+        $url = 'https://maps.googleapis.com/maps/api/staticmap?' . http_build_query([
+            'center' => $latitude . ',' . $longitude,
+            'zoom' => 16,
+            'size' => $mapSize,
+            'scale' => 2,
+            'format' => 'png32',
+            'markers' => 'color:red|' . $latitude . ',' . $longitude,
+            'key' => $apiKey,
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $imageData = @file_get_contents($url);
         if ($imageData === false) {
             return false;
         }
 
-        Storage::disk('public')->put($folder . '/' . $filename, $imageData);
-
-        $pngPath = storage_path('app/public/' . $folder . '/' . $filename);
-        $jpgFilename = str_replace('.png', '.jpg', $filename);
-        $jpgPath = storage_path('app/public/' . $folder . '/' . $jpgFilename);
+        Storage::disk('public')->put($storagePath, $imageData);
 
         if (!file_exists($pngPath)) {
             return false;
         }
 
-        $image = imagecreatefrompng($pngPath);
-        if (!$image) {
-            return false;
+        return $pngPath;
+    }
+
+    private function resolvePdfImagePath(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
         }
 
-        $bg = imagecreatetruecolor(imagesx($image), imagesy($image));
-        $white = imagecolorallocate($bg, 255, 255, 255);
-        imagefill($bg, 0, 0, $white);
-        imagecopy($bg, $image, 0, 0, 0, 0, imagesx($image), imagesy($image));
+        if (str_starts_with($path, 'data:') || filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
 
-        $success = imagejpeg($bg, $jpgPath, 90);
+        $normalizedPath = ltrim($path, '/');
+        $publicPath = public_path($normalizedPath);
 
-        imagedestroy($image);
-        imagedestroy($bg);
+        if (is_file($publicPath)) {
+            return $publicPath;
+        }
 
-        unlink($pngPath);
+        if (str_starts_with($normalizedPath, 'storage/')) {
+            $storagePath = storage_path('app/public/' . substr($normalizedPath, strlen('storage/')));
 
-        return $success ? $jpgPath : false;
+            if (is_file($storagePath)) {
+                return $storagePath;
+            }
+        }
+
+        return null;
     }
 
 
@@ -312,183 +336,87 @@ class ApplicanESignatureController extends Controller
     public function download($id)
     {
 
-        $applicant = Applicant::find($id);
+        $applicant = Applicant::with('users')->findOrFail($id);
         $applicantEsign = ApplicantESignature::where('applicant_id', $applicant->id)->first();
 
         $adminEsign = AdminESignature::with('user')->where('applicant_id', $applicant->id)->first();
 
         $applicantEsignEvents = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->orderBy('id','asc')->get();
         $finalizedEvent = ApplicantESignatureEvent::where('applicant_id', $applicant->id)->where('event_type', EsignEventType::FINALIZED->value)->where('user_type', 'applicant')->first();
-  
+        $defaultMap = public_path('build/assets/images/report_icons/google-map.jpg');
+        $adminMap = $defaultMap;
+        $applicantMap = $defaultMap;
 
-        $verifiedIcon = public_path('build/assets/images/report_icons/verified-icon.svg');
-        $documentImage = public_path('build/assets/images/report_icons/document-image.jpg');
+        if (!empty($adminEsign?->latitude) && !empty($adminEsign?->longitude)) {
+            $generatedAdminMap = $this->getMapScreenshot($adminEsign->latitude, $adminEsign->longitude, $applicant->id);
+            $adminMap = $generatedAdminMap && is_file($generatedAdminMap) ? $generatedAdminMap : $defaultMap;
+        }
+
+        if (!empty($applicantEsign?->latitude) && !empty($applicantEsign?->longitude)) {
+            $generatedApplicantMap = $this->getMapScreenshot($applicantEsign->latitude, $applicantEsign->longitude, $applicant->id);
+            $applicantMap = $generatedApplicantMap && is_file($generatedApplicantMap) ? $generatedApplicantMap : $defaultMap;
+        }
+
+        $applicantEmail = $applicant->users->email ?? 'N/A';
+        $adminEmail = $adminEsign?->user?->email ?? 'N/A';
+        $adminName = $adminEsign?->user?->full_name ?? $adminEsign?->user?->name ?? $adminEmail;
+        $applicantName = trim((string) $applicant->full_name) ?: $applicantEmail;
         $fileName = 'audit-' . $applicant->application_no . '.pdf';
+        $adminPhoto = !empty($adminEsign?->user?->photo) && Storage::disk('local')->exists('public/users/' . $adminEsign->user->id . '/' . $adminEsign->user->photo)
+            ? public_path('storage/users/' . $adminEsign->user->id . '/' . $adminEsign->user->photo)
+            : null;
+        $applicantPhoto = !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/' . $applicant->id . '/' . $applicant->photo)
+            ? public_path('storage/applicants/' . $applicant->id . '/' . $applicant->photo)
+            : null;
 
+        $signers = [
+            [
+                'name' => $adminName,
+                'email' => $adminEmail,
+                'label' => 'Signer #1',
+                'color' => '#0d7a76',
+                'ip_address' => $adminEsign?->ip_address,
+                'browser' => $adminEsign?->browser,
+                'os' => $adminEsign?->os,
+                'latitude' => $adminEsign?->latitude,
+                'longitude' => $adminEsign?->longitude,
+                'signed_at' => $adminEsign?->created_at,
+                'map' => $adminMap,
+                'photo' => $adminPhoto,
+            ],
+            [
+                'name' => $applicantName,
+                'email' => $applicantEmail,
+                'label' => 'Signer #2',
+                'color' => '#8E2A3C',
+                'ip_address' => $applicantEsign?->ip_address,
+                'browser' => $applicantEsign?->browser,
+                'os' => $applicantEsign?->os,
+                'latitude' => $applicantEsign?->latitude,
+                'longitude' => $applicantEsign?->longitude,
+                'signed_at' => $finalizedEvent?->created_at ?? $applicantEsign?->signed_date,
+                'map' => $applicantMap,
+                'photo' => $applicantPhoto,
+            ],
+        ];
 
-        $PDFHTML = '';
-        $PDFHTML .= '<html>';
-        $PDFHTML .= '<head>';
-            $PDFHTML .= '<title>Audit of '.$applicant->application_no. '</title>';
-            $PDFHTML .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
-            $PDFHTML .= '<style>';
-                $PDFHTML .= 'body { font-family: Vardana, sans-serif; font-size: 13px; color: #1e293b; margin: 30px; }';
-                $PDFHTML .= 'h1 { font-size: 20px; margin: 0 0 16px 0; }';
-                $PDFHTML .= 'h2 { font-size: 16px; margin: 20px 0 12px 0; color: #374151; }';
-                $PDFHTML .= '.mr-2 { margin-right: 4px; }';
-                $PDFHTML .= '.-mt-2 { margin-top: -8px; }';
-                $PDFHTML .= 'table.columns { width: 100%; border-collapse: collapse; }';
-                $PDFHTML .= 'td.left { width: 150px; padding-right: 18px; vertical-align: top; }';
-                $PDFHTML .= 'td.left img { width: 120px; height: auto; display: block; border: 1px solid #d1d5db; }';
-                $PDFHTML .= 'td.right { vertical-align: top; }';
-                $PDFHTML .= 'table.meta { width: 100%; border-collapse: collapse; }';
-                $PDFHTML .= 'table.meta td { padding: 6px 4px; vertical-align: top; }';
-                $PDFHTML .= '.label { width: 110px; }';
-                $PDFHTML .= 'a { color: #2563eb; text-decoration: none; }';
-                $PDFHTML .= '.signers-table { width: 100%; border-collapse: collapse; margin: 16px 0; }';
-                $PDFHTML .= '.signers-table th, .signers-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }';
-                $PDFHTML .= '.signers-table th { background: #f9fafb; font-weight: bold; font-size: 12px; color: #374151; }';
-                $PDFHTML .= '.signers-table td { font-size: 12px; }';
-                $PDFHTML .= '.signer-info { margin: 8px 0; }';
-                $PDFHTML .= '.signer-email { font-weight: bold; margin-bottom: 4px; }';
-                $PDFHTML .= '.signer-details { font-size: 11px; color: #6b7280; }';
-                $PDFHTML .= '.verification-badges { margin: 4px 0; }';
-                $PDFHTML .= '.verification-badges .badge { margin-right: 4px; margin-bottom: 2px; }';
-                $PDFHTML .= '.map-container { width: 100%; }';
-                $PDFHTML .= '.map-image { width: 100%; height: 250px; border: 1px solid #d1d5db; border-radius: 4px; object-fit: cover; }';
-                $PDFHTML .= '.signer-section { margin: 0 0; }';
-            $PDFHTML .= '</style>';
-        $PDFHTML .= '</head>';
-        $PDFHTML .= '<body>';
-            $PDFHTML .= '<h1>Audit of \'' . $applicant->application_no . '\'</h1>';
-            $PDFHTML .= '<table class="columns">';
-                $PDFHTML .= '<tr>';
-                    $PDFHTML .= '<td class="left">';
-                        $PDFHTML .= '<img src="'.$documentImage.'" alt="preview" />';
-                    $PDFHTML .= '</td>';
-                    $PDFHTML .= '<td class="right ">';
-                        $PDFHTML .= '<table class="meta -mt-2">';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td colspan="2">This document is a <span style="background: #eeeeee; padding: 3px 5px;border-radius: 5px;">FINALIZED</span> sign request.</td>';
-                            $PDFHTML .= '</tr>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="label">From</td>';
-                                $PDFHTML .= '<td>London Churchill College ('. (isset($adminEsign->smtp_email) && !empty($adminEsign->smtp_email) ? $adminEsign->smtp_email : 'N/A') . ')</td>';
-                            $PDFHTML .= '</tr>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="label">File Owner</td>';
-                                $PDFHTML .= '<td>London Churchill College</td>';
-                            $PDFHTML .= '</tr>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="label">Signing Order</td>';
-                                $PDFHTML .= '<td>';
-                                    $PDFHTML .=  1 . '. ' . (isset($adminEsign->user->email) && !empty($adminEsign->user->email) ? $adminEsign->user->email : 'N/A')  . '<br/>';
-                                    $PDFHTML .=  2 . '. ' . (isset($applicant->users->email) && !empty($applicant->users->email) ? $applicant->users->email : 'N/A') . '<br/>';
-                                $PDFHTML .= '</td>';
-                            $PDFHTML .= '</tr>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="label">Initialized</td>';
-                                $PDFHTML .= '<td>'.(isset($adminEsign->created_at) && !empty($adminEsign->created_at) ? date('M d, Y', strtotime($adminEsign->created_at)).' '.date('h:i A T', strtotime($adminEsign->created_at)) : 'N/A').'</td>';
-                            $PDFHTML .= '</tr>';
-                            $PDFHTML .= '<tr>';
-                                $PDFHTML .= '<td class="label">Finalized</td>';
-                                $PDFHTML .= '<td>'.(isset($finalizedEvent->created_at) && !empty($finalizedEvent->created_at) ? date('M d, Y', strtotime($finalizedEvent->created_at)).' '.date('h:i A T', strtotime($finalizedEvent->created_at)) : 'N/A').'</td>';
-                            $PDFHTML .= '</tr>';
-                        $PDFHTML .= '</table>';
-                    $PDFHTML .= '</td>';
-                $PDFHTML .= '</tr>';
-            $PDFHTML .= '</table>';
-            if(isset($applicantEsign->signature) && !empty($applicantEsign->signature)):
-            $PDFHTML .= '<div style="text-align:center; margin-top:30px;">';
-                $PDFHTML .= '<img src="'. (isset($applicantEsign->signature) && !empty($applicantEsign->signature) ? $applicantEsign->signature : '') . '" style="max-width: 500px; height: auto; display:inline-block;" />';
-                $PDFHTML .= '<p style="margin-top:10px;">Signature</p>';
-            $PDFHTML .= '</div>';
-            endif;
-           $PDFHTML .= '<div style="page-break-before: always;">';
-             $PDFHTML .= '<h2>Signers</h2>';
-            $PDFHTML .= '<div class="signer-section">';
-                $PDFHTML .= '<div class="signer-header" style="overflow: hidden; margin-bottom: 12px;">';
-                    $PDFHTML .= '<img src="'. (isset($adminEsign->user->photo) && !empty($adminEsign->user->photo) && Storage::disk('local')->exists('public/users/' . $adminEsign->user->id . '/' . $adminEsign->user->photo) ? public_path('storage/users/' . $adminEsign->user->id . '/' . $adminEsign->user->photo) : public_path('build/assets/images/placeholders/200x200.jpg')) . '" alt="User Avatar" style="width: 50px; height: 50px;" />';
-                $PDFHTML .= '</div>';
-                $PDFHTML .= '<div class="signer-info">';
-                    $PDFHTML .= '<div class="signer-email">'. (isset($adminEsign->user->email) && !empty($adminEsign->user->email) ? $adminEsign->user->email : 'N/A'). '</div>';
-                    $PDFHTML .= '<div class="signer-details">Signer #1 - p.murphy+un0wqq</div>';
-                    $PDFHTML .= '<div class="verification-badges">';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified Email</span>';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified IP ' .($adminEsign?->ip_address ?? 'N/A'). '</span>';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified consent to Esign</span>';
-                    $PDFHTML .= '</div>';
-                    $PDFHTML .= '<div class="signer-details">Verified geolocation '. $this->convertToDMS($adminEsign?->latitude, true) . ' ' . $this->convertToDMS($adminEsign?->longitude, false) . ' (66661 m)</div>';
-                $PDFHTML .= '</div>';
-            $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="map-container">';
-                $PDFHTML .= '<img src="'. (isset($adminEsign->latitude) && !empty($adminEsign->latitude) ? $this->getMapScreenshot($adminEsign->latitude,$adminEsign->longitude, $applicant->id) : public_path('build/assets/images/report_icons/google-map.jpg')).'" alt="Location Map" class="map-image" />';
-            $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="signer-section" style="margin-top: 20px">';
-                $PDFHTML .= '<div class="signer-header" style="overflow: hidden; margin-bottom: 12px;">';
-                    $PDFHTML .= '<img src="'.(isset($applicant->photo) && !empty($applicant->photo) && Storage::disk('local')->exists('public/applicants/' . $applicant->id . '/' . $applicant->photo) ? public_path('storage/applicants/' . $applicant->id . '/' . $applicant->photo) : public_path('build/assets/images/placeholders/200x200.jpg')) . '" alt="User Avatar" style="width: 50px; height: 50px;" />';
-                $PDFHTML .= '</div>';
-                $PDFHTML .= '<div class="signer-info">';
-                    $PDFHTML .= '<div class="signer-email">'. $applicant->users->email. '</div>';
-                    $PDFHTML .= '<div class="signer-details">Signer #1 - p.murphy+un0wqq</div>';
-                    $PDFHTML .= '<div class="verification-badges">';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified Email</span>';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified IP ' .($applicantEsign?->view_ip_address ?? 'N/A'). '</span>';
-                        $PDFHTML .= '<span style="color: #6b7280; margin-right: 8px;"><img src="'.$verifiedIcon.'" alt="Verified" style="width: 8px; height: 8px; vertical-align: middle; margin-right: 8px;" />Verified consent to Esign</span>';
-                    $PDFHTML .= '</div>';
-                    $PDFHTML .= '<div class="signer-details">Verified geolocation '. $this->convertToDMS($applicantEsign?->latitude, true) . ' ' . $this->convertToDMS($applicantEsign?->longitude, false) . ' (66661 m)</div>';
-                $PDFHTML .= '</div>';
-            $PDFHTML .= '</div>';
-            $PDFHTML .= '<div class="map-container">';
-                $PDFHTML .= '<img src="'.(isset($applicantEsign->latitude) && !empty($applicantEsign->latitude) ? $this->getMapScreenshot($applicantEsign->latitude,$applicantEsign->longitude, $applicant->id) : public_path('build/assets/images/report_icons/google-map.jpg')).'" alt="Location Map" class="map-image" />';
-            $PDFHTML .= '</div>';
-           $PDFHTML .= '</div>';
-
-           $PDFHTML .= '<div style="margin-top:32px; page-break-before:always;">';
-            $PDFHTML .= '<h2 style="font-size:18px;margin:28px 0 14px 0;font-weight:600;">Audit Trail</h2>';
-            $PDFHTML .= '<table style="width:100%; border-collapse:collapse; font-size:13px; color:#1e293b;">';
-            foreach ($applicantEsignEvents as $event) {
-                $PDFHTML .= '<tr style="border-bottom:1px solid #e5e7eb; vertical-align:top;">';
-                $PDFHTML .= '<td style="padding-top: 8px;vertical-align:top;">';
-                if ($event->event_type === EsignEventType::SIGN_REQUEST_CREATED->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/notebook-text.png').'" alt="Notebook" />';
-                } elseif ($event->event_type === EsignEventType::EMAIL_SENT->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/mail.png').'" alt="Mail Send" />';
-                } elseif ($event->event_type === EsignEventType::VIEWED->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/eye.png').'" alt="View" />';
-                } elseif ($event->event_type === EsignEventType::LOCATION_VERIFIED->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/map-pinned.png').'" alt="Location Map" />';
-                } elseif ($event->event_type === EsignEventType::CONSENTED_TO_ESIGN->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/square-check.png').'" alt="Consented to e-sign" />';
-                } elseif ($event->event_type === EsignEventType::FINALIZED->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/file-check.png').'" alt="Finalized" />';
-                } elseif ($event->event_type === EsignEventType::EMAIL_READ->value) {
-                    $PDFHTML .= '<img style="width: 16px; height: 16px; background: transparent; border: none;" src="'.public_path('build/assets/images/report_icons/mail-open.png').'" alt="Mail Read" />';
-                }
-                $PDFHTML .= '</td>';
-                $PDFHTML .= '<td style="width:140px; padding:8px; font-weight:bold;">'. (EsignEventType::fromValue($event->event_type)?->label() ?? $event->event_type). '</td>';
-                $PDFHTML .= '<td style="padding:8px;">' . $event->event_description;
-                if (isset($event->extra_field['opened']) && $event->extra_field['opened'] === true):
-                    $PDFHTML .= '<span style="background:#f3f4f6; color:#374151; padding:2px 6px; border-radius:4px; font-weight:500; margin-left:6px;">OPENED</span>';
-                endif;
-                if (in_array($event->event_type, [EsignEventType::SIGN_REQUEST_CREATED->value,EsignEventType::VIEWED->value, EsignEventType::CONSENTED_TO_ESIGN->value]) && !empty($event->ip_address)):
-                    $PDFHTML .= '<div style="font-size:11px; color:#64748b; margin-top:2px;">' . 'IP ' . $event->ip_address . ', ' . $event->browser . ', ' . $event->os. '</div>';
-                endif;
-                if ($event->event_type === EsignEventType::EMAIL_SENT->value):
-                    $PDFHTML .= '<div style="font-size:11px; color:#64748b; margin-top:2px;">' . $event->created_at->diffForHumans() . ', ' . date('M d, Y h:i A T', strtotime($event->created_at)). '</div>';
-                endif;
-                if ($event->event_type === EsignEventType::LOCATION_VERIFIED->value):
-                    $PDFHTML .= '<div style="font-size:11px; color:#64748b; margin-top:2px;">'. 'IP ' . $event->ip_address . ', ' . $event->browser . ', ' . $event->os. '</div>';
-                    $PDFHTML .= '<div style="font-size:11px; color:#64748b; margin-top:2px;">'. $event->latitude_d_m_s . ' ' . $event->longitude_d_m_s. '</div>';
-                endif;
-                $PDFHTML .= '</td>';
-                $PDFHTML .= '<td style="padding:8px; text-align:right; font-size:12px; white-space:nowrap;">' . date('M d, Y', strtotime($event->created_at)) . '<br>'. date('h:i A T', strtotime($event->created_at)) . '</td>';
-                $PDFHTML .= '</tr>';
-            }
-            $PDFHTML .= '</table>';
-            $PDFHTML .= '</div>';
-        $PDFHTML .= '</body>';
-        $PDFHTML .= '</html>';
+        $PDFHTML = view('pages.students.admission.pdf.e-signature-audit', [
+            'applicant' => $applicant,
+            'applicantEsign' => $applicantEsign,
+            'adminEsign' => $adminEsign,
+            'applicantEsignEvents' => $applicantEsignEvents,
+            'finalizedEvent' => $finalizedEvent,
+            'signers' => $signers,
+            'signatureImage' => $this->resolvePdfImagePath($applicantEsign?->signature),
+            'logoImage' => public_path('build/assets/images/logo_white.svg'),
+            'documentImage' => public_path('build/assets/images/report_icons/document-image.jpg'),
+            'reference' => $applicant->application_no ?? $applicant->id,
+            'signatureId' => $applicantEsign?->id ? 'ESIG-' . $applicant->id . '-' . $applicantEsign->id : 'ESIG-' . $applicant->id,
+            'fromEmail' => $adminEsign?->smtp_email ?? 'N/A',
+            'applicantEmail' => $applicantEmail,
+            'adminEmail' => $adminEmail,
+            'applicantName' => $applicantName,
+        ])->render();
 
         $pdf = PDF::loadHTML($PDFHTML)
             ->setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])

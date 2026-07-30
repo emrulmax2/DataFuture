@@ -17,10 +17,15 @@ class GroupController extends Controller
     public function index()
     {
         return view('pages.course-management.groups.index', [
-            'title' => 'Terms & Modules - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Groups - London Churchill College',
             'subtitle' => 'Groups',
+            'cmPageTitle' => 'Groups',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Groups', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::where('active', 1)->orderBy('name', 'ASC')->get(),
@@ -31,7 +36,7 @@ class GroupController extends Controller
 
     public function list(Request $request){
         $queryStr = (isset($request->querystr) && !empty($request->querystr) ? $request->querystr : '');
-        $status = (isset($request->status) ? $request->status : 1);
+        $status = (isset($request->status) && $request->status !== '' ? $request->status : 1);
         $term = (isset($request->term) && $request->term > 0 ? $request->term : 0);
         $courseId = (isset($request->course_id) && $request->course_id > 0 ? $request->course_id : 0);
 
@@ -47,16 +52,20 @@ class GroupController extends Controller
         endif;
         if($term > 0): $query->where('term_declaration_id', $term); endif;
         if($courseId > 0): $query->where('course_id', $courseId); endif;
-        if($status == 2):
+        // "all" is the Status filter's fourth option: every group whatever its
+        // state, archived ones included.
+        if($status === 'all'):
+            $query->withTrashed();
+        elseif($status == 2):
             $query->onlyTrashed();
         else:
             $query->where('active', $status);
         endif;
 
-        $total_rows = $count = $query->count();
+        $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';        
+        $perpage = (isset($request->size) && $request->size == 'true' ? ($total_rows > 0 ? $total_rows : 10) : ($request->size > 0 ? $request->size : 10));
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -82,7 +91,8 @@ class GroupController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        // `total` feeds the header count and the footer's page range.
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(GroupsRequests $request){

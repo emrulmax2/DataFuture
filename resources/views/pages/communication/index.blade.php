@@ -1,3 +1,12 @@
+{{--
+    Bulk Communication.
+
+    Reached from the class plan tree with a "-" separated list of plan ids in
+    the URL. Every endpoint, field name and hidden input below is the one
+    `BulkCommunicationController` already expects — `student_ids` as a comma
+    string, `letter_body` / `body` appended from the editors, `documents[]` for
+    the attachments — so only the chrome is new.
+--}}
 @extends('../layout/' . $layout)
 
 @section('subhead')
@@ -5,330 +14,336 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Bulk Communications</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            {{-- <button data-tw-toggle="modal" data-tw-target="#addRoleModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Role</button> --}}
-        </div>
-    </div>
-    <!-- BEGIN: HTML Table Data -->
-    <div class="intro-y box mt-5">
-        <div class="flex items-center p-5 border-b border-slate-200/60 dark:border-darkmode-400">
-            <h2 class="font-medium text-base mr-auto">Student Lists</h2>
-            <div class="ml-auto" id="communicationBtnsArea" style="display: none;">
-                <button type="button" class="sendBulkSmsBtn btn btn-pending shadow-md text-white"><i data-lucide="smartphone" class="w-4 h-4 mr-2"></i>Send SMS</button>
-                <button type="button" class="sendBulkMailBtn btn btn-success shadow-md text-white"><i data-lucide="mail" class="w-4 h-4 mr-2"></i>Send Email</button>
-                <button type="button" class="generateBulkLetterBtn btn btn-primary shadow-md text-white"><i data-lucide="mailbox" class="w-4 h-4 mr-2"></i>Generate Letter</button>
-            </div>
-        </div>
-        <div class="p-5">
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="communicationStudentListTable" data-plans="{{ $plans }}" class="table-report table-report--tabulator"></div>
-            </div>
-        </div>
-    </div>
-    <!-- END: HTML Table Data -->
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
 
-    <!-- BEGIN: Send Letter Modal -->
-    <div id="generateBulkLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="generateBulkLetterForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send Letter</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
+        <div class="cm-layout__content">
+            <div class="cm-card cm-tablecard">
+                <div class="cm-tablecard__head cm-tablecard__head--divided">
+                    <div class="cm-tablecard__titles" style="display:block;">
+                        <h2 class="cm-tablecard__title cm-serif">Student List</h2>
+                        <p class="cm-commhead__sub">
+                            {{ $planCount }} {{ $planCount === 1 ? 'class plan' : 'class plans' }}
+                            @if(!empty($planNames))
+                                <span class="cm-commhead__dot">&middot;</span>{{ implode(', ', $planNames) }}
+                            @endif
+                        </p>
                     </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
-                            <input id="issued_date" type="text" value="<?php echo date('d-m-Y') ?>" name="issued_date" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
-                            <div class="acc__input-error error-issued_date text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
-                            <select id="letter_set_id" name="letter_set_id" class="w-full tom-selects">
-                                <option value="">Please Select</option>
-                                @if(!empty($letterSet))
-                                    @foreach($letterSet as $ls)
-                                        <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-letter_set_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-5 letterEditorArea" style="display: none;">
-                            <div class="flex justify-between mb-2">
-                                <div class="ml-auto">@include('pages.settings.letter.letter-tags')</div>
-                            </div>
-                            <div class="editor document-editor">
-                                <div class="document-editor__toolbar"></div>
-                                <div class="document-editor__editable-container">
-                                    <div class="document-editor__editable" id="letterEditor"></div>
-                                </div>
-                            </div>
-                            <div class="acc__input-error error-letter_body text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="signatory_id" class="form-label">Signatory</label>
-                            <select id="signatory_id" name="signatory_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($signatory))
-                                    @foreach($signatory as $sg)
-                                        <option value="{{ $sg->id }}">{{ $sg->signatory_name }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-signatory_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="form-check form-switch items-center">
-                                <label class="form-check-label ml-0 mr-5" for="checkbox-switch-7">Send Email</label>
-                                <input id="send_in_email" class="form-check-input" name="send_in_email" value="1" type="checkbox">
-                            </div>
-                        </div>
-                        <div class="mt-3 commonSmtpWrap" style="display: none;">
-                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($smtps))
-                                    @foreach($smtps as $sm)
-                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
-                            Generate Letter                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
+
+                    {{-- Revealed by `rowSelectionChanged` — there is nothing to
+                         send to until somebody is ticked. --}}
+                    <div class="cm-tablecard__actions" id="communicationBtnsArea" hidden>
+                        <span class="cm-commcount" data-cm-selected></span>
+                        <button type="button" class="sendBulkSmsBtn cm-btn cm-btn--pill cm-btn--sms">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"></rect><path d="M12 18h.01"></path></svg>
+                            Send SMS
                         </button>
-                        <input type="hidden" name="student_ids" value=""/>
-                        <input type="hidden" name="print_pdf" value="1"/>
+                        <button type="button" class="sendBulkMailBtn cm-btn cm-btn--pill cm-btn--mail">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>
+                            Send Email
+                        </button>
+                        <button type="button" class="generateBulkLetterBtn cm-btn cm-btn--pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H5.2L4 17.2z"></path><path d="M8 9h8M8 12h5"></path></svg>
+                            Generate Letter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="cm-commbar">
+                    <button type="button" class="cm-btn cm-btn--ghost" data-cm-select-all>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                        Select all on page
+                    </button>
+                    <button type="button" class="cm-btn cm-btn--ghost" data-cm-select-none>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        Clear selection
+                    </button>
+
+                    <span class="cm-commbar__spacer"></span>
+                    <span class="cm-tablecard__count" data-cm-count="student"></span>
+                </div>
+
+                <div class="cm-tabulator-wrap">
+                    <div id="communicationStudentListTable" class="cm-tabulator" data-plans="{{ $plans }}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Send SMS                                                          --}}
+    {{-- ---------------------------------------------------------------- --}}
+    <div id="sendBulkSmsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog cm-modal__dialog cm-modal__dialog--md">
+            <form method="POST" action="#" id="sendBulkSmsForm" autocomplete="off" enctype="multipart/form-data">
+                <div class="modal-content cm-modal">
+                    <div class="cm-modal__head">
+                        <div>
+                            <div class="cm-modal__eyebrow"><span data-cm-sms-eyebrow>Bulk message</span></div>
+                            <h2 class="cm-modal__title cm-serif">Send SMS</h2>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="cm-modal__body cm-modal__body--grid2">
+                        <div class="cm-field cm-field--span2">
+                            <label for="sms_template_id">Template</label>
+                            <select id="sms_template_id" name="sms_template_id" class="cm-select sms_template_id">
+                                <option value="">Please Select</option>
+                                @foreach($smsTemplates as $st)
+                                    <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="cm-field cm-field--span2">
+                            <label for="sms_subject">Subject <span>*</span></label>
+                            <input id="sms_subject" type="text" name="subject" class="cm-input subject" placeholder="What is this message about?">
+                            <div class="acc__input-error error-subject"></div>
+                        </div>
+
+                        <div class="cm-field cm-field--span2">
+                            {{-- The counter is a sibling of the caption, not a
+                                 child of it: `.cm-field > label span` is the
+                                 required-marker rule and would paint it red. --}}
+                            <div class="cm-labelrow">
+                                <label for="smsTextArea">SMS <span>*</span></label>
+                                {{-- Characters left / how many 160-char parts
+                                     the message will be billed as. --}}
+                                <span class="cm-smscount sms_countr">160 / 1</span>
+                            </div>
+                            <textarea id="smsTextArea" rows="6" name="sms" class="cm-input cm-textarea sms" placeholder="Type the message…"></textarea>
+                            <div class="acc__input-error error-sms"></div>
+                        </div>
+                    </div>
+
+                    <div class="cm-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            Cancel
+                        </button>
+                        <button type="submit" id="sendSMSBtn" class="cm-btn cm-btn--save">
+                            @include('pages.course-management.partials.save-glyphs')
+                            Send SMS
+                        </button>
+                        <input type="hidden" name="student_ids" value="">
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Send Letter Modal -->
 
-    <!-- BEGIN: Send Mail Modal -->
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Send Email                                                        --}}
+    {{-- ---------------------------------------------------------------- --}}
     <div id="sendBulkMailModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="sendBulkMailForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send Email</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
+        <div class="modal-dialog cm-modal__dialog cm-modal__dialog--wide">
+            <form method="POST" action="#" id="sendBulkMailForm" autocomplete="off" enctype="multipart/form-data">
+                <div class="modal-content cm-modal">
+                    <div class="cm-modal__head">
+                        <div>
+                            <div class="cm-modal__eyebrow"><span data-cm-mail-eyebrow>Bulk message</span></div>
+                            <h2 class="cm-modal__title cm-serif">Send Email</h2>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        </button>
                     </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+
+                    <div class="cm-modal__body cm-modal__body--grid2">
+                        <div class="cm-field">
+                            <label for="mail_comon_smtp_id">SMTP <span>*</span></label>
+                            <select id="mail_comon_smtp_id" name="comon_smtp_id" class="cm-select comon_smtp_id">
                                 <option value="">Please Select</option>
-                                @if($smtps->count() > 0)
-                                    @foreach($smtps as $sm)
-                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                    @endforeach
-                                @endif
+                                @foreach($smtps as $sm)
+                                    <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                @endforeach
                             </select>
-                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                            <div class="acc__input-error error-comon_smtp_id"></div>
                         </div>
-                        <div class="mt-3">
-                            <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                            <input id="subject" type="text" name="subject" class="form-control w-full">
-                            <div class="acc__input-error error-subject text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3 mb-4">
-                            <label for="email_template_id" class="form-label">Template</label>
-                            <select id="email_template_id" name="email_template_id" class="w-full tom-selects">
+
+                        <div class="cm-field">
+                            <label for="email_template_id">Template</label>
+                            <select id="email_template_id" name="email_template_id" class="cm-select email_template_id">
                                 <option value="">Please Select</option>
-                                @if($emailTemplates->count() > 0)
-                                    @foreach($emailTemplates as $et)
-                                        <option value="{{ $et->id }}">{{ $et->email_title }}</option>
-                                    @endforeach
-                                @endif
+                                @foreach($emailTemplates as $et)
+                                    <option value="{{ $et->id }}">{{ $et->email_title }}</option>
+                                @endforeach
                             </select>
                         </div>
-                        <div>
-                            <div class="editor document-editor">
+
+                        <div class="cm-field cm-field--span2">
+                            <label for="subject">Subject <span>*</span></label>
+                            <input id="subject" type="text" name="subject" class="cm-input subject" placeholder="Email subject line">
+                            <div class="acc__input-error error-subject"></div>
+                        </div>
+
+                        <div class="cm-field cm-field--span2">
+                            <label>Message <span>*</span></label>
+                            <div class="editor document-editor cm-editor">
                                 <div class="document-editor__toolbar"></div>
                                 <div class="document-editor__editable-container">
                                     <div class="document-editor__editable" id="mailEditor"></div>
                                 </div>
                             </div>
-                            <div class="acc__input-error error-body text-danger mt-2"></div>
+                            <div class="acc__input-error error-body"></div>
                         </div>
-                        <div class="mt-3 flex justify-start items-center relative">
-                            <label for="sendMailsDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Attachments
-                            </label>
-                            <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="sendMailsDocument"/>
-                        </div>
-                        <div id="sendMailsDocumentNames" class="sendMailsDocumentNames mt-3" style="display: none"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendEmailBtn" class="btn btn-primary w-auto">     
-                            Send Mail                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                        </button>
-                        <input type="hidden" name="student_ids" value=""/>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-    <!-- END: Send Mail Modal -->
 
-    <!-- BEGIN: Send SMS Modal -->
-    <div id="sendBulkSmsModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <form method="POST" action="#" id="sendBulkSmsForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Send SMS</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
-                        <div>
-                            <label for="sms_template_id" class="form-label">Template</label>
-                            <select id="sms_template_id" name="sms_template_id" class="w-full tom-selects">
-                                <option value="">Please Select</option>
-                                @if($smsTemplates->count() > 0)
-                                    @foreach($smsTemplates as $st)
-                                        <option value="{{ $st->id }}">{{ $st->sms_title }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                        <div class="mt-3">
-                            <label for="sms_subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                            <input id="sms_subject" type="text" name="subject" class="form-control w-full">
-                            <div class="acc__input-error error-subject text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="flex justify-between items-center">
-                                <label for="smsTextArea" class="form-label">SMS <span class="text-danger">*</span></label>
-                                <span class="sms_countr font-bold">160 / 1</span>
+                        <div class="cm-field cm-field--span2">
+                            <label>Attachments</label>
+                            <div class="cm-upload">
+                                <label for="sendMailsDocument" class="cm-btn cm-btn--ghost cm-upload__button">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 9l5-5 5 5M12 4v12"></path></svg>
+                                    Choose files
+                                </label>
+                                <span class="cm-upload__hint">Images, PDF, Word, Excel or PowerPoint</span>
+                                <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" id="sendMailsDocument" class="cm-upload__input">
                             </div>
-                            <textarea maxlength rows="7" id="smsTextArea" name="sms" class="form-control w-full"></textarea>
-                            <div class="acc__input-error error-sms text-danger mt-2"></div>
+                            <div id="sendMailsDocumentNames" class="cm-upload__files sendMailsDocumentNames" hidden></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="sendSMSBtn" class="btn btn-primary w-auto">     
-                            Send SMS                      
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
+
+                    <div class="cm-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            Cancel
                         </button>
-                        <input type="hidden" name="student_ids" value=""/>
+                        <button type="submit" id="sendEmailBtn" class="cm-btn cm-btn--save">
+                            @include('pages.course-management.partials.save-glyphs')
+                            Send Email
+                        </button>
+                        <input type="hidden" name="student_ids" value="">
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Send SMS Modal -->
 
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitle"></div>
-                        <div class="text-slate-500 mt-2 successModalDesc"></div>
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Generate Letter                                                   --}}
+    {{-- ---------------------------------------------------------------- --}}
+    <div id="generateBulkLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog cm-modal__dialog cm-modal__dialog--wide">
+            <form method="POST" action="#" id="generateBulkLetterForm" autocomplete="off" enctype="multipart/form-data">
+                <div class="modal-content cm-modal">
+                    <div class="cm-modal__head">
+                        <div>
+                            <div class="cm-modal__eyebrow"><span data-cm-letter-eyebrow>Bulk letter</span></div>
+                            <h2 class="cm-modal__title cm-serif">Generate Letter</h2>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        </button>
                     </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
+
+                    <div class="cm-modal__body cm-modal__body--grid2">
+                        <div class="cm-field">
+                            <label for="issued_date">Issued Date <span>*</span></label>
+                            <input id="issued_date" type="text" name="issued_date" value="{{ date('d-m-Y') }}" class="cm-input datepicker issued_date" data-format="DD-MM-YYYY" data-single-mode="true" readonly>
+                            <div class="acc__input-error error-issued_date"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="letter_set_id">Letter <span>*</span></label>
+                            <select id="letter_set_id" name="letter_set_id" class="cm-select letter_set_id">
+                                <option value="">Please Select</option>
+                                @foreach($letterSet as $ls)
+                                    <option value="{{ $ls->id }}">{{ $ls->letter_type.' - '.$ls->letter_title }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-letter_set_id"></div>
+                        </div>
+
+                        {{-- Revealed once a letter is picked, because the body
+                             is the chosen letter's template. --}}
+                        <div class="cm-field cm-field--span2 letterEditorArea" hidden>
+                            <div class="cm-labelrow">
+                                <label>Letter Body <span>*</span></label>
+                                @include('pages.settings.letter.letter-tags')
+                            </div>
+                            <div class="editor document-editor cm-editor">
+                                <div class="document-editor__toolbar"></div>
+                                <div class="document-editor__editable-container">
+                                    <div class="document-editor__editable" id="letterEditor"></div>
+                                </div>
+                            </div>
+                            <div class="acc__input-error error-letter_body"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label for="signatory_id">Signatory</label>
+                            <select id="signatory_id" name="signatory_id" class="cm-select signatory_id">
+                                <option value="">Please Select</option>
+                                @foreach($signatory as $sg)
+                                    <option value="{{ $sg->id }}">{{ $sg->signatory_name }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-signatory_id"></div>
+                        </div>
+
+                        <div class="cm-field">
+                            <label>Delivery</label>
+                            {{-- The toggle sits in a wrapper so its own <label>
+                                 is not a direct child of `.cm-field`, whose
+                                 caption rules would uppercase it and paint its
+                                 spans in the required-marker red. --}}
+                            <div class="cm-togglewrap">
+                                <label class="cm-togglecard" for="send_in_email">
+                                    <input id="send_in_email" class="cm-togglecard__input" type="checkbox" name="send_in_email" value="1">
+                                    <span class="cm-togglecard__card">
+                                        <span class="cm-togglecard__mark">
+                                            {{-- Inline rather than lucide: createIcons
+                                                 replaces the placeholder once, and both
+                                                 glyphs have to survive every toggle. --}}
+                                            <svg class="cm-togglecard__glyph cm-togglecard__glyph--off" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                                            <svg class="cm-togglecard__glyph cm-togglecard__glyph--on" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+                                        </span>
+                                        <span class="cm-togglecard__text">
+                                            <strong>Send by email</strong>
+                                            <small class="cm-togglecard__hint cm-togglecard__hint--on">The letter will be emailed too</small>
+                                            <small class="cm-togglecard__hint cm-togglecard__hint--off">Generate the PDF only</small>
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="cm-field cm-field--span2 commonSmtpWrap" hidden>
+                            <label for="comon_smtp_id">SMTP <span>*</span></label>
+                            <select id="comon_smtp_id" name="comon_smtp_id" class="cm-select comon_smtp_id">
+                                <option value="">Please Select</option>
+                                @foreach($smtps as $sm)
+                                    <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                @endforeach
+                            </select>
+                            <div class="acc__input-error error-comon_smtp_id"></div>
+                        </div>
+                    </div>
+
+                    <div class="cm-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            Cancel
+                        </button>
+                        <button type="submit" id="sendLetterBtn" class="cm-btn cm-btn--save">
+                            @include('pages.course-management.partials.save-glyphs')
+                            Generate Letter
+                        </button>
+                        <input type="hidden" name="student_ids" value="">
+                        {{-- The response carries a pdf url that is opened in a
+                             new tab when this is 1. --}}
+                        <input type="hidden" name="print_pdf" value="1">
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-    <!-- END: Success Modal Content -->
 
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitle">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWith btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
-
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModal" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitle">Oops!</div>
-                        <div class="text-slate-500 mt-2 warningModalDesc"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">OK, Got it</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
+
 @section('script')
-    @vite('resources/js/bulk-communication.js')
+    @vite('resources/js/course-bulk-communication.js')
 @endsection

@@ -23,14 +23,12 @@
             ? Storage::disk('local')->url('public/'.$opt['site_favicon'])
             : asset('build/assets/images/placeholders/200x200.jpg');
         $authUser = auth()->user();
-        $isStaffGuard = Auth::check() && !Auth::guard('agent')->check() && !Auth::guard('applicant')->check() && !Auth::guard('student')->check();
-        $staffPrivileges = $isStaffGuard ? Auth::user()->priv() : [];
-        $canSearchStudents = $isStaffGuard && !empty($staffPrivileges['live']) && $staffPrivileges['live'] != '0';
-        $canSearchEmployees = $isStaffGuard && !empty($staffPrivileges['hr_porta']) && $staffPrivileges['hr_porta'] != '0';
-        $canShowGlobalSearch = $canSearchStudents || $canSearchEmployees;
-        $searchPlaceholder = $canSearchStudents && $canSearchEmployees
-            ? 'Search Student, Staff...'
-            : ($canSearchStudents ? 'Search Student...' : 'Search Staff...');
+        $searchConfig = \App\Support\GlobalSearch::forCurrentUser();
+        $canSearchApplicants = $searchConfig['applicants'];
+        $canSearchStudents = $searchConfig['students'];
+        $canSearchEmployees = $searchConfig['employees'];
+        $canShowGlobalSearch = $searchConfig['show'];
+        $searchPlaceholder = $searchConfig['placeholder'];
         $employeeUser = Auth::check() ? (cache()->get('employeeCache' . Auth::id()) ?? Auth::user()->load('employee')) : null;
         $employee = $employeeUser?->employee;
         $userName = trim((isset($employee?->title?->name) ? $employee->title->name.' ' : '').($employee?->first_name ?? '').' '.($employee?->last_name ?? ''));
@@ -113,7 +111,7 @@
                 </nav>
                 <div class="ss-header__spacer"></div>
                 @if ($canShowGlobalSearch && Route::has('global.search'))
-                    <div class="ss-search" data-global-search data-search-url="{{ route('global.search') }}" data-search-students="{{ $canSearchStudents ? '1' : '0' }}" data-search-employees="{{ $canSearchEmployees ? '1' : '0' }}">
+                    <div class="ss-search" data-global-search data-search-url="{{ route('global.search') }}" data-search-applicants="{{ $canSearchApplicants ? '1' : '0' }}" data-search-students="{{ $canSearchStudents ? '1' : '0' }}" data-search-employees="{{ $canSearchEmployees ? '1' : '0' }}">
                         <label class="ss-search__box">
                             <i data-lucide="search"></i>
                             <input type="search" autocomplete="off" placeholder="{{ $searchPlaceholder }}" data-global-search-input>

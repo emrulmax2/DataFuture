@@ -1,25 +1,42 @@
-<ul class="nav nav-link-tabs flex-col sm:flex-row justify-center lg:justify-start text-center liveStudentMainMenu">
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('agent-user.show', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'agent-user.show' ? 'active' : '' }}">
-            Applicants/Students Details
+@php
+    $profileTabCounts = $profileTabCounts ?? [];
+    $profileTabs = [
+        [
+            'route' => 'agent-user.show',
+            'label' => 'Applicants/Students Details',
+            'icon' => 'users',
+            'count' => $profileTabCounts['applicants'] ?? 0,
+        ],
+        [
+            'route' => 'sub-agent.show',
+            'label' => 'Sub Agents',
+            'icon' => 'user-plus',
+            'count' => $profileTabCounts['sub'] ?? 0,
+        ],
+        [
+            'route' => 'agent-user.documents',
+            'label' => 'Documents',
+            'icon' => 'file-text',
+            'count' => $profileTabCounts['docs'] ?? 0,
+        ],
+        [
+            'route' => 'agent-user.payment.settings',
+            'label' => 'Payment Settings',
+            'icon' => 'landmark',
+            'count' => $profileTabCounts['pay'] ?? 0,
+        ],
+    ];
+@endphp
+
+<nav class="agm-profile-tabs" aria-label="Agent profile sections">
+    @foreach($profileTabs as $tab)
+        @php
+            $isActive = Route::currentRouteName() === $tab['route'];
+        @endphp
+        <a href="{{ route($tab['route'], $employee->id) }}" class="agm-profile-tab {{ $isActive ? 'is-active' : '' }}">
+            <i data-lucide="{{ $tab['icon'] }}"></i>
+            <span>{{ $tab['label'] }}</span>
+            <small>{{ $tab['count'] }}</small>
         </a>
-    </li>
-    
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('sub-agent.show', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'sub-agent.show' ? 'active' : '' }}">
-            Sub Agents
-        </a>
-    </li>
-    
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('agent-user.documents', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'agent-user.documents' ? 'active' : '' }}">
-            Documents
-        </a>
-    </li>
-    
-    <li class="nav-item" role="presentation">
-        <a href="{{ route('agent-user.payment.settings', $employee->id) }}" class="nav-link py-4 {{ Route::currentRouteName() == 'agent-user.payment.settings' ? 'active' : '' }}">
-            Payment Settings
-        </a>
-    </li>
-</ul>
+    @endforeach
+</nav>

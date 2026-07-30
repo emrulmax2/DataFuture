@@ -5,198 +5,157 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">Application Ref No. <u><strong>{{ (isset($applicant->application_no) && !empty($applicant->application_no) ? $applicant->application_no : '---') }}</strong></u></h2>
-    </div>
     <!-- BEGIN: Profile Info -->
 
     @include('pages.students.admission.show-info')
-    @include('pages.students.admission.show-menu')
     
     <!-- END: Profile Info -->
 
+    <div class="adm-sections adm-comm">
     <!-- BEGIN: Letters -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Letters</div>
-            </div>
-            <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send New Letter</button>
+    <div class="adm-section">
+        <div class="adm-section__head">
+            <div class="adm-section__title">Letters</div>
+            <div class="adm-tabletools__actions">
+                <button data-tw-toggle="modal" data-tw-target="#addLetterModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send New Letter</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CML" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CML" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CML" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+        <div class="adm-sectionbody">
+            <div class="adm-tabletools">
+                <form id="tabulatorFilterForm-CML" class="adm-tabletools__filters">
+                    <span class="adm-filter-text">Query</span>
+                    <input id="query-CML" name="query" type="text" class="adm-input" placeholder="Search...">
+                    <span class="adm-filter-text">Status</span>
+                    <div class="adm-field adm-field--narrow">
+                        <select id="status-CML" name="status" class="adm-select">
                             <option selected value="1">Active</option>
                             <option value="2">Archived</option>
                         </select>
+                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
                     </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CML" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CML" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+                    <button id="tabulator-html-filter-go-CML" type="button" class="adm-btn adm-btn--primary">Go</button>
+                    <button id="tabulator-html-filter-reset-CML" type="button" class="adm-btn adm-btn--soft">Reset</button>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CML" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
+                <div class="adm-tabletools__actions">
+                    <button type="button" id="tabulator-print-CML" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
+                    <div class="dropdown adm-dropdown">
+                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+                        <div class="dropdown-menu">
                             <ul class="dropdown-content">
                                 <li>
-                                    <a id="tabulator-export-csv-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
+                                    <a id="tabulator-export-csv-CML" href="javascript:;" class="dropdown-item">Export CSV</a>
                                 </li>
                                 <li>
-                                    <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
+                                    <a id="tabulator-export-xlsx-CML" href="javascript:;" class="dropdown-item">Export XLSX</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommLetterListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="adm-table-wrap">
+                <div id="applicantCommLetterListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
     <!-- END: Letters -->
 
     <!-- BEGIN: Email -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">Email</div>
-            </div>
-            <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send Email</button>
+    <div class="adm-section">
+        <div class="adm-section__head">
+            <div class="adm-section__title">Email</div>
+            <div class="adm-tabletools__actions">
+                <button data-tw-toggle="modal" data-tw-target="#sendEmailModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send Email</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CME" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CME" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CME" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+        <div class="adm-sectionbody">
+            <div class="adm-tabletools">
+                <form id="tabulatorFilterForm-CME" class="adm-tabletools__filters">
+                    <span class="adm-filter-text">Query</span>
+                    <input id="query-CME" name="query" type="text" class="adm-input" placeholder="Search...">
+                    <span class="adm-filter-text">Status</span>
+                    <div class="adm-field adm-field--narrow">
+                        <select id="status-CME" name="status" class="adm-select">
                             <option selected value="1">Active</option>
                             <option value="2">Archived</option>
                         </select>
+                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
                     </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CME" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CME" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+                    <button id="tabulator-html-filter-go-CME" type="button" class="adm-btn adm-btn--primary">Go</button>
+                    <button id="tabulator-html-filter-reset-CME" type="button" class="adm-btn adm-btn--soft">Reset</button>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CME" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
+                <div class="adm-tabletools__actions">
+                    <button type="button" id="tabulator-print-CME" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
+                    <div class="dropdown adm-dropdown">
+                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+                        <div class="dropdown-menu">
                             <ul class="dropdown-content">
                                 <li>
-                                    <a id="tabulator-export-csv-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
+                                    <a id="tabulator-export-csv-CME" href="javascript:;" class="dropdown-item">Export CSV</a>
                                 </li>
                                 <li>
-                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
+                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">Export XLSX</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommEmailListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="adm-table-wrap">
+                <div id="applicantCommEmailListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
     <!-- END: Email -->
 
     <!-- BEGIN: SMS -->
-    <div class="intro-y box p-5 mt-5">
-        <div class="grid grid-cols-12 gap-0 items-center">
-            <div class="col-span-6">
-                <div class="font-medium text-base">SMS</div>
-            </div>
-            <div class="col-span-6 text-right relative">
-                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="btn btn-primary shadow-md mr-2"><i data-lucide="plus-circle" class="w-4 h-4 mr-2"></i>Send SMS</button>
+    <div class="adm-section">
+        <div class="adm-section__head">
+            <div class="adm-section__title">SMS</div>
+            <div class="adm-tabletools__actions">
+                <button data-tw-toggle="modal" data-tw-target="#smsSMSModal" type="button" class="adm-btn adm-btn--primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>Send SMS</button>
             </div>
         </div>
-        <div class="intro-y mt-5">
-            <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                <form id="tabulatorFilterForm-CMS" class="xl:flex sm:mr-auto" >
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Query</label>
-                        <input id="query-CMS" name="query" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0"  placeholder="Search...">
-                    </div>
-                    <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                        <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                        <select id="status-CMS" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
+        <div class="adm-sectionbody">
+            <div class="adm-tabletools">
+                <form id="tabulatorFilterForm-CMS" class="adm-tabletools__filters">
+                    <span class="adm-filter-text">Query</span>
+                    <input id="query-CMS" name="query" type="text" class="adm-input" placeholder="Search...">
+                    <span class="adm-filter-text">Status</span>
+                    <div class="adm-field adm-field--narrow">
+                        <select id="status-CMS" name="status" class="adm-select">
                             <option selected value="1">Active</option>
                             <option value="2">Archived</option>
                         </select>
+                        <svg class="adm-field__caret" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg>
                     </div>
-                    <div class="mt-2 xl:mt-0">
-                        <button id="tabulator-html-filter-go-CMS" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                        <button id="tabulator-html-filter-reset-CMS" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                    </div>
+                    <button id="tabulator-html-filter-go-CMS" type="button" class="adm-btn adm-btn--primary">Go</button>
+                    <button id="tabulator-html-filter-reset-CMS" type="button" class="adm-btn adm-btn--soft">Reset</button>
                 </form>
-                <div class="flex mt-5 sm:mt-0">
-                    <button id="tabulator-print-CMS" class="btn btn-outline-secondary w-1/2 sm:w-auto mr-2">
-                        <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Print
-                    </button>
-                    <div class="dropdown w-1/2 sm:w-auto">
-                        <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" aria-expanded="false" data-tw-toggle="dropdown">
-                            <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                        </button>
-                        <div class="dropdown-menu w-40">
+                <div class="adm-tabletools__actions">
+                    <button type="button" id="tabulator-print-CMS" class="adm-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14h12v8H6z"></path></svg>Print</button>
+                    <div class="dropdown adm-dropdown">
+                        <button type="button" class="dropdown-toggle adm-btn" aria-expanded="false" data-tw-toggle="dropdown"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><path d="M14 2v6h6"></path></svg>Export<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa8b0" stroke-width="2.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+                        <div class="dropdown-menu">
                             <ul class="dropdown-content">
                                 <li>
-                                    <a id="tabulator-export-csv-CMS" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export CSV
-                                    </a>
+                                    <a id="tabulator-export-csv-CMS" href="javascript:;" class="dropdown-item">Export CSV</a>
                                 </li>
                                 <li>
-                                    <a id="tabulator-export-xlsx-CME" href="javascript:;" class="dropdown-item">
-                                        <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Export XLSX
-                                    </a>
+                                    <a id="tabulator-export-xlsx-CMS" href="javascript:;" class="dropdown-item">Export XLSX</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto scrollbar-hidden">
-                <div id="applicantCommSMSListTable" data-applicant="{{ $applicant->id }}" class="mt-5 table-report table-report--tabulator"></div>
+            <div class="adm-table-wrap">
+                <div id="applicantCommSMSListTable" data-applicant="{{ $applicant->id }}" class="table-report table-report--tabulator"></div>
             </div>
         </div>
     </div>
     <!-- END: SMS -->
+    </div>
 
     <!-- BEGIN: Send Letter Modal -->
     <div id="addLetterModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
@@ -210,22 +169,24 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
-                            <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full" data-format="DD-MM-YYYY"  data-single-mode="true">
-                            <div class="acc__input-error error-issued_date text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($smtps))
-                                    @foreach($smtps as $sm)
-                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                        <div class="adm-comm-modal-grid adm-comm-modal-grid--half">
+                            <div>
+                                <label for="issued_date" class="form-label">Issued Date <span class="text-danger">*</span></label>
+                                <input id="issued_date" type="text" name="issued_date" class="datepicker form-control w-full" placeholder="DD-MM-YYYY" data-format="DD-MM-YYYY"  data-single-mode="true">
+                                <div class="acc__input-error error-issued_date text-danger mt-2"></div>
+                            </div>
+                            <div>
+                                <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
+                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($smtps))
+                                        @foreach($smtps as $sm)
+                                            <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                            </div>
                         </div>
                         <div class="mt-3">
                             <label for="letter_set_id" class="form-label">Letter <span class="text-danger">*</span></label>
@@ -281,7 +242,7 @@
                         <button type="submit" id="sendLetterBtn" class="btn btn-primary w-auto">     
                             Send Letter                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -306,7 +267,7 @@
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="font-medium text-base mr-auto">Vew Communication</h2>
+                    <h2 class="font-medium text-base mr-auto">View Communication</h2>
                     <a data-tw-dismiss="modal" href="javascript:;">
                         <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
                     </a>
@@ -364,7 +325,7 @@
                         <button type="submit" id="sendSMSBtn" class="btn btn-primary w-auto">     
                             Send SMS                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
@@ -396,22 +357,24 @@
                         </a>
                     </div>
                     <div class="modal-body">
-                        <div>
-                            <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
-                            <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
-                                <option value="">Please Select</option>
-                                @if(!empty($smtps))
-                                    @foreach($smtps as $sm)
-                                        <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
-                        </div>
-                        <div class="mt-3">
-                            <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
-                            <input id="subject" type="text" name="subject" class="form-control w-full">
-                            <div class="acc__input-error error-subject text-danger mt-2"></div>
+                        <div class="adm-comm-modal-grid adm-comm-modal-grid--half">
+                            <div>
+                                <label for="comon_smtp_id" class="form-label">SMTP <span class="text-danger">*</span></label>
+                                <select id="comon_smtp_id" name="comon_smtp_id" class="form-control w-full">
+                                    <option value="">Please Select</option>
+                                    @if(!empty($smtps))
+                                        @foreach($smtps as $sm)
+                                            <option value="{{ $sm->id }}">{{ $sm->smtp_user }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                <div class="acc__input-error error-comon_smtp_id text-danger mt-2"></div>
+                            </div>
+                            <div>
+                                <label for="subject" class="form-label">Subject <span class="text-danger">*</span></label>
+                                <input id="subject" type="text" name="subject" class="form-control w-full">
+                                <div class="acc__input-error error-subject text-danger mt-2"></div>
+                            </div>
                         </div>
                         <div class="mt-3 mb-4">
                             <label for="email_template_id" class="form-label">Template</label>
@@ -432,20 +395,22 @@
                             </div>
                             <div class="acc__input-error error-body text-danger mt-2"></div>
                         </div>
-                        <div class="mt-3 flex justify-start items-center relative">
-                            <label for="sendMailsDocument" class="inline-flex items-center justify-center btn btn-primary  cursor-pointer">
-                                <i data-lucide="navigation" class="w-4 h-4 mr-2 text-white"></i> Upload Attachments
+                        <div class="adm-mail-upload mt-3">
+                            <label for="sendMailsDocument" class="adm-mail-upload__button">
+                                <i data-lucide="paperclip" class="w-4 h-4"></i>
+                                <span>Upload Attachments</span>
                             </label>
+                            <span class="adm-mail-upload__hint">PDF, DOC, image, spreadsheet</span>
                             <input type="file" accept=".jpeg,.jpg,.png,.gif,.txt,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx" multiple name="documents[]" class="absolute w-0 h-0 overflow-hidden opacity-0" id="sendMailsDocument"/>
                         </div>
-                        <div id="sendMailsDocumentNames" class="sendMailsDocumentNames mt-3" style="display: none"></div>
+                        <div id="sendMailsDocumentNames" class="sendMailsDocumentNames adm-mail-upload__files mt-3" style="display: none"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
                         <button type="submit" id="sendEmailBtn" class="btn btn-primary w-auto">     
                             Send Mail                      
                             <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
+                                stroke="white" class="adm-btn-loader w-4 h-4 ml-2">
                                 <g fill="none" fill-rule="evenodd">
                                     <g transform="translate(1 1)" stroke-width="4">
                                         <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>

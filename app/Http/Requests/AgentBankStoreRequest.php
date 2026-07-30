@@ -21,19 +21,32 @@ class AgentBankStoreRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $rules = [
+            'agent_id' => 'required|integer|exists:agents,id',
             'beneficiary' => 'required',
             'sort_code' => 'required',
             'ac_no' => 'required',
+            'active' => 'nullable|in:1',
         ];
+
+        if($this->routeIs('agent-user.update.bank')):
+            $rules['id'] = 'required|integer|exists:agent_bank_details,id';
+        endif;
+
+        return $rules;
     }
 
     public function messages()
     {
         return [
+            'agent_id.required' => 'Agent is required',
+            'agent_id.exists' => 'Agent was not found',
             'beneficiary.required' => 'This field is required',
             'sort_code.required' => 'This field is required',
             'ac_no.required' => 'This field is required',
+            'active.in' => 'Invalid status selected',
+            'id.required' => 'Bank details record is required',
+            'id.exists' => 'Bank details record was not found',
         ];
     }
 }

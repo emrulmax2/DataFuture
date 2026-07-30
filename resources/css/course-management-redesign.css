@@ -1,0 +1,7914 @@
+/*
+ * Course Management module redesign.
+ *
+ * Loaded only by `layout/course-top-menu.blade.php`, so nothing here can leak
+ * into the rest of the app. Every rule is scoped under `.cm-body` (the <body>
+ * class) or a `.cm-*` class.
+ *
+ * Unlike the admission module this palette is fixed — navy + gold — and is
+ * never driven by a course `color_theme`. The custom properties still live on
+ * <body> rather than an inner wrapper because the theme's modals are
+ * re-parented to <body> when shown; scoping them deeper would strip the
+ * palette from every popup once the CRUD screens land.
+ */
+
+/* ------------------------------------------------------------------ *
+ * Tokens
+ * ------------------------------------------------------------------ */
+
+.cm-body {
+    /* Brand */
+    --cm-head: #101c3d;
+    --cm-navy: #16264f;
+    --cm-navy-deep: #0f1c3c;
+    --cm-navy-soft: #1b2c56;
+    --cm-gold: #c9a24a;
+    --cm-gold-light: #e8c877;
+    --cm-gold-ink: #8a6d1f;
+    --cm-gold-tint: #f4efe1;
+    --cm-teal: #1f7a5c;
+    --cm-teal-hover: #16593f;
+
+    /* Neutrals */
+    --cm-bg: #f4f3f0;
+    --cm-card: #ffffff;
+    --cm-ink: #1b2330;
+    --cm-ink-2: #3f4653;
+    --cm-muted: #5a626e;
+    --cm-faint: #78808c;
+    --cm-label: #8a919c;
+    --cm-dim: #a29e94;
+    --cm-line: #e6e3dc;
+    --cm-line-2: #eeece6;
+    --cm-line-3: #f0eee9;
+    --cm-line-4: #f3f1ec;
+    --cm-grid: #e2dfd7;
+    --cm-field: #e0dcd3;
+    --cm-field-bg: #fbfaf7;
+    --cm-danger: #d64545;
+
+    /* Shell metrics — the module runs edge to edge; the wide plan/tree grids
+     * further in need every pixel, so there is no centred max-width here. */
+    --cm-gutter: 30px;
+    --cm-radius: 14px;
+    --cm-side: 316px;
+    --cm-header-h: 62px;
+}
+
+.cm-body {
+    background: var(--cm-bg);
+    color: var(--cm-ink);
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    min-height: 100vh;
+    padding: 0;
+}
+
+.cm-body *,
+.cm-body *::before,
+.cm-body *::after {
+    box-sizing: border-box;
+}
+
+/* Only *unstyled* anchors take the accent colour. A blanket `.cm-body a` rule
+ * scores 0,1,1 and would out-specify every single-class component
+ * (.cm-btn--primary, .cm-nav__item, …), repainting them teal-on-teal.
+ * Components own their own colour; this is just the default. */
+.cm-body a {
+    text-decoration: none;
+}
+
+.cm-body a:not([class]) {
+    color: var(--cm-teal);
+}
+
+.cm-body a:not([class]):hover {
+    color: var(--cm-teal-hover);
+}
+
+.cm-body input::placeholder,
+.cm-body textarea::placeholder {
+    color: #a9b0ba;
+}
+
+.cm-body select,
+.cm-body input,
+.cm-body textarea,
+.cm-body button {
+    font-family: inherit;
+}
+
+.cm-body ::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.cm-body ::-webkit-scrollbar-thumb {
+    background: #d5d1c8;
+    background-clip: content-box;
+    border: 2px solid transparent;
+    border-radius: 8px;
+}
+
+.cm-serif {
+    font-family: "Spectral", Georgia, "Times New Roman", serif;
+}
+
+.cm-sr-only {
+    clip: rect(0, 0, 0, 0);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Header
+ * ------------------------------------------------------------------ */
+
+.cm-header {
+    background: var(--cm-head);
+    position: sticky;
+    top: 0;
+    z-index: 40;
+}
+
+.cm-header__bar {
+    align-items: center;
+    display: flex;
+    gap: 26px;
+    height: var(--cm-header-h);
+    padding: 0 var(--cm-gutter);
+}
+
+.cm-header__logo {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+}
+
+.cm-header__logo img {
+    display: block;
+    height: 38px;
+    width: auto;
+}
+
+.cm-header__logo--fallback span {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.cm-header__divider {
+    background: rgba(255, 255, 255, 0.14);
+    flex-shrink: 0;
+    height: 30px;
+    width: 1px;
+}
+
+.cm-header__spacer {
+    align-items: center;
+    display: flex;
+    gap: 18px;
+    margin-left: auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * Header — primary nav
+ * ------------------------------------------------------------------ */
+
+.cm-nav {
+    align-items: stretch;
+    display: flex;
+    gap: 26px;
+    height: var(--cm-header-h);
+    margin-left: 6px;
+    min-width: 0;
+}
+
+.cm-nav__item {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: rgba(255, 255, 255, 0.62);
+    cursor: pointer;
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.cm-nav__item svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.cm-nav__item:hover {
+    border-bottom-color: rgba(201, 162, 74, 0.4);
+    color: #fff;
+}
+
+.cm-nav__item--active {
+    border-bottom-color: var(--cm-gold);
+    color: #fff;
+    font-weight: 800;
+}
+
+.cm-nav__item--active > svg:first-child {
+    color: var(--cm-gold-light);
+}
+
+.cm-nav__caret {
+    transition: transform 0.18s ease;
+}
+
+.cm-nav__group {
+    display: flex;
+    position: relative;
+}
+
+.cm-nav__group.is-open .cm-nav__caret {
+    transform: rotate(180deg);
+}
+
+.cm-nav__menu {
+    background: var(--cm-navy);
+    border: 1px solid rgba(201, 162, 74, 0.22);
+    border-radius: 12px;
+    box-shadow: 0 26px 56px -18px rgba(5, 12, 32, 0.6);
+    left: 0;
+    opacity: 0;
+    padding: 6px;
+    pointer-events: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    transform: translateY(-6px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    width: 262px;
+    z-index: 50;
+}
+
+.cm-nav__group.is-open .cm-nav__menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.cm-nav__menu-title {
+    color: var(--cm-gold-light);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    padding: 10px 12px 8px;
+    text-transform: uppercase;
+}
+
+.cm-nav__menu-item {
+    align-items: center;
+    border-radius: 9px;
+    display: flex;
+    gap: 12px;
+    padding: 9px 12px;
+}
+
+.cm-nav__menu-item:hover,
+.cm-nav__menu-item--active {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.cm-nav__menu-icon {
+    align-items: center;
+    background: rgba(201, 162, 74, 0.18);
+    border-radius: 9px;
+    color: var(--cm-gold-light);
+    display: flex;
+    flex-shrink: 0;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.cm-nav__menu-icon svg {
+    stroke: currentColor;
+}
+
+.cm-nav__menu-copy {
+    min-width: 0;
+}
+
+.cm-nav__menu-name {
+    color: #eef1f8;
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.cm-nav__menu-desc {
+    color: #9fadd0;
+    display: block;
+    font-size: 11.5px;
+    margin-top: 1px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Header — search
+ * ------------------------------------------------------------------ */
+
+.cm-search {
+    align-items: center;
+    display: flex;
+    position: relative;
+    width: 262px;
+}
+
+.cm-search > svg:first-child {
+    color: var(--cm-gold);
+    left: 12px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.cm-search__input {
+    background: var(--cm-navy-soft);
+    border: 1px solid rgba(201, 162, 74, 0.32);
+    border-radius: 9px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 500;
+    height: 34px;
+    outline: none;
+    padding: 0 32px 0 36px;
+    width: 100%;
+}
+
+.cm-search__input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.cm-search__input:focus {
+    background: #213465;
+    border-color: var(--cm-gold);
+}
+
+.cm-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.cm-search__close {
+    cursor: pointer;
+    position: absolute;
+    right: 11px;
+}
+
+.cm-search__results {
+    background: var(--cm-head);
+    border: 1px solid rgba(201, 162, 74, 0.34);
+    border-radius: 12px;
+    box-shadow: 0 26px 56px -20px rgba(0, 0, 0, 0.72);
+    display: none;
+    max-height: 60vh;
+    overflow-y: auto;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 10px);
+    width: 360px;
+    z-index: 60;
+}
+
+.cm-search[data-search-open="true"] .cm-search__results,
+.cm-search__results.is-open {
+    display: block;
+}
+
+.cm-search__results .lcc-global-search__group-title {
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--cm-gold-light);
+}
+
+.cm-search__results .lcc-global-search__group + .lcc-global-search__group .lcc-global-search__group-title {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cm-search__results .lcc-global-search__item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    color: #edf2fb;
+}
+
+.cm-search__results .lcc-global-search__item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.cm-search__results .lcc-global-search__copy strong {
+    color: #fff;
+}
+
+.cm-search__results .lcc-global-search__copy small {
+    color: #aeb8d3;
+}
+
+.cm-search__results .lcc-global-search__initials {
+    background: rgba(31, 122, 92, 0.24);
+    color: #bff2df;
+}
+
+.cm-search__results .lcc-global-search__group--applicants .lcc-global-search__initials,
+.cm-search__results .lcc-global-search__group--applicants .lcc-global-search__status {
+    background: rgba(201, 162, 74, 0.2);
+    color: #f3d78f;
+}
+
+.cm-search__results .lcc-global-search__group--employees .lcc-global-search__initials,
+.cm-search__results .lcc-global-search__group--employees .lcc-global-search__status {
+    background: rgba(174, 184, 211, 0.2);
+    color: #d1dbf2;
+}
+
+.cm-search__results .lcc-global-search__status {
+    background: rgba(31, 122, 92, 0.22);
+    color: #bff2df;
+}
+
+.cm-search__results .lcc-global-search__empty,
+.cm-search__results .lcc-global-search__loading {
+    color: #aeb8d3;
+}
+
+.cm-search__note {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-align: center;
+}
+
+.cm-search__grouptitle {
+    color: var(--cm-dim);
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    padding: 10px 12px 6px;
+    text-transform: uppercase;
+}
+
+.cm-search__item {
+    align-items: center;
+    border-radius: 9px;
+    display: flex;
+    gap: 11px;
+    padding: 8px 11px;
+}
+
+.cm-search__item:hover {
+    background: var(--cm-field-bg);
+}
+
+.cm-search__initials {
+    align-items: center;
+    background: #eef1f8;
+    border-radius: 50%;
+    color: #2f4b7c;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 800;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+.cm-search__copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-search__copy strong {
+    color: var(--cm-navy);
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-search__copy small {
+    color: var(--cm-faint);
+    display: block;
+    font-size: 11.5px;
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-search__status {
+    background: var(--cm-gold-tint);
+    border-radius: 6px;
+    color: var(--cm-gold-ink);
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    white-space: nowrap;
+}
+
+.cm-search__toggle {
+    align-items: center;
+    background: transparent;
+    border: 1px solid rgba(201, 162, 74, 0.32);
+    border-radius: 9px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    display: none;
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.cm-search__toggle:hover {
+    border-color: var(--cm-gold);
+    color: #fff;
+}
+
+/* ------------------------------------------------------------------ *
+ * Header — profile
+ * ------------------------------------------------------------------ */
+
+.cm-profile {
+    position: relative;
+}
+
+.cm-profile__trigger {
+    align-items: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    gap: 11px;
+    padding: 0;
+}
+
+.cm-profile__copy {
+    line-height: 1.2;
+    text-align: right;
+}
+
+.cm-profile__name {
+    color: #fff;
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-profile__role {
+    color: var(--cm-gold);
+    display: block;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+}
+
+.cm-profile__avatar {
+    align-items: center;
+    background: var(--cm-navy-soft);
+    border-radius: 11px;
+    box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.45);
+    color: var(--cm-gold-light);
+    display: flex;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    height: 36px;
+    justify-content: center;
+    overflow: hidden;
+    width: 36px;
+}
+
+.cm-profile__avatar img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.cm-profile__caret {
+    color: rgba(255, 255, 255, 0.55);
+    transition: transform 0.18s ease;
+}
+
+.cm-profile.is-open .cm-profile__caret {
+    transform: rotate(180deg);
+}
+
+.cm-profile__menu {
+    background: var(--cm-navy);
+    border: 1px solid rgba(201, 162, 74, 0.22);
+    border-radius: 12px;
+    box-shadow: 0 26px 56px -20px rgba(5, 12, 32, 0.62);
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    transform: translateY(-6px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+    width: 246px;
+    z-index: 50;
+}
+
+.cm-profile.is-open .cm-profile__menu {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.cm-profile__menu-head {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 14px;
+}
+
+.cm-profile__menu-name {
+    color: #fff;
+    display: block;
+    font-size: 13.5px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-profile__menu-email {
+    color: #9fadd0;
+    display: block;
+    font-size: 11.5px;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-profile__menu-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+}
+
+.cm-profile__menu-link {
+    align-items: center;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    padding: 8px 10px;
+}
+
+.cm-profile__menu-link svg:first-child {
+    color: var(--cm-gold-light);
+    flex-shrink: 0;
+}
+
+.cm-profile__menu-link span {
+    color: #eef1f8;
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.cm-profile__menu-link:hover {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.cm-profile__menu-link--danger svg:first-child,
+.cm-profile__menu-link--danger span {
+    color: #ff9d9d;
+}
+
+.cm-profile__menu-link--danger:hover {
+    background: rgba(214, 69, 69, 0.18);
+}
+
+/* ------------------------------------------------------------------ *
+ * Page head band
+ * ------------------------------------------------------------------ */
+
+.cm-pagehead {
+    background: var(--cm-navy);
+    overflow: hidden;
+    position: relative;
+}
+
+.cm-pagehead::after {
+    background: linear-gradient(90deg, var(--cm-gold), rgba(201, 162, 74, 0));
+    bottom: 0;
+    content: "";
+    height: 2px;
+    left: 0;
+    position: absolute;
+    right: 0;
+}
+
+.cm-pagehead__inner {
+    align-items: center;
+    display: flex;
+    gap: 30px;
+    justify-content: space-between;
+    padding: 22px var(--cm-gutter) 24px;
+}
+
+.cm-pagehead__main {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    min-width: 0;
+}
+
+.cm-pagehead__icon {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.3);
+    color: var(--cm-gold-light);
+    display: flex;
+    flex-shrink: 0;
+    height: 46px;
+    justify-content: center;
+    width: 46px;
+}
+
+.cm-pagehead__title {
+    color: #fff;
+    font-size: 29px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0;
+    text-wrap: pretty;
+}
+
+.cm-pagehead__rule {
+    background: rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+    height: 26px;
+    width: 1px;
+}
+
+.cm-crumbs {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+}
+
+/* Forced: these sit inside the page-head band, and app-wide link colours in
+ * datafuture.css reach them and tint the trail off-palette. */
+.cm-body .cm-crumbs a,
+.cm-body .cm-crumbs span {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.cm-body .cm-crumbs a:hover {
+    color: #fff !important;
+}
+
+.cm-body .cm-crumbs__sep {
+    color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.cm-body .cm-crumbs strong {
+    color: var(--cm-gold-light) !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.cm-crumbs__sep {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 11px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Buttons
+ * ------------------------------------------------------------------ */
+
+.cm-btn {
+    align-items: center;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 8px;
+    padding: 10px 18px;
+    transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+    white-space: nowrap;
+}
+
+.cm-btn svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.cm-btn--gold-outline {
+    background: transparent;
+    border: 1px solid rgba(201, 162, 74, 0.5);
+    color: #efe4c6;
+}
+
+.cm-btn--gold-outline:hover {
+    background: var(--cm-gold);
+    border-color: var(--cm-gold);
+    color: var(--cm-navy);
+}
+
+.cm-btn--primary {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-btn--primary:hover {
+    background: var(--cm-navy-deep);
+    color: #fff;
+}
+
+.cm-btn--ghost {
+    background: transparent;
+    border: 1px solid var(--cm-field);
+    color: var(--cm-muted);
+}
+
+.cm-btn--ghost:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+/* ------------------------------------------------------------------ *
+ * Shell
+ * ------------------------------------------------------------------ */
+
+.cm-main {
+    padding: 28px var(--cm-gutter) 64px;
+    width: 100%;
+}
+
+.cm-layout {
+    align-items: flex-start;
+    display: flex;
+    gap: var(--cm-gutter);
+}
+
+.cm-layout__side {
+    flex-shrink: 0;
+    position: sticky;
+    top: calc(var(--cm-header-h) + 24px);
+    width: var(--cm-side);
+}
+
+.cm-layout__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-card {
+    background: var(--cm-card);
+    border: 1px solid var(--cm-line);
+    border-radius: var(--cm-radius);
+    overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ *
+ * Sidebar navigation
+ * ------------------------------------------------------------------ */
+
+.cm-sidenav__group + .cm-sidenav__group {
+    border-top: 1px solid var(--cm-line-3);
+}
+
+.cm-sidenav__head {
+    align-items: center;
+    background: transparent;
+    border: none;
+    color: var(--cm-ink-2);
+    cursor: pointer;
+    display: flex;
+    font-size: 11px;
+    font-weight: 800;
+    gap: 10px;
+    letter-spacing: 0.11em;
+    padding: 15px 16px;
+    text-align: left;
+    text-transform: uppercase;
+    transition: background 0.14s ease;
+    width: 100%;
+}
+
+.cm-sidenav__head:hover {
+    background: var(--cm-field-bg);
+}
+
+.cm-sidenav__head--active {
+    color: var(--cm-navy);
+}
+
+.cm-sidenav__num {
+    color: #b3aea2;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    width: 18px;
+}
+
+.cm-sidenav__head--active .cm-sidenav__num {
+    color: #a8842a;
+}
+
+.cm-sidenav__label {
+    flex: 1;
+    line-height: 1.3;
+    min-width: 0;
+}
+
+.cm-sidenav__caret {
+    color: var(--cm-dim);
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+}
+
+.cm-sidenav__group.is-open .cm-sidenav__caret {
+    transform: rotate(180deg);
+}
+
+.cm-sidenav__list {
+    display: none;
+    flex-direction: column;
+    padding: 0 0 10px;
+}
+
+.cm-sidenav__group.is-open .cm-sidenav__list {
+    display: flex;
+}
+
+.cm-sidenav__link {
+    align-items: center;
+    color: #4f5866;
+    display: flex;
+    font-size: 13.5px;
+    font-weight: 600;
+    gap: 11px;
+    padding: 9px 16px 9px 44px;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.cm-sidenav__link svg {
+    color: #c2bdb2;
+    flex-shrink: 0;
+}
+
+.cm-sidenav__link:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+.cm-sidenav__link--active {
+    background: #f2f4f9;
+    color: var(--cm-navy);
+    font-weight: 800;
+}
+
+.cm-sidenav__link--active svg {
+    color: var(--cm-gold);
+}
+
+/* ------------------------------------------------------------------ *
+ * Alerts
+ * ------------------------------------------------------------------ */
+
+.cm-alert {
+    align-items: flex-start;
+    border-radius: 11px;
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 11px;
+    line-height: 1.5;
+    margin: 14px;
+    padding: 14px 16px;
+}
+
+.cm-alert svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.cm-alert--danger {
+    background: #fbe9e9;
+    color: #b3413f;
+}
+
+/* ------------------------------------------------------------------ *
+ * Stat grid
+ * ------------------------------------------------------------------ */
+
+.cm-stats {
+    background: var(--cm-grid);
+    border: 1px solid var(--cm-grid);
+    border-radius: var(--cm-radius);
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    overflow: hidden;
+}
+
+.cm-stat {
+    align-items: stretch;
+    background: var(--cm-card);
+    color: var(--cm-navy);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 24px 20px;
+    text-align: left;
+    transition: background 0.16s ease, color 0.16s ease;
+}
+
+.cm-stat--link:hover {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-stat__top {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.cm-stat__label {
+    color: inherit;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    opacity: 0.78;
+    text-transform: uppercase;
+}
+
+.cm-stat__icon {
+    color: inherit;
+    display: flex;
+    flex-shrink: 0;
+    opacity: 0.5;
+}
+
+.cm-stat__value {
+    color: inherit;
+    display: block;
+    font-size: 42px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+}
+
+.cm-stat__foot {
+    align-items: center;
+    border-top: 1px solid currentColor;
+    color: inherit;
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 6px;
+    margin-top: auto;
+    opacity: 0.68;
+    padding-top: 14px;
+}
+
+.cm-stat--static .cm-stat__foot {
+    opacity: 0.42;
+}
+
+/* ------------------------------------------------------------------ *
+ * Empty state
+ * ------------------------------------------------------------------ */
+
+.cm-empty {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 76px var(--cm-gutter);
+    text-align: center;
+}
+
+.cm-empty__icon {
+    align-items: center;
+    border: 1px solid var(--cm-line);
+    border-radius: 50%;
+    color: var(--cm-gold);
+    display: flex;
+    height: 46px;
+    justify-content: center;
+    width: 46px;
+}
+
+.cm-empty__title {
+    color: var(--cm-navy);
+    font-size: 21px;
+    font-weight: 600;
+}
+
+.cm-empty__text {
+    color: var(--cm-label);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.6;
+    max-width: 380px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Detail header — record summary + tabs
+ * ------------------------------------------------------------------ */
+
+.cm-detail {
+    margin-bottom: 20px;
+}
+
+.cm-detail__top {
+    padding: 26px 30px 0;
+}
+
+.cm-detail__eyebrow {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.cm-detail__badge {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 6px;
+    color: var(--cm-gold-ink);
+    display: inline-flex;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    text-transform: uppercase;
+}
+
+.cm-detail__sub {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cm-detail__title {
+    color: var(--cm-navy);
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0;
+    max-width: 760px;
+    text-wrap: pretty;
+}
+
+.cm-detail__meta {
+    border-top: 1px solid var(--cm-line-3);
+    display: grid;
+    gap: 0 24px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    margin-top: 22px;
+}
+
+.cm-meta {
+    align-items: flex-start;
+    display: flex;
+    gap: 11px;
+    min-width: 0;
+    padding: 16px 22px 18px 0;
+}
+
+.cm-meta__icon {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 9px;
+    color: var(--cm-gold-ink);
+    display: flex;
+    flex-shrink: 0;
+    height: 30px;
+    justify-content: center;
+    margin-top: 1px;
+    width: 30px;
+}
+
+.cm-meta__label {
+    color: #8a8579;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.cm-meta__value {
+    color: var(--cm-ink);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-top: 5px;
+    text-wrap: pretty;
+}
+
+.cm-tabs {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border-top: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 30px;
+}
+
+.cm-tab {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: #565e6b;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 8px 16px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cm-tab:hover {
+    color: var(--cm-navy);
+}
+
+.cm-tab.is-active {
+    background: var(--cm-gold-tint);
+    color: #6d5514;
+    font-weight: 800;
+}
+
+.cm-tab svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Table card — header + toolbar
+ * ------------------------------------------------------------------ */
+
+.cm-tablecard__head {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: space-between;
+    padding: 22px 26px 18px;
+}
+
+.cm-tablecard__titles {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+    min-width: 0;
+}
+
+.cm-tablecard__title {
+    color: var(--cm-navy);
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.cm-tablecard__count {
+    color: var(--cm-faint);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.cm-tablecard__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Search that lives in the card header instead of a toolbar row, for screens
+ * whose endpoint filters on nothing else. `.cm-tablecard__head` carries the
+ * rule that would otherwise sit under the toolbar. */
+.cm-headsearch {
+    margin: 0;
+}
+
+.cm-headsearch__box {
+    align-items: center;
+    background: #fbfaf7;
+    border: 1px solid var(--cm-field);
+    border-radius: 999px;
+    display: flex;
+    gap: 8px;
+    padding: 0 14px;
+    transition: border-color 0.14s ease, background 0.14s ease;
+}
+
+.cm-headsearch__box:focus-within {
+    background: #fff;
+    border-color: var(--cm-navy);
+}
+
+.cm-headsearch__box > svg {
+    color: #b2b7bf;
+    flex-shrink: 0;
+}
+
+.cm-headsearch__box input {
+    background: transparent;
+    border: none;
+    color: var(--cm-ink);
+    font-family: inherit;
+    font-size: 13px;
+    height: 36px;
+    outline: none;
+    padding: 0;
+    width: 186px;
+}
+
+.cm-headsearch__box input::placeholder {
+    color: #a4a49e;
+}
+
+.cm-headsearch__box input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.cm-tablecard__head--divided {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding-bottom: 18px;
+}
+
+/* `hidden` has to beat every `display` this file sets. The UA sheet's
+ * `[hidden] { display: none }` loses to any class rule with a display — which
+ * is how tab panels all rendered at once, and how the Generate Days button
+ * stayed on screen with nothing selected (`.cm-btn` is `inline-flex`). */
+.cm-body [hidden] {
+    display: none !important;
+}
+
+.cm-toolbar {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0 26px 18px;
+}
+
+.cm-toolbar__spacer {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-search-inline {
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.cm-search-inline > svg {
+    color: #b2b7bf;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.cm-search-inline input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #ddd9d0;
+    color: var(--cm-ink);
+    font-size: 13.5px;
+    outline: none;
+    padding: 8px 4px 8px 24px;
+    width: 178px;
+}
+
+.cm-search-inline input:focus {
+    border-bottom-color: var(--cm-navy);
+}
+
+.cm-search-inline input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.cm-chips {
+    align-items: center;
+    background: #f2f1ed;
+    border-radius: 999px;
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+}
+
+.cm-chip {
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: #5c564a;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 14px;
+    transition: background 0.14s ease, color 0.14s ease;
+    white-space: nowrap;
+}
+
+.cm-chip.is-active {
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(20, 34, 74, 0.08);
+    color: var(--cm-navy);
+    font-weight: 800;
+}
+
+/* Extra dropdown filters that sit beside the status chips. */
+.cm-filterselect {
+    display: inline-flex;
+    min-width: 0;
+}
+
+.cm-filterselect select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 11px center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+    border: 1px solid var(--cm-field);
+    border-radius: 9px;
+    color: var(--cm-ink);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 600;
+    max-width: 210px;
+    outline: none;
+    padding: 7px 28px 7px 11px;
+    text-overflow: ellipsis;
+}
+
+.cm-filterselect select:focus {
+    border-color: var(--cm-navy);
+}
+
+.cm-linkbtn {
+    background: none;
+    border: none;
+    color: #565e6b;
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 4px;
+}
+
+.cm-linkbtn:hover {
+    color: var(--cm-navy);
+    text-decoration: underline;
+}
+
+.cm-pillbtn {
+    align-items: center;
+    background: transparent;
+    border: 1px solid var(--cm-field);
+    border-radius: 999px;
+    color: #4d5663;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 7px;
+    padding: 7px 14px;
+    transition: background 0.14s ease, color 0.14s ease;
+    white-space: nowrap;
+}
+
+.cm-pillbtn:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+/* Sized here, not just inline on the markup: the row formatters emit
+ * `<i data-lucide>` placeholders and Lucide swaps in a 24x24 svg, which
+ * `flex-shrink: 0` then holds at full size and blows the button out. */
+.cm-pillbtn svg {
+    display: block;
+    flex-shrink: 0;
+    height: 14px;
+    width: 14px;
+}
+
+.cm-btn--pill {
+    background: var(--cm-navy);
+    border-radius: 999px;
+    color: #fff;
+    padding: 9px 17px;
+}
+
+.cm-btn--pill:hover {
+    background: var(--cm-navy-deep);
+}
+
+/* The export menu rides the theme dropdown, so only the panel is restyled. */
+.cm-body .cm-export-menu {
+    width: 178px;
+}
+
+.cm-body .cm-export-menu .dropdown-content {
+    background: #fff;
+    border: 1px solid var(--cm-line);
+    border-radius: 12px;
+    box-shadow: 0 22px 48px -18px rgba(10, 20, 50, 0.35);
+    padding: 6px;
+}
+
+.cm-body .cm-export-menu .dropdown-item {
+    align-items: center;
+    border-radius: 9px;
+    color: var(--cm-ink-2);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 10px;
+    padding: 9px 11px;
+}
+
+.cm-body .cm-export-menu .dropdown-item:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+/* ------------------------------------------------------------------ *
+ * Tabulator
+ *
+ * Overrides the theme's `table-report--tabulator` skin. Scoped through
+ * `.cm-body .cm-tabulator` so it can only ever repaint tables inside this
+ * module — every rule here needs to out-specify datafuture.css.
+ * ------------------------------------------------------------------ */
+
+.cm-tabulator-wrap {
+    overflow-x: auto;
+}
+
+.cm-body .cm-tabulator.tabulator {
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    margin: 0;
+}
+
+.cm-body .cm-tabulator .tabulator-header {
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid var(--cm-line);
+    color: #655f52;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col {
+    background: transparent;
+    border-right: 0;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col .tabulator-col-content {
+    align-items: center;
+    display: flex;
+    min-height: 42px;
+    padding: 0 12px;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col:first-child .tabulator-col-content {
+    padding-left: 26px;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col:last-child .tabulator-col-content {
+    padding-right: 26px;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col-title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+    background: var(--cm-field-bg);
+}
+
+/* Tabulator reserves room for its sort arrow with `padding-right: 25px` on the
+ * column title, but the theme skin resets that to `pr-0` — so the arrow lands
+ * on top of the last letter. Hide the native arrow and draw the caret as an
+ * inline `::after` instead: staying in the title's text flow means the
+ * right-aligned Actions header keeps its alignment. */
+.cm-body .cm-tabulator .tabulator-header .tabulator-col .tabulator-col-sorter,
+.cm-body .cm-tabulator .tabulator-header .tabulator-col .tabulator-arrow {
+    display: none;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col.tabulator-sortable .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23c2bdb2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 9 4-4 4 4'/%3E%3Cpath d='m16 15-4 4-4-4'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 10px 10px;
+    content: "";
+    display: inline-block;
+    height: 10px;
+    margin-left: 6px;
+    vertical-align: -1px;
+    width: 10px;
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="asc"] .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2316264f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 15 6-6 6 6'/%3E%3C/svg%3E");
+}
+
+.cm-body .cm-tabulator .tabulator-header .tabulator-col.tabulator-sortable[aria-sort="desc"] .tabulator-col-title::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2316264f' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.cm-body .cm-tabulator .tabulator-tableholder,
+.cm-body .cm-tabulator .tabulator-tableHolder {
+    background: transparent;
+}
+
+/* `nowrap` on the row, `normal` on the cell: cells are inline-block siblings,
+ * so when their widths exceed the row the last one drops onto a second line —
+ * which is what put the action buttons under the row on wide tables. The row
+ * now overflows instead and `.cm-tabulator-wrap` scrolls it. Cells reset the
+ * value for their own text. */
+.cm-body .cm-tabulator .tabulator-row,
+.cm-body .cm-tabulator .tabulator-row.tabulator-row-even {
+    background: #fff;
+    border-bottom: 1px solid var(--cm-line-4);
+    min-height: 58px;
+    white-space: nowrap;
+    transition: background 0.12s ease;
+}
+
+.cm-body .cm-tabulator .tabulator-row:hover,
+.cm-body .cm-tabulator .tabulator-row.tabulator-row-even:hover {
+    background: var(--cm-field-bg);
+}
+
+/* `inline-flex`, never `flex`: Tabulator lays cells out as `inline-block`
+ * siblings and sets their widths itself. A block-level `flex` box takes the
+ * full row width, which stacks every cell onto its own line. */
+.cm-body .cm-tabulator .tabulator-row .tabulator-cell {
+    align-items: center;
+    border-right: 0;
+    color: var(--cm-muted);
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+    min-height: 58px;
+    padding: 12px;
+    vertical-align: middle;
+    white-space: normal;
+}
+
+.cm-body .cm-tabulator .tabulator-row .tabulator-cell:first-child {
+    padding-left: 26px;
+}
+
+.cm-body .cm-tabulator .tabulator-row .tabulator-cell:last-child {
+    padding-right: 26px;
+}
+
+.cm-body .cm-tabulator .tabulator-cell[tabulator-field="id"] {
+    color: #5a626e;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.cm-body .cm-tabulator .tabulator-cell.cm-cell--primary {
+    color: var(--cm-navy);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* The opposite of `--clamp`: names long enough to dominate the table wrap onto
+ * a second line instead, so the column can be narrow and the rest of the row
+ * gets the space back. Pair it with `variableHeight` on the column or the
+ * wrapped line is cut off by the row's fixed height. */
+.cm-body .cm-tabulator .tabulator-cell.cm-cell--wrap {
+    align-items: center;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Long descriptive columns (tuition source, degree offered) stay on one line
+ * and ellipsize rather than pushing every row taller. */
+.cm-body .cm-tabulator .tabulator-cell.cm-cell--clamp {
+    display: inline-block;
+    line-height: 58px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-body .cm-tabulator .tabulator-placeholder {
+    color: var(--cm-dim);
+}
+
+.cm-body .cm-tabulator .tabulator-placeholder span {
+    color: var(--cm-dim);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 56px 20px;
+}
+
+/* Row actions */
+.cm-rowactions {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+/* Row buttons run tighter than toolbar ones — two labelled actions have to
+ * clear the Actions column without forcing the table into a scroll. */
+.cm-rowactions .cm-pillbtn {
+    font-size: 11.5px;
+    gap: 5px;
+    padding: 6px 10px;
+}
+
+.cm-rowactions .cm-pillbtn svg {
+    height: 13px;
+    width: 13px;
+}
+
+.cm-rowbtn {
+    align-items: center;
+    background: #eeede9;
+    border: none;
+    border-radius: 8px;
+    color: #6d747e;
+    cursor: pointer;
+    display: inline-flex;
+    height: 29px;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.14s ease, color 0.14s ease;
+    width: 29px;
+}
+
+.cm-rowbtn svg {
+    height: 14px;
+    width: 14px;
+}
+
+.cm-rowbtn--edit:hover {
+    background: #e0f0e8;
+    color: #1a7a58;
+}
+
+.cm-rowbtn--delete:hover {
+    background: #fbe3e3;
+    color: #d13c3c;
+}
+
+.cm-rowbtn--restore:hover {
+    background: #e2eefa;
+    color: #1f6fa8;
+}
+
+.cm-rowbtn--view:hover {
+    background: #e2eefa;
+    color: #1f6fa8;
+}
+
+/* Row status toggle. Rendered by the column formatter as a button rather than
+ * a checkbox: the change is only committed after the confirm dialog, so the
+ * control must not flip itself on click. */
+.cm-switch {
+    background: rgba(214, 69, 69, 0.14);
+    border: none;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(214, 69, 69, 0.28);
+    cursor: pointer;
+    display: inline-block;
+    flex-shrink: 0;
+    height: 20px;
+    padding: 0;
+    position: relative;
+    transition: background 0.18s ease;
+    width: 38px;
+}
+
+.cm-switch--on {
+    background: rgba(31, 122, 92, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(31, 122, 92, 0.3);
+}
+
+.cm-switch__knob {
+    align-items: center;
+    background: var(--cm-danger);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    transition: left 0.18s ease, background 0.18s ease;
+    width: 16px;
+}
+
+.cm-switch--on .cm-switch__knob {
+    background: var(--cm-teal);
+    left: 20px;
+}
+
+/* Footer / pagination */
+/* `margin: 0` matters — the theme skin adds `mt-2` to every footer. */
+.cm-body .cm-tabulator .tabulator-footer {
+    background: #fff;
+    border-top: 1px solid var(--cm-line-2);
+    color: var(--cm-faint);
+    margin: 0;
+    padding: 16px 26px 20px;
+}
+
+/* No flex `gap` here: spacing is set per element instead, so the pager reads
+ * as one evenly spaced run. A container gap would stack on top of the page
+ * buttons' own margins and open a visible hole either side of the numbers. */
+.cm-body .cm-tabulator .tabulator-footer .tabulator-paginator {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    justify-content: flex-start;
+    row-gap: 8px;
+    text-align: left;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-paginator > label {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 700;
+    margin: 0 10px 0 0;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page-size {
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 8px;
+    color: var(--cm-ink);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 700;
+    margin: 0 12px 0 0;
+    outline: none;
+    padding: 6px 10px;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-pages {
+    align-items: center;
+    display: inline-flex;
+    margin: 0;
+}
+
+/* The range readout is injected after the size select — see course-semester.js.
+ * It must not carry the auto margin that pushes the pager right: it is optional
+ * markup, so alignment would collapse on any table that skips it. */
+.cm-page-range {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-right: 12px;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 9px;
+    color: #5a626e;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 700;
+    height: 30px;
+    justify-content: center;
+    margin: 0 3px;
+    min-width: 30px;
+    padding: 0 8px;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page[data-page="first"],
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page[data-page="last"] {
+    display: none;
+}
+
+/* Tabulator appends first / prev / pages / next / last in that order, and the
+ * two ends are hidden above — so `prev` is the leading visible control and the
+ * one that carries the margin pushing the whole pager to the right edge. */
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page[data-page="prev"] {
+    margin-left: auto;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page:not(:disabled):hover {
+    background: #ecebe7;
+    color: var(--cm-navy);
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page.active,
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page.active:hover {
+    background: var(--cm-navy);
+    border-color: var(--cm-navy);
+    color: #fff;
+    font-weight: 800;
+}
+
+.cm-body .cm-tabulator .tabulator-footer .tabulator-page:disabled {
+    opacity: 0.45;
+}
+
+/* ------------------------------------------------------------------ *
+ * Modals
+ *
+ * The theme's modal engine (tailwind.Modal) still drives show/hide, so the
+ * `.modal` / `.modal-dialog` / `.modal-content` shell stays; only the inner
+ * chrome is ours. Rules are scoped to `.cm-body` — which is <body> itself,
+ * so they survive the modal being re-parented on show.
+ * ------------------------------------------------------------------ */
+
+.cm-body .cm-modal__dialog {
+    max-width: calc(100vw - 40px);
+    width: 520px;
+}
+
+.cm-body .cm-modal__dialog--sm {
+    width: 440px;
+}
+
+.cm-body .cm-modal__dialog--md {
+    width: 640px;
+}
+
+.cm-body .cm-modal__dialog--wide {
+    width: 900px;
+}
+
+.cm-body .cm-modal {
+    background: #fff;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 40px 90px -30px rgba(10, 20, 50, 0.5);
+    overflow: hidden;
+}
+
+.cm-modal__head {
+    align-items: flex-start;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    padding: 22px 26px 18px;
+}
+
+.cm-modal__eyebrow {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 7px;
+}
+
+.cm-modal__eyebrow::before {
+    background: var(--cm-gold);
+    content: "";
+    display: block;
+    height: 2px;
+    width: 16px;
+}
+
+.cm-modal__eyebrow span {
+    color: #a8842a;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+    text-transform: uppercase;
+}
+
+.cm-modal__title {
+    color: var(--cm-navy);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+/* Same treatment as the Cancel button in the footer, so the two ways out of a
+ * dialog read as the same action. */
+.cm-modal__close {
+    align-items: center;
+    background: #fbe9e9;
+    border: 1px solid #f2d3d3;
+    border-radius: 50%;
+    color: #c0392b;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    height: 32px;
+    justify-content: center;
+    transition: background 0.14s ease, border-color 0.14s ease;
+    width: 32px;
+}
+
+.cm-modal__close:hover {
+    background: #f7dcdc;
+    border-color: #e9bfbf;
+    color: #a93226;
+}
+
+.cm-modal__body {
+    display: grid;
+    gap: 17px 20px;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 22px 26px;
+}
+
+.cm-modal__body--grid2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cm-modal__body--grid3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cm-modal__body--grid4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cm-field--span2 {
+    grid-column: span 2;
+}
+
+.cm-field--span3 {
+    grid-column: span 3;
+}
+
+.cm-field--span4 {
+    grid-column: span 4;
+}
+
+.cm-modal__foot {
+    align-items: center;
+    border-top: 1px solid var(--cm-line-2);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 26px 22px;
+}
+
+/* Fields */
+.cm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.cm-field > label {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-field > label span {
+    color: var(--cm-danger);
+}
+
+.cm-input {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-field);
+    border-radius: 10px;
+    color: var(--cm-ink);
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    padding: 11px 13px;
+    width: 100%;
+}
+
+.cm-input:focus {
+    background: #fff;
+    border-color: var(--cm-navy);
+}
+
+.cm-textarea {
+    line-height: 1.6;
+    min-height: 84px;
+    resize: vertical;
+}
+
+.cm-select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: var(--cm-field-bg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 13px center;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+    border: 1px solid var(--cm-field);
+    border-radius: 10px;
+    color: var(--cm-ink);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    padding: 11px 36px 11px 13px;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.cm-select:focus {
+    background-color: #fff;
+    border-color: var(--cm-navy);
+}
+
+/* ------------------------------------------------------------------ *
+ * TomSelect
+ *
+ * This is TomSelect 1.7.8, where the wrapper element is `.ts-control` — it
+ * also inherits the original select's classes — and `.ts-input` is the visible
+ * box. There is no `.ts-wrapper` in this version. Styling `.ts-control` as the
+ * field would nest a box inside a box, so it is flattened and the chrome lives
+ * on `.ts-input`, matching how the admission module skins the same widget.
+ *
+ * `!important` is needed throughout: the theme skin
+ * (css/components/_tom-select.css) carries 18 of its own.
+ *
+ * Dropdowns render to <body> (`dropdownParent`) because `.cm-modal` clips its
+ * overflow, which is why the panel rules are not nested under `.cm-modal`.
+ * ------------------------------------------------------------------ */
+
+.cm-body .ts-control.cm-select {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+.cm-body .ts-control.cm-select .ts-input {
+    align-items: center;
+    background-color: var(--cm-field-bg) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-position: right 13px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 12px 12px !important;
+    border: 1px solid var(--cm-field) !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+    color: var(--cm-ink);
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 44px;
+    padding: 11px 36px 11px 13px !important;
+    width: 100%;
+}
+
+.cm-body .ts-control.cm-select.focus .ts-input,
+.cm-body .ts-control.cm-select .ts-input.focus,
+.cm-body .ts-control.cm-select .ts-input.dropdown-active {
+    background-color: #fff !important;
+    border-color: var(--cm-navy) !important;
+    box-shadow: none !important;
+}
+
+.cm-body .ts-control.cm-select--sm .ts-input {
+    background-color: #fff !important;
+    border-radius: 9px !important;
+    font-size: 13px;
+    min-height: 38px;
+    padding: 9px 30px 9px 11px !important;
+}
+
+/* The library draws its own caret; ours is the background image. */
+.cm-body .ts-control.cm-select .ts-input::after,
+.cm-body .ts-control.cm-select .ts-input::before {
+    display: none !important;
+}
+
+.cm-body .ts-control.cm-select .ts-input > input {
+    color: var(--cm-ink);
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.cm-body .ts-control.cm-select .ts-input > input::placeholder {
+    color: #a9b0ba;
+    opacity: 1;
+}
+
+.cm-body .ts-control.cm-select .ts-input .item {
+    color: var(--cm-ink);
+}
+
+.cm-body .ts-control.cm-select.border-danger .ts-input {
+    border-color: var(--cm-danger) !important;
+}
+
+.cm-body .ts-control.cm-select.disabled .ts-input {
+    background-color: #f2f1ed !important;
+    opacity: 1;
+}
+
+/* A multiple select. Every chosen person is an `.item` chip inside the same
+ * box, so it has to wrap and grow rather than stay one line tall. */
+.cm-body .ts-control.cm-select .ts-input.multi {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 36px 8px 10px !important;
+}
+
+.cm-body .ts-control.cm-select .ts-input.multi .item {
+    align-items: center;
+    background: #eef1f7;
+    border: 1px solid #dbe2ee;
+    border-radius: 999px;
+    color: var(--cm-navy);
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 5px;
+    margin: 0 !important;
+    padding: 4px 5px 4px 11px;
+}
+
+/* The `remove_button` plugin's ×. */
+.cm-body .ts-control.cm-select .ts-input.multi .item .remove {
+    align-items: center;
+    border: 0 !important;
+    border-radius: 50%;
+    color: var(--cm-dim);
+    display: inline-flex;
+    height: 17px;
+    justify-content: center;
+    line-height: 1;
+    padding: 0 !important;
+    text-decoration: none;
+    width: 17px;
+}
+
+.cm-body .ts-control.cm-select .ts-input.multi .item .remove:hover {
+    background: #f4d9d9;
+    color: var(--cm-danger);
+}
+
+.cm-body .ts-control.cm-select .ts-input.multi > input {
+    flex: 1;
+    min-width: 90px;
+}
+
+/* The assign modal's eyebrow carries the year > term > course > group trail
+ * the server builds, underlines and all. */
+.cm-modal__eyebrow [data-cm-assign-eyebrow] {
+    color: var(--cm-faint);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-modal__eyebrow [data-cm-assign-eyebrow] u {
+    color: var(--cm-dim);
+    text-decoration: none;
+}
+
+/* Panel — rendered to <body>, so scoped by its own class instead.
+ *
+ * The z-index has to clear the theme's modal, which is also re-parented to
+ * <body>. Anything in the normal range leaves the panel opening *behind* the
+ * modal, which reads as the dropdown not opening at all; 100050 is the value
+ * the site-settings module already uses for the same situation. */
+.ts-dropdown.cm-tom-dropdown {
+    background: #fff;
+    border: 1px solid #e6e3dc;
+    border-radius: 12px;
+    box-shadow: 0 22px 48px -18px rgba(10, 20, 50, 0.35);
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* Block, not flex — the flex attempt made the panel collapse again. Both
+     * `height` and `max-height` are forced because something in the app-wide
+     * TomSelect styles was pinning this panel to roughly one row, which is what
+     * kept slicing the list; `height: auto` lets it grow to its content and the
+     * max-height caps it. */
+    height: auto !important;
+    margin-top: 6px;
+    max-height: 340px !important;
+    overflow: hidden !important;
+    padding: 6px;
+    z-index: 100050 !important;
+}
+
+/* The list scrolls inside the panel rather than growing without limit. */
+/* The scroller. `min-height` guarantees a usable list even if anything tries to
+ * collapse it again; `height: auto` defeats a fixed height from elsewhere. */
+.ts-dropdown.cm-tom-dropdown .ts-dropdown-content {
+    background: #fff;
+    border-radius: 8px;
+    display: block !important;
+    height: auto !important;
+    max-height: 300px !important;
+    min-height: 42px;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+}
+
+/* Opaque rows, so nothing behind the panel can ever read through. */
+.ts-dropdown.cm-tom-dropdown .option {
+    background: #fff;
+    display: block;
+}
+
+/* Typing in the control filters; the caret is the control's, not the list's. */
+.cm-body .ts-control.cm-classinput .ts-input > input {
+    color: var(--cm-ink);
+    opacity: 1;
+}
+
+.ts-dropdown.cm-tom-dropdown .dropdown-input-wrap {
+    padding: 2px 2px 6px;
+}
+
+.ts-dropdown.cm-tom-dropdown .dropdown-input {
+    background: #fbfaf7;
+    border: 1px solid #e0dcd3 !important;
+    border-radius: 9px;
+    box-shadow: none !important;
+    color: #1b2330;
+    font-size: 13px;
+    padding: 9px 11px !important;
+}
+
+.ts-dropdown.cm-tom-dropdown .dropdown-input:focus {
+    background: #fff;
+    border-color: #16264f !important;
+}
+
+.ts-dropdown.cm-tom-dropdown .option {
+    border-radius: 9px;
+    color: #3f4653;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+    padding: 9px 11px;
+}
+
+.ts-dropdown.cm-tom-dropdown .option.active {
+    background: #f2f4f9 !important;
+    color: #16264f;
+}
+
+.ts-dropdown.cm-tom-dropdown .option[aria-selected="true"] {
+    background: #16264f !important;
+    color: #fff;
+}
+
+.ts-dropdown.cm-tom-dropdown .no-results {
+    color: #a29e94;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px;
+}
+
+/* Switch field — a real checkbox so the existing form payloads are unchanged
+ * (`franchise_course=Yes`, `active=1`); the card is just its label. The input
+ * stays in the DOM and focusable, and every state is driven by sibling
+ * selectors so no JS has to keep the two in sync. */
+.cm-switchfield {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    position: relative;
+}
+
+.cm-switchfield > span:first-child {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-switchcard__input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+.cm-switchcard {
+    align-items: center;
+    background: #fffafa;
+    border: 1px solid #f0dede;
+    border-radius: 12px;
+    display: flex;
+    gap: 14px;
+    padding: 12px 14px;
+    transition: background 0.16s ease, border-color 0.16s ease;
+    width: 100%;
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard {
+    background: #fbfbfd;
+    border-color: #dfe3ec;
+}
+
+.cm-switchcard__input:focus-visible ~ .cm-switchcard {
+    border-color: var(--cm-navy);
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.12);
+}
+
+.cm-switchcard__tile {
+    align-items: center;
+    background: #fbe4e4;
+    border-radius: 11px;
+    color: var(--cm-danger);
+    display: flex;
+    flex-shrink: 0;
+    height: 38px;
+    justify-content: center;
+    transition: background 0.16s ease, color 0.16s ease;
+    width: 38px;
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard .cm-switchcard__tile {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-switchcard__tile [data-cm-switch-on] {
+    display: none;
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard .cm-switchcard__tile [data-cm-switch-on] {
+    display: block;
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard .cm-switchcard__tile [data-cm-switch-off] {
+    display: none;
+}
+
+.cm-switchcard__copy {
+    min-width: 0;
+}
+
+/* Labels come from data attributes so the on/off wording lives in the markup
+ * next to the field rather than in a stylesheet. */
+.cm-switchcard__title::before {
+    content: attr(data-off);
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard .cm-switchcard__title::before {
+    content: attr(data-on);
+}
+
+.cm-switchcard__title {
+    color: var(--cm-navy);
+    display: block;
+    font-size: 13.5px;
+    font-weight: 800;
+}
+
+.cm-switchcard__desc::before {
+    content: attr(data-off);
+}
+
+.cm-switchcard__input:checked ~ .cm-switchcard .cm-switchcard__desc::before {
+    content: attr(data-on);
+}
+
+.cm-switchcard__desc {
+    color: var(--cm-faint);
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.cm-body .cm-field .acc__input-error {
+    color: var(--cm-danger);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cm-body .cm-input.border-danger,
+.cm-body .cm-select.border-danger {
+    border-color: var(--cm-danger);
+}
+
+/* ------------------------------------------------------------------ *
+ * Step header — wizard progress
+ * ------------------------------------------------------------------ */
+
+.cm-stephead {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 20px 26px 16px;
+}
+
+.cm-stephead__meta {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-bottom: 8px;
+}
+
+.cm-stephead__pill {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 6px;
+    color: var(--cm-gold-ink);
+    display: inline-flex;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    padding: 3px 9px;
+    text-transform: uppercase;
+}
+
+.cm-stephead__sub {
+    color: var(--cm-label);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cm-stephead__title {
+    color: var(--cm-navy);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Read-only detail grid + assessment list (wizard step 2)
+ * ------------------------------------------------------------------ */
+
+.cm-readonly {
+    display: grid;
+    gap: 16px 30px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cm-readonly__item {
+    align-items: baseline;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: 132px minmax(0, 1fr);
+    min-width: 0;
+}
+
+.cm-readonly__label {
+    color: var(--cm-label);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cm-readonly__value {
+    color: var(--cm-ink);
+    font-size: 13.5px;
+    font-weight: 700;
+    min-width: 0;
+    text-wrap: pretty;
+}
+
+.cm-readonly__value--lead {
+    color: var(--cm-navy);
+    text-decoration: underline;
+}
+
+.cm-asslist {
+    border: 1px solid var(--cm-line-2);
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.cm-asslist__head,
+.cm-asslist__row {
+    align-items: center;
+    display: grid;
+    gap: 0 12px;
+    grid-template-columns: 44px minmax(0, 1fr) 130px 60px;
+}
+
+.cm-asslist__head {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 10px 14px;
+}
+
+.cm-asslist__head span {
+    color: #8a8579;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.cm-asslist__row {
+    border-bottom: 1px solid var(--cm-line-4);
+    padding: 12px 14px;
+}
+
+.cm-asslist__row:last-child {
+    border-bottom: 0;
+}
+
+.cm-asslist__n {
+    color: var(--cm-label);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cm-asslist__name {
+    color: var(--cm-navy);
+    font-size: 13.5px;
+    font-weight: 700;
+    min-width: 0;
+}
+
+.cm-asslist__code {
+    color: var(--cm-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.cm-asslist__toggle {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cm-asslist__empty {
+    align-items: center;
+    background: #f7f1de;
+    color: #6d5514;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 12px;
+    padding: 16px 18px;
+}
+
+/* Only one wizard step is on screen at a time. */
+.cm-body .cm-step[hidden] {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .cm-readonly {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Two-panel picker — chosen on the left, available on the right
+ * ------------------------------------------------------------------ */
+
+.cm-picker {
+    align-items: start;
+    display: grid;
+    gap: 26px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    padding: 22px 26px;
+}
+
+.cm-picker__col {
+    min-width: 0;
+}
+
+.cm-picker__head {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cm-picker__label {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-picker__count {
+    color: var(--cm-dim);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cm-picker__list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* A chosen module: label plus a remove control. */
+.cm-chosen {
+    align-items: center;
+    background: #f2f4f9;
+    border: 1px solid #c4cee6;
+    border-radius: 10px;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 12px 14px;
+}
+
+.cm-chosen__name {
+    color: var(--cm-navy);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    min-width: 0;
+    text-wrap: pretty;
+}
+
+.cm-chosen__remove {
+    align-items: center;
+    background: #fff;
+    border: none;
+    border-radius: 7px;
+    color: var(--cm-label);
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    height: 26px;
+    justify-content: center;
+    width: 26px;
+}
+
+.cm-chosen__remove:hover {
+    background: #fbe3e3;
+    color: #d13c3c;
+}
+
+/* An available module: a toggle. Clicking anywhere on it flips selection. */
+.cm-option {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 10px;
+    color: #4f5866;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 12px 14px;
+    text-align: left;
+    transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease;
+    width: 100%;
+}
+
+.cm-option:hover {
+    border-color: #c4cee6;
+}
+
+.cm-option.is-on {
+    background: #f2f4f9;
+    border-color: #c4cee6;
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-option__name {
+    line-height: 1.35;
+    min-width: 0;
+    text-wrap: pretty;
+}
+
+.cm-option__mark {
+    align-items: center;
+    background: transparent;
+    border-radius: 50%;
+    color: #c2bdb2;
+    display: flex;
+    flex-shrink: 0;
+    height: 20px;
+    justify-content: center;
+    transition: background 0.13s ease, color 0.13s ease;
+    width: 20px;
+}
+
+.cm-option.is-on .cm-option__mark {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-picker__empty {
+    align-items: center;
+    background: #f7f1de;
+    border-radius: 11px;
+    color: #6d5514;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 12px;
+    padding: 16px 18px;
+}
+
+.cm-body .cm-picker__empty[hidden] {
+    display: none;
+}
+
+@media (max-width: 860px) {
+    .cm-picker {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Finder — cascading selects that reveal a result below
+ * ------------------------------------------------------------------ */
+
+.cm-finder {
+    margin-bottom: 20px;
+}
+
+.cm-finder__head {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 20px 26px 16px;
+}
+
+.cm-finder__hint {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: 5px 0 0;
+}
+
+.cm-finder__grid {
+    align-items: end;
+    display: grid;
+    gap: 16px 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 20px 26px 24px;
+}
+
+/* The plan wizard's setup step carries a fourth field. */
+.cm-finder__grid--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* Steps stay hidden until the select before them has a value. */
+.cm-body .cm-finder__grid .cm-field[hidden] {
+    display: none;
+}
+
+/* Loading mark beside a cascading field's label. */
+.cm-fieldspin {
+    height: 12px;
+    margin-left: 7px;
+    vertical-align: -1px;
+    width: 12px;
+}
+
+.cm-finder__note {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 11px;
+    color: var(--cm-gold-ink);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 11px;
+    margin: 0 26px 4px;
+    padding: 14px 16px;
+}
+
+.cm-finder__note svg {
+    flex-shrink: 0;
+}
+
+.cm-badge {
+    align-items: center;
+    border-radius: 999px;
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 800;
+    gap: 7px;
+    letter-spacing: 0.04em;
+    padding: 5px 12px;
+}
+
+.cm-badge--ok {
+    background: #e0f0e8;
+    color: #1a7a58;
+}
+
+.cm-body [data-cm-result][hidden],
+.cm-body [data-cm-assigned][hidden] {
+    display: none;
+}
+
+/* Four fields need an intermediate step; the module's own sidebar already
+ * takes 316px, so the content area is narrow well before the viewport is. */
+@media (max-width: 1240px) {
+    .cm-finder__grid--four {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 860px) {
+    .cm-finder__grid,
+    .cm-finder__grid--four {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Instance accordion
+ *
+ * The Instance tab is hand-rendered rather than a Tabulator: each instance is
+ * a summary row that expands to its own terms table, which is not a shape
+ * Tabulator gives you without nesting a second instance inside a rowFormatter.
+ * ------------------------------------------------------------------ */
+
+.cm-inst__head,
+.cm-inst__row {
+    align-items: center;
+    display: grid;
+    gap: 0 12px;
+    grid-template-columns: 40px 64px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 96px minmax(0, 1fr) minmax(0, 1fr) 168px;
+    padding: 0 26px;
+}
+
+.cm-inst__head {
+    border-bottom: 1px solid var(--cm-line);
+    min-height: 42px;
+}
+
+.cm-inst__head span {
+    color: var(--cm-dim);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    min-width: 0;
+    text-transform: uppercase;
+}
+
+.cm-inst__row {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line-2);
+    min-height: 58px;
+    padding-bottom: 12px;
+    padding-top: 12px;
+}
+
+.cm-inst__toggle {
+    align-items: center;
+    background: #eeede9;
+    border: none;
+    border-radius: 8px;
+    color: #5a626e;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    height: 26px;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+    width: 26px;
+}
+
+.cm-inst.is-open .cm-inst__toggle {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-inst.is-open .cm-inst__toggle svg {
+    transform: rotate(180deg);
+}
+
+.cm-inst__toggle svg {
+    transition: transform 0.18s ease;
+}
+
+.cm-inst__id {
+    color: #b0aca2;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.cm-inst__year {
+    color: var(--cm-navy);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.cm-inst__cell {
+    color: var(--cm-muted);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    min-width: 0;
+}
+
+.cm-inst__cell--money {
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-inst__actions {
+    align-items: center;
+    display: flex;
+    gap: 7px;
+    justify-content: flex-end;
+}
+
+.cm-inst__body {
+    display: none;
+    overflow-x: auto;
+    padding: 16px 26px 20px;
+}
+
+.cm-inst.is-open .cm-inst__body {
+    display: block;
+}
+
+.cm-terms {
+    border: 1px solid #edeae3;
+    border-radius: 11px;
+    min-width: 1040px;
+    overflow: hidden;
+}
+
+.cm-terms__head,
+.cm-terms__row {
+    align-items: center;
+    display: grid;
+    gap: 0 10px;
+    grid-template-columns: repeat(11, minmax(0, 1fr)) 78px;
+    padding: 0 16px;
+}
+
+.cm-terms__head {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid #edeae3;
+    min-height: 40px;
+}
+
+.cm-terms__head span {
+    color: #8a8579;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    min-width: 0;
+    text-transform: uppercase;
+}
+
+.cm-terms__row {
+    border-bottom: 1px solid #f4f2ed;
+    padding-bottom: 11px;
+    padding-top: 11px;
+}
+
+.cm-terms__row:last-child {
+    border-bottom: 0;
+}
+
+.cm-terms__row:hover {
+    background: var(--cm-field-bg);
+}
+
+.cm-terms__row span {
+    color: #4f5866;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    line-height: 1.35;
+    min-width: 0;
+}
+
+.cm-terms__actions {
+    display: flex;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+.cm-terms__actions .cm-rowbtn {
+    height: 26px;
+    width: 26px;
+}
+
+.cm-inst__empty {
+    align-items: center;
+    background: #f7f1de;
+    border-radius: 11px;
+    color: #6d5514;
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 12px;
+    padding: 16px 18px;
+}
+
+/* Venue repeater — one row per venue, appended and removed client side. Every
+ * row posts the same five parallel arrays, so the row template is shared
+ * between the add and edit forms and between server- and client-rendered rows. */
+.cm-venues {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 12px;
+    min-width: 0;
+    padding: 14px 16px 16px;
+}
+
+.cm-venues__head {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cm-venues__head > span {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-venues__add {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border: none;
+    border-radius: 999px;
+    color: #6d5514;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    gap: 6px;
+    padding: 7px 13px;
+}
+
+.cm-venues__add:hover {
+    background: #ece2c8;
+}
+
+.cm-venues__grid {
+    display: grid;
+    gap: 8px 12px;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) 92px minmax(0, 0.9fr) minmax(0, 0.9fr) 34px;
+    align-items: center;
+}
+
+.cm-venues__grid > .cm-venues__col {
+    color: #8a8579;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.cm-venues__col--center {
+    text-align: center;
+}
+
+/* Each row is `display: contents` so its six cells join the parent grid and
+ * stay aligned with the header, however many rows there are. */
+.cm-venue-row {
+    display: contents;
+}
+
+.cm-input--sm,
+.cm-select--sm {
+    background-color: #fff;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 11px;
+}
+
+.cm-select--sm {
+    padding-right: 30px;
+}
+
+.cm-venues__switch {
+    display: flex;
+    justify-content: center;
+}
+
+/* Compact checkbox-driven switch used inside a venue row. */
+.cm-switchmini {
+    cursor: pointer;
+    display: inline-flex;
+    position: relative;
+}
+
+.cm-switchmini__input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+.cm-switchmini__track {
+    background: rgba(214, 69, 69, 0.14);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(214, 69, 69, 0.28);
+    display: block;
+    height: 20px;
+    position: relative;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+    width: 38px;
+}
+
+.cm-switchmini__input:checked ~ .cm-switchmini__track {
+    background: rgba(31, 122, 92, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(31, 122, 92, 0.3);
+}
+
+.cm-switchmini__input:focus-visible ~ .cm-switchmini__track {
+    box-shadow: inset 0 0 0 1px var(--cm-navy), 0 0 0 3px rgba(22, 38, 79, 0.16);
+}
+
+.cm-switchmini__knob {
+    align-items: center;
+    background: var(--cm-danger);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    height: 16px;
+    justify-content: center;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    transition: left 0.18s ease, background 0.18s ease;
+    width: 16px;
+}
+
+.cm-switchmini__knob [data-cm-switch-on] {
+    display: none;
+}
+
+.cm-switchmini__input:checked ~ .cm-switchmini__track .cm-switchmini__knob [data-cm-switch-on] {
+    display: block;
+}
+
+.cm-switchmini__input:checked ~ .cm-switchmini__track .cm-switchmini__knob [data-cm-switch-off] {
+    display: none;
+}
+
+.cm-switchmini__input:checked ~ .cm-switchmini__track .cm-switchmini__knob {
+    background: var(--cm-teal);
+    left: 20px;
+}
+
+.cm-venues__remove {
+    align-items: center;
+    background: #eeede9;
+    border: none;
+    border-radius: 8px;
+    color: #6d747e;
+    cursor: pointer;
+    display: flex;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+.cm-venues__remove:hover {
+    background: #fbe3e3;
+    color: #d13c3c;
+}
+
+.cm-venues__cell--empty {
+    height: 1px;
+}
+
+/* Stacked venue name + SLC code inside a table cell. */
+.cm-stack__name {
+    color: var(--cm-ink-2);
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.cm-stack__sub {
+    color: var(--cm-label);
+    display: block;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Conditional fields (Required Hours appears only with a work placement). */
+.cm-field[hidden],
+.cm-switchfield[hidden] {
+    display: none;
+}
+
+/* Checklist — a grid of real checkboxes, each styled through its own label. */
+.cm-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.cm-checklist__head {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding-bottom: 9px;
+}
+
+.cm-checklist__head > span {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.cm-checklist__toggle {
+    background: none;
+    border: none;
+    color: var(--cm-teal);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0;
+}
+
+.cm-checklist__toggle:hover {
+    text-decoration: underline;
+}
+
+.cm-checklist__grid {
+    display: grid;
+    gap: 11px 20px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.cm-check {
+    align-items: flex-start;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 9px;
+    line-height: 1.35;
+    min-width: 0;
+    position: relative;
+}
+
+.cm-check__input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+.cm-check__box {
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #d3cfc6;
+    border-radius: 5px;
+    color: #fff;
+    display: flex;
+    flex-shrink: 0;
+    height: 18px;
+    justify-content: center;
+    margin-top: 1px;
+    transition: background 0.12s ease, border-color 0.12s ease;
+    width: 18px;
+}
+
+.cm-check__box svg {
+    display: none;
+}
+
+.cm-check__input:checked ~ .cm-check__box {
+    background: var(--cm-navy);
+    border-color: var(--cm-navy);
+}
+
+.cm-check__input:checked ~ .cm-check__box svg {
+    display: block;
+}
+
+.cm-check__input:checked ~ .cm-check__label {
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-check__input:focus-visible ~ .cm-check__box {
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.16);
+}
+
+/* Footer buttons — one height and one padding across every variant so Cancel
+ * and Save/Update line up exactly; `box-sizing: border-box` means the outlined
+ * variants' 1px border does not make them taller. */
+.cm-btn--cancel,
+.cm-btn--save,
+.cm-btn--danger,
+.cm-btn--keep,
+.cm-btn--go,
+.cm-btn--bulk,
+.cm-btn--ghost {
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    height: 38px;
+    padding: 0 20px;
+}
+
+.cm-btn--cancel {
+    background: #fbe9e9;
+    border: 1px solid #f2d3d3;
+    color: #c0392b;
+}
+
+.cm-btn--cancel:hover {
+    background: #f7dcdc;
+    border-color: #e9bfbf;
+}
+
+.cm-btn--save {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-btn--save:hover {
+    background: var(--cm-navy-deep);
+}
+
+.cm-btn--danger {
+    background: var(--cm-danger);
+    color: #fff;
+}
+
+.cm-btn--danger:hover {
+    background: #bf3a3a;
+}
+
+.cm-btn--keep {
+    background: transparent;
+    border: 1px solid var(--cm-field);
+    color: #565e6b;
+}
+
+.cm-btn--keep:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+.cm-spinner {
+    height: 16px;
+    width: 16px;
+}
+
+/* Confirm modal */
+.cm-body .cm-confirm__dialog {
+    max-width: calc(100vw - 40px);
+    width: 420px;
+}
+
+.cm-body .cm-confirm {
+    background: #fff;
+    border: 0;
+    border-radius: 16px;
+    box-shadow: 0 40px 90px -30px rgba(10, 20, 50, 0.55);
+    overflow: hidden;
+}
+
+.cm-confirm__body {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 28px 28px 0;
+}
+
+.cm-confirm__icon {
+    align-items: center;
+    background: #fbeaea;
+    border-radius: 50%;
+    color: var(--cm-danger);
+    display: flex;
+    flex-shrink: 0;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+}
+
+.cm-confirm__icon--restore {
+    background: #e0f0e8;
+    color: var(--cm-teal);
+}
+
+.cm-confirm__title {
+    color: var(--cm-navy);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.cm-confirm__text {
+    color: var(--cm-faint);
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin: 9px 0 0;
+}
+
+.cm-confirm__foot {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 24px 28px 26px;
+}
+
+/* Success modal */
+.cm-body .cm-success {
+    background: #fff;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 40px 90px -30px rgba(10, 20, 50, 0.55);
+    overflow: hidden;
+    text-align: center;
+}
+
+.cm-success__body {
+    padding: 34px 30px 0;
+}
+
+.cm-success__icon {
+    align-items: center;
+    background: #e0f0e8;
+    border: 2px solid var(--cm-teal);
+    border-radius: 50%;
+    color: var(--cm-teal);
+    display: flex;
+    height: 62px;
+    justify-content: center;
+    margin: 0 auto;
+    width: 62px;
+}
+
+.cm-success__icon--warn {
+    background: #fbeaea;
+    border-color: var(--cm-danger);
+    color: var(--cm-danger);
+}
+
+.cm-success__title {
+    color: var(--cm-navy);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-top: 20px;
+}
+
+.cm-success__text {
+    color: var(--cm-faint);
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin: 10px 0 0;
+}
+
+.cm-success__foot {
+    padding: 24px 30px 28px;
+}
+
+/* ------------------------------------------------------------------ *
+ * Responsive
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 1400px) {
+    .cm-search {
+        width: 210px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .cm-body {
+        --cm-gutter: 20px;
+    }
+
+    .cm-nav {
+        gap: 18px;
+    }
+
+    .cm-search {
+        width: 180px;
+    }
+
+    .cm-profile__copy {
+        display: none;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cm-header__bar {
+        gap: 16px;
+    }
+
+    .cm-search {
+        display: none;
+    }
+
+    .cm-search.is-open {
+        background: var(--cm-head);
+        display: flex;
+        left: 0;
+        padding: 0 var(--cm-gutter);
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+        z-index: 45;
+    }
+
+    .cm-search.is-open > svg:first-child {
+        left: calc(var(--cm-gutter) + 12px);
+    }
+
+    .cm-search.is-open .cm-search__input {
+        height: var(--cm-header-h);
+    }
+
+    .cm-search.is-open .cm-search__close {
+        right: calc(var(--cm-gutter) + 11px);
+    }
+
+    .cm-search__results {
+        left: var(--cm-gutter);
+        right: var(--cm-gutter);
+        width: auto;
+    }
+
+    .cm-search__toggle {
+        display: flex;
+    }
+
+    .cm-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .cm-layout__side {
+        position: static;
+        width: 100%;
+    }
+
+    .cm-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 860px) {
+    .cm-header__bar {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 12px var(--cm-gutter);
+        row-gap: 10px;
+    }
+
+    .cm-header__divider {
+        display: none;
+    }
+
+    .cm-nav {
+        height: auto;
+        margin-left: 0;
+        order: 3;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        width: 100%;
+    }
+
+    .cm-nav__item {
+        padding-bottom: 6px;
+    }
+
+    .cm-search.is-open {
+        padding: 10px var(--cm-gutter);
+        position: static;
+    }
+
+    .cm-search.is-open .cm-search__input {
+        height: 40px;
+    }
+
+    .cm-pagehead__inner {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .cm-pagehead__title {
+        font-size: 24px;
+    }
+
+    .cm-pagehead__rule {
+        display: none;
+    }
+}
+
+@media (max-width: 960px) {
+    .cm-modal__body--grid3,
+    .cm-modal__body--grid4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .cm-field--span3,
+    .cm-field--span4 {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .cm-modal__body--grid3,
+    .cm-modal__body--grid4 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cm-field--span2,
+    .cm-field--span3,
+    .cm-field--span4 {
+        grid-column: span 1;
+    }
+
+    .cm-stats {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cm-stat__value {
+        font-size: 36px;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Class Plans
+ *
+ * The list screen carries a full ten-control filter panel rather than the
+ * toolbar the other lists use, because its endpoint takes ten parameters and
+ * four of them are multi-selects.
+ * ------------------------------------------------------------------ */
+
+.cm-planfilters {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 4px 26px 20px;
+}
+
+.cm-planfilters__grid {
+    display: grid;
+    gap: 16px 20px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cm-planfilters__foot {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.cm-planfilters__spacer {
+    flex: 1;
+    min-width: 0;
+}
+
+/* The affirmative action on this screen is Go, not Save, so it takes the
+ * teal the module reserves for "run this". */
+.cm-btn--go {
+    background: var(--cm-teal);
+    border: none;
+    color: #fff;
+    padding: 0 26px;
+}
+
+.cm-btn--go:hover {
+    background: var(--cm-teal-hover);
+    color: #fff;
+}
+
+
+
+/* ------------------------------------------------------------------ *
+ * Chip pickers — a single choice made from a short, fixed set
+ *
+ * Used for Class Type and Class Day, which the legacy modal rendered as a
+ * <select> and a row of radios. The chosen value still posts through a hidden
+ * input, so the payload is unchanged.
+ * ------------------------------------------------------------------ */
+
+.cm-optpick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cm-optpick__btn {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid #e4e1da;
+    border-radius: 10px;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 7px;
+    padding: 8px 13px 8px 9px;
+    transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease;
+}
+
+.cm-optpick__btn:hover {
+    border-color: #c4cee6;
+}
+
+.cm-optpick__btn.is-on {
+    background: #f2f4f9;
+    border-color: #c4cee6;
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-optpick__box {
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #cbc7bd;
+    border-radius: 5px;
+    color: #fff;
+    display: grid;
+    flex-shrink: 0;
+    height: 17px;
+    place-items: center;
+    transition: background 0.13s ease, border-color 0.13s ease;
+    width: 17px;
+}
+
+.cm-optpick__box svg {
+    opacity: 0;
+}
+
+.cm-optpick__btn.is-on .cm-optpick__box {
+    background: var(--cm-navy);
+    border-color: var(--cm-navy);
+}
+
+.cm-optpick__btn.is-on .cm-optpick__box svg {
+    opacity: 1;
+}
+
+/* ------------------------------------------------------------------ *
+ * Read-only summary lines in the plan modal
+ * ------------------------------------------------------------------ */
+
+.cm-readout {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.cm-readout__label {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.cm-readout__value {
+    color: var(--cm-navy);
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+/* ------------------------------------------------------------------ *
+ * Plan list cells
+ * ------------------------------------------------------------------ */
+
+/* The Module cell stacks the module name over its course, so the link is a
+ * block and the course line wraps beneath it. */
+.cm-stack {
+    display: block;
+    min-width: 0;
+}
+
+.cm-planlink {
+    color: var(--cm-teal);
+    display: block;
+    font-weight: 700;
+    line-height: 1.35;
+    text-decoration: none;
+}
+
+.cm-planlink + .cm-stack__sub {
+    font-variant-numeric: normal;
+    line-height: 1.4;
+    margin-top: 3px;
+}
+
+.cm-planlink:hover {
+    color: var(--cm-teal-hover);
+    text-decoration: underline;
+}
+
+/* Tabulator draws its own selection checkboxes, and the theme's base styles
+ * size and colour every `input[type=checkbox]` in the app. Drawn from scratch
+ * here — tinting with `accent-color` alone lost to those rules and left an
+ * oversized, unfilled box. `!important` throughout for the same reason. */
+.cm-body .cm-tabulator input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: #fff !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 11px 11px !important;
+    border: 1.5px solid #cbc7bd !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    height: 18px !important;
+    margin: 0 !important;
+    min-height: 18px !important;
+    min-width: 18px !important;
+    padding: 0 !important;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+    vertical-align: middle !important;
+    width: 18px !important;
+}
+
+/* The row-selection column. `.tabulator-cell:first-child` adds the module's
+ * 26px gutter, which squeezed the 18px box out of a 40px column. */
+.cm-body .cm-tabulator .tabulator-row .tabulator-cell.cm-cell--check,
+.cm-body .cm-tabulator .tabulator-header .tabulator-col.cm-cell--check .tabulator-col-content {
+    justify-content: flex-start;
+    padding-left: 26px;
+    padding-right: 0;
+}
+
+.cm-body .cm-tabulator input[type="checkbox"]:hover {
+    border-color: var(--cm-navy) !important;
+}
+
+.cm-body .cm-tabulator input[type="checkbox"]:checked {
+    background-color: var(--cm-navy) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") !important;
+    border-color: var(--cm-navy) !important;
+}
+
+.cm-body .cm-tabulator .tabulator-row.tabulator-selected,
+.cm-body .cm-tabulator .tabulator-row.tabulator-selected:hover {
+    background: #f4f7fc;
+}
+
+/* ------------------------------------------------------------------ *
+ * Calendar view — server-rendered room x day timetable
+ *
+ * The markup comes from `PlanController::grid` as a plain bordered table, so
+ * these rules dress what that method already emits.
+ * ------------------------------------------------------------------ */
+
+.cm-planscal {
+    overflow-x: auto;
+    padding: 20px 26px 26px;
+}
+
+.cm-planscal__loading {
+    color: var(--cm-dim);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 48px 0;
+    text-align: center;
+}
+
+.cm-planscal .routineBuilderTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 100%;
+    width: max-content;
+}
+
+.cm-planscal .routineBuilderTable th {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line);
+    color: var(--cm-dim);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    min-width: 150px;
+    padding: 11px 12px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.cm-planscal .routineBuilderTable td {
+    border-bottom: 1px solid var(--cm-line-4);
+    padding: 10px 12px;
+    vertical-align: top;
+}
+
+.cm-planscal .routineBuilderTable td:first-child {
+    color: var(--cm-navy);
+    font-size: 12.5px;
+    font-weight: 800;
+    min-width: 70px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.cm-planscal .routineDayBoxes {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.cm-planscal .routineDayBox {
+    background: #fff;
+    border: 1px solid #e2e5ec;
+    border-radius: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-width: 210px;
+    padding: 9px;
+}
+
+.cm-planscal .rdbItem {
+    min-width: 0;
+    width: 100%;
+}
+
+.cm-planscal .rdItemHalf {
+    width: calc(50% - 2px);
+}
+
+.cm-planscal .routineDayBox .btn {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 8px;
+    color: var(--cm-ink-2);
+    display: flex;
+    font-size: 11.5px;
+    font-weight: 600;
+    gap: 6px;
+    line-height: 1.35;
+    padding: 6px 9px;
+    text-align: left;
+    width: 100%;
+}
+
+.cm-planscal .routineDayBox .btn svg {
+    color: var(--cm-gold-ink);
+    flex-shrink: 0;
+    height: 13px;
+    width: 13px;
+}
+
+.cm-planscal .routineDayBox .btn-course,
+.cm-planscal .routineDayBox .btn-module {
+    background: #f2f4f9;
+    border-color: #c4cee6;
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-planscal .routineDayBox .btn-course svg,
+.cm-planscal .routineDayBox .btn-module svg {
+    color: var(--cm-navy);
+}
+
+@media (max-width: 1280px) {
+    .cm-planfilters__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .cm-planfilters__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .cm-planfilters__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Class Plan Builder
+ * ------------------------------------------------------------------ */
+
+.cm-planhead {
+    padding: 26px 30px 0;
+}
+
+.cm-planhead__top {
+    align-items: flex-start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    justify-content: space-between;
+}
+
+.cm-planhead__id {
+    min-width: 0;
+}
+
+.cm-planhead__title {
+    color: var(--cm-navy);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.cm-planhead__course {
+    color: var(--cm-faint);
+    font-size: 13px;
+    font-weight: 600;
+    margin: 7px 0 0;
+    max-width: 620px;
+}
+
+.cm-planhead__actions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: 14px;
+}
+
+.cm-planhead__count {
+    text-align: right;
+}
+
+.cm-planhead__countlabel {
+    color: var(--cm-dim);
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.cm-planhead__countvalue {
+    color: var(--cm-navy);
+    display: block;
+    font-size: 30px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 4px;
+}
+
+.cm-planhead__meta {
+    border-top: 1px solid var(--cm-line-3);
+    display: grid;
+    gap: 0 24px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-top: 22px;
+}
+
+/* Venue picker */
+
+.cm-venuepick {
+    margin-top: 18px;
+    padding: 20px 26px;
+}
+
+.cm-venuepick__label {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.cm-venuepick__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.cm-venuechip {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid #e4e1da;
+    border-radius: 10px;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 8px 9px;
+    transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease;
+}
+
+.cm-venuechip.is-on {
+    background: #f2f4f9;
+    border-color: #c4cee6;
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+.cm-venuechip__input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+.cm-venuechip__box {
+    align-items: center;
+    background: #fff;
+    border: 1.5px solid #cbc7bd;
+    border-radius: 5px;
+    color: #fff;
+    display: grid;
+    flex-shrink: 0;
+    height: 17px;
+    place-items: center;
+    width: 17px;
+}
+
+.cm-venuechip__box svg {
+    opacity: 0;
+}
+
+.cm-venuechip.is-on .cm-venuechip__box {
+    background: var(--cm-navy);
+    border-color: var(--cm-navy);
+}
+
+.cm-venuechip.is-on .cm-venuechip__box svg {
+    opacity: 1;
+}
+
+.cm-venuechip__count {
+    align-items: center;
+    background: #e6e3dc;
+    border-radius: 999px;
+    color: var(--cm-label);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    height: 19px;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 6px;
+}
+
+.cm-venuechip.is-on .cm-venuechip__count {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+/* Routine sets */
+
+.cm-routine {
+    margin-top: 18px;
+    overflow: hidden;
+}
+
+.cm-routine__head {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    padding: 18px 26px 14px;
+}
+
+.cm-routine__headleft {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.cm-routine__title {
+    color: var(--cm-navy);
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.cm-routine__search input {
+    width: 160px;
+}
+
+.cm-clip {
+    align-items: center;
+    background: #f2f4f9;
+    border: 1px solid #c4cee6;
+    border-radius: 10px;
+    color: var(--cm-navy);
+    display: flex;
+    gap: 9px;
+    max-width: 340px;
+    padding: 7px 9px 7px 12px;
+}
+
+.cm-clip__copy {
+    min-width: 0;
+}
+
+.cm-clip__label {
+    color: var(--cm-label);
+    display: block;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.cm-clip__value {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-clip__clear {
+    align-items: center;
+    background: #fff;
+    border: none;
+    border-radius: 7px;
+    color: var(--cm-label);
+    cursor: pointer;
+    display: grid;
+    flex-shrink: 0;
+    height: 24px;
+    place-items: center;
+    width: 24px;
+}
+
+.cm-clip__clear:hover {
+    color: var(--cm-danger);
+}
+
+/* Day tabs */
+
+.cm-daytabs {
+    align-items: center;
+    background: #f2f1ed;
+    border-radius: 12px;
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+}
+
+.cm-daytab {
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #565e6b;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 8px;
+    padding: 9px 16px;
+    transition: background 0.14s ease, color 0.14s ease;
+}
+
+.cm-daytab:hover {
+    color: var(--cm-navy);
+}
+
+.cm-daytab.is-active {
+    background: var(--cm-navy);
+    color: #fff;
+    font-weight: 800;
+}
+
+.cm-daytab__badge {
+    align-items: center;
+    background: #eeede9;
+    border-radius: 999px;
+    color: var(--cm-faint);
+    display: inline-flex;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    height: 19px;
+    justify-content: center;
+    min-width: 19px;
+    padding: 0 5px;
+}
+
+.cm-daytab.is-active .cm-daytab__badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+/* Room panels — a masonry of columns, as in the design */
+
+.cm-routine__pane {
+    padding: 20px 26px 26px;
+}
+
+.cm-roomgrid {
+    column-gap: 18px;
+    columns: 300px;
+}
+
+.cm-routine__noroom {
+    color: var(--cm-dim);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 30px 0;
+    text-align: center;
+}
+
+.cm-roompanel {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 12px;
+    break-inside: avoid;
+    display: inline-block;
+    margin-bottom: 18px;
+    overflow: hidden;
+    vertical-align: top;
+    width: 100%;
+}
+
+.cm-roompanel.has-cards {
+    border-color: #c4cee6;
+}
+
+.cm-roompanel__head {
+    align-items: center;
+    background: #fff;
+    border: none;
+    border-bottom: 1px solid #edeae3;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    gap: 11px;
+    padding: 13px 15px;
+    text-align: left;
+    width: 100%;
+}
+
+.cm-roompanel__names {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-roompanel__room {
+    color: var(--cm-navy);
+    display: block;
+    font-size: 13.5px;
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.cm-roompanel__venue {
+    color: var(--cm-label);
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 0;
+}
+
+.cm-roompanel__count {
+    align-items: center;
+    background: #eeede9;
+    border-radius: 999px;
+    color: var(--cm-label);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    height: 19px;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 6px;
+}
+
+.cm-roompanel__count.is-filled {
+    background: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-roompanel__body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 13px;
+}
+
+.cm-body .cm-roompanel.is-closed .cm-roompanel__body {
+    display: none;
+}
+
+.cm-roompanel__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cm-body .cm-roompanel__cards:empty {
+    display: none;
+}
+
+.cm-roompanel__empty {
+    color: var(--cm-dim);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 18px 12px;
+    text-align: center;
+}
+
+.cm-roompanel__foot {
+    display: flex;
+    gap: 8px;
+}
+
+.cm-addclass {
+    align-items: center;
+    background: #fff;
+    border: 1px dashed #cfcbc2;
+    border-radius: 10px;
+    color: var(--cm-navy);
+    cursor: pointer;
+    display: flex;
+    flex: 1;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 8px;
+    justify-content: center;
+    padding: 10px;
+    transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.cm-addclass:hover {
+    background: #f2f4f9;
+    border-color: var(--cm-navy);
+}
+
+.cm-addclass:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.cm-pastebtn {
+    align-items: center;
+    background: #f2f4f9;
+    border: 1px solid #c4cee6;
+    border-radius: 10px;
+    color: var(--cm-navy);
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 7px;
+    padding: 10px 13px;
+}
+
+.cm-pastebtn:hover {
+    background: #e6ecf7;
+}
+
+/* The class card */
+
+.cm-classcard {
+    background: #fff;
+    border: 1px solid #e2e5ec;
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.cm-classcard__head {
+    align-items: center;
+    background: #f2f1ed;
+    color: var(--cm-muted);
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+}
+
+/* Stacked cards in one room cycle through this palette by position, so a busy
+ * room reads as separate classes rather than one block. */
+.cm-classcard[data-cm-tint="0"] .cm-classcard__head {
+    background: #e8eefa;
+    color: #1c4f86;
+}
+
+.cm-classcard[data-cm-tint="1"] .cm-classcard__head {
+    background: #e4f2ea;
+    color: #1a7a58;
+}
+
+.cm-classcard[data-cm-tint="2"] .cm-classcard__head {
+    background: #f6ece1;
+    color: #8a5a1f;
+}
+
+.cm-classcard[data-cm-tint="3"] .cm-classcard__head {
+    background: #eee9f7;
+    color: #5b478f;
+}
+
+.cm-classcard[data-cm-tint="4"] .cm-classcard__head {
+    background: #fbe9e9;
+    color: #a83c3c;
+}
+
+.cm-classcard[data-cm-tint="5"] .cm-classcard__head {
+    background: #e6f1f4;
+    color: #1f6b7a;
+}
+
+.cm-classcard__summary {
+    /* Top, not centre: a module name that wraps to two lines would otherwise
+       drop the icon to the middle of the block, away from the title. */
+    align-items: flex-start;
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex: 1;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 9px;
+    line-height: 1.35;
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+}
+
+/* Nudged to sit on the first line's centre: the line box is ~17px against a
+   15px glyph, so half the difference lines the two up optically. */
+.cm-classcard__summary svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+    opacity: 0.75;
+}
+
+.cm-classcard__act {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-radius: 7px;
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    flex-shrink: 0;
+    height: 24px;
+    place-items: center;
+    width: 24px;
+}
+
+.cm-classcard__act:hover {
+    background: #fff;
+}
+
+.cm-classcard__act--danger:hover {
+    color: var(--cm-danger);
+}
+
+.cm-body .cm-classcard.is-closed .cm-classcard__body {
+    display: none;
+}
+
+/* Flagged by the pre-save check when the card has no module. Cleared as soon
+ * as one is chosen. */
+.cm-classcard.is-invalid {
+    border-color: var(--cm-danger);
+    box-shadow: 0 0 0 3px rgba(214, 69, 69, 0.16);
+}
+
+.cm-classcard.is-invalid .cm-classcard__head {
+    background: #fbe9e9;
+    color: #a83c3c;
+}
+
+/* Only the module field, named explicitly — TomSelect's wrapper inherits the
+ * select's classes but not its data attributes, so it cannot be picked out by
+ * `[data-cm-field]` once the widget is attached. */
+.cm-classcard.is-invalid .cm-classfield--module select,
+.cm-classcard.is-invalid .cm-classfield--module .ts-control .ts-input {
+    border-color: var(--cm-danger) !important;
+}
+
+.cm-classcard__grid {
+    display: grid;
+    gap: 9px 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 11px 12px 12px;
+}
+
+.cm-classfield {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cm-classfield--wide {
+    grid-column: span 2;
+}
+
+/* Only one tutor field shows at a time, so it takes the whole row. The other
+ * is hidden, never removed — its value still goes out with the next save. */
+.cm-body .cm-classcard[data-cm-tutor="tutor"] .cm-classfield--ptutor,
+.cm-body .cm-classcard[data-cm-tutor="ptutor"] .cm-classfield--tutor {
+    display: none;
+}
+
+.cm-classcard[data-cm-tutor="tutor"] .cm-classfield--tutor,
+.cm-classcard[data-cm-tutor="ptutor"] .cm-classfield--ptutor {
+    grid-column: span 2;
+}
+
+.cm-classfield > span {
+    color: #9aa0aa;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+/* Deliberately compact: a room panel is only ~300px wide and can hold several
+ * cards, so every extra pixel of field height pushes the sheet taller. */
+.cm-classinput {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-field);
+    border-radius: 8px;
+    color: var(--cm-ink);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    height: 30px;
+    outline: none;
+    padding: 0 9px;
+    width: 100%;
+}
+
+select.cm-classinput {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 9px center;
+    background-repeat: no-repeat;
+    background-size: 11px 11px;
+    cursor: pointer;
+    padding-right: 26px;
+    text-overflow: ellipsis;
+}
+
+.cm-classinput:focus {
+    background-color: #fff;
+    border-color: var(--cm-navy);
+}
+
+.cm-classdate {
+    cursor: pointer;
+}
+
+/* TomSelect on a card. As elsewhere in this module the wrapper is `.ts-control`
+ * (v1.7.8 has no `.ts-wrapper`) and it inherits the select's classes, so the
+ * box styles have to be undone on the wrapper and re-applied to `.ts-input`,
+ * at the card's compact height. */
+.cm-body .ts-control.cm-classinput {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    height: auto !important;
+    padding: 0 !important;
+    width: 100%;
+}
+
+.cm-body .ts-control.cm-classinput .ts-input {
+    align-items: center;
+    background-color: var(--cm-field-bg) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23a8a49a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+    background-position: right 9px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 11px 11px !important;
+    border: 1px solid var(--cm-field) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: var(--cm-ink);
+    cursor: pointer;
+    display: flex;
+    font-size: 12px;
+    font-weight: 600;
+    min-height: 30px;
+    padding: 0 26px 0 9px !important;
+    width: 100%;
+}
+
+.cm-body .ts-control.cm-classinput.focus .ts-input,
+.cm-body .ts-control.cm-classinput .ts-input.focus,
+.cm-body .ts-control.cm-classinput .ts-input.dropdown-active {
+    background-color: #fff !important;
+    border-color: var(--cm-navy) !important;
+}
+
+/* The library draws its own caret; ours is the background image. */
+.cm-body .ts-control.cm-classinput .ts-input::after,
+.cm-body .ts-control.cm-classinput .ts-input::before {
+    display: none !important;
+}
+
+.cm-body .ts-control.cm-classinput .ts-input > input {
+    font-size: 12px;
+    min-height: 0;
+}
+
+.cm-body .ts-control.cm-classinput .ts-input .item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 1240px) {
+    .cm-planhead__meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .cm-planhead__meta {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cm-roomgrid {
+        columns: 1;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Class Plan Tree View
+ * ------------------------------------------------------------------ */
+
+.cm-treelayout {
+    align-items: flex-start;
+    display: flex;
+    gap: 18px;
+}
+
+/* The module menu keeps its own width; hiding it hands the space to the tree
+ * and the detail rather than leaving a gap. */
+.cm-treelayout__nav {
+    flex-shrink: 0;
+    position: sticky;
+    top: calc(var(--cm-header-h) + 24px);
+    width: var(--cm-side);
+}
+
+.cm-body .cm-treelayout.is-navhidden .cm-treelayout__nav {
+    display: none;
+}
+
+.cm-treelayout__nav .cm-layout__side {
+    position: static;
+    width: 100%;
+}
+
+.cm-treeside {
+    flex-shrink: 0;
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--cm-header-h) + 24px);
+    width: 390px;
+}
+
+.cm-treeside__head {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 14px 16px;
+}
+
+.cm-treeside__title {
+    color: var(--cm-label);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.cm-treeside__rail {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 7px;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: grid;
+    height: 26px;
+    place-items: center;
+    width: 26px;
+}
+
+.cm-treeside__rail:hover {
+    background: var(--cm-field-bg);
+    color: var(--cm-navy);
+}
+
+.cm-treeside__body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.cm-treemain {
+    flex: 1;
+    min-width: 0;
+}
+
+/* The tree itself — nested lists, one level per depth.
+ *
+ * Each item is a two-column grid: the row takes the first column, its tools the
+ * second, and the child list spans both. That keeps the tools on the row's first
+ * line no matter how long the label is — course names here run to three lines,
+ * and pulling the tools up with a negative margin put them on top of the text.
+ */
+
+.cm-tree,
+.cm-tree__child {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cm-tree__child {
+    padding-left: 15px;
+}
+
+/* Row and tools share one line, so the hover and selected fills run the whole
+ * width instead of stopping where the buttons begin. */
+.cm-tree__item {
+    min-width: 0;
+}
+
+/* Group rows start where the course name above them starts, rather than one
+ * indent further in — the mark and gap of the parent row, not the whole row. */
+.cm-tree__line--leaf {
+    margin-left: 20px;
+}
+
+.cm-tree__line {
+    align-items: flex-start;
+    border-radius: 9px;
+    display: flex;
+    gap: 2px;
+    margin-bottom: 2px;
+    min-width: 0;
+    transition: background 0.13s ease;
+}
+
+.cm-tree__line:hover,
+.cm-tree__line.is-active {
+    background: var(--cm-gold-tint);
+}
+
+.cm-tree__line.is-active {
+    box-shadow: inset 2px 0 0 var(--cm-gold);
+}
+
+.cm-tree__row {
+    align-items: flex-start;
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    color: var(--cm-ink-2);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 9px;
+    flex: 1;
+    line-height: 1.4;
+    min-width: 0;
+    padding: 8px 8px 8px 7px;
+    text-align: left;
+    transition: background 0.13s ease, color 0.13s ease;
+    width: 100%;
+}
+
+.cm-tree__line:hover .cm-tree__row {
+    color: var(--cm-navy);
+}
+
+/* Depth reads through weight and colour, not size. */
+.cm-tree > .cm-tree__item > .cm-tree__row {
+    color: var(--cm-navy);
+    font-size: 13.5px;
+    font-weight: 800;
+}
+
+.cm-tree__row--leaf {
+    color: var(--cm-gold-ink);
+    font-weight: 600;
+}
+
+.cm-tree__line:hover .cm-tree__row--leaf,
+.cm-tree__line.is-active .cm-tree__row--leaf {
+    color: #6d5514;
+}
+
+.cm-tree__row.is-active {
+    color: var(--cm-navy);
+    font-weight: 800;
+}
+
+.cm-tree__mark {
+    align-items: center;
+    background: #eeede9;
+    border-radius: 6px;
+    color: var(--cm-muted);
+    display: grid;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 800;
+    height: 19px;
+    line-height: 1;
+    place-items: center;
+    transition: background 0.13s ease, color 0.13s ease;
+    width: 19px;
+}
+
+.cm-tree__line:hover .cm-tree__row .cm-tree__mark:not(.cm-tree__mark--leaf) {
+    background: #e6ddc4;
+}
+
+/* An open branch marks itself navy. The row sits inside `.cm-tree__line`, so
+ * this cannot be a direct child of the item — it stopped matching when the line
+ * wrapper was introduced. */
+.cm-tree__item.is-open > .cm-tree__line > .cm-tree__row .cm-tree__mark {
+    background: var(--cm-navy) !important;
+    color: #fff;
+}
+
+.cm-tree__mark--leaf {
+    background: transparent;
+    color: var(--cm-gold);
+}
+
+.cm-tree__line:hover .cm-tree__mark--leaf,
+.cm-tree__row.is-active .cm-tree__mark--leaf {
+    background: transparent;
+    color: var(--cm-navy);
+}
+
+/* `break-word`, not `anywhere`: long course names still wrap, but a short group
+ * code like JAN24-BUS-A is left whole instead of being split at the hyphen. */
+/* No top offset anywhere on the row: the mark, the label's first line, the
+ * evening glyph and the tools all sit on the same centre line. */
+.cm-tree__label {
+    min-width: 0;
+    overflow-wrap: break-word;
+    padding-top: 0;
+}
+
+/* Evening groups run outside the normal week. A tinted dot rather than a second
+ * icon, so it does not compete with the row's tools. */
+.cm-tree__eve {
+    align-items: center;
+    color: #4a6a9a;
+    display: grid;
+    flex-shrink: 0;
+    height: 19px;
+    opacity: 0.75;
+    place-items: center;
+    width: 14px;
+}
+
+.cm-tree__eve.is-eve {
+    color: #c98a1f;
+    opacity: 1;
+}
+
+.cm-tree__spin {
+    animation: cm-tree-spin 0.7s linear infinite;
+    border: 2px solid var(--cm-line);
+    border-radius: 50%;
+    border-top-color: var(--cm-navy);
+    flex-shrink: 0;
+    height: 13px;
+    margin-top: 3px;
+    width: 13px;
+}
+
+
+@keyframes cm-tree-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Row tools — real buttons, revealed on hover so a long tree stays calm. */
+.cm-tree__tools {
+    align-items: center;
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 4px;
+    padding: 6px 7px 0 4px;
+}
+
+/* `datafuture.css` draws a diagonal bar with `::after` on `.visibility_0` and
+ * nudges `.visibilityBtn` up 2px — both date from when the markup always used a
+ * plain eye. Our glyph is already an eye-off, so the bar doubles up. */
+.cm-tree__tool.visibilityBtn {
+    position: static;
+    top: auto;
+}
+
+.cm-tree__tool.visibilityBtn.visibility_0::after {
+    display: none !important;
+}
+
+/* Proper buttons: a filled, bordered chip at rest so they read as controls
+ * rather than as decoration sitting on the row. */
+.cm-tree__tool {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 8px;
+    color: var(--cm-muted);
+    cursor: pointer;
+    display: grid;
+    flex-shrink: 0;
+    height: 23px;
+    place-items: center;
+    transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease, box-shadow 0.13s ease;
+    width: 23px;
+}
+
+.cm-tree__tool svg {
+    height: 12px;
+    width: 12px;
+}
+
+.cm-tree__tool:hover {
+    box-shadow: 0 1px 2px rgba(20, 34, 74, 0.08);
+}
+
+/* Hidden from students is a state, so it is coloured at rest, not on hover. */
+.cm-tree__tool.visibility_0 {
+    background: #fbe9e9;
+    border-color: #f2d3d3;
+    color: var(--cm-danger);
+}
+
+.cm-tree__tool.visibility_1 {
+    background: #e0f0e8;
+    border-color: #cfe6db;
+    color: var(--cm-teal);
+}
+
+.cm-tree__tool:not(.visibility_0):not(.visibility_1):hover {
+    background: var(--cm-field-bg);
+    border-color: #cbc7bd;
+    color: var(--cm-navy);
+}
+
+.cm-tree__tool:disabled {
+    cursor: wait;
+    opacity: 0.5;
+}
+
+/* The group settings menu. It is portalled by the theme's dropdown, so it is
+ * styled on its own class rather than under `.cm-tree`. */
+.cm-treemenu.dropdown-menu {
+    min-width: 212px;
+    z-index: 100040;
+}
+
+/* A caption, so the menu says what it acts on rather than just listing verbs. */
+.cm-treemenu .dropdown-content::before {
+    color: var(--cm-dim);
+    content: "Group settings";
+    display: block;
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 6px 11px 8px;
+    text-transform: uppercase;
+}
+
+.cm-treemenu .dropdown-content {
+    background: #fff;
+    border: 1px solid var(--cm-line);
+    border-radius: 12px;
+    box-shadow: 0 22px 48px -18px rgba(10, 20, 50, 0.35);
+    padding: 6px;
+}
+
+.cm-treemenu .dropdown-item {
+    align-items: center;
+    border-radius: 9px;
+    color: var(--cm-ink-2);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 11px;
+    padding: 9px 11px;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.cm-treemenu .dropdown-item:hover {
+    background: #f2f4f9;
+    color: var(--cm-navy);
+}
+
+/* The icon sits in its own tinted tile, matching the module's menu rows. */
+.cm-treemenu .dropdown-item svg {
+    background: var(--cm-gold-tint);
+    border-radius: 8px;
+    box-sizing: content-box;
+    color: var(--cm-gold-ink);
+    flex-shrink: 0;
+    padding: 6px;
+}
+
+.cm-treemenu .dropdown-item:hover svg {
+    background: #e2e9f7;
+    color: var(--cm-navy);
+}
+
+.cm-tree__empty {
+    color: var(--cm-dim);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 12px;
+}
+
+/* Right-hand panel */
+
+.cm-treepanel__head {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 22px 26px 18px;
+}
+
+.cm-treepanel__meta {
+    display: grid;
+    gap: 14px 22px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.cm-treepanel__actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.cm-btn--bulk {
+    background: #5b478f;
+    border: none;
+    color: #fff;
+}
+
+.cm-btn--bulk:hover {
+    background: #4c3b78;
+    color: #fff;
+}
+
+.cm-treeempty {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    padding: 26px;
+}
+
+.cm-treeempty__icon {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 11px;
+    color: var(--cm-gold-ink);
+    display: grid;
+    flex-shrink: 0;
+    height: 40px;
+    place-items: center;
+    width: 40px;
+}
+
+.cm-treeempty__title {
+    color: var(--cm-navy);
+    font-size: 14.5px;
+    font-weight: 800;
+}
+
+.cm-treeempty__text {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-top: 3px;
+}
+
+/* The stacked days / day / time / tutor cell */
+
+.cm-treedays {
+    display: block;
+    min-width: 0;
+}
+
+/* Plain text with a calendar in front and an out-arrow behind — no fill, but
+ * still plainly something that opens. */
+.cm-treedays__link {
+    align-items: center;
+    color: var(--cm-teal);
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 800;
+    gap: 5px;
+    padding: 0;
+    text-decoration: none;
+    transition: color 0.13s ease;
+}
+
+.cm-treedays__link:hover {
+    color: var(--cm-teal-hover);
+    text-decoration: underline;
+}
+
+.cm-treedays__go {
+    opacity: 0.65;
+}
+
+.cm-treedays__link:hover .cm-treedays__go {
+    opacity: 1;
+}
+
+.cm-treedays__zero {
+    color: var(--cm-dim);
+    font-size: 11.5px;
+    font-weight: 700;
+}
+
+.cm-treedays__day {
+    color: var(--cm-ink);
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 3px;
+}
+
+.cm-treedays__time {
+    color: var(--cm-muted);
+    display: block;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    margin-top: 1px;
+}
+
+.cm-treedays__tutor {
+    color: var(--cm-label);
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-top: 1px;
+}
+
+.cm-treedays__none {
+    color: #c2bdb2;
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+/* Tabulator cells are `inline-flex`, so the stack and its button became flex
+ * siblings and sat side by side. These two columns stack instead, which is what
+ * lets the day columns be narrow. */
+/* The card can never be wider than its column, so the table scrolls inside its
+ * own wrapper instead of pushing the page out. */
+.cm-treemain,
+.cm-treemain > * {
+    max-width: 100%;
+    min-width: 0;
+}
+
+.cm-treepanel {
+    overflow: hidden;
+}
+
+/* The paired id reads as one value, so it never breaks across lines. */
+.cm-body .cm-tabulator .tabulator-cell.cm-cell--nowrap {
+    white-space: nowrap;
+}
+
+.cm-body .cm-tabulator .tabulator-row .tabulator-cell.cm-cell--stack {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+    white-space: normal;
+}
+
+.cm-body .cm-treedays__edit {
+    font-size: 11.5px;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 10px;
+}
+
+/* "Upload Submission" is the widest cell content in the table; keeping it
+ * compact is what lets the Results column sit at 150. */
+.cm-body .cm-pillbtn--gold {
+    padding: 7px 11px;
+}
+
+/* Row buttons in the tree table are filled rather than outlined — a soft chip,
+ * the way the design draws them, so they read as row actions instead of
+ * competing with the toolbar's outlined buttons. */
+.cm-body #classPlanTreeListTable .cm-pillbtn {
+    background: #eeede9;
+    border-color: transparent;
+    color: var(--cm-navy);
+}
+
+.cm-body #classPlanTreeListTable .cm-treedays__edit:hover {
+    background: #e0f0e8;
+    border-color: transparent;
+    color: #1a7a58;
+}
+
+.cm-body #classPlanTreeListTable a.cm-pillbtn:hover {
+    background: #e2eefa;
+    border-color: transparent;
+    color: #1f6fa8;
+}
+
+/* Class Plan Dates — a compact filter row above the table. */
+.cm-datehead__sub {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: 5px 0 0;
+}
+
+.cm-datefilters {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 26px;
+}
+
+.cm-datefilters__spacer {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-input--sm,
+.cm-select--sm {
+    font-size: 13px;
+    height: 38px;
+    padding: 0 13px;
+    width: auto;
+}
+
+.cm-select--sm {
+    padding-right: 34px;
+}
+
+.cm-datestate {
+    color: var(--cm-teal);
+    font-size: 12.5px;
+    font-weight: 700;
+}
+
+.cm-datestate.is-soon {
+    color: #1c4f86;
+}
+
+.cm-datestate.is-muted {
+    color: var(--cm-dim);
+}
+
+/* Assigned students modal — avatar, linked registration number, status badge. */
+.cm-avatar {
+    align-items: center;
+    background: #eef1f8;
+    border-radius: 50%;
+    color: #2f4b7c;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 800;
+    height: 30px;
+    justify-content: center;
+    overflow: hidden;
+    width: 30px;
+}
+
+.cm-avatar img {
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+}
+
+.cm-avatar[data-cm-tone="0"] { background: #ede7f8; color: #6b46c1; }
+.cm-avatar[data-cm-tone="1"] { background: #d9f2f3; color: #12707c; }
+.cm-avatar[data-cm-tone="2"] { background: #fbe3ec; color: #a83a67; }
+.cm-avatar[data-cm-tone="3"] { background: #e4ecfb; color: #2f5bc4; }
+.cm-avatar[data-cm-tone="4"] { background: #f6e8d8; color: #8a5a1f; }
+.cm-avatar[data-cm-tone="5"] { background: #ddf0e6; color: #1a7a58; }
+
+/* The assigned-students list carries seven columns, so it gets more room than
+ * the module's standard wide dialog. Scoped to this modal only. */
+.cm-body #viewAssignedStudentModal .cm-modal__dialog {
+    width: min(1180px, calc(100vw - 48px));
+}
+
+.cm-body #viewAssignedStudentModal .cm-modal__body {
+    padding: 18px 20px;
+}
+
+/* The list is framed inside the dialog, so it reads as one object rather than
+ * rows floating on the modal's background. */
+.cm-body #viewAssignedStudentModal .cm-tabulator-wrap {
+    border: 1px solid var(--cm-line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-header {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line);
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-header .tabulator-col .tabulator-col-content {
+    align-items: center;
+    display: flex;
+    min-height: 46px;
+    padding: 0 12px;
+}
+
+/* The sort caret rides on the label's own line, so a taller header does not
+ * leave it floating above the text. */
+.cm-body #assignedStudentModalListTable .tabulator-header .tabulator-col-title {
+    align-items: center;
+    display: flex;
+    line-height: 1;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-header .tabulator-col:first-child .tabulator-col-content {
+    padding-left: 20px;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-header .tabulator-col:last-child .tabulator-col-content {
+    padding-right: 20px;
+}
+
+/* The footer is inside the frame too, so it needs no rule of its own. */
+.cm-body #assignedStudentModalListTable .tabulator-footer {
+    border-top: 1px solid var(--cm-line);
+    padding: 10px 20px 12px;
+}
+
+/* A denser row for the student list: it is a reference list, so more of it on
+ * screen beats the airier spacing the main tables use. */
+.cm-body #assignedStudentModalListTable .tabulator-row {
+    min-height: 44px;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-row .tabulator-cell {
+    min-height: 44px;
+    padding: 7px 12px;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-row .tabulator-cell:first-child {
+    padding-left: 20px;
+}
+
+.cm-body #assignedStudentModalListTable .tabulator-row .tabulator-cell:last-child {
+    padding-right: 20px;
+}
+
+.cm-body #assignedStudentModalListTable .cm-avatar {
+    height: 26px;
+    width: 26px;
+}
+
+.cm-studentcell {
+    align-items: center;
+    display: inline-flex;
+    gap: 11px;
+    min-width: 0;
+}
+
+.cm-fulltime {
+    color: #c98a1f;
+    display: grid;
+    place-items: center;
+}
+
+.cm-fulltime.is-full {
+    color: var(--cm-ink);
+}
+
+.cm-studentlink {
+    color: var(--cm-navy);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.cm-studentlink:hover {
+    color: var(--cm-teal);
+    text-decoration: underline;
+}
+
+.cm-statusbadge {
+    align-items: center;
+    background: #e4f2ea;
+    border-radius: 999px;
+    color: #1a7a58;
+    display: inline-flex;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.3;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+.cm-statusbadge.is-bad {
+    background: #fbe3e3;
+    color: #a83c3c;
+}
+
+/* Module cell: the class type reads as a chip above the module name, so the
+ * kind of class is scannable down the column. */
+.cm-treemod {
+    display: block;
+    min-width: 0;
+}
+
+.cm-treemod__type {
+    align-items: center;
+    background: #f2f1ed;
+    border-radius: 999px;
+    color: var(--cm-muted);
+    display: inline-flex;
+    font-size: 10.5px;
+    font-weight: 800;
+    gap: 6px;
+    height: 24px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    padding: 0 11px;
+}
+
+/* The dot takes the chip's own colour, so each kind reads at a glance. */
+.cm-treemod__dot {
+    background: currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 6px;
+    width: 6px;
+}
+
+.cm-treemod__type[data-cm-type="theory"] {
+    background: #e8eefa;
+    color: #1c4f86;
+}
+
+.cm-treemod__type[data-cm-type="seminar"] {
+    background: #eee9f7;
+    color: #5b478f;
+}
+
+.cm-treemod__type[data-cm-type="practical"] {
+    background: #e4f2ea;
+    color: #1a7a58;
+}
+
+.cm-treemod__type[data-cm-type="tutorial"] {
+    background: #f6ece1;
+    color: #8a5a1f;
+}
+
+.cm-treemod .cm-planlink {
+    display: block;
+}
+
+/* Results can hold two links, so they stack. */
+.cm-treeresults {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cm-body #classPlanTreeListTable .cm-pillbtn--view {
+    background: #e0f0e8;
+    color: #1a7a58;
+}
+
+.cm-body #classPlanTreeListTable .cm-pillbtn--view:hover {
+    background: #cfe6db;
+    color: #16593f;
+}
+
+/* Creating a tutorial is an additive action, so it reads gold like the module's
+ * other "add" affordances rather than as another edit. */
+.cm-body #classPlanTreeListTable .cm-treedays__add {
+    background: var(--cm-gold-tint);
+    color: #6d5514;
+}
+
+.cm-body #classPlanTreeListTable .cm-treedays__add:hover {
+    background: #ece2c8;
+    color: #6d5514;
+}
+
+.cm-body #classPlanTreeListTable .cm-pillbtn--gold {
+    background: var(--cm-gold-tint);
+    color: #6d5514;
+}
+
+.cm-body #classPlanTreeListTable .cm-pillbtn--gold:hover {
+    background: #ece2c8;
+    color: #6d5514;
+}
+
+.cm-pillbtn--gold {
+    background: var(--cm-gold-tint);
+    border-color: transparent;
+    color: #6d5514;
+}
+
+.cm-pillbtn--gold:hover {
+    background: #ece2c8;
+    color: #6d5514;
+}
+
+@media (max-width: 1100px) {
+    .cm-treelayout {
+        flex-direction: column;
+    }
+
+    .cm-treeside {
+        position: static;
+        width: 100%;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Bulk Communication
+ *
+ * Reached from the class plan tree. The three send dialogs share the
+ * module's field and modal shells; what is new here is the SMS counter,
+ * the delivery switch, the attachment list and the CKEditor frame.
+ * ------------------------------------------------------------------ */
+
+.cm-commhead__sub {
+    color: var(--cm-faint);
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: 5px 0 0;
+}
+
+.cm-commhead__dot {
+    padding: 0 7px;
+}
+
+/* How many students the buttons beside it would act on. */
+.cm-commcount {
+    background: var(--cm-gold-tint);
+    border: 1px solid #e7dcbd;
+    border-radius: 999px;
+    color: var(--cm-gold-ink);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 5px 12px;
+    white-space: nowrap;
+}
+
+.cm-btn--sms {
+    background: #5b3fa8;
+    border-color: #5b3fa8;
+}
+
+.cm-btn--sms:hover,
+.cm-btn--sms:focus {
+    background: #4d3492;
+    border-color: #4d3492;
+}
+
+.cm-btn--mail {
+    background: var(--cm-teal);
+    border-color: var(--cm-teal);
+}
+
+.cm-btn--mail:hover,
+.cm-btn--mail:focus {
+    background: var(--cm-teal-hover);
+    border-color: var(--cm-teal-hover);
+}
+
+.cm-commbar {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 26px;
+}
+
+.cm-commbar__spacer {
+    flex: 1;
+    min-width: 0;
+}
+
+/* A caption with something pinned to its right — the SMS counter, the letter
+ * tag picker. The extra element is a sibling of the <label> rather than a
+ * child, because `.cm-field > label span` is the required-marker rule and
+ * would paint anything inside the caption red. That puts the <label> one level
+ * down, so the caption styling is restated here. */
+.cm-labelrow {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.cm-labelrow > label {
+    color: var(--cm-label);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.cm-labelrow > label span {
+    color: var(--cm-danger);
+}
+
+.cm-smscount {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-field);
+    border-radius: 999px;
+    color: var(--cm-dim);
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 3px 10px;
+}
+
+/* Past 160 characters the message is billed as more than one SMS. */
+.cm-smscount.is-over {
+    background: #fdf3e6;
+    border-color: #f0dcbd;
+    color: #96601a;
+}
+
+/* The CKEditor shell: one bordered box holding the toolbar and the page. */
+.cm-body .cm-editor.document-editor {
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.cm-body .cm-editor .document-editor__toolbar .ck.ck-toolbar {
+    background: var(--cm-field-bg);
+    border: 0;
+    border-bottom: 1px solid var(--cm-line-2);
+    border-radius: 0;
+}
+
+.cm-body .cm-editor .document-editor__editable-container .document-editor__editable {
+    background: #fff;
+    border: 0;
+    box-shadow: none;
+    margin: 0;
+    min-height: 230px;
+    padding: 16px 18px;
+    width: 100%;
+}
+
+.cm-body .cm-editor .ck.ck-editor__editable.ck-focused {
+    border: 0;
+    box-shadow: none;
+}
+
+/* Attachments */
+.cm-upload {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+}
+
+.cm-upload__button {
+    cursor: pointer;
+    margin: 0;
+}
+
+.cm-upload__hint {
+    color: var(--cm-faint);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* The real control; the label above is what gets clicked. */
+.cm-upload__input {
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    width: 0;
+}
+
+.cm-upload__files {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+    margin-top: 11px;
+}
+
+.cm-upload__file {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 9px;
+    display: flex;
+    gap: 9px;
+    min-height: 42px;
+    min-width: 0;
+    padding: 8px 11px;
+}
+
+.cm-upload__file-icon {
+    align-items: center;
+    background: #e7edf6;
+    border-radius: 7px;
+    color: var(--cm-navy);
+    display: inline-flex;
+    flex: 0 0 26px;
+    height: 26px;
+    justify-content: center;
+    width: 26px;
+}
+
+.cm-upload__file-name {
+    color: var(--cm-ink);
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cm-upload__file-size {
+    color: var(--cm-faint);
+    flex: 0 0 auto;
+    font-size: 11.5px;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+/* Delivery toggle — the module's tick/cross card, as used elsewhere in the
+ * app: a bordered card whose mark and hint both flip with the checkbox. */
+.cm-togglewrap {
+    align-items: center;
+    display: flex;
+    min-height: 44px;
+    width: 100%;
+}
+
+.cm-togglecard {
+    cursor: pointer;
+    display: block;
+    margin: 0;
+    width: 100%;
+}
+
+/* Off-screen but still focusable and still the thing the form submits. */
+.cm-togglecard__input {
+    clip: rect(0 0 0 0);
+    height: 1px !important;
+    overflow: hidden;
+    position: absolute;
+    width: 1px !important;
+}
+
+.cm-togglecard__card {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--cm-field);
+    border-radius: 10px;
+    display: flex;
+    gap: 12px;
+    padding: 9px 18px 9px 10px;
+    transition: border-color 0.13s ease;
+    width: 100%;
+}
+
+.cm-togglecard__mark {
+    align-items: center;
+    background: rgba(192, 69, 63, 0.11);
+    border-radius: 9px;
+    color: #c0453f;
+    display: inline-flex;
+    flex: 0 0 30px;
+    height: 30px;
+    justify-content: center;
+    transition: background 0.13s ease, color 0.13s ease;
+    width: 30px;
+}
+
+.cm-togglecard__text {
+    min-width: 0;
+}
+
+.cm-togglecard__text strong,
+.cm-togglecard__text small {
+    display: block;
+    text-transform: none;
+}
+
+.cm-togglecard__text strong {
+    color: var(--cm-ink);
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
+.cm-togglecard__text small {
+    color: var(--cm-faint);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-top: 1px;
+    white-space: nowrap;
+}
+
+/* Unchecked shows the cross and the "off" hint. Written with the parent in
+ * the selector because `.cm-togglecard__text small` above sets `display:
+ * block` and would otherwise outrank a bare class. */
+.cm-togglecard__glyph--on,
+.cm-togglecard__text .cm-togglecard__hint--on {
+    display: none;
+}
+
+.cm-togglecard__input:checked + .cm-togglecard__card {
+    border-color: var(--cm-teal);
+}
+
+.cm-togglecard__input:checked + .cm-togglecard__card .cm-togglecard__mark {
+    background: rgba(31, 122, 92, 0.13);
+    color: var(--cm-teal);
+}
+
+.cm-togglecard__input:checked + .cm-togglecard__card .cm-togglecard__glyph--off,
+.cm-togglecard__input:checked + .cm-togglecard__card .cm-togglecard__text .cm-togglecard__hint--off {
+    display: none;
+}
+
+.cm-togglecard__input:checked + .cm-togglecard__card .cm-togglecard__glyph--on,
+.cm-togglecard__input:checked + .cm-togglecard__card .cm-togglecard__text .cm-togglecard__hint--on {
+    display: block;
+}
+
+.cm-togglecard__input:focus-visible + .cm-togglecard__card {
+    border-color: var(--cm-navy);
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.14);
+}
+
+/* Letter tag picker. The partial is shared with the admission module, so the
+ * class names are `adm-tags__*` there; these are the same rules in this
+ * module's palette. tw-starter moves the open menu to <body>, which is the
+ * `.cm-body` element itself, so the panel rules still apply. */
+.cm-body .adm-tags__button {
+    align-items: center;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-field);
+    border-radius: 8px;
+    color: var(--cm-navy);
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 800;
+    gap: 6px;
+    height: 30px;
+    justify-content: center;
+    padding: 0 11px;
+    text-decoration: none;
+}
+
+.cm-body .adm-tags__button:hover,
+.cm-body .adm-tags__button:focus {
+    background: #eef1f7;
+    border-color: #dbe2ee;
+}
+
+.cm-body .adm-tags__button svg,
+.cm-body .adm-tags__button .lucide {
+    flex: 0 0 auto;
+    height: 13px;
+    width: 13px;
+}
+
+.cm-body .adm-tags__menu {
+    margin-top: 8px !important;
+    width: min(520px, calc(100vw - 32px)) !important;
+}
+
+.cm-body .adm-tags__panel {
+    background: #fff;
+    border: 1px solid var(--cm-line-2);
+    border-radius: 12px;
+    box-shadow: 0 18px 44px rgba(11, 28, 51, 0.16);
+    list-style: none;
+    margin: 0;
+    max-height: 380px;
+    overflow: auto;
+    padding: 0;
+}
+
+.cm-body .adm-tags__header {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line-2);
+    color: var(--cm-ink);
+    display: flex;
+    flex-direction: column;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+    gap: 2px;
+    line-height: 1.25;
+    margin: 0 !important;
+    padding: 12px 16px 10px !important;
+}
+
+.cm-body .adm-tags__header small {
+    color: var(--cm-faint);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.cm-body .adm-tags__header--section {
+    border-top: 1px solid var(--cm-line-2);
+    margin-top: 5px !important;
+}
+
+.cm-body .adm-tags__item.dropdown-item {
+    align-items: center;
+    color: var(--cm-dim) !important;
+    cursor: pointer;
+    display: flex !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    min-height: 32px;
+    overflow: hidden;
+    padding: 7px 16px !important;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+}
+
+.cm-body .adm-tags__item.dropdown-item::before {
+    background: rgba(197, 160, 71, 0.28);
+    border: 1px solid rgba(197, 160, 71, 0.4);
+    border-radius: 999px;
+    content: "";
+    flex: 0 0 7px;
+    height: 7px;
+    margin-right: 9px;
+    width: 7px;
+}
+
+.cm-body .adm-tags__item.dropdown-item:hover,
+.cm-body .adm-tags__item.dropdown-item:focus {
+    background: #f7f4ec !important;
+    color: var(--cm-ink) !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Assign / Deassign Students
+ *
+ * Three stacked cards over one transfer grid. The grid is the screen:
+ * Existing on the left, Potential on the right, the three actions in the
+ * gutter between them, and the search that fills Potential alongside.
+ *
+ * This screen carries no module sidebar, so `.cm-asg` is the full content
+ * width. Nothing here reuses a legacy class name — `datafuture.css` still
+ * styles the old screen's `.addRemoveBtns` / `.assignStudentsList` and would
+ * win on specificity.
+ * ------------------------------------------------------------------ */
+
+.cm-asg {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+/* Card head — a gold dot, a serif title, and whatever the card counts. */
+.cm-asg__head {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    justify-content: space-between;
+    padding: 20px 26px 16px;
+}
+
+.cm-asg__heading {
+    align-items: center;
+    display: flex;
+    gap: 11px;
+    min-width: 0;
+}
+
+.cm-asg__dot {
+    background: var(--cm-gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 8px;
+    width: 8px;
+}
+
+.cm-asg__title {
+    color: var(--cm-navy);
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.cm-asg__count {
+    color: var(--cm-dim);
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* ---- Unassigned filters ------------------------------------------- */
+
+.cm-asgfilters {
+    align-items: flex-end;
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 20px;
+    padding: 18px 26px;
+}
+
+.cm-asgfilters__term {
+    flex: 0 0 226px;
+    max-width: 100%;
+}
+
+.cm-asgfilters__statuses {
+    flex: 1 1 420px;
+    min-width: 0;
+}
+
+.cm-asgfilters__actions {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Go / Reset / Move. Soft-cornered rather than pill, and a neutral Reset —
+ * the module's shared `--go` / `--cancel` pair is fully round and tints
+ * Cancel red, which reads as a destructive action this button is not. */
+.cm-btn--asggo,
+.cm-btn--asgreset,
+.cm-btn--asgmove {
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    height: 42px;
+    padding: 0 22px;
+}
+
+.cm-btn--asggo {
+    background: var(--cm-teal);
+    border: 1px solid var(--cm-teal);
+    color: #fff;
+}
+
+.cm-btn--asggo:hover {
+    background: var(--cm-teal-hover);
+    border-color: var(--cm-teal-hover);
+    color: #fff;
+}
+
+.cm-btn--asgreset {
+    background: transparent;
+    border: 1px solid var(--cm-field);
+    color: var(--cm-faint);
+}
+
+.cm-btn--asgreset:hover {
+    background: #f7f6f3;
+    color: var(--cm-navy);
+}
+
+.cm-btn--asgmove {
+    background: var(--cm-navy);
+    border: 1px solid var(--cm-navy);
+    color: #fff;
+}
+
+.cm-btn--asgmove:hover {
+    background: var(--cm-navy-deep);
+    border-color: var(--cm-navy-deep);
+    color: #fff;
+}
+
+/* The status multi-select — navy pills, as in the design.
+ *
+ * Keyed off the WRAPPER, not the inner control: TomSelect 1.7.8 puts `multi`
+ * and `plugin-remove_button` on `.ts-control` (the wrapper) and gives the
+ * inner box only `items ts-input`. A rule written as `.ts-input.multi .item`
+ * therefore never matches — which is why the chips were still the library's
+ * own grey `.ts-control.multi .ts-input > div`, divider and all.
+ *
+ * The two `!important`s answer the library's own: it forces
+ * `padding-right: 0 !important` on a removable chip. */
+.cm-body .ts-control.cm-select--chips.multi .ts-input {
+    align-content: center;
+    gap: 7px;
+    min-height: 44px;
+    padding: 6px 34px 6px 10px !important;
+}
+
+.cm-body .ts-control.cm-select--chips.multi .ts-input > .item {
+    align-items: center;
+    background: var(--cm-navy);
+    border: 0;
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 6px;
+    line-height: 1.3;
+    margin: 0;
+    padding: 4px 5px 4px 11px !important;
+}
+
+.cm-body .ts-control.cm-select--chips.multi .ts-input > .item.active {
+    background: var(--cm-navy-deep);
+    color: #fff;
+}
+
+/* A round translucent ×, replacing the library's bordered-off tab. */
+.cm-body .ts-control.cm-select--chips.multi .ts-input > .item .remove {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.22);
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 12px;
+    height: 16px;
+    justify-content: center;
+    line-height: 1;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    width: 16px;
+}
+
+.cm-body .ts-control.cm-select--chips.multi .ts-input > .item .remove:hover {
+    background: rgba(255, 255, 255, 0.42);
+    color: #fff;
+}
+
+/* "Add status…" keeps its place beside the chips — TomSelect leaves the
+ * placeholder on for a multi, and the compact pills leave room for it. */
+.cm-body .ts-control.cm-select--chips.multi .ts-input > input {
+    font-size: 12.5px;
+    min-width: 110px;
+}
+
+.cm-body .ts-control.cm-select--chips.multi .ts-input > input::placeholder {
+    color: var(--cm-label);
+    opacity: 1;
+}
+
+/* Shown until Go has been pressed, and again after Reset. */
+.cm-asgempty {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 44px 26px;
+    text-align: center;
+}
+
+.cm-asgempty__icon {
+    align-items: center;
+    border: 1px solid var(--cm-line);
+    border-radius: 50%;
+    color: var(--cm-gold);
+    display: flex;
+    height: 42px;
+    justify-content: center;
+    width: 42px;
+}
+
+.cm-asgempty__title {
+    color: var(--cm-navy);
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-top: 3px;
+}
+
+.cm-asgempty__text {
+    color: var(--cm-label);
+    font-size: 12.5px;
+    font-weight: 500;
+}
+
+/* ---- Assigned To --------------------------------------------------- */
+
+.cm-asgtarget {
+    align-items: start;
+    display: grid;
+    gap: 30px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+    padding: 24px 26px;
+}
+
+/* Exactly three tracks, so the design's reading order holds: year, term and
+ * course across the top, group and evening underneath. `auto-fit` would
+ * reflow to four columns on a wide screen and break that pairing. */
+.cm-asgtarget__meta {
+    display: grid;
+    gap: 22px 24px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-width: 0;
+}
+
+.cm-meta__copy {
+    min-width: 0;
+}
+
+@media (max-width: 1180px) {
+    .cm-asgtarget {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cm-asgtarget__meta {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+.cm-asgmods {
+    border-left: 1px solid var(--cm-line-3);
+    min-width: 0;
+    padding-left: 30px;
+}
+
+@media (max-width: 1180px) {
+    .cm-asgmods {
+        border-left: none;
+        border-top: 1px solid var(--cm-line-3);
+        padding-left: 0;
+        padding-top: 20px;
+    }
+}
+
+.cm-asgmods__head {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.cm-asgmods__head > span {
+    color: #8a8579;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+/* Eight rows before it scrolls, as in the design — enough that a typical
+ * group's whole timetable is on screen at once. */
+.cm-asgmods__list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-height: 296px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.cm-asgmods__empty {
+    color: var(--cm-dim);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 14px 0;
+}
+
+/* Teal, matching the design — the shared `.cm-linkbtn` is slate. */
+.cm-asgmods__head .cm-linkbtn {
+    color: var(--cm-teal);
+    padding: 0;
+}
+
+.cm-asgmods__head .cm-linkbtn:hover {
+    color: var(--cm-teal-hover);
+}
+
+/* A module row is an on/off bar, not a checkbox on a plain line: this list is
+ * the control that scopes every add and remove, so both states are stated
+ * outright — included reads blue with a tick, excluded reads red with a
+ * cross. `is-on` is mirrored from the checkbox by the JS, because a checkbox
+ * cannot tint its own label. */
+.cm-modrow {
+    align-items: center;
+    background: #fdeeed;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    display: flex;
+    gap: 11px;
+    min-width: 0;
+    padding: 6px 12px;
+    position: relative;
+    transition: background 0.13s ease;
+}
+
+.cm-modrow.is-on {
+    background: #eff2f9;
+}
+
+.cm-modrow:hover {
+    background: #fbe3e1;
+}
+
+.cm-modrow.is-on:hover {
+    background: #e6ebf6;
+}
+
+.cm-modrow__input {
+    height: 0;
+    opacity: 0;
+    position: absolute;
+    width: 0;
+}
+
+.cm-modrow__box {
+    align-items: center;
+    background: #e0443f;
+    border-radius: 6px;
+    color: #fff;
+    display: flex;
+    flex-shrink: 0;
+    height: 20px;
+    justify-content: center;
+    transition: background 0.12s ease;
+    width: 20px;
+}
+
+.cm-modrow.is-on .cm-modrow__box {
+    background: var(--cm-navy);
+}
+
+/* One glyph at a time — the box states which way the row is set rather than
+ * being an empty square the eye has to interpret. */
+.cm-modrow__box [data-cm-on] {
+    display: none;
+}
+
+.cm-modrow.is-on .cm-modrow__box [data-cm-on] {
+    display: block;
+}
+
+.cm-modrow.is-on .cm-modrow__box [data-cm-off] {
+    display: none;
+}
+
+.cm-modrow__input:focus-visible ~ .cm-modrow__box {
+    box-shadow: 0 0 0 3px rgba(22, 38, 79, 0.16);
+}
+
+/* An excluded module reads at normal weight — it is still listed, but it is
+ * not part of what the next add or remove will touch. */
+.cm-modrow__label {
+    color: #9aa0aa;
+    flex: 1;
+    font-size: 12.5px;
+    font-weight: 400;
+    line-height: 1.35;
+    min-width: 0;
+    text-wrap: pretty;
+}
+
+.cm-modrow.is-on .cm-modrow__label {
+    color: var(--cm-navy);
+    font-weight: 700;
+}
+
+/* The plan id reads as a reference, not as part of the name. It follows the
+ * row's weight so an excluded module is uniformly normal. */
+.cm-modrow__id {
+    color: var(--cm-label);
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+}
+
+.cm-modrow.is-on .cm-modrow__id {
+    font-weight: 700;
+}
+
+.cm-modrow__count {
+    color: var(--cm-dim);
+    flex-shrink: 0;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+/* ---- The transfer grid --------------------------------------------- */
+
+/* `--cm-stu-h` is shared by the two lists and the action gutter, so the
+ * buttons centre against the lists rather than against the grid row — the
+ * search column beside them is taller, and centring on the row pushed them
+ * well below the lists' midpoint. */
+.cm-asggrid {
+    --cm-stu-h: 512px;
+    align-items: stretch;
+    display: grid;
+    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 150px minmax(0, 1fr) minmax(340px, 400px);
+    min-width: 0;
+}
+
+@media (max-width: 1400px) {
+    .cm-asggrid {
+        grid-template-columns: minmax(0, 1fr) 146px minmax(0, 1fr);
+    }
+
+    .cm-asgside {
+        display: grid;
+        gap: 18px;
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .cm-asggrid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Both columns are the same fixed height so they line up whatever they hold —
+ * an empty Potential column next to a full Existing one otherwise leaves the
+ * action gutter floating against nothing. */
+.cm-stulist {
+    display: flex;
+    flex-direction: column;
+    height: var(--cm-stu-h);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cm-stulist__head {
+    align-items: center;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-shrink: 0;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 18px 20px 15px;
+}
+
+.cm-stulist__titles {
+    align-items: baseline;
+    display: flex;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cm-stulist__titles h3 {
+    color: var(--cm-navy);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.cm-stulist__titles > span {
+    color: var(--cm-dim);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Teal, matching the design — the shared `.cm-linkbtn` is slate. */
+.cm-stulist__head .cm-linkbtn {
+    color: var(--cm-teal);
+    padding: 0;
+}
+
+.cm-stulist__head .cm-linkbtn:hover {
+    color: var(--cm-teal-hover);
+}
+
+.cm-stulist__sel {
+    color: var(--cm-teal);
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* The scroller takes whatever the head and foot leave. A flex column, so an
+ * empty column can centre its notice over the whole space instead of pinning
+ * it to the top. */
+.cm-stulist__scroll {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 16px;
+}
+
+/* Dimmed and inert while its request is in flight, so a stale list cannot be
+ * clicked into a second request. The JS marks the list itself, since that is
+ * what it replaces; the scroller is covered too for completeness. */
+.cm-stulist__scroll.is-loading,
+.cm-stulist__body.is-loading {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* `0 0 auto`: the list keeps its content height so the scroller scrolls,
+ * rather than being squeezed by the notice beside it. */
+.cm-stulist__body {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Denser than the module-wide 30px: these lists are long and read as a set. */
+.cm-stulist__body .cm-avatar {
+    font-size: 10px;
+    height: 26px;
+    width: 26px;
+}
+
+.cm-stulist__foot {
+    border-top: 1px solid var(--cm-line-2);
+    flex-shrink: 0;
+    padding: 14px 16px;
+}
+
+/* The unassigned card's empty state, re-used inside a transfer column: it
+ * takes the slack the list leaves and centres itself in it. */
+.cm-asgempty--inlist {
+    flex: 1;
+    justify-content: center;
+    padding: 16px 12px;
+}
+
+.cm-asgempty--inlist .cm-asgempty__text {
+    max-width: 30ch;
+    text-wrap: pretty;
+}
+
+.cm-stufilter {
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.cm-stufilter > svg {
+    color: #b2b7bf;
+    left: 12px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.cm-stufilter input {
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-field);
+    border-radius: 10px;
+    color: var(--cm-ink);
+    font-size: 13px;
+    outline: none;
+    padding: 10px 12px 10px 34px;
+    width: 100%;
+}
+
+.cm-stufilter input:focus {
+    background: #fff;
+    border-color: var(--cm-navy);
+}
+
+.cm-stufilter input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+}
+
+/* ---- A student row -------------------------------------------------- */
+
+.cm-stu {
+    min-width: 0;
+    position: relative;
+}
+
+/* A soft grey bar, not a white card on a white panel — the two columns are
+ * read side by side, so the rows need to separate from the card without a
+ * hard border doing the work. */
+.cm-stu__row {
+    align-items: center;
+    background: #f6f5f3;
+    border: 1px solid #efede8;
+    border-radius: 10px;
+    color: var(--cm-ink);
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    gap: 10px;
+    min-width: 0;
+    padding: 7px 12px;
+    text-align: left;
+    transition: background 0.13s ease, border-color 0.13s ease;
+    width: 100%;
+}
+
+.cm-stu__row:hover {
+    background: #eeece7;
+    border-color: #e2dfd8;
+}
+
+/* Selected rows are navy-filled: the two columns are read side by side, so a
+ * tint alone would not carry across the gutter. */
+.cm-stu.is-picked > .cm-stu__row {
+    background: var(--cm-navy);
+    border-color: var(--cm-navy);
+    color: #fff;
+}
+
+.cm-stu.is-picked > .cm-stu__row .cm-stu__note {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+/* A row that cannot be moved — already in this group, or on another course.
+ * Red rather than grey, as in the design and the screen it replaces: it is a
+ * reason the transfer will not happen, not merely a disabled control. */
+.cm-stu.is-locked > .cm-stu__row,
+.cm-stu.is-locked > .cm-stu__row:hover {
+    background: #fdeeed;
+    border-color: #f4d4d1;
+    color: #a8433a;
+    cursor: not-allowed;
+}
+
+.cm-stu.is-locked > .cm-stu__row .cm-stu__note {
+    color: #bd5f56;
+}
+
+.cm-stu.is-locked > .cm-stu__row .cm-stu__tick {
+    display: none;
+}
+
+.cm-stu.is-locked .cm-avatar {
+    background: #fbdedb;
+    color: #a8433a;
+}
+
+.cm-stu.is-locked > .cm-stu__count {
+    color: #bd5f56;
+}
+
+.cm-stu__copy {
+    display: block;
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-stu__name {
+    display: block;
+    line-height: 1.35;
+    text-wrap: pretty;
+}
+
+/* The registration number leads the row, but at 600 — 800 read as a heading
+ * against the regular-weight name beside it. */
+.cm-stu__name strong {
+    color: var(--cm-navy);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+.cm-stu.is-picked > .cm-stu__row .cm-stu__name strong {
+    color: #fff;
+}
+
+.cm-stu__note {
+    color: var(--cm-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* An attendance issue is a state, so it is coloured at rest. */
+.cm-stu.is-flagged > .cm-stu__row .cm-stu__name strong {
+    color: #c0392b;
+}
+
+.cm-stu.is-picked.is-flagged > .cm-stu__row .cm-stu__name strong {
+    color: #ffbdb4;
+}
+
+/* The tick only appears once the row is selected — an empty box on every row
+ * would compete with the module list above. */
+.cm-stu__tick {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    opacity: 0;
+}
+
+.cm-stu.is-picked > .cm-stu__row .cm-stu__tick {
+    opacity: 1;
+}
+
+/* "(n)" — how many class plans this student sits on. It is a sibling of the
+ * row rather than a child, because a button cannot nest inside a button; the
+ * row reserves the width it is positioned into. */
+.cm-stu.has-count > .cm-stu__row {
+    padding-right: 48px;
+}
+
+/* Plain text, not a chip: it is a quiet count of the student's other classes,
+ * and a gold pill on every row shouted over the names. */
+.cm-stu__count {
+    background: none;
+    border: none;
+    color: var(--cm-dim);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    padding: 2px 4px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: color 0.13s ease;
+}
+
+.cm-stu__count:hover {
+    color: var(--cm-navy);
+    text-decoration: underline;
+}
+
+.cm-stu.is-picked > .cm-stu__count {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.cm-stu.is-picked > .cm-stu__count:hover {
+    color: #fff;
+}
+
+/* The status caption above each block of potential students. */
+.cm-stugroup {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin: 10px 2px 0;
+}
+
+.cm-stulist__body > .cm-stugroup:first-child {
+    margin-top: 0;
+}
+
+.cm-stugroup > span:first-child {
+    color: #8a8579;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.cm-stugroup > span:last-child {
+    color: #c2bdb2;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+}
+
+.cm-stunotice {
+    align-items: flex-start;
+    background: var(--cm-gold-tint);
+    border-radius: 11px;
+    color: var(--cm-gold-ink);
+    display: flex;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 9px;
+    line-height: 1.4;
+    padding: 11px 12px;
+}
+
+.cm-stunotice svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ---- The action gutter ---------------------------------------------- */
+
+/* Sized to the lists, then centred inside that — see `--cm-stu-h`. */
+.cm-asgacts {
+    align-items: stretch;
+    align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    height: var(--cm-stu-h);
+    justify-content: center;
+}
+
+/* Not `.cm-btn`: these are the gutter's own control, and they carry a filled
+ * resting state so the column reads as three affordances even before a row is
+ * picked. The resting fill is a shade off the page so the edges are legible —
+ * `#f2f1ed` on a `#f4f3f0` page was all but invisible. */
+.cm-asgact {
+    align-items: center;
+    background: #edebe6;
+    border: 1px solid #e2dfd8;
+    border-radius: 9px;
+    color: #6d6a63;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 8px;
+    height: 40px;
+    justify-content: center;
+    padding: 0 14px;
+    transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.cm-asgact svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+.cm-asgact:disabled {
+    background: #f1efea;
+    border-color: #e6e3dc;
+    color: #a9a49b;
+    cursor: not-allowed;
+}
+
+.cm-asgact--add:not(:disabled) {
+    background: var(--cm-teal);
+    border-color: var(--cm-teal);
+    color: #fff;
+}
+
+.cm-asgact--add:not(:disabled):hover {
+    background: var(--cm-teal-hover);
+    border-color: var(--cm-teal-hover);
+}
+
+.cm-asgact--remove:not(:disabled) {
+    background: #b3403f;
+    border-color: #b3403f;
+    color: #fff;
+}
+
+.cm-asgact--remove:not(:disabled):hover {
+    background: #9a3534;
+    border-color: #9a3534;
+}
+
+.cm-asgact--move:not(:disabled) {
+    background: #5b478f;
+    border-color: #5b478f;
+    color: #fff;
+}
+
+.cm-asgact--move:not(:disabled):hover {
+    background: #4c3b78;
+    border-color: #4c3b78;
+}
+
+@media (max-width: 900px) {
+    /* Stacked, so the gutter becomes a row of three between the two lists and
+       no longer needs to match their height. */
+    .cm-asgacts {
+        flex-direction: row;
+        flex-wrap: wrap;
+        height: auto;
+    }
+
+    .cm-asgact {
+        flex: 1 1 140px;
+        width: auto;
+    }
+}
+
+/* ---- The search column ---------------------------------------------- */
+
+.cm-asgside {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+}
+
+.cm-asgside__head {
+    border-bottom: 1px solid var(--cm-line-2);
+    padding: 18px 20px 15px;
+}
+
+.cm-asgside__head h3 {
+    color: var(--cm-navy);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.cm-asgside__head--split {
+    align-items: center;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.cm-asgside__body {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 16px 20px 20px;
+}
+
+/* All four fields to one height. Left alone they drift: the search box is a
+ * plain <input> whose height is its 14px text at the inherited 1.5 line-height
+ * plus padding (~45px), while the three TomSelect boxes below it floor at
+ * their own `min-height: 44px`. Pinning the height and zeroing the vertical
+ * padding makes both exactly 44px — `box-sizing: border-box` is already set
+ * module-wide, so the border and padding are inside that. */
+.cm-asgside__body .cm-input {
+    height: 44px;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+
+.cm-body .cm-asgside__body .ts-control.cm-select .ts-input {
+    min-height: 44px;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+}
+
+.cm-asgside__mods {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.cm-sidemods {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* A module in the side list. Everything is dimmed except whichever module the
+ * search narrowed to, so the group's shape stays visible. */
+.cm-sidemod {
+    align-items: center;
+    border-radius: 11px;
+    display: flex;
+    gap: 11px;
+    min-width: 0;
+    opacity: 0.4;
+    padding: 9px 10px;
+    transition: background 0.13s ease, opacity 0.13s ease;
+}
+
+.cm-sidemod.is-on {
+    opacity: 1;
+}
+
+.cm-sidemod:hover {
+    background: var(--cm-field-bg);
+}
+
+/* Tinted per position, from the same palette the avatars use. */
+.cm-sidemod__tile {
+    align-items: center;
+    background: var(--cm-gold-tint);
+    border-radius: 9px;
+    color: var(--cm-gold-ink);
+    display: flex;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 800;
+    height: 30px;
+    justify-content: center;
+    width: 30px;
+}
+
+.cm-sidemod__tile[data-cm-tone="0"] { background: #ede7f8; color: #6b46c1; }
+.cm-sidemod__tile[data-cm-tone="1"] { background: #d9f2f3; color: #12707c; }
+.cm-sidemod__tile[data-cm-tone="2"] { background: #fbe3ec; color: #a83a67; }
+.cm-sidemod__tile[data-cm-tone="3"] { background: #e4ecfb; color: #2f5bc4; }
+.cm-sidemod__tile[data-cm-tone="4"] { background: #f6e8d8; color: #8a5a1f; }
+.cm-sidemod__tile[data-cm-tone="5"] { background: #ddf0e6; color: #1a7a58; }
+
+.cm-sidemod__copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-sidemod__name {
+    color: var(--cm-ink);
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-wrap: pretty;
+}
+
+.cm-sidemod__count {
+    color: var(--cm-dim);
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* ---- Inline notices -------------------------------------------------- */
+
+.cm-note {
+    align-items: flex-start;
+    border: 1px solid;
+    border-radius: 12px;
+    display: flex;
+    gap: 11px;
+    padding: 13px 14px;
+}
+
+.cm-note--ok {
+    background: #e9f4ee;
+    border-color: #bfe0cd;
+    color: #17643f;
+}
+
+.cm-note--bad {
+    background: #fbeceb;
+    border-color: #f0cac7;
+    color: #96322c;
+}
+
+.cm-note__icon {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    margin-top: 1px;
+}
+
+.cm-note__copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.cm-note__copy p {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.45;
+    margin: 0;
+    text-wrap: pretty;
+}
+
+.cm-note__more {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    margin-top: 6px;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.cm-note__detail {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+}
+
+.cm-note__detail li {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 9px;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 8px 10px;
+}
+
+.cm-note__detail strong {
+    display: block;
+    font-weight: 800;
+}
+
+.cm-note__detail span {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.cm-note__close {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    flex-shrink: 0;
+    height: 22px;
+    justify-content: center;
+    opacity: 0.6;
+    width: 22px;
+}
+
+.cm-note__close:hover {
+    background: rgba(255, 255, 255, 0.7);
+    opacity: 1;
+}
+
+/* ---- Dialogs --------------------------------------------------------- */
+
+/* The module list behind a row's "(n)" chip. */
+.cm-modlist {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.cm-modlist li {
+    align-items: flex-start;
+    background: var(--cm-field-bg);
+    border: 1px solid var(--cm-line-2);
+    border-radius: 10px;
+    color: var(--cm-ink);
+    display: flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 10px;
+    line-height: 1.4;
+    padding: 10px 12px;
+    text-wrap: pretty;
+}
+
+.cm-modlist li svg {
+    color: var(--cm-teal);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cm-modlist em {
+    background: #f2f1ed;
+    border-radius: 999px;
+    color: var(--cm-muted);
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    text-transform: uppercase;
+    vertical-align: 1px;
+}
+
+/* The re-assign dialog's two module columns. */
+.cm-swap {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+    margin-top: 20px;
+}
+
+.cm-swap__col {
+    border: 1px solid var(--cm-line);
+    border-radius: 12px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.cm-swap__head {
+    background: var(--cm-field-bg);
+    border-bottom: 1px solid var(--cm-line-2);
+    color: var(--cm-navy);
+    font-size: 12.5px;
+    font-weight: 800;
+    padding: 12px 14px;
+}
+
+.cm-swap__head em {
+    color: var(--cm-label);
+    display: block;
+    font-size: 10.5px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    margin-top: 3px;
+    text-transform: uppercase;
+}
+
+.cm-swap__body {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 12px 14px;
+}
+
+.cm-swap__arrow {
+    align-items: center;
+    align-self: center;
+    color: var(--cm-dim);
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 720px) {
+    .cm-swap {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cm-swap__arrow {
+        transform: rotate(90deg);
+    }
+}
+
+/* A stack of `cm-check` rows, as used inside the re-assign columns. */
+.cm-checkstack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cm-check__id {
+    color: #b0aca2;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.cm-check__type {
+    background: #f2f1ed;
+    border-radius: 999px;
+    color: var(--cm-muted);
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 2px 7px;
+    text-transform: uppercase;
+    vertical-align: 1px;
+}
+
+.cm-check__count {
+    background: var(--cm-gold-tint);
+    border-radius: 999px;
+    color: var(--cm-gold-ink);
+    display: inline-block;
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    padding: 2px 7px;
+}
+
+/* ---- Unassigned table cells ------------------------------------------ */
+
+/* The evening / weekend glyph, in both the student and the group column. */
+.cm-eve {
+    align-items: center;
+    color: #c98a1f;
+    display: inline-flex;
+    justify-content: center;
+}
+
+.cm-eve.is-eve {
+    color: var(--cm-navy);
+}
+
+/* The student cell — photo, then the registration number over the name. A
+ * missing photo falls back to tinted initials, so the column keeps its rhythm
+ * whether or not a record has one. */
+.cm-body #unsignedStudentList .cm-avatar {
+    height: 34px;
+    width: 34px;
+}
+
+.cm-body #unsignedStudentList .cm-cell--student .cm-stack__name {
+    color: var(--cm-navy);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.cm-body #unsignedStudentList .cm-cell--student .cm-stack__sub {
+    color: var(--cm-muted);
+    font-size: 12.5px;
+    font-variant-numeric: normal;
+    font-weight: 500;
+    margin-top: 1px;
+    white-space: nowrap;
+}
+
+/* A student status is a stage, not a pass or a fail, so the column reads as a
+ * palette: red stops the student, amber is provisional, violet is a
+ * registration, green is a normal standing. */
+.cm-statusbadge.is-hold {
+    background: #f7edd8;
+    color: #8a6212;
+}
+
+.cm-statusbadge.is-reg {
+    background: #ece7f9;
+    color: #5b3fa8;
+}
+
+.cm-statusbadge.is-new {
+    background: #e4ecfb;
+    color: #2f5bc4;
+}
+
+/* ------------------------------------------------------------------ *
+ * Groups
+ *
+ * A four-control filter row rather than the chips the simple lists use: the
+ * endpoint takes a query, a term, a course and a status, and the course list
+ * is long enough to need the searchable control.
+ * ------------------------------------------------------------------ */
+
+.cm-groupfilters {
+    align-items: flex-end;
+    border-bottom: 1px solid var(--cm-line-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 18px;
+    padding: 0 26px 20px;
+}
+
+.cm-groupfilters__query {
+    flex-shrink: 0;
+    width: 220px;
+}
+
+.cm-groupfilters__term {
+    flex-shrink: 0;
+    width: 180px;
+}
+
+/* The one field that takes the slack — course names run long. */
+.cm-groupfilters__course {
+    flex: 1;
+    min-width: 220px;
+}
+
+.cm-groupfilters__status {
+    flex-shrink: 0;
+    width: 150px;
+}
+
+.cm-groupfilters__actions,
+.cm-groupfilters__tools {
+    align-items: center;
+    display: flex;
+    flex-shrink: 0;
+    gap: 9px;
+}
+
+/* Every control on this row is button height, so the fields do not stand
+ * taller than the Go / Reset / Print buttons they sit beside. */
+.cm-groupfilters .cm-input,
+.cm-groupfilters .cm-select {
+    font-size: 13px;
+    height: 38px;
+    padding-bottom: 0;
+    padding-top: 0;
+}
+
+.cm-groupfilters .cm-pillbtn,
+.cm-groupfilters .cm-btn--pill {
+    height: 38px;
+}
+
+.cm-body .cm-groupfilters .ts-control.cm-select .ts-input {
+    font-size: 13px;
+    min-height: 38px;
+    padding-bottom: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Course names run to sixty characters. The control keeps one line and cuts
+ * the name off rather than growing the whole filter row to two. */
+.cm-body .cm-groupfilters .ts-control.cm-select .ts-input {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.cm-body .cm-groupfilters .ts-control.cm-select .ts-input .item {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Print and the bulk menu sit apart from the filters they do not belong to. */
+.cm-groupfilters__tools {
+    margin-left: auto;
+}
+
+/* Search box with the glyph inside it, unlike `.cm-search-inline`, which is
+ * the underlined toolbar variant. */
+.cm-inputsearch {
+    align-items: center;
+    display: flex;
+    position: relative;
+}
+
+.cm-inputsearch > svg {
+    color: #b2b7bf;
+    left: 11px;
+    pointer-events: none;
+    position: absolute;
+}
+
+.cm-inputsearch .cm-input {
+    padding-left: 33px;
+}
+
+.cm-inputsearch .cm-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Selected-row readout beside the card title. Teal, because it reports a live
+ * state rather than the record total next to it. */
+.cm-tablecard__sel {
+    color: var(--cm-teal);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cm-body .cm-actionmenu {
+    width: 216px;
+}
+
+.cm-menuicon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+}
+
+.cm-menuicon--ok {
+    color: #1a7a58;
+}
+
+.cm-menuicon--warn {
+    color: #c98a1f;
+}
+
+.cm-menuicon--danger {
+    color: #d13c3c;
+}
+
+.cm-menuicon--info {
+    color: #2f4b7c;
+}
+
+/* Evening / weekend delivery as a tinted tile, so the column scans as a
+ * pattern rather than as a Yes/No word column. */
+.cm-daychip {
+    background: #eef1f8;
+    border-radius: 9px;
+    color: #4a6a9a;
+    display: inline-grid;
+    height: 28px;
+    place-items: center;
+    width: 28px;
+}
+
+.cm-daychip.is-eve {
+    background: #fdf3e0;
+    color: #c98a1f;
+}
+
+/* Three states, not two: an archived group can still hold `active = 1`, so
+ * the archive reads as its own neutral tone. */
+.cm-statusline {
+    align-items: center;
+    display: inline-flex;
+    font-size: 12.5px;
+    font-weight: 700;
+    gap: 6px;
+}
+
+.cm-statusline__dot {
+    background: currentColor;
+    border-radius: 50%;
+    flex-shrink: 0;
+    height: 6px;
+    width: 6px;
+}
+
+.cm-statusline.is-ok {
+    color: #1a7a58;
+}
+
+.cm-statusline.is-off {
+    color: #c98a1f;
+}
+
+.cm-statusline.is-archived {
+    color: #8a8579;
+}
+
+.cm-statusline.is-archived .cm-statusline__dot {
+    background: #b0aca2;
+}
+
+@media (max-width: 1180px) {
+    .cm-groupfilters__query,
+    .cm-groupfilters__term,
+    .cm-groupfilters__status {
+        flex: 1;
+        min-width: 160px;
+        width: auto;
+    }
+
+    .cm-groupfilters__course {
+        flex-basis: 100%;
+    }
+
+    .cm-groupfilters__tools {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .cm-groupfilters {
+        padding: 0 18px 18px;
+    }
+
+    .cm-groupfilters__actions,
+    .cm-groupfilters__tools {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+}

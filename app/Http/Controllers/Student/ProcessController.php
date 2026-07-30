@@ -378,6 +378,25 @@ class ProcessController extends Controller
         return response()->json(['last_page' => $last_page, 'data' => $data]);
     }
 
+    private function realEmployeePhotoUrl($employee): string
+    {
+        if(!$employee || empty($employee->id) || empty($employee->photo)):
+            return '';
+        endif;
+
+        $photoPath = 'public/employees/'.$employee->id.'/'.$employee->photo;
+        return Storage::disk('local')->exists($photoPath) ? Storage::disk('local')->url($photoPath) : '';
+    }
+
+    private function initialsFromName(?string $name): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $name));
+        $first = isset($parts[0]) && $parts[0] !== '' ? substr($parts[0], 0, 1) : 'U';
+        $second = isset($parts[1]) && $parts[1] !== '' ? substr($parts[1], 0, 1) : '';
+
+        return strtoupper($first.$second);
+    }
+
     public function processTaskUserList(Request $request){
         $task_id = $request->task_id;
         $task = TaskList::find($task_id);
@@ -385,27 +404,34 @@ class ProcessController extends Controller
         $html = '';
         if(isset($task->users) && $task->users->count() > 0):
             foreach($task->users as $tusr):
+                $employee = isset($tusr->user->employee) ? $tusr->user->employee : null;
+                $employeeName = isset($employee->full_name) ? $employee->full_name : 'Unknown Employee';
+                $employeePhoto = $this->realEmployeePhotoUrl($employee);
                 $html .= '<tr>';
                     $html .= '<td>';
                         $html .= '<div class="block">';
-                            $html .= '<div class="w-10 h-10 intro-x image-fit mr-5 inline-block">';
-                                $html .= '<img alt="'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'" class="rounded-full shadow" src="'.(isset($tusr->user->employee->photo_url) && !empty($tusr->user->employee->photo_url) ? $tusr->user->employee->photo_url : asset('build/assets/images/placeholders/200x200.jpg')).'">';
+                            $html .= '<div class="w-10 h-10 intro-x mr-5 inline-flex items-center justify-center">';
+                                if($employeePhoto !== ''):
+                                    $html .= '<img alt="'.e($employeeName).'" class="rounded-full shadow w-10 h-10 object-cover" src="'.e($employeePhoto).'">';
+                                else:
+                                    $html .= '<span class="adm-process-avatar" title="'.e($employeeName).'">'.e($this->initialsFromName($employeeName)).'</span>';
+                                endif;
                             $html .= '</div>';
                             $html .= '<div class="inline-block relative" style="top: -5px;">';
-                                $html .= '<div class="font-medium whitespace-nowrap uppercase">'.(isset($tusr->user->employee->full_name) ? $tusr->user->employee->full_name : 'Unknown Employee').'</div>';
-                                if(isset($tusr->user->employee->employment->employeeJobTitle->name) && !empty($tusr->user->employee->employment->employeeJobTitle->name)):
-                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.$tusr->user->employee->employment->employeeJobTitle->name.'</div>';
+                                $html .= '<div class="font-medium whitespace-nowrap uppercase">'.e($employeeName).'</div>';
+                                if(isset($employee->employment->employeeJobTitle->name) && !empty($employee->employment->employeeJobTitle->name)):
+                                    $html .= '<div class="text-slate-500 text-xs whitespace-nowrap">'.e($employee->employment->employeeJobTitle->name).'</div>';
                                 endif;
                             $html .= '</div>';
                         $html .= '</div>';
                     $html .= '</td>';
-                    $html .= '<td>'.(isset($tusr->user->employee->employment->department->name) ? $tusr->user->employee->employment->department->name : '').'</td>';
-                    $html .= '<td>'.(isset($tusr->user->employee->employment->employeeWorkType->name) ? $tusr->user->employee->employment->employeeWorkType->name : '').'</td>';
-                    $html .= '<td>'.(isset($tusr->user->employee->employment->works_number) ? $tusr->user->employee->employment->works_number : '').'</td>';
+                    $html .= '<td>'.e(isset($employee->employment->department->name) ? $employee->employment->department->name : '').'</td>';
+                    $html .= '<td>'.e(isset($employee->employment->employeeWorkType->name) ? $employee->employment->employeeWorkType->name : '').'</td>';
+                    $html .= '<td>'.e(isset($employee->employment->works_number) ? $employee->employment->works_number : '').'</td>';
                     $html .= '<td>';
-                        if(isset($tusr->user->employee->status) && $tusr->user->employee->status == 1):
+                        if(isset($employee->status) && $employee->status == 1):
                             $html .= '<span class="btn inline-flex btn-success w-auto px-2 text-white py-0 rounded-0">Active</span>';
-                        elseif(isset($tusr->user->employee->status) && $tusr->user->employee->status == 2):
+                        elseif(isset($employee->status) && $employee->status == 2):
                             $html .= '<span class="btn inline-flex btn-danger w-auto px-2 text-white py-0 rounded-0">Inactive</span>';
                         endif;
                     $html .= '</td>';

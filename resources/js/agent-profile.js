@@ -4,174 +4,166 @@ import Tabulator from "tabulator-tables";
 import TomSelect from "tom-select";
 
 ("use strict");
-// var agentTableId = (function () {
-//     var _tableGen = function () {
-//         // Setup Tabulator
-//         let querystr = $("#query-Agent").val() != "" ? $("#query-Agent").val() : "";
-//         let status = $("#status-Agent").val() != "" ? $("#status-Agent").val() : "";
-//         let agentId = $('#addressModal [name=id]').val()
-//         let tableContent = new Tabulator("#agentTableId", {
-//             ajaxURL: route("agent-user.termlist",agentId),
-//             ajaxParams: { querystr: querystr, status: status, id: agentId},
-//             ajaxFiltering: true,
-//             ajaxSorting: true,
-//             printAsHtml: true,
-//             printStyled: true,
-//             pagination: "remote",
-//             paginationSize: 10,
-//             paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-//             layout: "fitColumns",
-//             responsiveLayout: "collapse",
-//             placeholder: "No matching records found",
-//             columnDefaults:{
-//             resizable:true,
-//             },
-//             columns: [
-//                 {
-//                     title: "Serial",
-//                     field: "sl",
-//                     width: "180",
-//                     headerSort: false,
-//                 },
-//                 ,
-//                 {
-//                     title: "Term Name",
-//                     field: "term",
-//                     headerHozAlign: "left",
-//                     headerSort: false,
-//                 },
-//                 {
-//                     title: "Total Applicants",
-//                     field: "ApplicantCount",
-//                     headerHozAlign: "left",
-//                     headerSort: false,
-//                     hozAlign: "center",
-//                     headerHozAlign: "center",
-                    
-//                 },
-//                 {
-//                     title: "Total Students",
-//                     field: "StudentCount",
-//                     headerHozAlign: "left",
-//                     headerSort: false,
-//                     hozAlign: "center",
-//                     headerHozAlign: "center",
-//                     headerSort: false,
-                    
-//                 },
-//             ],
-//             rowFormatter:function(row){
-//                 //create and style holder elements
-//                var holderEl = document.createElement("div");
-//                var tableEl = document.createElement("div");
-        
-//                holderEl.style.boxSizing = "border-box";
-//                //holderEl.style.padding = "10px 30px 10px 10px";
-//                //holderEl.style.borderTop = "1px solid #333";
-//                //holderEl.style.borderBotom = "1px solid #333";
-               
-        
-//                //tableEl.style.border = "1px solid #333";
-        
-//                holderEl.appendChild(tableEl);
-        
-//                row.getElement().appendChild(holderEl);
-        
-//                var subTable = new Tabulator(tableEl, {
-//                    layout:"fitColumns",
-//                    pagination: "local",
-//                    paginationSize: 10,
-//                    paginationSizeSelector: [true, 5, 10, 20, 30, 40],
-//                    data:row.getData()._children,
-//                    columns:[
-//                    {title:"Name", field:"name"},
-//                    {title:"Gender", field:"gender"},
-//                    {title:"Status", field:"status"},
-//                    {title:"Mobile", field:"mobile"},
-//                     {
-//                         title: "Actions",
-//                         field: "id",
-//                         headerSort: false,
-//                         hozAlign: "center",
-//                         headerHozAlign: "center",
-//                         width: "180",
-//                         download: false,
-//                         formatter(cell, formatterParams) {                        
-//                             var btns = "";
-//                             if (cell.getData().status == "Applicant") {
-//                                 btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-//                             } else {
-//                                 btns +='<a href="'+route('agent-user.show', cell.getData().id)+'" class="btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="eye-off" class="w-4 h-4"></i></a>';
-//                             }
-                            
-//                             return btns;
-//                         },
-//                     },
-//                    ]
-//                })
-//             },
-//             renderComplete() {
-//                 createIcons({
-//                     icons,
-//                     "stroke-width": 1.5,
-//                     nameAttr: "data-lucide",
-//                 });
-//             },
-//         });
 
-//         // Export
-//         $("#tabulator-export-csv").on("click", function (event) {
-//             tableContent.download("csv", "data.csv");
-//         });
+const escapeHtml = (value) => {
+    const div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+};
 
-//         $("#tabulator-export-json").on("click", function (event) {
-//             tableContent.download("json", "data.json");
-//         });
+const avatarPalette = ["#0b6b66", "#6d4bb0", "#2f6ea5", "#2b8754", "#c65a2a", "#9f2945"];
 
-//         $("#tabulator-export-xlsx").on("click", function (event) {
-//             window.XLSX = xlsx;
-//             tableContent.download("xlsx", "data.xlsx", {
-//                 sheetName: "Agent List",
-//             });
-//         });
+const avatarColor = (value) => {
+    const source = String(value || "applicant");
+    let hash = 0;
 
-//         $("#tabulator-export-html").on("click", function (event) {
-//             tableContent.download("html", "data.html", {
-//                 style: true,
-//             });
-//         });
+    for (let index = 0; index < source.length; index += 1) {
+        hash = source.charCodeAt(index) + ((hash << 5) - hash);
+    }
 
-//         // Print
-//         $("#tabulator-print").on("click", function (event) {
-//             tableContent.print();
-//         });
-//     };
-//     return {
-//         init: function () {
-//             _tableGen();
-//         },
-//     };
-// })();
+    return avatarPalette[Math.abs(hash) % avatarPalette.length];
+};
+
+const fallbackInitials = (name) => {
+    const clean = String(name || "Applicant").replace(/^(Mr|Miss|Mrs|Ms)\.?\s+/i, "").trim();
+    const words = clean.split(/\s+/).filter(Boolean);
+    const first = words[0]?.slice(0, 1) || "A";
+    const second = (words[1] || words[0] || "P").slice(0, 1);
+
+    return `${first}${second}`.toUpperCase();
+};
+
+const isRealPhoto = (value) => {
+    const photo = String(value || "");
+
+    return photo !== "" && photo.slice(0, 5) !== "data:";
+};
+
+const renderApplicantAvatar = (row) => {
+    const initials = escapeHtml(row.initials || fallbackInitials(row.name));
+    const photo = String(row.photo_url || "");
+
+    if (isRealPhoto(photo)) {
+        return `
+            <span class="agm-profile-applicant-avatar" style="background:${avatarColor(row.name || row.id)}">
+                <img src="${escapeHtml(photo)}" alt="${escapeHtml(row.name || "Applicant")}">
+            </span>
+        `;
+    }
+
+    return `<span class="agm-profile-applicant-avatar" style="background:${avatarColor(row.name || row.id)}">${initials}</span>`;
+};
+
+const chipTone = (value, fallback = "slate") => {
+    const text = String(value || "").toLowerCase();
+    if (/completed|active|enrolled|approved|accepted|success|passed/.test(text)) return "green";
+    if (/withdrawn|refused|discarded|rejected|cancel|fail|inactive/.test(text)) return "red";
+    if (/progress|pending|incomplete|review|waiting/.test(text)) return "gold";
+
+    return fallback;
+};
+
+const renderStatusChip = (value, tone = null, withIcon = false) => {
+    const label = String(value || "").trim();
+    if (label === "") {
+        return `<span class="agm-agent-empty-mark">&mdash;</span>`;
+    }
+
+    const safeTone = tone || chipTone(label);
+    const icon = withIcon && safeTone === "green"
+        ? '<i data-lucide="check"></i>'
+        : withIcon && safeTone === "red"
+            ? '<i data-lucide="x"></i>'
+            : '<b></b>';
+
+    return `<span class="agm-profile-status-chip is-${safeTone}">${icon}${escapeHtml(label)}</span>`;
+};
+
 var applicantApplicantionList = (function () {
+    let tableContent;
+    let totalRows = 0;
+    let resizeBound = false;
+    const tableSelector = "#applicantApplicantionList";
+
+    const getAgentId = () => $('#addressForm input[name="id"]').val();
+
+    const getParams = () => ({
+        refno: ($("#application_no").val() || "").trim(),
+        email: ($("#applicantEmail").val() || "").trim(),
+        phone: ($("#applicantPhone").val() || "").trim(),
+        semesters: $("#semesters").val() || [],
+        statuses: $("#statuses").val() || [],
+        courses: $("#courses").val() || [],
+        agents: $("#agents").val() || [],
+        querystr: ($("#query-CNTR").val() || "").trim(),
+    });
+
+    const syncFooter = () => {
+        window.requestAnimationFrame(() => {
+            const tableElement = document.querySelector(tableSelector);
+            if (!tableElement || !tableContent) return;
+
+            const paginator = tableElement.querySelector(".tabulator-paginator");
+            const label = paginator?.querySelector("label");
+            const pageSize = paginator?.querySelector(".tabulator-page-size");
+            if (!paginator || !label || !pageSize) return;
+
+            label.textContent = "Rows";
+
+            let meta = paginator.querySelector(".agm-agent-page-meta");
+            if (!meta) {
+                meta = document.createElement("span");
+                meta.className = "agm-agent-page-meta";
+                paginator.insertAdjacentElement("afterbegin", meta);
+            }
+
+            let range = paginator.querySelector(".agm-agent-page-range");
+            if (!range) {
+                range = document.createElement("span");
+                range.className = "agm-agent-page-range";
+            }
+
+            meta.appendChild(label);
+            meta.appendChild(pageSize);
+            meta.appendChild(range);
+
+            let pagination = paginator.querySelector(".agm-agent-pagination-control");
+            if (!pagination) {
+                pagination = document.createElement("span");
+                pagination.className = "agm-agent-pagination-control";
+                paginator.appendChild(pagination);
+            }
+
+            Array.from(paginator.children).forEach((child) => {
+                if (child === meta || child === pagination) return;
+                if (child.matches(".tabulator-page, .tabulator-pages")) {
+                    pagination.appendChild(child);
+                }
+            });
+
+            const currentPage = Number(tableContent.getPage ? tableContent.getPage() : 1) || 1;
+            const rawSize = tableContent.getPageSize ? tableContent.getPageSize() : 10;
+            const pageSizeValue = rawSize === true ? totalRows : Number(rawSize) || totalRows || 10;
+            const start = totalRows > 0 ? (currentPage - 1) * pageSizeValue + 1 : 0;
+            const end = totalRows > 0 ? Math.min(currentPage * pageSizeValue, totalRows) : 0;
+
+            range.textContent = `${start}-${end} of ${totalRows}`;
+        });
+    };
+
     var _tableGen = function () {
-        // Setup Tabulator
+        const id = getAgentId();
+        const listUrl = route("agent-user.query.list", id);
 
-        let id = $('#addressForm input[name="id"]').val()
-        let application_no = $("#application_no").val() != "" ? $("#application_no").val() : "";
-        let applicantEmail = $("#applicantEmail").val() != "" ? $("#applicantEmail").val() : "";
-        let applicantPhone = $("#applicantPhone").val() != "" ? $("#applicantPhone").val() : "";
-        let querystr = $("#query-CNTR").val() != "" ? $("#query-CNTR").val() : "";
+        if (tableContent) {
+            tableContent.setData(listUrl, getParams());
+            syncFooter();
+            return;
+        }
 
-        let semesters = $("#semesters").val() != "" ? $("#semesters").val() : [];
-        let courses = $("#courses").val() != "" ? $("#courses").val() : [];
-        let statuses = $("#statuses").val() != "" ? $("#statuses").val() : [];
-        let agents = $("#agents").val() != "" ? $("#agents").val() : [];
-
-        let tableContent = new Tabulator("#applicantApplicantionList", {
-
-            ajaxURL: route("agent-user.query.list",id),
-
-            ajaxParams: {  refno: application_no, email:applicantEmail, phone:applicantPhone, semesters: semesters, statuses:statuses, courses:courses, agents:agents, querystr:querystr },
+        tableContent = new Tabulator(tableSelector, {
+            ajaxURL: listUrl,
+            ajaxParams: getParams(),
 
             ajaxFiltering: true,
             ajaxSorting: true,
@@ -179,58 +171,108 @@ var applicantApplicantionList = (function () {
             printStyled: true,
             pagination: "remote",
             paginationSize: 10,
-            paginationSizeSelector: [true, 10,20, 30, 40,50],
+            paginationSizeSelector: [10, 25, 50, 100, true],
             layout: "fitColumns",
-            responsiveLayout: "collapse",
+            responsiveLayout: false,
             placeholder: "No matching records found",
             columns: [
                 {
                     title: "#ID",
                     field: "application_no",
-                    width: "180",
+                    width: 92,
+                    minWidth: 86,
+                    formatter(cell) {
+                        return `<span class="agm-agent-id">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Name",
                     field: "name",
+                    headerSort: false,
                     headerHozAlign: "left",
+                    minWidth: 190,
+                    widthGrow: 2,
+                    formatter(cell) {
+                        const row = cell.getData();
+
+                        return `
+                            <div class="agm-profile-applicant">
+                                ${renderApplicantAvatar(row)}
+                                <strong>${escapeHtml(row.name)}</strong>
+                            </div>
+                        `;
+                    },
                 },
                 {
                     title: "DOB",
                     field: "dob",
+                    headerSort: false,
                     headerHozAlign: "left",
+                    width: 100,
+                    formatter(cell) {
+                        return `<span class="agm-profile-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Gender",
                     field: "gender",
                     headerSort:false,
                     headerHozAlign: "left",
-                    width: "100"
+                    width: 76,
+                    formatter(cell) {
+                        return `<span class="agm-profile-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Course",
                     field: "course",
+                    headerSort: false,
                     headerHozAlign: "left",
+                    minWidth: 180,
+                    widthGrow: 2,
+                    formatter(cell) {
+                        return `<span class="agm-profile-course" title="${escapeHtml(cell.getValue())}">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "Submission Date",
                     field: "submission_date",
                     headerHozAlign: "left",
+                    width: 118,
+                    formatter(cell) {
+                        return `<span class="agm-profile-muted">${escapeHtml(cell.getValue())}</span>`;
+                    },
                 },
                 {
                     title: "RF code",
                     field: "referral_code",
                     headerHozAlign: "left",
+                    width: 92,
+                    formatter(cell) {
+                        const value = String(cell.getValue() || "").trim();
+                        return value === "" ? `<span class="agm-agent-empty-mark">&mdash;</span>` : `<span class="agm-agent-code">${escapeHtml(value)}</span>`;
+                    },
                 },
                 {
                     title: "Status",
                     field: "status",
+                    headerSort: false,
                     headerHozAlign: "left",
+                    width: 116,
+                    formatter(cell) {
+                        return renderStatusChip(cell.getValue(), chipTone(cell.getValue(), "gold"), false);
+                    },
                 },
                 
                 {
                     title: "Current Status",
                     field: "current_status",
+                    headerSort: false,
                     headerHozAlign: "left",
+                    width: 188,
+                    formatter(cell) {
+                        return renderStatusChip(cell.getValue(), null, true);
+                    },
                 },
                 {
                     title: "Actions",
@@ -238,48 +280,58 @@ var applicantApplicantionList = (function () {
                     headerSort: false,
                     hozAlign: "right",
                     headerHozAlign: "right",
-                    width: "180",
+                    width: 88,
+                    minWidth: 84,
                     download: false,
-                    formatter(cell, formatterParams) {      
-
-                        var btns = "";
+                    formatter(cell) {
                         if (cell.getData().submission_date == '') {
-
-                            btns += '';
-                        
-                        }else{
-
-                            btns += '<a href="'+route('admission.show', cell.getData().id)+'" class="btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye-off" class="lucide lucide-eye-off w-4 h-4"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path><line x1="2" x2="22" y1="2" y2="22"></line></svg></a>';
+                            return `<span class="agm-agent-empty-mark">&mdash;</span>`;
                         }
-                        
-                        return btns;
+
+                        return `
+                            <span class="agm-agent-actions">
+                                <a href="${route('admission.show', cell.getData().id)}" class="agm-agent-action agm-agent-action--view" title="View applicant">
+                                    <i data-lucide="eye"></i>
+                                </a>
+                            </span>
+                        `;
                     },
                 },
             ],
+            ajaxResponse: function (url, params, response) {
+                totalRows = Number(response.all_rows || 0);
+                syncFooter();
+
+                return response;
+            },
+            dataLoaded() {
+                syncFooter();
+            },
+            pageLoaded() {
+                syncFooter();
+            },
             renderComplete() {
                 createIcons({
                     icons,
-                    "stroke-width": 1.5,
+                    "stroke-width": 1.8,
                     nameAttr: "data-lucide",
                 });
-                const columnLists = this.getColumns();
-                if (columnLists.length > 0) {
-                    const lastColumn = columnLists[columnLists.length - 1];
-                    const currentWidth = lastColumn.getWidth();
-                    lastColumn.setWidth(currentWidth - 1);
-                }
+                syncFooter();
             }
         });
 
-        // Redraw table onresize
-        window.addEventListener("resize", () => {
-            tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
+        if (!resizeBound) {
+            resizeBound = true;
+            window.addEventListener("resize", () => {
+                tableContent?.redraw();
+                createIcons({
+                    icons,
+                    "stroke-width": 1.8,
+                    nameAttr: "data-lucide",
+                });
+                syncFooter();
             });
-        });
+        }
     };
     return {
         init: function () {
@@ -353,7 +405,7 @@ function checkPasswordStrength(password) {
             plugins: {
                 dropdown_input: {}
             },
-            placeholder: 'Search Here...',
+            placeholder: '',
             dropdownParent: 'body',
             dropdownClass: 'ts-dropdown lcc-tom-float',
             persist: false,
@@ -383,6 +435,7 @@ function checkPasswordStrength(password) {
 
         var statuses = new TomSelect('#statuses', tomOptionsMul);
         var agents = new TomSelect('#agents', tomOptionsMul);
+        const filterSelects = [semesters, courses, statuses, agents];
 
             // Filter function
             function filterHTMLForm() {
@@ -392,9 +445,12 @@ function checkPasswordStrength(password) {
             $("#studentGroupSearchSubmitBtn").on("click", function (event) {
                 filterHTMLForm();
             });
-            // On reset filter form
-            
-        
+            $("#studentGroupSearchResetBtn").on("click", function () {
+                $("#application_no, #applicantEmail, #applicantPhone, #query-CNTR").val("");
+                filterSelects.forEach((select) => select.clear(true));
+                filterHTMLForm();
+            });
+
     }
     const succModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#successModal"));
     const editContactModal = tailwind.Modal.getOrCreateInstance(document.querySelector("#editContactModal"));

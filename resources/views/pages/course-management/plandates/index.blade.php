@@ -5,194 +5,104 @@
 @endsection
 
 @section('subcontent')
-    <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
-        <h2 class="text-lg font-medium mr-auto">{{ $subtitle }}</h2>
-        <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
-            <button data-tw-toggle="modal" data-tw-target="#addPlansDateModal" type="button" class="add_btn btn btn-primary shadow-md mr-2">Add New Date</button>
-            <a href="{{ route('class.plan') }}" type="button" class="btn btn-success text-white shadow-md mr-2">Back to List</a>
-        </div>
-    </div>
+    <div class="cm-layout">
+        @include('pages.course-management.partials.sidebar')
 
-    <!-- BEGIN: Settings Page Content -->
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-12 lg:col-span-4 2xl:col-span-3 flex lg:block flex-col-reverse">
-            <!-- BEGIN: Profile Info -->
-            @include('pages.course-management.sidebar')
-            <!-- END: Profile Info -->
-        </div>
-
-        <div class="col-span-12 lg:col-span-8 2xl:col-span-9">
-            <div class="intro-y box p-5 lg:mt-5">
-                <div class="flex flex-col sm:flex-row sm:items-end xl:items-start">
-                    <form id="tabulatorFilterForm-PD" class="xl:flex sm:mr-auto" >
-                        <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                            <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Date</label>
-                            <input id="dates-PD" name="dates" type="text" class="form-control sm:w-40 2xl:w-full mt-2 sm:mt-0 datepicker" data-format="DD-MM-YYYY" data-single-mode="true"  placeholder="DD-MM-YYYY">
-                        </div>
-                        <div class="sm:flex items-center sm:mr-4 mt-2 xl:mt-0">
-                            <label class="w-12 flex-none xl:w-auto xl:flex-initial mr-2">Status</label>
-                            <select id="status-PD" name="status" class="form-select w-full mt-2 sm:mt-0 sm:w-auto" >
-                                <option value="1">Active</option>
-                                <option value="2">Archived</option>
-                            </select>
-                        </div>
-                        <div class="mt-2 xl:mt-0">
-                            <button id="tabulator-html-filter-go-PD" type="button" class="btn btn-primary w-full sm:w-16" >Go</button>
-                            <button id="tabulator-html-filter-reset-PD" type="button" class="btn btn-secondary w-full sm:w-16 mt-2 sm:mt-0 sm:ml-1" >Reset</button>
-                        </div>
-                    </form>
-                    <div class="flex mt-5 sm:mt-0">
-                        <div class="dropdown w-1/2 sm:w-auto bulkActions ml-2 hidden">
-                            <button class="dropdown-toggle btn btn-outline-secondary w-full sm:w-auto" id="bulkActionsDropdown" aria-expanded="false" data-tw-toggle="dropdown">
-                                <i data-lucide="settings" class="w-4 h-4 mr-2"></i> Bulk Actions <i data-lucide="chevron-down" class="w-4 h-4 ml-auto sm:ml-2"></i>
-                            </button>
-                            <div class="dropdown-menu w-40">
-                                <ul class="dropdown-content">
-                                    {{--<li>
-                                        <a id="activeSelected" data-action="ACTIVEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
-                                            <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-success"></i> Mark as Active
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a id="inactiveSelected" data-action="INACTIVEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
-                                            <i data-lucide="x-circle" class="w-4 h-4 mr-2 text-warning"></i> Mark as Inactive
-                                        </a>
-                                    </li>--}}
-                                    <li>
-                                        <a id="deleteSelected" data-action="DELETEALL" href="javascript:;" class="dropdown-item bulkActionBtn">
-                                            <i data-lucide="trash-2" class="w-4 h-4 mr-2 text-danger"></i> Move to Archive
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a id="restoreSelected" data-action="RESTOREALL" href="javascript:;" class="dropdown-item bulkActionBtn">
-                                            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 text-success"></i> Restore
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+        <div class="cm-layout__content">
+            <div class="cm-card cm-tablecard">
+                <div class="cm-tablecard__head cm-tablecard__head--divided">
+                    <div class="cm-tablecard__titles" style="display:block;">
+                        <h2 class="cm-tablecard__title cm-serif">Class Plan Dates</h2>
+                        <p class="cm-datehead__sub">{{ $planLabel }}</p>
+                    </div>
+                    <div class="cm-tablecard__actions">
+                        <button type="button" data-tw-toggle="modal" data-tw-target="#addPlanDateModal" class="cm-btn cm-btn--pill">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+                            Add New Date
+                        </button>
+                        <a href="{{ route('plans.tree') }}" class="cm-btn cm-btn--ghost">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                            Back to tree
+                        </a>
                     </div>
                 </div>
-                <div class="overflow-x-auto scrollbar-hidden">
-                    <div id="classPlanDateListsTable" data-planid="{{ $planid }}" class="mt-5 table-report table-report--tabulator"></div>
+
+                {{-- `dates` and `status` are the names `list()` reads. --}}
+                <form class="cm-datefilters" id="planDateFilterForm" autocomplete="off">
+                    <input type="text" id="pd-date" name="dates" class="cm-input cm-input--sm datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY">
+                    <select id="pd-status" name="status" class="cm-select cm-select--sm">
+                        <option value="1" selected>Active</option>
+                        <option value="2">Archived</option>
+                    </select>
+                    <button type="submit" class="cm-btn cm-btn--go">Go</button>
+                    <button type="button" id="planDateReset" class="cm-btn cm-btn--ghost">Reset</button>
+
+                    <span class="cm-datefilters__spacer"></span>
+                    <span class="cm-tablecard__count" data-cm-count="date"></span>
+                </form>
+
+                <div class="cm-tabulator-wrap">
+                    <div id="planDateListTable" class="cm-tabulator" data-planid="{{ $planid }}"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- BEGIN: Add Modal -->
-    <div id="addPlansDateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="POST" action="#" id="addPlansDateForm" enctype="multipart/form-data">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="font-medium text-base mr-auto">Add Date</h2>
-                        <a data-tw-dismiss="modal" href="javascript:;">
-                            <i data-lucide="x" class="w-5 h-5 text-slate-400"></i>
-                        </a>
-                    </div>
-                    <div class="modal-body">
+    {{-- ---------------------------------------------------------------- --}}
+    {{-- Add a date                                                        --}}
+    {{-- ---------------------------------------------------------------- --}}
+    <div id="addPlanDateModal" class="modal" data-tw-backdrop="static" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog cm-modal__dialog cm-modal__dialog--sm">
+            <form method="POST" action="#" id="addPlanDateForm" autocomplete="off">
+                <div class="modal-content cm-modal">
+                    <div class="cm-modal__head">
                         <div>
-                            <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                            <select id="name" name="name" class="form-control w-full">
+                            <div class="cm-modal__eyebrow"><span>New record</span></div>
+                            <h2 class="cm-modal__title cm-serif">Add New Date</h2>
+                        </div>
+                        <button type="button" data-tw-dismiss="modal" class="cm-modal__close" aria-label="Close">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="cm-modal__body">
+                        <div class="cm-field">
+                            <label for="pd_name">Name <span>*</span></label>
+                            <select id="pd_name" name="name" class="cm-select">
                                 <option value="">Please Select</option>
-                                <option value="Revision">Revision</option>
                                 <option value="Teaching">Teaching</option>
+                                <option value="Revision">Revision</option>
                                 <option value="Submission">Submission</option>
                             </select>
-                            <div class="acc__input-error error-name text-danger mt-2"></div>
+                            <div class="acc__input-error error-name"></div>
                         </div>
-                        <div>
-                            <label for="date" class="form-label">Date <span class="text-danger">*</span></label>
-                            <input id="date" type="text" name="date" class="form-control w-full datepicker" data-format="DD-MM-YYYY" data-single-mode="true">
-                            <div class="acc__input-error error-date text-danger mt-2"></div>
+
+                        <div class="cm-field">
+                            <label for="pd_date">Date <span>*</span></label>
+                            <input id="pd_date" type="text" name="date" class="cm-input datepicker" data-format="DD-MM-YYYY" data-single-mode="true" placeholder="DD-MM-YYYY" readonly>
+                            <div class="acc__input-error error-date"></div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-20 mr-1">Cancel</button>
-                        <button type="submit" id="saveDate" class="btn btn-primary w-auto">
-                            Save
-                            <svg style="display: none;" width="25" viewBox="-2 -2 42 42" xmlns="http://www.w3.org/2000/svg"
-                                stroke="white" class="w-4 h-4 ml-2">
-                                <g fill="none" fill-rule="evenodd">
-                                    <g transform="translate(1 1)" stroke-width="4">
-                                        <circle stroke-opacity=".5" cx="18" cy="18" r="18"></circle>
-                                        <path d="M36 18c0-9.94-8.06-18-18-18">
-                                            <animateTransform attributeName="transform" type="rotate" from="0 18 18"
-                                                to="360 18 18" dur="1s" repeatCount="indefinite"></animateTransform>
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
+
+                    <div class="cm-modal__foot">
+                        <button type="button" data-tw-dismiss="modal" class="cm-btn cm-btn--cancel">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                            Cancel
                         </button>
-                        <input type="hidden" name="plan_id" value="{{ $planid }}"/>
+                        <button type="submit" id="savePlanDate" class="cm-btn cm-btn--save">
+                            @include('pages.course-management.partials.save-glyphs')
+                            Save
+                        </button>
+                        <input type="hidden" name="plan_id" value="{{ $planid }}">
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <!-- END: Add Modal -->
-    
-    
-    <!-- BEGIN: Success Modal Content -->
-    <div id="successModalDP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="check-circle" class="w-16 h-16 text-success mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 successModalTitleDP"></div>
-                        <div class="text-slate-500 mt-2 successModalDescDP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-primary w-24">Ok</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Success Modal Content -->
-    <!-- BEGIN: Delete Confirm Modal Content -->
-    <div id="confirmModalDP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 confModTitleDP">Are you sure?</div>
-                        <div class="text-slate-500 mt-2 confModDescDP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">No, Cancel</button>
-                        <button type="button" data-id="0" data-action="none" class="agreeWithDP btn btn-danger w-auto">Yes, I agree</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Delete Confirm Modal Content -->
 
-    <!-- BEGIN: Warning Modal Content -->
-    <div id="warningModalDP" class="modal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-body p-0">
-                    <div class="p-5 text-center">
-                        <i data-lucide="x-circle" class="w-16 h-16 text-danger mx-auto mt-3"></i>
-                        <div class="text-3xl mt-5 warningModalTitleDP">Oops!</div>
-                        <div class="text-slate-500 mt-2 warningModalDescDP"></div>
-                    </div>
-                    <div class="px-5 pb-8 text-center">
-                        <button type="button" data-tw-dismiss="modal" class="btn btn-outline-secondary w-24 mr-1">OK, Got it</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- END: Warning Modal Content -->
+    @include('pages.course-management.partials.list-dialogs')
 @endsection
 
 @section('script')
-    @vite('resources/js/course-management.js')
-    @vite('resources/js/plans-date-list.js')
+    @vite('resources/js/course-plan-dates.js')
 @endsection

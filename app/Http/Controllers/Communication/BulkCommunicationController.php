@@ -14,6 +14,7 @@ use App\Models\EmailTemplate;
 use App\Models\Employee;
 use App\Models\LetterSet;
 use App\Models\Option;
+use App\Models\Plan;
 use App\Models\Signatory;
 use App\Models\SmsTemplate;
 use App\Models\Student;
@@ -37,14 +38,34 @@ class BulkCommunicationController extends Controller
 {
     use GenerateStudentLetterTrait, GenerateBulkCommunicationPdfTrait;
     
+    /**
+     * `$classplans` is a "-" separated list of plan ids, the same shape
+     * `list()` explodes. It is reached from the class plan tree, so the page
+     * runs on the Course Management shell and offers a way back to it.
+     */
     public function index($classplans){
+        $planIds = array_filter(explode('-', (string) $classplans));
+        $plans = Plan::with('creations')->whereIn('id', $planIds)->get();
+
+        // Named in the card head so it is obvious whose students these are.
+        $planNames = $plans->map(function ($plan) {
+            return trim(($plan->creations->module_name ?? '').' '.($plan->class_type ?? ''));
+        })->filter()->unique()->values()->all();
+
         return view('pages.communication.index', [
             'title' => 'Bulk Communication - London Churchill College',
             'subtitle' => 'Bulk Communication',
+            'layout' => 'course-top-menu',
+            'cmPageTitle' => 'Bulk Communication',
+            'cmBackUrl' => route('plans.tree'),
+            'cmBackLabel' => 'Back to tree',
             'breadcrumbs' => [
+                ['label' => 'Class Plan Tree', 'href' => route('plans.tree')],
                 ['label' => 'Bulk Communication', 'href' => 'javascript:void(0);']
             ],
             'plans' => $classplans,
+            'planCount' => count($planIds),
+            'planNames' => $planNames,
             'smsTemplates' => SmsTemplate::where('live', 1)->where('status', 1)->orderBy('sms_title', 'ASC')->get(),
             'emailTemplates' => EmailTemplate::where('live', 1)->where('status', 1)->orderBy('email_title', 'ASC')->get(),
             'letterSet' => LetterSet::where('live', 1)->where('status', 1)->orderBy('letter_type', 'ASC')->orderBy('letter_title', 'ASC')->get(),
@@ -68,8 +89,8 @@ class BulkCommunicationController extends Controller
         $total_rows = $query->count();
         $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
         $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 100));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-        
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
+
         $limit = $perpage;
         $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
@@ -98,7 +119,7 @@ class BulkCommunicationController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     /* Bulk Letter Start */

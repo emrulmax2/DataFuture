@@ -18,10 +18,15 @@ class CoursCreationController extends Controller
 {
     public function index(){
         return view('pages.course-management.course-creation.index', [
-            'title' => 'Course & Semester - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Course Creations - London Churchill College',
             'subtitle' => 'Course Creations',
+            'cmPageTitle' => 'Course Creations',
+            'cmBackUrl' => route('course.management'),
+            'cmBackLabel' => 'Back to Course Management',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Course Creations', 'href' => 'javascript:void(0);']
             ],
             'courses' => Course::orderBy('name','asc')->get(),
@@ -37,37 +42,25 @@ class CoursCreationController extends Controller
         $course = (isset($request->course) && $request->course > 0 ? $request->course : '');
         $semester = (isset($request->semester) && $request->semester > 0 ? $request->semester : '');
 
-        $query = CourseCreation::where('id', '!=', 0);
-        if(!empty($queryStr)):
-            $query->where('duration','LIKE','%'.$queryStr.'%');
-            $query->orWhere('unit_length','LIKE','%'.$queryStr.'%');
-            $query->orWhere('slc_code','LIKE','%'.$queryStr.'%');
-        endif;
-        if(!empty($course) && $course > 0 ):
-            $query->where('course_id', $course);
-        endif;
-        if(!empty($semester) && $semester > 0 ):
-            $query->where('semester_id', $semester);
-        endif;
-        $total_rows = $query->count();
-        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
-        $perpage = (isset($request->size) && $request->size == 'true' ? $total_rows : ($request->size > 0 ? $request->size : 10));
-        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : '';
-
         $sorters = (isset($request->sorters) && !empty($request->sorters) ? $request->sorters : array(['field' => 'id', 'dir' => 'DESC']));
         $sorts = [];
         foreach($sorters as $sort):
             $sorts[] = $sort['field'].' '.$sort['dir'];
         endforeach;
-        
-        $limit = $perpage;
-        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
 
+        // Built once, then counted and paginated. It used to be built twice —
+        // and the copy that produced `$total_rows` never had the status filter
+        // applied, so the Archived view reported the active count.
         $query = CourseCreation::orderByRaw(implode(',', $sorts));
         if(!empty($queryStr)):
-            $query->where('duration','LIKE','%'.$queryStr.'%');
-            $query->orWhere('unit_length','LIKE','%'.$queryStr.'%');
-            $query->orWhere('slc_code','LIKE','%'.$queryStr.'%');
+            // Grouped: the three OR terms used to sit beside the course and
+            // semester filters as siblings, and AND binds tighter than OR — so
+            // a search ignored whichever course or semester was selected.
+            $query->where(function($q) use ($queryStr) {
+                $q->where('duration','LIKE','%'.$queryStr.'%')
+                  ->orWhere('unit_length','LIKE','%'.$queryStr.'%')
+                  ->orWhere('slc_code','LIKE','%'.$queryStr.'%');
+            });
         endif;
         if(!empty($course) && $course > 0 ):
             $query->where('course_id', $course);
@@ -78,6 +71,18 @@ class CoursCreationController extends Controller
         if($status == 2):
             $query->onlyTrashed();
         endif;
+
+        $total_rows = (clone $query)->reorder()->count();
+        $page = (isset($request->page) && $request->page > 0 ? $request->page : 0);
+        $perpage = (isset($request->size) && $request->size == 'true'
+            ? ($total_rows > 0 ? $total_rows : 10)
+            : ($request->size > 0 ? $request->size : 10));
+        // 1, not '' — an empty string reaches Tabulator as NaN and breaks the pager.
+        $last_page = $total_rows > 0 ? ceil($total_rows / $perpage) : 1;
+
+        $limit = $perpage;
+        $offset = ($page > 0 ? ($page - 1) * $perpage : 0);
+
         $Query= $query->skip($offset)
                ->take($limit)
                ->get();
@@ -104,7 +109,7 @@ class CoursCreationController extends Controller
                 $i++;
             endforeach;
         endif;
-        return response()->json(['last_page' => $last_page, 'data' => $data]);
+        return response()->json(['last_page' => $last_page, 'total' => $total_rows, 'data' => $data]);
     }
 
     public function store(CourseCreationsRequest $request){
@@ -147,10 +152,15 @@ class CoursCreationController extends Controller
     public function show($id) {
 
         return view('pages.course-management.course-creation.show', [
-            'title' => 'Course & Semester - London Churchill College',
+            // Opts this screen into the redesigned module shell.
+            'layout' => 'course-top-menu',
+            'title' => 'Course Creation Details - London Churchill College',
             'subtitle' => 'Course Creation Details',
+            'cmPageTitle' => 'Course Creation Details',
+            'cmBackUrl' => route('course.creation'),
+            'cmBackLabel' => 'Back to Course Creations',
             'breadcrumbs' => [
-                ['label' => 'Course Management', 'href' => 'javascript:void(0);'],
+                ['label' => 'Course Management', 'href' => route('course.management')],
                 ['label' => 'Course Creations', 'href' => route('course.creation')],
                 ['label' => 'Details', 'href' => 'javascript:void(0);']
             ],

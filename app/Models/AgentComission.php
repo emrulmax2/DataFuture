@@ -19,6 +19,7 @@ class AgentComission extends Model
         'entry_date',
         'status',
         'agent_comission_payment_id',
+        'agent_bank_detail_id',
         'created_by',
         'updated_by',
     ];
@@ -34,6 +35,10 @@ class AgentComission extends Model
 
     public function agent(){
         return $this->belongsTo(Agent::class, 'agent_id');
+    }
+
+    public function agentBank(){
+        return $this->belongsTo(AgentBankDetail::class, 'agent_bank_detail_id');
     }
 
     public function agentuser(){
@@ -54,5 +59,9 @@ class AgentComission extends Model
 
     public function payment(){
         return $this->belongsTo(AgentComissionPayment::class, 'agent_comission_payment_id');
+    }
+
+    public function bankdetail(){
+        return $this->belongsTo(AgentBankDetail::class, 'agent_bank_detail_id');
     }
 }

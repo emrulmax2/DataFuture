@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Applicant;
 use App\Models\Employee;
 use App\Models\Student;
+use App\Support\GlobalSearch;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -13,19 +15,55 @@ class GlobalSearchController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $query = trim((string) $request->query('q', ''));
-        $user = auth()->user();
-        $privileges = $user ? $user->priv() : [];
-        $canSearchStudents = !empty($privileges['live']) && $privileges['live'] != '0';
-        $canSearchEmployees = !empty($privileges['hr_porta']) && $privileges['hr_porta'] != '0';
+        $searchConfig = GlobalSearch::forCurrentUser();
+        $canSearchApplicants = $searchConfig['applicants'];
+        $canSearchStudents = $searchConfig['students'];
+        $canSearchEmployees = $searchConfig['employees'];
 
-        if (Str::length($query) < 2 || (!$canSearchStudents && !$canSearchEmployees)) {
+        if (Str::length($query) < 2 || !$searchConfig['show']) {
             return response()->json([
+                'applicants' => [],
                 'students' => [],
                 'employees' => [],
+                'permissions' => [
+                    'applicants' => $canSearchApplicants,
+                    'students' => $canSearchStudents,
+                    'employees' => $canSearchEmployees,
+                ],
             ]);
         }
 
         $like = '%' . $query . '%';
+
+        $applicants = $canSearchApplicants ? Applicant::with(['status', 'title', 'users'])
+            ->where(function ($applicantQuery) use ($like) {
+                $applicantQuery->where('first_name', 'LIKE', $like)
+                    ->orWhere('last_name', 'LIKE', $like)
+                    ->orWhere('application_no', 'LIKE', $like)
+                    ->orWhereRaw("CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) LIKE ?", [$like])
+                    ->orWhereHas('users', function ($userQuery) use ($like) {
+                        $userQuery->where('email', 'LIKE', $like);
+                    });
+            })
+            ->orderBy('first_name')
+            ->limit(6)
+            ->get()
+            ->map(function (Applicant $applicant) {
+                $name = trim((isset($applicant->title->name) ? $applicant->title->name . ' ' : '') . $applicant->first_name . ' ' . $applicant->last_name);
+                $reference = $applicant->application_no ?: $applicant->id;
+
+                return [
+                    'name' => $name,
+                    'meta' => collect([
+                        $reference ? '#' . $reference : null,
+                        isset($applicant->status->name) ? $applicant->status->name : null,
+                    ])->filter()->implode(' / '),
+                    'status' => isset($applicant->status->name) ? $applicant->status->name : 'Applicant',
+                    'initials' => $this->initials($applicant->first_name, $applicant->last_name),
+                    'url' => route('admission.show', $applicant->id),
+                ];
+            })
+            ->values() : collect();
 
         $students = $canSearchStudents ? Student::with(['status', 'title'])
             ->where(function ($studentQuery) use ($like) {
@@ -87,8 +125,14 @@ class GlobalSearchController extends Controller
             ->values() : collect();
 
         return response()->json([
+            'applicants' => $applicants,
             'students' => $students,
             'employees' => $employees,
+            'permissions' => [
+                'applicants' => $canSearchApplicants,
+                'students' => $canSearchStudents,
+                'employees' => $canSearchEmployees,
+            ],
         ]);
     }
 

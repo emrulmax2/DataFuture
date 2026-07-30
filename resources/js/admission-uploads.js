@@ -6,6 +6,147 @@ import { each } from "jquery";
 import Dropzone from "dropzone";
 
 ("use strict");
+
+function uploadEscape(value) {
+    return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function uploadInitials(name) {
+    const initials = String(name || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join("");
+
+    return initials || "?";
+}
+
+function uploadAvatarColor(seed) {
+    const palette = ["#0d7a76", "#6d4bb0", "#2f7d4f", "#c0562a", "#2f8f7d", "#3a6ea5"];
+    const text = String(seed || "");
+    let hash = 0;
+
+    for (let i = 0; i < text.length; i += 1) {
+        hash = (hash + text.charCodeAt(i) * (i + 1)) % palette.length;
+    }
+
+    return palette[hash];
+}
+
+function uploadRenderLucide() {
+    createIcons({
+        icons,
+        "stroke-width": 1.8,
+        nameAttr: "data-lucide",
+    });
+}
+
+function uploadPersonHtml(name, date, seed) {
+    const safeName = uploadEscape(name || "Unknown");
+    const safeDate = uploadEscape(date || "");
+
+    return '<div class="adm-upload-by">' +
+        '<span class="adm-upload-by__avatar" style="background:' + uploadAvatarColor(seed || name) + ';">' + uploadInitials(name) + '</span>' +
+        '<span class="adm-upload-by__text">' +
+            '<span class="adm-upload-by__name">' + safeName + '</span>' +
+            '<span class="adm-upload-by__date">' + safeDate + '</span>' +
+        '</span>' +
+    '</div>';
+}
+
+function uploadDocIcon(type) {
+    const ext = String(type || "").toLowerCase();
+    if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return "image";
+    if (["xls", "xlsx", "csv"].includes(ext)) return "sheet";
+    if (["doc", "docx"].includes(ext)) return "doc";
+    if (["ppt", "pptx"].includes(ext)) return "slides";
+    if (ext === "pdf") return "pdf";
+    return "file";
+}
+
+function uploadDocumentHtml(data) {
+    const type = uploadEscape(String(data.doc_type || "FILE").toUpperCase());
+    const title = uploadEscape(data.display_file_name || "Unknown");
+    const fileName = uploadEscape(data.current_file_name || "");
+    const icon = uploadDocIcon(data.doc_type);
+
+    return '<div class="adm-upload-doc adm-upload-doc--' + icon + '">' +
+        '<span class="adm-upload-doc__icon"><i data-lucide="' + (icon === "image" ? "image" : "file") + '"></i></span>' +
+        '<span class="adm-upload-doc__text">' +
+            '<span class="adm-upload-doc__title">' + title + '</span>' +
+            '<span class="adm-upload-doc__meta">' + type + (fileName ? " · " + fileName : "") + '</span>' +
+        '</span>' +
+    '</div>';
+}
+
+function uploadHardCopyHtml(value) {
+    const checked = Number(value) === 1;
+    return '<span class="adm-upload-yn adm-upload-yn--' + (checked ? "yes" : "no") + '">' +
+        '<span class="adm-upload-yn__icon"><i data-lucide="' + (checked ? "check" : "x") + '"></i></span>' +
+        '<span>' + (checked ? "Yes" : "No") + '</span>' +
+    '</span>';
+}
+
+function uploadActionButton(action) {
+    const tag = action.tag || "button";
+    const attrs = [
+        'data-id="' + uploadEscape(action.id) + '"',
+        'class="' + uploadEscape(action.className) + ' adm-row-action adm-row-action--' + uploadEscape(action.type) + '"',
+        'title="' + uploadEscape(action.title) + '"',
+        'aria-label="' + uploadEscape(action.title) + '"',
+    ];
+
+    if (tag === "button") attrs.push('type="button"');
+    if (tag === "a") attrs.push('href="javascript:void(0);"');
+
+    return '<' + tag + ' ' + attrs.join(" ") + '>' +
+        '<i data-lucide="' + uploadEscape(action.icon) + '"></i>' +
+    '</' + tag + '>';
+}
+
+function uploadActions(actions) {
+    return '<div class="adm-row-actions">' +
+        actions.filter(Boolean).map(uploadActionButton).join("") +
+    '</div>';
+}
+
+function uploadSetButtonBusy(selector, busy) {
+    const button = document.querySelector(selector);
+    if (!button) return;
+
+    button.toggleAttribute("disabled", busy);
+    const loader = button.querySelector(".adm-btn-loader");
+    if (loader) {
+        loader.style.display = busy ? "inline-block" : "none";
+    }
+}
+
+function uploadDecorateModalButtons(scope = document) {
+    scope.querySelectorAll(".modal-footer .btn, .modal-body.p-0 .px-5.pb-8.text-center .btn").forEach((button) => {
+        if (button.querySelector(".adm-btn-icon")) return;
+
+        const text = button.textContent.trim().toLowerCase();
+        let icon = "check";
+
+        if (text.includes("cancel") || text.includes("no,")) icon = "x";
+        else if (text.includes("upload")) icon = "upload-cloud";
+        else if (text.includes("agree")) icon = "check";
+
+        const iconEl = document.createElement("i");
+        iconEl.setAttribute("data-lucide", icon);
+        iconEl.className = "adm-btn-icon";
+        button.prepend(iconEl);
+    });
+
+    uploadRenderLucide();
+}
+
 var applicantUploadListTable = (function () {
     var _tableGen = function () {
         // Setup Tabulator
@@ -44,37 +185,27 @@ var applicantUploadListTable = (function () {
                     title: "Name",
                     field: "display_file_name",
                     headerHozAlign: "left",
+                    minWidth: 320,
+                    formatter(cell) {
+                        return uploadDocumentHtml(cell.getData());
+                    },
                 },
                 {
                     title: "Checked",
                     field: "hard_copy_check",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        if (cell.getData().hard_copy_check == 1) {
-                            return '<span class="btn btn-success-soft px-1 py-0 rounded-0">Yes</span>';
-                        } else {
-                            return '<span class="btn btn-pending-soft px-1 py-0 rounded-0">No</span>';
-                        }
+                    width: 150,
+                    formatter(cell) {
+                        return uploadHardCopyHtml(cell.getData().hard_copy_check);
                     },
                 },
                 {
                     title: "Uploaded By",
                     field: "created_by",
                     headerHozAlign: "left",
-                    formatter(cell, formatterParams) {
-                        var html = "";
-                        html += "<div>";
-                        html +=
-                            '<div class="font-medium whitespace-nowrap">' +
-                            cell.getData().created_by +
-                            "</div>";
-                        html +=
-                            '<div class="text-slate-500 text-xs whitespace-nowrap">' +
-                            cell.getData().created_at +
-                            "</div>";
-                        html += "</div>";
-
-                        return html;
+                    minWidth: 220,
+                    formatter(cell) {
+                        return uploadPersonHtml(cell.getData().created_by, cell.getData().created_at, cell.getData().id);
                     },
                 },
                 {
@@ -83,36 +214,37 @@ var applicantUploadListTable = (function () {
                     headerSort: false,
                     hozAlign: "center",
                     headerHozAlign: "center",
-                    width: "180",
+                    width: "130",
                     download: false,
                     formatter(cell, formatterParams) {
-                        var btns = "";
-                        btns +=
-                            '<a data-id="' +
-                            cell.getData().id +
-                            '" href="javascript:void(0);" download class="downloadDoc btn-rounded btn btn-linkedin text-white p-0 w-9 h-9 ml-1"><i data-lucide="cloud-lightning" class="w-4 h-4"></i></a>';
-                        if (cell.getData().deleted_at == null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="delete_btn btn btn-danger text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="Trash2" class="w-4 h-4"></i></button>';
-                        } else if (cell.getData().deleted_at != null) {
-                            btns +=
-                                '<button data-id="' +
-                                cell.getData().id +
-                                '"  class="restore_btn btn btn-linkedin text-white btn-rounded ml-1 p-0 w-9 h-9"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>';
-                        }
-
-                        return btns;
+                        return uploadActions([
+                            {
+                                tag: "a",
+                                type: "download",
+                                className: "downloadDoc",
+                                icon: "download",
+                                id: cell.getData().id,
+                                title: "Download",
+                            },
+                            cell.getData().deleted_at == null ? {
+                                type: "delete",
+                                className: "delete_btn",
+                                icon: "trash-2",
+                                id: cell.getData().id,
+                                title: "Delete",
+                            } : {
+                                type: "restore",
+                                className: "restore_btn",
+                                icon: "rotate-cw",
+                                id: cell.getData().id,
+                                title: "Restore",
+                            },
+                        ]);
                     },
                 },
             ],
             renderComplete() {
-                createIcons({
-                    icons,
-                    "stroke-width": 1.5,
-                    nameAttr: "data-lucide",
-                });
+                uploadRenderLucide();
                 const columnLists = this.getColumns();
                 if (columnLists.length > 0) {
                     const lastColumn = columnLists[columnLists.length - 1];
@@ -125,11 +257,7 @@ var applicantUploadListTable = (function () {
         // Redraw table onresize
         window.addEventListener("resize", () => {
             tableContent.redraw();
-            createIcons({
-                icons,
-                "stroke-width": 1.5,
-                nameAttr: "data-lucide",
-            });
+            uploadRenderLucide();
         });
 
         // Export
@@ -204,6 +332,8 @@ var applicantUploadListTable = (function () {
         document.querySelector("#uploadDocumentModal")
     );
 
+    uploadDecorateModalButtons();
+
     const uploadDocumentModalEl = document.getElementById(
         "uploadDocumentModal"
     );
@@ -214,12 +344,9 @@ var applicantUploadListTable = (function () {
         $('#uploadDocumentModal input[name="display_name"]').val("");
         $(
             '#uploadDocumentModal input[name="hard_copy_check_status"][value="0"]'
-        ).prop("checked", false);
-        document
-            .querySelector("#uploadDocBtn")
-            .removeAttribute("disabled", "disabled");
-        document.querySelector("#uploadDocBtn svg").style.cssText =
-            "display: none;";
+        ).prop("checked", true);
+        $("#documentNameDisplay").text("");
+        uploadSetButtonBusy("#uploadDocBtn", false);
     });
     const confirmModalEl = document.getElementById("confirmModal");
     confirmModalEl.addEventListener("hide.tw.modal", function (event) {
@@ -264,16 +391,20 @@ var applicantUploadListTable = (function () {
     if ($("#uploadDocumentForm").length > 0) {
         let dzError = false;
         Dropzone.autoDiscover = false;
-        Dropzone.options.uploadDocumentForm = {
+        const uploadDocumentDropzoneOptions = {
             autoProcessQueue: false,
             maxFiles: 10,
-            maxFilesize: 20,
+            maxFilesize: 5,
             parallelUploads: 10,
             acceptedFiles:
                 ".jpeg,.jpg,.png,.gif,.pdf,.xl,.xls,.xlsx,.doc,.docx,.ppt,.pptx,.txt",
             addRemoveLinks: true,
             thumbnailWidth: 100,
             thumbnailHeight: 100,
+            accept: (file, done) => {
+                console.log("Uploaded");
+                done();
+            },
             /*accept: function(file, done) {
                 if(!file.name.match(/[`!@#$%^&*+\-=\[\]{};':"\\|,<>\/?~]/)){
                     alert("Invalid File Name");
@@ -284,14 +415,7 @@ var applicantUploadListTable = (function () {
             },*/
         };
 
-        let options = {
-            accept: (file, done) => {
-                console.log("Uploaded");
-                done();
-            },
-        };
-
-        var drzn1 = new Dropzone("#uploadDocumentForm", options);
+        var drzn1 = new Dropzone("#uploadDocumentForm", uploadDocumentDropzoneOptions);
 
         drzn1.on("addedfile", function (file) {
             if (file.name.match(/[`!@#$%^&*+\=\[\]{};':"\\|,<>\/?~]/)) {
@@ -339,9 +463,7 @@ var applicantUploadListTable = (function () {
         });
 
         drzn1.on("queuecomplete", function () {
-            $("#uploadDocBtn").removeAttr("disabled");
-            document.querySelector("#uploadDocBtn svg").style.cssText =
-                "display: none;";
+            uploadSetButtonBusy("#uploadDocBtn", false);
 
             uploadDocumentModal.hide();
             if (!dzError) {
@@ -399,11 +521,7 @@ var applicantUploadListTable = (function () {
 
         $("#uploadDocBtn").on("click", function (e) {
             e.preventDefault();
-            document
-                .querySelector("#uploadDocBtn")
-                .setAttribute("disabled", "disabled");
-            document.querySelector("#uploadDocBtn svg").style.cssText =
-                "display: inline-block;";
+            uploadSetButtonBusy("#uploadDocBtn", true);
 
             if (drzn1.files.length > 0) {
                 if (
@@ -436,12 +554,7 @@ var applicantUploadListTable = (function () {
                         $(
                             "#uploadDocumentModal .modal-content .uploadError"
                         ).remove();
-                        document
-                            .querySelector("#uploadDocBtn")
-                            .removeAttribute("disabled", "disabled");
-                        document.querySelector(
-                            "#uploadDocBtn svg"
-                        ).style.cssText = "display: none;";
+                        uploadSetButtonBusy("#uploadDocBtn", false);
                     }, 2000);
                 }
             } else {
@@ -460,11 +573,7 @@ var applicantUploadListTable = (function () {
                     $(
                         "#uploadDocumentModal .modal-content .uploadError"
                     ).remove();
-                    document
-                        .querySelector("#uploadDocBtn")
-                        .removeAttribute("disabled", "disabled");
-                    document.querySelector("#uploadDocBtn svg").style.cssText =
-                        "display: none;";
+                    uploadSetButtonBusy("#uploadDocBtn", false);
                 }, 2000);
             }
         });
@@ -486,7 +595,7 @@ var applicantUploadListTable = (function () {
 
             $('#documentNameDisplay').text(documentLabelText);
 
-            $('.displayNameInput').on('keyup', function() {
+            $('.displayNameInput').off('input.admUploadName').on('input.admUploadName', function() {
                 var displayName = $(this).val();
                 var seperator = " ";
                 if(displayName.length > 0){
